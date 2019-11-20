@@ -186,6 +186,48 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
 
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
+    void shouldIgnoreParallelEdges(String graphImpl, Direction direction) {
+        // Add parallel edges
+        db.execute("" +
+                   " MATCH (person {name: 'Alice'})" +
+                   " MATCH (thing {name: 'p1'})" +
+                   " CREATE (person)-[:LIKES]->(thing)"
+        );
+        db.execute("" +
+                   " MATCH (person {name: 'Charlie'})" +
+                   " MATCH (thing {name: 'p3'})" +
+                   " CREATE (person)-[:LIKES]->(thing)" +
+                   " CREATE (person)-[:LIKES]->(thing)" +
+                   " CREATE (person)-[:LIKES]->(thing)"
+        );
+
+        String query = "CALL algo.beta.jaccard.stream(" +
+                       "    '', 'LIKES', {" +
+                       "        graph: $graph," +
+                       "        direction: $direction," +
+                       "        similarityCutoff: 0.0" +
+                       "    }" +
+                       ") YIELD node1, node2, similarity";
+
+        Collection<String> result = new HashSet<>();
+        runQuery(query, db, MapUtil.map("graph", graphImpl, "direction", direction.name()),
+            row -> {
+                long node1 = row.getNumber("node1").longValue();
+                long node2 = row.getNumber("node2").longValue();
+                double similarity = row.getNumber("similarity").doubleValue();
+                result.add(resultString(node1, node2, similarity));
+            });
+
+        assertEquals(
+            direction == INCOMING
+                ? EXPECTED_INCOMING
+                : EXPECTED_OUTGOING,
+            result
+        );
+    }
+
+    @ParameterizedTest(name = "{0} -- {1}")
+    @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldWriteResults(String graphImpl, Direction direction) throws KernelException {
         String query = "CALL algo.beta.jaccard(" +
                        "    '', 'LIKES', {" +

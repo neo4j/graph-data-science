@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -476,6 +477,46 @@ final class NeighborhoodSimilarityTest {
         neighborhoodSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
+    }
+
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @MethodSource("supportedLoadAndComputeDirections")
+    void shouldIgnoreParallelEdges(Direction loadDirection, Direction algoDirection, int concurrency) {
+        // Add parallel edges
+        db.execute("" +
+                   " MATCH (person {name: 'Alice'})" +
+                   " MATCH (thing {name: 'p1'})" +
+                   " CREATE (person)-[:LIKES]->(thing)"
+        );
+        db.execute("" +
+                   " MATCH (person {name: 'Dave'})" +
+                   " MATCH (thing {name: 'p3'})" +
+                   " CREATE (person)-[:LIKES]->(thing)" +
+                   " CREATE (person)-[:LIKES]->(thing)" +
+                   " CREATE (person)-[:LIKES]->(thing)"
+        );
+
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDeduplicationStrategy(DeduplicationStrategy.NONE)
+            .withDirection(loadDirection)
+            .load(HugeGraphFactory.class);
+
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
+            configBuilder().withConcurrency(concurrency).toConfig(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        Set<String> result = neighborhoodSimilarity
+            .computeToStream(algoDirection)
+            .map(NeighborhoodSimilarityTest::resultString)
+            .collect(Collectors.toSet());
+        neighborhoodSimilarity.release();
+
+        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
 
     @ParameterizedTest(name = "concurrency = {0}")

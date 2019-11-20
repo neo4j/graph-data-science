@@ -23,9 +23,9 @@ package org.neo4j.graphalgo.impl.jaccard;
 import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongArrayList;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Intersections;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -126,28 +126,19 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
         vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
 
+        DegreeComputer degreeComputer = new DegreeComputer();
+        VectorComputer vectorComputer = new VectorComputer();
         vectors.setAll(node -> {
-            MutableInt degreeCount = new MutableInt();
-            graph.forEachRelationship(node, direction, (source, target) -> {
-                if (source != target) {
-                    degreeCount.increment();
-                }
-                return true;
-            });
-            int degree = degreeCount.getValue();
-
+            graph.forEachRelationship(node, direction, degreeComputer);
+            int degree = degreeComputer.degree;
+            degreeComputer.reset();
+            vectorComputer.reset(degree);
             if (degree >= config.degreeCutoff) {
                 nodesToCompare++;
                 nodeFilter.set(node);
 
-                final LongArrayList targetIds = new LongArrayList(degree, ARRAY_SIZING_STRATEGY);
-                graph.forEachRelationship(node, direction, (source, target) -> {
-                    if (source != target) {
-                        targetIds.add(target);
-                    }
-                    return true;
-                });
-                return targetIds.buffer;
+                graph.forEachRelationship(node, direction, vectorComputer);
+                return vectorComputer.targetIds.buffer;
             }
             return null;
         });
@@ -355,4 +346,43 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         }
     }
 
+    private static final class VectorComputer implements RelationshipConsumer {
+
+        long lastTarget = -1;
+        LongArrayList targetIds;
+
+        @Override
+        public boolean accept(long source, long target) {
+            if (source != target && lastTarget != target) {
+                targetIds.add(target);
+            }
+            lastTarget = target;
+            return true;
+        }
+
+        void reset(int degree) {
+            lastTarget = -1;
+            targetIds = new LongArrayList(degree, ARRAY_SIZING_STRATEGY);
+        }
+    }
+
+    private static final class DegreeComputer implements RelationshipConsumer {
+
+        long lastTarget = -1;
+        int degree = 0;
+
+        @Override
+        public boolean accept(long source, long target) {
+            if (source != target && lastTarget != target) {
+                degree++;
+            }
+            lastTarget = target;
+            return true;
+        }
+
+        void reset() {
+            lastTarget = -1;
+            degree = 0;
+        }
+    }
 }
