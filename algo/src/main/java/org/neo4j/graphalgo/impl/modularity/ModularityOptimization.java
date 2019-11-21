@@ -130,6 +130,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
                 long currentColor = colorsUsed.nextSetBit(0);
                 while (currentColor != -1) {
+                    assertRunning();
                     optimizeForColor(currentColor);
                     currentColor = colorsUsed.nextSetBit(currentColor + 1);
                 }
@@ -157,7 +158,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             concurrency,
             executor,
             tracker
-        ).compute();
+        ).withProgressLogger(progressLogger)
+         .withTerminationFlag(terminationFlag)
+         .compute();
 
         this.colors = coloring.colors();
         this.colorsUsed = coloring.usedColors();

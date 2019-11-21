@@ -149,7 +149,9 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         nodesToColor.set(0, nodeCount);
 
         while (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
+            assertRunning();
             runColoring();
+            assertRunning();
             runValidation();
             ++ranIterations;
         }

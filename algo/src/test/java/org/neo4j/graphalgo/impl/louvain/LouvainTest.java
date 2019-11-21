@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -39,6 +40,8 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
@@ -56,6 +59,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
+import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
 class LouvainTest {
 
@@ -301,6 +305,31 @@ class LouvainTest {
         MemoryTree memoryTree = new LouvainFactory(config).memoryEstimation(dimensions, concurrency);
         assertEquals(min, memoryTree.memoryUsage().min);
         assertEquals(max, memoryTree.memoryUsage().max);
+    }
+
+    @Test
+    void testCanBeInterruptedByTxCancelation() {
+        Graph graph = new RandomGraphGenerator(
+            100_000,
+            10,
+            RelationshipDistribution.UNIFORM,
+            Optional.empty(),
+            AllocationTracker.EMPTY
+        ).generate();
+
+        assertTerminates((terminationFlag) -> {
+            new Louvain(
+                graph,
+                DEFAULT_CONFIG,
+                Direction.BOTH,
+                Pools.DEFAULT,
+                2,
+                AllocationTracker.EMPTY
+            )
+                .withProgressLogger(TestProgressLogger.INSTANCE)
+                .withTerminationFlag(terminationFlag)
+                .compute();
+        }, 1000, 1000);
     }
 
     static Stream<Arguments> memoryEstimationTuples() {

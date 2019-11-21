@@ -33,7 +33,6 @@ import org.neo4j.logging.NullLog;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 public final class Louvain extends Algorithm<Louvain> {
@@ -77,6 +76,8 @@ public final class Louvain extends Algorithm<Louvain> {
 
         long oldNodeCount = rootGraph.nodeCount();
         for (ranLevels = 0; ranLevels < config.maxLevel; ranLevels++) {
+            assertRunning();
+
             ModularityOptimization modularityOptimization = runModularityOptimization(workingGraph, seed);
             modularityOptimization.release();
 
@@ -161,10 +162,14 @@ public final class Louvain extends Algorithm<Louvain> {
             tracker
         );
 
+        assertRunning();
+
         workingGraph.forEachNode((nodeId) -> {
             nodeImporter.addNode(modularityOptimization.getCommunityId(nodeId));
             return true;
         });
+
+        assertRunning();
 
         SubGraphGenerator.RelImporter relImporter = nodeImporter.build();
 
