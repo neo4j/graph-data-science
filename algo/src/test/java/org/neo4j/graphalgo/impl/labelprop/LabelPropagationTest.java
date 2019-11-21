@@ -26,8 +26,10 @@ import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -75,15 +77,15 @@ final class LabelPropagationTest {
     @BeforeEach
     void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
+        db.execute(DB_CYPHER).close();
     }
 
     @AfterEach
     void shutdownGraphDb() {
-        if (db != null) db.shutdown();
+        db.shutdown();
     }
 
     Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
-        db.execute(DB_CYPHER).close();
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
                 .withDefaultConcurrency();
@@ -118,6 +120,30 @@ final class LabelPropagationTest {
         lp.compute(Direction.OUTGOING, 1L);
         HugeLongArray labels = lp.labels();
         assertArrayEquals(new long[]{1, 1, 3, 4, 4, 1}, labels.toArray(), "Incorrect result assuming initial labels are neo4j id");
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void shouldWorkWithSeedOnExplicitlyLoadedGraph(Class<? extends GraphFactory> graphImpl) {
+
+        Graph graph = new GraphLoader(db, Pools.DEFAULT)
+            .withDirection(Direction.OUTGOING)
+            .withDefaultConcurrency()
+            .withLabel("User")
+            .withRelationshipType("FOLLOW")
+            .withOptionalNodeProperties(PropertyMapping.of("seedId", 0.0))
+            .withName(graphImpl.getSimpleName()).load(graphImpl);
+
+        LabelPropagation lp = new LabelPropagation(
+            graph,
+            10000,
+            Pools.DEFAULT_CONCURRENCY,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        HugeLongArray labels = lp.compute(Direction.OUTGOING, 1L).labels();
+
+        assertArrayEquals(new long[]{2, 2, 3, 4, 4, 2}, labels.toArray());
     }
 
     @AllGraphTypesTest
