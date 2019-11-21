@@ -65,23 +65,34 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
         return getMemoryEstimation(setup, dimensions, false);
     }
 
-
     public static MemoryEstimation getMemoryEstimation(
         GraphSetup setup,
         GraphDimensions dimensions,
         boolean nonExistingGraph
     ) {
+        return getMemoryEstimation(setup.loadOutgoing, setup.loadIncoming, setup.loadAsUndirected, dimensions);
+    }
+
+    public static MemoryEstimation getMemoryEstimation(
+            boolean loadOutgoing,
+            boolean loadIncoming,
+            boolean loadAsUndirected,
+            GraphDimensions dimensions,
+            boolean nonExistingGraph
+    ) {
         MemoryEstimations.Builder builder = MemoryEstimations
-                .builder(HugeGraph.class)
-                .add("nodeIdMap", IdMap.memoryEstimation());
+            .builder(HugeGraph.class)
+            .add("nodeIdMap", IdMap.memoryEstimation());
 
         // Node properties
-        for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
-            // for estimations based on node/rel-counts, unresolved PropertyMappings should not throw on calling `exists()`
-            if (nonExistingGraph || propertyMapping.exists()) {
-                builder.add(propertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
-            } else {
-                builder.add(propertyMapping.propertyKey(), NullPropertyMap.MEMORY_USAGE);
+        if (dimensions.nodeProperties() != null) {
+            for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
+                // for estimations based on node/rel-counts, unresolved PropertyMappings should not throw on calling `exists()`
+            if (nonExistingGraph ||propertyMapping.exists()) {
+                    builder.add(propertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
+                } else {
+                    builder.add(propertyMapping.propertyKey(), NullPropertyMap.MEMORY_USAGE);
+                }
             }
         }
 
@@ -89,14 +100,14 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
         for (PropertyMapping mapping : dimensions.relProperties()) {
             if (nonExistingGraph || mapping.exists()) {
                 // Adjacency lists and Adjacency offsets
-                MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
+                MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(loadAsUndirected);
                 MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
-                if (setup.loadOutgoing || setup.loadAsUndirected) {
+                if (loadOutgoing || loadAsUndirected) {
                     builder.add("outgoing properties for " + mapping.neoPropertyKey(), adjacencyListSize);
                     builder.add("outgoing property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
 
                 }
-                if (setup.loadIncoming && !setup.loadAsUndirected) {
+                if (loadIncoming && !loadAsUndirected) {
                     builder.add("incoming properties for " + mapping.neoPropertyKey(), adjacencyListSize);
                     builder.add("incoming property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
                 }
@@ -104,14 +115,14 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
         }
 
         // Adjacency lists and Adjacency offsets
-        MemoryEstimation adjacencyListSize = AdjacencyList.compressedMemoryEstimation(setup.loadAsUndirected);
+        MemoryEstimation adjacencyListSize = AdjacencyList.compressedMemoryEstimation(loadAsUndirected);
         MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
-        if (setup.loadOutgoing || setup.loadAsUndirected) {
+        if (loadOutgoing || loadAsUndirected) {
             builder.add("outgoing", adjacencyListSize);
             builder.add("outgoing offsets", adjacencyOffsetsSetup);
 
         }
-        if (setup.loadIncoming && !setup.loadAsUndirected) {
+        if (loadIncoming && !loadAsUndirected) {
             builder.add("incoming", adjacencyListSize);
             builder.add("incoming offsets", adjacencyOffsetsSetup);
         }

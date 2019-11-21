@@ -43,7 +43,7 @@ public final class AdjacencyList {
     public static MemoryEstimation compressedMemoryEstimation(long avgDegree, long nodeCount) {
         return MemoryEstimations
             .builder(AdjacencyList.class)
-            .rangePerGraphDimension("pages", dim -> {
+            .rangePerGraphDimension("pages", (dim, concurrency) -> {
                 // Best case scenario:
                 // Difference between node identifiers in each adjacency list is 1.
                 // This leads to ideal compression through delta encoding.
@@ -82,7 +82,7 @@ public final class AdjacencyList {
 
         return MemoryEstimations
                 .builder(AdjacencyList.class)
-                .perGraphDimension("pages", dim -> {
+                .perGraphDimension("pages", (dim, concurrency) -> {
                     long nodeCount = dim.nodeCount();
                     long relCount = undirected ? dim.maxRelCount() * 2 : dim.maxRelCount();
 
@@ -90,7 +90,7 @@ public final class AdjacencyList {
                     int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
                     long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
 
-                    return pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages);
+                    return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
                 })
                 .build();
     }

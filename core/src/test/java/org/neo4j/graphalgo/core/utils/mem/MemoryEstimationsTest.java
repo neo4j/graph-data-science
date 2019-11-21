@@ -103,8 +103,8 @@ class MemoryEstimationsTest {
     @Test
     void testPerGraphDimension() {
         MemoryEstimation memoryEstimation = MemoryEstimations.builder()
-                .perGraphDimension("foo", graphDimensions -> graphDimensions.nodeCount() * 42)
-                .rangePerGraphDimension("bar", graphDimensions -> MemoryRange.of(23).times(graphDimensions.nodeCount()))
+                .perGraphDimension("foo", (graphDimensions, concurrency) -> MemoryRange.of(graphDimensions.nodeCount() * 42))
+                .rangePerGraphDimension("bar", (graphDimensions, concurrency) -> MemoryRange.of(23).times(graphDimensions.nodeCount()))
                 .build();
 
         assertEquals(

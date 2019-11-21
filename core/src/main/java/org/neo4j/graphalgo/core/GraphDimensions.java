@@ -153,6 +153,10 @@ public final class GraphDimensions {
         private RelationshipTypeMappings relationshipTypeMappings;
         private PropertyMappings relProperties;
 
+        public Builder() {
+            this.highestNeoId = -1;
+        }
+
         public Builder setNodeCount(long nodeCount) {
             this.nodeCount = nodeCount;
             return this;
@@ -191,13 +195,13 @@ public final class GraphDimensions {
         public GraphDimensions build() {
             return new GraphDimensions(
                     nodeCount,
-                    highestNeoId,
+                    highestNeoId == -1 ? nodeCount : highestNeoId,
                     maxRelCount,
                     labelId,
-                    nodeProperties,
+                    nodeProperties == null ? PropertyMappings.EMPTY : nodeProperties,
                     relationshipTypeMappings,
-                    relProperties
-            );
+                    relProperties == null ? PropertyMappings.EMPTY : relProperties
+                );
         }
     }
 }

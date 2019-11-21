@@ -24,11 +24,11 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntToLongFunction;
 import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
-import java.util.function.ToLongFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -383,10 +383,14 @@ public final class MemoryEstimations {
          * @param fn          function to compute memory consumption in bytes
          * @return this builder
          */
-        public Builder perGraphDimension(final String description, final ToLongFunction<GraphDimensions> fn) {
+        public Builder perGraphDimension(
+            final String description,
+            final BiFunction<GraphDimensions, Integer, MemoryRange> fn
+        ) {
             components.add(new LeafEstimation(
-                    description,
-                    (dimensions, concurrency) -> MemoryRange.of(fn.applyAsLong(dimensions))));
+                description,
+                fn::apply
+            ));
             return this;
         }
 
@@ -401,11 +405,13 @@ public final class MemoryEstimations {
          * @return this builder
          */
         public Builder rangePerGraphDimension(
-                final String description,
-                final Function<GraphDimensions, MemoryRange> fn) {
+            final String description,
+            final BiFunction<GraphDimensions, Integer, MemoryRange> fn
+        ) {
             components.add(new LeafEstimation(
-                    description,
-                    (dimensions, concurrency) -> fn.apply(dimensions)));
+                description,
+                fn::apply
+            ));
             return this;
         }
 
