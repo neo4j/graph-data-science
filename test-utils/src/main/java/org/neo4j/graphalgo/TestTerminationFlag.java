@@ -20,8 +20,13 @@
 
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.exceptions.Status;
+
+import java.util.ArrayList;
 
 public class TestTerminationFlag implements TerminationFlag {
 
@@ -41,5 +46,22 @@ public class TestTerminationFlag implements TerminationFlag {
             // ignore
         }
         return !transaction.getReasonIfTerminated().isPresent() && transaction.isOpen();
+    }
+
+    public static void executeAndTerminate(KernelTransaction transaction, Runnable runnable, long sleepMillis) {
+        ArrayList<Runnable> runnables = new ArrayList<>();
+
+        runnables.add(runnable);
+
+        runnables.add(() -> {
+            try {
+                Thread.sleep(sleepMillis);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            transaction.markForTermination(Status.Transaction.TransactionMarkedAsFailed);
+        });
+
+        ParallelUtil.run(runnables, Pools.DEFAULT);
     }
 }

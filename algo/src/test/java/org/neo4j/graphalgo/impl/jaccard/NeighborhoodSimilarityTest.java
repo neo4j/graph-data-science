@@ -24,6 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -49,16 +50,15 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.api.KernelTransactions;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -577,6 +577,7 @@ final class NeighborhoodSimilarityTest {
         assertTrue(log.containsMessage(INFO, NeighborhoodSimilarity.class.getSimpleName()));
     }
 
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     @Test
     void shouldTerminate() {
         KernelTransactions kernelTransactions = db
@@ -600,30 +601,19 @@ final class NeighborhoodSimilarityTest {
             AllocationTracker.EMPTY
         ).withTerminationFlag(terminationFlag);
 
-        ArrayList<Runnable> runnables = new ArrayList<>();
-
-        runnables.add(() -> {
+        Runnable algoRunner = () -> {
             try {
                 neighborhoodSimilarity.computeToStream(OUTGOING);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        });
-
-        runnables.add(() -> {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            kernelTransaction.markForTermination(Status.Transaction.TransactionMarkedAsFailed);
-        });
+        };
 
         assertThrows(
             TransactionTerminatedException.class,
             () ->  {
                 try {
-                    ParallelUtil.run(runnables, Pools.DEFAULT);
+                    TestTerminationFlag.executeAndTerminate(kernelTransaction, algoRunner, 100);
                 } catch (RuntimeException e) {
                     throw e.getCause();
                 }
