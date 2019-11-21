@@ -70,9 +70,10 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                  "{iterations: 10, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', write: true, concurrency: 4}) " +
                  "YIELD nodes, ranIterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, seedProperty")
     public Stream<BetaLabelPropagationStats> betaLabelPropagation(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationshipType,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         return run(label, relationshipType, config);
     }
@@ -82,9 +83,10 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                  "{iterations: 10, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', concurrency: 4}) " +
                  "YIELD nodeId, community")
     public Stream<BetaStreamResult> betaLabelPropagationStream(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationshipType,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         return stream(label, relationshipType, config);
     }
@@ -97,10 +99,11 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                  "YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, seedProperty - " +
                  "simple label propagation kernel")
     public Stream<LabelPropagationStats> labelPropagation(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationshipType,
-            @Name(value = "config", defaultValue = "null") Object directionOrConfig,
-            @Name(value = "deprecatedConfig", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "config", defaultValue = "null") Object directionOrConfig,
+        @Name(value = "deprecatedConfig", defaultValue = "{}") Map<String, Object> config
+    ) {
         Map<String, Object> rawConfig = config;
         if (directionOrConfig == null) {
             if (!config.isEmpty()) {
@@ -121,9 +124,10 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                  "{iterations: 10, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', concurrency: 4}) " +
                  "YIELD nodeId, label")
     public Stream<StreamResult> labelPropagationStream(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationshipType,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
         return betaLabelPropagationStream(label, relationshipType, config).map(StreamResult::new);
     }
 
@@ -131,9 +135,10 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     @Description("CALL algo.labelPropagation.memrec(label:String, relationship:String, config:Map<String, Object>) " +
                  "YIELD nodeId, label")
     public Stream<MemRecResult> labelPropagationMemrec(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationshipType,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
         return Stream.of(new MemRecResult(memoryEstimation));
@@ -151,17 +156,18 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation> algorithmFactory(final ProcedureConfiguration config) {
+    protected AlgorithmFactory<LabelPropagation> algorithmFactory(ProcedureConfiguration config) {
         return new LabelPropagationFactory();
     }
 
     @Override
-    protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+    protected GraphLoader configureAlgoLoader(GraphLoader loader, ProcedureConfiguration config) {
         return loader
-                .withReducedRelationshipLoading(config.getDirection(Direction.OUTGOING))
-                .withOptionalNodeProperties(createPropertyMappings(
-                        config.getString(SEED_PROPERTY_KEY, CONFIG_OLD_SEED_KEY, null),
-                        config.getString(CONFIG_WEIGHT_KEY, null)));
+            .withReducedRelationshipLoading(config.getDirection(Direction.OUTGOING))
+            .withOptionalNodeProperties(createPropertyMappings(
+                config.getString(SEED_PROPERTY_KEY, CONFIG_OLD_SEED_KEY, null),
+                config.getString(CONFIG_WEIGHT_KEY, null)
+            ));
     }
 
     @Override
@@ -170,9 +176,10 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     }
 
     private Stream<BetaLabelPropagationStats> run(
-            final String label,
-            final String relationshipType,
-            final Map<String, Object> config) {
+        String label,
+        String relationshipType,
+        Map<String, Object> config
+    ) {
         ProcedureSetup setup = setup(label, relationshipType, config);
 
         if (setup.graph.isEmpty()) {
@@ -184,7 +191,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             throw new IllegalArgumentException(String.format("Write property '%s' not specified", WRITE_PROPERTY_KEY));
         }
 
-        final HugeLongArray labels = compute(setup);
+        HugeLongArray labels = compute(setup);
         setup.statsBuilder.withCommunityFunction(labels::get);
 
 
@@ -192,12 +199,13 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             String seedProperty = setup.procedureConfig.getString(SEED_PROPERTY_KEY, CONFIG_OLD_SEED_KEY, null);
             setup.statsBuilder.withWrite(true);
             write(
-                    setup.procedureConfig.getWriteConcurrency(),
-                    setup.procedureConfig.getWriteProperty(),
-                    seedProperty,
-                    setup.graph,
-                    labels,
-                    setup.statsBuilder);
+                setup.procedureConfig.getWriteConcurrency(),
+                setup.procedureConfig.getWriteProperty(),
+                seedProperty,
+                setup.graph,
+                labels,
+                setup.statsBuilder
+            );
 
             setup.graph.releaseProperties();
         }
@@ -206,9 +214,10 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     }
 
     private Stream<BetaStreamResult> stream(
-            final String label,
-            final String relationshipType,
-            final Map<String, Object> config) {
+        String label,
+        String relationshipType,
+        Map<String, Object> config
+    ) {
         ProcedureSetup setup = setup(label, relationshipType, config);
 
         if (setup.graph.isEmpty()) {
@@ -216,18 +225,19 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             return Stream.empty();
         }
 
-        final HugeLongArray labels = compute(setup);
+        HugeLongArray labels = compute(setup);
 
         setup.graph.releaseProperties();
 
         return LongStream.range(0L, labels.size())
-                .mapToObj(i -> new BetaStreamResult(setup.graph.toOriginalNodeId(i), labels.get(i)));
+            .mapToObj(i -> new BetaStreamResult(setup.graph.toOriginalNodeId(i), labels.get(i)));
     }
 
     private ProcedureSetup setup(
-            String label,
-            String relationshipType,
-            Map<String, Object> config) {
+        String label,
+        String relationshipType,
+        Map<String, Object> config
+    ) {
 
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
@@ -255,20 +265,23 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
         if (!computeDirection.isPresent()) {
             throw new IllegalArgumentException(String.format(
-                    "Incompatible directions between loaded graph and requested compute direction. Load direction: '%s' Compute direction: '%s'",
-                    setup.graph.getLoadDirection(),
-                    procedureDirection));
+                "Incompatible directions between loaded graph and requested compute direction. Load direction: '%s' Compute direction: '%s'",
+                setup.graph.getLoadDirection(),
+                procedureDirection
+            ));
         }
 
-        final HugeLongArray algoResult = runWithExceptionLogging(
-                "LabelPropagation failed",
-                () -> setup.statsBuilder.timeEval(() -> algo.compute(
-                        computeDirection.get(),
-                        setup.procedureConfig.getIterations(DEFAULT_ITERATIONS)))).labels();
+        HugeLongArray algoResult = runWithExceptionLogging(
+            "LabelPropagation failed",
+            () -> setup.statsBuilder.timeEval(() -> algo.compute(
+                computeDirection.get(),
+                setup.procedureConfig.getIterations(DEFAULT_ITERATIONS)
+            ))
+        ).labels();
 
         setup.statsBuilder
-                .ranIterations(algo.ranIterations())
-                .didConverge(algo.didConverge());
+            .ranIterations(algo.ranIterations())
+            .didConverge(algo.didConverge());
 
         algo.release();
         setup.graph.releaseTopology();
@@ -277,12 +290,13 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     }
 
     private void write(
-            int concurrency,
-            String writeProperty,
-            String seedProperty,
-            Graph graph,
-            HugeLongArray labels,
-            BetaLabelPropagationStats.WriteResultBuilder stats) {
+        int concurrency,
+        String writeProperty,
+        String seedProperty,
+        Graph graph,
+        HugeLongArray labels,
+        BetaLabelPropagationStats.WriteResultBuilder stats
+    ) {
         log.debug("Writing results");
 
         try (ProgressTimer ignored = stats.timeWrite()) {
@@ -295,14 +309,14 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                 translator = new PropertyTranslator.OfLongIfChanged<>(seedProperties, HugeLongArray::get);
             }
             NodePropertyExporter.of(api, graph, TerminationFlag.wrap(transaction))
-                    .withLog(log)
-                    .parallel(Pools.DEFAULT, concurrency)
-                    .build()
-                    .write(
-                            writeProperty,
-                            labels,
-                            translator
-                    );
+                .withLog(log)
+                .parallel(Pools.DEFAULT, concurrency)
+                .build()
+                .write(
+                    writeProperty,
+                    labels,
+                    translator
+                );
         }
     }
 
@@ -313,10 +327,11 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         final BetaLabelPropagationStats.WriteResultBuilder statsBuilder;
 
         ProcedureSetup(
-                final Graph graph,
-                final AllocationTracker tracker,
-                final ProcedureConfiguration procedureConfig,
-                final BetaLabelPropagationStats.WriteResultBuilder statsBuilder) {
+            Graph graph,
+            AllocationTracker tracker,
+            ProcedureConfiguration procedureConfig,
+            BetaLabelPropagationStats.WriteResultBuilder statsBuilder
+        ) {
             this.graph = graph;
             this.tracker = tracker;
             this.procedureConfig = procedureConfig;

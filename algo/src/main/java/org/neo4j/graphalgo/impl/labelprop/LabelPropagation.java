@@ -61,11 +61,11 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     private boolean didConverge;
 
     public LabelPropagation(
-            Graph graph,
-            int batchSize,
-            int concurrency,
-            ExecutorService executor,
-            AllocationTracker tracker
+        Graph graph,
+        int batchSize,
+        int concurrency,
+        ExecutorService executor,
+        AllocationTracker tracker
     ) {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
@@ -155,22 +155,23 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, this.batchSize);
 
         Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
-                nodeCount,
-                batchSize,
-                (start, length) -> () -> PrimitiveLongCollections.range(start, start + length - 1L));
+            nodeCount,
+            batchSize,
+            (start, length) -> () -> PrimitiveLongCollections.range(start, start + length - 1L)
+        );
 
         int threads = nodeBatches.size();
         List<StepRunner> tasks = new ArrayList<>(threads);
         for (PrimitiveLongIterable iter : nodeBatches) {
             InitStep initStep = new InitStep(
-                    graph,
-                    nodeProperties,
-                    nodeWeights,
-                    iter,
-                    labels,
-                    getProgressLogger(),
-                    direction,
-                    maxLabelId
+                graph,
+                nodeProperties,
+                nodeWeights,
+                iter,
+                labels,
+                getProgressLogger(),
+                direction,
+                maxLabelId
             );
             StepRunner task = new StepRunner(initStep);
             tasks.add(task);
