@@ -1,7 +1,7 @@
 description = 'Neo4j Graph Algorithms :: Test Utils'
 
 dependencies {
-    compile project(':core')
+    compile project(':algo-common')
 
     compile group: 'org.neo4j',                             name: 'neo4j',                    version: ver.'neo4j'
     compile group: 'org.neo4j',                             name: 'neo4j-common',             version: ver.'neo4j'

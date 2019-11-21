@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.impl.generator;
 
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.AdjacencyBuilder;
@@ -53,6 +54,19 @@ public final class RandomGraphGenerator {
     private final RelationshipDistribution relationshipDistribution;
     private final Optional<RelationshipPropertyProducer> maybePropertyProducer;
 
+    public static Graph generate(int nodeCount, int averageDegree) {
+        return generate(nodeCount, averageDegree, RelationshipDistribution.POWER_LAW);
+    }
+
+    public static Graph generate(int nodeCount, int averageDegree, RelationshipDistribution distribution) {
+        return new RandomGraphGenerator(
+            nodeCount,
+            averageDegree,
+            distribution,
+            Optional.empty(),
+            AllocationTracker.EMPTY
+        ).generate();
+    }
 
     public RandomGraphGenerator(
             long nodeCount,

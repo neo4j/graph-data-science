@@ -27,18 +27,30 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
+import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.TransactionTerminatedException;
+import org.neo4j.internal.kernel.api.security.LoginContext;
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.impl.api.KernelTransactions;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
 public final class TestSupport {
 
@@ -126,4 +138,56 @@ public final class TestSupport {
         Assertions.assertEquals(CanonicalAdjacencyMatrix.canonicalize(expected), CanonicalAdjacencyMatrix.canonicalize(actual));
     }
 
+    /**
+     * This method assumes that the given algorithm calls {@link Algorithm#assertRunning()} at least once.
+     * When called, the algorithm will sleep for {@code sleepMillis} milliseconds before it check the transaction state.
+     * A second thread will terminate the transaction during the sleep interval.
+     */
+    public static void assertAlgorithmTermination(
+        GraphDatabaseAPI db,
+        Algorithm algorithm,
+        Consumer<Algorithm> algoConsumer,
+        long sleepMillis
+    ) {
+        assert sleepMillis >= 100 && sleepMillis <= 10_000;
+
+        KernelTransaction kernelTx = db
+            .getDependencyResolver()
+            .resolveDependency(KernelTransactions.class, ONLY)
+            .newInstance(
+                KernelTransaction.Type.explicit,
+                LoginContext.AUTH_DISABLED,
+                10_000
+            );
+
+        algorithm.withTerminationFlag(new TestTerminationFlag(kernelTx, sleepMillis));
+
+        Runnable algorithmThread = () -> {
+            try {
+                algoConsumer.accept(algorithm);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
+
+        Runnable interruptingThread = () -> {
+            try {
+                Thread.sleep(sleepMillis / 2);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            kernelTx.markForTermination(Status.Transaction.TransactionMarkedAsFailed);
+        };
+
+        assertThrows(
+            TransactionTerminatedException.class,
+            () -> {
+                try {
+                    ParallelUtil.run(Arrays.asList(algorithmThread, interruptingThread), Pools.DEFAULT);
+                } catch (RuntimeException e) {
+                    throw e.getCause();
+                }
+            }
+        );
+    }
 }
