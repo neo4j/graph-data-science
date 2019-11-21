@@ -30,6 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestTerminationFlag;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -37,16 +38,26 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.TransactionTerminatedException;
+import org.neo4j.internal.kernel.api.security.LoginContext;
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.impl.api.KernelTransactions;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,6 +66,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
@@ -62,6 +74,7 @@ import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
+import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
@@ -565,6 +578,60 @@ final class NeighborhoodSimilarityTest {
     }
 
     @Test
+    void shouldTerminate() {
+        KernelTransactions kernelTransactions = db
+            .getDependencyResolver()
+            .resolveDependency(KernelTransactions.class, ONLY);
+
+        Graph graph = createGraph();
+
+        KernelTransaction kernelTransaction = kernelTransactions.newInstance(
+            KernelTransaction.Type.explicit,
+            LoginContext.AUTH_DISABLED,
+            10_000
+        );
+
+        TerminationFlag terminationFlag = new TestTerminationFlag(kernelTransaction, 200);
+
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
+            configBuilder().withConcurrency(1).toConfig(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        ).withTerminationFlag(terminationFlag);
+
+        ArrayList<Runnable> runnables = new ArrayList<>();
+
+        runnables.add(() -> {
+            try {
+                neighborhoodSimilarity.computeToStream(OUTGOING);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        runnables.add(() -> {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            kernelTransaction.markForTermination(Status.Transaction.TransactionMarkedAsFailed);
+        });
+
+        assertThrows(
+            TransactionTerminatedException.class,
+            () ->  {
+                try {
+                    ParallelUtil.run(runnables, Pools.DEFAULT);
+                } catch (RuntimeException e) {
+                    throw e.getCause();
+                }
+            }
+        );
+    }
+
+    @Test
     void shouldComputeMemrec() {
         GraphDimensions dimensions = new GraphDimensions.Builder()
             .setNodeCount(1_000_000)
@@ -666,6 +733,19 @@ final class NeighborhoodSimilarityTest {
             .build().estimate(dimensions, 1);
 
         assertEquals(expected.memoryUsage(), actual.memoryUsage());
+    }
+
+    private Graph createGraph() {
+        int nodes = 10;
+        long averageDegree = 5L;
+
+        return new RandomGraphGenerator(
+            nodes,
+            averageDegree,
+            RelationshipDistribution.POWER_LAW,
+            Optional.empty(),
+            AllocationTracker.EMPTY
+        ).generate();
     }
 
     private static class ConfigBuilder {

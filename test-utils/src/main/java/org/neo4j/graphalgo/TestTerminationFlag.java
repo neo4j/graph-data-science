@@ -17,37 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils;
 
+package org.neo4j.graphalgo;
+
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.kernel.api.KernelTransaction;
 
-public class TerminationFlagImpl implements TerminationFlag {
+public class TestTerminationFlag implements TerminationFlag {
 
     private final KernelTransaction transaction;
+    private final long sleepMillis;
 
-    private long interval = 10_000;
-
-    private volatile long lastCheck = 0;
-    private volatile boolean running = true;
-
-    public TerminationFlagImpl(KernelTransaction transaction) {
+    public TestTerminationFlag(KernelTransaction transaction, long sleepMillis) {
         this.transaction = transaction;
-    }
-
-    public TerminationFlagImpl withCheckInterval(long interval) {
-        this.interval = interval;
-        return this;
+        this.sleepMillis = sleepMillis;
     }
 
     @Override
     public boolean running() {
-        final long currentTime = System.currentTimeMillis();
-        if (currentTime > lastCheck + interval) {
-            if (transaction.getReasonIfTerminated().isPresent() || !transaction.isOpen()) {
-                running = false;
-            }
-            lastCheck = currentTime;
+        try {
+            Thread.sleep(sleepMillis);
+        } catch (InterruptedException e) {
+            // ignore
         }
-        return running;
+        return !transaction.getReasonIfTerminated().isPresent() && transaction.isOpen();
     }
 }

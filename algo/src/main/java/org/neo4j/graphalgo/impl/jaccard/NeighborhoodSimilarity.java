@@ -84,25 +84,20 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         // Create a filter for which nodes to compare and calculate the neighborhood for each node
         prepare(direction);
 
-        // Compute similarities
-        Stream<SimilarityResult> stream;
+        assertRunning();
 
+        // Compute similarities
         if (config.hasTopN() && !config.hasTopK()) {
             // Special case: compute topN without topK.
             // This can not happen when algo is called from proc.
             // Ignore parallelism, always run single threaded,
             // but run on primitives.
-            stream = computeTopN();
+            return computeTopN();
         } else {
-            stream = config.isParallel()
+            return config.isParallel()
                 ? computeParallel()
                 : compute();
         }
-
-        // Log progress
-        stream = log(stream);
-
-        return assertRunning(stream);
     }
 
     public SimilarityGraphResult computeToGraph(Direction direction) {
@@ -163,7 +158,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     private Stream<SimilarityResult> computeAll() {
-        return nodeStream()
+        return loggelableAndTerminatableNodeStream()
             .boxed()
             .flatMap(node1 -> {
                 long[] vector1 = vectors.get(node1);
@@ -178,7 +173,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private Stream<SimilarityResult> computeAllParallel() {
         return ParallelUtil.parallelStream(
-            nodeStream(), stream -> stream
+            loggelableAndTerminatableNodeStream(), stream -> stream
                 .boxed()
                 .flatMap(node1 -> {
                     long[] vector1 = vectors.get(node1);
@@ -195,7 +190,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private TopKMap computeTopkMap() {
         Comparator<SimilarityResult> comparator = config.topK > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topK), comparator, tracker);
-        nodeStream()
+        loggelableAndTerminatableNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
                 nodeStream(node1 + 1)
@@ -214,7 +209,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         Comparator<SimilarityResult> comparator = config.topK > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topK), comparator, tracker);
         ParallelUtil.parallelStreamConsume(
-            nodeStream(),
+            loggelableAndTerminatableNodeStream(),
             stream -> stream
                 .forEach(node1 -> {
                     long[] vector1 = vectors.get(node1);
@@ -239,7 +234,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private Stream<SimilarityResult> computeTopN() {
         TopNList topNList = new TopNList(config.topN);
-        nodeStream()
+        loggelableAndTerminatableNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
                 nodeStream(node1 + 1)
@@ -259,19 +254,19 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return topNList.stream();
     }
 
-    private Stream<SimilarityResult> log(Stream<SimilarityResult> stream) {
+    private LongStream log(LongStream stream) {
         long logInterval = Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100));
-        return stream.peek(sim -> {
-            if ((sim.node1 & (logInterval - 1)) == 0) {
-                progressLogger.logProgress(sim.node1, nodesToCompare);
+        return stream.peek(node -> {
+            if ((node & (logInterval - 1)) == 0) {
+                progressLogger.logProgress(node, nodesToCompare);
             }
         });
     }
 
-    private Stream<SimilarityResult> assertRunning(Stream<SimilarityResult> stream) {
+    private LongStream assertRunning(LongStream stream) {
         long checkInterval = Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100));
-        return stream.peek(sim -> {
-            if ((sim.node1 & (checkInterval - 1)) == 0) {
+        return stream.peek(node -> {
+            if ((node & (checkInterval - 1)) == 0) {
                 assertRunning();
             }
         });
@@ -286,6 +281,10 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private LongStream nodeStream() {
         return nodeStream(0);
+    }
+
+    private LongStream loggelableAndTerminatableNodeStream() {
+        return log(assertRunning(nodeStream()));
     }
 
     private LongStream nodeStream(long offset) {

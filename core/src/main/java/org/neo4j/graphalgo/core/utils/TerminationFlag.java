@@ -23,9 +23,6 @@ import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
 
-/**
- * @author mknblch
- */
 public interface TerminationFlag {
 
     TerminationFlag RUNNING_TRUE = () -> true;
@@ -34,6 +31,10 @@ public interface TerminationFlag {
 
     static TerminationFlag wrap(KernelTransaction transaction) {
         return new TerminationFlagImpl(transaction);
+    }
+
+    static TerminationFlag wrap(KernelTransaction transaction, long interval) {
+        return new TerminationFlagImpl(transaction).withCheckInterval(interval);
     }
 
     boolean running();
