@@ -59,8 +59,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 class LouvainTest {
 
-    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, TOLERANCE_DEFAULT, false, Optional.empty());
-    static final Louvain.Config DEFAULT_CONFIG_WITH_DENDROGRAM = new Louvain.Config(
+    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(
         10,
         10,
         TOLERANCE_DEFAULT,
@@ -141,7 +140,7 @@ class LouvainTest {
 
         Louvain algorithm = new Louvain(
             graph,
-            DEFAULT_CONFIG_WITH_DENDROGRAM,
+            DEFAULT_CONFIG,
             direction,
             Pools.DEFAULT,
             1,
@@ -178,7 +177,7 @@ class LouvainTest {
 
         Louvain algorithm = new Louvain(
             graph,
-            DEFAULT_CONFIG_WITH_DENDROGRAM,
+            DEFAULT_CONFIG,
             direction,
             Pools.DEFAULT,
             1,
@@ -314,7 +313,6 @@ class LouvainTest {
             arguments(42, 10, 6459129, 105316768)
         );
     }
-
 
     private Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher, String... nodeProperties) {
         return loadGraph(graphImpl, cypher, false, nodeProperties);
