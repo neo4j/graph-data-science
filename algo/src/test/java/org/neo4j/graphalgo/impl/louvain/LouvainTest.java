@@ -21,7 +21,9 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
@@ -34,27 +36,44 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 class LouvainTest {
 
-    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, TOLERANCE_DEFAULT, false,  Optional.empty());
-    static final Louvain.Config DEFAULT_CONFIG_WITH_DENDROGRAM = new Louvain.Config(10, 10, TOLERANCE_DEFAULT, true, Optional.empty());
-    static final Louvain.Config DEFAULT_CONFIG_WITH_SEED = new Louvain.Config(10, 10, TOLERANCE_DEFAULT, true, Optional.of("seed"));
+    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, TOLERANCE_DEFAULT, false, Optional.empty());
+    static final Louvain.Config DEFAULT_CONFIG_WITH_DENDROGRAM = new Louvain.Config(
+        10,
+        10,
+        TOLERANCE_DEFAULT,
+        true,
+        Optional.empty()
+    );
+    static final Louvain.Config DEFAULT_CONFIG_WITH_SEED = new Louvain.Config(
+        10,
+        10,
+        TOLERANCE_DEFAULT,
+        true,
+        Optional.of("seed")
+    );
 
     Direction direction;
     GraphDatabaseAPI db;
@@ -210,47 +229,103 @@ class LouvainTest {
         final HugeLongArray[] dendrogram = algorithm.dendrograms();
         final double[] modularities = algorithm.modularities();
 
-        System.out.println("dendrogram = " + Arrays.toString(dendrogram));
+        Map<Long, Long[]> expectedCommunitiesWithlabels = MapUtil.genericMap(
+            new HashMap<>(),
+            1L, new Long[]{0L, 1L, 2L, 3L, 4L, 5L, 14L},
+            2L, new Long[]{6L, 7L, 8L},
+            42L, new Long[]{9L, 10L, 11L, 12L, 13L}
+        );
 
         assertCommunitiesWithLabels(
             dendrogram[0],
-            new long[]{1, 2, 42},
-            new long[]{0, 1, 2, 3, 4, 5, 14},
-            new long[]{6, 7, 8},
-            new long[]{9, 10, 11, 12, 13}
+            expectedCommunitiesWithlabels
         );
 
         assertEquals(1, algorithm.levels());
         assertEquals(0.38, modularities[modularities.length - 1], 0.01);
     }
 
-    @Test
-    void testMemoryEstimationComputation() {
-        LouvainFactory factory = new LouvainFactory(DEFAULT_CONFIG);
+    @AllGraphTypesTest
+    void testTolerance(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadGraph(graphImpl, DB_CYPHER);
 
-        GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
-        assertEquals(MemoryRange.of(632, 1096), factory.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
-        assertEquals(MemoryRange.of(1136, 1600), factory.memoryEstimation().estimate(dimensions0, 4).memoryUsage());
+        Louvain algorithm = new Louvain(
+            graph,
+            new Louvain.Config(
+                10,
+                10,
+                2.0,
+                false,
+                Optional.empty()
+            ),
+            direction,
+            Pools.DEFAULT,
+            1,
+            AllocationTracker.EMPTY
+        ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
-        GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(MemoryRange.of(7032, 14696), factory.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
-        assertEquals(MemoryRange.of(14736, 22400), factory.memoryEstimation().estimate(dimensions100, 4).memoryUsage());
+        algorithm.compute();
 
-        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(
-            MemoryRange.of(6400976563256L, 13602075196672L),
-            factory.memoryEstimation().estimate(dimensions100B, 1).memoryUsage()
-        );
-        assertEquals(
-            MemoryRange.of(13602075196712L, 20803173830128L),
-            factory.memoryEstimation().estimate(dimensions100B, 4).memoryUsage());
+        assertEquals(1, algorithm.levels());
     }
+
+    @AllGraphTypesTest
+    void testMaxLevels(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadGraph(graphImpl, DB_CYPHER);
+
+        Louvain algorithm = new Louvain(
+            graph,
+            new Louvain.Config(
+                1,
+                10,
+                TOLERANCE_DEFAULT,
+                false,
+                Optional.empty()
+            ),
+            direction,
+            Pools.DEFAULT,
+            1,
+            AllocationTracker.EMPTY
+        ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+
+        algorithm.compute();
+
+        assertEquals(1, algorithm.levels());
+    }
+
+    @ParameterizedTest
+    @MethodSource("memoryEstimationTuples")
+    void testMemoryEstimation(int concurrency, int levels, long min, long max) {
+        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000L).setMaxRelCount(500_000L).build();
+
+        Louvain.Config config = new Louvain.Config(levels, 10, TOLERANCE_DEFAULT, false, Optional.empty());
+        MemoryTree memoryTree = new LouvainFactory(config).memoryEstimation(dimensions, concurrency);
+        assertEquals(min, memoryTree.memoryUsage().min);
+        assertEquals(max, memoryTree.memoryUsage().max);
+    }
+
+    static Stream<Arguments> memoryEstimationTuples() {
+        return Stream.of(
+            arguments(1, 1, 6414193, 16338904),
+            arguments(1, 10, 6414193, 23538904),
+            arguments(4, 1, 6417481, 22143280),
+            arguments(4, 10, 6417481, 29343280),
+            arguments(42, 1, 6459129, 98116768),
+            arguments(42, 10, 6459129, 105316768)
+        );
+    }
+
 
     private Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher, String... nodeProperties) {
         return loadGraph(graphImpl, cypher, false, nodeProperties);
     }
 
-    private Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher, boolean loadRelWeight, String... nodeProperties) {
+    private Graph loadGraph(
+        Class<? extends GraphFactory> graphImpl,
+        String cypher,
+        boolean loadRelWeight,
+        String... nodeProperties
+    ) {
         db.execute(cypher);
         GraphLoader loader = new GraphLoader(db)
             .withOptionalNodeProperties(

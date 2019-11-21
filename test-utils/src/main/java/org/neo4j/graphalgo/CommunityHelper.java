@@ -20,7 +20,11 @@
 
 package org.neo4j.graphalgo;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -83,21 +87,27 @@ public final class CommunityHelper {
         }
     }
 
-    public static void assertCommunitiesWithLabels(HugeLongArray communityData, long[] labels, long[]... communities) {
-        assertCommunitiesWithLabels(communityData.toArray(), labels, communities);
+    public static void assertCommunitiesWithLabels(HugeLongArray communityData, Map<Long, Long[]> expectedCommunities) {
+        assertCommunitiesWithLabels(communityData.toArray(), expectedCommunities);
     }
 
-    public static void assertCommunitiesWithLabels(long[] communityData, long[] labels, long[]... communities) {
-        assertCommunities(communityData, communities);
-        for (int i = 0; i < communities.length; i++) {
-            long[] community = communities[i];
-            for (int j = 0; j < community.length; j++) {
-                assertEquals(labels[i], communityData[(int) community[j]],
+    public static void assertCommunitiesWithLabels(long[] communityData, Map<Long, Long[]> expectedCommunities) {
+        long[][] longCommunities = new long[expectedCommunities.size()][];
+        int i = 0;
+        for (Long[] community : expectedCommunities.values()) {
+           longCommunities[i++] = ArrayUtils.toPrimitive(community);
+        }
+
+        assertCommunities(communityData, longCommunities);
+        for (Long label : expectedCommunities.keySet()) {
+            Long[] community = expectedCommunities.get(label);
+            for (Long nodeId : community) {
+                assertEquals(label, communityData[nodeId.intValue()],
                     String.format(
                         "Expected node %d to be in community %d, but was %d",
-                        community[j],
-                        labels[i],
-                        communityData[(int) community[j]]
+                        nodeId,
+                        label,
+                        communityData[nodeId.intValue()]
                     )
                 );
             }
