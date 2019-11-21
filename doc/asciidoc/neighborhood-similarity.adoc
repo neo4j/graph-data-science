@@ -89,7 +89,7 @@ YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
 | writeProperty         | string  | 'score'                | yes      | The relationship property that stores the similarity score.
 | similarityCutoff      | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
 | degreeCutoff          | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| topK                  | int     | 10                     | yes      | Limit on the number of scores per node. The K larges results are returned.
+| topK                  | int     | 10                     | yes      | Limit on the number of scores per node. The K largest results are returned.
 | bottomK               | int     | 10                     | yes      | Limit on the number of scores per node. The K smallest results are returned.
 | topN                  | int     | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned.
 | bottomN               | int     | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
@@ -152,7 +152,7 @@ YIELD node1, node2, similarity
 | readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | similarityCutoff  | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
 | degreeCutoff      | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| topK              | int     | 10                     | yes      | Limit on the number of scores per node. The K larges results are returned.
+| topK              | int     | 10                     | yes      | Limit on the number of scores per node. The K largest results are returned.
 | bottomK           | int     | 10                     | yes      | Limit on the number of scores per node. The K smallest results are returned.
 | topN              | int     | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned.
 | bottomN           | int     | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
@@ -284,8 +284,8 @@ As we can see from the results, the number of created relationships is equal to 
 === Limiting results
 
 There are four limits that can be applied to the similarity results.
-Top limits the result to the highest similarity score.
-Bottom limits the result to the lowest similarity score.
+Top limits the result to the highest similarity scores.
+Bottom limits the result to the lowest similarity scores.
 Both top and bottom limits can apply to the result as a whole ("N"), or to the result per node ("K").
 
 [NOTE]
