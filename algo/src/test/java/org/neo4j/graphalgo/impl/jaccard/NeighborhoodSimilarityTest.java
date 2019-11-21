@@ -610,20 +610,20 @@ final class NeighborhoodSimilarityTest {
 
         long thisInstance = 56;
 
-        long nodeFilterRangeMin = 125016L;
-        long nodeFilterRangeMax = 125016L;
+        long nodeFilterRangeMin = 125_016L;
+        long nodeFilterRangeMax = 125_016L;
         MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
 
-        long vectorsRangeMin = 56000016L;
-        long vectorsRangeMax = 56000016L;
+        long vectorsRangeMin = 56_000_016L;
+        long vectorsRangeMax = 56_000_016L;
         MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
 
-        long graphRangeMin = 113516712L;
-        long graphRangeMax = 212614704L;
+        long graphRangeMin = 113_516_712L;
+        long graphRangeMax = 212_614_704L;
         MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
 
-        long topKMapRangeMin = 1688000024L;
-        long topKMapRangeMax = 1688000024L;
+        long topKMapRangeMin = 1_688_000_024L;
+        long topKMapRangeMax = 1_688_000_024L;
         MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
 
         MemoryTree expected = MemoryEstimations.builder()
@@ -662,20 +662,20 @@ final class NeighborhoodSimilarityTest {
 
         long thisInstance = 56;
 
-        long nodeFilterRangeMin = 125016L;
-        long nodeFilterRangeMax = 125016L;
+        long nodeFilterRangeMin = 125_016L;
+        long nodeFilterRangeMax = 125_016L;
         MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
 
-        long vectorsRangeMin = 56000016L;
-        long vectorsRangeMax = 56000016L;
+        long vectorsRangeMin = 56_000_016L;
+        long vectorsRangeMax = 56_000_016L;
         MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
 
-        long graphRangeMin = 8651112L;
-        long graphRangeMax = 8651112L;
+        long graphRangeMin = 8_651_112L;
+        long graphRangeMax = 8_651_112L;
         MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
 
-        long topKMapRangeMin = 1688000024L;
-        long topKMapRangeMax = 1688000024L;
+        long topKMapRangeMin = 1_688_000_024L;
+        long topKMapRangeMax = 1_688_000_024L;
         MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
 
         MemoryTree expected = MemoryEstimations.builder()
