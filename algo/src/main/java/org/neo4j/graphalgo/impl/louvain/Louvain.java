@@ -87,7 +87,10 @@ public final class Louvain extends Algorithm<Louvain> {
             workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
             seed = new OriginalIdNodeProperties(workingGraph);
 
-            if (workingGraph.nodeCount() == oldNodeCount || workingGraph.nodeCount() == 1) {
+            if (workingGraph.nodeCount() == oldNodeCount
+                || workingGraph.nodeCount() == 1
+                || hasConverged()
+            ) {
                 resizeResultArrays();
                 break;
             }
@@ -135,7 +138,7 @@ public final class Louvain extends Algorithm<Louvain> {
             louvainGraph,
             direction,
             10,
-            TOLERANCE_DEFAULT,
+            config.tolerance,
             seed,
             concurrency,
             DEFAULT_BATCH_SIZE,
@@ -175,6 +178,16 @@ public final class Louvain extends Algorithm<Louvain> {
         });
 
         return relImporter.build();
+    }
+
+    private boolean hasConverged() {
+        if (ranLevels == 0) {
+            return false;
+        }
+
+        double oldModularity = modularities[ranLevels - 1];
+        double currentModularity = modularities[ranLevels];
+        return !(currentModularity > oldModularity && Math.abs(currentModularity - oldModularity) > config.tolerance);
     }
 
     public Config config() {
