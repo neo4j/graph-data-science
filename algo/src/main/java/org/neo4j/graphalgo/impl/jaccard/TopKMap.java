@@ -41,7 +41,7 @@ public class TopKMap {
         return MemoryEstimations.builder(TopKMap.class)
             .add("topK lists",
                 MemoryEstimations.builder("topK lists", TopKList.class)
-                    .add("queues", LongPriorityQueue.memoryEstimation(topK))
+                    .add("queues", BoundedLongPriorityQueue.memoryEstimation(topK))
                     .build()
                     .times(items)
             )
