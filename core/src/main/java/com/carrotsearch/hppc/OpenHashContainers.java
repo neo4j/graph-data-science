@@ -19,6 +19,8 @@
  */
 package com.carrotsearch.hppc;
 
+import static com.carrotsearch.hppc.HashContainers.MIN_HASH_ARRAY_LENGTH;
+
 public final class OpenHashContainers {
 
     public static int emptyBufferSize() {
@@ -26,7 +28,23 @@ public final class OpenHashContainers {
     }
 
     public static int expectedBufferSize(final int elements) {
-        return HashContainers.minBufferSize(elements, HashContainers.DEFAULT_LOAD_FACTOR) + 1;
+        return minBufferSize(elements, HashContainers.DEFAULT_LOAD_FACTOR) + 1;
+    }
+
+    // com.carrotsearch.hppc.HashContainers.minBufferSize() without range check.
+    static int minBufferSize(int elements, double loadFactor) {
+        if (elements < 0) {
+            throw new IllegalArgumentException(
+                "Number of elements must be >= 0: " + elements);
+        }
+
+        long length = (long) Math.ceil(elements / loadFactor);
+        if (length == elements) {
+            length++;
+        }
+        length = Math.max(MIN_HASH_ARRAY_LENGTH, BitUtil.nextHighestPowerOfTwo(length));
+
+        return (int) length;
     }
 
     private OpenHashContainers() {

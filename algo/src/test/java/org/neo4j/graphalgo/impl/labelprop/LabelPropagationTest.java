@@ -232,6 +232,17 @@ final class LabelPropagationTest extends AlgoTestBase {
         assertMemoryEstimation(nodeCount, concurrency);
     }
 
+    @Test
+    void shouldBoundMemrecToMaxSupportedDegree() {
+        LabelPropagationFactory labelPropagation = new LabelPropagationFactory();
+        GraphDimensions largeDimensions = new GraphDimensions.Builder()
+            .setNodeCount((long)Integer.MAX_VALUE + (long)Integer.MAX_VALUE)
+            .build();
+
+        // test for no failure and no overflow
+        assertTrue(0 < labelPropagation.memoryEstimation().estimate(largeDimensions, 1).memoryUsage().max);
+    }
+
     private void assertMemoryEstimation(long nodeCount, int concurrency) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
 
