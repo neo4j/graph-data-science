@@ -218,7 +218,7 @@ class GraphCreateProcTest extends ProcTestBase {
 
     @Test
     void failForNulls() {
-        assertError("CALL algo.beta.graph.create(null)", "'graphName' cannot be null");
+        assertError("CALL algo.beta.graph.create(null)", "No value for the key `graphName` was specified");
         //assertError("CALL algo.beta.graph.create('name', null)", "'nodeFilter' cannot be null");
         //assertError("CALL algo.beta.graph.create('name', 'A', null)", "'relationshipFilter' cannot be null");
     }
