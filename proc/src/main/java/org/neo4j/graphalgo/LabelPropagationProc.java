@@ -147,17 +147,22 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     private PropertyMapping[] createPropertyMappings(String seedProperty, String weightProperty) {
         ArrayList<PropertyMapping> propertyMappings = new ArrayList<>();
         if (seedProperty != null) {
-            propertyMappings.add(PropertyMapping.of(LabelPropagation.SEED_TYPE, seedProperty, 0D));
+            propertyMappings.add(PropertyMapping.of(seedProperty, 0D));
         }
         if (weightProperty != null) {
-            propertyMappings.add(PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, weightProperty, 1D));
+            propertyMappings.add(PropertyMapping.of(weightProperty, 1D));
         }
         return propertyMappings.toArray(new PropertyMapping[0]);
     }
 
     @Override
     protected AlgorithmFactory<LabelPropagation> algorithmFactory(ProcedureConfiguration config) {
-        return new LabelPropagationFactory();
+        int batchSize = config.getBatchSize();
+        int concurrency = config.getConcurrency();
+        String seedProperty = config.getString(SEED_PROPERTY_KEY, CONFIG_OLD_SEED_KEY, null);
+        String weightProperty = config.getString(CONFIG_WEIGHT_KEY, null);
+        LabelPropagation.Config algoConfig = new LabelPropagation.Config(seedProperty, weightProperty, batchSize, concurrency);
+        return new LabelPropagationFactory(algoConfig);
     }
 
     @Override
@@ -301,7 +306,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
         try (ProgressTimer ignored = stats.timeWrite()) {
             boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperty, writeProperty);
-            NodeProperties seedProperties = graph.nodeProperties(LabelPropagation.SEED_TYPE);
+            NodeProperties seedProperties = graph.nodeProperties(seedProperty);
             boolean hasSeedProperties = seedProperties != null && !(seedProperties instanceof NullPropertyMap);
 
             PropertyTranslator<HugeLongArray> translator = HugeLongArray.Translator.INSTANCE;

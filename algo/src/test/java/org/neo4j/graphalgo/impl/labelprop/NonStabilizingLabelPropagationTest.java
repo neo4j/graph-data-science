@@ -100,8 +100,9 @@ class NonStabilizingLabelPropagationTest {
         Graph graph = loadGraph(graphImpl);
         LabelPropagation labelPropagation = new LabelPropagation(
                 graph,
-                ParallelUtil.DEFAULT_BATCH_SIZE,
-                Pools.DEFAULT_CONCURRENCY,
+                new LabelPropagationTest.ConfigBuilder()
+                .withBatchSize(ParallelUtil.DEFAULT_BATCH_SIZE)
+                .build(),
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY);
         LabelPropagation compute = labelPropagation.compute(Direction.OUTGOING, 10);

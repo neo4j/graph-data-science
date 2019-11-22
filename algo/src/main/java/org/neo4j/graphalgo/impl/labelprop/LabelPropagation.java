@@ -43,15 +43,11 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     public static final double DEFAULT_WEIGHT = 1.0;
 
-    public static final String SEED_TYPE = "seed";
-    public static final String WEIGHT_TYPE = "weight";
-
     private final long nodeCount;
     private final AllocationTracker tracker;
     private final NodeProperties nodeProperties;
     private final NodeProperties nodeWeights;
-    private final int batchSize;
-    private final int concurrency;
+    private final Config config;
     private final ExecutorService executor;
 
     private Graph graph;
@@ -62,25 +58,23 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     public LabelPropagation(
         Graph graph,
-        int batchSize,
-        int concurrency,
+        Config config,
         ExecutorService executor,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
-        this.batchSize = batchSize;
-        this.concurrency = concurrency;
+        this.config = config;
         this.executor = executor;
         this.tracker = tracker;
 
-        NodeProperties seedProperty = graph.nodeProperties(SEED_TYPE);
+        NodeProperties seedProperty = graph.nodeProperties(config.seedProperty);
         if (seedProperty == null) {
             seedProperty = new NullPropertyMap(0.0);
         }
         this.nodeProperties = seedProperty;
 
-        NodeProperties weightProperty = graph.nodeProperties(WEIGHT_TYPE);
+        NodeProperties weightProperty = graph.nodeProperties(config.weightProperty);
         if (weightProperty == null) {
             weightProperty = new NullPropertyMap(1.0);
         }
@@ -126,7 +120,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         long currentIteration = 0L;
         while (currentIteration < maxIterations) {
-            ParallelUtil.runWithConcurrency(concurrency, stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
+            ParallelUtil.runWithConcurrency(config.concurrency, stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
             ++currentIteration;
         }
 
@@ -152,7 +146,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private List<StepRunner> stepRunners(Direction direction) {
         long nodeCount = graph.nodeCount();
-        long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, this.batchSize);
+        long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, config.batchSize);
 
         Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
             nodeCount,
@@ -176,7 +170,22 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             StepRunner task = new StepRunner(initStep);
             tasks.add(task);
         }
-        ParallelUtil.runWithConcurrency(concurrency, tasks, 1, MICROSECONDS, terminationFlag, executor);
+        ParallelUtil.runWithConcurrency(config.concurrency, tasks, 1, MICROSECONDS, terminationFlag, executor);
         return tasks;
+    }
+
+    public static class Config {
+
+        private final String seedProperty;
+        private final String weightProperty;
+        private final int batchSize;
+        private final int concurrency;
+
+        public Config(String seedProperty, String weightProperty, int batchSize, int concurrency) {
+            this.seedProperty = seedProperty;
+            this.weightProperty = weightProperty;
+            this.batchSize = batchSize;
+            this.concurrency = concurrency;
+        }
     }
 }

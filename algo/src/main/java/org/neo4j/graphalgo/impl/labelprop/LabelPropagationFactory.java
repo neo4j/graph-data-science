@@ -37,18 +37,21 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public class LabelPropagationFactory extends AlgorithmFactory<LabelPropagation> {
 
+    private final LabelPropagation.Config config;
+
+    public LabelPropagationFactory(LabelPropagation.Config config) {
+        this.config = config;
+    }
+
     @Override
     public LabelPropagation build(
             final Graph graph,
             final ProcedureConfiguration configuration,
             final AllocationTracker tracker,
             final Log log) {
-        int concurrency = configuration.getConcurrency();
-        int batchSize = configuration.getBatchSize();
         return new LabelPropagation(
                 graph,
-                batchSize,
-                concurrency,
+                config,
                 Pools.DEFAULT,
                 tracker
         );
