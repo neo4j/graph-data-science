@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.petitparser.context.Result;
 import org.petitparser.parser.Parser;
 
@@ -51,7 +52,7 @@ public final class RelationshipTypes {
         PARSER = identifier.separatedBy(pipe.trim()).map(withoutSeparators()).end("expected letter, digit, or underscore");
     }
 
-    public static Set<String> parse(String relTypes) {
+    public static Set<String> parse(@Nullable String relTypes) {
         if (relTypes == null || relTypes.isEmpty()) {
             return Collections.emptySet();
         }

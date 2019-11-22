@@ -38,7 +38,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
     private long maxNodeId;
 
     CypherNodeLoader(long nodeCount, GraphDatabaseAPI api, GraphSetup setup) {
-        super(setup.startLabel(), nodeCount, api, setup);
+        super(setup.nodeLabel(), nodeCount, api, setup);
         maxNodeId = 0L;
         nodePropertyBuilders = nodeProperties(nodeCount, setup);
         builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker());

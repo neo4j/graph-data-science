@@ -34,8 +34,8 @@ public final class RelationshipFilter extends EntityFilter {
     private static final String DEFAULT_PROJECTION = "NATURAL";
 
 
-    public final String type;
-    public final String projection;
+    private final String type;
+    private final String projection;
 
     private RelationshipFilter(String type, String projection, PropertyMappings properties) {
         super(properties);
@@ -73,6 +73,10 @@ public final class RelationshipFilter extends EntityFilter {
         ));
     }
 
+    public boolean hasMappings() {
+        return properties().hasMappings();
+    }
+
     public boolean isEmpty() {
         return this == EMPTY;
     }
@@ -85,5 +89,13 @@ public final class RelationshipFilter extends EntityFilter {
 
     public static RelationshipFilter empty() {
         return EMPTY;
+    }
+
+    public String type() {
+        return type;
+    }
+
+    public String projection() {
+        return projection;
     }
 }

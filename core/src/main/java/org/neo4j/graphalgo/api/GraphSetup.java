@@ -19,10 +19,18 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeFilters;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipFilter;
+import org.neo4j.graphalgo.RelationshipFilters;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
@@ -37,14 +45,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class GraphSetup {
 
-    // user name
-    private final String username;
-    // graph name
-    private final String name;
-    // start label type. null means any label.
-    private final String startLabel;
-    // relationtype name. null means any relation.
-    private final String relationshipType;
+    private final GraphCreateConfig createConfig;
+
     // direction for loading the graph.
     private final Direction direction;
     // load incoming relationships.
@@ -52,8 +54,6 @@ public class GraphSetup {
     // load outgoing relationships.
     private final boolean loadOutgoing;
     // default property is used for relationships if a property is not set.
-    @Deprecated
-    private final Optional<Double> relationshipDefaultPropertyValue;
 
     private final Map<String, Object> params;
 
@@ -64,35 +64,25 @@ public class GraphSetup {
 
     // the executor service for parallel execution. null means single threaded evaluation.
     private final ExecutorService executor;
-    // concurrency level
-    private final int concurrency;
     // batchSize for parallel computation
     private final int batchSize;
 
     // in/out adjacencies are allowed to be merged into an undirected view of the graph
     private final boolean loadAsUndirected;
 
-    private final PropertyMappings nodePropertyMappings;
-    private final PropertyMappings relationshipPropertyMappings;
     private final DeduplicationStrategy deduplicationStrategy;
 
     /**
      * main ctor
-     *
-     * @param startLabel                 the start label. null means any label.
-     * @param relationshipType           the relation type identifier. null for any relationship
-     * @param executor                   the executor. null means single threaded evaluation
+     *  @param executor                   the executor. null means single threaded evaluation
      * @param batchSize                  batch size for parallel loading
      * @param deduplicationStrategy      strategy for handling relationship duplicates
+     * @param createConfig
      */
     public GraphSetup(
-        String username,
-        String startLabel,
-        String relationshipType,
         Direction direction,
         Map<String, Object> params,
         ExecutorService executor,
-        int concurrency,
         int batchSize,
         DeduplicationStrategy deduplicationStrategy,
         Log log,
@@ -100,21 +90,13 @@ public class GraphSetup {
         boolean loadAsUndirected,
         AllocationTracker tracker,
         TerminationFlag terminationFlag,
-        String name,
-        PropertyMappings nodePropertyMappings,
-        PropertyMappings relationshipPropertyMappings
+        GraphCreateConfig createConfig
     ) {
-
-        this.username = username;
-        this.startLabel = startLabel;
-        this.relationshipType = relationshipType;
         this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
         this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
         this.direction = direction;
-        this.relationshipDefaultPropertyValue = relationshipPropertyMappings.defaultWeight();
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
-        this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.deduplicationStrategy = deduplicationStrategy;
         this.log = log;
@@ -122,64 +104,144 @@ public class GraphSetup {
         this.loadAsUndirected = loadAsUndirected;
         this.tracker = tracker;
         this.terminationFlag = terminationFlag;
-        this.name = name;
-        this.nodePropertyMappings = nodePropertyMappings;
-        this.relationshipPropertyMappings = relationshipPropertyMappings;
+        this.createConfig = createConfig;
     }
 
-    private boolean loadConcurrent() {
-        return executor != null;
+    public String username() {
+        return createConfig.username();
+    }
+
+    public String name() {
+        return createConfig.graphName();
     }
 
     public int concurrency() {
         if (!loadConcurrent()) {
             return 1;
         }
-        return concurrency;
+        return createConfig.concurrency();
     }
 
-    public boolean shouldLoadRelationshipProperties() {
-        return relationshipPropertyMappings.hasMappings();
-    }
-
+    /**
+     * @deprecated This feature is going away and will mean load nothing instead
+     */
+    @Deprecated
     public boolean loadAnyLabel() {
-        return startLabel == null || startLabel.isEmpty();
+        return StringUtils.isEmpty(nodeLabel());
     }
 
+    /**
+     * @deprecated This feature is going away and will mean load nothing instead
+     */
+    @Deprecated
     public boolean loadAnyRelationshipType() {
-        return relationshipType == null;
+        return StringUtils.isEmpty(relationshipType());
     }
 
-    public String username() {
-        return username;
+    public @NotNull String nodeLabel() {
+        return createConfig.nodeFilter().labelFilter().orElse("");
     }
 
-    public String name() {
-        return name;
+    public @NotNull String relationshipType() {
+        return createConfig.relationshipFilter().typeFilter();
     }
 
-    public String startLabel() {
-        return startLabel;
+    public NodeFilters nodeFilters() {
+        return createConfig.nodeFilter();
     }
 
-    public String relationshipType() {
-        return relationshipType;
+    public RelationshipFilters relationshipFilters() {
+        return createConfig.relationshipFilter();
     }
 
+    /**
+     * @deprecated There is no global direction anymore
+     */
+    @Deprecated
     public Direction direction() {
         return direction;
     }
 
+    /**
+     * @deprecated There is no global direction anymore
+     */
+    @Deprecated
     public boolean loadIncoming() {
         return loadIncoming;
     }
 
+    /**
+     * @deprecated There is no global direction anymore
+     */
+    @Deprecated
     public boolean loadOutgoing() {
         return loadOutgoing;
     }
 
+    /**
+     * @deprecated There is no global direction anymore
+     */
+    @Deprecated
+    public boolean loadAsUndirected() {
+        return loadAsUndirected;
+    }
+
+    public boolean shouldLoadRelationshipProperties() {
+        return createConfig
+            .relationshipFilter()
+            .allFilters()
+            .stream()
+            .anyMatch(RelationshipFilter::hasMappings);
+    }
+
+    /**
+     * @deprecated There is no global relationship property anymore
+     */
+    @Deprecated
     public Optional<Double> relationshipDefaultPropertyValue() {
-        return relationshipDefaultPropertyValue;
+        return Optional.empty();
+    }
+
+    /**
+     * @deprecated There is no global node property configuration anymore
+     */
+    @Deprecated
+    public PropertyMappings nodePropertyMappings() {
+        PropertyMapping[] propertyMappings = createConfig.nodeFilter()
+            .allFilters()
+            .stream()
+            .flatMap(e -> e.properties().stream())
+            .toArray(PropertyMapping[]::new);
+        return PropertyMappings.of(propertyMappings);
+    }
+
+    public PropertyMappings nodePropertyMappings(ElementIdentifier identifier) {
+        return createConfig.nodeFilter().getFilter(identifier).properties();
+    }
+
+    /**
+     * @deprecated There is no global relationship property configuration anymore
+     */
+    @Deprecated
+    public PropertyMappings relationshipPropertyMappings() {
+        PropertyMapping[] propertyMappings = createConfig.relationshipFilter()
+            .allFilters()
+            .stream()
+            .flatMap(e -> e.properties().stream())
+            .toArray(PropertyMapping[]::new);
+        return PropertyMappings.of(propertyMappings);
+    }
+
+    public PropertyMappings relationshipPropertyMappings(ElementIdentifier identifier) {
+        return createConfig.relationshipFilter().getFilter(identifier).properties();
+    }
+
+    /**
+     * @deprecated There is no global relationship deduplication strategy anymore
+     */
+    @Deprecated
+    public DeduplicationStrategy deduplicationStrategy() {
+        return deduplicationStrategy;
     }
 
     public Map<String, Object> params() {
@@ -210,19 +272,7 @@ public class GraphSetup {
         return batchSize;
     }
 
-    public boolean loadAsUndirected() {
-        return loadAsUndirected;
-    }
-
-    public PropertyMappings nodePropertyMappings() {
-        return nodePropertyMappings;
-    }
-
-    public PropertyMappings relationshipPropertyMappings() {
-        return relationshipPropertyMappings;
-    }
-
-    public DeduplicationStrategy deduplicationStrategy() {
-        return deduplicationStrategy;
+    private boolean loadConcurrent() {
+        return executor != null;
     }
 }

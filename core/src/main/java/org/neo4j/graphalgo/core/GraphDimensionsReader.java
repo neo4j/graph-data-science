@@ -52,7 +52,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         TokenRead tokenRead = transaction.tokenRead();
         Read dataRead = transaction.dataRead();
         final int labelId = readTokens && !setup.loadAnyLabel()
-                ? tokenRead.nodeLabel(setup.startLabel())
+                ? tokenRead.nodeLabel(setup.nodeLabel())
                 : Read.ANY_LABEL;
 
         RelationshipTypeMappings.Builder mappingsBuilder = new RelationshipTypeMappings.Builder();

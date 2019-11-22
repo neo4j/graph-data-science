@@ -23,6 +23,7 @@ package org.neo4j.graphalgo;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -102,6 +103,18 @@ public final class NodeFilters {
 
     private NodeFilters(Map<ElementIdentifier, NodeFilter> filters) {
         this.filters = filters;
+    }
+
+    public NodeFilter getFilter(ElementIdentifier identifier) {
+        NodeFilter filter = filters.get(identifier);
+        if (filter == null) {
+            throw new IllegalArgumentException("Node label identifier does not exist: " + identifier);
+        }
+        return filter;
+    }
+
+    public Collection<NodeFilter> allFilters() {
+        return filters.values();
     }
 
     public Optional<String> labelFilter() {

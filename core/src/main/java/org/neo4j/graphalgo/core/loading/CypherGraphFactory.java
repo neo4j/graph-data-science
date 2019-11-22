@@ -57,7 +57,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
     protected void validateTokens() { }
 
     public final MemoryEstimation memoryEstimation() {
-        BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.startLabel(), api, setup).load();
+        BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.nodeLabel(), api, setup).load();
         dimensions.nodeCount(nodeCount.rows());
 
         BatchLoadResult relCount = new CountingCypherRecordLoader(setup.relationshipType(), api, setup).load();
@@ -70,7 +70,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
     public Graph importGraph() {
         // Temporarily override the security context to enforce read-only access during load
         try (Revertable revertable = setReadOnlySecurityContext()) {
-            BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.startLabel(), api, setup).load();
+            BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.nodeLabel(), api, setup).load();
             IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
             Relationships relationships = new CypherRelationshipLoader(nodes.idMap(), api, setup).load();
 

@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 
 import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
@@ -94,13 +95,13 @@ public final class GraphDimensions {
     }
 
     public void checkValidNodePredicate(GraphSetup setup) {
-        if (nonEmpty(setup.startLabel()) && labelId() == NO_SUCH_LABEL) {
-            throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.startLabel()));
+        if (isEmpty(setup.nodeLabel()) && labelId() == NO_SUCH_LABEL) {
+            throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.nodeLabel()));
         }
     }
 
     public void checkValidRelationshipTypePredicate(GraphSetup setup) {
-        if (nonEmpty(setup.relationshipType())) {
+        if (isEmpty(setup.relationshipType())) {
             String missingTypes = relTypeMappings
                     .stream()
                     .filter(m -> !m.doesExist())
@@ -128,7 +129,7 @@ public final class GraphDimensions {
                 .filter(mapping -> {
                     int id = mapping.propertyKeyId();
                     String propertyKey = mapping.neoPropertyKey();
-                    return nonEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
+                    return isEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
                 })
                 .map(PropertyMapping::neoPropertyKey)
                 .collect(joining("', '"));
@@ -138,10 +139,6 @@ public final class GraphDimensions {
                     recordType,
                     missingProperties));
         }
-    }
-
-    private static boolean nonEmpty(String s) {
-        return s != null && !s.isEmpty();
     }
 
     public static class Builder {

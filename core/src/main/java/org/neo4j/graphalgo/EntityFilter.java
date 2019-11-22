@@ -32,7 +32,7 @@ abstract class EntityFilter {
 
     static final String PROPERTIES_KEY = "properties";
 
-    public final PropertyMappings properties;
+    private final PropertyMappings properties;
 
     EntityFilter(PropertyMappings properties) {
         this.properties = properties;
@@ -68,4 +68,8 @@ abstract class EntityFilter {
     }
 
     abstract void writeToObject(Map<String, Object> value);
+
+    public PropertyMappings properties() {
+        return properties;
+    }
 }

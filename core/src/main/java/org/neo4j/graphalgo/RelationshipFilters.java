@@ -23,6 +23,8 @@ package org.neo4j.graphalgo;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -95,7 +97,7 @@ public final class RelationshipFilters {
 
         filters.values().stream()
             .collect(Collectors.collectingAndThen(
-                Collectors.groupingBy(filter -> filter.type, Collectors.counting()),
+                Collectors.groupingBy(filter -> filter.type(), Collectors.counting()),
                 map -> {
                     Stream<Map.Entry<String, Long>> duplicateTypes = map
                         .entrySet()
@@ -120,11 +122,23 @@ public final class RelationshipFilters {
         this.filters = filters;
     }
 
+    public RelationshipFilter getFilter(ElementIdentifier identifier) {
+        RelationshipFilter filter = filters.get(identifier);
+        if (filter == null) {
+            throw new IllegalArgumentException("Relationship type identifier does not exist: " + identifier);
+        }
+        return filter;
+    }
+
+    public Collection<RelationshipFilter> allFilters() {
+        return filters.values();
+    }
+
     public String typeFilter() {
         if (isEmpty()) {
             return "";
         }
-        return filters.values().stream().map(f -> f.type).collect(Collectors.joining("|"));
+        return filters.values().stream().map(f -> f.type()).collect(Collectors.joining("|"));
     }
 
     public boolean isEmpty() {

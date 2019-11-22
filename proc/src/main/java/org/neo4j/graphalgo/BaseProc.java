@@ -45,7 +45,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public abstract class BaseProc<Config extends BaseConfig> {
+public abstract class BaseProc<CONFIG extends BaseConfig> {
 
     public static final String NODECOUNT_KEY = "nodeCount";
     public static final String RELCOUNT_KEY = "relationshipCount";
@@ -73,7 +73,7 @@ public abstract class BaseProc<Config extends BaseConfig> {
 
     protected GraphLoader newConfigureLoader(
         GraphLoader loader,
-        Config config
+        CONFIG config
     ) {
         return loader;
     }
@@ -117,7 +117,7 @@ public abstract class BaseProc<Config extends BaseConfig> {
 
     protected final GraphLoader newLoader(
         AllocationTracker tracker,
-        Config config
+        CONFIG config
     ) {
         GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
             .init(log, getUsername())

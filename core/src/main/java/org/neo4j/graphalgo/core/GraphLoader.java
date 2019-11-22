@@ -31,10 +31,12 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.helpers.Exceptions;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -60,12 +62,14 @@ public class GraphLoader {
 
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
     private static final MethodType CTOR_METHOD = MethodType.methodType(
-            void.class,
-            GraphDatabaseAPI.class,
-            GraphSetup.class);
+        void.class,
+        GraphDatabaseAPI.class,
+        GraphSetup.class
+    );
 
-    private String username = null;
+    private String username = AuthSubject.ANONYMOUS.username();
     private String name = null;
+    private int concurrency = Pools.DEFAULT_CONCURRENCY;
     private String label = null;
     private String relation = null;
     private Direction direction = Direction.BOTH;
@@ -74,7 +78,6 @@ public class GraphLoader {
     private ExecutorService executorService;
     private final Map<String, Object> params = new HashMap<>();
     private int batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
-    private int concurrency;
 
     private DeduplicationStrategy deduplicationStrategy = DeduplicationStrategy.DEFAULT;
 
@@ -86,6 +89,7 @@ public class GraphLoader {
     private final PropertyMappings.Builder nodePropertyMappings = new PropertyMappings.Builder();
     private final PropertyMappings.Builder relPropertyMappings = new PropertyMappings.Builder();
     private boolean isLoadedGraph = false;
+    private GraphCreateConfig createConfig;
 
     /**
      * Creates a new serial GraphLoader.
@@ -93,7 +97,6 @@ public class GraphLoader {
     public GraphLoader(GraphDatabaseAPI api) {
         this.api = Objects.requireNonNull(api);
         this.executorService = null;
-        this.concurrency = Pools.DEFAULT_CONCURRENCY;
     }
 
     /**
@@ -104,7 +107,6 @@ public class GraphLoader {
     public GraphLoader(GraphDatabaseAPI api, ExecutorService executorService) {
         this.api = Objects.requireNonNull(api);
         this.executorService = Objects.requireNonNull(executorService);
-        this.concurrency = Pools.DEFAULT_CONCURRENCY;
     }
 
     public GraphLoader init(
@@ -131,6 +133,11 @@ public class GraphLoader {
 //            .withBatchSize(config.getBatchSize())
 //            .withDeduplicationStrategy(config.getDeduplicationStrategy())
 //            .withParams(config.getParams());
+    }
+
+    public GraphLoader withGraphCreateConfig(GraphCreateConfig createConfig) {
+        this.createConfig = createConfig;
+        return this;
     }
 
     /**
@@ -203,8 +210,9 @@ public class GraphLoader {
     public GraphLoader withConcurrency(int newConcurrency) {
         if (newConcurrency <= 0) {
             throw new IllegalArgumentException(String.format(
-                    "Concurrency less than one is invalid: %d",
-                    newConcurrency));
+                "Concurrency less than one is invalid: %d",
+                newConcurrency
+            ));
         }
         this.concurrency = Pools.allowedConcurrency(newConcurrency);
         return this;
@@ -218,11 +226,19 @@ public class GraphLoader {
         return withConcurrency(Pools.DEFAULT_CONCURRENCY);
     }
 
+    /**
+     * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
+     */
+    @Deprecated
     public GraphLoader withName(String name) {
         this.name = name;
         return this;
     }
 
+    /**
+     * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
+     */
+    @Deprecated
     public GraphLoader withUsername(String username) {
         this.username = username;
         return this;
@@ -232,6 +248,7 @@ public class GraphLoader {
      * Instructs the loader to load only nodes with the given label.
      *
      * @param label Must not be null; to remove a label filter, use {@link #withAnyLabel()} instead.
+     * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withLabel(String label) {
         this.label = Objects.requireNonNull(label);
@@ -242,6 +259,7 @@ public class GraphLoader {
      * Instructs the loader to load only nodes with the given label.
      *
      * @param label May be null
+     * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withOptionalLabel(String label) {
         this.label = label;
@@ -252,6 +270,7 @@ public class GraphLoader {
      * Instructs the loader to load only nodes with the given {@link Label}.
      *
      * @param label Must not be null; to remove a label filter, use {@link #withAnyLabel()} instead.
+     * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withLabel(Label label) {
         this.label = Objects.requireNonNull(label).name();
@@ -260,6 +279,8 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to load any node with no restriction to any label.
+     *
+     * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withAnyLabel() {
         this.label = null;
@@ -270,6 +291,7 @@ public class GraphLoader {
      * Instructs the loader to load only relationships with the given relationship type.
      *
      * @param relationshipType Must not be null; to remove a type filter, use {@link #withAnyRelationshipType()} instead.
+     * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withRelationshipType(String relationshipType) {
         this.relation = Objects.requireNonNull(relationshipType);
@@ -281,6 +303,7 @@ public class GraphLoader {
      * If the argument is null, all relationship types will be considered.
      *
      * @param relationshipType May be null
+     * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withOptionalRelationshipType(String relationshipType) {
         this.relation = relationshipType;
@@ -291,6 +314,7 @@ public class GraphLoader {
      * Instructs the loader to load only relationships with the given {@link RelationshipType}.
      *
      * @param relationshipType Must not be null; to remove a type filter, use {@link #withAnyRelationshipType()} instead.
+     * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withRelationshipType(RelationshipType relationshipType) {
         this.relation = Objects.requireNonNull(relationshipType).name();
@@ -299,6 +323,8 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to load all relationships.
+     *
+     * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withAnyRelationshipType() {
         this.relation = null;
@@ -307,6 +333,8 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to load only relationships of the given direction.
+     *
+     * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withDirection(Direction direction) {
         this.direction = direction;
@@ -340,7 +368,7 @@ public class GraphLoader {
      *
      * @param direction The direction requested
      * @apiNote This must only be used for algorithms, that do not require
-     *         storing outgoing and incoming relationships separately.
+     *     storing outgoing and incoming relationships separately.
      */
     public GraphLoader withReducedRelationshipLoading(Direction direction) {
         if (direction == Direction.BOTH && !isLoadedGraph) {
@@ -443,27 +471,28 @@ public class GraphLoader {
             return (GraphFactory) constructor.invoke(api, setup);
         } catch (Throwable throwable) {
             throw Exceptions.launderedException(
-                    throwable.getMessage(),
-                    throwable);
+                throwable.getMessage(),
+                throwable
+            );
         }
     }
 
     public GraphSetup toSetup() {
-        PropertyMappings relMappings = this.relPropertyMappings.build();
-        if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
-            relMappings = new PropertyMappings.Builder()
-                    .addAllMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
-                    .build();
+        if (createConfig == null) {
+//            PropertyMappings relMappings = this.relPropertyMappings.build();
+//            if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
+//                relMappings = new PropertyMappings.Builder()
+//                    .addAllMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
+//                    .build();
+//            }
+
+            throw new IllegalStateException("Missing GraphCreateConfig");
         }
 
         return new GraphSetup(
-            username,
-            label,
-            relation,
             direction,
             params,
             executorService,
-            concurrency,
             batchSize,
             deduplicationStrategy,
             log,
@@ -471,9 +500,7 @@ public class GraphLoader {
             undirected,
             tracker,
             terminationFlag,
-            name,
-            nodePropertyMappings.build(),
-            relMappings
+            createConfig
         );
     }
 }

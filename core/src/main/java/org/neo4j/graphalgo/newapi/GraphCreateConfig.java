@@ -79,7 +79,8 @@ public interface GraphCreateConfig extends BaseConfig {
             .withOptionalLabel(nodeFilter().labelFilter().orElse(null))
             .withOptionalRelationshipType(relationshipFilter().typeFilter())
             .withConcurrency(concurrency())
-            .withLoadedGraph(true);
+            .withLoadedGraph(true)
+            .withGraphCreateConfig(this);
     }
 
     static GraphCreateConfig legacyFactory(String graphName) {
