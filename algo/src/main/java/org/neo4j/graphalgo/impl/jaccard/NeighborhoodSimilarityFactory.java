@@ -63,13 +63,13 @@ public class NeighborhoodSimilarityFactory extends AlgorithmFactory<Neighborhood
                         .perNode("array", nodeCount -> nodeCount * averageVectorSize).build();
                 })
             );
-        if (computesSimilarityGraph) {
+        if (computesSimilarityGraph && !config.hasTopK()) {
             builder.add(
                 "similarity graph",
                 SimilarityGraphBuilder.memoryEstimation(config.topK(), config.topN())
             );
         }
-        if (config.topK() > 0) {
+        if (config.hasTopK()) {
             builder.add(
                 "topK map",
                 MemoryEstimations.setup("", (dimensions, concurrency) ->
