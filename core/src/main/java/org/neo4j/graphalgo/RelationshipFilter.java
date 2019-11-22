@@ -87,6 +87,15 @@ public final class RelationshipFilter extends EntityFilter {
         value.put(PROJECTION_KEY, projection);
     }
 
+    @Override
+    public RelationshipFilter withAdditionalPropertyMappings(PropertyMappings mappings) {
+        PropertyMappings newMappings = properties().mergeWith(mappings);
+        if (newMappings == properties()) {
+            return this;
+        }
+        return new RelationshipFilter(type, projection, newMappings);
+    }
+
     public static RelationshipFilter empty() {
         return EMPTY;
     }

@@ -72,6 +72,15 @@ public final class NodeFilter extends EntityFilter {
         value.put(LABEL_KEY, label);
     }
 
+    @Override
+    public NodeFilter withAdditionalPropertyMappings(PropertyMappings mappings) {
+        PropertyMappings newMappings = properties().mergeWith(mappings);
+        if (newMappings == properties()) {
+            return this;
+        }
+        return new NodeFilter(label, newMappings);
+    }
+
     public static NodeFilter empty() {
         return EMPTY;
     }

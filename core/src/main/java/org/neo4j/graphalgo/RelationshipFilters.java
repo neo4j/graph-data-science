@@ -24,15 +24,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableMap;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toMap;
 
 public final class RelationshipFilters {
 
@@ -95,24 +96,22 @@ public final class RelationshipFilters {
             return EMPTY;
         }
 
-        filters.values().stream()
-            .collect(Collectors.collectingAndThen(
-                Collectors.groupingBy(filter -> filter.type(), Collectors.counting()),
-                map -> {
-                    Stream<Map.Entry<String, Long>> duplicateTypes = map
-                        .entrySet()
-                        .stream()
-                        .filter(entry -> entry.getValue() > 1);
-                    duplicateTypes.forEach(entry -> {
-                        throw new IllegalArgumentException(String.format(
-                            "Duplicate relationship type: '%s'",
-                            entry.getKey()
-                        ));
-                    });
-                    return true;
-                }
-            ));
+        Map<String, Long> entriesPerType = filters
+            .values()
+            .stream()
+            .collect(groupingBy(RelationshipFilter::type, counting()));
 
+        String duplicateTypes = entriesPerType.entrySet().stream()
+            .filter(entry -> entry.getValue() > 1)
+            .map(entry -> String.format("'%s", entry.getKey()))
+            .collect(Collectors.joining(", '"));
+
+        if (!duplicateTypes.isEmpty()) {
+            throw new IllegalArgumentException(String.format(
+                "Duplicate relationship type(s): %s",
+                duplicateTypes
+            ));
+        }
         return new RelationshipFilters(unmodifiableMap(filters));
     }
 
@@ -132,6 +131,21 @@ public final class RelationshipFilters {
 
     public Collection<RelationshipFilter> allFilters() {
         return filters.values();
+    }
+
+    public RelationshipFilters addPropertyMappings(PropertyMappings mappings) {
+        if (!mappings.hasMappings()) {
+            return this;
+        }
+        Map<ElementIdentifier, RelationshipFilter> newFilters = filters.entrySet().stream().collect(toMap(
+            Map.Entry::getKey,
+            e -> e.getValue().withAdditionalPropertyMappings(mappings)
+        ));
+        if (newFilters.isEmpty()) {
+            // TODO: special identifier for 'SELECT ALL'
+            newFilters.put(new ElementIdentifier("*"), RelationshipFilter.empty().withAdditionalPropertyMappings(mappings));
+        }
+        return create(newFilters);
     }
 
     public String typeFilter() {

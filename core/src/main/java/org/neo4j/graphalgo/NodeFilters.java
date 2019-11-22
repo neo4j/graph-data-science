@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableMap;
+import static java.util.stream.Collectors.toMap;
 
 public final class NodeFilters {
 
@@ -115,6 +116,21 @@ public final class NodeFilters {
 
     public Collection<NodeFilter> allFilters() {
         return filters.values();
+    }
+
+    public NodeFilters addPropertyMappings(PropertyMappings mappings) {
+        if (!mappings.hasMappings()) {
+            return this;
+        }
+        Map<ElementIdentifier, NodeFilter> newFilters = filters.entrySet().stream().collect(toMap(
+            Map.Entry::getKey,
+            e -> e.getValue().withAdditionalPropertyMappings(mappings)
+        ));
+        if (newFilters.isEmpty()) {
+            // TODO: special identifier for 'SELECT ALL'
+            newFilters.put(new ElementIdentifier("*"), NodeFilter.empty().withAdditionalPropertyMappings(mappings));
+        }
+        return create(newFilters);
     }
 
     public Optional<String> labelFilter() {

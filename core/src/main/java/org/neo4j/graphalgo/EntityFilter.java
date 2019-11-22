@@ -69,6 +69,8 @@ abstract class EntityFilter {
 
     abstract void writeToObject(Map<String, Object> value);
 
+    public abstract EntityFilter withAdditionalPropertyMappings(PropertyMappings mappings);
+
     public PropertyMappings properties() {
         return properties;
     }

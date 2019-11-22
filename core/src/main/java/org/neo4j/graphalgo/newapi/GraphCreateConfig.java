@@ -90,6 +90,24 @@ public interface GraphCreateConfig extends BaseConfig {
             .withGraphCreateConfig(this);
     }
 
+    @Value.Check
+    @Configuration.Ignore
+    default GraphCreateConfig withNormalizedPropertyMappings() {
+        PropertyMappings nodeProperties = nodeProperties();
+        PropertyMappings relationshipProperties = relationshipProperties();
+        if (nodeProperties.hasMappings() || relationshipProperties.hasMappings()) {
+            return ImmutableGraphCreateConfig
+                .builder()
+                .from(this)
+                .nodeFilter(nodeFilter().addPropertyMappings(nodeProperties))
+                .nodeProperties(PropertyMappings.EMPTY)
+                .relationshipFilter(relationshipFilter().addPropertyMappings(relationshipProperties))
+                .relationshipProperties(PropertyMappings.EMPTY)
+                .build();
+        }
+        return this;
+    }
+
     static GraphCreateConfig legacyFactory(String graphName) {
         return ImmutableGraphCreateConfig
             .builder()
@@ -110,12 +128,13 @@ public interface GraphCreateConfig extends BaseConfig {
         @Nullable Object relationshipFilter,
         CypherMapWrapper config
     ) {
-        return new GraphCreateConfigImpl(
+        GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
             graphName,
             nodeFilter,
             relationshipFilter,
             userName,
             config
         );
+        return graphCreateConfig.withNormalizedPropertyMappings();
     }
 }

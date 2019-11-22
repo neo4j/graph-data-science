@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
+import org.neo4j.stream.Streams;
 
 import java.util.Collections;
 import java.util.Map;
@@ -199,7 +200,9 @@ public class GraphSetup {
      */
     @Deprecated
     public Optional<Double> relationshipDefaultPropertyValue() {
-        return Optional.empty();
+        return createConfig.relationshipFilter().allFilters().stream().flatMap(
+            f -> Streams.ofOptional(f.properties().defaultWeight())
+        ).findFirst();
     }
 
     /**

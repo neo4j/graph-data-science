@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeFilters;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -490,7 +491,7 @@ public class GraphLoader {
             }
             createConfig = ImmutableGraphCreateConfig
                 .builder()
-                .graphName(name)
+                .graphName(StringUtils.trimToEmpty(name))
                 .concurrency(concurrency)
                 .username(username)
                 .nodeProperties(nodePropertyMappings.build())

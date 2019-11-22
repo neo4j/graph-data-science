@@ -123,6 +123,18 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    public PropertyMappings mergeWith(PropertyMappings other) {
+        if (!hasMappings()) {
+            return other;
+        }
+        if (!other.hasMappings()) {
+            return this;
+        }
+        Builder builder = new Builder();
+        builder.addAllMappings(Stream.concat(stream(), other.stream()).distinct());
+        return builder.build();
+    }
+
     public static final class Builder {
         private final List<PropertyMapping> mappings;
 
