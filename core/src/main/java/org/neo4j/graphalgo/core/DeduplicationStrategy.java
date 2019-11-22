@@ -37,7 +37,7 @@ public enum DeduplicationStrategy {
                     "Try using SKIP or some other duplicate relationships strategy.");
         }
     },
-    SKIP {
+    SINGLE {
         public double merge(double runningTotal, double value) {
             return runningTotal;
         }
@@ -61,9 +61,11 @@ public enum DeduplicationStrategy {
     public abstract double merge(double runningTotal, double value);
 
     public static DeduplicationStrategy lookup(String name) {
-        DeduplicationStrategy deduplicationStrategy = null;
+        if (name.equalsIgnoreCase("SKIP")) {
+            name = SINGLE.name();
+        }
         try {
-            deduplicationStrategy = DeduplicationStrategy.valueOf(name);
+            return DeduplicationStrategy.valueOf(name.toUpperCase());
         } catch (IllegalArgumentException e) {
             String availableStrategies = Arrays
                     .stream(DeduplicationStrategy.values())
@@ -74,7 +76,6 @@ public enum DeduplicationStrategy {
                     name,
                     availableStrategies));
         }
-        return deduplicationStrategy;
     }
 
 }

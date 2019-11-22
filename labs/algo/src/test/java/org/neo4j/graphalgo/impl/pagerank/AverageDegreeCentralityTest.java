@@ -177,7 +177,7 @@ final class AverageDegreeCentralityTest {
                         .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                         .withRelationshipType(
                                 "MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
-                        .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
+                        .withDeduplicationStrategy(DeduplicationStrategy.SINGLE)
                         .load(graphFactory);
             }
         } else {

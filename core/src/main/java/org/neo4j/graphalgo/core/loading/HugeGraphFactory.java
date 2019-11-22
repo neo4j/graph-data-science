@@ -288,7 +288,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 .relProperties()
                 .stream()
                 .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
-                        ? DeduplicationStrategy.SKIP
+                        ? DeduplicationStrategy.SINGLE
                         : property.deduplicationStrategy()
                 )
                 .toArray(DeduplicationStrategy[]::new);
@@ -296,7 +296,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
         if (deduplicationStrategies.length == 0) {
             DeduplicationStrategy deduplicationStrategy =
                 setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
-                            ? DeduplicationStrategy.SKIP
+                            ? DeduplicationStrategy.SINGLE
                             : setup.deduplicationStrategy();
             deduplicationStrategies = new DeduplicationStrategy[]{deduplicationStrategy};
         }
