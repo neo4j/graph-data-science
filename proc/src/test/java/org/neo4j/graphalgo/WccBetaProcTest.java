@@ -23,7 +23,9 @@ import com.carrotsearch.hppc.IntIntScatterMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.wcc.WccProc;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -35,7 +37,11 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_WEIGHT_KEY;
+import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_THRESHOLD;
 
 class WccBetaProcTest extends ProcTestBase {
 
@@ -354,6 +360,29 @@ class WccBetaProcTest extends ProcTestBase {
             }
         );
         assertMapContains(map, 1, 2, 7);
+    }
+
+    @AllGraphNamesTest
+    void shouldFailWhenSpecifyingThresholdWithoutRelationshipWeight(String graphImpl) {
+        String query = "CALL algo.beta.wcc.stream(" +
+                       "    '', 'TYPE', {" +
+                       "        defaultValue: 10.0, concurrency: 1, threshold: 3.14, graph: $graph" +
+                       "    }" +
+                       ") YIELD setId";
+        QueryExecutionException exception = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(query, MapUtil.map("graph", graphImpl))
+        );
+        Throwable rootCause = ExceptionUtil.rootCause(exception);
+
+        assertTrue(rootCause
+            .getMessage()
+            .contains(String.format(
+                "%s requires a `%s` or `%s`",
+                CONFIG_THRESHOLD,
+                RELATIONSHIP_WEIGHT_KEY,
+                DEPRECATED_RELATIONSHIP_PROPERTY_KEY
+            )));
     }
 
     @AllGraphNamesTest

@@ -44,8 +44,11 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_WEIGHT_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_ALGO_TYPE;
+import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_THRESHOLD;
 
 public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
@@ -163,6 +166,17 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         final AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         final WriteResultBuilder builder = new WriteResultBuilder(configuration, tracker);
+
+        if (config.containsKey(CONFIG_THRESHOLD) &&
+            !(config.containsKey(RELATIONSHIP_WEIGHT_KEY) || config.containsKey(DEPRECATED_RELATIONSHIP_PROPERTY_KEY))) {
+            throw new IllegalArgumentException(
+                String.format(
+                    "The parameter %s requires a `%s` or `%s` to be set.",
+                    CONFIG_THRESHOLD,
+                    RELATIONSHIP_WEIGHT_KEY,
+                    DEPRECATED_RELATIONSHIP_PROPERTY_KEY
+                ));
+        }
 
         Graph graph = loadGraph(configuration, tracker, builder);
 
