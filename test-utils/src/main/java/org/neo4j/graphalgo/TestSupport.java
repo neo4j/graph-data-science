@@ -140,7 +140,7 @@ public final class TestSupport {
 
     /**
      * This method assumes that the given algorithm calls {@link Algorithm#assertRunning()} at least once.
-     * When called, the algorithm will sleep for {@code sleepMillis} milliseconds before it check the transaction state.
+     * When called, the algorithm will sleep for {@code sleepMillis} milliseconds before it checks the transaction state.
      * A second thread will terminate the transaction during the sleep interval.
      */
     public static void assertAlgorithmTermination(
