@@ -1,0 +1,80 @@
+/*
+ * Copyright (c) 2017-2019 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.neo4j.graphalgo;
+
+import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.utils.TransactionWrapper;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+
+import java.util.Map;
+import java.util.function.Consumer;
+
+abstract class ProcTestBaseExtentions extends ProcTestBase {
+
+    <A extends Algorithm<A>, P extends BaseAlgoProc<A>, F extends AlgorithmFactory<A>> void getAlgoFactory(
+        Class<? extends P> procClazz,
+        String nodeLabels,
+        String relTypes,
+        Map<String, Object> config,
+        Consumer<F> func
+    ) {
+        getAlgoProc(procClazz, proc -> {
+            ProcedureConfiguration procedureConfiguration = proc.newConfig(nodeLabels, relTypes, config);
+            func.accept((F) proc.algorithmFactory(procedureConfiguration));
+        });
+    }
+
+    <A extends Algorithm<A>, P extends BaseAlgoProc<A>> void getGraphSetup(
+        Class<? extends P> procClazz,
+        String nodeLabels,
+        String relTypes,
+        Map<String, Object> config,
+        Consumer<GraphSetup> func
+    ) {
+        getAlgoProc(procClazz, (proc) -> {
+            ProcedureConfiguration procedureConfiguration = proc.newConfig(nodeLabels, relTypes, config);
+            func.accept(proc.newLoader(procedureConfiguration, AllocationTracker.EMPTY).toSetup());
+        });
+    }
+
+    private <A extends Algorithm<A>, P extends BaseAlgoProc<A>> void getAlgoProc(
+        Class<? extends P> procClazz,
+        Consumer<P> func
+    ) {
+        new TransactionWrapper(db).accept((tx -> {
+            P proc;
+            try {
+                proc = procClazz.newInstance();
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException("Could not instantiate Procedure Class " + procClazz.getSimpleName());
+            }
+
+            proc.transaction = tx;
+            proc.api = db;
+            proc.callContext = ProcedureCallContext.EMPTY;
+            proc.log = new TestLog();
+
+            func.accept(proc);
+        }));
+    }
+}

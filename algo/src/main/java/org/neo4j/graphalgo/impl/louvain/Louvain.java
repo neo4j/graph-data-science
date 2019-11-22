@@ -208,7 +208,7 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     public long getCommunity(long nodeId) {
-        return dendrograms[ranLevels].get(nodeId);
+        return dendrograms[levels() -1 ].get(nodeId);
     }
 
     public long[] getCommunities(long nodeId) {

@@ -72,7 +72,7 @@ public class LouvainLegacy {
             -1,
             -1,
             0,
-            new double[]{},
+            new ArrayList<>(),
             -1,
             false,
             null,
@@ -121,7 +121,7 @@ public class LouvainLegacy {
             long p5,
             long p1,
             long iterations,
-            double[] modularities,
+            List<Double> modularities,
             double finalModularity,
             boolean write,
             String writeProperty,
@@ -144,7 +144,7 @@ public class LouvainLegacy {
             this.p5 = p5;
             this.p1 = p1;
             this.iterations = iterations;
-            this.modularities = new ArrayList<>(modularities.length);
+            this.modularities = new ArrayList<>(modularities.size());
             this.write = write;
             this.includeIntermediateCommunities = includeIntermediateCommunities;
             for (double mod : modularities) this.modularities.add(mod);

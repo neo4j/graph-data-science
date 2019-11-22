@@ -366,8 +366,8 @@ class LouvainTest {
         if (graphImpl == CypherGraphFactory.class) {
             direction = Direction.OUTGOING;
             loader
-                .withNodeStatement("MATCH (u) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
-                .withRelationshipStatement("MATCH (u1)-[rel]-(u2) \n" +
+                .withNodeStatement("MATCH (u:Node) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
+                .withRelationshipStatement("MATCH (u1:Node)-[rel]-(u2:Node) \n" +
                                            "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight")
                 .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .undirected();

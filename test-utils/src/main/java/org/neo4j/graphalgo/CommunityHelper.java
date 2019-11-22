@@ -20,12 +20,13 @@
 
 package org.neo4j.graphalgo;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -40,24 +41,36 @@ public final class CommunityHelper {
      * It only tests if members are in the same or different communities, given the input and
      * disregards specific community values.
      *
-     * @param communityData The output of a community detection algorithm.
-     * @param communities   The expected membership of communities. Elements within an array are
-     *                      expected to be in the same community, whereas all elements of different
-     *                      arrays are expected to be in different communities.
+     * @param actual   The output of a community detection algorithm.
+     * @param expected The expected membership of communities. Elements within an array are
+     *                 expected to be in the same community, whereas all elements of different
+     *                 arrays are expected to be in different communities.
      */
-    public static void assertCommunities(long[] communityData, long[]... communities) {
-        for (long[] community : communities) {
-            assertSameCommunity(communityData, community);
+    public static void assertCommunities(long[] actual, long[]... expected) {
+        List<Long> actualList = Arrays.stream(actual).boxed().collect(toList());
+        List<List<Long>> expectedList = Arrays.stream(expected).map(
+            a -> Arrays.stream(a).boxed().collect(toList())
+        ).collect(toList());
+
+        assertCommunities(actualList, expectedList);
+    }
+
+    public static void assertCommunities(List<Long> actualCommunityData, List<List<Long>> expectedCommunities) {
+        for (List<Long> community : expectedCommunities) {
+            assertSameCommunity(actualCommunityData, community);
         }
 
-        for (int i = 0; i < communities.length; i++) {
-            for (int j = i + 1; j < communities.length; j++) {
+        for (int i = 0; i < expectedCommunities.size(); i++) {
+            for (int j = i + 1; j < expectedCommunities.size(); j++) {
+                int expected = expectedCommunities.get(i).get(0).intValue();
+                int actual = expectedCommunities.get(j).get(0).intValue();
                 assertNotEquals(
-                    communityData[(int) communities[i][0]], communityData[(int) communities[j][0]],
+                    actualCommunityData.get(expected),
+                    actualCommunityData.get(actual),
                     String.format(
                         "Expected node %d to be in a different community than node %d",
-                        communities[i][0],
-                        communities[j][0]
+                        expected,
+                        actual
                     )
                 );
             }
@@ -69,18 +82,25 @@ public final class CommunityHelper {
     }
 
     public static void assertSameCommunity(long[] communities, long[] members) {
-        long expectedCommunity = communities[(int) members[0]];
+        List<Long> communitiesList = Arrays.stream(communities).boxed().collect(toList());
+        List<Long> membersList = Arrays.stream(members).boxed().collect(toList());
+        assertSameCommunity(communitiesList, membersList);
+    }
 
-        for (int i = 1; i < members.length; i++) {
-            long actualCommunity = communities[(int) members[i]];
+    public static void assertSameCommunity(List<Long> communities, List<Long> members) {
+        long expectedCommunity = communities.get(members.get(0).intValue());
+
+        for (int i = 1; i < members.size(); i++) {
+            Long member = members.get(i);
+            long actualCommunity = communities.get(member.intValue());
             assertEquals(
                 expectedCommunity,
                 actualCommunity,
                 String.format(
                     "Expected node %d (community %d) to have the same community as node %d (community %d)",
-                    members[i],
+                    member,
                     actualCommunity,
-                    members[0],
+                    members.get(0),
                     expectedCommunity
                 )
             );
@@ -92,13 +112,14 @@ public final class CommunityHelper {
     }
 
     public static void assertCommunitiesWithLabels(long[] communityData, Map<Long, Long[]> expectedCommunities) {
-        long[][] longCommunities = new long[expectedCommunities.size()][];
-        int i = 0;
-        for (Long[] community : expectedCommunities.values()) {
-           longCommunities[i++] = ArrayUtils.toPrimitive(community);
-        }
+        List<Long> communityDataList = Arrays.stream(communityData).boxed().collect(toList());
+        List<List<Long>> expectedCommunitiesList = expectedCommunities
+            .values()
+            .stream()
+            .map(l -> Arrays.stream(l).collect(toList()))
+            .collect(toList());
 
-        assertCommunities(communityData, longCommunities);
+        assertCommunities(communityDataList, expectedCommunitiesList);
         for (Long label : expectedCommunities.keySet()) {
             Long[] community = expectedCommunities.get(label);
             for (Long nodeId : community) {

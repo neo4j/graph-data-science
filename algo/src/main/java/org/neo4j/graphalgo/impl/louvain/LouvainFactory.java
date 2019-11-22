@@ -37,7 +37,7 @@ import org.neo4j.logging.Log;
 public class LouvainFactory extends AlgorithmFactory<Louvain> {
 
     public static final Direction DEFAULT_LOUVAIN_DIRECTION = Direction.BOTH;
-    private Louvain.Config config;
+    public Louvain.Config config;
 
     public LouvainFactory(Louvain.Config config) {
         this.config = config;

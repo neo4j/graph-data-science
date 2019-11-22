@@ -19,43 +19,44 @@
  */
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.IntIntScatterMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
-import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.LockSupport;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
+import static org.neo4j.graphalgo.LouvainProc.DEFAULT_INCLUDE_INTERMEDIATE_COMMUNITIES;
+import static org.neo4j.graphalgo.LouvainProc.DEFAULT_INNER_ITERATIONS;
+import static org.neo4j.graphalgo.LouvainProc.DEFAULT_LEVELS;
+import static org.neo4j.graphalgo.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_KEY;
+import static org.neo4j.graphalgo.LouvainProc.INNER_ITERATIONS_KEY;
+import static org.neo4j.graphalgo.LouvainProc.LEVELS_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.GRAPH_IMPL_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 
-/**
- * Graph:
- *
- * (a)-(b)---(e)-(f)
- *  | X |     | X |   (z)
- * (c)-(d)   (g)-(h)
- */
-class LouvainProcTest extends ProcTestBase {
-
-    private static final String[] NODES = {"a", "b", "c", "d", "e", "f", "g", "h", "z"};
-    private static final int[] NODE_CLUSTER_ID = {0, 0, 0, 0, 1, 1, 1, 1, 2};
+class LouvainProcTest extends ProcTestBaseExtentions {
+    
+    private static final List<List<Long>> RESULT = Arrays.asList(
+        Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 14L),
+        Arrays.asList(6L, 7L, 8L),
+        Arrays.asList(9L, 10L, 11L, 12L, 13L)
+    );
 
     @BeforeEach
     void setupGraph() throws KernelException {
@@ -63,34 +64,48 @@ class LouvainProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
 
         final String cypher =
-                "CREATE " +
-                "  (a:Node {name: 'a', c: 1})" +
-                ", (c:Node {name: 'c', c: 1})" + // shuffled
-                ", (b:Node {name: 'b', c: 1})" +
-                ", (d:Node {name: 'd', c: 1})" +
+            "CREATE" +
+            "  (a:Node {seed: 1})" +        // 0
+            ", (b:Node {seed: 1})" +        // 1
+            ", (c:Node {seed: 1})" +        // 2
+            ", (d:Node {seed: 1})" +        // 3
+            ", (e:Node {seed: 1})" +        // 4
+            ", (f:Node {seed: 1})" +        // 5
+            ", (g:Node {seed: 2})" +        // 6
+            ", (h:Node {seed: 2})" +        // 7
+            ", (i:Node {seed: 2})" +        // 8
+            ", (j:Node {seed: 42})" +       // 9
+            ", (k:Node {seed: 42})" +       // 10
+            ", (l:Node {seed: 42})" +       // 11
+            ", (m:Node {seed: 42})" +       // 12
+            ", (n:Node {seed: 42})" +       // 13
+            ", (x:Node {seed: 1})" +        // 14
 
-                ", (e:Node {name: 'e', c: 1})" +
-                ", (g:Node {name: 'g', c: 1})" +
-                ", (f:Node {name: 'f', c: 1})" +
-                ", (h:Node {name: 'h', c: 1})" +
-
-                ", (z:Node {name: 'z', c: 1})" + // assign impossible community to outstanding node
-
-                ", (a)-[:TYPE {weight: 0.5}]->(b)" +
-                ", (a)-[:TYPE {weight: 1.5}]->(c)" +
-                ", (a)-[:TYPE {weight: 0.5}]->(d)" +
-                ", (c)-[:TYPE {weight: 1.5}]->(d)" +
-                ", (b)-[:TYPE {weight: 0.5}]->(c)" +
-                ", (b)-[:TYPE {weight: 1.5}]->(d)" +
-
-                ", (f)-[:TYPE]->(e)" +
-                ", (e)-[:TYPE]->(g)" +
-                ", (e)-[:TYPE]->(h)" +
-                ", (f)-[:TYPE]->(h)" +
-                ", (f)-[:TYPE]->(g)" +
-                ", (g)-[:TYPE]->(h)" +
-
-                ", (b)-[:TYPE {weight: 42}]->(e)";
+            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+            ", (a)-[:TYPE {weight: 1.0}]->(d)" +
+            ", (a)-[:TYPE {weight: 1.0}]->(f)" +
+            ", (b)-[:TYPE {weight: 1.0}]->(d)" +
+            ", (b)-[:TYPE {weight: 1.0}]->(x)" +
+            ", (b)-[:TYPE {weight: 1.0}]->(g)" +
+            ", (b)-[:TYPE {weight: 1.0}]->(e)" +
+            ", (c)-[:TYPE {weight: 1.0}]->(x)" +
+            ", (c)-[:TYPE {weight: 1.0}]->(f)" +
+            ", (d)-[:TYPE {weight: 1.0}]->(k)" +
+            ", (e)-[:TYPE {weight: 1.0}]->(x)" +
+            ", (e)-[:TYPE {weight: 0.01}]->(f)" +
+            ", (e)-[:TYPE {weight: 1.0}]->(h)" +
+            ", (f)-[:TYPE {weight: 1.0}]->(g)" +
+            ", (g)-[:TYPE {weight: 1.0}]->(h)" +
+            ", (h)-[:TYPE {weight: 1.0}]->(i)" +
+            ", (h)-[:TYPE {weight: 1.0}]->(j)" +
+            ", (i)-[:TYPE {weight: 1.0}]->(k)" +
+            ", (j)-[:TYPE {weight: 1.0}]->(k)" +
+            ", (j)-[:TYPE {weight: 1.0}]->(m)" +
+            ", (j)-[:TYPE {weight: 1.0}]->(n)" +
+            ", (k)-[:TYPE {weight: 1.0}]->(m)" +
+            ", (k)-[:TYPE {weight: 1.0}]->(l)" +
+            ", (l)-[:TYPE {weight: 1.0}]->(n)" +
+            ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
         registerProcedures(LouvainProc.class, GraphLoadProc.class);
         db.execute(cypher);
@@ -99,383 +114,298 @@ class LouvainProcTest extends ProcTestBase {
     @AfterEach
     void clearCommunities() {
         db.shutdown();
-    }
-
-    @AllGraphNamesTest
-    void test(String graphImpl) {
-        String query = "CALL algo.louvain(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, graph: $graph" +
-                       "    } " +
-                       ") YIELD nodes, communityCount, loadMillis, computeMillis, writeMillis, postProcessingMillis, p99";
-
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    long nodes = row.getNumber("nodes").longValue();
-                    long communityCount = row.getNumber("communityCount").longValue();
-                    long loadMillis = row.getNumber("loadMillis").longValue();
-                    long computeMillis = row.getNumber("computeMillis").longValue();
-                    long writeMillis = row.getNumber("writeMillis").longValue();
-
-                    assertEquals(9, nodes, "invalid node count");
-                    assertEquals(3, communityCount, "wrong community count");
-                    assertTrue(loadMillis >= 0, "invalid loadTime");
-                    assertTrue(writeMillis >= 0, "invalid writeTime");
-                    assertTrue(computeMillis >= 0, "invalid computeTime");
-                }
-        );
-    }
-
-    @AllGraphNamesTest
-    void testInnerIterations(String graphImpl) {
-        String query = "CALL algo.louvain(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, innerIterations: 100, graph: $graph" +
-                       "    }" +
-                       ") YIELD nodes, communityCount, loadMillis, computeMillis, writeMillis, postProcessingMillis, p99";
-
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    long nodes = row.getNumber("nodes").longValue();
-                    long communityCount = row.getNumber("communityCount").longValue();
-                    long loadMillis = row.getNumber("loadMillis").longValue();
-                    long computeMillis = row.getNumber("computeMillis").longValue();
-                    long writeMillis = row.getNumber("writeMillis").longValue();
-
-                    assertEquals(9, nodes, "invalid node count");
-                    assertEquals(3, communityCount, "wrong community count");
-                    assertTrue(loadMillis >= 0, "invalid loadTime");
-                    assertTrue(writeMillis >= 0, "invalid writeTime");
-                    assertTrue(computeMillis >= 0, "invalid computeTime");
-                }
-        );
-    }
-
-    @AllGraphNamesTest
-    void testStream(String graphImpl) {
-        String query = "CALL algo.louvain.stream(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, innerIterations: 10, graph: $graph" +
-                       "    }" +
-                       ") YIELD nodeId, community, communities";
-        IntIntScatterMap testMap = new IntIntScatterMap();
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    long community = (long) row.get("community");
-                    testMap.addTo((int) community, 1);
-                }
-        );
-        assertEquals(3, testMap.size());
-    }
-
-    @AllGraphNamesTest
-    void testPredefinedCommunities(String graphImpl) {
-        String query = "CALL algo.louvain.stream(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, seedProperty: 'c', graph: $graph" +
-                       "    }" +
-                       ") YIELD nodeId, community, communities";
-        IntIntScatterMap testMap = new IntIntScatterMap();
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    long community = (long) row.get("community");
-                    assertEquals(0L, community);
-                    testMap.addTo((int) community, 1);
-                }
-        );
-        assertEquals(1, testMap.size());
-    }
-
-    @AllGraphNamesTest
-    void testPredefinedCommunitiesFromLoadedGraph(String graphImpl) {
-        String loadQuery = "CALL algo.graph.load('foo', '', '', { nodeProperties: { c: { property: 'c', defaulValue: -1 } } })";
-        runQuery(loadQuery);
-        String query = "CALL algo.louvain.stream(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, seedProperty: 'c', graph: 'foo'" +
-                       "    }" +
-                       ") YIELD nodeId, community, communities";
-        IntIntScatterMap testMap = new IntIntScatterMap();
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    long community = (long) row.get("community");
-                    assertEquals(0L, community);
-                    testMap.addTo((int) community, 1);
-                }
-        );
-        assertEquals(1, testMap.size());
-    }
-
-    @AllGraphNamesTest
-    void testPredefinedCommunitiesWithOldKey(String graphImpl) {
-        String query = "CALL algo.louvain.stream(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, communityProperty: 'c', graph: $graph" +
-                       "    }" +
-                       ") YIELD nodeId, community, communities";
-        IntIntScatterMap testMap = new IntIntScatterMap();
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    long community = (long) row.get("community");
-                    assertEquals(0L, community);
-                    testMap.addTo((int) community, 1);
-                }
-        );
-        assertEquals(1, testMap.size());
-    }
-
-    @AllGraphNamesTest
-    void throwsIfPredefinedCommunityPropertyDoesNotExist(String graphImpl) {
-        String query = "CALL algo.louvain.stream(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, seedProperty: 'does_not_exist', graph: $graph" +
-                       "    }" +
-                       ") YIELD nodeId, community, communities";
-        QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
-            runQuery(query, MapUtil.map("graph", graphImpl),
-                    row -> {}
-            );
-        });
-        Throwable rootCause = ExceptionUtil.rootCause(exception);
-        assertEquals("Node properties not found: 'does_not_exist'", rootCause.getMessage());
-    }
-
-    @AllGraphNamesTest
-    void testStreamNoIntermediateCommunitiesByDefault(String graphImpl) {
-        String query = "CALL algo.louvain.stream(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, seedProperty: 'c', graph: $graph" +
-                       "    }" +
-                       ") YIELD nodeId, community, communities";
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    Object communities = row.get("communities");
-                    assertNull(communities);
-                }
-        );
-    }
-
-    @AllGraphNamesTest
-    void testStreamIncludingIntermediateCommunities(String graphImpl) {
-        String query = "CALL algo.louvain.stream(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, includeIntermediateCommunities: true, graph: $graph" +
-                       "    }" +
-                       ") YIELD nodeId, communities";
-        IntIntScatterMap testMap = new IntIntScatterMap();
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    long community = (Long) ((List) row.get("communities")).get(0);
-                    testMap.addTo((int) community, 1);
-                }
-        );
-        assertEquals(3, testMap.size());
+        GraphCatalog.removeAllLoadedGraphs();
     }
 
     @AllGraphNamesTest
     void testWrite(String graphImpl) {
-        String query = "CALL algo.louvain(" +
+        String writeProperty = "myFancyCommunity";
+        String query = "CALL algo.beta.louvain(" +
                        "    '', '', {" +
-                       "        concurrency: 1, graph: $graph" +
-                       "    }" +
-                       ")";
-        runQuery(query, MapUtil.map("graph", graphImpl));
+                       "        graph: $graph," +
+                       "        writeProperty: '" + writeProperty + "'" +
+                       "    } " +
+                       ") YIELD nodes, communityCount, modularity, modularities, levels, includeIntermediateCommunities, loadMillis, computeMillis, writeMillis, postProcessingMillis, p99";
 
-        String readQuery = "MATCH (n) RETURN n.community AS community";
-
-        IntIntScatterMap testMap = new IntIntScatterMap();
-        runQuery(readQuery, row -> {
-            int community = ((Number) row.get("community")).intValue();
-            testMap.addTo(community, 1);
-        });
-
-        assertEquals(3, testMap.size());
-    }
-
-    @AllGraphNamesTest
-    void testWriteIncludingIntermediateCommunities(String graphImpl) {
-        String query = "CALL algo.louvain(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, includeIntermediateCommunities: true, graph: $graph" +
-                       "    }" +
-                       ")";
-        runQuery(query, MapUtil.map("graph", graphImpl));
-
-        String readQuery = "MATCH (n) RETURN n.communities AS communities";
-
-        IntIntScatterMap testMap = new IntIntScatterMap();
-        runQuery(readQuery, row -> {
-            Object communities = row.get("communities");
-            int community = Math.toIntExact(((long[]) communities)[0]);
-            testMap.addTo(community, 1);
-        });
-
-        assertEquals(3, testMap.size());
-    }
-
-    @AllGraphNamesTest
-    void testWriteNoIntermediateCommunitiesByDefault(String graphImpl) {
-        String query = "CALL algo.louvain(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, graph: $graph" +
-                       "    }" +
-                       ")";
-        runQuery(query, MapUtil.map("graph", graphImpl));
-
-        String readQuery = "MATCH (n) " +
-                           "WHERE not(exists(n.communities)) " +
-                           "RETURN count(*) AS count";
-
-        AtomicLong testInteger = new AtomicLong(0);
-        runQuery(readQuery, row -> {
-            long count = (long) row.get("count");
-            testInteger.set(count);
-        });
-
-        assertEquals(9, testInteger.get());
-    }
-
-    @AllGraphNamesTest
-    void testWithLabelRel(String graphImpl) {
-        String query = "CALL algo.louvain(" +
-                       "    'Node', 'TYPE', {" +
-                       "        concurrency: 1, graph: $graph" +
-                       "    }" +
-                       ") YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis";
-
-        runQuery(query, MapUtil.map("graph", graphImpl),
+        runQuery(query, MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
                 row -> {
                     long nodes = row.getNumber("nodes").longValue();
                     long communityCount = row.getNumber("communityCount").longValue();
+                    double modularity = row.getNumber("modularity").doubleValue();
+                    List<Double> modularities = (List<Double>) row.get("modularities");
+                    long levels = row.getNumber("levels").longValue();
+                    boolean includeIntermediate = row.getBoolean("includeIntermediateCommunities");
                     long loadMillis = row.getNumber("loadMillis").longValue();
                     long computeMillis = row.getNumber("computeMillis").longValue();
                     long writeMillis = row.getNumber("writeMillis").longValue();
 
-                    assertEquals(9, nodes, "invalid node count");
+                    assertEquals(15, nodes, "invalid node count");
                     assertEquals(3, communityCount, "wrong community count");
+                    assertEquals(2, modularities.size(), "invalud modularities");
+                    assertEquals(2, levels, "invalid level count");
+                    assertFalse(includeIntermediate, "invalid level count");
+                    assertTrue(modularity > 0, "wrong modularity value");
                     assertTrue(loadMillis >= 0, "invalid loadTime");
                     assertTrue(writeMillis >= 0, "invalid writeTime");
                     assertTrue(computeMillis >= 0, "invalid computeTime");
                 }
         );
-
-        assertNodeSets();
+        assertWriteResult(RESULT, writeProperty);
     }
 
     @AllGraphNamesTest
-    void testWithWeight(String graphImpl) {
-        String query = "CALL algo.louvain(" +
-                       "    'Node', 'TYPE', {" +
-                       "        weightProperty: 'weight', defaultValue: 1.0, concurrency: 1, graph: $graph" +
-                       "    }" +
-                       ") YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis";
-
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    long nodes = row.getNumber("nodes").longValue();
-                    long communityCount = row.getNumber("communityCount").longValue();
-                    long loadMillis = row.getNumber("loadMillis").longValue();
-                    long computeMillis = row.getNumber("computeMillis").longValue();
-                    long writeMillis = row.getNumber("writeMillis").longValue();
-
-                    assertEquals(4, communityCount);
-                    assertEquals(9, nodes, "invalid node count");
-                    assertTrue(loadMillis >= 0, "invalid loadTime");
-                    assertTrue(writeMillis >= 0, "invalid writeTime");
-                    assertTrue(computeMillis >= 0, "invalid computeTime");
-                }
-        );
-
-        int[] expectedClusterIds = new int[]{0, 1, 0, 0, 1, 2, 2, 2, 3};
-        int[] actualClusterIds = new int[NODES.length];
-        for (int i = 0; i < NODES.length; i++) {
-            String node = NODES[i];
-            int clusterId = getClusterId(node);
-            actualClusterIds[i] = clusterId;
-        }
-        assertArrayEquals(expectedClusterIds, actualClusterIds);
-    }
-
-    @AllGraphNamesTest
-    void throwsIfWeightPropertyDoesNotExist(String graphImpl) {
-        String query = "CALL algo.louvain.stream(" +
+    void testWriteIntermediateCommunities(String graphImpl) {
+        String writeProperty = "myFancyCommunity";
+        String query = "CALL algo.beta.louvain(" +
                        "    '', '', {" +
-                       "        weightProperty: 'does_not_exist', graph: $graph" +
-                       "    }" +
-                       ") YIELD nodeId, community, communities";
-        QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
-            runQuery(query, MapUtil.map("graph", graphImpl),
-                    row -> {}
-            );
+                       "        graph: $graph," +
+                       "        includeIntermediateCommunities: true," +
+                       "        writeProperty: '" + writeProperty + "'" +
+                       "    } " +
+                       ") YIELD includeIntermediateCommunities";
+
+        runQuery(query, MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
+            row -> {
+                assertTrue(row.getBoolean(INCLUDE_INTERMEDIATE_COMMUNITIES_KEY));
+            }
+        );
+
+        runQuery(String.format("MATCH (n) RETURN n.%s as %s", writeProperty, writeProperty), row ->{
+            Object maybeList = row.get(writeProperty);
+            assertTrue(maybeList instanceof long[]);
+            long[] communities = (long[]) maybeList;
+            assertEquals(2, communities.length);
         });
-        Throwable rootCause = ExceptionUtil.rootCause(exception);
-        assertEquals("Relationship properties not found: 'does_not_exist'", rootCause.getMessage());
     }
 
-    @Disabled
     @AllGraphNamesTest
-    void shouldRunWithSaturatedThreadPool(String graphImpl) {
-        // ensure that we don't drop task that can't be scheduled while executing the algorithm.
-
-        // load graph first to isolate failing behavior to the actual algorithm execution.
-        String loadQuery = "CALL algo.graph.load(" +
-                           "    'louvainGraph', '', '', {" +
-                           "        graph: $graph, weightProperty: 'weight'" +
-                           "    }" +
-                           ")";
-        runQuery(loadQuery, MapUtil.map("graph", graphImpl));
-
-        List<Future<?>> futures = new ArrayList<>();
-        // block all available threads
-        for (int i = 0; i < Pools.DEFAULT_CONCURRENCY; i++) {
-            futures.add(
-                    Pools.DEFAULT.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
-            );
-        }
-
-        String query = "CALL algo.louvain(" +
+    void testStream(String graphImpl) {
+        String query = "CALL algo.beta.louvain.stream(" +
                        "    '', '', {" +
-                       "        graph: 'louvainGraph'" +
-                       "    }" +
-                       ") YIELD nodes, communityCount";
-        try {
-            runQuery(query, row -> {
-                assertEquals(9, row.getNumber("nodes").longValue(), "invalid node count");
-                assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
-            });
-        } finally {
-            ParallelUtil.awaitTermination(futures);
-        }
+                       "        graph: $graph" +
+                       "    } " +
+                       ") YIELD nodeId as id, community";
+
+        List<Long> actualCommunities = new ArrayList<>();
+        runQuery(query, MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
+            row -> {
+                long community = row.getNumber("community").longValue();
+                int id = row.getNumber("id").intValue();
+                actualCommunities.add(id, community);
+            }
+        );
+        assertCommunities(actualCommunities, RESULT);
+    }
+
+    @AllGraphNamesTest
+    void testStreamCommunities(String graphImpl) {
+        String query = "CALL algo.beta.louvain.stream(" +
+                       "    '', '', {" +
+                       "        graph: $graph," +
+                       "        includeIntermediateCommunities: true" +
+                       "    } " +
+                       ") YIELD nodeId as id, community, communities";
+
+        runQuery(query, MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
+            row -> {
+                Object maybeList = row.get("communities");
+                assertTrue(maybeList instanceof List);
+                List<Long> communities = (List<Long>) maybeList;
+                assertEquals(2, communities.size());
+                assertEquals(communities.get(1), row.getNumber("community").longValue());
+            }
+        );
     }
 
     @Test
-    void shouldAllowCypherGraph() {
-        String query = "CALL algo.louvain(" +
-                       "    'MATCH (n) RETURN id(n) as id'," +
-                       "    'MATCH (s)-->(t) RETURN id(s) as source, id(t) as target'," +
-                       "     {graph: 'cypher'}" +
-                       ") YIELD nodes, communityCount";
+    void testRunOnLoadedGraph() {
+        runQuery("CALL algo.graph.load('myGraph','','', { direction: 'BOTH' })");
 
-        runQuery(query, row -> {
-            assertEquals(9, row.getNumber("nodes").longValue(), "invalid node count");
-            assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
-        });
+        String query = "CALL algo.beta.louvain.stream(" +
+                       "    '', '', {" +
+                       "        graph: 'myGraph'" +
+                       "    } " +
+                       ") YIELD nodeId as id, community";
+
+        List<Long> actualCommunities = new ArrayList<>();
+        runQuery(query,
+            row -> {
+                long community = row.getNumber("community").longValue();
+                int id = row.getNumber("id").intValue();
+                actualCommunities.add(id, community);
+            }
+        );
+        assertCommunities(actualCommunities, RESULT);
+
+        actualCommunities.clear();
+        runQuery(query,
+            row -> {
+                long community = row.getNumber("community").longValue();
+                int id = row.getNumber("id").intValue();
+                actualCommunities.add(id, community);
+            }
+        );
+        assertCommunities(actualCommunities, RESULT);
     }
 
-    private void assertNodeSets() {
-        for (int i = 0; i < NODES.length; i++) {
-            String node = NODES[i];
-            int expected = NODE_CLUSTER_ID[i];
-            int clusterId = getClusterId(node);
-            assertEquals(expected, clusterId);
-        }
+    @AllGraphNamesTest
+    void testWriteWithSeeding(String graphImpl) {
+        String writeProperty = "myFancyWriteProperty";
+        String query = "CALL algo.beta.louvain(" +
+                       "    '', '', {" +
+                       "        graph: $graph," +
+                       "        seedProperty: 'seed'," +
+                       "        writeProperty: '" + writeProperty + "'" +
+                       "    } " +
+                       ") YIELD nodes, communityCount, levels";
+
+        runQuery(query, MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
+            row -> {
+                assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
+                assertEquals(1, row.getNumber("levels").longValue(), "wrong number of levels");
+            }
+        );
+        assertWriteResult(RESULT, writeProperty);
     }
 
-    private int getClusterId(String nodeName) {
-        int[] id = {-1};
-        runQuery("MATCH (n) WHERE n.name = '" + nodeName + "' RETURN n", row -> {
-            id[0] = ((Number) row.getNode("n").getProperty("community")).intValue();
+    @AllGraphNamesTest
+    void testDefaults(String graphImpl) {
+        getAlgoFactory(
+            LouvainProc.class,
+            "", "",
+            MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
+            (LouvainFactory factory) -> {
+                assertEquals(DEFAULT_INCLUDE_INTERMEDIATE_COMMUNITIES, factory.config.includeIntermediateCommunities);
+                assertEquals(DEFAULT_LEVELS, factory.config.maxLevel);
+                assertEquals(DEFAULT_INNER_ITERATIONS, factory.config.maxInnerIterations);
+                assertEquals(TOLERANCE_DEFAULT, factory.config.tolerance);
+                assertFalse(factory.config.maybeSeedPropertyKey.isPresent());
+            }
+        );
+    }
+
+    @AllGraphNamesTest
+    void testOverwritingDefaults(String graphImpl) {
+        Map<String, Object> config = MapUtil.map(
+            GRAPH_IMPL_KEY, graphImpl,
+            INCLUDE_INTERMEDIATE_COMMUNITIES_KEY, true,
+            LEVELS_KEY, 42,
+            INNER_ITERATIONS_KEY, 42,
+            TOLERANCE_KEY, 0.42,
+            SEED_PROPERTY_KEY, "foobar"
+        );
+
+        getAlgoFactory(
+            LouvainProc.class,
+            "", "",
+            config,
+            (LouvainFactory factory) -> {
+                assertTrue(factory.config.includeIntermediateCommunities);
+                assertEquals(42, factory.config.maxLevel);
+                assertEquals(42, factory.config.maxInnerIterations);
+                assertEquals(0.42, factory.config.tolerance);
+                assertEquals("foobar", factory.config.maybeSeedPropertyKey.orElse("not_set"));
+            }
+        );
+    }
+
+    @AllGraphNamesTest
+    void testGraphLoaderDefaults(String graphImpl) {
+        getGraphSetup(
+            LouvainProc.class,
+            "", "",
+            MapUtil.map(
+                GRAPH_IMPL_KEY, graphImpl
+            ),
+            setup -> {
+                assertTrue(setup.loadAnyLabel());
+                assertEquals(Direction.BOTH, setup.direction);
+                assertFalse(setup.nodePropertyMappings.head().isPresent());
+                assertFalse(setup.relationshipPropertyMappings.head().isPresent());
+            }
+        );
+    }
+
+    @AllGraphNamesTest
+    void testGraphLoaderWithSeeding(String graphImpl) {
+        getGraphSetup(
+            LouvainProc.class,
+            "", "",
+            MapUtil.map(
+                GRAPH_IMPL_KEY, graphImpl,
+                SEED_PROPERTY_KEY, "foobar"
+            ),
+            setup -> {
+                PropertyMapping propertyMapping = setup.nodePropertyMappings.head().get();
+                assertEquals("foobar", propertyMapping.neoPropertyKey);
+                assertEquals("foobar", propertyMapping.propertyKey);
+            }
+        );
+    }
+
+    @AllGraphNamesTest
+    void testGraphLoaderWithWeight(String graphImpl) {
+        getGraphSetup(
+            LouvainProc.class,
+            "", "",
+            MapUtil.map(
+                GRAPH_IMPL_KEY, graphImpl,
+                DEPRECATED_RELATIONSHIP_PROPERTY_KEY, "foobar"
+            ),
+            setup -> {
+                PropertyMapping propertyMapping = setup.relationshipPropertyMappings.head().get();
+                assertEquals("foobar", propertyMapping.neoPropertyKey);
+                assertEquals("foobar", propertyMapping.propertyKey);
+            }
+        );
+    }
+
+    @Test
+    void testGraphLoaderOnLoadedGraphWithSeeds() {
+        String seedProperty = "mySeed";
+
+        runQuery(
+            "CALL algo.graph.load('myGraph','','', { " +
+            "   direction: 'BOTH'," +
+            "   nodeProperties: {" +
+            "       mySeed: 'seed'" +
+            "   }" +
+            "})");
+
+        Map<String, Object> config = MapUtil.map(
+            GRAPH_IMPL_KEY, "myGraph",
+            SEED_PROPERTY_KEY, seedProperty
+        );
+
+        getGraphSetup(
+            LouvainProc.class,
+            "", "",
+            config,
+            setup -> {
+                PropertyMapping propertyMapping = setup.nodePropertyMappings.head().get();
+                assertEquals(seedProperty, propertyMapping.neoPropertyKey);
+                assertEquals(seedProperty, propertyMapping.propertyKey);
+            }
+        );
+
+        getAlgoFactory(
+            LouvainProc.class,
+            "", "",
+            config,
+            (LouvainFactory factory) -> {
+                assertEquals(seedProperty, factory.config.maybeSeedPropertyKey.orElse("not set"));
+            }
+        );
+    }
+
+    private void assertWriteResult(List<List<Long>> expectedCommunities, String writeProperty) {
+        List<Long> actualCommunities = new ArrayList<>();
+        runQuery(String.format("MATCH (n) RETURN id(n) as id, n.%s as community", writeProperty), (row) -> {
+            long community = row.getNumber("community").longValue();
+            int id = row.getNumber("id").intValue();
+            actualCommunities.add(id, community);
         });
-        return id[0];
+
+        assertCommunities(actualCommunities, expectedCommunities);
     }
 }

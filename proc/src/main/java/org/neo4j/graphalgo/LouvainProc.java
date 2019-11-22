@@ -34,15 +34,17 @@ import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -50,6 +52,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
+import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEFAULT_LOUVAIN_DIRECTION;
 import static org.neo4j.procedure.Mode.READ;
 
 /**
@@ -59,14 +62,14 @@ import static org.neo4j.procedure.Mode.READ;
  */
 public class LouvainProc extends BaseAlgoProc<Louvain> {
 
-    public static final int DEFAULT_CONCURRENCY = 1;
+    public static final int DEFAULT_CONCURRENCY = 4;
 
     public static final String LEVELS_KEY = "levels";
     public static final int DEFAULT_LEVELS = 10;
     public static final String INNER_ITERATIONS_KEY = "innerIterations";
     public static final int DEFAULT_INNER_ITERATIONS = 10;
     public static final String INCLUDE_INTERMEDIATE_COMMUNITIES_KEY = "includeIntermediateCommunities";
-    public static final boolean INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT = false;
+    public static final boolean DEFAULT_INCLUDE_INTERMEDIATE_COMMUNITIES = false;
 
     @Procedure(value = "algo.beta.louvain", mode = Mode.WRITE)
     @Description("CALL algo.beta.louvain(label:String, relationship:String, " +
@@ -197,7 +200,12 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     protected GraphLoader configureGraphLoader(
         GraphLoader loader, ProcedureConfiguration config
     ) {
-        return loader.withDirection(config.getDirection(Direction.OUTGOING));
+        final String seedProperty = config.getString(SEED_PROPERTY_KEY, null);
+        if (seedProperty != null) {
+            loader.withOptionalNodeProperties(PropertyMapping.of(seedProperty, -1));
+        }
+
+        return loader.withDirection(config.getDirection(DEFAULT_LOUVAIN_DIRECTION));
     }
 
     @Override
@@ -206,7 +214,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             config.getInt(LEVELS_KEY, DEFAULT_LEVELS),
             config.getInt(INNER_ITERATIONS_KEY, DEFAULT_INNER_ITERATIONS),
             config.get(TOLERANCE_KEY, TOLERANCE_DEFAULT),
-            config.getBool(INCLUDE_INTERMEDIATE_COMMUNITIES_KEY, INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT),
+            config.getBool(INCLUDE_INTERMEDIATE_COMMUNITIES_KEY, DEFAULT_INCLUDE_INTERMEDIATE_COMMUNITIES),
             config.getString(SEED_PROPERTY_KEY)
         );
 
@@ -300,12 +308,12 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     public static final class StreamResult {
         public final long nodeId;
-        public final long[] communities;
+        public final List<Long> communities;
         public final long community;
 
         StreamResult(final long nodeId, final long[] communities, final long community) {
             this.nodeId = nodeId;
-            this.communities = communities;
+            this.communities = Arrays.stream(communities).boxed().collect(Collectors.toList());
             this.community = community;
         }
     }
@@ -345,7 +353,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         public final long communityCount;
         public final long levels;
         public final double modularity;
-        public final double[] modularities;
+        public final List<Double> modularities;
         public final long p1;
         public final long p5;
         public final long p10;
@@ -392,7 +400,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             this.communityCount = communityCount;
             this.levels = levels;
             this.modularity = modularity;
-            this.modularities = modularities;
+            this.modularities = Arrays.stream(modularities).boxed().collect(Collectors.toList());
             this.p1 = p1;
             this.p5 = p5;
             this.p10 = p10;
@@ -433,7 +441,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
         WriteResultBuilder withModularity(double modularity) {
             this.modularity = modularity;
-            return null;
+            return this;
         }
 
         WriteResultBuilder withIncludeIntermediateCommunities(boolean includeIntermediateCommunities) {
