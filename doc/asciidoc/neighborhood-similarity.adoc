@@ -13,7 +13,7 @@ This topic includes:
 * <<algorithms-neighborhood-similarity-examples, Examples>>
 ** <<algorithms-neighborhood-similarity-examples-stream, Streaming results>>
 ** <<algorithms-neighborhood-similarity-examples-write, Writing results>>
-** <<algorithms-neighborhood-similarity-examples-limits, Limits>>
+** <<algorithms-neighborhood-similarity-examples-limits, Limiting results>>
 *** <<algorithms-neighborhood-similarity-examples-limits-topk-bottomk, topK and bottomK>>
 *** <<algorithms-neighborhood-similarity-examples-limits-topn-bottomn, topN and bottomN>>
 ** <<algorithms-neighborhood-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
@@ -23,7 +23,7 @@ This topic includes:
 == Introduction
 
 The Neighborhood Similarity algorithm compares a set of nodes based on the nodes they are connected to.
-Two nodes are considered to be similar if they share many of the same neighbors.
+Two nodes are considered similar if they share many of the same neighbors.
 Neighborhood Similarity computes pair-wise similarities based on the Jaccard metric.
 
 The input of this algorithm is a bipartite, connected graph containing two disjoint node sets.
@@ -101,12 +101,12 @@ YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
 | Name                  | Type    | Description
 | nodesCompared         | int     | The number of nodes compared.
 | relationships         | int     | The number of relationships created.
-| write                 | boolean | Specifies if the result was written back as a node property.
+| write                 | boolean | Specifies if the result was written back as a new relationship.
 | writeRelationshipType | string  | The relationship type used to represent a similarity score.
 | writeProperty         | string  | The relationship property that stores the similarity score.
 | loadMillis            | int     | Milliseconds for loading data.
 | computeMillis         | int     | Milliseconds for running the algorithm.
-| writeMillis           | int     | Milliseconds for writing result data back.
+| writeMillis           | int     | Milliseconds for writing result data back to Neo4j.
 | postProcessingMillis  | int     | Milliseconds for computing percentiles.
 | min                   | double  | The minimum similarity score computed.
 | max                   | double  | The maximum similarity score computed.
@@ -162,9 +162,9 @@ YIELD node1, node2, similarity
 [opts="header",cols="1m,1,6"]
 |===
 | Name          | Type     | Description
-| node1         | int      | Node ID
-| node2         | int      | Node ID
-| similarity    | double   | Similarity score
+| node1         | int      | The Neo4j ID of the first node.
+| node2         | int      | The Neo4j ID of the second node.
+| similarity    | double   | The similarity score for the two nodes.
 |===
 
 
@@ -211,7 +211,7 @@ In order to load both node sets, Persons and Instruments, we need to pass an emp
 [NOTE]
 ====
 Loading a graph with an empty node filter means all the nodes in the Neo4j graph are loaded.
-To circumvent this, an common node label like 'Node' can be added to Person and Instrument nodes.
+To circumvent this, a common node label like 'Node' can be added to Person and Instrument nodes.
 ====
 
 
@@ -222,7 +222,6 @@ To circumvent this, an common node label like 'Node' can be added to Person and 
 [source, cypher]
 ----
 CALL algo.beta.jaccard.stream('', 'LIKES', {
-  graph: 'huge',
   direction: 'OUTGOING'
 })
 YIELD node1, node2, similarity
@@ -256,14 +255,13 @@ Because of that the result set contains the top 10 similarity scores for each no
 === Writing results
 
 To instead write the similarity results back to the graph in Neo4j, use the following query.
-Each result is written as a relationship between the compared nodes.
+Each result is written as a new relationship between the compared nodes.
 The similarity score is written as a property on the relationship.
 
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
 CALL algo.beta.jaccard('', 'LIKES', {
-  graph: 'huge',
   direction: 'OUTGOING',
   write: true
 })
@@ -290,16 +288,17 @@ Both top and bottom limits can apply to the result as a whole ("N"), or to the r
 
 [NOTE]
 ====
-There is always a "K" limit, either bottomK or topK, when computing Neighborhood Similarity.
+There must always be a "K" limit, either bottomK or topK, which is a positive number.
+The default value for topK and bottomK is 10.
 ====
 
 
-.Limits
+.Result limits
 [opts="header", cols="1h,1,1"]
 |===
-|               | total result | result per node
-| highest score | topN         | topK
-| lowest score  | bottomN      | bottomK
+|               | total results | results per node
+| highest score | topN          | topK
+| lowest score  | bottomN       | bottomK
 |===
 
 
@@ -316,7 +315,6 @@ If neither is specified, topK is used.
 [source, cypher]
 ----
 CALL algo.beta.jaccard.stream('', 'LIKES', {
-  graph: 'huge',
   direction: 'OUTGOING',
   topK: 1
 })
@@ -340,7 +338,6 @@ ORDER BY Person1
 [source, cypher]
 ----
 CALL algo.beta.jaccard.stream('', 'LIKES', {
-  graph: 'huge',
   direction: 'OUTGOING',
   bottomK: 1
 })
@@ -370,11 +367,10 @@ For topN, the N largest similarity scores are returned.
 For bottomN, the N smallest similarity scores are returned.
 A value of 0 means no global limit is imposed and all results from topK or bottomK are returned.
 
-.The following will load the graph, run the algorithm, and streams the 3 highest out of the top 1 results per node:
+.The following will load the graph, run the algorithm, and stream the 3 highest out of the top 1 results per node:
 [source, cypher]
 ----
 CALL algo.beta.jaccard.stream('', 'LIKES', {
-  graph: 'huge',
   direction: 'OUTGOING',
   topK: 1,
   topN: 3
@@ -405,7 +401,6 @@ This value can not be lower than 1.
 [source, cypher]
 ----
 CALL algo.beta.jaccard.stream('', 'LIKES', {
-  graph: 'huge',
   direction: 'OUTGOING',
   degreeCutOff: 3
 })
@@ -424,19 +419,17 @@ ORDER BY Person1
 |===
 
 Similarity cutoff is a lower limit for the similarity score to be present in the result.
-The default value is set to 1E-42 to exclude results with a similarity score of 0.
+The default value is very small (`1E-42`) to exclude results with a similarity score of 0.
 
 [NOTE]
 ====
-Setting similarityCutoff to 0 will compute a potentially vast result set.
-This can lead to an increased runtime during streaming and writing.
+Setting similarity cutoff to 0 may yield a very large result set, increased runtime and memory consumption.
 ====
 
 .The following will ignore node pairs with a similarty score less than 0.5:
 [source, cypher]
 ----
 CALL algo.beta.jaccard.stream('', 'LIKES', {
-  graph: 'huge',
   direction: 'OUTGOING',
   similarityCutoff: 0.5
 })
