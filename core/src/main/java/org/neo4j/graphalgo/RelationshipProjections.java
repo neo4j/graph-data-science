@@ -35,24 +35,24 @@ import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 
-public final class RelationshipFilters {
+public final class RelationshipProjections {
 
-    private static final RelationshipFilters EMPTY = new RelationshipFilters(emptyMap());
+    private static final RelationshipProjections EMPTY = new RelationshipProjections(emptyMap());
 
-    public static RelationshipFilters of(@Nullable String type) {
+    public static RelationshipProjections of(@Nullable String type) {
         if (StringUtils.isEmpty(type)) {
             return EMPTY;
         }
         ElementIdentifier identifier = new ElementIdentifier(type);
-        RelationshipFilter filter = RelationshipFilter.of(type);
+        RelationshipProjection filter = RelationshipProjection.of(type);
         return create(singletonMap(identifier, filter));
     }
 
-    public static RelationshipFilters of(Map<String, ?> map) {
-        Map<ElementIdentifier, RelationshipFilter> filters = new LinkedHashMap<>();
+    public static RelationshipProjections of(Map<String, ?> map) {
+        Map<ElementIdentifier, RelationshipProjection> filters = new LinkedHashMap<>();
         map.forEach((name, spec) -> {
             ElementIdentifier identifier = new ElementIdentifier(name);
-            RelationshipFilter filter = RelationshipFilter.fromObject(spec, identifier);
+            RelationshipProjection filter = RelationshipProjection.fromObject(spec, identifier);
             // sanity
             if (filters.put(identifier, filter) != null) {
                 throw new IllegalStateException(String.format("Duplicate key: %s", name));
@@ -61,16 +61,16 @@ public final class RelationshipFilters {
         return create(filters);
     }
 
-    public static RelationshipFilters of(Iterable<?> items) {
-        Map<ElementIdentifier, RelationshipFilter> filters = new LinkedHashMap<>();
+    public static RelationshipProjections of(Iterable<?> items) {
+        Map<ElementIdentifier, RelationshipProjection> filters = new LinkedHashMap<>();
         for (Object item : items) {
-            RelationshipFilters relationshipFilters = fromObject(item);
-            filters.putAll(relationshipFilters.filters);
+            RelationshipProjections relationshipProjections = fromObject(item);
+            filters.putAll(relationshipProjections.filters);
         }
         return create(filters);
     }
 
-    public static RelationshipFilters fromObject(Object object) {
+    public static RelationshipProjections fromObject(Object object) {
         if (object == null) {
             return of(emptyMap());
         }
@@ -91,19 +91,19 @@ public final class RelationshipFilters {
         ));
     }
 
-    private static RelationshipFilters create(Map<ElementIdentifier, RelationshipFilter> filters) {
-        if (filters.values().stream().allMatch(RelationshipFilter::isEmpty)) {
+    private static RelationshipProjections create(Map<ElementIdentifier, RelationshipProjection> filters) {
+        if (filters.values().stream().allMatch(RelationshipProjection::isEmpty)) {
             return EMPTY;
         }
 
         Map<String, Long> entriesPerType = filters
             .values()
             .stream()
-            .collect(groupingBy(RelationshipFilter::type, counting()));
+            .collect(groupingBy(RelationshipProjection::type, counting()));
 
         String duplicateTypes = entriesPerType.entrySet().stream()
             .filter(entry -> entry.getValue() > 1)
-            .map(entry -> String.format("'%s", entry.getKey()))
+            .map(entry -> String.format("'%s'", entry.getKey()))
             .collect(Collectors.joining(", '"));
 
         if (!duplicateTypes.isEmpty()) {
@@ -112,38 +112,38 @@ public final class RelationshipFilters {
                 duplicateTypes
             ));
         }
-        return new RelationshipFilters(unmodifiableMap(filters));
+        return new RelationshipProjections(unmodifiableMap(filters));
     }
 
-    private final Map<ElementIdentifier, RelationshipFilter> filters;
+    private final Map<ElementIdentifier, RelationshipProjection> filters;
 
-    private RelationshipFilters(Map<ElementIdentifier, RelationshipFilter> filters) {
+    private RelationshipProjections(Map<ElementIdentifier, RelationshipProjection> filters) {
         this.filters = filters;
     }
 
-    public RelationshipFilter getFilter(ElementIdentifier identifier) {
-        RelationshipFilter filter = filters.get(identifier);
+    public RelationshipProjection getFilter(ElementIdentifier identifier) {
+        RelationshipProjection filter = filters.get(identifier);
         if (filter == null) {
             throw new IllegalArgumentException("Relationship type identifier does not exist: " + identifier);
         }
         return filter;
     }
 
-    public Collection<RelationshipFilter> allFilters() {
+    public Collection<RelationshipProjection> allFilters() {
         return filters.values();
     }
 
-    public RelationshipFilters addPropertyMappings(PropertyMappings mappings) {
+    public RelationshipProjections addPropertyMappings(PropertyMappings mappings) {
         if (!mappings.hasMappings()) {
             return this;
         }
-        Map<ElementIdentifier, RelationshipFilter> newFilters = filters.entrySet().stream().collect(toMap(
+        Map<ElementIdentifier, RelationshipProjection> newFilters = filters.entrySet().stream().collect(toMap(
             Map.Entry::getKey,
             e -> e.getValue().withAdditionalPropertyMappings(mappings)
         ));
         if (newFilters.isEmpty()) {
             // TODO: special identifier for 'SELECT ALL'
-            newFilters.put(new ElementIdentifier("*"), RelationshipFilter.empty().withAdditionalPropertyMappings(mappings));
+            newFilters.put(new ElementIdentifier("*"), RelationshipProjection.empty().withAdditionalPropertyMappings(mappings));
         }
         return create(newFilters);
     }
@@ -159,7 +159,7 @@ public final class RelationshipFilters {
         return this == EMPTY;
     }
 
-    public static RelationshipFilters empty() {
+    public static RelationshipProjections empty() {
         return EMPTY;
     }
 

@@ -22,11 +22,11 @@ package org.neo4j.graphalgo.api;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.NodeFilters;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipFilter;
-import org.neo4j.graphalgo.RelationshipFilters;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -140,19 +140,19 @@ public class GraphSetup {
     }
 
     public @NotNull String nodeLabel() {
-        return createConfig.nodeFilter().labelFilter().orElse("");
+        return createConfig.nodeProjection().labelFilter().orElse("");
     }
 
     public @NotNull String relationshipType() {
-        return createConfig.relationshipFilter().typeFilter();
+        return createConfig.relationshipProjection().typeFilter();
     }
 
-    public NodeFilters nodeFilters() {
-        return createConfig.nodeFilter();
+    public NodeProjections nodeFilters() {
+        return createConfig.nodeProjection();
     }
 
-    public RelationshipFilters relationshipFilters() {
-        return createConfig.relationshipFilter();
+    public RelationshipProjections relationshipFilters() {
+        return createConfig.relationshipProjection();
     }
 
     /**
@@ -189,10 +189,10 @@ public class GraphSetup {
 
     public boolean shouldLoadRelationshipProperties() {
         return createConfig
-            .relationshipFilter()
+            .relationshipProjection()
             .allFilters()
             .stream()
-            .anyMatch(RelationshipFilter::hasMappings);
+            .anyMatch(RelationshipProjection::hasMappings);
     }
 
     /**
@@ -200,7 +200,7 @@ public class GraphSetup {
      */
     @Deprecated
     public Optional<Double> relationshipDefaultPropertyValue() {
-        return createConfig.relationshipFilter().allFilters().stream().flatMap(
+        return createConfig.relationshipProjection().allFilters().stream().flatMap(
             f -> Streams.ofOptional(f.properties().defaultWeight())
         ).findFirst();
     }
@@ -210,7 +210,7 @@ public class GraphSetup {
      */
     @Deprecated
     public PropertyMappings nodePropertyMappings() {
-        PropertyMapping[] propertyMappings = createConfig.nodeFilter()
+        PropertyMapping[] propertyMappings = createConfig.nodeProjection()
             .allFilters()
             .stream()
             .flatMap(e -> e.properties().stream())
@@ -219,7 +219,7 @@ public class GraphSetup {
     }
 
     public PropertyMappings nodePropertyMappings(ElementIdentifier identifier) {
-        return createConfig.nodeFilter().getFilter(identifier).properties();
+        return createConfig.nodeProjection().getFilter(identifier).properties();
     }
 
     /**
@@ -227,7 +227,7 @@ public class GraphSetup {
      */
     @Deprecated
     public PropertyMappings relationshipPropertyMappings() {
-        PropertyMapping[] propertyMappings = createConfig.relationshipFilter()
+        PropertyMapping[] propertyMappings = createConfig.relationshipProjection()
             .allFilters()
             .stream()
             .flatMap(e -> e.properties().stream())
@@ -236,7 +236,7 @@ public class GraphSetup {
     }
 
     public PropertyMappings relationshipPropertyMappings(ElementIdentifier identifier) {
-        return createConfig.relationshipFilter().getFilter(identifier).properties();
+        return createConfig.relationshipProjection().getFilter(identifier).properties();
     }
 
     /**

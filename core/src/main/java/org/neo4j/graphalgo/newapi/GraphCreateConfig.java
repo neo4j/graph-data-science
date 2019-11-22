@@ -23,9 +23,9 @@ package org.neo4j.graphalgo.newapi;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.NodeFilters;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipFilters;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -41,21 +41,13 @@ public interface GraphCreateConfig extends BaseConfig {
     @Configuration.Parameter
     String graphName();
 
-    @Value.Default
-    @Value.Parameter(false)
-    @Configuration.Parameter(acceptNull = true)
-    @ConvertWith("org.neo4j.graphalgo.NodeFilters#fromObject")
-    default NodeFilters nodeFilter() {
-        return NodeFilters.empty();
-    }
+    @Configuration.Parameter
+    @ConvertWith("org.neo4j.graphalgo.NodeProjections#fromObject")
+    NodeProjections nodeProjection();
 
-    @Value.Default
-    @Value.Parameter(false)
-    @Configuration.Parameter(acceptNull = true)
-    @ConvertWith("org.neo4j.graphalgo.RelationshipFilters#fromObject")
-    default RelationshipFilters relationshipFilter() {
-        return RelationshipFilters.empty();
-    }
+    @Configuration.Parameter
+    @ConvertWith("org.neo4j.graphalgo.RelationshipProjections#fromObject")
+    RelationshipProjections relationshipProjection();
 
     @Value.Default
     @Value.Parameter(false)
@@ -83,8 +75,8 @@ public interface GraphCreateConfig extends BaseConfig {
     default GraphLoader configureLoader(GraphLoader loader) {
         return loader
             .withName(graphName())
-            .withOptionalLabel(nodeFilter().labelFilter().orElse(null))
-            .withOptionalRelationshipType(relationshipFilter().typeFilter())
+            .withOptionalLabel(nodeProjection().labelFilter().orElse(null))
+            .withOptionalRelationshipType(relationshipProjection().typeFilter())
             .withConcurrency(concurrency())
             .withLoadedGraph(true)
             .withGraphCreateConfig(this);
@@ -99,9 +91,9 @@ public interface GraphCreateConfig extends BaseConfig {
             return ImmutableGraphCreateConfig
                 .builder()
                 .from(this)
-                .nodeFilter(nodeFilter().addPropertyMappings(nodeProperties))
+                .nodeProjection(nodeProjection().addPropertyMappings(nodeProperties))
                 .nodeProperties(PropertyMappings.EMPTY)
-                .relationshipFilter(relationshipFilter().addPropertyMappings(relationshipProperties))
+                .relationshipProjection(relationshipProjection().addPropertyMappings(relationshipProperties))
                 .relationshipProperties(PropertyMappings.EMPTY)
                 .build();
         }
@@ -112,13 +104,15 @@ public interface GraphCreateConfig extends BaseConfig {
         return ImmutableGraphCreateConfig
             .builder()
             .graphName(graphName)
+            .nodeProjection(NodeProjections.empty())
+            .relationshipProjection(RelationshipProjections.empty())
             .concurrency(-1)
             .build();
     }
 
     @TestOnly
     static GraphCreateConfig emptyWithName(String userName, String name) {
-        return ImmutableGraphCreateConfig.of(userName, name);
+        return ImmutableGraphCreateConfig.of(userName, name, NodeProjections.empty(), RelationshipProjections.empty());
     }
 
     static GraphCreateConfig of(

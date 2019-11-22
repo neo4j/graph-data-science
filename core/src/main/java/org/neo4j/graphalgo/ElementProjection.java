@@ -28,13 +28,13 @@ import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
 
-abstract class EntityFilter {
+abstract class ElementProjection {
 
     static final String PROPERTIES_KEY = "properties";
 
     private final PropertyMappings properties;
 
-    EntityFilter(PropertyMappings properties) {
+    ElementProjection(PropertyMappings properties) {
         this.properties = properties;
     }
 
@@ -43,11 +43,11 @@ abstract class EntityFilter {
     public final Map<String, Object> toObject() {
         Map<String, Object> value = new LinkedHashMap<>();
         writeToObject(value);
-        value.put(PROPERTIES_KEY, properties.toObject());
+        value.put(PROPERTIES_KEY, properties.toObject(includeAggregation()));
         return value;
     }
 
-    static <T extends EntityFilter> T create(
+    static <T extends ElementProjection> T create(
         Map<String, Object> config,
         Function<PropertyMappings, T> constructor
     ) {
@@ -69,7 +69,9 @@ abstract class EntityFilter {
 
     abstract void writeToObject(Map<String, Object> value);
 
-    public abstract EntityFilter withAdditionalPropertyMappings(PropertyMappings mappings);
+    abstract boolean includeAggregation();
+
+    public abstract ElementProjection withAdditionalPropertyMappings(PropertyMappings mappings);
 
     public PropertyMappings properties() {
         return properties;

@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.core;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.NodeFilters;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipFilters;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -496,8 +496,8 @@ public class GraphLoader {
                 .username(username)
                 .nodeProperties(nodePropertyMappings.build())
                 .relationshipProperties(relMappings)
-                .nodeFilter(NodeFilters.of(label))
-                .relationshipFilter(RelationshipFilters.of(relation))
+                .nodeProjection(NodeProjections.of(label))
+                .relationshipProjection(RelationshipProjections.of(relation))
                 .build();
         }
 

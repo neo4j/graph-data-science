@@ -25,9 +25,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public final class RelationshipFilter extends EntityFilter {
+public final class RelationshipProjection extends ElementProjection {
 
-    private static final RelationshipFilter EMPTY = new RelationshipFilter("", "", PropertyMappings.EMPTY);
+    private static final RelationshipProjection EMPTY = new RelationshipProjection("", "", PropertyMappings.EMPTY);
     private static final String TYPE_KEY = "type";
     private static final String PROJECTION_KEY = "projection";
 
@@ -37,26 +37,26 @@ public final class RelationshipFilter extends EntityFilter {
     private final String type;
     private final String projection;
 
-    private RelationshipFilter(String type, String projection, PropertyMappings properties) {
+    private RelationshipProjection(String type, String projection, PropertyMappings properties) {
         super(properties);
         this.type = type;
         this.projection = projection.isEmpty() ? DEFAULT_PROJECTION : projection;
     }
 
-    public static RelationshipFilter of(@Nullable String type) {
+    public static RelationshipProjection of(@Nullable String type) {
         if (StringUtils.isEmpty(type)) {
             return EMPTY;
         }
-        return new RelationshipFilter(type, "", PropertyMappings.EMPTY);
+        return new RelationshipProjection(type, "", PropertyMappings.EMPTY);
     }
 
-    public static RelationshipFilter of(Map<String, Object> map, ElementIdentifier identifier) {
+    public static RelationshipProjection of(Map<String, Object> map, ElementIdentifier identifier) {
         String type = map.containsKey(TYPE_KEY) ? nonEmptyString(map, TYPE_KEY): identifier.name;
         String projection = map.containsKey(PROJECTION_KEY) ? nonEmptyString(map, PROJECTION_KEY) : DEFAULT_PROJECTION;
-        return create(map, properties -> new RelationshipFilter(type, projection, properties));
+        return create(map, properties -> new RelationshipProjection(type, projection, properties));
     }
 
-    public static RelationshipFilter fromObject(Object object, ElementIdentifier identifier) {
+    public static RelationshipProjection fromObject(Object object, ElementIdentifier identifier) {
         if (object == null) {
             return EMPTY;
         }
@@ -82,21 +82,26 @@ public final class RelationshipFilter extends EntityFilter {
     }
 
     @Override
+    boolean includeAggregation() {
+        return true;
+    }
+
+    @Override
     void writeToObject(Map<String, Object> value) {
         value.put(TYPE_KEY, type);
         value.put(PROJECTION_KEY, projection);
     }
 
     @Override
-    public RelationshipFilter withAdditionalPropertyMappings(PropertyMappings mappings) {
+    public RelationshipProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
         PropertyMappings newMappings = properties().mergeWith(mappings);
         if (newMappings == properties()) {
             return this;
         }
-        return new RelationshipFilter(type, projection, newMappings);
+        return new RelationshipProjection(type, projection, newMappings);
     }
 
-    public static RelationshipFilter empty() {
+    public static RelationshipProjection empty() {
         return EMPTY;
     }
 

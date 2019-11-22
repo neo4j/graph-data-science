@@ -25,31 +25,31 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public final class NodeFilter extends EntityFilter {
+public final class NodeProjection extends ElementProjection {
 
-    private static final NodeFilter EMPTY = new NodeFilter("", PropertyMappings.EMPTY);
+    private static final NodeProjection EMPTY = new NodeProjection("", PropertyMappings.EMPTY);
     private static final String LABEL_KEY = "label";
 
     public final String label;
 
-    private NodeFilter(String label, PropertyMappings properties) {
+    private NodeProjection(String label, PropertyMappings properties) {
         super(properties);
         this.label = label;
     }
 
-    public static NodeFilter of(@Nullable String label) {
+    public static NodeProjection of(@Nullable String label) {
         if (StringUtils.isEmpty(label)) {
             return EMPTY;
         }
-        return new NodeFilter(label, PropertyMappings.EMPTY);
+        return new NodeProjection(label, PropertyMappings.EMPTY);
     }
 
-    public static NodeFilter of(Map<String, Object> map, ElementIdentifier identifier) {
+    public static NodeProjection of(Map<String, Object> map, ElementIdentifier identifier) {
         String label = map.containsKey(LABEL_KEY)? nonEmptyString(map, LABEL_KEY) : identifier.name;
-        return create(map, properties -> new NodeFilter(label, properties));
+        return create(map, properties -> new NodeProjection(label, properties));
     }
 
-    public static NodeFilter fromObject(Object object, ElementIdentifier identifier) {
+    public static NodeProjection fromObject(Object object, ElementIdentifier identifier) {
         if (object instanceof String) {
             return of((String) object);
         }
@@ -68,20 +68,25 @@ public final class NodeFilter extends EntityFilter {
     }
 
     @Override
+    boolean includeAggregation() {
+        return false;
+    }
+
+    @Override
     void writeToObject(Map<String, Object> value) {
         value.put(LABEL_KEY, label);
     }
 
     @Override
-    public NodeFilter withAdditionalPropertyMappings(PropertyMappings mappings) {
+    public NodeProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
         PropertyMappings newMappings = properties().mergeWith(mappings);
         if (newMappings == properties()) {
             return this;
         }
-        return new NodeFilter(label, newMappings);
+        return new NodeProjection(label, newMappings);
     }
 
-    public static NodeFilter empty() {
+    public static NodeProjection empty() {
         return EMPTY;
     }
 }

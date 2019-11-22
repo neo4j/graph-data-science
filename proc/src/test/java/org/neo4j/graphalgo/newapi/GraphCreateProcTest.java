@@ -123,19 +123,19 @@ class GraphCreateProcTest extends ProcTestBase {
         return Stream.of(
             Arguments.of(
                 map("weight", map("property", "weight")),
-                map("weight", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "None"))
+                map("weight", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "NONE"))
             ),
             Arguments.of(
                 map("score", map("property", "weight", "defaultValue", 3D)),
-                map("score", map("property", "weight", "defaultValue", 3D, "aggregation", "None"))
+                map("score", map("property", "weight", "defaultValue", 3D, "aggregation", "NONE"))
             ),
             Arguments.of(
                 singletonList("weight"),
-                map("age", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "None"))
+                map("weight", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "NONE"))
             ),
             Arguments.of(
                 map("score", "weight"),
-                map("score", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "None"))
+                map("score", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "NONE"))
             )
         );
     }
@@ -218,9 +218,9 @@ class GraphCreateProcTest extends ProcTestBase {
 
     @Test
     void failForNulls() {
-        assertError("CALL algo.beta.graph.create(null)", "No value for the key `graphName` was specified");
-        //assertError("CALL algo.beta.graph.create('name', null)", "'nodeFilter' cannot be null");
-        //assertError("CALL algo.beta.graph.create('name', 'A', null)", "'relationshipFilter' cannot be null");
+        assertError("CALL algo.beta.graph.create(null, null, null)", "No value for the key `graphName` was specified");
+        assertError("CALL algo.beta.graph.create('name', null, null)", "No value for the key `nodeProjection` was specified");
+        assertError("CALL algo.beta.graph.create('name', 'A', null)", "No value for the key `relationshipProjection` was specified");
     }
 
     @Test
@@ -236,7 +236,7 @@ class GraphCreateProcTest extends ProcTestBase {
         String name = "g";
 
         assertCypherResult(
-            "CALL algo.beta.graph.create($name)",
+            "CALL algo.beta.graph.create($name, {}, {})",
             map("name", name),
             singletonList(map(
                 "graphName", name,
@@ -255,21 +255,21 @@ class GraphCreateProcTest extends ProcTestBase {
         Map nodeFilter = map("A", map("label", "INVALID"));
 
         assertError(
-            "CALL algo.beta.graph.create($name, $nodeFilter)",
+            "CALL algo.beta.graph.create($name, $nodeFilter, {})",
             map("name", name, "nodeFilter", nodeFilter),
-            "'INVALID' does not exist in the Neo4j database"
+            "Node label not found: 'INVALID'"
         );
     }
 
     @Test
-    void failsOnDuplicateNeoLabel() {
+    void failsOnMultipleLabelProjections() {
         String name = "g";
         Map<String, Object> nodeFilter = map("A", map("label", "A"), "B", map("label", "A"));
 
         assertError(
-            "CALL algo.beta.graph.create($name, $nodeFilter)",
+            "CALL algo.beta.graph.create($name, $nodeFilter, {})",
             map("name", name, "nodeFilter", nodeFilter),
-            "Duplicate node label: 'A'"
+            "Only one node filter is supported."
         );
     }
 
@@ -280,7 +280,7 @@ class GraphCreateProcTest extends ProcTestBase {
         String name = "g";
 
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, $nodeFilter)",
+            "CALL algo.beta.graph.create($name, $nodeFilter, {})",
             map("name", name, "nodeFilter", nodeFilter),
             singletonList(map(
                 "graphName", name,
@@ -299,9 +299,9 @@ class GraphCreateProcTest extends ProcTestBase {
         Map<String, Object> nodeFilter = singletonMap("A", map("label", "A", "properties", map("property", "invalid")));
 
         assertError(
-            "CALL algo.beta.graph.create($name, $nodeFilter)",
+            "CALL algo.beta.graph.create($name, $nodeFilter, {})",
             map("name", name, "nodeFilter", nodeFilter),
-            "Property key 'invalid' not existing in the Neo4j database"
+            "Node properties not found: 'invalid'"
         );
     }
 
@@ -315,7 +315,7 @@ class GraphCreateProcTest extends ProcTestBase {
 
         // TODO: check property values on graph
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, $nodeFilter)",
+            "CALL algo.beta.graph.create($name, $nodeFilter, {})",
             map("name", name, "nodeFilter", nodeFilter),
             singletonList(map(
                 "graphName", name,
@@ -436,7 +436,7 @@ class GraphCreateProcTest extends ProcTestBase {
         assertError(
             "CALL algo.beta.graph.create($name, {}, $relFilter)",
             map("name", name, "relFilter", relFilter),
-            "Duplicate relationship type: 'REL'"
+            "Duplicate relationship type(s): 'REL'"
         );
     }
 

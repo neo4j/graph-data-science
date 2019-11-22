@@ -125,9 +125,9 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
                 .toArray();
     }
 
-    public Map<String, Object> toObject() {
+    public Map<String, Object> toObject(boolean includeAggregation) {
         return stream()
-            .map(PropertyMapping::toObject)
+            .map(mapping -> mapping.toObject(includeAggregation))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

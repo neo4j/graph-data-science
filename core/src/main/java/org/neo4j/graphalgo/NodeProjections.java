@@ -34,24 +34,24 @@ import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.toMap;
 
-public final class NodeFilters {
+public final class NodeProjections {
 
-    private static final NodeFilters EMPTY = new NodeFilters(emptyMap());
+    private static final NodeProjections EMPTY = new NodeProjections(emptyMap());
 
-    public static NodeFilters of(@Nullable String label) {
+    public static NodeProjections of(@Nullable String label) {
         if (StringUtils.isEmpty(label)) {
             return EMPTY;
         }
         ElementIdentifier identifier = new ElementIdentifier(label);
-        NodeFilter filter = NodeFilter.of(label);
+        NodeProjection filter = NodeProjection.of(label);
         return create(singletonMap(identifier, filter));
     }
 
-    public static NodeFilters of(Map<String, ?> map) {
-        Map<ElementIdentifier, NodeFilter> filters = new LinkedHashMap<>();
+    public static NodeProjections of(Map<String, ?> map) {
+        Map<ElementIdentifier, NodeProjection> filters = new LinkedHashMap<>();
         map.forEach((name, spec) -> {
             ElementIdentifier identifier = new ElementIdentifier(name);
-            NodeFilter filter = NodeFilter.fromObject(spec, identifier);
+            NodeProjection filter = NodeProjection.fromObject(spec, identifier);
             // sanity
             if (filters.put(identifier, filter) != null) {
                 throw new IllegalStateException(String.format("Duplicate key: %s", name));
@@ -60,16 +60,16 @@ public final class NodeFilters {
         return create(filters);
     }
 
-    public static NodeFilters of(Iterable<?> items) {
-        Map<ElementIdentifier, NodeFilter> filters = new LinkedHashMap<>();
+    public static NodeProjections of(Iterable<?> items) {
+        Map<ElementIdentifier, NodeProjection> filters = new LinkedHashMap<>();
         for (Object item : items) {
-            NodeFilters nodeFilters = fromObject(item);
-            filters.putAll(nodeFilters.filters);
+            NodeProjections nodeProjections = fromObject(item);
+            filters.putAll(nodeProjections.filters);
         }
         return create(filters);
     }
 
-    public static NodeFilters fromObject(Object object) {
+    public static NodeProjections fromObject(Object object) {
         if (object == null) {
             return of(emptyMap());
         }
@@ -90,45 +90,45 @@ public final class NodeFilters {
         ));
     }
 
-    private static NodeFilters create(Map<ElementIdentifier, NodeFilter> filters) {
-        if (filters.values().stream().allMatch(NodeFilter::isEmpty)) {
+    private static NodeProjections create(Map<ElementIdentifier, NodeProjection> filters) {
+        if (filters.values().stream().allMatch(NodeProjection::isEmpty)) {
             return EMPTY;
         }
         if (filters.size() != 1) {
             throw new IllegalArgumentException("Only one node filter is supported.");
         }
-        return new NodeFilters(unmodifiableMap(filters));
+        return new NodeProjections(unmodifiableMap(filters));
     }
 
-    private final Map<ElementIdentifier, NodeFilter> filters;
+    private final Map<ElementIdentifier, NodeProjection> filters;
 
-    private NodeFilters(Map<ElementIdentifier, NodeFilter> filters) {
+    private NodeProjections(Map<ElementIdentifier, NodeProjection> filters) {
         this.filters = filters;
     }
 
-    public NodeFilter getFilter(ElementIdentifier identifier) {
-        NodeFilter filter = filters.get(identifier);
+    public NodeProjection getFilter(ElementIdentifier identifier) {
+        NodeProjection filter = filters.get(identifier);
         if (filter == null) {
             throw new IllegalArgumentException("Node label identifier does not exist: " + identifier);
         }
         return filter;
     }
 
-    public Collection<NodeFilter> allFilters() {
+    public Collection<NodeProjection> allFilters() {
         return filters.values();
     }
 
-    public NodeFilters addPropertyMappings(PropertyMappings mappings) {
+    public NodeProjections addPropertyMappings(PropertyMappings mappings) {
         if (!mappings.hasMappings()) {
             return this;
         }
-        Map<ElementIdentifier, NodeFilter> newFilters = filters.entrySet().stream().collect(toMap(
+        Map<ElementIdentifier, NodeProjection> newFilters = filters.entrySet().stream().collect(toMap(
             Map.Entry::getKey,
             e -> e.getValue().withAdditionalPropertyMappings(mappings)
         ));
         if (newFilters.isEmpty()) {
             // TODO: special identifier for 'SELECT ALL'
-            newFilters.put(new ElementIdentifier("*"), NodeFilter.empty().withAdditionalPropertyMappings(mappings));
+            newFilters.put(new ElementIdentifier("*"), NodeProjection.empty().withAdditionalPropertyMappings(mappings));
         }
         return create(newFilters);
     }
@@ -144,7 +144,7 @@ public final class NodeFilters {
         return this == EMPTY;
     }
 
-    public static NodeFilters empty() {
+    public static NodeProjections empty() {
         return EMPTY;
     }
 

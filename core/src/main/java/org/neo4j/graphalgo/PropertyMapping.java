@@ -40,7 +40,7 @@ public abstract class PropertyMapping {
         "",
         "",
         0.0,
-        DeduplicationStrategy.DEFAULT
+        DeduplicationStrategy.NONE
     );
 
     public final String propertyKey;
@@ -88,7 +88,7 @@ public abstract class PropertyMapping {
             final Object aggregationValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_AGGREGATION_KEY);
             DeduplicationStrategy deduplicationStrategy;
             if (aggregationValue == null) {
-                deduplicationStrategy = DeduplicationStrategy.DEFAULT;
+                deduplicationStrategy = DeduplicationStrategy.NONE;
             } else if (aggregationValue instanceof String) {
                 deduplicationStrategy = DeduplicationStrategy.lookup(((String) aggregationValue).toUpperCase());
             } else {
@@ -167,11 +167,11 @@ public abstract class PropertyMapping {
         return copyWithDeduplicationStrategy(deduplicationStrategy);
     }
 
-    public Map.Entry<String, Object> toObject() {
+    public Map.Entry<String, Object> toObject(boolean includeAggregation) {
         Map<String, Object> value = new LinkedHashMap<>();
         value.put(RELATIONSHIP_PROPERTIES_PROPERTY_KEY, neoPropertyKey);
         value.put(RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY, defaultValue);
-        if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
+        if (includeAggregation) {
             value.put(RELATIONSHIP_PROPERTIES_AGGREGATION_KEY, deduplicationStrategy.name());
         }
         return new AbstractMap.SimpleImmutableEntry<>(propertyKey, value);
@@ -295,11 +295,11 @@ public abstract class PropertyMapping {
      * Creates a PropertyMapping. The given property key is also used for internal reference.
      */
     public static PropertyMapping of(String neoPropertyKey, double defaultValue) {
-        return of(neoPropertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.DEFAULT);
+        return of(neoPropertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.NONE);
     }
 
     public static PropertyMapping of(String propertyKey, String neoPropertyKey, double defaultValue) {
-        return of(propertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.DEFAULT);
+        return of(propertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.NONE);
     }
 
     public static PropertyMapping of(

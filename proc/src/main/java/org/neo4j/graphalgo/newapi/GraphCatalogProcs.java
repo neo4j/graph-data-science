@@ -24,9 +24,9 @@ import org.HdrHistogram.AtomicHistogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.NodeFilters;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipFilters;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -85,8 +85,8 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
                  "  createMillis: INTEGER")
     public Stream<GraphCreateResult> create(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeFilter", defaultValue = "null") @Nullable Object nodeFilter,
-        @Name(value = "relationshipFilter", defaultValue = "null") @Nullable Object relationshipFilter,
+        @Name(value = "nodeFilter") @Nullable Object nodeFilter,
+        @Name(value = "relationshipFilter") @Nullable Object relationshipFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         // input
@@ -118,7 +118,7 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
             GraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
             HugeGraphFactory graphFactory = loader.build(HugeGraphFactory.class);
             GraphsByRelationshipType graphFromType =
-                !config.relationshipFilter().isEmpty() || propertyMappings.hasMappings()
+                !config.relationshipProjection().isEmpty() || propertyMappings.hasMappings()
                     ? graphFactory.importAllGraphs()
                     : GraphsByRelationshipType.of(graphFactory.build());
 
@@ -175,14 +175,14 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
 
         static final class Builder {
             private final String graphName;
-            private final NodeFilters nodeFilters;
-            private final RelationshipFilters relationshipFilters;
+            private final NodeProjections nodeProjections;
+            private final RelationshipProjections relationshipProjections;
             private long nodes, relationships, createMillis;
 
             Builder(GraphCreateConfig config) {
                 this.graphName = config.graphName();
-                nodeFilters = config.nodeFilter();
-                relationshipFilters = config.relationshipFilter();
+                nodeProjections = config.nodeProjection();
+                relationshipProjections = config.relationshipProjection();
             }
 
             void withGraph(GraphsByRelationshipType graph) {
@@ -197,8 +197,8 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
             GraphCreateResult build() {
                 return new GraphCreateResult(
                     graphName,
-                    nodeFilters.toObject(),
-                    relationshipFilters.toObject(),
+                    nodeProjections.toObject(),
+                    relationshipProjections.toObject(),
                     nodes,
                     relationships,
                     createMillis
@@ -216,8 +216,8 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
 
         GraphCatalogEntry(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
             this.graphName = config.graphName();
-            nodeFilter = config.nodeFilter().toObject();
-            relationshipFilter = config.relationshipFilter().toObject();
+            nodeFilter = config.nodeProjection().toObject();
+            relationshipFilter = config.relationshipProjection().toObject();
             nodes = graph.nodeCount();
             relationships = graph.relationshipCount();
             histogram = computeHistogram ? computeHistogram(graph) : emptyMap();
