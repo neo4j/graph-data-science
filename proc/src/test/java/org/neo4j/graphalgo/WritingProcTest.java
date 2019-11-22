@@ -83,7 +83,9 @@ public class WritingProcTest extends ProcTestBase {
     private static Stream<String> procsToTest() {
         return Stream.of(
                 "algo.labelPropagation",
+                "algo.beta.labelPropagation",
                 "algo.louvain",
+                "algo.beta.louvain",
                 "algo.pageRank",
                 "algo.unionFind"
         );

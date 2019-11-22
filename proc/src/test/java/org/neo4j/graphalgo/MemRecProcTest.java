@@ -68,7 +68,7 @@ class MemRecProcTest extends ProcTestBase {
                 ModularityOptimizationProc.class
         );
         availableAlgoProcedures = "the available and supported procedures are {" +
-                                  "beta.modularityOptimization, beta.k1coloring, beta.wcc, graph.load, labelPropagation, louvain, pageRank, unionFind, wcc" +
+                                  "beta.k1coloring, beta.modularityOptimization, beta.wcc, graph.load, labelPropagation, louvain, pageRank, unionFind, wcc" +
                                   "}.";
         db.execute(DB_CYPHER);
     }

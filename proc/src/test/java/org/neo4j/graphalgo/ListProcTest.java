@@ -46,6 +46,8 @@ class ListProcTest extends ProcTestBase {
         "algo.beta.k1coloring.stream",
         "algo.beta.labelPropagation",
         "algo.beta.labelPropagation.stream",
+        "algo.beta.louvain",
+        "algo.beta.louvain.stream",
         "algo.beta.wcc",
         "algo.beta.wcc.memrec",
         "algo.beta.wcc.pregel",

@@ -54,6 +54,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEFAULT_LOUVAIN_DIRECTION;
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 /**
  * modularity based community detection algorithm
@@ -71,7 +72,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     public static final String INCLUDE_INTERMEDIATE_COMMUNITIES_KEY = "includeIntermediateCommunities";
     public static final boolean DEFAULT_INCLUDE_INTERMEDIATE_COMMUNITIES = false;
 
-    @Procedure(value = "algo.beta.louvain", mode = Mode.WRITE)
+    @Procedure(value = "algo.beta.louvain", mode = WRITE)
     @Description("CALL algo.beta.louvain(label:String, relationship:String, " +
                  "{levels: 10, innerIterations: 10, tolerance: 0.00001, weightProperty:'weight', seedProperty: 'seed', write: true, writeProperty:'community', includeIntermediateCommunities: false, concurrency:4 }) " +
                  "YIELD nodes, communityCount, levels, modularity, modularities, write, writerProperty, includeIntermediateCommunities, loadMillis, computeMillis, writeMillis, postProcessingMillis")
@@ -94,6 +95,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         return stream(label, relationshipTypes, config);
     }
 
+    @Procedure(value = "algo.louvain", mode = WRITE)
     @Description("CALL algo.louvain(label:String, relationship:String, " +
                  "{weightProperty:'weight', defaultValue:1.0, write: true, writeProperty:'community', concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic'}) " +
                  "YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis")
