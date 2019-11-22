@@ -76,7 +76,7 @@ abstract class CypherRecordLoader<R> {
     }
 
     private void parallelLoad() {
-        ExecutorService pool = setup.executor;
+        ExecutorService pool = setup.executor();
 
         final int threads;
         final int batchSize;
@@ -128,8 +128,8 @@ abstract class CypherRecordLoader<R> {
             Result.ResultVisitor<RuntimeException> visitor) {
         Map<String, Object> parameters =
                 batchSize == CypherLoadingUtils.NO_BATCHING
-                        ? setup.params
-                        : CypherLoadingUtils.params(setup.params, offset, batchSize);
+                        ? setup.params()
+                        : CypherLoadingUtils.params(setup.params(), offset, batchSize);
         api.execute(loadQuery, parameters).accept(visitor);
     }
 }

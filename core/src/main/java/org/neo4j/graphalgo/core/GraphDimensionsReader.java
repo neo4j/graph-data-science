@@ -52,12 +52,12 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         TokenRead tokenRead = transaction.tokenRead();
         Read dataRead = transaction.dataRead();
         final int labelId = readTokens && !setup.loadAnyLabel()
-                ? tokenRead.nodeLabel(setup.startLabel)
+                ? tokenRead.nodeLabel(setup.startLabel())
                 : Read.ANY_LABEL;
 
         RelationshipTypeMappings.Builder mappingsBuilder = new RelationshipTypeMappings.Builder();
         if (readTokens && !setup.loadAnyRelationshipType()) {
-            Set<String> types = RelationshipTypes.parse(setup.relationshipType);
+            Set<String> types = RelationshipTypes.parse(setup.relationshipType());
             for (String typeName : types) {
                 int typeId = tokenRead.relationshipType(typeName);
                 RelationshipTypeMapping typeMapping = RelationshipTypeMapping.of(typeName, typeId);
@@ -66,8 +66,8 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         }
         RelationshipTypeMappings relationshipTypeMappings = mappingsBuilder.build();
 
-        PropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings);
-        PropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings);
+        PropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings());
+        PropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
 
         final long nodeCount = dataRead.countsForNode(labelId);
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);

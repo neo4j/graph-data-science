@@ -134,9 +134,9 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 defaultWeights);
 
         RelationshipImporter importer = new RelationshipImporter(
-                setup.tracker,
+            setup.tracker(),
                 outBuilder,
-                setup.loadAsUndirected ? outBuilder : inBuilder
+                setup.loadAsUndirected() ? outBuilder : inBuilder
         );
 
         return new SingleTypeRelationshipImporter.Builder(mapping, importer, relationshipCounter);

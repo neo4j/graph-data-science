@@ -46,12 +46,12 @@ public final class GraphCatalog extends GraphFactory {
 
     @Override
     protected Graph importGraph() {
-        assert setup.relationshipPropertyMappings.numberOfMappings() <= 1;
+        assert setup.relationshipPropertyMappings().numberOfMappings() <= 1;
         return get(
-            setup.username,
-            setup.name,
-            setup.relationshipType,
-            setup.relationshipPropertyMappings.head().map(PropertyMapping::propertyKey)
+            setup.username(),
+            setup.name(),
+            setup.relationshipType(),
+            setup.relationshipPropertyMappings().head().map(PropertyMapping::propertyKey)
         );
     }
 
@@ -62,10 +62,10 @@ public final class GraphCatalog extends GraphFactory {
 
     public MemoryEstimation memoryEstimation() {
         Graph graph = get(
-            setup.username,
-            setup.name,
-            setup.relationshipType,
-            setup.relationshipPropertyMappings.head().map(PropertyMapping::propertyKey)
+            setup.username(),
+            setup.name(),
+            setup.relationshipType(),
+            setup.relationshipPropertyMappings().head().map(PropertyMapping::propertyKey)
         );
         dimensions.nodeCount(graph.nodeCount());
         dimensions.maxRelCount(graph.relationshipCount());

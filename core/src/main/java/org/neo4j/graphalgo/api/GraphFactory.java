@@ -51,11 +51,11 @@ public abstract class GraphFactory implements Assessable {
     }
 
     public GraphFactory(GraphDatabaseAPI api, GraphSetup setup, boolean readTokens) {
-        this.threadPool = setup.executor;
+        this.threadPool = setup.executor();
         this.api = api;
         this.setup = setup;
-        this.log = setup.log;
-        this.progressLogger = progressLogger(log, setup.logMillis);
+        this.log = setup.log();
+        this.progressLogger = progressLogger(log, setup.logMillis());
         dimensions = new GraphDimensionsReader(api, setup, readTokens).call();
         progress = importProgress(progressLogger, dimensions, setup);
     }
@@ -83,15 +83,15 @@ public abstract class GraphFactory implements Assessable {
             GraphDimensions dimensions,
             GraphSetup setup) {
         long relOperations = 0L;
-        if (setup.loadIncoming || setup.loadAsUndirected) {
+        if (setup.loadIncoming() || setup.loadAsUndirected()) {
             relOperations += dimensions.maxRelCount();
         }
-        if (setup.loadOutgoing || setup.loadAsUndirected) {
+        if (setup.loadOutgoing() || setup.loadAsUndirected()) {
             relOperations += dimensions.maxRelCount();
         }
         return new ApproximatedImportProgress(
                 progressLogger,
-                setup.tracker,
+            setup.tracker(),
                 dimensions.nodeCount(),
                 relOperations
         );

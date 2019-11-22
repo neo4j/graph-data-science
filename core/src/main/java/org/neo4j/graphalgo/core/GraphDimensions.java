@@ -94,13 +94,13 @@ public final class GraphDimensions {
     }
 
     public void checkValidNodePredicate(GraphSetup setup) {
-        if (nonEmpty(setup.startLabel) && labelId() == NO_SUCH_LABEL) {
-            throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.startLabel));
+        if (nonEmpty(setup.startLabel()) && labelId() == NO_SUCH_LABEL) {
+            throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.startLabel()));
         }
     }
 
     public void checkValidRelationshipTypePredicate(GraphSetup setup) {
-        if (nonEmpty(setup.relationshipType)) {
+        if (nonEmpty(setup.relationshipType())) {
             String missingTypes = relTypeMappings
                     .stream()
                     .filter(m -> !m.doesExist())

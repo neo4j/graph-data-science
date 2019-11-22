@@ -82,7 +82,6 @@ public class GraphLoader {
     private long logMillis = -1;
     private AllocationTracker tracker = AllocationTracker.EMPTY;
     private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
-    private boolean sorted = false;
     private boolean undirected = false;
     private final PropertyMappings.Builder nodePropertyMappings = new PropertyMappings.Builder();
     private final PropertyMappings.Builder relPropertyMappings = new PropertyMappings.Builder();
@@ -128,6 +127,7 @@ public class GraphLoader {
 
     public GraphLoader init(Log log, String username) {
         return withLog(log).withUsername(username);
+        // TODO: find a place to get/store these settings as well
 //            .withBatchSize(config.getBatchSize())
 //            .withDeduplicationStrategy(config.getDeduplicationStrategy())
 //            .withParams(config.getParams());
@@ -156,8 +156,11 @@ public class GraphLoader {
         return this;
     }
 
+    /**
+     * @deprecated remove calls, there is no replacement
+     */
+    @Deprecated
     public GraphLoader sorted() {
-        this.sorted = true;
         return this;
     }
 
@@ -454,24 +457,23 @@ public class GraphLoader {
         }
 
         return new GraphSetup(
-                username,
-                label,
-                null,
-                relation,
-                direction,
-                params,
-                executorService,
-                concurrency,
-                batchSize,
-                deduplicationStrategy,
-                log,
-                logMillis,
-                sorted,
-                undirected,
-                tracker,
-                terminationFlag,
-                name,
-                nodePropertyMappings.build(),
-                relMappings);
+            username,
+            label,
+            relation,
+            direction,
+            params,
+            executorService,
+            concurrency,
+            batchSize,
+            deduplicationStrategy,
+            log,
+            logMillis,
+            undirected,
+            tracker,
+            terminationFlag,
+            name,
+            nodePropertyMappings.build(),
+            relMappings
+        );
     }
 }

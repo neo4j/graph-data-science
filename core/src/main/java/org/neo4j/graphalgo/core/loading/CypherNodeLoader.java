@@ -38,10 +38,10 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
     private long maxNodeId;
 
     CypherNodeLoader(long nodeCount, GraphDatabaseAPI api, GraphSetup setup) {
-        super(setup.startLabel, nodeCount, api, setup);
+        super(setup.startLabel(), nodeCount, api, setup);
         maxNodeId = 0L;
         nodePropertyBuilders = nodeProperties(nodeCount, setup);
-        builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker);
+        builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker());
         importer = new NodeImporter(builder, nodePropertyBuilders.values());
     }
 
@@ -63,7 +63,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
     @Override
     IdsAndProperties result() {
-        IdMap idMap = IdMapBuilder.build(builder, maxNodeId, setup.concurrency, setup.tracker);
+        IdMap idMap = IdMapBuilder.build(builder, maxNodeId, setup.concurrency(), setup.tracker());
         Map<String, NodeProperties> nodeProperties = nodePropertyBuilders.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().propertyKey(), e -> e.getValue().build()));
         return new IdsAndProperties(idMap, nodeProperties);
@@ -71,7 +71,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
     private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties(long capacity, GraphSetup setup) {
         Map<PropertyMapping, NodePropertiesBuilder> nodeProperties = new HashMap<>();
-        for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
+        for (PropertyMapping propertyMapping : setup.nodePropertyMappings()) {
             nodeProperties.put(
                     propertyMapping,
                     NodePropertiesBuilder.of(

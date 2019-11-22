@@ -38,89 +38,78 @@ import java.util.concurrent.ExecutorService;
 public class GraphSetup {
 
     // user name
-    public final String username;
+    private final String username;
     // graph name
-    public final String name;
+    private final String name;
     // start label type. null means any label.
-    public final String startLabel;
-    // end label type (not yet implemented).
-    public final String endLabel;
+    private final String startLabel;
     // relationtype name. null means any relation.
-    public final String relationshipType;
+    private final String relationshipType;
     // direction for loading the graph.
-    public final Direction direction;
+    private final Direction direction;
     // load incoming relationships.
-    public final boolean loadIncoming;
+    private final boolean loadIncoming;
     // load outgoing relationships.
-    public final boolean loadOutgoing;
-    // load outgoing and incoming relationships.
-    public final boolean loadBoth;
+    private final boolean loadOutgoing;
     // default property is used for relationships if a property is not set.
     @Deprecated
-    public final Optional<Double> relationshipDefaultPropertyValue;
+    private final Optional<Double> relationshipDefaultPropertyValue;
 
-    public final Map<String, Object> params;
+    private final Map<String, Object> params;
 
-    public final Log log;
-    public final long logMillis;
-    public final AllocationTracker tracker;
-    public final TerminationFlag terminationFlag;
+    private final Log log;
+    private final long logMillis;
+    private final AllocationTracker tracker;
+    private final TerminationFlag terminationFlag;
 
     // the executor service for parallel execution. null means single threaded evaluation.
-    public final ExecutorService executor;
+    private final ExecutorService executor;
     // concurrency level
-    public final int concurrency;
+    private final int concurrency;
     // batchSize for parallel computation
-    public final int batchSize;
+    private final int batchSize;
 
-    // tells whether the underlying array should be sorted during import
-    public final boolean sort;
     // in/out adjacencies are allowed to be merged into an undirected view of the graph
-    public final boolean loadAsUndirected;
+    private final boolean loadAsUndirected;
 
-    public final PropertyMappings nodePropertyMappings;
-    public final PropertyMappings relationshipPropertyMappings;
-    public final DeduplicationStrategy deduplicationStrategy;
+    private final PropertyMappings nodePropertyMappings;
+    private final PropertyMappings relationshipPropertyMappings;
+    private final DeduplicationStrategy deduplicationStrategy;
 
     /**
      * main ctor
      *
      * @param startLabel                 the start label. null means any label.
-     * @param endLabel                   not implemented yet
      * @param relationshipType           the relation type identifier. null for any relationship
      * @param executor                   the executor. null means single threaded evaluation
      * @param batchSize                  batch size for parallel loading
      * @param deduplicationStrategy      strategy for handling relationship duplicates
-     * @param sort                       true if relationships should stored in sorted ascending order
      */
     public GraphSetup(
-            String username,
-            String startLabel,
-            String endLabel,
-            String relationshipType,
-            Direction direction,
-            Map<String, Object> params,
-            ExecutorService executor,
-            int concurrency,
-            int batchSize,
-            DeduplicationStrategy deduplicationStrategy,
-            Log log,
-            long logMillis,
-            boolean sort,
-            boolean loadAsUndirected,
-            AllocationTracker tracker,
-            TerminationFlag terminationFlag,
-            String name,
-            PropertyMappings nodePropertyMappings,
-            PropertyMappings relationshipPropertyMappings) {
+        String username,
+        String startLabel,
+        String relationshipType,
+        Direction direction,
+        Map<String, Object> params,
+        ExecutorService executor,
+        int concurrency,
+        int batchSize,
+        DeduplicationStrategy deduplicationStrategy,
+        Log log,
+        long logMillis,
+        boolean loadAsUndirected,
+        AllocationTracker tracker,
+        TerminationFlag terminationFlag,
+        String name,
+        PropertyMappings nodePropertyMappings,
+        PropertyMappings relationshipPropertyMappings
+    ) {
 
         this.username = username;
         this.startLabel = startLabel;
-        this.endLabel = endLabel;
         this.relationshipType = relationshipType;
         this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
         this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
-        this.loadBoth = loadOutgoing && loadIncoming;
         this.direction = direction;
         this.relationshipDefaultPropertyValue = relationshipPropertyMappings.defaultWeight();
         this.params = params == null ? Collections.emptyMap() : params;
@@ -130,7 +119,6 @@ public class GraphSetup {
         this.deduplicationStrategy = deduplicationStrategy;
         this.log = log;
         this.logMillis = logMillis;
-        this.sort = sort;
         this.loadAsUndirected = loadAsUndirected;
         this.tracker = tracker;
         this.terminationFlag = terminationFlag;
@@ -139,7 +127,7 @@ public class GraphSetup {
         this.relationshipPropertyMappings = relationshipPropertyMappings;
     }
 
-    public boolean loadConcurrent() {
+    private boolean loadConcurrent() {
         return executor != null;
     }
 
@@ -160,5 +148,81 @@ public class GraphSetup {
 
     public boolean loadAnyRelationshipType() {
         return relationshipType == null;
+    }
+
+    public String username() {
+        return username;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public String startLabel() {
+        return startLabel;
+    }
+
+    public String relationshipType() {
+        return relationshipType;
+    }
+
+    public Direction direction() {
+        return direction;
+    }
+
+    public boolean loadIncoming() {
+        return loadIncoming;
+    }
+
+    public boolean loadOutgoing() {
+        return loadOutgoing;
+    }
+
+    public Optional<Double> relationshipDefaultPropertyValue() {
+        return relationshipDefaultPropertyValue;
+    }
+
+    public Map<String, Object> params() {
+        return params;
+    }
+
+    public Log log() {
+        return log;
+    }
+
+    long logMillis() {
+        return logMillis;
+    }
+
+    public AllocationTracker tracker() {
+        return tracker;
+    }
+
+    public TerminationFlag terminationFlag() {
+        return terminationFlag;
+    }
+
+    public ExecutorService executor() {
+        return executor;
+    }
+
+    public int batchSize() {
+        return batchSize;
+    }
+
+    public boolean loadAsUndirected() {
+        return loadAsUndirected;
+    }
+
+    public PropertyMappings nodePropertyMappings() {
+        return nodePropertyMappings;
+    }
+
+    public PropertyMappings relationshipPropertyMappings() {
+        return relationshipPropertyMappings;
+    }
+
+    public DeduplicationStrategy deduplicationStrategy() {
+        return deduplicationStrategy;
     }
 }

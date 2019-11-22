@@ -47,36 +47,36 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
     private long totalRelationshipsImported;
 
     CypherRelationshipLoader(IdMap idMap, GraphDatabaseAPI api, GraphSetup setup) {
-        super(setup.relationshipType, idMap.nodeCount(), api, setup);
+        super(setup.relationshipType(), idMap.nodeCount(), api, setup);
 
         DeduplicationStrategy deduplicationStrategy =
-                setup.deduplicationStrategy == DeduplicationStrategy.DEFAULT
+            setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
                         ? DeduplicationStrategy.NONE
-                        : setup.deduplicationStrategy;
+                        : setup.deduplicationStrategy();
         outgoingRelationshipsBuilder = new RelationshipsBuilder(
                 new DeduplicationStrategy[]{deduplicationStrategy},
-                setup.tracker,
+            setup.tracker(),
                 setup.shouldLoadRelationshipProperties() ? SINGLE_RELATIONSHIP_WEIGHT : NO_RELATIONSHIP_WEIGHT);
 
-        ImportSizing importSizing = ImportSizing.of(setup.concurrency, idMap.nodeCount());
+        ImportSizing importSizing = ImportSizing.of(setup.concurrency(), idMap.nodeCount());
         int pageSize = importSizing.pageSize();
         int numberOfPages = importSizing.numberOfPages();
 
-        this.maybeDefaultRelProperty = setup.relationshipDefaultPropertyValue;
+        this.maybeDefaultRelProperty = setup.relationshipDefaultPropertyValue();
         Double defaultRelationshipProperty = maybeDefaultRelProperty.orElseGet(PropertyMapping.EMPTY_PROPERTY::defaultValue);
 
         AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
                 outgoingRelationshipsBuilder,
                 numberOfPages,
                 pageSize,
-                setup.tracker,
+            setup.tracker(),
                 new LongAdder(),
                 new int[]{DEFAULT_WEIGHT_PROPERTY_ID},
                 new double[]{defaultRelationshipProperty}
         );
 
         this.idMap = idMap;
-        importer = new RelationshipImporter(setup.tracker, outBuilder, null);
+        importer = new RelationshipImporter(setup.tracker(), outBuilder, null);
         imports = importer.imports(false, true, false, maybeDefaultRelProperty.isPresent());
         totalRecordsSeen = 0;
         totalRelationshipsImported = 0;
@@ -107,7 +107,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
 
     @Override
     Relationships result() {
-        ParallelUtil.run(importer.flushTasks(), setup.executor);
+        ParallelUtil.run(importer.flushTasks(), setup.executor());
 
         AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder.adjacency.build();
         AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder.globalAdjacencyOffsets;
@@ -120,7 +120,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
                 outAdjacencyList,
                 null,
                 outAdjacencyOffsets,
-                setup.relationshipDefaultPropertyValue,
+            setup.relationshipDefaultPropertyValue(),
                 null,
                 outWeightList,
                 null,
