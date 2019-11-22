@@ -49,17 +49,25 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
     }
 
     public static PropertyMappings fromObject(Object relPropertyMapping) {
+        if (relPropertyMapping instanceof PropertyMappings) {
+            return (PropertyMappings) relPropertyMapping;
+        }
         if (relPropertyMapping instanceof String) {
             String propertyMapping = (String) relPropertyMapping;
             return fromObject(Collections.singletonMap(propertyMapping, propertyMapping));
+        } else if (relPropertyMapping instanceof List) {
+            Builder builder = new Builder();
+            for (Object mapping : (List<?>) relPropertyMapping) {
+                builder.addAllMappings(fromObject(mapping).mappings);
+            }
+            return builder.build();
         } else if (relPropertyMapping instanceof Map) {
-            PropertyMapping[] propertyMappings = ((Map<String, Object>) relPropertyMapping).entrySet()
-                    .stream()
-                    .map(entry -> {
-                        Object propertyName = entry.getKey();
-                        return PropertyMapping.fromObject((String) propertyName, entry.getValue());
-                    }).toArray(PropertyMapping[]::new);
-            return PropertyMappings.of(propertyMappings);
+            Builder builder = new Builder();
+            ((Map<String, Object>) relPropertyMapping).forEach((key, spec) -> {
+                PropertyMapping propertyMapping = PropertyMapping.fromObject(key, spec);
+                builder.addMapping(propertyMapping);
+            });
+            return builder.build();
         } else {
             throw new IllegalArgumentException(String.format(
                     "Expected String or Map for property mappings. Got %s.",
