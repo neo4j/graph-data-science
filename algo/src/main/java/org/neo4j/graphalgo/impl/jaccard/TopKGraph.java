@@ -41,6 +41,12 @@ public class TopKGraph extends FilterGraph {
     }
 
     @Override
+    public int degree(long nodeId, Direction direction) {
+        TopKMap.TopKList topKList = topKMap.get(nodeId);
+        return topKList != null ? topKList.size() : 0;
+    }
+
+    @Override
     public long relationshipCount() {
         return topKMap.similarityPairCount();
     }
@@ -59,5 +65,5 @@ public class TopKGraph extends FilterGraph {
         if (topKList != null) {
             topKList.forEach((node2, similarity) -> consumer.accept(node1, node2, similarity));
         }
-    }
+   }
 }
