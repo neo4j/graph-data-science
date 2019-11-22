@@ -20,14 +20,28 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
+
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public abstract class BoundedLongLongPriorityQueue {
 
     public interface Consumer {
         void accept(long element1, long element2, double priority);
+    }
+
+    public static MemoryEstimation memoryEstimation(int capacity) {
+        return MemoryEstimations.builder(BoundedLongLongPriorityQueue.class)
+            .fixed("elements1", sizeOfLongArray(capacity))
+            .fixed("elements2", sizeOfLongArray(capacity))
+            .fixed("priorities", sizeOfDoubleArray(capacity))
+            .build();
     }
 
     private final int bound;

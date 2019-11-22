@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.queue.LongPriorityQueue;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -37,13 +36,13 @@ public class TopKMap {
 
     private final BitSet nodeFilter;
 
-    static MemoryEstimation memoryEstimation(long items, int topK) {
+    static MemoryEstimation memoryEstimation(long nodes, int topK) {
         return MemoryEstimations.builder(TopKMap.class)
             .add("topK lists",
                 MemoryEstimations.builder("topK lists", TopKList.class)
                     .add("queues", BoundedLongPriorityQueue.memoryEstimation(topK))
                     .build()
-                    .times(items)
+                    .times(nodes)
             )
             .build();
     }

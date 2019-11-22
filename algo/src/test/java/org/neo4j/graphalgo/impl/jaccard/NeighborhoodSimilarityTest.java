@@ -697,14 +697,19 @@ final class NeighborhoodSimilarityTest {
         long vectorsRangeMax = 56_000_016L;
         MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
 
+        long topNListMin = 2_504L;
+        long topNListMax = 2_504L;
+        MemoryRange topNListRange = MemoryRange.of(topNListMin, topNListMax);
+
         MemoryEstimations.Builder builder = MemoryEstimations.builder()
             .fixed("this.instance", thisInstance)
             .fixed("node filter", nodeFilterRange)
-            .fixed("vectors", vectorsRange);
+            .fixed("vectors", vectorsRange)
+            .fixed("topNList", topNListRange);
 
         if (topK == 0) {
-            long graphRangeMin = 8_651_112L;
-            long graphRangeMax = 8_651_112L;
+            long graphRangeMin = 270_520L;
+            long graphRangeMax = 270_520L;
             builder.fixed("similarity graph", MemoryRange.of(graphRangeMin, graphRangeMax));
         } else {
             long topKMapRangeMin = 1_688_000_024L;

@@ -34,25 +34,36 @@ import java.util.stream.Stream;
 
 class SimilarityGraphBuilder {
 
-    static MemoryEstimation memoryEstimation(int topK, int top) {
+    static MemoryEstimation memoryEstimation(int topK, int topN) {
         return MemoryEstimations.setup("", (dimensions, concurrency) -> {
             long maxNodesToCompare = Math.min(dimensions.maxRelCount(), dimensions.nodeCount());
             long maxNumberOfSimilarityResults = maxNodesToCompare * (maxNodesToCompare - 1) / 2;
-            long maxNodesWithNewRels = maxNodesToCompare;
-            if (top > 0) {
-                maxNumberOfSimilarityResults = Math.min(maxNumberOfSimilarityResults, top);
-                maxNodesWithNewRels = maxNumberOfSimilarityResults * 2;
+
+            long newNodeCount = maxNodesToCompare;
+            long newRelationshipCount = maxNumberOfSimilarityResults;
+
+            if (topN > 0) {
+                newRelationshipCount = Math.min(newRelationshipCount, topN);
+                // If we reduce the number of relationships via topN,
+                // we also have a new upper bound of the number of
+                // nodes connected by those relationships.
+                // The upper bound is a graph consisting of disjoint node pairs.
+                newNodeCount = Math.min(maxNodesToCompare, newRelationshipCount * 2);
             }
-            int averageDegree = Math.toIntExact(maxNumberOfSimilarityResults / maxNodesWithNewRels);
+
+            int averageDegree = Math.toIntExact(newRelationshipCount / newNodeCount);
+            // For topK, we duplicate each similarity pair, which leads to a higher average degree.
+            // At the same time, we limit the average degree by topK.
             if (topK > 0) {
-                averageDegree = Math.min(averageDegree, topK);
+                averageDegree = Math.min(Math.toIntExact(2 * newRelationshipCount / newNodeCount), topK);
             }
+
             return MemoryEstimations.builder(HugeGraph.class)
                 .add(
                     "adjacency list",
-                    AdjacencyList.compressedMemoryEstimation(averageDegree, maxNodesWithNewRels)
+                    AdjacencyList.compressedMemoryEstimation(averageDegree, newNodeCount)
                 )
-                .add("adjacency offsets", AdjacencyOffsets.memoryEstimation())
+                .add("adjacency offsets", AdjacencyOffsets.memoryEstimation(concurrency, newNodeCount))
                 .build();
         });
     }

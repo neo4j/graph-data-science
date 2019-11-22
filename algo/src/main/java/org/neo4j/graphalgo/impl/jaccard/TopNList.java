@@ -20,12 +20,21 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+
 import java.util.Iterator;
 import java.util.PrimitiveIterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class TopNList {
+
+    static MemoryEstimation memoryEstimation(int topN) {
+        return MemoryEstimations.builder(TopNList.class)
+            .add("queue", BoundedLongLongPriorityQueue.memoryEstimation(topN))
+            .build();
+    }
 
     private final BoundedLongLongPriorityQueue queue;
 
