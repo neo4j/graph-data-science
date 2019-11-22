@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipFilters;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
-import org.neo4j.graphalgo.annotation.Configuration.Parameter;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -39,26 +38,34 @@ import org.neo4j.graphalgo.core.utils.Pools;
 @Configuration("GraphCreateConfigImpl")
 public interface GraphCreateConfig extends BaseConfig {
 
-    @Parameter
+    @Configuration.Parameter
     String graphName();
 
-    @Parameter(acceptNull = true)
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.Parameter(acceptNull = true)
     @ConvertWith("org.neo4j.graphalgo.NodeFilters#fromObject")
     default NodeFilters nodeFilter() {
         return NodeFilters.empty();
     }
 
-    @Parameter(acceptNull = true)
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.Parameter(acceptNull = true)
     @ConvertWith("org.neo4j.graphalgo.RelationshipFilters#fromObject")
     default RelationshipFilters relationshipFilter() {
         return RelationshipFilters.empty();
     }
 
+    @Value.Default
+    @Value.Parameter(false)
     @ConvertWith("org.neo4j.graphalgo.PropertyMappings#fromObject")
     default PropertyMappings nodeProperties() {
         return PropertyMappings.EMPTY;
     }
 
+    @Value.Default
+    @Value.Parameter(false)
     @ConvertWith("org.neo4j.graphalgo.PropertyMappings#fromObject")
     default PropertyMappings relationshipProperties() {
         return PropertyMappings.EMPTY;

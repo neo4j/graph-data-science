@@ -20,8 +20,10 @@
 package org.neo4j.graphalgo.core;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.NodeFilters;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipFilters;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -32,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
@@ -68,7 +71,7 @@ public class GraphLoader {
     );
 
     private String username = AuthSubject.ANONYMOUS.username();
-    private String name = null;
+    private String name = "";
     private int concurrency = Pools.DEFAULT_CONCURRENCY;
     private String label = null;
     private String relation = null;
@@ -479,14 +482,22 @@ public class GraphLoader {
 
     public GraphSetup toSetup() {
         if (createConfig == null) {
-//            PropertyMappings relMappings = this.relPropertyMappings.build();
-//            if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
-//                relMappings = new PropertyMappings.Builder()
-//                    .addAllMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
-//                    .build();
-//            }
-
-            throw new IllegalStateException("Missing GraphCreateConfig");
+            PropertyMappings relMappings = this.relPropertyMappings.build();
+            if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
+                relMappings = new PropertyMappings.Builder()
+                    .addAllMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
+                    .build();
+            }
+            createConfig = ImmutableGraphCreateConfig
+                .builder()
+                .graphName(name)
+                .concurrency(concurrency)
+                .username(username)
+                .nodeProperties(nodePropertyMappings.build())
+                .relationshipProperties(relMappings)
+                .nodeFilter(NodeFilters.of(label))
+                .relationshipFilter(RelationshipFilters.of(relation))
+                .build();
         }
 
         return new GraphSetup(
