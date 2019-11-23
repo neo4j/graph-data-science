@@ -19,28 +19,10 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+public class RegistrationException extends Exception {
 
-public class TriangleStreamProcTest_451 extends ProcTestBase {
-
-    private static GraphDatabaseAPI db;
-
-    @BeforeEach
-    void setup() throws RegistrationException {
-        db = TestDatabaseCreator.createTestDatabase();
-       registerProcedures(TriangleProc.class);
-    }
-
-    @AfterEach
-    void teardownGraph() {
-        db.shutdown();
-    }
-
-    @Test
-    public void testEmptySet() {
-        db.execute("CALL algo.triangleCount.stream('', '') YIELD nodeId, triangles");
+    public RegistrationException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
+

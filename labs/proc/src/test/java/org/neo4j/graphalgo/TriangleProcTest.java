@@ -22,9 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
@@ -48,12 +46,11 @@ import static org.mockito.Mockito.verify;
  */
 class TriangleProcTest extends ProcTestBase {
 
-    private static final Label LABEL = Label.label("Node");
     private static GraphDatabaseAPI db;
     private static String[] idToName;
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +

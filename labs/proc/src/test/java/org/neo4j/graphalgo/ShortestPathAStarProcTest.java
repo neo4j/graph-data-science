@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 class ShortestPathAStarProcTest extends ProcTestBase {
 	
 	@BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
 		/* Singapore to Chiba
 		 * Path nA (0NM) -> nB (29NM) -> nC (723NM) -> nD (895NM) -> nE (996NM) -> nF (1353NM)
 		 * 	    nG (1652NM) -> nH (2392NM) -> nX (2979NM)

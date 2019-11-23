@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -52,7 +51,7 @@ public class ParallelBetweennessCentralityProcTest extends ProcTestBase {
     private BetweennessCentrality.ResultConsumer consumer;
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws RegistrationException {
 
         db = TestDatabaseCreator.createTestDatabase();;
 

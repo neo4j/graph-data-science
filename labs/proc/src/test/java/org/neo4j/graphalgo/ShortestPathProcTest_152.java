@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.ShortestPathDijkstra;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.function.DoubleConsumer;
 
@@ -45,7 +44,7 @@ class ShortestPathProcTest_152 extends ProcTestBase {
     private static long endNodeId;
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Loc{name:'A'}), " +

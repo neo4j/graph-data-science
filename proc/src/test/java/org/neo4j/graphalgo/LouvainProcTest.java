@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,7 +58,7 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
     );
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws RegistrationException {
 
         db = TestDatabaseCreator.createTestDatabase();
 

@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +52,7 @@ class StronglyConnectedComponentsProcTest extends ProcTestBase {
     private static GraphDatabaseAPI db;
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
         registerProcedures(GraphLoadProc.class, StronglyConnectedComponentsProc.class);

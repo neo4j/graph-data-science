@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.List;
 
@@ -39,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class WccProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         String createGraph = "CREATE" +
                 " (nA:Label {nodeId: 0, seedId: 42})" +
                 ",(nB:Label {nodeId: 1, seedId: 42})" +

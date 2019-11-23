@@ -28,7 +28,6 @@ import org.mockito.Matchers;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -38,7 +37,7 @@ import static org.mockito.Mockito.verify;
 class BetweennessCentralityProcTest_148 extends ProcTestBase {
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws RegistrationException {
 
         db = TestDatabaseCreator.createTestDatabase();
 

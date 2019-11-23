@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.HashMap;
 
@@ -33,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class KSpanningTreeProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +

@@ -23,7 +23,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,7 +39,7 @@ import static org.neo4j.helpers.collection.MapUtil.map;
 class VersionFuncTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerFunctions(VersionFunc.class);
     }

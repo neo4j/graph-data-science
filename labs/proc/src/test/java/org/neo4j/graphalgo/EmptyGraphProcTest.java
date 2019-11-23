@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.unionfind.MSColoringProc;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -32,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class EmptyGraphProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
 
         db = TestDatabaseCreator.createTestDatabase();
 

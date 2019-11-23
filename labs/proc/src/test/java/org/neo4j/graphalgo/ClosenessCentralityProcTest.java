@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.anyLong;
@@ -55,7 +54,7 @@ class ClosenessCentralityProcTest extends ProcTestBase {
     private TestConsumer consumer;
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         DefaultBuilder builder = GraphBuilder.create(db)
                 .setLabel("Node")

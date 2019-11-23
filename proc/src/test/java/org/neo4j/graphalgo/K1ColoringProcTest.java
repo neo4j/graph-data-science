@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +47,7 @@ class K1ColoringProcTest extends ProcTestBase {
         ",(a)-[:REL]->(c)";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(K1ColoringProc.class, GraphLoadProc.class);
         db.execute(DB_CYPHER);

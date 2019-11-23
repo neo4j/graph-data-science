@@ -21,7 +21,6 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class YensKSharedPrefixMaxDepthProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +

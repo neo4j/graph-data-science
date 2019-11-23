@@ -26,7 +26,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.function.Consumer;
 
@@ -37,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MultistepSCCProcTest extends ProcTestBase{
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +

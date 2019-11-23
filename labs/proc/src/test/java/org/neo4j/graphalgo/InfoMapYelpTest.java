@@ -35,7 +35,7 @@ class InfoMapYelpTest {
     private GraphDatabaseService db;
 
     @BeforeEach
-    void setUp() throws KernelException, IOException {
+    void setUp() throws IOException, KernelException {
         db = LdbcDownloader.openDb("Yelp");
         Procedures proceduresService = ((GraphDatabaseAPI) db).getDependencyResolver().resolveDependency(Procedures.class);
         proceduresService.registerProcedure(InfoMapProc.class, true);

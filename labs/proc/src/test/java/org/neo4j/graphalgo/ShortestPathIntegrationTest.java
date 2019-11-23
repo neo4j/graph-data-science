@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -54,7 +53,7 @@ class ShortestPathIntegrationTest extends ProcTestBase {
             ", (nD)-[:TYPE {cost: 2.0}]->(nX)";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
         registerProcedures(ShortestPathProc.class);

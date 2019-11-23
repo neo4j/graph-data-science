@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.impl.generator.RelationshipPropertyProducer;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +57,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_
 class GraphGenerateProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphGenerateProc.class);
     }

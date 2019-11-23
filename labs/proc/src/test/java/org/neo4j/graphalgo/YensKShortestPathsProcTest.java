@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class YensKShortestPathsProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +

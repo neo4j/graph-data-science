@@ -22,9 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -42,15 +40,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  */
 public class PrimProcTest extends ProcTestBase {
 
-    private static final RelationshipType type = RelationshipType.withName("TYPE");
-
     @AfterEach
     void tearDown() {
         db.shutdown();
     }
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         String cypher = "CREATE(a:Node {start:true}) " +
                 "CREATE(b:Node) " +
                 "CREATE(c:Node) " +

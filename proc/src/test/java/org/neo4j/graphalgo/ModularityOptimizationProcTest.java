@@ -26,7 +26,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Map;
 
@@ -59,7 +58,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
 
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ModularityOptimizationProc.class, GraphLoadProc.class);
         db.execute(DB_CYPHER);

@@ -25,7 +25,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
@@ -43,7 +42,7 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
     private static final Map<Long, Double> expected = new HashMap<>();
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         ClassLoader classLoader = EigenvectorCentralityProcTest.class.getClassLoader();
         File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
 

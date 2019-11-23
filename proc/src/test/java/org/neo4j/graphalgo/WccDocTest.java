@@ -24,12 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 class WccDocTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         String createGraph = "CREATE (nAlice:User {name: 'Alice'}) " +
                              "CREATE (nBridget:User {name: 'Bridget'}) " +
                              "CREATE (nCharles:User {name: 'Charles'}) " +

@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collections;
 
@@ -52,7 +51,7 @@ class BetweennessCentralityProcTest extends ProcTestBase {
     private BetweennessCentrality.ResultConsumer consumer;
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(BetweennessCentralityProc.class);
 

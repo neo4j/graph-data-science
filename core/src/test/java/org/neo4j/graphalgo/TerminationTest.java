@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.TransactionFailureException;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.api.KernelTransactions;
@@ -37,7 +36,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
 /**        _______
  *        /       \
@@ -54,7 +52,7 @@ class TerminationTest extends ProcTestBase {
     private KernelTransactions kernelTransactions;
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(TerminateProcedure.class);
         kernelTransactions = resolveDependency(KernelTransactions.class);

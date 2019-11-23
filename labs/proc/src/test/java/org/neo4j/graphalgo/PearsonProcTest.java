@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collections;
 import java.util.Map;
@@ -76,7 +75,7 @@ class PearsonProcTest extends ProcTestBase {
             "RETURN *";
 
     @BeforeEach
-    void beforeClass() throws KernelException {
+    void beforeClass() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(PearsonProc.class);
         registerFunctions(IsFiniteFunc.class);

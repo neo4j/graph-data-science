@@ -26,7 +26,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class YensKShortestPathsStreamingProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +

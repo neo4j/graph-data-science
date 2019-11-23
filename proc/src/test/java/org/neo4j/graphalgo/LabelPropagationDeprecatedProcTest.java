@@ -60,7 +60,7 @@ class LabelPropagationDeprecatedProcTest extends ProcTestBase {
             ", (b)-[:X]->(:B {id: 11, weight: 8.0, score: 8.0, community: 2})";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(LabelPropagationProc.class);
         db.execute(DB_CYPHER);

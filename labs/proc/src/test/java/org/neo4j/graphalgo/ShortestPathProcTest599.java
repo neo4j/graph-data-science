@@ -23,7 +23,6 @@ import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -55,7 +54,7 @@ class ShortestPathProcTest599 extends ProcTestBase {
             "";
 
     @BeforeEach
-    void setupGraphDb() throws KernelException {
+    void setupGraphDb() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
         registerProcedures(ShortestPathProc.class);

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
@@ -47,7 +46,7 @@ class EigenvectorCentralityNormalizationProcTest extends ProcTestBase {
     }
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         ClassLoader classLoader = EigenvectorCentralityNormalizationProcTest.class.getClassLoader();
         File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
 

@@ -19,14 +19,11 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -34,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.core.utils.ExceptionUtil.rootCause;
 
-class IllegalLabelsProcTest {
+class IllegalLabelsProcTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -42,25 +39,23 @@ class IllegalLabelsProcTest {
             ", (b:B {id: 1}) " +
             ", (a)-[:X]->(b)";
 
-    private static GraphDatabaseAPI DB;
-
-    @BeforeAll
-    static void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(UnionFindProc.class);
-        DB.execute(DB_CYPHER);
+    @BeforeEach
+    void setup() throws RegistrationException {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(UnionFindProc.class);
+        db.execute(DB_CYPHER);
     }
 
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdown() {
+        db.shutdown();
     }
 
     @AllGraphNamesTest
     void testUnionFindStreamWithInvalidNodeLabel(String graphName) {
         QueryExecutionException ex = assertThrows(
                 QueryExecutionException.class,
-                () -> DB.execute(String.format("CALL algo.unionFind.stream('C', '',{graph:'%s'})", graphName)));
+                () -> db.execute(String.format("CALL algo.unionFind.stream('C', '',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Node label not found: 'C'"));
     }
@@ -68,7 +63,7 @@ class IllegalLabelsProcTest {
     @AllGraphNamesTest
     void testUnionFindStreamWithInvalidRelType(String graphName) {
         QueryExecutionException ex = assertThrows(QueryExecutionException.class, () ->
-                DB.execute(String.format("CALL algo.unionFind.stream('', 'Y',{graph:'%s'})", graphName)));
+                db.execute(String.format("CALL algo.unionFind.stream('', 'Y',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Relationship type(s) not found: 'Y'"));
     }
@@ -76,7 +71,7 @@ class IllegalLabelsProcTest {
     @AllGraphNamesTest
     void testUnionFindStreamWithValidNodeLabelAndInvalidRelType(String graphName) {
         QueryExecutionException ex = assertThrows(QueryExecutionException.class, () ->
-                DB.execute(String.format("CALL algo.unionFind.stream('A', 'Y',{graph:'%s'})", graphName)));
+                db.execute(String.format("CALL algo.unionFind.stream('A', 'Y',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Relationship type(s) not found: 'Y'"));
     }
@@ -84,7 +79,7 @@ class IllegalLabelsProcTest {
     @AllGraphNamesTest
     void testUnionFindStreamWithMultipleInvaludRelTypes(String graphName) {
         QueryExecutionException ex = assertThrows(QueryExecutionException.class, () ->
-                DB.execute(String.format("CALL algo.unionFind.stream('A', 'Y | Z',{graph:'%s'})", graphName)));
+                db.execute(String.format("CALL algo.unionFind.stream('A', 'Y | Z',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Relationship type(s) not found: 'Y', 'Z'"));
     }

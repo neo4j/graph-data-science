@@ -30,7 +30,6 @@ import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Iterators;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -50,7 +49,7 @@ class Node2VecWalkProcTest extends ProcTestBase {
     private Transaction tx;
 
     @BeforeEach
-    void beforeClass() throws KernelException {
+    void beforeClass() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(NodeWalkerProc.class);
         db.execute(buildDatabaseQuery(), Collections.singletonMap("count",NODE_COUNT-4)).close();

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -99,7 +98,7 @@ class ListProcTest extends ProcTestBase {
     private static final List<String> ALL = Stream.concat(PROCEDURES.stream(), FUNCTIONS.stream()).collect(Collectors.toList());
 
     @BeforeEach
-    void setUp() throws KernelException {
+    void setUp() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphLoadProc.class,

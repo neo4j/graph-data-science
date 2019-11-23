@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collections;
 import java.util.Map;
@@ -67,7 +66,7 @@ class OverlapProcTest extends ProcTestBase {
             "RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(OverlapProc.class);
         db.execute(buildDatabaseQuery()).close();

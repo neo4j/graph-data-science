@@ -57,7 +57,7 @@ public class SimilaritiesFuncTest extends ProcTestBase {
     private static GraphDatabaseAPI db;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerFunctions(SimilaritiesFunc.class);
         db.execute(DB_CYPHER).close();

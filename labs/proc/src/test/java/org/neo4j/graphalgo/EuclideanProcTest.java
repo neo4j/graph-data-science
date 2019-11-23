@@ -22,11 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.EuclideanProc;
-import org.neo4j.graphalgo.ProcTestBase;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collections;
 import java.util.Map;
@@ -79,7 +75,7 @@ class EuclideanProcTest extends ProcTestBase {
             " RETURN *";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(EuclideanProc.class);
         db.execute(buildDatabaseQuery()).close();

@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.List;
 
@@ -46,7 +45,7 @@ import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_THRESHOLD;
 class WccBetaProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         String createGraph = "CREATE" +
                              " (nA:Label {nodeId: 0, seedId: 42})" +
                              ",(nB:Label {nodeId: 1, seedId: 42})" +

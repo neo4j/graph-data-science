@@ -25,7 +25,6 @@ import org.mockito.Matchers;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.DoubleConsumer;
@@ -86,7 +85,7 @@ final class ShortestPathsProcTest extends ProcTestBase {
     private static GraphDatabaseAPI db;
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ShortestPathsProc.class);
 

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Iterators;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collections;
 
@@ -38,7 +37,7 @@ class RandomWalkLargeResultProcTest extends ProcTestBase {
     private Transaction tx;
 
     @BeforeEach
-    void beforeClass() throws KernelException {
+    void beforeClass() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(NodeWalkerProc.class);
         db.execute(buildDatabaseQuery(), Collections.singletonMap("count",NODE_COUNT)).close();

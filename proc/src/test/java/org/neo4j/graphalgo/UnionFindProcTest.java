@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -48,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class UnionFindProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         String createGraph =
                 "CREATE" +
                 " (nA:Label {nodeId: 0, seed: 42})" +

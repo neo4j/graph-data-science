@@ -22,8 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.util.function.DoubleConsumer;
 
@@ -75,7 +73,7 @@ final class ShortestPathDeltaSteppingUndirectedProcTest extends ProcTestBase {
             ", (i)-[:TYPE {cost :2}]->(x)";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ShortestPathDeltaSteppingProc.class);
         db.execute(DB_CYPHER);

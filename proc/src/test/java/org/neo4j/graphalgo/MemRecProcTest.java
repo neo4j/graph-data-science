@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Map;
 import java.util.Optional;
@@ -54,7 +53,7 @@ class MemRecProcTest extends ProcTestBase {
     private static final long RELATIONSHIP_COUNT = 5L;
 
     @BeforeEach
-    void setUp() throws KernelException {
+    void setUp() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
                 GraphLoadProc.class,

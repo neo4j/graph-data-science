@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.scc.SCCIterativeTarjan;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -70,7 +69,7 @@ class IterativeTarjanSCCTest extends ConnectedComponentsTest {
             ", (i)-[:TYPE {cost: 3}]->(g)";
 
     @BeforeEach
-    void setupGraphDb() throws KernelException {
+    void setupGraphDb() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(StronglyConnectedComponentsProc.class);
         db.execute(DB_CYPHER);

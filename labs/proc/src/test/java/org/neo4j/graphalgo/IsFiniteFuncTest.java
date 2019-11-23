@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class IsFiniteFuncTest extends ProcTestBase {
 
     @BeforeEach
-    void setUp() throws KernelException {
+    void setUp() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerFunctions(IsFiniteFunc.class);
     }

@@ -28,7 +28,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.stream.Stream;
 
@@ -41,7 +40,7 @@ import static org.neo4j.graphalgo.TestSupport.toArguments;
 public class WritingProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             LabelPropagationProc.class,

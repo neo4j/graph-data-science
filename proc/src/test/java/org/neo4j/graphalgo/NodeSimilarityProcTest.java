@@ -36,7 +36,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -116,7 +115,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
     }
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
         registerProcedures(NodeSimilarityProc.class);
@@ -228,8 +227,8 @@ class NodeSimilarityProcTest extends ProcTestBase {
 
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
-    void shouldWriteResults(String graphImpl, Direction direction) throws KernelException {
-        String query = "CALL algo.nodeSimilarity(" +
+    void shouldWriteResults(String graphImpl, Direction direction) throws RegistrationException {
+            String query = "CALL algo.nodeSimilarity(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +

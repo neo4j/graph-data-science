@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Map;
 
@@ -54,7 +53,7 @@ class ResourceAllocationSimilarityFuncTest extends ProcTestBase {
             "MERGE (praveena)-[:FRIENDS]->(michael)";
 
     @BeforeEach
-    void setUp() throws KernelException {
+    void setUp() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
         registerFunctions(LinkPredictionFunc.class);
         db.execute(DB_CYPHER).close();

@@ -19,39 +19,33 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class EmptyGraphProcTest {
+class EmptyGraphProcTest extends ProcTestBase {
 
-    private static GraphDatabaseAPI db;
-
-    @BeforeAll
-    public static void setup() throws KernelException {
-
+    @BeforeEach
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
-
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(LabelPropagationProc.class);
-        procedures.registerProcedure(LouvainProc.class);
-        procedures.registerProcedure(PageRankProc.class);
-        procedures.registerProcedure(UnionFindProc.class);
-        procedures.registerProcedure(WccProc.class);
+        registerProcedures(
+            LabelPropagationProc.class,
+            LouvainProc.class,
+            PageRankProc.class,
+            UnionFindProc.class,
+            WccProc.class
+        );
     }
 
-    @AfterAll
-    static void tearDown() {
-        if (db != null) db.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     public String graphImpl = "huge";

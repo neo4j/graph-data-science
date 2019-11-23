@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Disabled;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -80,7 +79,7 @@ final class WeightedAllShortestPathsProcTest extends ProcTestBase {
     private static long targetNodeId;
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws RegistrationException {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
         registerProcedures(AllShortestPathsProc.class);
