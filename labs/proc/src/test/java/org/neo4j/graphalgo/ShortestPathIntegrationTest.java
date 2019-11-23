@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -36,7 +34,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class ShortestPathIntegrationTest {
+class ShortestPathIntegrationTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -55,28 +53,22 @@ class ShortestPathIntegrationTest {
             ", (nC)-[:TYPE {cost: 2.0}]->(nD)" +
             ", (nD)-[:TYPE {cost: 2.0}]->(nX)";
 
-    private static GraphDatabaseAPI DB;
-
-    @BeforeAll
-    static void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER);
-        DB.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(ShortestPathProc.class);
+    @BeforeEach
+    void setup() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        db.execute(DB_CYPHER);
+        registerProcedures(ShortestPathProc.class);
     }
 
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) {
-            DB.shutdown();
-        }
+    @AfterEach
+    void shutdown() {
+        db.shutdown();
     }
 
     @AllGraphNamesTest
     void noWeightStream(String graphName) throws Exception {
         PathConsumer consumer = mock(PathConsumer.class);
-        DB.execute(
+        db.execute(
                 String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
                         "CALL algo.shortestPath.stream(start, end, '', { graph: '%s' }) " +
                         "YIELD nodeId, cost RETURN nodeId, cost", graphName))
@@ -91,7 +83,7 @@ class ShortestPathIntegrationTest {
 
     @AllGraphNamesTest
     void noWeightWrite(String graphName) throws Exception {
-        DB.execute(
+        db.execute(
                 String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
                         "CALL algo.shortestPath(start, end, '', { graph: '%s' }) " +
                         "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
@@ -107,7 +99,7 @@ class ShortestPathIntegrationTest {
 
         final CostConsumer mock = mock(CostConsumer.class);
 
-        DB.execute("MATCH (n) WHERE exists(n.sssp) RETURN id(n) as id, n.sssp as sssp")
+        db.execute("MATCH (n) WHERE exists(n.sssp) RETURN id(n) as id, n.sssp as sssp")
                 .accept(row -> {
                     mock.accept(
                             row.getNumber("id").longValue(),
@@ -124,7 +116,7 @@ class ShortestPathIntegrationTest {
     @AllGraphNamesTest
     void testDijkstraStream(String graphName) throws Exception {
         PathConsumer consumer = mock(PathConsumer.class);
-        DB.execute(
+        db.execute(
                 String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
                         "CALL algo.shortestPath.stream(start, end, 'cost',{graph:'%s'}) " +
                         "YIELD nodeId, cost RETURN nodeId, cost", graphName))
@@ -141,7 +133,7 @@ class ShortestPathIntegrationTest {
 
     @AllGraphNamesTest
     void testDijkstra(String graphName) throws Exception {
-        DB.execute(
+        db.execute(
                 String.format(
                         "MATCH (start:Node {type:'start'}), (end:Node {type:'end'}) " +
                         "CALL algo.shortestPath(start, end, 'cost',{graph:'%s', write:true, writeProperty:'cost'}) " +
@@ -158,7 +150,7 @@ class ShortestPathIntegrationTest {
 
         final CostConsumer mock = mock(CostConsumer.class);
 
-        DB.execute("MATCH (n) WHERE exists(n.cost) RETURN id(n) as id, n.cost as cost")
+        db.execute("MATCH (n) WHERE exists(n.cost) RETURN id(n) as id, n.cost as cost")
                 .accept(row -> {
                     mock.accept(
                             row.getNumber("id").longValue(),

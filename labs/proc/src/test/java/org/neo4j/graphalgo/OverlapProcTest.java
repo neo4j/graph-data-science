@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collections;
@@ -35,49 +34,47 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-class JaccardProcTest extends ProcTestBase {
+class OverlapProcTest extends ProcTestBase {
 
-    private Transaction tx;
     private static final String STATEMENT_STREAM =
-            " MATCH (p:Person)-[:LIKES]->(i:Item)" +
-            " WITH {item:id(p), categories: collect(DISTINCT id(i))} AS userData" +
-            " WITH collect(userData) AS data" +
-            " CALL algo.similarity.jaccard.stream(data,$config)" +
-            " YIELD item1, item2, count1, count2, intersection, similarity" +
-            " RETURN * ORDER BY item1, item2";
+            "MATCH (p:Person)-[:LIKES]->(i:Item) \n" +
+            "WITH {item:id(p), categories: collect(distinct id(i))} as userData\n" +
+            "WITH collect(userData) as data\n" +
+            "call algo.similarity.overlap.stream(data,$config) " +
+            "yield item1, item2, count1, count2, intersection, similarity " +
+            "RETURN item1, item2, count1, count2, intersection, similarity " +
+            "ORDER BY item1,item2";
 
     private static final String STATEMENT =
-            " MATCH (p:Person)-[:LIKES]->(i:Item)" +
-            " WITH {item:id(p), categories: collect(DISTINCT id(i))} AS userData" +
-            " WITH collect(userData) AS data" +
-            " CALL algo.similarity.jaccard(data, $config)" +
-            " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations" +
-            " RETURN *";
+            "MATCH (p:Person)-[:LIKES]->(i:Item) \n" +
+            "WITH {item:id(p), categories: collect(distinct id(i))} as userData\n" +
+            "WITH collect(userData) as data\n" +
+            "CALL algo.similarity.overlap(data, $config) " +
+            "yield p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations " +
+            "RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations";
 
     private static final String STORE_EMBEDDING_STATEMENT =
-            " MATCH (p:Person)-[:LIKES]->(i:Item)" +
-            " WITH p, collect(DISTINCT id(i)) AS userData" +
-            " SET p.embedding = userData";
+            "MATCH (p:Person)-[:LIKES]->(i:Item) \n" +
+            "WITH p, collect(distinct id(i)) as userData\n" +
+            "SET p.embedding = userData";
 
     private static final String EMBEDDING_STATEMENT =
-            " MATCH (p:Person)" +
-            " WITH {item:id(p), categories: p.embedding} AS userData" +
-            " WITH collect(userData) AS data" +
-            " CALL algo.similarity.jaccard(data, $config)" +
-            " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs" +
-            " RETURN *";
+            "MATCH (p:Person) \n" +
+            "WITH {item:id(p), categories: p.embedding} as userData\n" +
+            "WITH collect(userData) as data\n" +
+            "CALL algo.similarity.overlap(data, $config) " +
+            "yield p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs " +
+            "RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs";
 
     @BeforeEach
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(JaccardProc.class);
+        registerProcedures(OverlapProc.class);
         db.execute(buildDatabaseQuery()).close();
-        tx = db.beginTx();
     }
 
     @AfterEach
     void tearDown() {
-        tx.close();
         db.shutdown();
     }
 
@@ -92,6 +89,7 @@ class JaccardProcTest extends ProcTestBase {
                 "MERGE (p)-[:LIKES]->(i) RETURN count(*) ";
         db.execute(statement,singletonMap("size",size)).close();
     }
+
     private static String buildDatabaseQuery() {
         return  "CREATE (a:Person {name:'Alice'})\n" +
                 "CREATE (b:Person {name:'Bob'})\n" +
@@ -116,8 +114,9 @@ class JaccardProcTest extends ProcTestBase {
         // b / c = 0 : 0/3 = 0
     }
 
+
     @Test
-    void jaccardSingleMultiThreadComparision() {
+    void overlapSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
         Result result1 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 1)));
@@ -137,7 +136,7 @@ class JaccardProcTest extends ProcTestBase {
     }
 
     @Test
-    void jaccardSingleMultiThreadComparisionTopK() {
+    void overlapSingleMultiThreadComparisionTopK() {
         int size = 333;
         buildRandomDB(size);
 
@@ -145,7 +144,7 @@ class JaccardProcTest extends ProcTestBase {
         Result result2 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 2)));
         Result result4 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 4)));
         Result result8 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 8)));
-        int count=0;
+        int count = 0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
             assertEquals(row1, result2.next(), row1.toString());
@@ -153,69 +152,81 @@ class JaccardProcTest extends ProcTestBase {
             assertEquals(row1, result8.next(), row1.toString());
             count++;
         }
-        int people = size/10;
-        assertEquals(people,count);
+        assertFalse(result2.hasNext());
+        assertFalse(result4.hasNext());
+        assertFalse(result8.hasNext());
     }
 
     @Test
-    void topNjaccardStreamTest() {
+    void topNoverlapStreamTest() {
         Result results = db.execute(STATEMENT_STREAM, map("config",map("top",2)));
-        assert01(results.next());
-        assert02(results.next());
+        assert10(results.next());
+        assert20(results.next());
         assertFalse(results.hasNext());
     }
 
     @Test
-    void jaccardStreamTest() {
+    void overlapStreamTest() {
         Result results = db.execute(STATEMENT_STREAM, map("config",map("concurrency",1)));
+
         assertTrue(results.hasNext());
-        assert01(results.next());
-        assert02(results.next());
+        assert10(results.next());
+        assert20(results.next());
         assert12(results.next());
         assertFalse(results.hasNext());
     }
 
     @Test
-    void jaccardStreamSourceTargetIdsTest() {
-        Result results = db.execute(STATEMENT_STREAM, map("config",map(
-                "concurrency",1,
-                "targetIds", Collections.singletonList(1L),
-                "sourceIds", Collections.singletonList(0L))));
+    void overlapStreamSourceTargetIdsTest() {
+//        Map<String, Object> config = map(
+//                "concurrency", 1,
+//                "sourceIds", Collections.singletonList(1L),
+//                "targetIds", Collections.singletonList(0L)
+//        );
+
+        Map<String, Object> config = map(
+                "concurrency", 1,
+                "sourceIds", Collections.singletonList(1L)
+        );
+
+        Map<String, Object> params = map("config", config);
+
+        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+
+        Result results = db.execute(STATEMENT_STREAM, params);
 
         assertTrue(results.hasNext());
-        assert01(results.next());
+        assert10(results.next());
         assertFalse(results.hasNext());
     }
 
     @Test
-    void jaccardStreamSourceTargetIdsTopKTest() {
-        Result results = db.execute(STATEMENT_STREAM, map("config",map(
-                "concurrency",1,
-                "topK", 1,
-                "sourceIds", Collections.singletonList(0L))));
-
-        assertTrue(results.hasNext());
-        assert01(results.next());
-        assertFalse(results.hasNext());
-    }
-
-    @Test
-    void topKJaccardStreamTest() {
+    void topKoverlapStreamTest() {
         Map<String, Object> params = map("config", map( "concurrency", 1,"topK", 1));
         System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
 
         Result results = db.execute(STATEMENT_STREAM, params);
         assertTrue(results.hasNext());
-        assert01(results.next());
-        assert01(flip(results.next()));
-        assert02(flip(results.next()));
+        assert10(results.next());
+        assert20(results.next());
         assertFalse(results.hasNext());
     }
 
-    private Map<String, Object> flip(Map<String, Object> row) {
-        return map("similarity", row.get("similarity"),"intersection", row.get("intersection"),
-                "item1",row.get("item2"),"count1",row.get("count2"),
-                "item2",row.get("item1"),"count2",row.get("count1"));
+    @Test
+    void topKoverlapSourceTargetIdsStreamTest() {
+        Map<String, Object> config = map(
+                "concurrency", 1,
+                "topK", 1,
+                "sourceIds", Collections.singletonList(1L)
+
+        );
+        Map<String, Object> params = map("config", config);
+        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+
+        Result results = db.execute(STATEMENT_STREAM, params);
+        assertTrue(results.hasNext());
+        assert10(results.next());
+        assertFalse(results.hasNext());
     }
 
     private void assertSameSource(Result results, int count, long source) {
@@ -233,94 +244,90 @@ class JaccardProcTest extends ProcTestBase {
 
 
     @Test
-    void topK4jaccardStreamTest() {
+    void topK4overlapStreamTest() {
         Map<String, Object> params = map("config", map("topK", 4, "concurrency", 4, "similarityCutoff", -0.1));
         System.out.println(db.execute(STATEMENT_STREAM,params).resultAsString());
 
         Result results = db.execute(STATEMENT_STREAM,params);
-        assertSameSource(results, 2, 0L);
-        assertSameSource(results, 2, 1L);
+        assertSameSource(results, 0, 0L);
+        assertSameSource(results, 1, 1L);
         assertSameSource(results, 2, 2L);
         assertFalse(results.hasNext());
     }
 
     @Test
-    void topK3jaccardStreamTest() {
+    void topK3overlapStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3));
 
         System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
 
         Result results = db.execute(STATEMENT_STREAM, params);
-        assertSameSource(results, 2, 0L);
-        assertSameSource(results, 2, 1L);
+        assertSameSource(results, 0, 0L);
+        assertSameSource(results, 1, 1L);
         assertSameSource(results, 2, 2L);
         assertFalse(results.hasNext());
     }
 
     @Test
-    void simpleJaccardTest() {
+    void simpleoverlapTest() {
         Map<String, Object> params = map("config", map("similarityCutoff", 0.0));
 
         Map<String, Object> row = db.execute(STATEMENT,params).next();
-        assertEquals((double) row.get("p25"), 0.33, 0.01);
-        assertEquals((double) row.get("p50"), 0.33, 0.01);
-        assertEquals((double) row.get("p75"), 0.66, 0.01);
-        assertEquals((double) row.get("p95"), 0.66, 0.01);
-        assertEquals((double) row.get("p99"), 0.66, 0.01);
-        assertEquals((double) row.get("p100"), 0.66, 0.01);
+        assertEquals((double) row.get("p25"), 1.0, 0.01);
+        assertEquals((double) row.get("p50"), 1.0, 0.01);
+        assertEquals((double) row.get("p75"), 1.0, 0.01);
+        assertEquals((double) row.get("p95"), 1.0, 0.01);
+        assertEquals((double) row.get("p99"), 1.0, 0.01);
+        assertEquals((double) row.get("p100"), 1.0, 0.01);
     }
 
     @Test
-    void simpleJaccardFromEmbeddingTest() {
+    void simpleoverlapFromEmbeddingTest() {
         db.execute(STORE_EMBEDDING_STATEMENT);
 
         Map<String, Object> params = map("config", map("similarityCutoff", 0.0));
 
         Map<String, Object> row = db.execute(EMBEDDING_STATEMENT,params).next();
-        assertEquals((double) row.get("p25"), 0.33, 0.01);
-        assertEquals((double) row.get("p50"), 0.33, 0.01);
-        assertEquals((double) row.get("p75"), 0.66, 0.01);
-        assertEquals((double) row.get("p95"), 0.66, 0.01);
-        assertEquals((double) row.get("p99"), 0.66, 0.01);
-        assertEquals((double) row.get("p100"), 0.66, 0.01);
+        System.out.println("row = " + row);
+        assertEquals((double) row.get("p25"), 1.0, 0.01);
+        assertEquals((double) row.get("p50"), 1.0, 0.01);
+        assertEquals((double) row.get("p75"), 1.0, 0.01);
+        assertEquals((double) row.get("p95"), 1.0, 0.01);
+        assertEquals((double) row.get("p99"), 1.0, 0.01);
+        assertEquals((double) row.get("p100"), 1.0, 0.01);
     }
 
+    /*
+    Alice       [p1,p2,p3]
+    Bob         [p1,p2]
+    Charlie     [p3]
+    Dana        []
+     */
 
     @Test
-    void simpleJaccardWriteTest() {
+    void simpleoverlapWriteTest() {
         Map<String, Object> params = map("config", map( "write",true, "similarityCutoff", 0.1));
 
         db.execute(STATEMENT,params).close();
 
-        String checkSimilaritiesQuery = "MATCH (a)-[similar:SIMILAR]-(b)" +
+        String checkSimilaritiesQuery = "MATCH (a)-[similar:NARROWER_THAN]->(b)" +
                 "RETURN a.name AS node1, b.name as node2, similar.score AS score " +
                 "ORDER BY id(a), id(b)";
 
+        System.out.println(db.execute(checkSimilaritiesQuery).resultAsString());
         Result result = db.execute(checkSimilaritiesQuery);
 
         assertTrue(result.hasNext());
         Map<String, Object> row = result.next();
-        assertEquals(row.get("node1"), "Alice");
-        assertEquals(row.get("node2"), "Bob");
-        assertEquals((double) row.get("score"), 0.66, 0.01);
-
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Alice");
-        assertEquals(row.get("node2"), "Charlie");
-        assertEquals((double) row.get("score"), 0.33, 0.01);
-
-        assertTrue(result.hasNext());
-        row = result.next();
         assertEquals(row.get("node1"), "Bob");
         assertEquals(row.get("node2"), "Alice");
-        assertEquals((double) row.get("score"), 0.66, 0.01);
+        assertEquals((double) row.get("score"), 1.0, 0.01);
 
         assertTrue(result.hasNext());
         row = result.next();
         assertEquals(row.get("node1"), "Charlie");
         assertEquals(row.get("node2"), "Alice");
-        assertEquals((double) row.get("score"), 0.33, 0.01);
+        assertEquals((double) row.get("score"), 1.0, 0.01);
 
         assertFalse(result.hasNext());
     }
@@ -349,10 +356,10 @@ class JaccardProcTest extends ProcTestBase {
     }
 
     private void assert12(Map<String, Object> row) {
-        assertEquals(1L, row.get("item1"));
-        assertEquals(2L, row.get("item2"));
-        assertEquals(2L, row.get("count1"));
-        assertEquals(1L, row.get("count2"));
+        assertEquals(2L, row.get("item1"));
+        assertEquals(1L, row.get("item2"));
+        assertEquals(1L, row.get("count1"));
+        assertEquals(2L, row.get("count2"));
         // assertEquals(0L, row.get("intersection"));
         assertEquals(0D, row.get("similarity"));
     }
@@ -361,21 +368,21 @@ class JaccardProcTest extends ProcTestBase {
     // a / c = 1 : 1/3
     // b / c = 0 : 0/3 = 0
 
-    private void assert02(Map<String, Object> row) {
-        assertEquals(0L, row.get("item1"));
-        assertEquals(2L, row.get("item2"));
-        assertEquals(3L, row.get("count1"));
-        assertEquals(1L, row.get("count2"));
+    private void assert20(Map<String, Object> row) {
+        assertEquals(2L, row.get("item1"));
+        assertEquals(0L, row.get("item2"));
+        assertEquals(1L, row.get("count1"));
+        assertEquals(3L, row.get("count2"));
         // assertEquals(1L, row.get("intersection"));
-        assertEquals(1D/3D, row.get("similarity"));
+        assertEquals(1D/1D, row.get("similarity"));
     }
 
-    private void assert01(Map<String, Object> row) {
-        assertEquals(0L, row.get("item1"));
-        assertEquals(1L, row.get("item2"));
-        assertEquals(3L, row.get("count1"));
-        assertEquals(2L, row.get("count2"));
+    private void assert10(Map<String, Object> row) {
+        assertEquals(1L, row.get("item1"));
+        assertEquals(0L, row.get("item2"));
+        assertEquals(2L, row.get("count1"));
+        assertEquals(3L, row.get("count2"));
         // assertEquals(2L, row.get("intersection"));
-        assertEquals(2D/3D, row.get("similarity"));
+        assertEquals(2D/2D, row.get("similarity"));
     }
 }

@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,9 +29,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-public abstract class ConnectedComponentsTest {
+public abstract class ConnectedComponentsTest extends ProcTestBase{
 
-    protected GraphDatabaseAPI db;
     protected static Graph graph;
 
     private static void assertBelongSameSet(HugeLongArray data, Long... expected) {

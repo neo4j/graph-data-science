@@ -19,12 +19,11 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,19 +33,17 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class IsFiniteFuncTest {
+class IsFiniteFuncTest extends ProcTestBase {
 
-    private static GraphDatabaseAPI DB;
-
-    @BeforeAll
-    static void setUp() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.getDependencyResolver().resolveDependency(Procedures.class).registerFunction(IsFiniteFunc.class);
+    @BeforeEach
+    void setUp() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerFunctions(IsFiniteFunc.class);
     }
 
-    @AfterAll
-    static void tearDown() {
-        DB.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     @Test
@@ -85,7 +82,7 @@ class IsFiniteFuncTest {
 
     @Test
     void testInfinityAndNaN() {
-        double[] actual = DB.execute(
+        double[] actual = db.execute(
                 "WITH [42, algo.Infinity(), 13.37, 0, algo.NaN(), 1.7976931348623157e308, -13] AS values RETURN filter(x IN values WHERE algo.isFinite(x)) as xs")
                 .<List<Number>>columnAs("xs")
                 .stream()
@@ -105,7 +102,7 @@ class IsFiniteFuncTest {
 
     private boolean call(Number value, String fun) {
         String query = "RETURN " + fun + "($value) as x";
-        return DB.execute(query, singletonMap("value", value))
+        return db.execute(query, singletonMap("value", value))
                 .<Boolean>columnAs("x")
                 .stream()
                 .allMatch(Boolean::valueOf);

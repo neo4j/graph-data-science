@@ -23,10 +23,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.util.function.DoubleConsumer;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.AdditionalMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.mock;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.verify;
  *
  * S->X: {S,G,H,I,X}:8, {S,D,E,F,X}:12, {S,A,B,C,X}:20
  */
-final class ShortestPathDeltaSteppingProcTest extends ProcTestBase {
+final class ShortestPathDeltaSteppingUndirectedProcTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -59,22 +59,20 @@ final class ShortestPathDeltaSteppingProcTest extends ProcTestBase {
             ", (i:Node {name: 'i'})" +
             ", (x:Node {name: 'x'})" +
 
-            ", (x)-[:TYPE {cost: 5}]->(s)" + // creates cycle
+            ", (s)-[:TYPE {cost :5}]->(a)" + // line 1
+            ", (a)-[:TYPE {cost :5}]->(b)" +
+            ", (b)-[:TYPE {cost :5}]->(c)" +
+            ", (c)-[:TYPE {cost :5}]->(x)" +
 
-            ", (s)-[:TYPE {cost: 5}]->(a)" + // line 1
-            ", (a)-[:TYPE {cost: 5}]->(b)" +
-            ", (b)-[:TYPE {cost: 5}]->(c)" +
-            ", (c)-[:TYPE {cost: 5}]->(x)" +
+            ", (s)-[:TYPE {cost :3}]->(d)" + // line 2
+            ", (d)-[:TYPE {cost :3}]->(e)" +
+            ", (e)-[:TYPE {cost :3}]->(f)" +
+            ", (f)-[:TYPE {cost :3}]->(x)" +
 
-            ", (s)-[:TYPE {cost: 3}]->(d)" + // line 2
-            ", (d)-[:TYPE {cost: 3}]->(e)" +
-            ", (e)-[:TYPE {cost: 3}]->(f)" +
-            ", (f)-[:TYPE {cost: 3}]->(x)" +
-
-            ", (s)-[:TYPE {cost: 2}]->(g)" + // line 3
-            ", (g)-[:TYPE {cost: 2}]->(h)" +
-            ", (h)-[:TYPE {cost: 2}]->(i)" +
-            ", (i)-[:TYPE {cost: 2}]->(x)";
+            ", (s)-[:TYPE {cost :2}]->(g)" + // line 3
+            ", (g)-[:TYPE {cost :2}]->(h)" +
+            ", (h)-[:TYPE {cost :2}]->(i)" +
+            ", (i)-[:TYPE {cost :2}]->(x)";
 
     @BeforeEach
     void setup() throws KernelException {
@@ -89,34 +87,13 @@ final class ShortestPathDeltaSteppingProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    void testResultStream(String graphName) {
-
-        final DoubleConsumer consumer = mock(DoubleConsumer.class);
-
-        final String cypher =
-                "MATCH(n:Node {name:'s'}) " +
-                "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "'}) " +
-                "YIELD nodeId, distance RETURN nodeId, distance";
-
-        db.execute(cypher).accept(row -> {
-            double distance = row.getNumber("distance").doubleValue();
-            consumer.accept(distance);
-            return true;
-        });
-
-        verify(consumer, times(11)).accept(anyDouble());
-        verify(consumer, times(1)).accept(eq(8D, 0.1D));
-    }
-
-    @AllGraphNamesTest
     void testOutgoingResultStream(String graphName) {
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
-        final String cypher =
-                "MATCH(n:Node {name:'s'}) " +
-                "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "', direction: 'INCOMING'}) " +
-                "YIELD nodeId, distance RETURN nodeId, distance";
+        final String cypher = "MATCH(n:Node {name:'x'}) " +
+                              "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "', direction: 'OUTGOING'}) " +
+                              "YIELD nodeId, distance RETURN nodeId, distance";
 
         db.execute(cypher).accept(row -> {
             double distance = row.getNumber("distance").doubleValue();
@@ -125,34 +102,25 @@ final class ShortestPathDeltaSteppingProcTest extends ProcTestBase {
         });
 
         verify(consumer, times(11)).accept(anyDouble());
-        verify(consumer, times(1)).accept(eq(8D, 0.1D));
+        verify(consumer, times(10)).accept(eq(Double.POSITIVE_INFINITY, 0.1D));
     }
 
     @AllGraphNamesTest
-    void testWriteBack(String graphName) {
-
-        final String matchCypher =
-                "MATCH(n:Node {name:'s'}) " +
-                "WITH n CALL algo.shortestPath.deltaStepping(n, 'cost', 3.0, {write:true, writeProperty:'sp', graph:'" + graphName + "'}) " +
-                "YIELD nodeCount, loadDuration, evalDuration, writeDuration RETURN nodeCount, loadDuration, evalDuration, writeDuration";
-
-        db.execute(matchCypher).accept(row -> {
-            long writeDuration = row.getNumber("writeDuration").longValue();
-            assertNotEquals(-1L, writeDuration);
-            return false;
-        });
+    void testUndirectedResultStream(String graphName) {
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
-        final String testCypher = "MATCH(n:Node) WHERE exists(n.sp) WITH n RETURN id(n) as id, n.sp as sp";
+        final String cypher = "MATCH(n:Node {name:'x'}) " +
+                              "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "'}) " +
+                              "YIELD nodeId, distance RETURN nodeId, distance";
 
-        db.execute(testCypher).accept(row -> {
-            double sp = row.getNumber("sp").doubleValue();
-            consumer.accept(sp);
+        db.execute(cypher).accept(row -> {
+            double distance = row.getNumber("distance").doubleValue();
+            consumer.accept(distance);
             return true;
         });
 
         verify(consumer, times(11)).accept(anyDouble());
-        verify(consumer, times(1)).accept(eq(8D, 0.1D));
+        verify(consumer, times(1)).accept(eq(8, 0.1D));
     }
 }

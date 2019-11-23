@@ -19,15 +19,13 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -45,7 +43,7 @@ import static org.mockito.Mockito.verify;
  *
  * S->X: {S,G,H,I,X}:8, {S,D,E,F,X}:12, {S,A,B,C,X}:20
  */
-final class WeightedAllShortestPathsProcTest {
+final class WeightedAllShortestPathsProcTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -80,25 +78,22 @@ final class WeightedAllShortestPathsProcTest {
 
     private static long startNodeId;
     private static long targetNodeId;
-    private static GraphDatabaseAPI DB;
 
-    @BeforeAll
-    static void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER);
-        DB.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(AllShortestPathsProc.class);
-        try (Transaction tx = DB.beginTx()) {
-            startNodeId = DB.findNode(Label.label("Node"), "name", "s").getId();
-            targetNodeId = DB.findNode(Label.label("Node"), "name", "x").getId();
+    @BeforeEach
+    void setup() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        db.execute(DB_CYPHER);
+        registerProcedures(AllShortestPathsProc.class);
+        try (Transaction tx = db.beginTx()) {
+            startNodeId = db.findNode(Label.label("Node"), "name", "s").getId();
+            targetNodeId = db.findNode(Label.label("Node"), "name", "x").getId();
             tx.success();
         }
     }
 
-    @AfterAll
-    static void shutdownGraph() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdownGraph() {
+        db.shutdown();
     }
 
     @AllGraphNamesTest
@@ -109,7 +104,7 @@ final class WeightedAllShortestPathsProcTest {
         final String cypher = "CALL algo.allShortestPaths.stream('', {graph:'" + graphName + "', direction: 'OUTGOING'}) " +
                               "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
 
-        DB.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();
@@ -134,7 +129,7 @@ final class WeightedAllShortestPathsProcTest {
         final String cypher = "CALL algo.allShortestPaths.stream('', {graph:'" + graphName + "', direction: 'INCOMING'}) " +
                               "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
 
-        DB.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();
@@ -159,7 +154,7 @@ final class WeightedAllShortestPathsProcTest {
         final String cypher = "CALL algo.allShortestPaths.stream('cost', {graph:'" + graphName + "', direction: 'OUTGOING'}) " +
                               "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
 
-        DB.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();

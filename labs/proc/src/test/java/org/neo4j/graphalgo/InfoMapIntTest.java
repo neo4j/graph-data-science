@@ -24,8 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.BitSet;
 
@@ -40,9 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *     (a)--(c)---(d)--(f)
  *
  */
-class InfoMapIntTest {
-
-    private GraphDatabaseAPI db;
+class InfoMapIntProcTest extends ProcTestBase {
 
     @BeforeEach
     void setupGraph() throws KernelException {
@@ -65,8 +61,7 @@ class InfoMapIntTest {
                 " (e)-[:TYPE {v:1.0}]->(f)";
 
         db.execute(cypher);
-        db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(InfoMapProc.class);
-        db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(ArticleRankProc.class);
+        registerProcedures(InfoMapProc.class, ArticleRankProc.class);
     }
 
     @AfterEach

@@ -77,6 +77,10 @@ public class ProcTestBase {
         }
     }
 
+    <T> T resolveDependency(Class<T> dependency) {
+        return db.getDependencyResolver().resolveDependency(dependency, ONLY);
+    }
+
     protected String getUsername() {
         return "";
     }

@@ -19,13 +19,12 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
@@ -46,17 +45,15 @@ import static org.mockito.Mockito.verify;
  *        (c)   (g)  (f)
  *          \  /T3\
  *          (h)--(i)
- *
- * @author mknblch
  */
-class TriangleProcTest {
+class TriangleProcTest extends ProcTestBase {
 
     private static final Label LABEL = Label.label("Node");
-    private static GraphDatabaseAPI api;
+    private static GraphDatabaseAPI db;
     private static String[] idToName;
 
-    @BeforeAll
-    static void setup() throws KernelException {
+    @BeforeEach
+    void setup() throws KernelException {
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -84,31 +81,29 @@ class TriangleProcTest {
                 " (h)-[:TYPE]->(i),\n" +
                 " (i)-[:TYPE]->(g)";
 
-        api = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createTestDatabase();
 
-        api.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(TriangleProc.class);
+        registerProcedures(TriangleProc.class);
 
-        try (Transaction tx = api.beginTx()) {
-            api.execute(cypher);
+        try (Transaction tx = db.beginTx()) {
+            db.execute(cypher);
             tx.success();
         }
 
         idToName = new String[9];
 
-        try (Transaction tx = api.beginTx()) {
+        try (Transaction tx = db.beginTx()) {
             for (int i = 0; i < 9; i++) {
-                final String name = (String) api.getNodeById(i).getProperty("name");
+                final String name = (String) db.getNodeById(i).getProperty("name");
                 idToName[i] = name;
             }
             tx.success();
         }
     }
 
-    @AfterAll
-    static void shutdownGraph() {
-        if (api != null) api.shutdown();
+    @AfterEach
+    void shutdownGraph() {
+        db.shutdown();
     }
 
     private static int idsum(String... names) {
@@ -127,7 +122,7 @@ class TriangleProcTest {
     void testTriangleCountWriteCypher() {
         final String cypher = "CALL algo.triangleCount('Node', '', {concurrency:4, write:true}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount";
-        api.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             final long loadMillis = row.getNumber("loadMillis").longValue();
             final long computeMillis = row.getNumber("computeMillis").longValue();
             final long writeMillis = row.getNumber("writeMillis").longValue();
@@ -142,7 +137,7 @@ class TriangleProcTest {
         });
 
         final String request = "MATCH (n) WHERE exists(n.triangles) RETURN n.triangles as t";
-        api.execute(request).accept(row -> {
+        db.execute(request).accept(row -> {
             final int triangles = row.getNumber("t").intValue();
             assertEquals(1, triangles);
             return true;
@@ -154,7 +149,7 @@ class TriangleProcTest {
     void testTriangleCountExp1WriteCypher() {
         final String cypher = "CALL algo.triangleCount.forkJoin('Node', '', {concurrency:4, write:true}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount";
-        api.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             final long loadMillis = row.getNumber("loadMillis").longValue();
             final long computeMillis = row.getNumber("computeMillis").longValue();
             final long writeMillis = row.getNumber("writeMillis").longValue();
@@ -169,7 +164,7 @@ class TriangleProcTest {
         });
 
         final String request = "MATCH (n) WHERE exists(n.triangles) RETURN n.triangles as t";
-        api.execute(request).accept(row -> {
+        db.execute(request).accept(row -> {
             final int triangles = row.getNumber("t").intValue();
             assertEquals(1, triangles);
             return true;
@@ -180,7 +175,7 @@ class TriangleProcTest {
     void testTriangleCountStream() {
         final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
         final String cypher = "CALL algo.triangleCount.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles";
-        api.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             final long nodeId = row.getNumber("nodeId").longValue();
             final long triangles = row.getNumber("triangles").longValue();
             mock.consume(nodeId, triangles);
@@ -193,7 +188,7 @@ class TriangleProcTest {
     void testTriangleCountExp1Stream() {
         final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
         final String cypher = "CALL algo.triangleCount.forkJoin.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles";
-        api.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             final long nodeId = row.getNumber("nodeId").longValue();
             final long triangles = row.getNumber("triangles").longValue();
             mock.consume(nodeId, triangles);
@@ -207,7 +202,7 @@ class TriangleProcTest {
         HashSet<Integer> sums = new HashSet<>();
         final TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
         final String cypher = "CALL algo.triangle.stream('Node', '', {concurrency:4}) YIELD nodeA, nodeB, nodeC";
-        api.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             final long nodeA = row.getNumber("nodeA").longValue();
             final long nodeB = row.getNumber("nodeB").longValue();
             final long nodeC = row.getNumber("nodeC").longValue();

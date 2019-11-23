@@ -21,14 +21,12 @@ package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.LongLongScatterMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.Consumer;
 
@@ -36,12 +34,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Disabled
-class MultistepSCCProcTest {
+class MultistepSCCProcTest extends ProcTestBase{
 
-    private static GraphDatabaseAPI api;
-
-    @BeforeAll
-    static void setup() throws KernelException {
+    @BeforeEach
+    void setup() throws KernelException {
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -68,21 +64,18 @@ class MultistepSCCProcTest {
                 " (h)-[:TYPE {cost:3}]->(i),\n" +
                 " (i)-[:TYPE {cost:3}]->(g)";
 
-        api = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = api.beginTx()) {
-            api.execute(cypher);
+        db = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = db.beginTx()) {
+            db.execute(cypher);
             tx.success();
         }
 
-
-        api.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(StronglyConnectedComponentsProc.class);
+        registerProcedures(StronglyConnectedComponentsProc.class);
     }
 
-    @AfterAll
-    static void shutdownGraph() {
-        api.shutdown();
+    @AfterEach
+    void shutdownGraph() {
+        db.shutdown();
     }
 
     @Test
@@ -91,7 +84,7 @@ class MultistepSCCProcTest {
                 "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize " +
                 "RETURN loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize";
 
-        api.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
 
             assertTrue(row.getNumber("loadMillis").longValue() > 0L);
             assertTrue(row.getNumber("computeMillis").longValue() > 0L);
@@ -109,7 +102,7 @@ class MultistepSCCProcTest {
     void testStream() {
         String cypher = "CALL algo.scc.multistep.stream('Node', 'TYPE', {write:true, concurrency:4, cutoff:0}) YIELD nodeId, cluster RETURN nodeId, cluster";
         final LongLongScatterMap testMap = new LongLongScatterMap();
-        api.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             testMap.addTo(row.getNumber("cluster").longValue(), 1);
             return true;
         });

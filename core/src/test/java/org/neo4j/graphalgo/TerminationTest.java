@@ -57,7 +57,7 @@ class TerminationTest extends ProcTestBase {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(TerminateProcedure.class);
-        kernelTransactions = db.getDependencyResolver().resolveDependency(KernelTransactions.class, ONLY);
+        kernelTransactions = resolveDependency(KernelTransactions.class);
     }
 
     @AfterEach

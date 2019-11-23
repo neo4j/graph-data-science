@@ -19,47 +19,44 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.unionfind.MSColoringProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class EmptyGraphProcTest {
+class EmptyGraphProcTest extends ProcTestBase {
 
-    private static GraphDatabaseAPI db;
-
-    @BeforeAll
-    static void setup() throws KernelException {
+    @BeforeEach
+    void setup() throws KernelException {
 
         db = TestDatabaseCreator.createTestDatabase();
 
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(MSColoringProc.class);
-        procedures.registerProcedure(StronglyConnectedComponentsProc.class);
-        procedures.registerProcedure(AllShortestPathsProc.class);
-        procedures.registerProcedure(BetweennessCentralityProc.class);
-        procedures.registerProcedure(ClosenessCentralityProc.class);
-        procedures.registerProcedure(TriangleProc.class);
-        procedures.registerProcedure(DangalchevCentralityProc.class);
-        procedures.registerProcedure(HarmonicCentralityProc.class);
-        procedures.registerProcedure(KSpanningTreeProc.class);
-        procedures.registerProcedure(PrimProc.class);
-        procedures.registerProcedure(ShortestPathProc.class);
-        procedures.registerProcedure(ShortestPathsProc.class);
-        procedures.registerProcedure(KShortestPathsProc.class);
-        procedures.registerProcedure(ShortestPathDeltaSteppingProc.class);
+        registerProcedures(
+            AllShortestPathsProc.class,
+            BetweennessCentralityProc.class,
+            ClosenessCentralityProc.class,
+            DangalchevCentralityProc.class,
+            HarmonicCentralityProc.class,
+            KShortestPathsProc.class,
+            KSpanningTreeProc.class,
+            MSColoringProc.class,
+            PrimProc.class,
+            ShortestPathDeltaSteppingProc.class,
+            ShortestPathProc.class,
+            ShortestPathsProc.class,
+            StronglyConnectedComponentsProc.class,
+            TriangleProc.class
+        );
     }
 
-    @AfterAll
-    static void tearDown() {
-        if (db != null) db.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     private String graphImpl = "huge";

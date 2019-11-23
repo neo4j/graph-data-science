@@ -19,15 +19,14 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -46,16 +45,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  *       (4)--(5)--(1)
  *         \  /  \ /
  *         (3)---(2)
- *
- * @author mknblch
  */
-class UtilityProcsTest {
+class UtilityProcsTest extends ProcTestBase {
 
-    private static GraphDatabaseAPI DB;
+    private static GraphDatabaseAPI db;
 
-    @BeforeAll
-    static void setupGraph() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
+    @BeforeEach
+    void setupGraph() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -64,13 +61,13 @@ class UtilityProcsTest {
                 "CREATE (e:Node {name:'e'})\n" +
                 "CREATE (f:Node {name:'f'})\n";
 
-        DB.execute(cypher);
-        DB.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(UtilityProc.class);
+        db.execute(cypher);
+        registerProcedures(UtilityProc.class);
     }
 
-    @AfterAll
-    static void teardownGraph() {
-        DB.shutdown();
+    @AfterEach
+    void teardownGraph() {
+        db.shutdown();
     }
 
     @Test
@@ -79,7 +76,7 @@ class UtilityProcsTest {
 
         List<Node> expectedNodes = getNodes("a", "b", "c");
 
-        DB.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             Path path = (Path) row.get("path");
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
             assertEquals(expectedNodes, actualNodes);
@@ -94,7 +91,7 @@ class UtilityProcsTest {
         List<Node> expectedNodes = getNodes("a", "b", "c");
         List<Double> expectedCosts = Arrays.asList(0.1, 0.2);
 
-        DB.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             Path path = (Path) row.get("path");
 
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
@@ -111,7 +108,7 @@ class UtilityProcsTest {
     @Test
     void shouldThrowExceptionIfNotEnoughCostsProvided() {
         String cypher = "CALL algo.asPath([0,1,2], [0.1], {cumulativeWeights: false})";
-        assertThrows(RuntimeException.class, () -> DB.execute(cypher).close(), "'weights' contains 1 values, but 2 values were expected");
+        assertThrows(RuntimeException.class, () -> db.execute(cypher).close(), "'weights' contains 1 values, but 2 values were expected");
     }
 
     @Test
@@ -121,7 +118,7 @@ class UtilityProcsTest {
         List<Node> expectedNodes = getNodes("a", "b", "c");
         List<Double> expectedCosts = Arrays.asList(40.0, 30.0);
 
-        DB.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
             Path path = (Path) row.get("path");
 
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
@@ -138,14 +135,14 @@ class UtilityProcsTest {
     @Test
     void shouldThrowExceptionIfNotEnoughCumulativeWeightsProvided() {
         String cypher = "CALL algo.asPath([0,1,2], [0, 40.0])";
-        assertThrows(RuntimeException.class, () -> DB.execute(cypher).close(), "'weights' contains 2 values, but 3 values were expected");
+        assertThrows(RuntimeException.class, () -> db.execute(cypher).close(), "'weights' contains 2 values, but 3 values were expected");
     }
 
     private List<Node> getNodes(String... nodes) {
         List<Node> nodeIds;
-        try (Transaction tx = DB.beginTx()) {
+        try (Transaction tx = db.beginTx()) {
             nodeIds = Arrays.stream(nodes)
-                    .map(name -> DB.findNode(Label.label("Node"), "name", name))
+                    .map(name -> db.findNode(Label.label("Node"), "name", name))
                     .collect(toList());
         }
         return nodeIds;
