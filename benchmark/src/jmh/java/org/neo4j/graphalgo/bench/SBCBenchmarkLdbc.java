@@ -23,18 +23,26 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.Threads;
+import org.openjdk.jmh.annotations.Timeout;
+import org.openjdk.jmh.annotations.Warmup;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-/**
- * @author mknobloch
- */
 @Threads(1)
 @Fork(value = 1, jvmArgs = {"-Xms4g", "-Xmx4g", "-XX:+UseG1GC"})
 @Warmup(iterations = 1, time = 1)
@@ -43,21 +51,17 @@ import java.util.function.Consumer;
 @BenchmarkMode(Mode.SingleShotTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @Timeout(time = 2, timeUnit = TimeUnit.HOURS)
-public class SBCBenchmarkLdbc {
+public class SBCBenchmarkLdbc extends BaseBenchmark {
 
-    private GraphDatabaseAPI db;
     private Transaction tx;
-
 
     @Param({"8"})
     int threads;
 
     @Setup
-    public void setup() throws KernelException, IOException {
+    public void setup() throws Exception {
         db = LdbcDownloader.openDb();
-
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(BetweennessCentralityProc.class);
+        registerProcedures(BetweennessCentralityProc.class);
     }
 
     @Setup(Level.Invocation)

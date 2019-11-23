@@ -19,6 +19,7 @@
 package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -31,9 +32,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.test.TestGraphDatabaseFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -53,9 +51,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author mknblch
- */
 @Threads(1)
 @Fork(1)
 @Warmup(iterations = 10, time = 1)
@@ -63,22 +58,18 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-public class AllShortestPathsComparisionBenchmark {
+public class AllShortestPathsComparisionBenchmark extends BaseBenchmark {
 
-    public static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
+    private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
 
-    private GraphDatabaseAPI db;
     private List<Node> lines = new ArrayList<>();
 
     private final Map<String, Object> params = new HashMap<>();
     private Graph graph;
 
     @Setup
-    public void setup() throws KernelException {
-        db = (GraphDatabaseAPI)
-                new TestGraphDatabaseFactory()
-                        .newImpermanentDatabaseBuilder()
-                        .newGraphDatabase();
+    public void setup() {
+        db = TestDatabaseCreator.createTestDatabase();
 
         createNet(42); // 1764 nodes; 74088 edges
         params.put("head", lines.get(0).getId());

@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -55,9 +54,8 @@ import static org.neo4j.graphdb.Direction.OUTGOING;
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-public class ExportRelationshipsBenchmark {
+public class ExportRelationshipsBenchmark extends BaseBenchmark {
 
-    private GraphDatabaseAPI db;
     private Graph graph;
 
     @Param(value = {"1"})

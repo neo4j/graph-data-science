@@ -18,6 +18,7 @@
  */
 package org.neo4j.graphalgo.bench;
 
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -27,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.impl.multistepscc.MultistepSCC;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
@@ -36,7 +36,6 @@ import org.neo4j.internal.kernel.api.exceptions.TransactionFailureException;
 import org.neo4j.io.fs.FileUtils;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -55,9 +54,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author mknblch
- */
 @Threads(1)
 @Fork(value = 1, jvmArgs = {"-Xms4G", "-Xmx4G"})
 @Warmup(iterations = 5, time = 1)
@@ -65,44 +61,28 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
-public class MultistepSCCBenchmark {
+public class MultistepSCCBenchmark extends BaseBenchmark {
 
-    public static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
+    private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
+    private static final File STORE_DIR = new File("/tmp/graph.db");
+    private static final int NUM_SETS = 20;
 
-    private static GraphDatabaseAPI db;
+    private Graph graph;
+    private ThreadToStatementContextBridge bridge;
 
-    private static Graph graph;
-
-    private static ThreadToStatementContextBridge bridge;
-
-    public static final String GRAPH_DIRECTORY = "/tmp/graph.db";
-
-    private static File storeDir = new File(GRAPH_DIRECTORY);
-
-    public static int numSets = 20;
 
     @Setup
-    public static void setup() throws Exception {
-
-        FileUtils.deleteRecursively(storeDir);
-        if (storeDir.exists()) {
-            throw new IllegalStateException("could not delete " + storeDir);
+    public void setup() throws Exception {
+        FileUtils.deleteRecursively(STORE_DIR);
+        if (STORE_DIR.exists()) {
+            throw new IllegalStateException("could not delete " + STORE_DIR);
         }
 
-        if (null != db) {
-            db.shutdown();
-        }
-
-        db = (GraphDatabaseAPI) new GraphDatabaseFactory()
-                .newEmbeddedDatabaseBuilder(storeDir)
-                .setConfig(GraphDatabaseSettings.pagecache_memory, "4G")
-                .newGraphDatabase();
-
-        bridge = db.getDependencyResolver()
-                .resolveDependency(ThreadToStatementContextBridge.class);
+        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.pagecache_memory, "4G"));
+        bridge = resolveDependency(ThreadToStatementContextBridge.class);
 
         try (ProgressTimer timer = ProgressTimer.start(l -> System.out.println("creating test graph took " + l + " ms"))) {
-            createTestGraph(numSets, 10_000);
+            createTestGraph(NUM_SETS, 10_000);
         }
 
         graph = new GraphLoader(db)
@@ -118,14 +98,14 @@ public class MultistepSCCBenchmark {
         db.shutdown();
         Pools.DEFAULT.shutdownNow();
 
-        FileUtils.deleteRecursively(storeDir);
-        if (storeDir.exists()) {
+        FileUtils.deleteRecursively(STORE_DIR);
+        if (STORE_DIR.exists()) {
             throw new IllegalStateException("Could not delete graph");
         }
     }
 
 
-    private static void createTestGraph(int sets, int setSize) throws Exception {
+    private void createTestGraph(int sets, int setSize) throws Exception {
         final int rIdx;
         try (Transaction tx = db.beginTx();
              KernelTransaction stm = bridge.getKernelTransactionBoundToThisThread(true)) {
@@ -142,7 +122,7 @@ public class MultistepSCCBenchmark {
         ParallelUtil.run(runnables, Pools.DEFAULT);
     }
 
-    private static Runnable createRing(int size, int rIdx) throws Exception {
+    private Runnable createRing(int size, int rIdx) {
         return () -> {
             try (Transaction tx = db.beginTx();
                  KernelTransaction stm = bridge.getKernelTransactionBoundToThisThread(true)) {
