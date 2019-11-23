@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.queue.BoundedLongLongPriorityQueue;
+import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 
 import java.util.Comparator;
 import java.util.Iterator;
