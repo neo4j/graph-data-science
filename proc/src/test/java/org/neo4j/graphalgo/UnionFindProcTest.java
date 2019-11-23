@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class UnionFindProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         String createGraph =
                 "CREATE" +
                 " (nA:Label {nodeId: 0, seed: 42})" +

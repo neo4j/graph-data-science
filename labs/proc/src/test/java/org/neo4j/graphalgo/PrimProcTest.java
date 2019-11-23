@@ -46,7 +46,7 @@ public class PrimProcTest extends ProcTestBase {
     }
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         String cypher = "CREATE(a:Node {start:true}) " +
                 "CREATE(b:Node) " +
                 "CREATE(c:Node) " +

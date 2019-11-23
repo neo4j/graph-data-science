@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class GetNodeFuncTest extends ProcTestBase {
 
     @BeforeEach
-    void setUp() throws RegistrationException {
+    void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
         registerProcedures(Procedures.class);
         registerFunctions(GetNodeFunc.class);

@@ -39,7 +39,7 @@ import static org.neo4j.helpers.collection.MapUtil.map;
 class VersionFuncTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerFunctions(VersionFunc.class);
     }

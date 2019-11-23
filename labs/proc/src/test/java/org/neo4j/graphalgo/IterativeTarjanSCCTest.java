@@ -69,7 +69,7 @@ class IterativeTarjanSCCTest extends ConnectedComponentsTest {
             ", (i)-[:TYPE {cost: 3}]->(g)";
 
     @BeforeEach
-    void setupGraphDb() throws RegistrationException {
+    void setupGraphDb() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(StronglyConnectedComponentsProc.class);
         db.execute(DB_CYPHER);

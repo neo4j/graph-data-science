@@ -76,7 +76,7 @@ final class ShortestPathDeltaSteppingProcTest extends ProcTestBase {
             ", (i)-[:TYPE {cost: 2}]->(x)";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ShortestPathDeltaSteppingProc.class);
         db.execute(DB_CYPHER);

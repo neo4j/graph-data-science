@@ -75,7 +75,7 @@ class PearsonProcTest extends ProcTestBase {
             "RETURN *";
 
     @BeforeEach
-    void beforeClass() throws RegistrationException {
+    void beforeClass() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(PearsonProc.class);
         registerFunctions(IsFiniteFunc.class);

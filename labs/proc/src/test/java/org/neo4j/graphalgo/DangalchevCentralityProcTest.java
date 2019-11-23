@@ -54,7 +54,7 @@ class DangalchevCentralityProcTest extends ProcTestBase {
     private TestConsumer consumer;
 
     @BeforeEach
-    void setupGraph() throws RegistrationException {
+    void setupGraph() throws Exception {
 
         db = TestDatabaseCreator.createTestDatabase();
 
@@ -91,10 +91,10 @@ class DangalchevCentralityProcTest extends ProcTestBase {
     }
 
     @Test
-    void testClosenessStream() throws Exception {
+    void testClosenessStream() throws java.lang.Exception {
 
         db.execute("CALL algo.closeness.dangalchev.stream('Node', 'TYPE') YIELD nodeId, centrality")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     consumer.accept(
                             row.getNumber("nodeId").longValue(),
                             row.getNumber("centrality").doubleValue());
@@ -105,11 +105,11 @@ class DangalchevCentralityProcTest extends ProcTestBase {
     }
 
     @Test
-    void testClosenessWrite() throws Exception {
+    void testClosenessWrite() throws java.lang.Exception {
 
         db.execute("CALL algo.closeness.dangalchev('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
                 "nodes, loadMillis, computeMillis, writeMillis")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     assertNotEquals(-1L, row.getNumber("writeMillis"));
                     assertNotEquals(-1L, row.getNumber("computeMillis"));
                     assertNotEquals(-1L, row.getNumber("nodes"));

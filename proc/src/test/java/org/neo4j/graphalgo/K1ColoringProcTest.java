@@ -47,7 +47,7 @@ class K1ColoringProcTest extends ProcTestBase {
         ",(a)-[:REL]->(c)";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(K1ColoringProc.class, GraphLoadProc.class);
         db.execute(DB_CYPHER);

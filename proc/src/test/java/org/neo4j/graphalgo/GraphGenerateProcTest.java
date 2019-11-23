@@ -57,7 +57,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_
 class GraphGenerateProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphGenerateProc.class);
     }

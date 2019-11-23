@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 class ShortestPathAStarProcTest extends ProcTestBase {
 	
 	@BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
 		/* Singapore to Chiba
 		 * Path nA (0NM) -> nB (29NM) -> nC (723NM) -> nD (895NM) -> nE (996NM) -> nF (1353NM)
 		 * 	    nG (1652NM) -> nH (2392NM) -> nX (2979NM)

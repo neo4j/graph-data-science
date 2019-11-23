@@ -73,7 +73,7 @@ class CosineProcTest extends ProcTestBase {
             "RETURN *";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(CosineProc.class);
         registerFunctions(IsFiniteFunc.class);

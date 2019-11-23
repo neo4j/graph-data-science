@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.TestSupport.toArguments;
 public class WritingProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             LabelPropagationProc.class,

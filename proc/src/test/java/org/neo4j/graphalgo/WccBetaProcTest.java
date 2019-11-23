@@ -45,7 +45,7 @@ import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_THRESHOLD;
 class WccBetaProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         String createGraph = "CREATE" +
                              " (nA:Label {nodeId: 0, seedId: 42})" +
                              ",(nB:Label {nodeId: 1, seedId: 42})" +

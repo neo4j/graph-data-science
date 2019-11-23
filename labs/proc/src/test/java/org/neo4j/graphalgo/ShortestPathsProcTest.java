@@ -85,7 +85,7 @@ final class ShortestPathsProcTest extends ProcTestBase {
     private static GraphDatabaseAPI db;
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ShortestPathsProc.class);
 

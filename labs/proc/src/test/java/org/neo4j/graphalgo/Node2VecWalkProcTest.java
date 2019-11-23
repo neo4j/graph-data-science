@@ -49,7 +49,7 @@ class Node2VecWalkProcTest extends ProcTestBase {
     private Transaction tx;
 
     @BeforeEach
-    void beforeClass() throws RegistrationException {
+    void beforeClass() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(NodeWalkerProc.class);
         db.execute(buildDatabaseQuery(), Collections.singletonMap("count",NODE_COUNT-4)).close();

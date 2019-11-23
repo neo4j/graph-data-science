@@ -54,7 +54,7 @@ class ShortestPathProcTest599 extends ProcTestBase {
             "";
 
     @BeforeEach
-    void setupGraphDb() throws RegistrationException {
+    void setupGraphDb() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
         registerProcedures(ShortestPathProc.class);

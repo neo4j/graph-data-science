@@ -73,7 +73,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
             ", (b)-[:X]->(:B {id: 11, weight: 8.0, score: 8.0, seed: 2})";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(LabelPropagationProc.class, GraphLoadProc.class);
         db.execute(DB_CYPHER);

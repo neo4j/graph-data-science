@@ -53,7 +53,7 @@ class MemRecProcTest extends ProcTestBase {
     private static final long RELATIONSHIP_COUNT = 5L;
 
     @BeforeEach
-    void setUp() throws RegistrationException {
+    void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
                 GraphLoadProc.class,

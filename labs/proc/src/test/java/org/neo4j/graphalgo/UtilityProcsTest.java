@@ -50,7 +50,7 @@ class UtilityProcsTest extends ProcTestBase {
     private static GraphDatabaseAPI db;
 
     @BeforeEach
-    void setupGraph() throws RegistrationException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +

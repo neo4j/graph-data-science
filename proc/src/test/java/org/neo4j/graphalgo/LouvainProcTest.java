@@ -58,7 +58,7 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
     );
 
     @BeforeEach
-    void setupGraph() throws RegistrationException {
+    void setupGraph() throws Exception {
 
         db = TestDatabaseCreator.createTestDatabase();
 

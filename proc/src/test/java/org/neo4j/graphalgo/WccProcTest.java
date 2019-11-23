@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class WccProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         String createGraph = "CREATE" +
                 " (nA:Label {nodeId: 0, seedId: 42})" +
                 ",(nB:Label {nodeId: 1, seedId: 42})" +

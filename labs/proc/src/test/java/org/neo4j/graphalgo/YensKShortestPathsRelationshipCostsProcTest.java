@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class YensKShortestPathsRelationshipCostsProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setupGraph() throws RegistrationException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +

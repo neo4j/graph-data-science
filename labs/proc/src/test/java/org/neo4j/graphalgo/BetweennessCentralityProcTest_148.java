@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verify;
 class BetweennessCentralityProcTest_148 extends ProcTestBase {
 
     @BeforeEach
-    void setupGraph() throws RegistrationException {
+    void setupGraph() throws Exception {
 
         db = TestDatabaseCreator.createTestDatabase();
 
@@ -83,7 +83,7 @@ class BetweennessCentralityProcTest_148 extends ProcTestBase {
     }
 
     @Test
-    void testBCStreamDirectionBoth() throws Exception {
+    void testBCStreamDirectionBoth() throws java.lang.Exception {
 
         final Consumer mock = mock(Consumer.class);
         final String evalQuery = "CALL algo.betweenness.stream('User', 'FRIEND', {direction:'B'}) YIELD nodeId, centrality";

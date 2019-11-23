@@ -44,7 +44,7 @@ class ShortestPathProcTest_152 extends ProcTestBase {
     private static long endNodeId;
 
     @BeforeEach
-    void setupGraph() throws RegistrationException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Loc{name:'A'}), " +

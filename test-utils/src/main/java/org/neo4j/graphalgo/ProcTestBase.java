@@ -63,25 +63,17 @@ public class ProcTestBase {
         GraphCatalog.removeAllLoadedGraphs();
     }
 
-    void registerFunctions(Class<?>... functionClasses) throws RegistrationException {
-        final Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
-        try {
-            for (Class<?> clazz : functionClasses) {
-                procedures.registerFunction(clazz);
-            }
-        } catch (KernelException e) {
-            throw new RegistrationException(e.getMessage(), e);
+    void registerFunctions(Class<?>... functionClasses) throws KernelException {
+        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
+        for (Class<?> clazz : functionClasses) {
+            procedures.registerFunction(clazz);
         }
     }
 
-    void registerProcedures(Class<?>... procedureClasses) throws RegistrationException {
-        final Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
-        try {
-            for (Class<?> clazz : procedureClasses) {
-                procedures.registerProcedure(clazz);
-            }
-        } catch (KernelException e) {
-            throw new RegistrationException(e.getMessage(), e);
+    void registerProcedures(Class<?>... procedureClasses) throws KernelException {
+        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
+        for (Class<?> clazz : procedureClasses) {
+            procedures.registerProcedure(clazz);
         }
     }
 
@@ -291,7 +283,7 @@ public class ProcTestBase {
         try {
             db.execute(query, queryParameters);
             fail(format("Expected an exception to be thrown by query:\n%s", query));
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             assertThat(e, containsMessage(messageSubstring));
         }
     }

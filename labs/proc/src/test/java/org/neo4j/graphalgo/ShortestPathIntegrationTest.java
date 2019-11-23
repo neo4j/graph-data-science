@@ -53,7 +53,7 @@ class ShortestPathIntegrationTest extends ProcTestBase {
             ", (nD)-[:TYPE {cost: 2.0}]->(nX)";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
         registerProcedures(ShortestPathProc.class);
@@ -65,13 +65,13 @@ class ShortestPathIntegrationTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    void noWeightStream(String graphName) throws Exception {
+    void noWeightStream(String graphName) throws java.lang.Exception {
         PathConsumer consumer = mock(PathConsumer.class);
         db.execute(
                 String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
                         "CALL algo.shortestPath.stream(start, end, '', { graph: '%s' }) " +
                         "YIELD nodeId, cost RETURN nodeId, cost", graphName))
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     consumer.accept((Long) row.getNumber("nodeId"), (Double) row.getNumber("cost"));
                     return true;
                 });
@@ -81,13 +81,13 @@ class ShortestPathIntegrationTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    void noWeightWrite(String graphName) throws Exception {
+    void noWeightWrite(String graphName) throws java.lang.Exception {
         db.execute(
                 String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
                         "CALL algo.shortestPath(start, end, '', { graph: '%s' }) " +
                         "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
                         "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost", graphName))
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     assertEquals(1.0, (Double) row.getNumber("totalCost"), 0.01);
                     assertEquals(2L, row.getNumber("nodeCount"));
                     assertNotEquals(-1L, row.getNumber("loadMillis"));
@@ -113,13 +113,13 @@ class ShortestPathIntegrationTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    void testDijkstraStream(String graphName) throws Exception {
+    void testDijkstraStream(String graphName) throws java.lang.Exception {
         PathConsumer consumer = mock(PathConsumer.class);
         db.execute(
                 String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
                         "CALL algo.shortestPath.stream(start, end, 'cost',{graph:'%s'}) " +
                         "YIELD nodeId, cost RETURN nodeId, cost", graphName))
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     consumer.accept((Long) row.getNumber("nodeId"), (Double) row.getNumber("cost"));
                     return true;
                 });
@@ -131,14 +131,14 @@ class ShortestPathIntegrationTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    void testDijkstra(String graphName) throws Exception {
+    void testDijkstra(String graphName) throws java.lang.Exception {
         db.execute(
                 String.format(
                         "MATCH (start:Node {type:'start'}), (end:Node {type:'end'}) " +
                         "CALL algo.shortestPath(start, end, 'cost',{graph:'%s', write:true, writeProperty:'cost'}) " +
                         "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
                         "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost", graphName))
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     assertEquals(3.0, (Double) row.getNumber("totalCost"), 10E2);
                     assertEquals(4L, row.getNumber("nodeCount"));
                     assertNotEquals(-1L, row.getNumber("loadMillis"));

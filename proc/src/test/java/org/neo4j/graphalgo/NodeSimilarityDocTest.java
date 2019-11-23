@@ -51,7 +51,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
         "CREATE (dave)-[:LIKES]->(bongos);";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );

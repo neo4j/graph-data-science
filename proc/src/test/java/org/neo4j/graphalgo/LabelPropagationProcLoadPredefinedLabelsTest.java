@@ -50,7 +50,7 @@ class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
             ", (g:G {id: 6, community: 29})";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = (GraphDatabaseAPI) new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder()
                 .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")

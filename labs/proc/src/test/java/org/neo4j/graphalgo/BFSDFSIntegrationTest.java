@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 class BFSDFSIntegrationTest extends ProcTestBase {
 
     @BeforeEach
-    void setupGraph() throws RegistrationException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +

@@ -42,7 +42,7 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
     private static final Map<Long, Double> expected = new HashMap<>();
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         ClassLoader classLoader = EigenvectorCentralityProcTest.class.getClassLoader();
         File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
 

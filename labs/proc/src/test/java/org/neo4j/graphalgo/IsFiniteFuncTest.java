@@ -22,8 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class IsFiniteFuncTest extends ProcTestBase {
 
     @BeforeEach
-    void setUp() throws RegistrationException {
+    void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerFunctions(IsFiniteFunc.class);
     }

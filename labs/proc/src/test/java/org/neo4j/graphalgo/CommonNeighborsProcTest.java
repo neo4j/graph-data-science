@@ -55,7 +55,7 @@ class CommonNeighborsProcTest extends ProcTestBase {
             "MERGE (praveena)-[:FRIENDS]-(michael)";
 
     @BeforeEach
-    void setUp() throws RegistrationException {
+    void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
         registerFunctions(LinkPredictionFunc.class);
         db.execute(DB_CYPHER).close();

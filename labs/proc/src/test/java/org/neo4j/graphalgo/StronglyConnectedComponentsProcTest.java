@@ -52,7 +52,7 @@ class StronglyConnectedComponentsProcTest extends ProcTestBase {
     private static GraphDatabaseAPI db;
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
         registerProcedures(GraphLoadProc.class, StronglyConnectedComponentsProc.class);

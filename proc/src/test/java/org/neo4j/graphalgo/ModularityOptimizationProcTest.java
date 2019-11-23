@@ -58,7 +58,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
 
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ModularityOptimizationProc.class, GraphLoadProc.class);
         db.execute(DB_CYPHER);

@@ -33,7 +33,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 class BalancedTriadsProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" + // center node

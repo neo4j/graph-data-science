@@ -50,7 +50,7 @@ class TriangleProcTest extends ProcTestBase {
     private static String[] idToName;
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +

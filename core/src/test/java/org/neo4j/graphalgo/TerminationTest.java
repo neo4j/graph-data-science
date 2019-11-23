@@ -52,7 +52,7 @@ class TerminationTest extends ProcTestBase {
     private KernelTransactions kernelTransactions;
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(TerminateProcedure.class);
         kernelTransactions = resolveDependency(KernelTransactions.class);
@@ -93,14 +93,14 @@ class TerminationTest extends ProcTestBase {
     }
 
     // execute query as usual but also submits a termination thread which kills the tx after a timeout
-    private void executeAndKill(Result.ResultVisitor<? extends Exception> visitor) {
+    private void executeAndKill(Result.ResultVisitor<? extends java.lang.Exception> visitor) {
         final ArrayList<Runnable> runnables = new ArrayList<>();
 
         // add query runnable
         runnables.add(() -> {
             try {
                 db.execute(TerminationTest.QUERY).accept(visitor);
-            } catch (Exception e) {
+            } catch (java.lang.Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }

@@ -46,7 +46,7 @@ class EigenvectorCentralityNormalizationProcTest extends ProcTestBase {
     }
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         ClassLoader classLoader = EigenvectorCentralityNormalizationProcTest.class.getClassLoader();
         File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
 

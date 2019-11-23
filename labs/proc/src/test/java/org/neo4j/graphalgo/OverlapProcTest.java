@@ -66,7 +66,7 @@ class OverlapProcTest extends ProcTestBase {
             "RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(OverlapProc.class);
         db.execute(buildDatabaseQuery()).close();

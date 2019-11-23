@@ -98,7 +98,7 @@ class ListProcTest extends ProcTestBase {
     private static final List<String> ALL = Stream.concat(PROCEDURES.stream(), FUNCTIONS.stream()).collect(Collectors.toList());
 
     @BeforeEach
-    void setUp() throws RegistrationException {
+    void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphLoadProc.class,

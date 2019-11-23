@@ -54,7 +54,7 @@ class HarmonicCentralityProcTest extends ProcTestBase {
     private TestConsumer consumer;
 
     @BeforeEach
-    void setupGraph() throws RegistrationException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         builder = GraphBuilder.create(db)
                 .setLabel("Node")
@@ -93,10 +93,10 @@ class HarmonicCentralityProcTest extends ProcTestBase {
     }
 
     @Test
-    void testHarmonicStream() throws Exception {
+    void testHarmonicStream() throws java.lang.Exception {
 
         db.execute("CALL algo.closeness.harmonic.stream('Node', 'TYPE') YIELD nodeId, centrality")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     consumer.accept(
                             row.getNumber("nodeId").longValue(),
                             row.getNumber("centrality").doubleValue());
@@ -108,10 +108,10 @@ class HarmonicCentralityProcTest extends ProcTestBase {
 
 
     @Test
-    void testHugeHarmonicStream() throws Exception {
+    void testHugeHarmonicStream() throws java.lang.Exception {
 
         db.execute("CALL algo.closeness.harmonic.stream('Node', 'TYPE', {graph:'huge'}) YIELD nodeId, centrality")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     consumer.accept(
                             row.getNumber("nodeId").longValue(),
                             row.getNumber("centrality").doubleValue());
@@ -122,11 +122,11 @@ class HarmonicCentralityProcTest extends ProcTestBase {
     }
 
     @Test
-    void testHarmonicWrite() throws Exception {
+    void testHarmonicWrite() throws java.lang.Exception {
 
         db.execute("CALL algo.closeness.harmonic('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
                 "nodes, loadMillis, computeMillis, writeMillis")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     assertNotEquals(-1L, row.getNumber("writeMillis"));
                     assertNotEquals(-1L, row.getNumber("computeMillis"));
                     assertNotEquals(-1L, row.getNumber("nodes"));
@@ -145,11 +145,11 @@ class HarmonicCentralityProcTest extends ProcTestBase {
     }
 
     @Test
-    void testHugeHarmonicWrite() throws Exception {
+    void testHugeHarmonicWrite() throws java.lang.Exception {
 
         db.execute("CALL algo.closeness.harmonic('','', {write:true, stats:true, writeProperty:'centrality', graph:'huge'}) YIELD " +
                 "nodes, loadMillis, computeMillis, writeMillis")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     assertNotEquals(-1L, row.getNumber("writeMillis"));
                     assertNotEquals(-1L, row.getNumber("computeMillis"));
                     assertNotEquals(-1L, row.getNumber("nodes"));

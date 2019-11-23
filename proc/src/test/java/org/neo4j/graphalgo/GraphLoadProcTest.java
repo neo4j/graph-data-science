@@ -93,7 +93,7 @@ class GraphLoadProcTest extends ProcTestBase {
             ", (b)-[:Z { weight: 42.0 }]->(:B {id: 11, weight: 8.0, partition: 2})";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphLoadProc.class,

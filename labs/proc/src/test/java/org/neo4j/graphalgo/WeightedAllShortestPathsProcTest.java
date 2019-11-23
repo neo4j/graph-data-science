@@ -79,7 +79,7 @@ final class WeightedAllShortestPathsProcTest extends ProcTestBase {
     private static long targetNodeId;
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
         registerProcedures(AllShortestPathsProc.class);

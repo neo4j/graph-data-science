@@ -64,7 +64,7 @@ class DegreeProcCypherLoadingProcTest extends ProcTestBase {
     }
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
             db.execute(DB_CYPHER).close();

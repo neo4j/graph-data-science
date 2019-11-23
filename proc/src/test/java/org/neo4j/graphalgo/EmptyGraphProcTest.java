@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class EmptyGraphProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             LabelPropagationProc.class,
@@ -57,9 +57,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    public void testUnionFind() throws Exception {
+    public void testUnionFind() throws java.lang.Exception {
         db.execute("CALL algo.unionFind('', '',{graph:'" + graphImpl + "'}) YIELD nodes")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });
@@ -72,9 +72,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    public void testWCC() throws Exception {
+    public void testWCC() throws java.lang.Exception {
         db.execute("CALL algo.beta.wcc('', '',{graph:'" + graphImpl + "'}) YIELD nodes")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });
@@ -88,18 +88,18 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     @Deprecated
-    public void testLabelDeprecatedPropagation() throws Exception {
+    public void testLabelDeprecatedPropagation() throws java.lang.Exception {
         db.execute("CALL algo.labelPropagation('', '', '', {graph:'" + graphImpl + "', writeProperty:'community'})")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });
     }
 
     @Test
-    public void testLabelBetaPropagation() throws Exception {
+    public void testLabelBetaPropagation() throws java.lang.Exception {
         db.execute("CALL algo.beta.labelPropagation('', '', {graph:'" + graphImpl + "', writeProperty:'community'})")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });
@@ -112,9 +112,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    public void testLouvain() throws Exception {
+    public void testLouvain() throws java.lang.Exception {
         db.execute("CALL algo.louvain('', '', {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });
@@ -127,9 +127,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    public void testPageRank() throws Exception {
+    public void testPageRank() throws java.lang.Exception {
         db.execute("CALL algo.pageRank('', '', {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<Exception>) row -> {
+                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });

@@ -40,7 +40,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
             ", (a)-[:X]->(b)";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(UnionFindProc.class);
         db.execute(DB_CYPHER);

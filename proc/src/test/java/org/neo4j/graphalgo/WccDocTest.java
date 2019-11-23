@@ -28,7 +28,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 class WccDocTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         String createGraph = "CREATE (nAlice:User {name: 'Alice'}) " +
                              "CREATE (nBridget:User {name: 'Bridget'}) " +
                              "CREATE (nCharles:User {name: 'Charles'}) " +

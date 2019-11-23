@@ -51,7 +51,7 @@ public class ParallelBetweennessCentralityProcTest extends ProcTestBase {
     private BetweennessCentrality.ResultConsumer consumer;
 
     @BeforeEach
-    void setupGraph() throws RegistrationException {
+    void setupGraph() throws Exception {
 
         db = TestDatabaseCreator.createTestDatabase();;
 

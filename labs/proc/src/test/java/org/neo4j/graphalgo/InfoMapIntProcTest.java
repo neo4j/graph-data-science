@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class InfoMapIntProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setupGraph() throws RegistrationException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         final String cypher =
                 "CREATE (a:Node {name:'a'} )\n" +

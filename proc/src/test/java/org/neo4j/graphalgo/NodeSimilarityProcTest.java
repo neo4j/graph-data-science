@@ -115,7 +115,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
     }
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
         registerProcedures(NodeSimilarityProc.class);
@@ -227,7 +227,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
 
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
-    void shouldWriteResults(String graphImpl, Direction direction) throws RegistrationException {
+    void shouldWriteResults(String graphImpl, Direction direction) throws Exception {
             String query = "CALL algo.nodeSimilarity(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +

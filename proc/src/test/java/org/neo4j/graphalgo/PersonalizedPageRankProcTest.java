@@ -80,7 +80,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
             ", (k)-[:TYPE2{foo:4.2}]->(e)";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
         registerProcedures(PageRankProc.class);

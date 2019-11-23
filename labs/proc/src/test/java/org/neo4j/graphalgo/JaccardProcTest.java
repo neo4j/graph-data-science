@@ -67,7 +67,7 @@ class JaccardProcTest extends ProcTestBase {
             " RETURN *";
 
     @BeforeEach
-    void setup() throws RegistrationException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(JaccardProc.class);
         db.execute(buildDatabaseQuery()).close();
