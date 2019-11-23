@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.impl.jaccard;
+package org.neo4j.graphalgo.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -32,17 +32,17 @@ import java.util.stream.StreamSupport;
 /**
  * An iterable over the set bits in a {@link BitSet}.
  */
-class SetBitsIterable implements Iterable<Long> {
+public class SetBitsIterable implements Iterable<Long> {
 
     private final BitSet set;
     private final long offset;
 
-    SetBitsIterable(BitSet set, long offset) {
+    public SetBitsIterable(BitSet set, long offset) {
         this.set = set;
         this.offset = offset;
     }
 
-    SetBitsIterable(BitSet set) {
+    public SetBitsIterable(BitSet set) {
         this(set, 0);
     }
 
@@ -51,7 +51,7 @@ class SetBitsIterable implements Iterable<Long> {
         return new Iterator(offset);
     }
 
-    LongStream stream() {
+    public LongStream stream() {
         return StreamSupport.longStream(spliterator(), false);
     }
 

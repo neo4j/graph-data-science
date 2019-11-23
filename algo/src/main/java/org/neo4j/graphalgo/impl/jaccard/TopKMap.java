@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.impl.jaccard;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
