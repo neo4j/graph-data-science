@@ -21,13 +21,14 @@
 package org.neo4j.graphalgo.core.utils.queue;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BoundedLongPriorityQueueTest {
 
@@ -40,13 +41,13 @@ class BoundedLongPriorityQueueTest {
 
         BoundedLongPriorityQueue queue = BoundedLongPriorityQueue.min(3);
 
-        queue.offer(0, 0.0);
-        queue.offer(6, 6.0);
-        queue.offer(1, 1.0);
-        queue.offer(5, 5.0);
-        queue.offer(2, 2.0);
-        queue.offer(4, 4.0);
-        queue.offer(3, 3.0);
+        assertTrue(queue.offer(0, 0.0));
+        assertTrue(queue.offer(6, 6.0));
+        assertTrue(queue.offer(1, 1.0));
+        assertTrue(queue.offer(5, 5.0));
+        assertTrue(queue.offer(2, 2.0));
+        assertFalse(queue.offer(4, 4.0));
+        assertFalse(queue.offer(3, 3.0));
 
         List<Long> actual = queue.elements().boxed().collect(Collectors.toList());
         assertEquals(expected, actual);
@@ -61,13 +62,13 @@ class BoundedLongPriorityQueueTest {
 
         BoundedLongPriorityQueue queue = BoundedLongPriorityQueue.max(3);
 
-        queue.offer(0, 0.0);
-        queue.offer(6, 6.0);
-        queue.offer(1, 1.0);
-        queue.offer(5, 5.0);
-        queue.offer(2, 2.0);
-        queue.offer(4, 4.0);
-        queue.offer(3, 3.0);
+        assertTrue(queue.offer(0, 0.0));
+        assertTrue(queue.offer(6, 6.0));
+        assertTrue(queue.offer(1, 1.0));
+        assertTrue(queue.offer(5, 5.0));
+        assertTrue(queue.offer(2, 2.0));
+        assertTrue(queue.offer(4, 4.0));
+        assertFalse(queue.offer(3, 3.0));
 
         List<Long> actual = queue.elements().boxed().collect(Collectors.toList());
         assertEquals(expected, actual);
@@ -82,9 +83,9 @@ class BoundedLongPriorityQueueTest {
 
         BoundedLongPriorityQueue queue = BoundedLongPriorityQueue.max(10);
 
-        queue.offer(6, 6.0);
-        queue.offer(5, 5.0);
-        queue.offer(4, 4.0);
+        assertTrue(queue.offer(6, 6.0));
+        assertTrue(queue.offer(5, 5.0));
+        assertTrue(queue.offer(4, 4.0));
 
         List<Long> actual = queue.elements().boxed().collect(Collectors.toList());
         assertEquals(expected, actual);

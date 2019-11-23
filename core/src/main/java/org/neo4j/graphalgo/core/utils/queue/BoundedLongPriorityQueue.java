@@ -56,7 +56,7 @@ public abstract class BoundedLongPriorityQueue {
         this.priorities = new double[bound];
     }
 
-    public abstract void offer(long element, double priority);
+    public abstract boolean offer(long element, double priority);
 
     public abstract void forEach(Consumer consumer);
 
@@ -72,11 +72,11 @@ public abstract class BoundedLongPriorityQueue {
             : Arrays.stream(priorities).limit(elementCount);
     }
 
-    public int count() {
+    public int size() {
         return elementCount;
     }
 
-    protected void add(long element, double priority) {
+    protected boolean add(long element, double priority) {
         if (elementCount < bound || Double.isNaN(minValue) || priority < minValue) {
             int idx = Arrays.binarySearch(priorities, 0, elementCount, priority);
             idx = (idx < 0) ? -idx : idx + 1;
@@ -91,15 +91,17 @@ public abstract class BoundedLongPriorityQueue {
                 elementCount++;
             }
             minValue = priorities[elementCount - 1];
+            return true;
         }
+        return false;
     }
 
     public static BoundedLongPriorityQueue max(int bound) {
         return new BoundedLongPriorityQueue(bound) {
 
             @Override
-            public void offer(long element, double priority) {
-                add(element, -priority);
+            public boolean offer(long element, double priority) {
+                return add(element, -priority);
             }
 
             @Override
@@ -120,8 +122,8 @@ public abstract class BoundedLongPriorityQueue {
         return new BoundedLongPriorityQueue(bound) {
 
             @Override
-            public void offer(long element, double priority) {
-                add(element, priority);
+            public boolean offer(long element, double priority) {
+                return add(element, priority);
             }
 
             @Override

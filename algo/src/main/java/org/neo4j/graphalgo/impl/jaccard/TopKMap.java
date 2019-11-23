@@ -117,7 +117,7 @@ public class TopKMap {
         }
 
         int size() {
-            return queue.count();
+            return queue.size();
         }
 
         void accept(long node2, double similarity) {
