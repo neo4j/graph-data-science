@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -48,8 +47,6 @@ class StronglyConnectedComponentsProcTest extends ProcTestBase {
             // group 2
             ", (d)-[:TYPE]->(e)" +
             ", (d)<-[:TYPE]-(e)";
-
-    private static GraphDatabaseAPI db;
 
     @BeforeEach
     void setup() throws Exception {

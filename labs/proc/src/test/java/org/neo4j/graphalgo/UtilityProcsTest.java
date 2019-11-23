@@ -26,7 +26,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,8 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  *         (3)---(2)
  */
 class UtilityProcsTest extends ProcTestBase {
-
-    private static GraphDatabaseAPI db;
 
     @BeforeEach
     void setupGraph() throws Exception {

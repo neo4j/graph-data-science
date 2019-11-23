@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
 
@@ -46,7 +45,6 @@ import static org.mockito.Mockito.verify;
  */
 class TriangleProcTest extends ProcTestBase {
 
-    private static GraphDatabaseAPI db;
     private static String[] idToName;
 
     @BeforeEach

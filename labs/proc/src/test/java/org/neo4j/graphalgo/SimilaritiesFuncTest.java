@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -54,8 +53,6 @@ public class SimilaritiesFuncTest extends ProcTestBase {
     // euclid similarity taken from here: http://stats.stackexchange.com/a/158285
     // pearson similarity taken from here: http://guides.neo4j.com/sandbox/recommendations
 
-    private static GraphDatabaseAPI db;
-
     @BeforeEach
     void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
@@ -69,7 +66,7 @@ public class SimilaritiesFuncTest extends ProcTestBase {
     }
 
     @Test
-    public void testCosineSimilarityWithSomeWeightPropertiesNull() throws java.lang.Exception {
+    public void testCosineSimilarityWithSomeWeightPropertiesNull() {
         String controlQuery =
                 "MATCH (p1:Employee)-[x:HAS_SKILL]->(sk:Skill)<-[y:REQUIRES_SKILL] -(p2:Role {name:'Role 1-Analytics Manager'})\n" +
                         "WITH SUM(x.proficiency * y.proficiency) AS xyDotProduct,\n" +
@@ -98,7 +95,7 @@ public class SimilaritiesFuncTest extends ProcTestBase {
     }
 
     @Test
-    public void testCosineSimilarityWithSomeRelationshipsNull() throws java.lang.Exception {
+    public void testCosineSimilarityWithSomeRelationshipsNull() {
         String controlQuery =
                 "MATCH (p1:Employee)\n" +
                         "MATCH (sk:Skill)<-[y:REQUIRES_SKILL] -(p2:Role {name:'Role 1-Analytics Manager'})\n" +
@@ -132,7 +129,7 @@ public class SimilaritiesFuncTest extends ProcTestBase {
     }
 
     @Test
-    public void testPearsonSimilarityWithSomeRelationshipsNull() throws java.lang.Exception {
+    public void testPearsonSimilarityWithSomeRelationshipsNull() {
         String controlQuery =
                 "MATCH (p2:Role {name:'Role 1-Analytics Manager'})-[s:REQUIRES_SKILL]->(:Skill) WITH p2, avg(s.proficiency) AS p2Mean " +
                 "MATCH (p1:Employee)\n" +
@@ -169,7 +166,7 @@ public class SimilaritiesFuncTest extends ProcTestBase {
     }
 
     @Test
-    public void testEuclideanDistance() throws java.lang.Exception {
+    public void testEuclideanDistance() {
         String controlQuery =
                 "MATCH (p1:Employee)\n" +
                         "MATCH (sk:Skill)<-[y:REQUIRES_SKILL] -(p2:Role {name:'Role 1-Analytics Manager'})\n" +
@@ -199,7 +196,7 @@ public class SimilaritiesFuncTest extends ProcTestBase {
     }
 
     @Test
-    public void testJaccardSimilarity() throws java.lang.Exception {
+    public void testJaccardSimilarity() {
         String controlQuery =
                 "MATCH (p1:Employee)-[:HAS_SKILL]->(sk)<-[:HAS_SKILL]-(p2)\n" +
                 "WITH p1,p2,size((p1)-[:HAS_SKILL]->()) as d1, size((p2)-[:HAS_SKILL]->()) as d2, count(distinct sk) as intersection\n" +
@@ -225,7 +222,7 @@ public class SimilaritiesFuncTest extends ProcTestBase {
     }
     
     @Test
-    public void testOverlapSimilarity() throws java.lang.Exception {
+    public void testOverlapSimilarity() {
         String controlQuery =
                 "MATCH (p1:Employee)-[:HAS_SKILL]->(sk)<-[:HAS_SKILL]-(p2)\n" +
                         "WITH p1,p2,size((p1)-[:HAS_SKILL]->()) as d1, size((p2)-[:HAS_SKILL]->()) as d2, count(distinct sk) as intersection\n" +
@@ -251,7 +248,7 @@ public class SimilaritiesFuncTest extends ProcTestBase {
     }
 
     @Test
-    public void testEuclideanSimilarity() throws java.lang.Exception {
+    public void testEuclideanSimilarity() {
         String controlQuery =
                 "MATCH (p1:Employee)\n" +
                         "MATCH (sk:Skill)<-[y:REQUIRES_SKILL] -(p2:Role {name:'Role 1-Analytics Manager'})\n" +
