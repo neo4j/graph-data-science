@@ -23,16 +23,18 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.partition.DegreePartitioning;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphdb.Direction;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
 /**
  * <p>
@@ -157,12 +159,25 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     }
 
     private void runColoring() {
-        List<Partition> degreePartitions = DegreePartitioning.fromConcurrency(
+        long nodeCount = graph.nodeCount();
+        long approximateRelationshipCount = ceilDiv(graph.relationshipCount(), nodeCount) * nodesToColor.cardinality();
+        long adjustedBatchSize = ParallelUtil.adjustedBatchSize(
+            approximateRelationshipCount,
             concurrency,
             minBatchSize,
-            direction,
+            Integer.MAX_VALUE
+        );
+
+        if (direction == Direction.BOTH) {
+            adjustedBatchSize *= 2;
+        }
+
+        List<Partition> degreePartitions = PartitionUtils.degreePartition(
+            new SetBitsIterable(nodesToColor).primitiveLongIterator(),
             graph,
-            Optional.of(nodesToColor));
+            direction,
+            adjustedBatchSize
+        );
 
         List<ColoringStep> steps = degreePartitions.stream().map(partition -> new ColoringStep(
             graph.concurrentCopy(),

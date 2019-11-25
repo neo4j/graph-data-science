@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.StatementApi;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.partition.DegreePartitioning;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -132,7 +132,7 @@ public final class RelationshipExporter extends StatementApi {
 
         // We use MIN_BATCH_SIZE since writing relationships
         // is performed batch-wise, but single-threaded.
-        DegreePartitioning.fromBatchSize(MIN_BATCH_SIZE, readDirection, graph)
+        PartitionUtils.degreePartition(graph, readDirection, MIN_BATCH_SIZE)
             .stream()
             .map(partition -> createBatchRunnable(
                 fallbackValue,

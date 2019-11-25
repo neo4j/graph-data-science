@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.partition.DegreePartitioning;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.logging.Log;
 
@@ -213,10 +213,13 @@ public class PageRank extends Algorithm<PageRank> {
         if (computeSteps != null) {
             return;
         }
-        List<Partition> partitions = DegreePartitioning.fromBatchSize(
-            adjustBatchSize(batchSize),
+
+        List<Partition> partitions = PartitionUtils.degreePartition(
+            graph,
             graph.getLoadDirection(),
-            graph);
+            adjustBatchSize(batchSize)
+        );
+
         ExecutorService executor = ParallelUtil.canRunInParallel(this.executor)
                 ? this.executor : null;
 
