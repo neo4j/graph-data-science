@@ -23,7 +23,7 @@ The Louvain method for community detection is an algorithm for detecting communi
 It maximizes a modularity score for each community, where the modularity quantifies the quality of an assignment of nodes to communities.
 This means evaluating how much more densely connected the nodes within a community are, compared to how connected they would be in a random network.
 
-The louvain algorithm is a hierarchical clustering algorithm, that recursively merges communities into a single node and executes the modularity clustering on the condensed graphs.
+The Louvain algorithm is a hierarchical clustering algorithm, that recursively merges communities into a single node and executes the modularity clustering on the condensed graphs.
 
 For more information on this algorithm, see:
 
@@ -35,6 +35,7 @@ For more information on this algorithm, see:
 Running this algorithm requires sufficient memory availability.
 Before running this algorithm, we recommend that you read <<memory-requirements>>.
 ====
+
 
 [[algorithms-louvain-syntax]]
 == Syntax
@@ -105,6 +106,7 @@ YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 | writeProperty                     | string        | The property name written back to.
 |===
 
+
 [[algorithms-louvain-syntax-stream]]
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
@@ -144,9 +146,9 @@ YIELD nodeId, community, communities
 [opts="header",cols="1m,1,6"]
 |===
 | Name          | Type         | Description
-| nodeId        | int          | Node ID
+| nodeId        | int          | Node ID.
 | community     | int          | The community ID of the final level.
-| communities   | list of int  | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false
+| communities   | list of int  | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
 |===
 
 [[algorithms-louvain-examples]]
@@ -174,9 +176,11 @@ CREATE (nMark)-[:LINK {weight: 1}]->(nMichael);
 CREATE (nMichael)-[:LINK {weight: 1}]->(nMark);
 ----
 
-This graph has two clusters of Users, that are closely connected. Between those clusters there is one single edge.
+This graph has two clusters of _Users_, that are closely connected.
+Between those clusters there is one single edge.
 The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
 In the following examples we will demonstrate using the Louvain algorithm on this graph.
+
 
 [[algorithms-louvain-examples-stream]]
 === Streaming results
@@ -206,8 +210,9 @@ ORDER BY name ASC
 |===
 
 We use default values for the procedure configuration parameter.
-Levels and innerIterations are set to 10 and the tolerance value is 0.0001.
-Because we did not set the value of `includeIntermediateCommunities` to true, the column communities is always `null`.
+Levels and `innerIterations` are set to 10 and the tolerance value is 0.0001.
+Because we did not set the value of `includeIntermediateCommunities` to `true`, the column communities is always `null`.
+
 
 [[algorithms-louvain-examples-write]]
 === Writing results
@@ -236,10 +241,11 @@ CALL algo.beta.louvain('User', 'LINK', {
 When writing back the results, only a single row is returned by the procedure.
 The result contains meta information, like the number of identified communities and the modularity values.
 
+
 [[algorithms-louvain-examples-stream-weighted]]
 === Running on weighted graphs
 
-The louvain algorithm can also run on weighted graphs, taking the given relationship weights into concern when calculating the modularity.
+The Louvain algorithm can also run on weighted graphs, taking the given relationship weights into concern when calculating the modularity.
 
 .The following will load the graph, run the algorithm on a weighted graph and stream results:
 [source, cypher]
@@ -268,12 +274,13 @@ ORDER BY name ASC
 
 Using the weighted relationships, we see that `Alice` and `Doug` have formed their own community, as their link is much stronger than all the others.
 
+
 [[algorithms-louvain-examples-stream-seeded]]
 === Running with seed communities
 
-The louvain algorithm can be run incrementally, by providing a seed property.
+The Louvain algorithm can be run incrementally, by providing a seed property.
 With the seed property an initial community mapping can be supplied for a subset of the loaded nodes.
-The algorithm will try to keep the seeded community ids.
+The algorithm will try to keep the seeded community IDs.
 
 .The following will load the seeded graph, run the algorithm and stream results:
 [source, cypher]
@@ -300,8 +307,9 @@ ORDER BY name ASC
 |6 rows
 |===
 
-Using the seeded graph, we see that the community around `Alice` keeps its initial community id of `42`.
-The other community is assigned a new community id, which is guaranteed to be larger than the largest community id.
+Using the seeded graph, we see that the community around `Alice` keeps its initial community ID of `42`.
+The other community is assigned a new community ID, which is guaranteed to be larger than the largest community ID.
+
 
 [[algorithms-louvain-examples-stream-intermediate]]
 === Streaming intermediate communities
