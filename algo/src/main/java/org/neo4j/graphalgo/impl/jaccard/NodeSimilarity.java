@@ -40,7 +40,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
+public class NodeSimilarity extends Algorithm<NodeSimilarity> {
 
     private final Graph graph;
     private final Config config;
@@ -53,7 +53,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private HugeObjectArray<long[]> vectors;
     private long nodesToCompare;
 
-    public NeighborhoodSimilarity(
+    public NodeSimilarity(
         Graph graph,
         Config config,
         ExecutorService executorService,
@@ -67,7 +67,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     @Override
-    public NeighborhoodSimilarity me() {
+    public NodeSimilarity me() {
         return this;
     }
 

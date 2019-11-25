@@ -29,23 +29,23 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity.Config;
+import org.neo4j.graphalgo.impl.jaccard.NodeSimilarity.Config;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class NeighborhoodSimilarityFactory extends AlgorithmFactory<NeighborhoodSimilarity> {
+public class NodeSimilarityFactory extends AlgorithmFactory<NodeSimilarity> {
 
     private final Config config;
     private final boolean computesSimilarityGraph;
-    public NeighborhoodSimilarityFactory(Config config, boolean computesSimilarityGraph) {
+    public NodeSimilarityFactory(Config config, boolean computesSimilarityGraph) {
         this.config = config;
         this.computesSimilarityGraph = computesSimilarityGraph;
     }
 
     @Override
-    public NeighborhoodSimilarity build(Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log) {
-        return new NeighborhoodSimilarity(graph, config, Pools.DEFAULT, tracker);
+    public NodeSimilarity build(Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log) {
+        return new NodeSimilarity(graph, config, Pools.DEFAULT, tracker);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class NeighborhoodSimilarityFactory extends AlgorithmFactory<Neighborhood
         int topN = Math.abs(config.topN());
         int topK = Math.abs(config.topK());
 
-        MemoryEstimations.Builder builder = MemoryEstimations.builder(NeighborhoodSimilarity.class)
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(NodeSimilarity.class)
             .perNode("node filter", nodeCount -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
             .add(
                 "vectors",

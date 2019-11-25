@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
+import org.neo4j.graphalgo.impl.jaccard.NodeSimilarity;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -65,7 +65,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-public class NeighborhoodSimilarityBenchmark {
+public class NodeSimilarityBenchmark {
 
     private GraphDatabaseAPI db;
     private Graph graph;
@@ -82,11 +82,11 @@ public class NeighborhoodSimilarityBenchmark {
     @Param(value = {"5"})
     int scaleFactor;
 
-    private NeighborhoodSimilarity.Config config;
+    private NodeSimilarity.Config config;
 
     @Setup
     public void setup() {
-        config = new NeighborhoodSimilarity.Config(0, 0, topN, topK, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
+        config = new NodeSimilarity.Config(0, 0, topN, topK, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
         db = TestDatabaseCreator.createTestDatabase();
 
         createGraph(db, scaleFactor);
@@ -121,8 +121,8 @@ public class NeighborhoodSimilarityBenchmark {
         runJaccardProcedure(blackhole, jaccardInput, procedureConfig);
     }
 
-    private NeighborhoodSimilarity initAlgo(NeighborhoodSimilarity.Config config) {
-        return new NeighborhoodSimilarity(
+    private NodeSimilarity initAlgo(NodeSimilarity.Config config) {
+        return new NodeSimilarity(
             graph,
             config,
             Pools.DEFAULT,

@@ -45,7 +45,7 @@ import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.neo4j.graphalgo.bench.NeighborhoodSimilarityBenchmark.createGraph;
+import static org.neo4j.graphalgo.bench.NodeSimilarityBenchmark.createGraph;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
 @Threads(1)

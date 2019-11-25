@@ -28,7 +28,7 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class NeighborhoodSimilarityDocTest extends ProcTestBase {
+class NodeSimilarityDocTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
         "CREATE (alice:Person {name: 'Alice'})" +
@@ -57,7 +57,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );
         db.execute(DB_CYPHER);
-        registerProcedures(NeighborhoodSimilarityProc.class);
+        registerProcedures(NodeSimilarityProc.class);
         registerFunctions(GetNodeFunc.class);
     }
 

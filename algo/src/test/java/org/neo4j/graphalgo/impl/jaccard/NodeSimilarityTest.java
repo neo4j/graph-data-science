@@ -70,7 +70,7 @@ import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-final class NeighborhoodSimilarityTest {
+final class NodeSimilarityTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -111,7 +111,7 @@ final class NeighborhoodSimilarityTest {
     private static final int COMPARED_PERSONS = 4;
 
     private static ConfigBuilder configBuilder() {
-        return new ConfigBuilder(new NeighborhoodSimilarity.Config(
+        return new ConfigBuilder(new NodeSimilarity.Config(
             0.0,
             1,
             0,
@@ -184,14 +184,14 @@ final class NeighborhoodSimilarityTest {
             arguments("INCOMING", "INCOMING"),
             arguments("BOTH", "INCOMING")
         );
-        return crossArguments(() -> directions, toArguments(NeighborhoodSimilarityTest::concurrencies));
+        return crossArguments(() -> directions, toArguments(NodeSimilarityTest::concurrencies));
     }
 
     static Stream<Arguments> topKAndConcurrencies() {
         Stream<Integer> topKStream = Stream.of(0, 100);
         return TestSupport.crossArguments(
             toArguments(() -> topKStream),
-            toArguments(NeighborhoodSimilarityTest::concurrencies)
+            toArguments(NodeSimilarityTest::concurrencies)
         );
     }
 
@@ -217,18 +217,18 @@ final class NeighborhoodSimilarityTest {
             .withDirection(loadDirection)
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Set<String> result = neighborhoodSimilarity
+        Set<String> result = nodeSimilarity
             .computeToStream(algoDirection)
-            .map(NeighborhoodSimilarityTest::resultString)
+            .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        neighborhoodSimilarity.release();
+        nodeSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
@@ -242,18 +242,18 @@ final class NeighborhoodSimilarityTest {
             .withDirection(loadDirection)
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).withTopN(1).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Set<String> result = neighborhoodSimilarity
+        Set<String> result = nodeSimilarity
             .computeToStream(algoDirection)
-            .map(NeighborhoodSimilarityTest::resultString)
+            .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        neighborhoodSimilarity.release();
+        nodeSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
     }
@@ -271,14 +271,14 @@ final class NeighborhoodSimilarityTest {
             .withDirection(loadDirection)
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).withTopN(-1).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Graph similarityGraph = neighborhoodSimilarity.computeToGraph(algoDirection).similarityGraph();
+        Graph similarityGraph = nodeSimilarity.computeToGraph(algoDirection).similarityGraph();
 
         assertGraphEquals(
             algoDirection == INCOMING
@@ -299,18 +299,18 @@ final class NeighborhoodSimilarityTest {
             .withDirection(loadDirection)
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withTopK(1).withConcurrency(concurrency).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Set<String> result = neighborhoodSimilarity
+        Set<String> result = nodeSimilarity
             .computeToStream(algoDirection)
-            .map(NeighborhoodSimilarityTest::resultString)
+            .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        neighborhoodSimilarity.release();
+        nodeSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_K_1 : EXPECTED_OUTGOING_TOP_K_1, result);
     }
@@ -328,14 +328,14 @@ final class NeighborhoodSimilarityTest {
             .withDirection(loadDirection)
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).withTopK(-1).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Graph similarityGraph = neighborhoodSimilarity.computeToGraph(algoDirection).similarityGraph();
+        Graph similarityGraph = nodeSimilarity.computeToGraph(algoDirection).similarityGraph();
 
         assertGraphEquals(
             algoDirection == INCOMING
@@ -360,18 +360,18 @@ final class NeighborhoodSimilarityTest {
             .withDirection(loadDirection)
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).withSimilarityCutoff(0.1).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Set<String> result = neighborhoodSimilarity
+        Set<String> result = nodeSimilarity
             .computeToStream(algoDirection)
-            .map(NeighborhoodSimilarityTest::resultString)
+            .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        neighborhoodSimilarity.release();
+        nodeSimilarity.release();
 
         assertEquals(
             algoDirection == INCOMING ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF,
@@ -392,18 +392,18 @@ final class NeighborhoodSimilarityTest {
             .withDirection(loadDirection)
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withDegreeCutoff(2).withConcurrency(concurrency).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Set<String> result = neighborhoodSimilarity
+        Set<String> result = nodeSimilarity
             .computeToStream(algoDirection)
-            .map(NeighborhoodSimilarityTest::resultString)
+            .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        neighborhoodSimilarity.release();
+        nodeSimilarity.release();
 
         assertEquals(
             algoDirection == INCOMING ? EXPECTED_INCOMING_DEGREE_CUTOFF : EXPECTED_OUTGOING_DEGREE_CUTOFF,
@@ -420,14 +420,14 @@ final class NeighborhoodSimilarityTest {
             .undirected()
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
-        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(OUTGOING).collect(Collectors.toSet());
-        neighborhoodSimilarity.release();
+        Set<SimilarityResult> result = nodeSimilarity.computeToStream(OUTGOING).collect(Collectors.toSet());
+        nodeSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
     }
 
@@ -444,14 +444,14 @@ final class NeighborhoodSimilarityTest {
             .withDirection(loadDirection)
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        SimilarityGraphResult similarityGraphResult = neighborhoodSimilarity.computeToGraph(algoDirection);
+        SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph(algoDirection);
         assertEquals(
             algoDirection == INCOMING ? COMPARED_ITEMS : COMPARED_PERSONS,
             similarityGraphResult.comparedNodes()
@@ -470,7 +470,7 @@ final class NeighborhoodSimilarityTest {
                           ", (e), (f), (g), (h)"),
             resultGraph
         );
-        neighborhoodSimilarity.release();
+        nodeSimilarity.release();
         resultGraph.release();
     }
 
@@ -490,18 +490,18 @@ final class NeighborhoodSimilarityTest {
             .withDirection(loadDirection)
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).withTopN(1).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Set<String> result = neighborhoodSimilarity
+        Set<String> result = nodeSimilarity
             .computeToStream(algoDirection)
-            .map(NeighborhoodSimilarityTest::resultString)
+            .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        neighborhoodSimilarity.release();
+        nodeSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
     }
@@ -530,18 +530,18 @@ final class NeighborhoodSimilarityTest {
             .withDirection(loadDirection)
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Set<String> result = neighborhoodSimilarity
+        Set<String> result = nodeSimilarity
             .computeToStream(algoDirection)
-            .map(NeighborhoodSimilarityTest::resultString)
+            .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        neighborhoodSimilarity.release();
+        nodeSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
@@ -557,7 +557,7 @@ final class NeighborhoodSimilarityTest {
 
         IllegalArgumentException ex = Assertions.assertThrows(
             IllegalArgumentException.class,
-            () -> new NeighborhoodSimilarity(
+            () -> new NodeSimilarity(
                 graph,
                 configBuilder().withConcurrency(concurrency).toConfig(),
                 Pools.DEFAULT,
@@ -578,23 +578,23 @@ final class NeighborhoodSimilarityTest {
             .withDirection(OUTGOING)
             .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().withTopN(100).withTopK(topK).withConcurrency(concurrency).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         ).withProgressLogger(log);
 
-        neighborhoodSimilarity.computeToGraph(OUTGOING);
+        nodeSimilarity.computeToGraph(OUTGOING);
 
         assertTrue(log.hasMessages(INFO));
-        assertTrue(log.containsMessage(INFO, NeighborhoodSimilarity.class.getSimpleName()));
+        assertTrue(log.containsMessage(INFO, NodeSimilarity.class.getSimpleName()));
     }
 
     @Timeout(value = 10)
     @Test
     void shouldTerminate() {
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             RandomGraphGenerator.generate(10, 2),
             configBuilder().withConcurrency(1).toConfig(),
             Pools.DEFAULT,
@@ -603,8 +603,8 @@ final class NeighborhoodSimilarityTest {
 
         assertAlgorithmTermination(
             db,
-            neighborhoodSimilarity,
-            nhs -> neighborhoodSimilarity.computeToStream(OUTGOING),
+            nodeSimilarity,
+            nhs -> nodeSimilarity.computeToStream(OUTGOING),
             100
         );
     }
@@ -617,7 +617,7 @@ final class NeighborhoodSimilarityTest {
             .setMaxRelCount(5_000_000)
             .build();
 
-        NeighborhoodSimilarity.Config config = new NeighborhoodSimilarity.Config(
+        NodeSimilarity.Config config = new NodeSimilarity.Config(
             0.0,
             0,
             0,
@@ -626,7 +626,7 @@ final class NeighborhoodSimilarityTest {
             ParallelUtil.DEFAULT_BATCH_SIZE
         );
 
-        NeighborhoodSimilarityFactory factory = new NeighborhoodSimilarityFactory(
+        NodeSimilarityFactory factory = new NodeSimilarityFactory(
             config,
             true
         );
@@ -671,7 +671,7 @@ final class NeighborhoodSimilarityTest {
             .setMaxRelCount(5_000_000)
             .build();
 
-        NeighborhoodSimilarity.Config config = new NeighborhoodSimilarity.Config(
+        NodeSimilarity.Config config = new NodeSimilarity.Config(
             0.0,
             0,
             100,
@@ -680,7 +680,7 @@ final class NeighborhoodSimilarityTest {
             ParallelUtil.DEFAULT_BATCH_SIZE
         );
 
-        NeighborhoodSimilarityFactory factory = new NeighborhoodSimilarityFactory(
+        NodeSimilarityFactory factory = new NodeSimilarityFactory(
             config,
             true
         );
@@ -724,14 +724,14 @@ final class NeighborhoodSimilarityTest {
 
     private static class ConfigBuilder {
 
-        private final NeighborhoodSimilarity.Config config;
+        private final NodeSimilarity.Config config;
         private int concurrency;
         private int topK;
         private int topN;
         private int degreeCutoff;
         private double similarityCutoff;
 
-        ConfigBuilder(NeighborhoodSimilarity.Config config) {
+        ConfigBuilder(NodeSimilarity.Config config) {
             this.config = config;
             this.concurrency = config.concurrency();
             this.topN = config.topN();
@@ -765,8 +765,8 @@ final class NeighborhoodSimilarityTest {
             return this;
         }
 
-        NeighborhoodSimilarity.Config toConfig() {
-            return new NeighborhoodSimilarity.Config(
+        NodeSimilarity.Config toConfig() {
+            return new NodeSimilarity.Config(
                 similarityCutoff,
                 degreeCutoff,
                 topN,
