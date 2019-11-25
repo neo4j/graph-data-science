@@ -39,26 +39,25 @@ CALL algo.memrec(label, relationship, algorithm, config)
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name          | Type    | Default        | Optional | Description
-| label         | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship  | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
-| algorithm | string  | null     | no      | The name of a graph algorithm or `graph.load` to return the memory requirements for the in memory graph only.
-h| Config ||||
-| direction     | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm.
-| graph         | string  | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-| concurrency   | int     | available CPUs | yes      | The number of concurrent threads.
+| Name          | Type      | Default   | Optional | Description
+| label         | string    | null      | yes      | The label to load from the graph. If null, load all nodes.
+| relationship  | string    | null      | yes      | The relationship type to load from the graph. If null, load all relationships.
+| algorithm     | string    | null      | no       | The name of a graph algorithm or `graph.load` to return the memory requirements for the in memory graph only.
+| config        | map       | {}        | no       | Additional configruation, see blow.
 |===
 
-.Config
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name          | Type    | Default        | Optional | Description
-| nodeCount         | int  | 0           | no      | The number of nodes in a fictive graph.
-| relationshipCount  | int  | 0           | yes      | The number of relationships in a fictive graph.
+| Name              | Type      | Default           | Optional  | Description
+| graph             | string    | 'huge'            | yes       | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement. Use the graph name when it is already loaded.
+| nodeCount         | int       | 0                 | yes       | The number of nodes in a fictive graph.
+| relationshipCount | int       | 0                 | yes       | The number of relationships in a fictive graph.
+| direction         | string    | 'OUTGOING'        | yes       | The relationship-direction to use in the algorithm.
+| concurrency       | int       | available CPUs    | yes       | The number of concurrent threads.
 |===
 
-This allows getting an estimate of the memory requirement to run graph-algorithms on a fictive graph,
-defined on its stats.
+Setting the `nodeCount` and `relationshipCount` parameters allows a memory estimation without loading the graph.
 For explicitly loaded graphs, the config-map needs to contain the graph name in the `graph` key.
 Additionally algorithm specific parameters can also be provided as config.
 
