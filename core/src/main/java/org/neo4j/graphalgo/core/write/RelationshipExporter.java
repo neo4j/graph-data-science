@@ -21,8 +21,6 @@
 package org.neo4j.graphalgo.core.write;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
@@ -32,14 +30,13 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.StatementApi;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.partition.DegreePartitioning;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Values;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -135,7 +132,7 @@ public final class RelationshipExporter extends StatementApi {
 
         // We use MIN_BATCH_SIZE since writing relationships
         // is performed batch-wise, but single-threaded.
-        degreePartitionGraph(MIN_BATCH_SIZE, readDirection)
+        DegreePartitioning.fromBatchSize(MIN_BATCH_SIZE, readDirection, graph)
             .stream()
             .map(partition -> createBatchRunnable(
                 fallbackValue,
@@ -189,53 +186,6 @@ public final class RelationshipExporter extends StatementApi {
                 nodeCount
             );
         });
-    }
-
-    private List<Partition> degreePartitionGraph(long batchSize, Direction direction) {
-        PrimitiveLongIterator nodes = graph.nodeIterator();
-        List<Partition> partitions = new ArrayList<>();
-        long start = 0L;
-        while (nodes.hasNext()) {
-            Partition partition = new Partition(
-                nodes,
-                graph,
-                direction,
-                start,
-                batchSize
-            );
-            partitions.add(partition);
-            start += partition.nodeCount;
-        }
-        return partitions;
-    }
-
-    private static final class Partition {
-
-        // rough estimate of what capacity would still yield acceptable performance
-        // per thread
-        private static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
-
-        private final long startNode;
-        private final int nodeCount;
-
-        Partition(
-            PrimitiveLongIterator nodes,
-            Degrees degrees,
-            Direction direction,
-            long startNode,
-            long batchSize
-        ) {
-            assert batchSize > 0L;
-            int nodeCount = 0;
-            long partitionSize = 0L;
-            while (nodes.hasNext() && partitionSize < batchSize && nodeCount < MAX_NODE_COUNT) {
-                long nodeId = nodes.next();
-                ++nodeCount;
-                partitionSize += degrees.degree(nodeId, direction);
-            }
-            this.startNode = startNode;
-            this.nodeCount = nodeCount;
-        }
     }
 
     private static class WriteConsumer implements RelationshipWithPropertyConsumer {

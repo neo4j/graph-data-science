@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
-import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
@@ -30,8 +29,9 @@ import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.partition.DegreePartitioning;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
@@ -213,10 +213,10 @@ public class PageRank extends Algorithm<PageRank> {
         if (computeSteps != null) {
             return;
         }
-        List<Partition> partitions = partitionGraph(
-                adjustBatchSize(batchSize),
-                nodeIterator,
-                degrees);
+        List<Partition> partitions = DegreePartitioning.fromBatchSize(
+            adjustBatchSize(batchSize),
+            graph.getLoadDirection(),
+            graph);
         ExecutorService executor = ParallelUtil.canRunInParallel(this.executor)
                 ? this.executor : null;
 
@@ -240,27 +240,6 @@ public class PageRank extends Algorithm<PageRank> {
         long degreeBatchSize = averageDegree * batchSize;
 
         return (int) Math.min(degreeBatchSize, Partition.MAX_NODE_COUNT);
-    }
-
-    private List<Partition> partitionGraph(
-            int batchSize,
-            NodeIterator nodeIterator,
-            Degrees degrees) {
-        PrimitiveLongIterator nodes = nodeIterator.nodeIterator();
-        List<Partition> partitions = new ArrayList<>();
-        long start = 0L;
-        Direction direction = graph.getLoadDirection();
-        while (nodes.hasNext()) {
-            Partition partition = new Partition(
-                    nodes,
-                    degrees,
-                    direction,
-                    start,
-                    batchSize);
-            partitions.add(partition);
-            start += partition.nodeCount;
-        }
-        return partitions;
     }
 
     private ComputeSteps createComputeSteps(
@@ -288,7 +267,7 @@ public class PageRank extends Algorithm<PageRank> {
 
         while (parts.hasNext()) {
             Partition partition = parts.next();
-            int partitionSize = partition.nodeCount;
+            int partitionSize = (int) partition.nodeCount;
             long start = partition.startNode;
             int i = 1;
             while (parts.hasNext()
@@ -412,7 +391,7 @@ public class PageRank extends Algorithm<PageRank> {
 
         while (parts.hasNext()) {
             Partition partition = parts.next();
-            int partitionCount = partition.nodeCount;
+            int partitionCount = (int) partition.nodeCount;
             int i = 1;
             while (parts.hasNext()
                    && i < partitionsPerThread
@@ -444,38 +423,6 @@ public class PageRank extends Algorithm<PageRank> {
     @Override
     public void release() {
         computeSteps.release();
-    }
-
-    static final class Partition {
-
-        // rough estimate of what capacity would still yield acceptable performance
-        // per thread
-        public static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
-
-        private final long startNode;
-        private final int nodeCount;
-
-        Partition(
-                PrimitiveLongIterator nodes,
-                Degrees degrees,
-                Direction direction,
-                long startNode,
-                long batchSize) {
-            assert batchSize > 0L;
-            int nodeCount = 0;
-            long partitionSize = 0L;
-            while (nodes.hasNext() && partitionSize < batchSize && nodeCount < MAX_NODE_COUNT) {
-                long nodeId = nodes.next();
-                ++nodeCount;
-                partitionSize += degrees.degree(nodeId, direction);
-            }
-            this.startNode = startNode;
-            this.nodeCount = nodeCount;
-        }
-
-        private boolean fits(int otherPartitionsCount) {
-            return MAX_NODE_COUNT - otherPartitionsCount >= nodeCount;
-        }
     }
 
     final class ComputeSteps {

@@ -99,7 +99,9 @@ class K1ColoringTest {
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,
-            Direction.OUTGOING, 1000, DEFAULT_BATCH_SIZE,
+            Direction.OUTGOING,
+            1000,
+            DEFAULT_BATCH_SIZE,
             1,
             Pools.DEFAULT,
             AllocationTracker.EMPTY

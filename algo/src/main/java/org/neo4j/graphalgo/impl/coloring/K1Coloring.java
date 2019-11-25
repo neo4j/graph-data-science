@@ -23,17 +23,15 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.PartitionUtils.TaskProducer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphdb.Direction;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-
-import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
-import static org.neo4j.graphalgo.core.utils.PartitionUtils.numberAlignedPartitioning;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -158,17 +156,23 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     }
 
     private void runColoring() {
-        TaskProducer<ColoringStep> producer = (batchStart, batchEnd) -> new ColoringStep(
+        List<Partition> degreePartitions = Partition.degreePartitioning(
+            graph.nodeCount(),
+            concurrency,
+            minBatchSize,
+            direction,
+            graph,
+            Optional.of(nodesToColor));
+
+        List<ColoringStep> steps = degreePartitions.stream().map(partition -> new ColoringStep(
             graph.concurrentCopy(),
             direction,
             colors,
             nodesToColor,
             nodeCount,
-            batchStart,
-            batchEnd
-        );
-
-        Collection<ColoringStep> steps = degreePartition(producer);
+            partition.startNode,
+            partition.startNode + partition.nodeCount
+        )).collect(Collectors.toList());
 
         ParallelUtil.runWithConcurrency(concurrency, steps, executor);
     }
@@ -176,64 +180,21 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     private void runValidation() {
         BitSet nextNodesToColor = new BitSet(nodeCount);
 
-        TaskProducer<ValidationStep> producer = (batchStart, batchEnd) -> new ValidationStep(
+        // The nodesToColor bitset is not thread safe, therefore we have to align the batches to multiples of 64
+        List<Partition> partitions = Partition.numberAlignedPartitioning(concurrency, nodeCount, Long.SIZE);
+
+        List<ValidationStep> steps = partitions.stream().map(partition -> new ValidationStep(
             graph.concurrentCopy(),
             direction,
             colors,
             nodesToColor,
             nextNodesToColor,
             nodeCount,
-            batchStart,
-            batchEnd
-        );
-
-        // The nodesToColor bitset is not thread safe, therefore we have to align the batches to multiples of 64
-        Collection<ValidationStep> steps = numberAlignedPartitioning(producer, concurrency, nodeCount, Long.SIZE);
+            partition.startNode,
+            partition.startNode + partition.nodeCount
+        )).collect(Collectors.toList());
 
         ParallelUtil.runWithConcurrency(concurrency, steps, executor);
         this.nodesToColor = nextNodesToColor;
-    }
-
-    private <T extends Runnable> Collection<T> degreePartition(
-        TaskProducer<T> taskSupplier
-    ) {
-
-        long cumulativeDegree = graph.relationshipCount();
-        long adjustedDegree = ceilDiv(cumulativeDegree, nodeCount) * nodesToColor.cardinality();
-
-        long batchDegree = ParallelUtil.adjustedBatchSize(
-            adjustedDegree,
-            concurrency,
-            minBatchSize,
-            Integer.MAX_VALUE
-        );
-
-        if (direction == Direction.BOTH) {
-            batchDegree *= 2;
-        }
-
-        Collection<T> tasks = new ArrayList<>(concurrency);
-        long currentNode = nodesToColor.nextSetBit(0);
-        long lastNode = 0;
-        long batchStart = currentNode;
-        long currentDegree = 0L;
-        while (currentNode >= 0 && currentNode < nodeCount - 1) {
-            currentDegree += graph.degree(currentNode, direction);
-
-            if (currentDegree >= batchDegree) {
-                tasks.add(taskSupplier.produce(batchStart, currentNode));
-                currentNode++;
-                batchStart = currentNode;
-                currentDegree = 0;
-            }
-            lastNode = currentNode;
-            currentNode = nodesToColor.nextSetBit(currentNode + 1);
-        }
-
-        if (currentDegree > 0) {
-            tasks.add(taskSupplier.produce(batchStart, Math.min(lastNode + 1, graph.nodeCount())));
-        }
-
-        return tasks;
     }
 }
