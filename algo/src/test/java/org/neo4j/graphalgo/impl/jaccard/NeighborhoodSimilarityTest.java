@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestSupport;
@@ -117,7 +118,7 @@ final class NeighborhoodSimilarityTest {
             0,
             Pools.DEFAULT_CONCURRENCY,
             ParallelUtil.DEFAULT_BATCH_SIZE
-        )); 
+        ));
     }
 
     static {
@@ -188,7 +189,10 @@ final class NeighborhoodSimilarityTest {
 
     static Stream<Arguments> topKAndConcurrencies() {
         Stream<Integer> topKStream = Stream.of(0, 100);
-        return TestSupport.crossArguments(toArguments(() -> topKStream), toArguments(NeighborhoodSimilarityTest::concurrencies));
+        return TestSupport.crossArguments(
+            toArguments(() -> topKStream),
+            toArguments(NeighborhoodSimilarityTest::concurrencies)
+        );
     }
 
     private GraphDatabaseAPI db;
@@ -256,7 +260,11 @@ final class NeighborhoodSimilarityTest {
 
     @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeNegativeTopNForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
+    void shouldComputeNegativeTopNForSupportedDirections(
+        Direction loadDirection,
+        Direction algoDirection,
+        int concurrency
+    ) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -309,7 +317,11 @@ final class NeighborhoodSimilarityTest {
 
     @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeNegativeTopKForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
+    void shouldComputeNegativeTopKForSupportedDirections(
+        Direction loadDirection,
+        Direction algoDirection,
+        int concurrency
+    ) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -337,7 +349,11 @@ final class NeighborhoodSimilarityTest {
 
     @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeWithSimilarityCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
+    void shouldComputeWithSimilarityCutoffForSupportedDirections(
+        Direction loadDirection,
+        Direction algoDirection,
+        int concurrency
+    ) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -365,7 +381,11 @@ final class NeighborhoodSimilarityTest {
 
     @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeWithDegreeCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
+    void shouldComputeWithDegreeCutoffForSupportedDirections(
+        Direction loadDirection,
+        Direction algoDirection,
+        int concurrency
+    ) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -413,7 +433,11 @@ final class NeighborhoodSimilarityTest {
 
     @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeSimilarityGraphInAllSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
+    void shouldComputeSimilarityGraphInAllSupportedDirections(
+        Direction loadDirection,
+        Direction algoDirection,
+        int concurrency
+    ) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -585,8 +609,9 @@ final class NeighborhoodSimilarityTest {
         );
     }
 
-    @Test
-    void shouldComputeMemrec() {
+    @ParameterizedTest(name = "topK = {0}")
+    @ValueSource(ints = {0, 100})
+    void shouldComputeMemrec(int topK) {
         GraphDimensions dimensions = new GraphDimensions.Builder()
             .setNodeCount(1_000_000)
             .setMaxRelCount(5_000_000)
@@ -596,7 +621,7 @@ final class NeighborhoodSimilarityTest {
             0.0,
             0,
             0,
-            100,
+            topK,
             Pools.DEFAULT_CONCURRENCY,
             ParallelUtil.DEFAULT_BATCH_SIZE
         );
@@ -618,76 +643,85 @@ final class NeighborhoodSimilarityTest {
         long vectorsRangeMax = 56_000_016L;
         MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
 
-        long graphRangeMin = 113_516_712L;
-        long graphRangeMax = 212_614_704L;
-        MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
+        MemoryEstimations.Builder builder = MemoryEstimations.builder()
+            .fixed("this.instance", thisInstance)
+            .fixed("node filter", nodeFilterRange)
+            .fixed("vectors", vectorsRange);
 
-        long topKMapRangeMin = 1_688_000_024L;
-        long topKMapRangeMax = 1_688_000_024L;
-        MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
+        if (topK == 0) {
+            long graphRangeMin = 500_050_564_640L;
+            long graphRangeMax = 500_050_564_640L;
+            builder.fixed("similarity graph", MemoryRange.of(graphRangeMin, graphRangeMax));
+        } else {
+            long topKMapRangeMin = 1_688_000_024L;
+            long topKMapRangeMax = 1_688_000_024L;
+            builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
+        }
 
-        MemoryTree expected = MemoryEstimations.builder()
+        MemoryTree expected = builder.build().estimate(dimensions, 1);
+
+        assertEquals(expected.memoryUsage(), actual.memoryUsage());
+    }
+
+    @ParameterizedTest(name = "topK = {0}")
+    @ValueSource(ints = {0, 100})
+    void shouldComputeMemrecWithTop(int topK) {
+        GraphDimensions dimensions = new GraphDimensions.Builder()
+            .setNodeCount(1_000_000)
+            .setMaxRelCount(5_000_000)
+            .build();
+
+        NeighborhoodSimilarity.Config config = new NeighborhoodSimilarity.Config(
+            0.0,
+            0,
+            100,
+            topK,
+            Pools.DEFAULT_CONCURRENCY,
+            ParallelUtil.DEFAULT_BATCH_SIZE
+        );
+
+        NeighborhoodSimilarityFactory factory = new NeighborhoodSimilarityFactory(
+            config,
+            true
+        );
+
+        MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
+
+        long thisInstance = 56;
+
+        long nodeFilterRangeMin = 125_016L;
+        long nodeFilterRangeMax = 125_016L;
+        MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
+
+        long vectorsRangeMin = 56_000_016L;
+        long vectorsRangeMax = 56_000_016L;
+        MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
+
+        long topNListMin = 2_504L;
+        long topNListMax = 2_504L;
+        MemoryRange topNListRange = MemoryRange.of(topNListMin, topNListMax);
+
+        MemoryEstimations.Builder builder = MemoryEstimations.builder()
             .fixed("this.instance", thisInstance)
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange)
-            .fixed("similarity graph", graphRange)
-            .fixed("topK map", topKRange)
-            .build().estimate(dimensions, 1);
+            .fixed("topNList", topNListRange);
+
+        if (topK == 0) {
+            long graphRangeMin = 270_520L;
+            long graphRangeMax = 270_520L;
+            builder.fixed("similarity graph", MemoryRange.of(graphRangeMin, graphRangeMax));
+        } else {
+            long topKMapRangeMin = 1_688_000_024L;
+            long topKMapRangeMax = 1_688_000_024L;
+            builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
+        }
+
+        MemoryTree expected = builder.build().estimate(dimensions, 1);
 
         assertEquals(expected.memoryUsage(), actual.memoryUsage());
     }
 
-    @Test
-    void shouldComputeMemrecWithTop() {
-        GraphDimensions dimensions = new GraphDimensions.Builder()
-            .setNodeCount(1_000_000)
-            .setMaxRelCount(5_000_000)
-            .build();
-
-        NeighborhoodSimilarity.Config config = new NeighborhoodSimilarity.Config(
-            0.0,
-            0,
-            100,
-            100,
-            Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE
-        );
-
-        NeighborhoodSimilarityFactory factory = new NeighborhoodSimilarityFactory(
-            config,
-            true
-        );
-
-        MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
-
-        long thisInstance = 56;
-
-        long nodeFilterRangeMin = 125_016L;
-        long nodeFilterRangeMax = 125_016L;
-        MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
-
-        long vectorsRangeMin = 56_000_016L;
-        long vectorsRangeMax = 56_000_016L;
-        MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
-
-        long graphRangeMin = 8_651_112L;
-        long graphRangeMax = 8_651_112L;
-        MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
-
-        long topKMapRangeMin = 1_688_000_024L;
-        long topKMapRangeMax = 1_688_000_024L;
-        MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
-
-        MemoryTree expected = MemoryEstimations.builder()
-            .fixed("", graphRange)
-            .fixed("", topKRange)
-            .fixed("", vectorsRange)
-            .fixed("", nodeFilterRange)
-            .fixed("", thisInstance)
-            .build().estimate(dimensions, 1);
-
-        assertEquals(expected.memoryUsage(), actual.memoryUsage());
-    }
     private static class ConfigBuilder {
 
         private final NeighborhoodSimilarity.Config config;

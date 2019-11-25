@@ -70,7 +70,6 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
     void shouldProduceStreamOutput() {
         String query = "CALL algo.beta.jaccard.stream(" +
                        "    '', 'LIKES', {" +
-                       "        graph: 'huge'," +
                        "        direction: 'OUTGOING'" +
                        "    }" +
                        ") YIELD node1, node2, similarity " +
@@ -99,7 +98,6 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
     @Test
     void shouldProduceWriteOutput() {
         String query = "CALL algo.beta.jaccard('', 'LIKES', {" +
-                       "  graph: 'huge'," +
                        "  direction: 'OUTGOING'," +
                        "  write: true" +
                        "})" +
@@ -120,7 +118,6 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
     void shouldProduceTopStreamOutput() {
         String query = "CALL algo.beta.jaccard.stream(" +
                        "    '', 'LIKES', {" +
-                       "        graph: 'huge'," +
                        "        direction: 'OUTGOING'," +
                        "        topK: 1," +
                        "        topN: 3" +
@@ -145,7 +142,6 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
     void shouldProduceTopKStreamOutput() {
         String query = "CALL algo.beta.jaccard.stream(" +
                        "    '', 'LIKES', {" +
-                       "        graph: 'huge'," +
                        "        direction: 'OUTGOING'," +
                        "        topK: 1" +
                        "    }" +
@@ -170,7 +166,6 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
     void shouldProduceBottomKStreamOutput() {
         String query = "CALL algo.beta.jaccard.stream(" +
                        "    '', 'LIKES', {" +
-                       "        graph: 'huge'," +
                        "        direction: 'OUTGOING'," +
                        "        bottomK: 1" +
                        "    }" +
@@ -196,7 +191,6 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
     void shouldProduceDegreeCutoffStreamOutput() {
         String query = "CALL algo.beta.jaccard.stream(" +
                        "    '', 'LIKES', {" +
-                       "        graph: 'huge'," +
                        "        direction: 'OUTGOING'," +
                        "        degreeCutoff: 3" +
                        "    }" +
@@ -219,7 +213,6 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
     void shouldProduceSimilarityCutoffStreamOutput() {
         String query = "CALL algo.beta.jaccard.stream(" +
                        "    '', 'LIKES', {" +
-                       "        graph: 'huge'," +
                        "        direction: 'OUTGOING'," +
                        "        similarityCutoff: 0.5" +
                        "    }" +

@@ -50,6 +50,9 @@ public class NeighborhoodSimilarityFactory extends AlgorithmFactory<Neighborhood
 
     @Override
     public MemoryEstimation memoryEstimation() {
+        int topN = Math.abs(config.topN());
+        int topK = Math.abs(config.topK());
+
         MemoryEstimations.Builder builder = MemoryEstimations.builder(NeighborhoodSimilarity.class)
             .perNode("node filter", nodeCount -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
             .add(
@@ -63,18 +66,21 @@ public class NeighborhoodSimilarityFactory extends AlgorithmFactory<Neighborhood
                         .perNode("array", nodeCount -> nodeCount * averageVectorSize).build();
                 })
             );
-        if (computesSimilarityGraph) {
+        if (computesSimilarityGraph && !config.hasTopK()) {
             builder.add(
                 "similarity graph",
-                SimilarityGraphBuilder.memoryEstimation(config.topK(), config.topN())
+                SimilarityGraphBuilder.memoryEstimation(topK, topN)
             );
         }
-        if (config.topK() > 0) {
+        if (config.hasTopK()) {
             builder.add(
                 "topK map",
                 MemoryEstimations.setup("", (dimensions, concurrency) ->
-                    TopKMap.memoryEstimation(dimensions.nodeCount(), config.topK()))
+                    TopKMap.memoryEstimation(dimensions.nodeCount(), topK))
             );
+        }
+        if (config.hasTopN()) {
+            builder.add("topN list", TopNList.memoryEstimation(topN));
         }
         return builder.build();
     }

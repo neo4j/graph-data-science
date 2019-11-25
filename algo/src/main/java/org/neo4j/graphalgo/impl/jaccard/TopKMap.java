@@ -21,11 +21,13 @@
 package org.neo4j.graphalgo.impl.jaccard;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.queue.LongPriorityQueue;
+import org.neo4j.graphalgo.core.utils.queue.BoundedLongLongPriorityQueue;
+import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -37,13 +39,13 @@ public class TopKMap {
 
     private final BitSet nodeFilter;
 
-    static MemoryEstimation memoryEstimation(long items, int topK) {
+    static MemoryEstimation memoryEstimation(long nodes, int topK) {
         return MemoryEstimations.builder(TopKMap.class)
             .add("topK lists",
                 MemoryEstimations.builder("topK lists", TopKList.class)
                     .add("queues", BoundedLongPriorityQueue.memoryEstimation(topK))
                     .build()
-                    .times(items)
+                    .times(nodes)
             )
             .build();
     }
@@ -115,7 +117,7 @@ public class TopKMap {
         }
 
         int size() {
-            return queue.count();
+            return queue.size();
         }
 
         void accept(long node2, double similarity) {

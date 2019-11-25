@@ -145,6 +145,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             "NeighborhoodSimilarity compute failed",
             () -> resultBuilder.timeEval(() -> neighborhoodSimilarity.computeToGraph(direction))
         );
+        graph.releaseTopology();
 
         Graph similarityGraph = similarityGraphResult.similarityGraph();
         resultBuilder

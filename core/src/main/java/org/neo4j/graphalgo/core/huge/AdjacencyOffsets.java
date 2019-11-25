@@ -48,15 +48,18 @@ public abstract class AdjacencyOffsets {
         }
     }
 
+    public static MemoryEstimation memoryEstimation(int concurrency, long nodeCount) {
+        ImportSizing importSizing = ImportSizing.of(concurrency, nodeCount);
+        return AdjacencyOffsets.memoryEstimation(
+            importSizing.pageSize(),
+            importSizing.numberOfPages());
+    }
+
     public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.setup(
                 "adjacency offsets",
-                (dimensions, concurrency) -> {
-                    ImportSizing importSizing = ImportSizing.of(concurrency, dimensions.nodeCount());
-                    return AdjacencyOffsets.memoryEstimation(
-                            importSizing.pageSize(),
-                            importSizing.numberOfPages());
-                });
+                (dimensions, concurrency) -> memoryEstimation(concurrency, dimensions.nodeCount())
+        );
     }
 
     public static AdjacencyOffsets of(long[] page) {
