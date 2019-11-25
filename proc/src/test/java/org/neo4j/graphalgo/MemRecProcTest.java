@@ -192,5 +192,8 @@ class MemRecProcTest extends ProcTestBase {
         testAgainstLoadedGraph("graph.load", map("relationshipProperties", "weight", "nodeProperties", "class"));
         testAgainstLoadedGraph("louvain", map());
         testAgainstLoadedGraph("louvain", map("relationshipProperties", "weight", "nodeProperties", "class"));
+        test("algo.memrec(null, null, 'pageRank', {graph: 'myGraph', nodeCount: 10})", "Unknown impl: myGraph");
+        test("algo.memrec(null, null, 'pageRank', {graph: 'cypher', nodeCount: 10})");
+        test("algo.memrec(null, null, 'pageRank', {graph: 'huge', nodeCount: 10})");
     }
 }
