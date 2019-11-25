@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.collection.primitive.PrimitiveLongIterator;
 
 import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
@@ -49,6 +50,10 @@ public class SetBitsIterable implements Iterable<Long> {
     @Override
     public PrimitiveIterator.OfLong iterator() {
         return new Iterator(offset);
+    }
+
+    public PrimitiveLongIterator primitiveLongIterator() {
+        return new PrimitiveLongIteratorWrapper(iterator());
     }
 
     public LongStream stream() {
@@ -86,6 +91,22 @@ public class SetBitsIterable implements Iterable<Long> {
             value = set.nextSetBit(value + 1);
             return returnValue;
         }
+    }
 
+    private static final class PrimitiveLongIteratorWrapper implements PrimitiveLongIterator {
+
+        private final PrimitiveIterator.OfLong nodeIterator;
+
+        private PrimitiveLongIteratorWrapper(PrimitiveIterator.OfLong nodeIterator) {this.nodeIterator = nodeIterator;}
+
+        @Override
+        public boolean hasNext() {
+            return nodeIterator.hasNext();
+        }
+
+        @Override
+        public long next() {
+            return nodeIterator.next();
+        }
     }
 }

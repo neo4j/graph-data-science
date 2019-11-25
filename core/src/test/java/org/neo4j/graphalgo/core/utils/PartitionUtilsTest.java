@@ -20,10 +20,16 @@
 
 package org.neo4j.graphalgo.core.utils;
 
+import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestGraph;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.graphdb.Direction;
 
 import java.util.Collection;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,7 +68,7 @@ class PartitionUtilsTest {
             concurrency,
             nodeCount,
             alignTo
-            );
+        );
 
         assertEquals(2, tasks.size());
         assertTrue(
@@ -73,6 +79,41 @@ class PartitionUtilsTest {
             tasks.stream().anyMatch((t) -> t.start == 128 && t.end == 200),
             String.format("Expected task with start %d and end %d, but found %s", 128, 200, tasks)
         );
+    }
+
+    @Test
+    void testDegreePartitioning() {
+        Graph graph = TestGraph.Builder.fromGdl(
+            "(a)-->(b)" +
+            "(a)-->(c)" +
+            "(b)-->(a)" +
+            "(b)-->(c)"
+        );
+
+        List<Partition> partitions = PartitionUtils.degreePartition(graph, Direction.OUTGOING, 2);
+        assertEquals(2, partitions.size());
+        assertEquals(0, partitions.get(0).startNode);
+        assertEquals(2, partitions.get(0).nodeCount);
+        assertEquals(2, partitions.get(1).startNode);
+        assertEquals(1, partitions.get(1).nodeCount);
+    }
+
+    @Test
+    void testDegreePartitioningWithNodeFilter() {
+        Graph graph = TestGraph.Builder.fromGdl(
+            "(a)-->(b)" +
+            "(a)-->(c)" +
+            "(b)-->(a)" +
+            "(b)-->(c)"
+        );
+        BitSet nodeFilter = new BitSet(graph.nodeCount());
+        nodeFilter.set(0);
+        nodeFilter.set(2);
+
+        List<Partition> partitions = PartitionUtils.degreePartition(new SetBitsIterable(nodeFilter).primitiveLongIterator(), graph, Direction.OUTGOING, 2);
+        assertEquals(1, partitions.size());
+        assertEquals(0, partitions.get(0).startNode);
+        assertEquals(3, partitions.get(0).nodeCount);
     }
 
 }

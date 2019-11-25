@@ -20,16 +20,10 @@
 
 package org.neo4j.graphalgo.core.utils.partition;
 
-import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
-import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
 public class Partition {
 
