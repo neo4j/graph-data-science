@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -81,7 +82,7 @@ public class ProcedureConfiguration implements BaseConfig {
         return configurationMap.getStringWithFallback(key, oldKey);
     }
 
-    public <V> V get(String key, V defaultValue) {
+    public <V> V get(String key, @Nullable V defaultValue) {
         return configurationMap.get(key, defaultValue);
     }
 

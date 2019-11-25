@@ -20,25 +20,32 @@
 
 package org.neo4j.graphalgo.impl.generator;
 
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 final class DistributionHelper {
     private DistributionHelper() {}
 
-    static long uniformSample(long upperBound) {
+    static long uniformSample(long upperBound, Long seed) {
         // bitwise AND to make it positive
-        return (ThreadLocalRandom.current().nextLong() & Long.MAX_VALUE) % upperBound;
+        return (getRandom(seed).nextLong() & Long.MAX_VALUE) % upperBound;
     }
 
-    static long gauseanSample(long upperBound, long mean, long stdDev) {
-        double gaussian = ThreadLocalRandom.current().nextGaussian() * stdDev + mean % upperBound;
+    static long gauseanSample(long upperBound, long mean, long stdDev, Long seed) {
+        double gaussian = getRandom(seed).nextGaussian() * stdDev + mean % upperBound;
         return Math.round(gaussian);
     }
 
     // https://stackoverflow.com/questions/17882907/python-scipy-stats-powerlaw-negative-exponent/46065079#46065079
-    static long powerLawSample(long min, long max, double gamma) {
-        double v = Math.pow((Math.pow(max, -gamma + 1.0d) - Math.pow(min, -gamma + 1.0d) * ThreadLocalRandom.current().nextDouble() + Math.pow(min, -gamma + 1.0d)), 1.0d / (-gamma + 1.0d));
+    static long powerLawSample(long min, long max, double gamma, Long seed) {
+        double v = Math.pow((Math.pow(max, -gamma + 1.0d) - Math.pow(min, -gamma + 1.0d) * getRandom(seed).nextDouble() + Math.pow(min, -gamma + 1.0d)), 1.0d / (-gamma + 1.0d));
         return Math.round(v);
     }
 
+    static Random getRandom(Long seed) {
+        Random random = new Random();
+        if (seed != null) {
+            random.setSeed(seed);
+        }
+        return random;
+    }
 }

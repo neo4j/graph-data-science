@@ -51,6 +51,7 @@ public final class RandomGraphGenerator {
     private final AllocationTracker allocationTracker;
     private final long nodeCount;
     private final long averageDegree;
+    private final Long seed;
     private final RelationshipDistribution relationshipDistribution;
     private final Optional<RelationshipPropertyProducer> maybePropertyProducer;
 
@@ -72,6 +73,7 @@ public final class RandomGraphGenerator {
             long nodeCount,
             long averageDegree,
             RelationshipDistribution relationshipDistribution,
+            Long seed,
             Optional<RelationshipPropertyProducer> maybePropertyProducer,
             AllocationTracker allocationTracker) {
         this.relationshipDistribution = relationshipDistribution;
@@ -79,6 +81,16 @@ public final class RandomGraphGenerator {
         this.allocationTracker = allocationTracker;
         this.nodeCount = nodeCount;
         this.averageDegree = averageDegree;
+        this.seed = seed;
+    }
+
+    public RandomGraphGenerator(
+        long nodeCount,
+        long averageDegree,
+        RelationshipDistribution relationshipDistribution,
+        Optional<RelationshipPropertyProducer> maybePropertyProducer,
+        AllocationTracker allocationTracker) {
+        this(nodeCount, averageDegree, relationshipDistribution, null, maybePropertyProducer, allocationTracker);
     }
 
     public HugeGraph generate() {
@@ -115,6 +127,14 @@ public final class RandomGraphGenerator {
         return relationshipDistribution;
     }
 
+    public Long getRelationshipSeed() {
+        return seed;
+    }
+
+    public Long getPropertySeed() {
+        return maybePropertyProducer.map(RelationshipPropertyProducer::seed).orElse(null);
+    }
+
     public Optional<RelationshipPropertyProducer> getMaybePropertyProducer() {
         return maybePropertyProducer;
     }
@@ -137,8 +157,8 @@ public final class RandomGraphGenerator {
     private Relationships generateRelationships(IdMap idMap) {
         RelImporter relImporter = new RelImporter(
                 idMap,
-                relationshipDistribution.degreeProducer(nodeCount, averageDegree),
-                relationshipDistribution.relationshipProducer(nodeCount, averageDegree),
+                relationshipDistribution.degreeProducer(nodeCount, averageDegree, seed),
+                relationshipDistribution.relationshipProducer(nodeCount, averageDegree, seed),
                 maybePropertyProducer);
         return relImporter.generate();
     }

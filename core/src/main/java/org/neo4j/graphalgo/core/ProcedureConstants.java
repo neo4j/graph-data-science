@@ -47,6 +47,7 @@ public final class ProcedureConstants {
     public static final String RELATIONSHIP_PROPERTY_MIN_KEY = "min";
     public static final String RELATIONSHIP_PROPERTY_MAX_KEY = "max";
     public static final String RELATIONSHIP_PROPERTY_VALUE_KEY = "value";
+    public static final String RELATIONSHIP_PROPERTY_SEED = "seed";
 
     // algos specific
     public static final String SEED_PROPERTY_KEY = "seedProperty";

@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.impl.generator.RelationshipPropertyProducer;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.ArrayList;
@@ -46,14 +45,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_DISTRIBUTION_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MAX_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MIN_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_NAME_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_TYPE_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_VALUE_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.*;
+import static org.neo4j.helpers.collection.MapUtil.map;
 
 class GraphGenerateProcTest extends ProcTestBase {
 
@@ -163,6 +156,31 @@ class GraphGenerateProcTest extends ProcTestBase {
         assertFalse(generator.getMaybePropertyProducer().isPresent());
     }
 
+    @Test
+    void shouldBeSeedableGenerator() {
+        long relationshipSeed = 4242L;
+        long propertySeed = 2323L;
+
+        Map propertyMap = map(
+            RELATIONSHIP_PROPERTY_NAME_KEY, "random",
+            RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
+            RELATIONSHIP_PROPERTY_MIN_KEY, 21.0D,
+            RELATIONSHIP_PROPERTY_MAX_KEY, 42.0D,
+            RELATIONSHIP_PROPERTY_SEED, propertySeed
+        );
+
+        Map<String, Object> configMap = map("relationshipSeed", relationshipSeed, RELATIONSHIP_PROPERTY_KEY, propertyMap);
+
+        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap, getUsername());
+
+        GraphGenerateProc proc = new GraphGenerateProc();
+        RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, procedureConfig);
+
+        assertEquals(relationshipSeed, generator.getRelationshipSeed());
+        assertEquals(propertySeed, generator.getPropertySeed());
+    }
+
+
     static Stream<Arguments> relationshipPropertyProducers() {
         Collection<Arguments> producers = new ArrayList<>();
 
@@ -201,7 +219,7 @@ class GraphGenerateProcTest extends ProcTestBase {
 
         producers.add(Arguments.of(
                 "Missing `name`",
-                MapUtil.map(
+                map(
                         "foobar", "baz"
                 ),
                 asList("`name`", "specified")
@@ -209,7 +227,7 @@ class GraphGenerateProcTest extends ProcTestBase {
 
         producers.add(Arguments.of(
                 "Missing `type`",
-                MapUtil.map(
+                map(
                         RELATIONSHIP_PROPERTY_NAME_KEY, "prop"
                 ),
                 asList("`type`", "specified")
@@ -217,7 +235,7 @@ class GraphGenerateProcTest extends ProcTestBase {
 
         producers.add(Arguments.of(
                 "Invalid type for `type`",
-                MapUtil.map(
+                map(
                         RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                         RELATIONSHIP_PROPERTY_TYPE_KEY, "foobar"
                 ),
@@ -226,7 +244,7 @@ class GraphGenerateProcTest extends ProcTestBase {
 
         producers.add(Arguments.of(
                 "Invalid type for `min`",
-                MapUtil.map(
+                map(
                         RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                         RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
                         RELATIONSHIP_PROPERTY_MIN_KEY, "Zweiundvierzig"
@@ -236,7 +254,7 @@ class GraphGenerateProcTest extends ProcTestBase {
 
         producers.add(Arguments.of(
                 "Null value for `min`",
-                MapUtil.map(
+                map(
                         RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                         RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
                         RELATIONSHIP_PROPERTY_MIN_KEY, null
@@ -246,7 +264,7 @@ class GraphGenerateProcTest extends ProcTestBase {
 
         producers.add(Arguments.of(
                 "Invalid type for `max`",
-                MapUtil.map(
+                map(
                         RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                         RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
                         RELATIONSHIP_PROPERTY_MAX_KEY, "Zweiundvierzig"
@@ -256,7 +274,7 @@ class GraphGenerateProcTest extends ProcTestBase {
 
         producers.add(Arguments.of(
                 "Null value for `max`",
-                MapUtil.map(
+                map(
                         RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                         RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
                         RELATIONSHIP_PROPERTY_MAX_KEY, null
@@ -266,7 +284,7 @@ class GraphGenerateProcTest extends ProcTestBase {
 
         producers.add(Arguments.of(
                 "Invalid type for `value`",
-                MapUtil.map(
+                map(
                         RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                         RELATIONSHIP_PROPERTY_TYPE_KEY, "FIXED",
                         RELATIONSHIP_PROPERTY_VALUE_KEY, "Zweiundvierzig"
@@ -276,7 +294,7 @@ class GraphGenerateProcTest extends ProcTestBase {
 
         producers.add(Arguments.of(
                 "Null value for `value`",
-                MapUtil.map(
+                map(
                         RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                         RELATIONSHIP_PROPERTY_TYPE_KEY, "FIXED",
                         RELATIONSHIP_PROPERTY_VALUE_KEY, null

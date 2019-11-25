@@ -20,6 +20,8 @@
 
 package org.neo4j.graphalgo.impl.generator;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -155,5 +157,47 @@ class RandomGraphGeneratorTest {
             });
             return true;
         });
+    }
+
+    @Test
+    void shouldBeSeedAble() {
+        int nbrNodes = 10;
+        long avgDeg = 5L;
+        long edgeSeed = 1337L;
+        long propertySeed = 1337L;
+
+        RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
+            nbrNodes,
+            avgDeg,
+            RelationshipDistribution.UNIFORM,
+            edgeSeed,
+            Optional.of(RelationshipPropertyProducer.random("prop", -10, 10, propertySeed)),
+            AllocationTracker.EMPTY);
+
+        RandomGraphGenerator otherRandomGenerator = new RandomGraphGenerator(
+            nbrNodes,
+            avgDeg,
+            RelationshipDistribution.UNIFORM,
+            edgeSeed,
+            Optional.of(RelationshipPropertyProducer.random("prop", -10, 10, propertySeed)),
+            AllocationTracker.EMPTY);
+
+        HugeGraph graph1 = randomGraphGenerator.generate();
+
+        HugeGraph graph2 = otherRandomGenerator.generate();
+
+        assertEquals(relationships(graph1), relationships(graph2));
+    }
+
+    List<Triple<Long, Long, Double>> relationships(HugeGraph graph) {
+        List<Triple<Long, Long, Double>> edgeList = new ArrayList<Triple<Long, Long, Double>>();
+        graph.forEachNode(node -> {
+            graph.forEachRelationship(node, Direction.INCOMING, Double.NaN, (src, target, weight) -> {
+                edgeList.add(new ImmutableTriple<>(src, target, weight));
+                return true;
+            });
+            return true;
+        });
+        return edgeList;
     }
 }

@@ -42,18 +42,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_DISTRIBUTION_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MAX_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MIN_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_NAME_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_TYPE_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_VALUE_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.*;
 
 public final class GraphGenerateProc extends BaseProc<ProcedureConfiguration> {
 
     public static final String DUMMY_RELATIONSHIP_NAME = "RELATIONSHIP";
+    public static final String RELATIONSHIP_SEED_KEY = "relationshipSeed";
 
 
     @Procedure(name = "algo.beta.graph.generate", mode = Mode.READ)
@@ -116,6 +110,7 @@ public final class GraphGenerateProc extends BaseProc<ProcedureConfiguration> {
                 nodeCount,
                 averageDegree,
                 getRelationshipDistribution(config),
+                config.get(RELATIONSHIP_SEED_KEY, null),
                 getRelationshipPropertyProducer(config),
                 AllocationTracker.EMPTY
         );
