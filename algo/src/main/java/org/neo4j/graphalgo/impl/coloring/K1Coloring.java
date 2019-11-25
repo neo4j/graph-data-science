@@ -196,7 +196,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         BitSet nextNodesToColor = new BitSet(nodeCount);
 
         // The nodesToColor bitset is not thread safe, therefore we have to align the batches to multiples of 64
-        List<Partition> partitions = Partition.numberAlignedPartitioning(concurrency, nodeCount, Long.SIZE);
+        List<Partition> partitions = PartitionUtils.numberAlignedPartitioning(concurrency, nodeCount, Long.SIZE);
 
         List<ValidationStep> steps = partitions.stream().map(partition -> new ValidationStep(
             graph.concurrentCopy(),

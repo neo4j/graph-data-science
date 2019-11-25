@@ -28,8 +28,8 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphdb.Direction;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -63,12 +63,16 @@ class PartitionUtilsTest {
         long nodeCount = 200;
         int concurrency = 2;
 
-        Collection<TestTask> tasks = PartitionUtils.numberAlignedPartitioning(
-            TestTask::new,
+        List<Partition> partitions = PartitionUtils.numberAlignedPartitioning(
             concurrency,
             nodeCount,
             alignTo
         );
+
+        List<TestTask> tasks = partitions
+            .stream()
+            .map(partition -> new TestTask(partition.startNode, partition.nodeCount))
+            .collect(Collectors.toList());
 
         assertEquals(2, tasks.size());
         assertTrue(
@@ -110,7 +114,12 @@ class PartitionUtilsTest {
         nodeFilter.set(0);
         nodeFilter.set(2);
 
-        List<Partition> partitions = PartitionUtils.degreePartition(new SetBitsIterable(nodeFilter).primitiveLongIterator(), graph, Direction.OUTGOING, 2);
+        List<Partition> partitions = PartitionUtils.degreePartition(
+            new SetBitsIterable(nodeFilter).primitiveLongIterator(),
+            graph,
+            Direction.OUTGOING,
+            2
+        );
         assertEquals(1, partitions.size());
         assertEquals(0, partitions.get(0).startNode);
         assertEquals(3, partitions.get(0).nodeCount);

@@ -20,11 +20,6 @@
 
 package org.neo4j.graphalgo.core.utils.partition;
 
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-
 public class Partition {
 
     public static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
@@ -39,22 +34,5 @@ public class Partition {
 
     public boolean fits(int otherPartitionsCount) {
         return MAX_NODE_COUNT - otherPartitionsCount >= nodeCount;
-    }
-
-    public static List<Partition> numberAlignedPartitioning(
-        int concurrency,
-        long nodeCount,
-        long alignTo
-    ) {
-        final long initialBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, alignTo);
-        final long remainder = initialBatchSize % alignTo;
-        final long adjustedBatchSize = remainder == 0 ? initialBatchSize : initialBatchSize + (alignTo - remainder);
-
-        List<Partition> partitions = new ArrayList<>(concurrency);
-        for (long i = 0; i < nodeCount; i+=adjustedBatchSize) {
-            partitions.add(new Partition(i, Math.min(nodeCount, i + adjustedBatchSize - 1)));
-        }
-
-        return partitions;
     }
 }
