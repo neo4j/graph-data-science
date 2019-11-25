@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.partition.DegreePartitioning;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphdb.Direction;
 
@@ -156,8 +157,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     }
 
     private void runColoring() {
-        List<Partition> degreePartitions = Partition.degreePartitioning(
-            graph.nodeCount(),
+        List<Partition> degreePartitions = DegreePartitioning.fromConcurrency(
             concurrency,
             minBatchSize,
             direction,
