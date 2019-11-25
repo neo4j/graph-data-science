@@ -57,6 +57,9 @@ h| Config ||||
 | relationshipCount  | int  | 0           | yes      | The number of relationships in a fictive graph.
 |===
 
+This allows getting an estimate of the memory requirement to run graph-algorithms on a fictive graph,
+defined on its stats.
+For explicitly loaded graphs, the config-map needs to contain the graph name in the `graph` key.
 Additionally algorithm specific parameters can also be provided as config.
 
 .Results
