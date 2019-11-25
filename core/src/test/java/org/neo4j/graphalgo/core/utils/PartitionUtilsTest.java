@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Collection;
 
