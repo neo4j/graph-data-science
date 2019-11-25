@@ -161,7 +161,7 @@ CALL algo.graph.load('cheapestRoads', 'Loc', 'ROAD', {
 === Cypher projection
 
 A Cypher projected graph will, by default, store all projected relationships without any deduplication (see `none` below).
-As for the Huge graph, we can specify a `deduplicateRelationships` strategy.
+As for the Huge graph, we can specify a `duplicateRelationships` strategy.
 
 .The following runs shortest path over a graph based on Cypher projections, picking the `ROAD` relationship with minimum cost:
 [source,cypher]
