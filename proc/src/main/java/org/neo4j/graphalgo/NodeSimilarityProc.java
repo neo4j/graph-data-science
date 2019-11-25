@@ -75,14 +75,14 @@ public class NodeSimilarityProc extends BaseAlgoProc<NodeSimilarity> {
 
     private static final Direction COMPUTE_DIRECTION_DEFAULT = OUTGOING;
 
-    @Procedure(name = "algo.beta.jaccard.stream", mode = Mode.READ)
-    @Description("CALL algo.beta.jaccard.stream(" +
+    @Procedure(name = "algo.nodeSimilarity.stream", mode = Mode.READ)
+    @Description("CALL algo.nodeSimilarity.stream(" +
                  "nodeFilter, relationshipFilter, {" +
                  "  similarityCutoff: 0.0, degreeCutoff: 0," +
                  "  topK: 10, bottomK: 10, topN: 0, bottomN: 0," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4" +
                  "}) " +
-                 "YIELD node1, node2, similarity - computes neighborhood similarities based on the Jaccard index")
+                 "YIELD node1, node2, similarity - computes node similarities based on the Jaccard index")
     public Stream<SimilarityResult> stream(
         @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
         @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,
@@ -106,15 +106,15 @@ public class NodeSimilarityProc extends BaseAlgoProc<NodeSimilarity> {
         );
     }
 
-    @Procedure(name = "algo.beta.jaccard", mode = Mode.WRITE)
-    @Description("CALL algo.beta.jaccard(" +
+    @Procedure(name = "algo.nodeSimilarity", mode = Mode.WRITE)
+    @Description("CALL algo.nodeSimilarity(" +
                  "nodeFilter, relationshipFilter, {" +
                  "  similarityCutoff: 0.0, degreeCutoff: 0," +
                  "  topK: 10, bottomK: 10, topN: 0, bottomN: 0," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4," +
                  "  write: 'true', writeRelationshipType: 'SIMILAR_TO', writeProperty: 'similarity', writeConcurrency: 4" +
                  "}) " +
-                 "YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty - computes neighborhood similarities based on the Jaccard index")
+                 "YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty - computes node similarities based on the Jaccard index")
     public Stream<NodeSimilarityResult> write(
         @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
         @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,
@@ -200,7 +200,7 @@ public class NodeSimilarityProc extends BaseAlgoProc<NodeSimilarity> {
         return histogram;
     }
 
-    @Procedure(value = "algo.beta.jaccard.memrec")
+    @Procedure(value = "algo.nodeSimilarity.memrec")
     public Stream<MemRecResult> memrec(
         @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
         @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,

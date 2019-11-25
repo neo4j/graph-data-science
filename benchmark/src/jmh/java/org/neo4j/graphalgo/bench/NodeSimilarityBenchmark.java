@@ -105,12 +105,12 @@ public class NodeSimilarityBenchmark {
     }
 
     @Benchmark
-    public void neighborhoodSimilarityToStream(Blackhole blackhole) {
+    public void nodeSimilarityToStream(Blackhole blackhole) {
         initAlgo(config).computeToStream(Direction.OUTGOING).forEach(blackhole::consume);
     }
 
     @Benchmark
-    public void neighborhoodSimilarityToGraph(Blackhole blackhole) {
+    public void nodeSimilarityToGraph(Blackhole blackhole) {
         blackhole.consume(initAlgo(config).computeToGraph(Direction.OUTGOING));
     }
 

@@ -59,7 +59,7 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL algo.beta.jaccard(nodeFilter: STRING, relationshipFilter: STRING, {
+CALL algo.nodeSimilarity(nodeFilter: STRING, relationshipFilter: STRING, {
   write: BOOLEAN,
   writeProperty: STRING
   // additional configuration
@@ -128,7 +128,7 @@ YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
 .The following describes the API for running the algorithm and streaming results:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream(nodeFilter: STRING, relationshipFilter: STRING, {
+CALL algo.nodeSimilarity.stream(nodeFilter: STRING, relationshipFilter: STRING, {
   // configuration
 })
 YIELD node1, node2, similarity
@@ -221,7 +221,7 @@ To circumvent this, a common node label like 'Node' can be added to Person and I
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING'
 })
 YIELD node1, node2, similarity
@@ -261,7 +261,7 @@ The similarity score is written as a property on the relationship.
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL algo.beta.jaccard('', 'LIKES', {
+CALL algo.nodeSimilarity('', 'LIKES', {
   direction: 'OUTGOING',
   write: true
 })
@@ -314,7 +314,7 @@ If neither is specified, topK is used.
 .The following will load the graph, run the algorithm, and stream the top 1 result per node:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING',
   topK: 1
 })
@@ -337,7 +337,7 @@ ORDER BY Person1
 .The following will load the graph, run the algorithm, and stream the bottom 1 result per node:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING',
   bottomK: 1
 })
@@ -370,7 +370,7 @@ A value of 0 means no global limit is imposed and all results from topK or botto
 .The following will load the graph, run the algorithm, and stream the 3 highest out of the top 1 results per node:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING',
   topK: 1,
   topN: 3
@@ -400,7 +400,7 @@ This value can not be lower than 1.
 .The following will ignore nodes with less than 3 LIKES relationships:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING',
   degreeCutOff: 3
 })
@@ -429,7 +429,7 @@ Setting similarity cutoff to 0 may yield a very large result set, increased runt
 .The following will ignore node pairs with a similarty score less than 0.5:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING',
   similarityCutoff: 0.5
 })

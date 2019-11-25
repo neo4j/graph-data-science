@@ -130,7 +130,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldStreamResults(String graphImpl, Direction direction) {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +
@@ -159,7 +159,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldStreamTopResults(String graphImpl, Direction direction) {
         int topN = 2;
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +
@@ -201,7 +201,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
                    " CREATE (person)-[:LIKES]->(thing)"
         );
 
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +
@@ -229,7 +229,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldWriteResults(String graphImpl, Direction direction) throws KernelException {
-        String query = "CALL algo.beta.jaccard(" +
+        String query = "CALL algo.nodeSimilarity(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +

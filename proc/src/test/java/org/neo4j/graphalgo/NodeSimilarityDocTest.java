@@ -68,7 +68,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'" +
                        "    }" +
@@ -97,7 +97,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceWriteOutput() {
-        String query = "CALL algo.beta.jaccard('', 'LIKES', {" +
+        String query = "CALL algo.nodeSimilarity('', 'LIKES', {" +
                        "  direction: 'OUTGOING'," +
                        "  write: true" +
                        "})" +
@@ -116,7 +116,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceTopStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        topK: 1," +
@@ -140,7 +140,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceTopKStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        topK: 1" +
@@ -164,7 +164,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceBottomKStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        bottomK: 1" +
@@ -189,7 +189,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceDegreeCutoffStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        degreeCutoff: 3" +
@@ -211,7 +211,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceSimilarityCutoffStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        similarityCutoff: 0.5" +
