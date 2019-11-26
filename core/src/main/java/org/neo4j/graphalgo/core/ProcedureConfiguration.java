@@ -435,7 +435,7 @@ public class ProcedureConfiguration {
             return null;
         }
 
-        return configurationMap.typedValue(key, Number.class, value).doubleValue();
+        return CypherMapWrapper.typedValue(key, Number.class, value).doubleValue();
     }
 
     public static ProcedureConfiguration create(Map<String, Object> config, String username) {
