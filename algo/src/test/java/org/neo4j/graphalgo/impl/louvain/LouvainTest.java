@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -35,6 +36,7 @@ import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
@@ -55,10 +57,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
+import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
@@ -337,6 +341,28 @@ class LouvainTest {
                 .withTerminationFlag(terminationFlag)
                 .compute();
         }, 1000, 1000);
+    }
+
+    @Test
+    void testLogging() {
+        Graph graph = loadGraph(HugeGraphFactory.class, DB_CYPHER);
+
+        TestLog log = new TestLog();
+
+        Louvain louvain = new Louvain(
+            graph,
+            DEFAULT_CONFIG,
+            Direction.BOTH,
+            Pools.DEFAULT,
+            1,
+            log,
+            AllocationTracker.EMPTY
+        );
+
+        louvain.compute();
+
+        assertTrue(log.containsMessage(INFO, "Louvain - Level 1 finished after"));
+        assertTrue(log.containsMessage(INFO, "Louvain - Finished after"));
     }
 
     static Stream<Arguments> memoryEstimationTuples() {
