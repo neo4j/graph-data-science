@@ -169,7 +169,6 @@ public final class Louvain extends Algorithm<Louvain> {
 
     private Graph summarizeGraph(Graph workingGraph, ModularityOptimization modularityOptimization, long maxCommunityId) {
         GraphGenerator.NodeImporter nodeImporter = GraphGenerator.create(
-            workingGraph.nodeCount(),
             maxCommunityId,
             direction,
             rootGraph.isUndirected(),

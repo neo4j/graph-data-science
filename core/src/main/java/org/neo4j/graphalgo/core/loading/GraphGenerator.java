@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.cursors.LongCursor;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -40,8 +39,7 @@ import java.util.stream.Stream;
 public class GraphGenerator {
 
     public static NodeImporter create(
-        long superGraphNodeCount,
-        long maxCommunityId,
+        long maxOriginalId,
         Direction direction,
         boolean undirected,
         boolean loadRelationshipProperty,
@@ -50,8 +48,7 @@ public class GraphGenerator {
         AllocationTracker tracker
     ) {
         return new NodeImporter(
-            superGraphNodeCount,
-            maxCommunityId,
+            maxOriginalId,
             direction,
             undirected,
             loadRelationshipProperty,
@@ -64,18 +61,17 @@ public class GraphGenerator {
 
         private final boolean undirected;
         private final boolean loadRelationshipProperty;
-        private final BitSet seenNeoIds;
+        private final BitSet seenOriginalIds;
         private final Direction direction;
         private final AllocationTracker tracker;
         private final ExecutorService executorService;
         private final DeduplicationStrategy deduplicationStrategy;
-        private final SparseNodeMapping.Builder neoToInternalBuilder;
+        private final SparseNodeMapping.Builder originalToInternalBuilder;
 
         private long nextAvailableId;
 
         NodeImporter(
-            long superGraphNodeCount,
-            long maxCommunityId,
+            long maxOriginalId,
             Direction direction,
             boolean undirected,
             boolean loadRelationshipProperty,
@@ -90,23 +86,23 @@ public class GraphGenerator {
             this.executorService = executorService;
             this.tracker = tracker;
 
-            this.neoToInternalBuilder = SparseNodeMapping.Builder.create(maxCommunityId, tracker);
+            this.originalToInternalBuilder = SparseNodeMapping.Builder.create(maxOriginalId, tracker);
             this.nextAvailableId = 0;
-            seenNeoIds = new BitSet(Math.min(maxCommunityId, superGraphNodeCount));
+            seenOriginalIds = new BitSet(maxOriginalId);
         }
 
         public void addNode(long originalId) {
-            if (!seenNeoIds.get(originalId)) {
-                neoToInternalBuilder.set(originalId, nextAvailableId++);
-                seenNeoIds.set(originalId);
+            if (!seenOriginalIds.get(originalId)) {
+                originalToInternalBuilder.set(originalId, nextAvailableId++);
+                seenOriginalIds.set(originalId);
             }
         }
 
         public RelImporter build() {
-            SparseNodeMapping neoToInternal = neoToInternalBuilder.build();
+            SparseNodeMapping neoToInternal = originalToInternalBuilder.build();
 
             HugeLongArray internalToNeo = HugeLongArray.newArray(nextAvailableId, tracker);
-            for (LongCursor nodeId : seenNeoIds.asLongLookupContainer()) {
+            for (LongCursor nodeId : seenOriginalIds.asLongLookupContainer()) {
                 internalToNeo.set(neoToInternal.get(nodeId.value), nodeId.value);
             }
 
@@ -232,7 +228,7 @@ public class GraphGenerator {
         }
 
         public void addFromInternal(long source, long target) {
-            relationshipBuffer.add(idMap.toMappedNodeId(source), idMap.toMappedNodeId(target), -1L, -1L);
+            relationshipBuffer.add(source, target, -1L, -1L);
             if (relationshipBuffer.isFull()) {
                 flushBuffer();
                 relationshipBuffer.reset();
@@ -240,7 +236,7 @@ public class GraphGenerator {
         }
 
         public void addFromInternal(long source, long target, double relationshipPropertyValue) {
-            relationshipBuffer.add(idMap.toMappedNodeId(source), idMap.toMappedNodeId(target), -1L, Double.doubleToLongBits(relationshipPropertyValue));
+            relationshipBuffer.add(source, target, -1L, Double.doubleToLongBits(relationshipPropertyValue));
             if (relationshipBuffer.isFull()) {
                 flushBuffer();
                 relationshipBuffer.reset();
@@ -251,7 +247,7 @@ public class GraphGenerator {
             relationshipStream.forEach(relationship -> addFromInternal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property()));
         }
 
-        public Graph build() {
+        public HugeGraph build() {
             flushBuffer();
             Relationships relationships = buildRelationships();
 
