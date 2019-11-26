@@ -44,9 +44,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.stream.Streams;
 
-import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -136,16 +134,10 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
         boolean computeHistogram = callContext.outputFields().anyMatch(HISTOGRAM_FIELD_NAME::equals);
         Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries;
 
-        if (isEmpty(graphName)) {
-            graphEntries = GraphCatalog.getLoadedGraphsNew(getUsername()).entrySet().stream();
-            // list all
-        } else {
-            graphEntries = Streams
-                .ofOptional(GraphCatalog.getUnion(getUsername(), graphName))
-                .map(graph -> new AbstractMap.SimpleImmutableEntry<>(
-                    GraphCreateConfig.legacyFactory(graphName),
-                    graph
-                ));
+        graphEntries = GraphCatalog.getLoadedGraphsNew(getUsername()).entrySet().stream();
+        if (!isEmpty(graphName)) {
+            // we should only list the provided graph
+            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
         }
 
         return graphEntries.map(e -> new GraphCatalogEntry(e.getKey(), e.getValue(), computeHistogram));
@@ -154,20 +146,20 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
     public static class GraphCreateResult {
 
         public final String graphName;
-        public final Map<String, Object> nodeFilter, relationshipFilter;
+        public final Map<String, Object> nodeProjection, relationshipProjection;
         public final long nodes, relationships, createMillis;
 
         GraphCreateResult(
             String graphName,
-            Map<String, Object> nodeFilter,
-            Map<String, Object> relationshipFilter,
+            Map<String, Object> nodeProjection,
+            Map<String, Object> relationshipProjection,
             long nodes,
             long relationships,
             long createMillis
         ) {
             this.graphName = graphName;
-            this.nodeFilter = nodeFilter;
-            this.relationshipFilter = relationshipFilter;
+            this.nodeProjection = nodeProjection;
+            this.relationshipProjection = relationshipProjection;
             this.nodes = nodes;
             this.relationships = relationships;
             this.createMillis = createMillis;
@@ -210,14 +202,14 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
     public static class GraphCatalogEntry {
 
         public final String graphName;
-        public final Map<String, Object> nodeFilter, relationshipFilter;
+        public final Map<String, Object> nodeProjection, relationshipProjection;
         public final long nodes, relationships;
         public final Map<String, Object> histogram;
 
         GraphCatalogEntry(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
             this.graphName = config.graphName();
-            nodeFilter = config.nodeProjection().toObject();
-            relationshipFilter = config.relationshipProjection().toObject();
+            nodeProjection = config.nodeProjection().toObject();
+            relationshipProjection = config.relationshipProjection().toObject();
             nodes = graph.nodeCount();
             relationships = graph.relationshipCount();
             histogram = computeHistogram ? computeHistogram(graph) : emptyMap();

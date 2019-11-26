@@ -40,8 +40,9 @@ public abstract class PropertyMapping {
         "",
         "",
         0.0,
-        DeduplicationStrategy.NONE
+        DeduplicationStrategy.DEFAULT
     );
+    private static final double DEFAULT_PROPERTY_VALUE = Double.NaN;
 
     public final String propertyKey;
     public final String neoPropertyKey;
@@ -88,7 +89,7 @@ public abstract class PropertyMapping {
             final Object aggregationValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_AGGREGATION_KEY);
             DeduplicationStrategy deduplicationStrategy;
             if (aggregationValue == null) {
-                deduplicationStrategy = DeduplicationStrategy.NONE;
+                deduplicationStrategy = DeduplicationStrategy.DEFAULT;
             } else if (aggregationValue instanceof String) {
                 deduplicationStrategy = DeduplicationStrategy.lookup(((String) aggregationValue).toUpperCase());
             } else {
@@ -295,11 +296,26 @@ public abstract class PropertyMapping {
      * Creates a PropertyMapping. The given property key is also used for internal reference.
      */
     public static PropertyMapping of(String neoPropertyKey, double defaultValue) {
-        return of(neoPropertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.NONE);
+        return of(neoPropertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.DEFAULT);
     }
 
     public static PropertyMapping of(String propertyKey, String neoPropertyKey, double defaultValue) {
-        return of(propertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.NONE);
+        return of(propertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.DEFAULT);
+    }
+
+    public static PropertyMapping of(
+        String propertyKey,
+        double defaultValue,
+        DeduplicationStrategy deduplicationStrategy
+    ) {
+        return new Unresolved(propertyKey, propertyKey, defaultValue, deduplicationStrategy);
+    }
+
+    public static PropertyMapping of(
+        String propertyKey,
+        DeduplicationStrategy deduplicationStrategy
+    ) {
+        return new Unresolved(propertyKey, propertyKey, DEFAULT_PROPERTY_VALUE, deduplicationStrategy);
     }
 
     public static PropertyMapping of(

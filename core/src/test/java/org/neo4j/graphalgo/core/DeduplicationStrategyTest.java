@@ -31,7 +31,7 @@ class DeduplicationStrategyTest {
     private static final double[] inputs = new double[]{0.5, 1.4};
 
     @ParameterizedTest
-    @CsvSource({"MAX, 1.4", "MIN, 0.5", "SKIP, 0.5", "SUM, 1.9"})
+    @CsvSource({"MAX, 1.4", "MIN, 0.5", "SINGLE, 0.5", "SUM, 1.9"})
     void testSuccessfulDuplateRelationshipStrategies(DeduplicationStrategy strategy, double expected) {
         assertEquals(expected, strategy.merge(inputs[0], inputs[1]));
     }

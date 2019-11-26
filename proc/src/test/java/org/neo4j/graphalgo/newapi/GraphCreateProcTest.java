@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.newapi;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -60,25 +61,25 @@ class GraphCreateProcTest extends ProcTestBase {
         GraphCatalog.removeAllLoadedGraphs();
     }
 
-    static Stream<Map<String, Object>> nodeFilters() {
+    static Stream<Map<String, Object>> nodeProjections() {
         return Stream.of(
             map("A", map("label", "A", "properties", emptyMap())),
             emptyMap()
         );
     }
 
-    static Stream<String> relationshipFilters() {
+    static Stream<String> relationshipProjections() {
         return Stream.of("REL", "");
     }
 
     static Stream<Arguments> allNodesAndRels() {
         return crossArguments(
-            () -> nodeFilters().map(Arguments::of),
-            () -> relationshipFilters().map(Arguments::of)
+            () -> nodeProjections().map(Arguments::of),
+            () -> relationshipProjections().map(Arguments::of)
         );
     }
 
-    static Stream<Arguments> nodeFilterVariants() {
+    static Stream<Arguments> nodeProjectionVariants() {
         return Stream.of(
             Arguments.of(
                 "default neo label",
@@ -123,19 +124,19 @@ class GraphCreateProcTest extends ProcTestBase {
         return Stream.of(
             Arguments.of(
                 map("weight", map("property", "weight")),
-                map("weight", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "NONE"))
+                map("weight", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "DEFAULT"))
             ),
             Arguments.of(
                 map("score", map("property", "weight", "defaultValue", 3D)),
-                map("score", map("property", "weight", "defaultValue", 3D, "aggregation", "NONE"))
+                map("score", map("property", "weight", "defaultValue", 3D, "aggregation", "DEFAULT"))
             ),
             Arguments.of(
                 singletonList("weight"),
-                map("weight", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "NONE"))
+                map("weight", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "DEFAULT"))
             ),
             Arguments.of(
                 map("score", "weight"),
-                map("score", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "NONE"))
+                map("score", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "DEFAULT"))
             )
         );
     }
@@ -145,17 +146,17 @@ class GraphCreateProcTest extends ProcTestBase {
             Arguments.of(
                 "default neo type",
                 singletonMap("REL", emptyMap()),
-                map("REL", map("type", "REL", "projection", "NATURAL", "properties", emptyMap()))
+                map("REL", map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap()))
             ),
             Arguments.of(
                 "aliased rel type",
                 map("CONNECTS", map("type", "REL")),
-                map("CONNECTS", map("type", "REL", "projection", "NATURAL", "properties", emptyMap()))
+                map("CONNECTS", map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap()))
             ),
             Arguments.of(
                 "rel filter as list",
                 singletonList("REL"),
-                map("REL", map("type", "REL", "projection", "NATURAL", "properties", emptyMap()))
+                map("REL", map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap()))
             )
         );
     }
@@ -178,18 +179,18 @@ class GraphCreateProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest(name = "nodeFilter = {0}, relFilter = {1}")
+    @ParameterizedTest(name = "nodeProjection = {0}, relFilter = {1}")
     @MethodSource(value = "allNodesAndRels")
-    void createGraph(Map<String, Object> nodeFilter, String relFilter) {
+    void createGraph(Map<String, Object> nodeProjection, String relFilter) {
         String name = "name";
 
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, $nodeFilter, $relFilter)",
-            map("name", name, "nodeFilter", nodeFilter, "relFilter", relFilter),
+            "CALL algo.beta.graph.create($name, $nodeProjection, $relFilter)",
+            map("name", name, "nodeProjection", nodeProjection, "relFilter", relFilter),
             singletonList(map(
                 "graphName", name,
-                "nodeFilter", nodeFilter,
-                "relationshipFilter", anything(),
+                "nodeProjection", nodeProjection,
+                "relationshipProjection", anything(),
                 "nodes", nodeCount,
                 "relationships", 2L,
                 "createMillis", instanceOf(Long.class)
@@ -240,8 +241,8 @@ class GraphCreateProcTest extends ProcTestBase {
             map("name", name),
             singletonList(map(
                 "graphName", name,
-                "nodeFilter", emptyMap(),
-                "relationshipFilter", emptyMap(),
+                "nodeProjection", emptyMap(),
+                "relationshipProjection", emptyMap(),
                 "nodes", nodeCount,
                 "relationships", 2L,
                 "createMillis", instanceOf(Long.class)
@@ -252,11 +253,11 @@ class GraphCreateProcTest extends ProcTestBase {
     @Test
     void failsOnInvalidNeoLabel() {
         String name = "g";
-        Map nodeFilter = map("A", map("label", "INVALID"));
+        Map nodeProjection = map("A", map("label", "INVALID"));
 
         assertError(
-            "CALL algo.beta.graph.create($name, $nodeFilter, {})",
-            map("name", name, "nodeFilter", nodeFilter),
+            "CALL algo.beta.graph.create($name, $nodeProjection, {})",
+            map("name", name, "nodeProjection", nodeProjection),
             "Node label not found: 'INVALID'"
         );
     }
@@ -264,28 +265,28 @@ class GraphCreateProcTest extends ProcTestBase {
     @Test
     void failsOnMultipleLabelProjections() {
         String name = "g";
-        Map<String, Object> nodeFilter = map("A", map("label", "A"), "B", map("label", "A"));
+        Map<String, Object> nodeProjection = map("A", map("label", "A"), "B", map("label", "A"));
 
         assertError(
-            "CALL algo.beta.graph.create($name, $nodeFilter, {})",
-            map("name", name, "nodeFilter", nodeFilter),
+            "CALL algo.beta.graph.create($name, $nodeProjection, {})",
+            map("name", name, "nodeProjection", nodeProjection),
             "Only one node filter is supported."
         );
     }
 
 
-    @ParameterizedTest(name = "{0}, nodeFilter = {1}")
-    @MethodSource("nodeFilterVariants")
-    void testNodeFilterVariants(String descr, Object nodeFilter, Map<String, Object> desugaredNodeFilter) {
+    @ParameterizedTest(name = "{0}, nodeProjection = {1}")
+    @MethodSource("nodeProjectionVariants")
+    void testnodeProjectionVariants(String descr, Object nodeProjection, Map<String, Object> desugarednodeProjection) {
         String name = "g";
 
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, $nodeFilter, {})",
-            map("name", name, "nodeFilter", nodeFilter),
+            "CALL algo.beta.graph.create($name, $nodeProjection, {})",
+            map("name", name, "nodeProjection", nodeProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeFilter", desugaredNodeFilter,
-                "relationshipFilter", emptyMap(),
+                "nodeProjection", desugarednodeProjection,
+                "relationshipProjection", emptyMap(),
                 "nodes", nodeCount,
                 "relationships", 2L,
                 "createMillis", instanceOf(Long.class)
@@ -296,31 +297,31 @@ class GraphCreateProcTest extends ProcTestBase {
     @Test
     void failsOnInvalidPropertKey() {
         String name = "g";
-        Map<String, Object> nodeFilter = singletonMap("A", map("label", "A", "properties", map("property", "invalid")));
+        Map<String, Object> nodeProjection = singletonMap("A", map("label", "A", "properties", map("property", "invalid")));
 
         assertError(
-            "CALL algo.beta.graph.create($name, $nodeFilter, {})",
-            map("name", name, "nodeFilter", nodeFilter),
+            "CALL algo.beta.graph.create($name, $nodeProjection, {})",
+            map("name", name, "nodeProjection", nodeProjection),
             "Node properties not found: 'invalid'"
         );
     }
 
     @ParameterizedTest(name = "properties = {0}")
     @MethodSource(value = "nodeProperties")
-    void nodePropertiesInNodeFilter(Object properties, Map<String, Object> expectedProperties) {
+    void nodePropertiesInnodeProjection(Object properties, Map<String, Object> expectedProperties) {
         String name = "g";
-        Map<String, Object> nodeFilter = map("B", map("label", "A", "properties", properties));
-        Map<String, Object> expectedNodeFilter = map("B", map("label", "A", "properties", expectedProperties));
+        Map<String, Object> nodeProjection = map("B", map("label", "A", "properties", properties));
+        Map<String, Object> expectednodeProjection = map("B", map("label", "A", "properties", expectedProperties));
 
 
         // TODO: check property values on graph
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, $nodeFilter, {})",
-            map("name", name, "nodeFilter", nodeFilter),
+            "CALL algo.beta.graph.create($name, $nodeProjection, {})",
+            map("name", name, "nodeProjection", nodeProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeFilter", expectedNodeFilter,
-                "relationshipFilter", emptyMap(),
+                "nodeProjection", expectednodeProjection,
+                "relationshipProjection", emptyMap(),
                 "nodes", nodeCount,
                 "relationships", 2L,
                 "createMillis", instanceOf(Long.class)
@@ -330,16 +331,16 @@ class GraphCreateProcTest extends ProcTestBase {
 
     @ParameterizedTest(name = "{0}, relFilter = {1}")
     @MethodSource("relFilterVariants")
-    void testRelFilterVariants(String descr, Object relFilter, Map<String, Object> desugaredRelFilter) {
+    void testRelFilterVariants(String descr, Object relProjection, Map<String, Object> desugaredRelProjection) {
         String name = "g";
 
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, {}, $relFilter)",
-            map("name", name, "relFilter", relFilter),
+            "CALL algo.beta.graph.create($name, {}, $relProjection)",
+            map("name", name, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeFilter", emptyMap(),
-                "relationshipFilter", desugaredRelFilter,
+                "nodeProjection", emptyMap(),
+                "relationshipProjection", desugaredRelProjection,
                 "nodes", nodeCount,
                 "relationships", 2L,
                 "createMillis", instanceOf(Long.class)
@@ -349,6 +350,7 @@ class GraphCreateProcTest extends ProcTestBase {
 
     @ParameterizedTest(name = "projection={0}")
     @MethodSource("relProjectionTypes")
+    @Disabled("will activate this once projection gets implemented")
     void relFilterProjections(String projection) {
         String name = "g";
         Map<String, Object> relFilter = map("B", map("type", "REL", "projection", projection, "properties", emptyMap()));
@@ -361,8 +363,8 @@ class GraphCreateProcTest extends ProcTestBase {
             map("name", name, "relFilter", relFilter),
             singletonList(map(
                 "graphName", name,
-                "nodeFilter", emptyMap(),
-                "relationshipFilter", relFilter,
+                "nodeProjection", emptyMap(),
+                "relationshipProjection", relFilter,
                 "nodes", nodeCount,
                 "relationships", expectedRels,
                 "createMillis", instanceOf(Long.class)
@@ -374,18 +376,17 @@ class GraphCreateProcTest extends ProcTestBase {
     @MethodSource(value = "relationshipProperties")
     void relPropertiesInRelFilter(Object properties, Map<String, Object> expectedProperties) {
         String name = "g";
-        Map<String, Object> relFilter = map("B", map("type", "REL", "properties", properties));
-        Map<String, Object> expectedRelFilter = map("B", map("type", "REL", "projection", "NATURAL", "properties", expectedProperties));
-
+        Map<String, Object> relProjection = map("B", map("type", "REL", "properties", properties));
+        Map<String, Object> expectedRelProjection = map("B", map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", expectedProperties));
 
         // TODO: check property values on graph
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, {}, $relFilter)",
-            map("name", name, "relFilter", relFilter),
+            "CALL algo.beta.graph.create($name, {}, $relProjection)",
+            map("name", name, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeFilter", emptyMap(),
-                "relationshipFilter", expectedRelFilter,
+                "nodeProjection", emptyMap(),
+                "relationshipProjection", expectedRelProjection,
                 "nodes", nodeCount,
                 "relationships", 2L,
                 "createMillis", instanceOf(Long.class)
@@ -398,17 +399,17 @@ class GraphCreateProcTest extends ProcTestBase {
     void relFilterPropertyAggregations(String aggregation) {
         String name = "g";
         Map<String, Object> properties = map("weight", map("property", "weight", "aggregation", aggregation, "defaultValue", Double.NaN));
-        Map<String, Object> relFilter = map("B", map("type", "REL", "projection", "NATURAL", "properties", properties));
+        Map<String, Object> relProjection = map("B", map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", properties));
 
 
         // TODO: check property values on graph
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, {}, $relFilter)",
-            map("name", name, "relFilter", relFilter),
+            "CALL algo.beta.graph.create($name, {}, $relProjection)",
+            map("name", name, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeFilter", emptyMap(),
-                "relationshipFilter", relFilter,
+                "nodeProjection", emptyMap(),
+                "relationshipProjection", relProjection,
                 "nodes", nodeCount,
                 "relationships", 2L,
                 "createMillis", instanceOf(Long.class)

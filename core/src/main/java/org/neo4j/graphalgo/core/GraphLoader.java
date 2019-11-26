@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core;
 
 import org.apache.commons.lang3.StringUtils;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -392,7 +393,7 @@ public class GraphLoader {
      *
      * @param nodeStatement
      */
-    public GraphLoader withNodeStatement(String nodeStatement) {
+    public GraphLoader withNodeStatement(@Language("Cypher") String nodeStatement) {
         this.label = nodeStatement;
         return this;
     }
@@ -402,7 +403,7 @@ public class GraphLoader {
      *
      * @param relationshipStatement
      */
-    public GraphLoader withRelationshipStatement(String relationshipStatement) {
+    public GraphLoader withRelationshipStatement(@Language("Cypher") String relationshipStatement) {
         this.relation = relationshipStatement;
         return this;
     }
@@ -484,11 +485,13 @@ public class GraphLoader {
     public GraphSetup toSetup() {
         if (createConfig == null) {
             PropertyMappings relMappings = this.relPropertyMappings.build();
-            if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
-                relMappings = new PropertyMappings.Builder()
-                    .addAllMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
-                    .build();
-            }
+            relMappings = new PropertyMappings.Builder()
+                .addAllMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
+                .build();
+            RelationshipProjections relProjections = RelationshipProjections
+                .of(relation)
+                .addAggregation(deduplicationStrategy);
+            NodeProjections nodeProjections = NodeProjections.of(label);
             createConfig = ImmutableGraphCreateConfig
                 .builder()
                 .graphName(StringUtils.trimToEmpty(name))
@@ -496,8 +499,8 @@ public class GraphLoader {
                 .username(username)
                 .nodeProperties(nodePropertyMappings.build())
                 .relationshipProperties(relMappings)
-                .nodeProjection(NodeProjections.of(label))
-                .relationshipProjection(RelationshipProjections.of(relation))
+                .nodeProjection(nodeProjections)
+                .relationshipProjection(relProjections)
                 .build();
         }
 
@@ -506,7 +509,6 @@ public class GraphLoader {
             params,
             executorService,
             batchSize,
-            deduplicationStrategy,
             log,
             logMillis,
             undirected,

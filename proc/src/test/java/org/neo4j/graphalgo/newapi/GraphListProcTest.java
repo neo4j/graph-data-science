@@ -70,10 +70,20 @@ class GraphListProcTest extends ProcTestBase {
         assertCypherResult("CALL algo.beta.graph.list()", singletonList(
             map(
                 "graphName", name,
-                "nodeFilter", "A",
-                "relationshipFilter", "REL",
-                "nodeProperties", emptyMap(),
-                "relationshipProperties", emptyMap(),
+                "nodeProjection", map(
+                    "A", map(
+                        "label", "A",
+                        "properties", emptyMap()
+                    )
+                ),
+                "relationshipProjection", map(
+                    "REL", map(
+                        "type", "REL",
+                        "projection", "NATURAL",
+                        "aggregation", "DEFAULT",
+                        "properties", emptyMap()
+                    )
+                ),
                 "nodes", 2L,
                 "relationships", 2L,
                 "histogram", map(
@@ -96,13 +106,22 @@ class GraphListProcTest extends ProcTestBase {
         String name = "name";
         db.execute("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
 
-        assertCypherResult("CALL algo.beta.graph.list() YIELD graphName, nodeFilter, relationshipFilter, nodeProperties, relationshipProperties, nodes, relationships", singletonList(
+        assertCypherResult("CALL algo.beta.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodes, relationships", singletonList(
             map(
                 "graphName", name,
-                "nodeFilter", "A",
-                "relationshipFilter", "REL",
-                "nodeProperties", emptyMap(),
-                "relationshipProperties", emptyMap(),
+                "nodeProjection", map(
+                    "A", map(
+                        "label", "A",
+                        "properties", emptyMap()
+                    )
+                ),
+                "relationshipProjection", map(
+                    "REL", map(
+                        "type", "REL",
+                        "projection", "NATURAL",
+                        "aggregation", "DEFAULT",
+                        "properties", emptyMap()
+                    )),
                 "nodes", 2L,
                 "relationships", 2L
             )

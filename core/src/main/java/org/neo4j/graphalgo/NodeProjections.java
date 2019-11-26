@@ -64,7 +64,7 @@ public final class NodeProjections {
         Map<ElementIdentifier, NodeProjection> filters = new LinkedHashMap<>();
         for (Object item : items) {
             NodeProjections nodeProjections = fromObject(item);
-            filters.putAll(nodeProjections.filters);
+            filters.putAll(nodeProjections.projections);
         }
         return create(filters);
     }
@@ -100,14 +100,14 @@ public final class NodeProjections {
         return new NodeProjections(unmodifiableMap(filters));
     }
 
-    private final Map<ElementIdentifier, NodeProjection> filters;
+    private final Map<ElementIdentifier, NodeProjection> projections;
 
-    private NodeProjections(Map<ElementIdentifier, NodeProjection> filters) {
-        this.filters = filters;
+    private NodeProjections(Map<ElementIdentifier, NodeProjection> projections) {
+        this.projections = projections;
     }
 
     public NodeProjection getFilter(ElementIdentifier identifier) {
-        NodeProjection filter = filters.get(identifier);
+        NodeProjection filter = projections.get(identifier);
         if (filter == null) {
             throw new IllegalArgumentException("Node label identifier does not exist: " + identifier);
         }
@@ -115,14 +115,14 @@ public final class NodeProjections {
     }
 
     public Collection<NodeProjection> allFilters() {
-        return filters.values();
+        return projections.values();
     }
 
     public NodeProjections addPropertyMappings(PropertyMappings mappings) {
         if (!mappings.hasMappings()) {
             return this;
         }
-        Map<ElementIdentifier, NodeProjection> newFilters = filters.entrySet().stream().collect(toMap(
+        Map<ElementIdentifier, NodeProjection> newFilters = projections.entrySet().stream().collect(toMap(
             Map.Entry::getKey,
             e -> e.getValue().withAdditionalPropertyMappings(mappings)
         ));
@@ -137,7 +137,7 @@ public final class NodeProjections {
         if (isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(filters.values().stream().map(f -> f.label).collect(Collectors.joining("")));
+        return Optional.of(projections.values().stream().map(f -> f.label).collect(Collectors.joining("")));
     }
 
     public boolean isEmpty() {
@@ -150,8 +150,8 @@ public final class NodeProjections {
 
     public Map<String, Object> toObject() {
         Map<String, Object> value = new LinkedHashMap<>();
-        filters.forEach((identifier, filter) -> {
-            value.put(identifier.name, filter.toObject());
+        projections.forEach((identifier, projection) -> {
+            value.put(identifier.name, projection.toObject());
         });
         return value;
     }

@@ -22,10 +22,12 @@ package org.neo4j.graphalgo;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
@@ -49,23 +51,23 @@ public final class RelationshipProjections {
     }
 
     public static RelationshipProjections of(Map<String, ?> map) {
-        Map<ElementIdentifier, RelationshipProjection> filters = new LinkedHashMap<>();
+        Map<ElementIdentifier, RelationshipProjection> projections = new LinkedHashMap<>();
         map.forEach((name, spec) -> {
             ElementIdentifier identifier = new ElementIdentifier(name);
             RelationshipProjection filter = RelationshipProjection.fromObject(spec, identifier);
             // sanity
-            if (filters.put(identifier, filter) != null) {
+            if (projections.put(identifier, filter) != null) {
                 throw new IllegalStateException(String.format("Duplicate key: %s", name));
             }
         });
-        return create(filters);
+        return create(projections);
     }
 
     public static RelationshipProjections of(Iterable<?> items) {
         Map<ElementIdentifier, RelationshipProjection> filters = new LinkedHashMap<>();
         for (Object item : items) {
             RelationshipProjections relationshipProjections = fromObject(item);
-            filters.putAll(relationshipProjections.filters);
+            filters.putAll(relationshipProjections.projections);
         }
         return create(filters);
     }
@@ -115,14 +117,14 @@ public final class RelationshipProjections {
         return new RelationshipProjections(unmodifiableMap(filters));
     }
 
-    private final Map<ElementIdentifier, RelationshipProjection> filters;
+    private final Map<ElementIdentifier, RelationshipProjection> projections;
 
-    private RelationshipProjections(Map<ElementIdentifier, RelationshipProjection> filters) {
-        this.filters = filters;
+    private RelationshipProjections(Map<ElementIdentifier, RelationshipProjection> projections) {
+        this.projections = projections;
     }
 
     public RelationshipProjection getFilter(ElementIdentifier identifier) {
-        RelationshipProjection filter = filters.get(identifier);
+        RelationshipProjection filter = projections.get(identifier);
         if (filter == null) {
             throw new IllegalArgumentException("Relationship type identifier does not exist: " + identifier);
         }
@@ -130,29 +132,43 @@ public final class RelationshipProjections {
     }
 
     public Collection<RelationshipProjection> allFilters() {
-        return filters.values();
+        return projections.values();
+    }
+
+    public RelationshipProjections addAggregation(DeduplicationStrategy aggregation) {
+        if (aggregation == DeduplicationStrategy.DEFAULT) {
+            return this;
+        }
+        return modifyProjections(p -> p.withAggregation(aggregation));
     }
 
     public RelationshipProjections addPropertyMappings(PropertyMappings mappings) {
         if (!mappings.hasMappings()) {
             return this;
         }
-        Map<ElementIdentifier, RelationshipProjection> newFilters = filters.entrySet().stream().collect(toMap(
+        return modifyProjections(p -> p.withAdditionalPropertyMappings(mappings));
+    }
+
+    private RelationshipProjections modifyProjections(UnaryOperator<RelationshipProjection> operator) {
+        Map<ElementIdentifier, RelationshipProjection> newProjections = projections.entrySet().stream().collect(toMap(
             Map.Entry::getKey,
-            e -> e.getValue().withAdditionalPropertyMappings(mappings)
+            e -> operator.apply(e.getValue())
         ));
-        if (newFilters.isEmpty()) {
+        if (newProjections.isEmpty()) {
             // TODO: special identifier for 'SELECT ALL'
-            newFilters.put(new ElementIdentifier("*"), RelationshipProjection.empty().withAdditionalPropertyMappings(mappings));
+            newProjections.put(
+                new ElementIdentifier("*"),
+                operator.apply(RelationshipProjection.empty())
+            );
         }
-        return create(newFilters);
+        return create(newProjections);
     }
 
     public String typeFilter() {
         if (isEmpty()) {
             return "";
         }
-        return filters.values().stream().map(f -> f.type()).collect(Collectors.joining("|"));
+        return projections.values().stream().map(f -> f.type()).collect(Collectors.joining("|"));
     }
 
     public boolean isEmpty() {
@@ -165,8 +181,8 @@ public final class RelationshipProjections {
 
     public Map<String, Object> toObject() {
         Map<String, Object> value = new LinkedHashMap<>();
-        filters.forEach((identifier, filter) -> {
-            value.put(identifier.name, filter.toObject());
+        projections.forEach((identifier, projection) -> {
+            value.put(identifier.name, projection.toObject());
         });
         return value;
     }

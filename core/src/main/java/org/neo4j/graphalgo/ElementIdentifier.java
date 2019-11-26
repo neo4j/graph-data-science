@@ -55,4 +55,8 @@ public final class ElementIdentifier {
                "name='" + name + '\'' +
                '}';
     }
+
+    public static ElementIdentifier of(@NotNull String name) {
+        return new ElementIdentifier(name);
+    }
 }

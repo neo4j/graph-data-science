@@ -21,39 +21,69 @@
 package org.neo4j.graphalgo;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.Map;
+import java.util.Objects;
 
 public final class RelationshipProjection extends ElementProjection {
 
-    private static final RelationshipProjection EMPTY = new RelationshipProjection("", "", PropertyMappings.EMPTY);
     private static final String TYPE_KEY = "type";
     private static final String PROJECTION_KEY = "projection";
+    private static final String AGGREGATION_KEY = "aggregation";
 
     private static final String DEFAULT_PROJECTION = "NATURAL";
+    private static final DeduplicationStrategy DEFAULT_AGGREGATION = DeduplicationStrategy.DEFAULT;
 
+    private static final RelationshipProjection EMPTY = new RelationshipProjection("", "", DEFAULT_AGGREGATION, PropertyMappings.EMPTY);
 
     private final String type;
     private final String projection;
+    private final DeduplicationStrategy aggregation;
 
-    private RelationshipProjection(String type, String projection, PropertyMappings properties) {
+    private RelationshipProjection(
+        String type,
+        String projection,
+        DeduplicationStrategy aggregation,
+        PropertyMappings properties
+    ) {
         super(properties);
         this.type = type;
+        this.aggregation = aggregation;
         this.projection = projection.isEmpty() ? DEFAULT_PROJECTION : projection;
     }
 
     public static RelationshipProjection of(@Nullable String type) {
+        return of(type, DEFAULT_PROJECTION);
+    }
+
+    public static RelationshipProjection of(@Nullable String type, @NotNull String projection) {
+        return of(type, projection, DEFAULT_AGGREGATION);
+    }
+
+    public static RelationshipProjection of(@Nullable String type, @NotNull String projection, @NotNull DeduplicationStrategy aggregation) {
+        return of(type, projection, aggregation, PropertyMappings.EMPTY);
+    }
+
+    public static RelationshipProjection of(@Nullable String type, @NotNull DeduplicationStrategy aggregation) {
+        return of(type, DEFAULT_PROJECTION, aggregation, PropertyMappings.EMPTY);
+    }
+
+    public static RelationshipProjection of(@Nullable String type, @NotNull String projection, @NotNull DeduplicationStrategy aggregation, PropertyMappings properties) {
         if (StringUtils.isEmpty(type)) {
             return EMPTY;
         }
-        return new RelationshipProjection(type, "", PropertyMappings.EMPTY);
+        return new RelationshipProjection(type, projection, aggregation, properties);
     }
 
     public static RelationshipProjection of(Map<String, Object> map, ElementIdentifier identifier) {
         String type = map.containsKey(TYPE_KEY) ? nonEmptyString(map, TYPE_KEY): identifier.name;
         String projection = map.containsKey(PROJECTION_KEY) ? nonEmptyString(map, PROJECTION_KEY) : DEFAULT_PROJECTION;
-        return create(map, properties -> new RelationshipProjection(type, projection, properties));
+        DeduplicationStrategy aggregation = map.containsKey(AGGREGATION_KEY) ? DeduplicationStrategy.valueOf(
+            nonEmptyString(map, AGGREGATION_KEY)) : DEFAULT_AGGREGATION;
+        return create(map, properties -> of(type, projection, aggregation, properties));
     }
 
     public static RelationshipProjection fromObject(Object object, ElementIdentifier identifier) {
@@ -90,6 +120,7 @@ public final class RelationshipProjection extends ElementProjection {
     void writeToObject(Map<String, Object> value) {
         value.put(TYPE_KEY, type);
         value.put(PROJECTION_KEY, projection);
+        value.put(AGGREGATION_KEY, aggregation.name());
     }
 
     @Override
@@ -98,7 +129,11 @@ public final class RelationshipProjection extends ElementProjection {
         if (newMappings == properties()) {
             return this;
         }
-        return new RelationshipProjection(type, projection, newMappings);
+        return new RelationshipProjection(type, projection, aggregation, newMappings);
+    }
+
+    public RelationshipProjection withAggregation(DeduplicationStrategy aggregation) {
+        return new RelationshipProjection(type, projection, aggregation, properties());
     }
 
     public static RelationshipProjection empty() {
@@ -111,5 +146,33 @@ public final class RelationshipProjection extends ElementProjection {
 
     public String projection() {
         return projection;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RelationshipProjection that = (RelationshipProjection) o;
+        return type.equals(that.type) &&
+               projection.equals(that.projection) &&
+               aggregation == that.aggregation;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, projection, aggregation);
+    }
+
+    @Override
+    public String toString() {
+        return "RelationshipProjection{" +
+               "type='" + type + '\'' +
+               ", projection='" + projection + '\'' +
+               ", aggregation=" + aggregation +
+               '}';
+    }
+
+    public DeduplicationStrategy aggregation() {
+        return aggregation;
     }
 }

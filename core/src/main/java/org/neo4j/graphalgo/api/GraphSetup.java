@@ -71,13 +71,10 @@ public class GraphSetup {
     // in/out adjacencies are allowed to be merged into an undirected view of the graph
     private final boolean loadAsUndirected;
 
-    private final DeduplicationStrategy deduplicationStrategy;
-
     /**
      * main ctor
      *  @param executor                   the executor. null means single threaded evaluation
      * @param batchSize                  batch size for parallel loading
-     * @param deduplicationStrategy      strategy for handling relationship duplicates
      * @param createConfig
      */
     public GraphSetup(
@@ -85,7 +82,6 @@ public class GraphSetup {
         Map<String, Object> params,
         ExecutorService executor,
         int batchSize,
-        DeduplicationStrategy deduplicationStrategy,
         Log log,
         long logMillis,
         boolean loadAsUndirected,
@@ -99,7 +95,6 @@ public class GraphSetup {
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
         this.batchSize = batchSize;
-        this.deduplicationStrategy = deduplicationStrategy;
         this.log = log;
         this.logMillis = logMillis;
         this.loadAsUndirected = loadAsUndirected;
@@ -244,7 +239,13 @@ public class GraphSetup {
      */
     @Deprecated
     public DeduplicationStrategy deduplicationStrategy() {
-        return deduplicationStrategy;
+        return createConfig
+            .relationshipProjection()
+            .allFilters()
+            .stream()
+            .map(RelationshipProjection::aggregation)
+            .findFirst()
+            .orElse(DeduplicationStrategy.DEFAULT);
     }
 
     public Map<String, Object> params() {
