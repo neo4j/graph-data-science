@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.impl.louvain;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.loading.GraphGenerator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -166,12 +168,14 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     private Graph summarizeGraph(Graph workingGraph, ModularityOptimization modularityOptimization, long maxCommunityId) {
-        SubGraphGenerator.NodeImporter nodeImporter = new SubGraphGenerator.NodeImporter(
+        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.create(
             workingGraph.nodeCount(),
             maxCommunityId,
             direction,
             rootGraph.isUndirected(),
             true,
+            DeduplicationStrategy.SUM,
+            executorService,
             tracker
         );
 
@@ -184,12 +188,12 @@ public final class Louvain extends Algorithm<Louvain> {
 
         assertRunning();
 
-        SubGraphGenerator.RelImporter relImporter = nodeImporter.build();
+        GraphGenerator.RelImporter relImporter = nodeImporter.build();
 
         workingGraph.forEachNode((nodeId) -> {
             long communityId = modularityOptimization.getCommunityId(nodeId);
             workingGraph.forEachRelationship(nodeId, direction, 1.0, (source, target, property) -> {
-                relImporter.add(communityId, modularityOptimization.getCommunityId(target), property);
+                relImporter.addFromOriginal(communityId, modularityOptimization.getCommunityId(target), property);
                 return true;
             });
             return true;
