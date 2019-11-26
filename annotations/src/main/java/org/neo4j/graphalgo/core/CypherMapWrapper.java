@@ -228,7 +228,7 @@ public final class CypherMapWrapper {
 
     private static IllegalArgumentException missingValueFor(String key) {
         return new IllegalArgumentException(String.format(
-            "No value for the key `%s` was specified",
+            "No value specified for the mandatory configuration parameter `%s`",
             key
         ));
     }

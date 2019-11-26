@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 
 import java.util.Map;
 
-@Configuration("InvalidAnnotationCombiationsConfig")
+@Configuration("InvalidAnnotationCombinationsConfig")
 public interface InvalidAnnotationCombinations {
 
     @Configuration.Key("key")

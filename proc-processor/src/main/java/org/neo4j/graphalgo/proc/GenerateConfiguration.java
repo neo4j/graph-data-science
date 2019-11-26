@@ -498,7 +498,8 @@ final class GenerateConfiguration {
                     "$T.super.$N()",
                     member.owner().asType(),
                     member.methodName()
-                ));
+                )
+            );
         }
 
         return Optional.of(builder.build());
@@ -508,7 +509,8 @@ final class GenerateConfiguration {
         return config.members().stream().map(member -> MethodSpec
             .overriding(member.method())
             .addStatement("return this.$N", names.get(member))
-            .build()).collect(Collectors.toList());
+            .build()
+        ).collect(Collectors.toList());
     }
 
     private <T> Optional<T> error(CharSequence message, Element element) {

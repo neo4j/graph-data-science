@@ -121,7 +121,7 @@ final class ConfigParser {
             if (isAnnotationPresent(method, Parameter.class)) {
                 messager.printMessage(
                     Diagnostic.Kind.ERROR,
-                    "The `@Parameter` annotation cannot be used together with the `@Key` annotation",
+                    String.format("The `@%s` annotation cannot be used together with the `@%s` annotation", Parameter.class.getSimpleName(), Key.class.getSimpleName()),
                     method
                 );
                 return Optional.empty();
