@@ -22,20 +22,36 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.helpers.collection.MapUtil.map;
 
 class MemRecProcTest extends ProcTestBase {
 
     private String availableAlgoProcedures;
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:A {class: 42.0})" +
+        ", (b:B {class: 42.0})" +
+
+        ", (a)-[:X { weight: 1.0 }]->(:A {class: 42.0})" +
+        ", (a)-[:X { weight: 1.0 }]->(:A {class: 42.0})" +
+        ", (a)-[:X { weight: 1.0 }]->(:A {class: 42.0})" +
+        ", (a)-[:Y { weight: 1.0 }]->(:A {class: 42.0})" +
+        ", (a)-[:Z { weight: 1.0 }]->(:A {class: 42.0})";
+
+    private static final long NODE_COUNT = 7L;
+    private static final long RELATIONSHIP_COUNT = 5L;
 
     @BeforeEach
     void setUp() throws KernelException {
@@ -53,6 +69,7 @@ class MemRecProcTest extends ProcTestBase {
         availableAlgoProcedures = "the available and supported procedures are {" +
                                   "beta.k1coloring, beta.wcc, graph.load, labelPropagation, louvain, pageRank, unionFind, wcc" +
                                   "}.";
+        db.execute(DB_CYPHER);
     }
 
     @AfterEach
@@ -132,4 +149,51 @@ class MemRecProcTest extends ProcTestBase {
         }
     }
 
+    private void testAgainstLoadedGraph(String algoName,Map<String, Object> parameters) {
+        GraphCatalog.removeAllLoadedGraphs();
+
+        parameters.putIfAbsent("relationshipProperties", null);
+        parameters.putIfAbsent("nodeProperties", null);
+        parameters.put("algo", algoName);
+
+        if (algoName.equals("graph.load")) {
+            parameters.put("graph", null);
+        }
+        else {
+            String loadGraphQuery = "CALL algo.graph.load('foo', '', '', {nodeProperty: $nodeProperties, relationshipProperties: $relationshipProperties})";
+            parameters.put("graph", "foo");
+            db.execute(loadGraphQuery, parameters);
+        }
+
+        String loadedMemRecQuery = "CALL algo.memrec('', '', $algo, {" +
+                                   "graph: $graph, relationshipProperties: $relationshipProperties, nodeProperties: $nodeProperties  " +
+                                   "})" +
+                                   " YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax";
+
+        Map<String, Object> memRecOnLoadedGraph = db.execute(loadedMemRecQuery, parameters).next();
+
+        parameters.put("nodeCount", NODE_COUNT);
+        parameters.put("relationshipCount", RELATIONSHIP_COUNT);
+
+        String nonExistingGraph = "CALL algo.memrec('', '', $algo, {" +
+                                  " nodeCount: $nodeCount, relationshipCount: $relationshipCount, " +
+                                  " relationshipProperties: $relationshipProperties, nodeProperties: $nodeProperties" +
+                                  " }) " +
+                                  "YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax";
+        Map<String, Object> memRecOnStats = db.execute(nonExistingGraph, parameters).next();
+
+        assertEquals(memRecOnLoadedGraph, memRecOnStats);
+    }
+
+    @Test
+    void memRecOnGraphStats() {
+        testAgainstLoadedGraph("graph.load", map());
+        testAgainstLoadedGraph("graph.load", map("relationshipProperties", "weight"));
+        testAgainstLoadedGraph("graph.load", map("relationshipProperties", "weight", "nodeProperties", "class"));
+        testAgainstLoadedGraph("louvain", map());
+        testAgainstLoadedGraph("louvain", map("relationshipProperties", "weight", "nodeProperties", "class"));
+        test("algo.memrec(null, null, 'pageRank', {graph: 'myGraph', nodeCount: 10})", "Unknown impl: myGraph");
+        test("algo.memrec(null, null, 'pageRank', {graph: 'cypher', nodeCount: 10})");
+        test("algo.memrec(null, null, 'pageRank', {graph: 'huge', nodeCount: 10})");
+    }
 }

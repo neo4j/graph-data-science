@@ -25,12 +25,13 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -122,10 +123,12 @@ public final class GraphLoadProc extends BaseProc {
         ProcedureConfiguration config = newConfig(label, relationshipType, configuration);
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
-        MemoryTree memoryTree = graphFactory
-                .memoryEstimation()
-                .estimate(graphFactory.dimensions(), config.getConcurrency());
-        return Stream.of(new MemRecResult(new MemoryTreeWithDimensions(memoryTree, graphFactory.dimensions())));
+        GraphDimensions dimensions = graphFactory.dimensions();;
+
+        MemoryTree memoryTree = getGraphMemoryEstimation(config, loader, graphFactory)
+            .estimate(dimensions, config.getConcurrency());
+
+        return Stream.of(new MemRecResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
     }
 
     @Override

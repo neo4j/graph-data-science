@@ -61,16 +61,24 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
         return getMemoryEstimation(setup, dimensions);
     }
 
+    public static MemoryEstimation getMemoryEstimation(GraphSetup setup, GraphDimensions dimensions) {
+        return getMemoryEstimation(setup, dimensions, false);
+    }
+
+
     public static MemoryEstimation getMemoryEstimation(
-            GraphSetup setup,
-            GraphDimensions dimensions) {
+        GraphSetup setup,
+        GraphDimensions dimensions,
+        boolean nonExistingGraph
+    ) {
         MemoryEstimations.Builder builder = MemoryEstimations
                 .builder(HugeGraph.class)
                 .add("nodeIdMap", IdMap.memoryEstimation());
 
         // Node properties
         for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
-            if (propertyMapping.exists()) {
+            // for estimations based on node/rel-counts, unresolved PropertyMappings should not throw on calling `exists()`
+            if (nonExistingGraph || propertyMapping.exists()) {
                 builder.add(propertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
             } else {
                 builder.add(propertyMapping.propertyKey(), NullPropertyMap.MEMORY_USAGE);
@@ -79,7 +87,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
 
         // Relationship properties
         for (PropertyMapping mapping : dimensions.relProperties()) {
-            if (mapping.exists()) {
+            if (nonExistingGraph || mapping.exists()) {
                 // Adjacency lists and Adjacency offsets
                 MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
                 MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
