@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.impl.jaccard;
+package org.neo4j.graphalgo.impl.nodesim;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.AlgorithmFactory;
@@ -29,16 +29,15 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.impl.jaccard.NodeSimilarity.Config;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public class NodeSimilarityFactory extends AlgorithmFactory<NodeSimilarity> {
 
-    private final Config config;
+    private final NodeSimilarity.Config config;
     private final boolean computesSimilarityGraph;
-    public NodeSimilarityFactory(Config config, boolean computesSimilarityGraph) {
+    public NodeSimilarityFactory(NodeSimilarity.Config config, boolean computesSimilarityGraph) {
         this.config = config;
         this.computesSimilarityGraph = computesSimilarityGraph;
     }
