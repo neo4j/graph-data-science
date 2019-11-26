@@ -2,7 +2,7 @@ description = 'Neo4j Graph Algorithms :: Core'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor project(':proc-processor')
+    annotationProcessor project(':config-generator')
     annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.immutables
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.immutables
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.immutables
