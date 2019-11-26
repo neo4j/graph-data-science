@@ -206,7 +206,7 @@ public final class CypherMapWrapper {
         return null == value ? defaultValue : (V) value;
     }
 
-    public static <T> T requireValue(String key, T value) {
+    public static <T> T failOnNull(String key, T value) {
         if (value == null) {
             throw missingValueFor(key);
         }

@@ -54,7 +54,7 @@ public final class MyConfig implements Inheritance.MyConfig {
         double inheritedValue,
         short inheritedDefaultValue
     ) {
-        this.baseValue = CypherMapWrapper.requireValue("baseValue", baseValue);
+        this.baseValue = CypherMapWrapper.failOnNull("baseValue", baseValue);
         this.overriddenValue = overriddenValue;
         this.overwrittenValue = overwrittenValue;
         this.inheritedValue = inheritedValue;

@@ -85,10 +85,10 @@ public final class FieldTypesConfig implements FieldTypes {
         this.aLong = aLong;
         this.aFloat = aFloat;
         this.aDouble = aDouble;
-        this.aNumber = CypherMapWrapper.requireValue("aNumber", aNumber);
-        this.aString = CypherMapWrapper.requireValue("aString", aString);
-        this.aMap = CypherMapWrapper.requireValue("aMap", aMap);
-        this.aList = CypherMapWrapper.requireValue("aList", aList);
+        this.aNumber = CypherMapWrapper.failOnNull("aNumber", aNumber);
+        this.aString = CypherMapWrapper.failOnNull("aString", aString);
+        this.aMap = CypherMapWrapper.failOnNull("aMap", aMap);
+        this.aList = CypherMapWrapper.failOnNull("aList", aList);
     }
 
     @Override

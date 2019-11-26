@@ -42,11 +42,11 @@ public final class NullableParametersConfig implements NullableParameters {
         @Nullable String referenceTypesCanBeMarkedAsNullable,
         @NotNull CypherMapWrapper config
     ) {
-        this.referenceTypesDefaultToNotNull = CypherMapWrapper.requireValue(
+        this.referenceTypesDefaultToNotNull = CypherMapWrapper.failOnNull(
             "referenceTypesDefaultToNotNull",
             referenceTypesDefaultToNotNull
         );
-        this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.requireValue(
+        this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.failOnNull(
             "referenceTypesCanBeMarkedAsNotNull",
             referenceTypesCanBeMarkedAsNotNull
         );
@@ -60,15 +60,15 @@ public final class NullableParametersConfig implements NullableParameters {
         @NotNull String referenceTypesCanBeMarkedAsNullable,
         int extraValue
     ) {
-        this.referenceTypesDefaultToNotNull = CypherMapWrapper.requireValue(
+        this.referenceTypesDefaultToNotNull = CypherMapWrapper.failOnNull(
             "referenceTypesDefaultToNotNull",
             referenceTypesDefaultToNotNull
         );
-        this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.requireValue(
+        this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.failOnNull(
             "referenceTypesCanBeMarkedAsNotNull",
             referenceTypesCanBeMarkedAsNotNull
         );
-        this.referenceTypesCanBeMarkedAsNullable = CypherMapWrapper.requireValue(
+        this.referenceTypesCanBeMarkedAsNullable = CypherMapWrapper.failOnNull(
             "referenceTypesCanBeMarkedAsNullable",
             referenceTypesCanBeMarkedAsNullable
         );

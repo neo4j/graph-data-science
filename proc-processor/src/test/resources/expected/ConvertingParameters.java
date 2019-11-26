@@ -30,7 +30,7 @@ public final class ConvertingParametersConfig implements ConvertingParameters {
     private final int parametersAreSubjectToConversion;
 
     public ConvertingParametersConfig(@NotNull String parametersAreSubjectToConversion) {
-        this.parametersAreSubjectToConversion = ConvertingParameters.toInt(CypherMapWrapper.requireValue(
+        this.parametersAreSubjectToConversion = ConvertingParameters.toInt(CypherMapWrapper.failOnNull(
             "parametersAreSubjectToConversion",
             parametersAreSubjectToConversion
         ));

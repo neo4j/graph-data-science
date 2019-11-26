@@ -244,7 +244,7 @@ final class GenerateConfiguration {
             } else {
                 paramType = paramType.annotated(NOT_NULL);
                 valueProducer = CodeBlock.of(
-                    "$T.requireValue($S, $N)",
+                    "$T.failOnNull($S, $N)",
                     CypherMapWrapper.class,
                     definition.configKey(),
                     definition.fieldName()
@@ -272,7 +272,7 @@ final class GenerateConfiguration {
         if (definition.fieldType().getKind() == TypeKind.DECLARED) {
             paramType = paramType.annotated(NOT_NULL);
             valueProducer = CodeBlock.of(
-                "this.$3N = $1T.requireValue($2S, $3N)",
+                "this.$3N = $1T.failOnNull($2S, $3N)",
                 CypherMapWrapper.class,
                 definition.configKey(),
                 definition.fieldName()
