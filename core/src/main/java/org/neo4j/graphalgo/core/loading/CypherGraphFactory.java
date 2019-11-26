@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphdb.NotInTransactionException;
@@ -36,7 +37,7 @@ import java.util.Optional;
 
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
-public class CypherGraphFactory extends GraphFactory {
+public class CypherGraphFactory extends GraphFactory implements MultipleRelTypesSupport {
 
     public static final String TYPE = "cypher";
 
@@ -89,6 +90,11 @@ public class CypherGraphFactory extends GraphFactory {
                     Optional.ofNullable(relationships.outRelPropertyOffsets()),
                     setup.loadAsUndirected);
         }
+    }
+
+    @Override
+    public GraphsByRelationshipType importAllGraphs() {
+        throw new UnsupportedOperationException("CypherGraphFactory#importAllGraphs");
     }
 
     private Revertable setReadOnlySecurityContext() {

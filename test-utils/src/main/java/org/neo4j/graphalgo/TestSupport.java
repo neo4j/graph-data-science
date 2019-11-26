@@ -45,11 +45,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
 public final class TestSupport {
@@ -62,7 +65,7 @@ public final class TestSupport {
     public @interface AllGraphTypesWithMultipleRelTypeSupportTest {}
 
     public static <T extends GraphFactory & MultipleRelTypesSupport> Stream<Class<T>> allTypesWithMultipleRelTypeSupport() {
-        return Stream.of((Class<T>) HugeGraphFactory.class);
+        return Stream.of((Class<T>) HugeGraphFactory.class, (Class<T>) CypherGraphFactory.class);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -136,6 +139,28 @@ public final class TestSupport {
         // TODO: we cannot check this right now, because the relationshhip counts depends on how the graph has been loaded for HugeGraph
 //        Assertions.assertEquals(expected.relationshipCount(), actual.relationshipCount(), "Relationship counts to not match.");
         Assertions.assertEquals(CanonicalAdjacencyMatrix.canonicalize(expected), CanonicalAdjacencyMatrix.canonicalize(actual));
+    }
+
+    /**
+     * Checks if exactly one of the given expected graphs matches the actual graph.
+     */
+    public static void assertGraphEquals(Collection<Graph> expectedGraphs, Graph actual) {
+        List<String> expectedCanonicalized = expectedGraphs.stream().map(CanonicalAdjacencyMatrix::canonicalize).collect(Collectors.toList());
+        String actualCanonicalized = CanonicalAdjacencyMatrix.canonicalize(actual);
+
+        boolean equals = expectedCanonicalized
+            .stream()
+            .map(expected -> expected.equals(actualCanonicalized))
+            .reduce(Boolean::logicalXor)
+            .orElse(false);
+
+        String message = String.format(
+            "None of the given graphs matches the actual one.%nActual:%n%s%nExpected:%n%s",
+            actualCanonicalized,
+            String.join("\n\n", expectedCanonicalized)
+        );
+
+        assertTrue(equals, message);
     }
 
     /**
