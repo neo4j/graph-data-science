@@ -23,9 +23,11 @@ package org.neo4j.graphalgo;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -33,10 +35,9 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class GraphLoaderBuilder {
+public final class TestGraphLoader {
 
     private final GraphDatabaseAPI db;
-    private final Class<? extends GraphFactory> graphFactory;
 
     private Optional<String> maybeLabel = Optional.empty();
     private Optional<String> maybeRelType = Optional.empty();
@@ -47,52 +48,63 @@ public final class GraphLoaderBuilder {
     private Direction direction = Direction.OUTGOING;
     private Optional<DeduplicationStrategy> maybeDeduplicationStrategy = Optional.empty();
 
-    public static GraphLoaderBuilder from(@NotNull GraphDatabaseAPI db, @NotNull Class<? extends GraphFactory> graphFactory) {
-        return new GraphLoaderBuilder(db, graphFactory);
+    public static TestGraphLoader from(@NotNull GraphDatabaseAPI db) {
+        return new TestGraphLoader(db);
     }
 
-    private GraphLoaderBuilder(GraphDatabaseAPI db, Class<? extends GraphFactory> graphFactory) {
+    private TestGraphLoader(GraphDatabaseAPI db) {
         this.db = db;
-        this.graphFactory = graphFactory;
     }
 
-    public GraphLoaderBuilder withLabel(String label) {
+    public TestGraphLoader withLabel(String label) {
         this.maybeLabel = Optional.of(label);
         return this;
     }
 
-    public GraphLoaderBuilder withRelType(String relType) {
+    public TestGraphLoader withRelationshipType(String relType) {
         this.maybeRelType = Optional.of(relType);
         return this;
     }
 
-    public GraphLoaderBuilder withNodeProperties(PropertyMappings nodeProperties) {
+    public TestGraphLoader withNodeProperties(PropertyMappings nodeProperties) {
         this.nodeProperties = nodeProperties;
         return this;
     }
 
-    public GraphLoaderBuilder withRelProperties(PropertyMappings relProperties) {
+    public TestGraphLoader withRelProperties(PropertyMapping... relProperties) {
+        this.relProperties = PropertyMappings.of(relProperties);
+        return this;
+    }
+
+    public TestGraphLoader withRelProperties(PropertyMappings relProperties) {
         this.relProperties = relProperties;
         return this;
     }
 
-    public GraphLoaderBuilder withDirection(Direction direction) {
+    public TestGraphLoader withDirection(Direction direction) {
         this.direction = direction;
         return this;
     }
 
-    public GraphLoaderBuilder withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
+    public TestGraphLoader withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
         this.maybeDeduplicationStrategy = Optional.of(deduplicationStrategy);
         return this;
     }
 
-    public Graph load() {
+    public <T extends GraphFactory> Graph buildGraph(Class<T> graphFactory) {
         try (Transaction ignored = db.beginTx()) {
-            return build().load(graphFactory);
+            return loader(graphFactory).build(graphFactory).build();
         }
     }
 
-    public GraphLoader build() {
+    // TODO: remove type constraints when we merge MultipleRelTypesSupport into GraphFactory
+    public <T extends GraphFactory & MultipleRelTypesSupport> GraphsByRelationshipType buildGraphs(Class<T> graphFactory) {
+        try (Transaction ignored = db.beginTx()) {
+            return loader(graphFactory).build(graphFactory).importAllGraphs();
+        }
+    }
+
+    private <T extends GraphFactory> GraphLoader loader(Class<T> graphFactory) {
         GraphLoader graphLoader = new GraphLoader(db).withDirection(direction);
 
         String nodeQueryTemplate = "MATCH (n%s) RETURN id(n) AS id%s";

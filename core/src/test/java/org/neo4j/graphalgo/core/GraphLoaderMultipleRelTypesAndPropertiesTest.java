@@ -25,9 +25,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.GraphLoaderBuilder;
+import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraph;
 import org.neo4j.graphalgo.TestSupport;
@@ -104,9 +103,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     void testLoadDuplicateRelationships(Class<? extends GraphFactory> graphFactory) {
         initDatabase();
 
-        Graph graph = GraphLoaderBuilder.from(db, graphFactory)
+        Graph graph = TestGraphLoader.from(db)
             .withDeduplicationStrategy(DeduplicationStrategy.NONE)
-            .load();
+            .buildGraph(graphFactory);
 
         Graph expected = TestGraph.Builder.fromGdl(
             "(n1)" +
@@ -124,10 +123,10 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     void testLoadDuplicateRelationshipsWithWeightsOnCypher(Class<? extends GraphFactory> graphFactory) {
         initDatabase();
-        Graph graph = GraphLoaderBuilder.from(db, graphFactory)
-            .withRelProperties(PropertyMappings.of(PropertyMapping.of("weight", 1.0)))
+        Graph graph = TestGraphLoader.from(db)
+            .withRelProperties(PropertyMapping.of("weight", 1.0))
             .withDeduplicationStrategy(NONE)
-            .load();
+            .buildGraph(graphFactory);
 
         Graph expected = TestGraph.Builder.fromGdl(
             "(n1)" +
@@ -159,10 +158,10 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     ) {
         initDatabase();
 
-        Graph graph = GraphLoaderBuilder.from(db, graphFactory)
+        Graph graph = TestGraphLoader.from(db)
             .withDeduplicationStrategy(deduplicationStrategy)
-            .withRelProperties(PropertyMappings.of(PropertyMapping.of("weight", 1.0)))
-            .load();
+            .withRelProperties(PropertyMapping.of("weight", 1.0))
+            .buildGraph(graphFactory);
 
         Graph expected = TestGraph.Builder.fromGdl(String.format(
             "(n1)" +
@@ -179,10 +178,10 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     void testLoadDuplicateRelationshipsWithWeightsAggregation(Class<? extends GraphFactory> graphFactory) {
         initDatabase();
 
-        Graph graph = GraphLoaderBuilder.from(db, graphFactory)
+        Graph graph = TestGraphLoader.from(db)
             .withDeduplicationStrategy(SKIP)
-            .withRelProperties(PropertyMappings.of(PropertyMapping.of("weight", 1.0)))
-            .load();
+            .withRelProperties(PropertyMapping.of("weight", 1.0))
+            .buildGraph(graphFactory);
 
         String expectedGraph =
             "(n1)" +
@@ -201,13 +200,11 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     <T extends GraphFactory & MultipleRelTypesSupport>
     void testLoadMultipleRelationships(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-
         initDatabase();
-        GraphsByRelationshipType graphs = new GraphLoader(db)
-            .withAnyLabel()
+
+        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
             .withRelationshipType("REL1 | REL2")
-            .build(graphFactory)
-            .importAllGraphs();
+            .buildGraphs(graphFactory);
 
         assertEquals(2, graphs.availableRelationshipTypes().size());
         assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));
@@ -226,12 +223,11 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     void testLoadMultipleRelationshipsWithWeights(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         initDatabase();
-        GraphsByRelationshipType graphs = new GraphLoader(db)
-            .withAnyLabel()
+
+        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
             .withRelationshipType("REL1 | REL2")
-            .withRelationshipProperties(PropertyMapping.of("prop1", 42D))
-            .build(graphFactory)
-            .importAllGraphs();
+            .withRelProperties(PropertyMapping.of("prop1", 42D))
+            .buildGraphs(graphFactory);
 
         assertEquals(2, graphs.availableRelationshipTypes().size());
         assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));

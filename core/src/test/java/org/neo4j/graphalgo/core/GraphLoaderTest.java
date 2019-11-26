@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.graphalgo.GraphLoaderBuilder;
+import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -68,41 +68,39 @@ class GraphLoaderTest {
 
     @AllGraphTypesTest
     void testAnyLabel(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = GraphLoaderBuilder.from(db, graphFactory).load();
+        Graph graph = TestGraphLoader.from(db).buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
     }
 
     @AllGraphTypesTest
     void testWithLabel(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = GraphLoaderBuilder.from(db, graphFactory).withLabel("Node1").load();
+        Graph graph = TestGraphLoader.from(db).withLabel("Node1").buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("()"));
     }
 
     @AllGraphTypesTest
     void testAnyRelation(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = GraphLoaderBuilder.from(db, graphFactory).load();
+        Graph graph = TestGraphLoader.from(db).buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
     }
 
     @AllGraphTypesTest
     void testWithBothWeightedRelationship(Class<? extends GraphFactory> graphFactory) {
-        PropertyMappings relPropertyMappings = PropertyMappings.of(PropertyMapping.of("weight", 1.0));
-
-        Graph graph = GraphLoaderBuilder.from(db, graphFactory)
-            .withRelType("REL3")
-            .withRelProperties(relPropertyMappings)
+        Graph graph = TestGraphLoader.from(db)
+            .withRelationshipType("REL3")
+            .withRelProperties(PropertyMapping.of("weight", 1.0))
             .withDirection(Direction.OUTGOING)
-            .load();
+            .buildGraph(graphFactory);
 
         assertGraphEquals(graph, fromGdl("(), ()-[{w:1337}]->()"));
     }
 
     @AllGraphTypesTest
     void testWithOutgoingRelationship(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = GraphLoaderBuilder.from(db, graphFactory)
-            .withRelType("REL3")
+        Graph graph = TestGraphLoader.from(db)
+            .withRelationshipType("REL3")
             .withDirection(Direction.OUTGOING)
-            .load();
+            .buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(), ()-->()"));
     }
 
@@ -113,10 +111,10 @@ class GraphLoaderTest {
                 PropertyMapping.of("prop2", "prop2", 0D),
                 PropertyMapping.of("prop3", "prop3", 0D));
 
-        Graph graph = GraphLoaderBuilder
-            .from(db, graphFactory)
+        Graph graph = TestGraphLoader
+            .from(db)
             .withNodeProperties(nodePropertyMappings)
-            .load();
+            .buildGraph(graphFactory);
 
         assertGraphEquals(graph, fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
                                          "(b {prop1: 0, prop2: 2, prop3: 0})" +
@@ -126,10 +124,9 @@ class GraphLoaderTest {
 
     @AllGraphTypesTest
     void testWithRelationshipProperty(Class<? extends GraphFactory> graphFactory) {
-        PropertyMappings relPropertyMappings = PropertyMappings.of(PropertyMapping.of("prop1", 1337.42));
-        Graph graph = GraphLoaderBuilder.from(db, graphFactory)
-            .withRelProperties(relPropertyMappings)
-            .load();
+        Graph graph = TestGraphLoader.from(db)
+            .withRelProperties(PropertyMapping.of("prop1", 1337.42))
+            .buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 1337.42D}]->(c), (b)-[{w: 1337.42D}]->(c)"));
     }
 
@@ -138,11 +135,10 @@ class GraphLoaderTest {
         TerminationFlag terminationFlag = () -> false;
         TransactionTerminatedException exception = assertThrows(
                 TransactionTerminatedException.class,
-                () -> {
-                    new GraphLoader(db)
-                            .withTerminationFlag(terminationFlag)
-                            .load(graphFactory);
-                });
+                () -> new GraphLoader(db)
+                        .withTerminationFlag(terminationFlag)
+                        .load(graphFactory)
+        );
         assertEquals(Status.Transaction.Terminated, exception.status());
     }
 }
