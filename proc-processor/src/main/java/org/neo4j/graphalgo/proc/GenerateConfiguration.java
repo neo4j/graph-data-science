@@ -359,7 +359,7 @@ final class GenerateConfiguration {
                     continue;
                 }
 
-                int invalidMessages = invalidCandidates.size();
+                int sizeBeforeValidation = invalidCandidates.size();
 
                 Set<Modifier> modifiers = candidate.getModifiers();
                 if (!modifiers.contains(Modifier.STATIC)) {
@@ -385,7 +385,7 @@ final class GenerateConfiguration {
                     ));
                 }
 
-                if (invalidCandidates.size() == invalidMessages) {
+                if (invalidCandidates.size() == sizeBeforeValidation) {
                     validCandidates.add(candidate);
                 }
             }
