@@ -377,6 +377,10 @@ public class HugeGraph implements Graph {
         return idMapping.toOriginalNodeId(nodeId);
     }
 
+    public IdMap idMapping() {
+        return idMapping;
+    }
+
     @Override
     public boolean contains(final long nodeId) {
         return idMapping.contains(nodeId);

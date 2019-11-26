@@ -18,12 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.impl.louvain;
+package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 
@@ -33,18 +35,33 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-class SubGraphGeneratorTest {
+class GraphGeneratorTest {
+
+    public static final Graph EXPECTED_WITH_DEDUPLICATION = fromGdl("(a)-[{w: 0.0}]->(b)-[{w: 2.0}]->(c)-[{w: 4.0}]->(d)-[{w: 6.0}]->(a)");
+    public static final Graph EXPECTED_WITHOUT_DEDUPLICATION = fromGdl(
+        "(a)-[{w: 0.0}]->(b)" +
+        "(a)-[{w: 0.0}]->(b)" +
+        "(b)-[{w: 1.0}]->(c)" +
+        "(b)-[{w: 1.0}]->(c)" +
+        "(c)-[{w: 2.0}]->(d)" +
+        "(c)-[{w: 2.0}]->(d)" +
+        "(d)-[{w: 3.0}]->(a)" +
+        "(d)-[{w: 3.0}]->(a)"
+    );
+    public static final Graph EXPECTED_UNWEIGHTED = fromGdl("(a)-->(b)-->(c)-->(d)-->(a)");
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = Direction.class)
     void unweighted(Direction direction) {
         int nodeCount = 4;
-        SubGraphGenerator.NodeImporter nodeImporter = SubGraphGenerator.create(
+        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.create(
             nodeCount,
             nodeCount,
             direction,
             false,
             false,
+            DeduplicationStrategy.SUM,
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
@@ -52,26 +69,41 @@ class SubGraphGeneratorTest {
             nodeImporter.addNode(i);
         }
 
-        SubGraphGenerator.RelImporter relImporter = nodeImporter.build();
+        GraphGenerator.RelImporter relImporter = nodeImporter.build();
         for (int i = 0; i < nodeCount; i++) {
-            relImporter.add(i, (i + 1) % nodeCount);
+            relImporter.addFromOriginal(i, (i + 1) % nodeCount);
         }
         Graph graph = relImporter.build();
-        assertGraphEquals(fromGdl("(a)-->(b)-->(c)-->(d)-->(a)"), graph);
+        assertGraphEquals(EXPECTED_UNWEIGHTED, graph);
     }
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = Direction.class)
-    void weighted(Direction direction) {
-        Graph graph = generateGraph(direction, false);
-        assertGraphEquals(fromGdl("(a)-[{w: 0.0}]->(b)-[{w: 1.0}]->(c)-[{w: 2.0}]->(d)-[{w: 3.0}]->(a)"), graph);
+    void weightedWithDeduplication(Direction direction) {
+        Graph graph = generateGraph(direction, false, DeduplicationStrategy.SUM);
+        assertGraphEquals(EXPECTED_WITH_DEDUPLICATION, graph);
+        assertEquals(direction, graph.getLoadDirection());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = Direction.class)
+    void weightedWithoutDeduplication(Direction direction) {
+        Graph graph = generateGraph(direction, false, DeduplicationStrategy.NONE);
+        assertGraphEquals(EXPECTED_WITHOUT_DEDUPLICATION, graph);
         assertEquals(direction, graph.getLoadDirection());
     }
 
     @Test
-    void undirected() {
-        Graph graph = generateGraph(Direction.OUTGOING, true);
-        assertGraphEquals(fromGdl("(a)-[{w: 0.0}]->(b)-[{w: 1.0}]->(c)-[{w: 2.0}]->(d)-[{w: 3.0}]->(a)"), graph);
+    void undirectedWithDeduplication() {
+        Graph graph = generateGraph(Direction.OUTGOING, true, DeduplicationStrategy.SUM);
+        assertGraphEquals(EXPECTED_WITH_DEDUPLICATION, graph);
+        assertEquals(Direction.OUTGOING, graph.getLoadDirection());
+    }
+
+    @Test
+    void undirectedWithoutDeduplication() {
+        Graph graph = generateGraph(Direction.OUTGOING, true, DeduplicationStrategy.NONE);
+        assertGraphEquals(EXPECTED_WITHOUT_DEDUPLICATION, graph);
         assertEquals(Direction.OUTGOING, graph.getLoadDirection());
     }
 
@@ -79,46 +111,22 @@ class SubGraphGeneratorTest {
     void shouldFailOnIncomingWithUndirected() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> generateGraph(Direction.INCOMING, true)
+            () -> generateGraph(Direction.INCOMING, true, DeduplicationStrategy.SUM)
         );
         assertTrue(exception.getMessage().contains("Direction must be OUTGOING if graph is undirected"));
     }
 
-    @Test
-    void shouldMergeParallelRelationships() {
+    private Graph generateGraph(Direction outgoing, boolean undirected, DeduplicationStrategy  deduplicationStrategy) {
         int nodeCount = 4;
 
-        SubGraphGenerator.NodeImporter nodeImporter = SubGraphGenerator.create(
-            nodeCount,
-            nodeCount,
-            Direction.BOTH,
-            false,
-            true,
-            AllocationTracker.EMPTY
-        );
-
-        for (int i = 0; i < nodeCount; i++) {
-            nodeImporter.addNode(i);
-        }
-
-        SubGraphGenerator.RelImporter relImporter = nodeImporter.build();
-        for (int i = 0; i < nodeCount * 2; i++) {
-            int index = i % nodeCount;
-            relImporter.add(index, (index + 1) % nodeCount, index);
-        }
-        Graph graph = relImporter.build();
-        assertGraphEquals(fromGdl("(a)-[{w: 0.0}]->(b)-[{w: 2.0}]->(c)-[{w: 4.0}]->(d)-[{w: 6.0}]->(a)"), graph);
-    }
-
-    private Graph generateGraph(Direction outgoing, boolean undirected) {
-        int nodeCount = 4;
-
-        SubGraphGenerator.NodeImporter nodeImporter = SubGraphGenerator.create(
+        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.create(
             nodeCount,
             nodeCount,
             outgoing,
             undirected,
             true,
+            deduplicationStrategy,
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
@@ -126,11 +134,11 @@ class SubGraphGeneratorTest {
             nodeImporter.addNode(i);
         }
 
-        SubGraphGenerator.RelImporter relImporter = nodeImporter.build();
+        GraphGenerator.RelImporter relImporter = nodeImporter.build();
         for (int i = 0; i < nodeCount; i++) {
-            relImporter.add(i, (i + 1) % nodeCount, i);
+            relImporter.addFromOriginal(i, (i + 1) % nodeCount, i);
+            relImporter.addFromOriginal(i, (i + 1) % nodeCount, i);
         }
         return relImporter.build();
     }
-
 }
