@@ -101,7 +101,7 @@ public class NodeSimilarityProc extends BaseAlgoProc<NodeSimilarity> {
 
         Direction direction = configuration.getDirection(COMPUTE_DIRECTION_DEFAULT);
         return runWithExceptionLogging(
-            "NeighborhoodSimilarity compute failed",
+            "NodeSimilarity compute failed",
             () -> nodeSimilarity.computeToStream(direction)
         );
     }
@@ -142,7 +142,7 @@ public class NodeSimilarityProc extends BaseAlgoProc<NodeSimilarity> {
 
         Direction direction = configuration.getDirection(COMPUTE_DIRECTION_DEFAULT);
         SimilarityGraphResult similarityGraphResult = runWithExceptionLogging(
-            "NeighborhoodSimilarity compute failed",
+            "NodeSimilarity compute failed",
             () -> resultBuilder.timeEval(() -> nodeSimilarity.computeToGraph(direction))
         );
         graph.releaseTopology();
@@ -154,7 +154,7 @@ public class NodeSimilarityProc extends BaseAlgoProc<NodeSimilarity> {
 
         if (configuration.isWriteFlag() && similarityGraph.relationshipCount() > 0) {
             runWithExceptionLogging(
-                "NeighborhoodSimilarity write-back failed",
+                "NodeSimilarity write-back failed",
                 () -> resultBuilder.timeWrite(
                     () -> {
                         RelationshipExporter exporter = RelationshipExporter

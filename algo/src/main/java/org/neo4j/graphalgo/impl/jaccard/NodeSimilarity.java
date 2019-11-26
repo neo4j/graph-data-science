@@ -119,7 +119,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity> {
     private void prepare(Direction direction) {
         if (direction == Direction.BOTH) {
             throw new IllegalArgumentException(
-                "Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
+                "Direction BOTH is not supported by the NodeSimilarity algorithm.");
         }
 
         vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
