@@ -20,46 +20,80 @@
 
 package org.neo4j.graphalgo;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class GraphLoaderUtil {
+public final class GraphLoaderBuilder {
 
-    private GraphLoaderUtil() {}
+    private final GraphDatabaseAPI db;
+    private final Class<? extends GraphFactory> graphFactory;
 
-    public static Graph initLoader(GraphDatabaseAPI db, Class<? extends GraphFactory> graphFactory) {
+    private Optional<String> maybeLabel = Optional.empty();
+    private Optional<String> maybeRelType = Optional.empty();
+
+    private PropertyMappings nodeProperties = PropertyMappings.EMPTY;
+    private PropertyMappings relProperties = PropertyMappings.EMPTY;
+
+    private Direction direction = Direction.OUTGOING;
+    private Optional<DeduplicationStrategy> maybeDeduplicationStrategy = Optional.empty();
+
+    public static GraphLoaderBuilder from(@NotNull GraphDatabaseAPI db, @NotNull Class<? extends GraphFactory> graphFactory) {
+        return new GraphLoaderBuilder(db, graphFactory);
+    }
+
+    private GraphLoaderBuilder(GraphDatabaseAPI db, Class<? extends GraphFactory> graphFactory) {
+        this.db = db;
+        this.graphFactory = graphFactory;
+    }
+
+    public GraphLoaderBuilder withLabel(String label) {
+        this.maybeLabel = Optional.of(label);
+        return this;
+    }
+
+    public GraphLoaderBuilder withRelType(String relType) {
+        this.maybeRelType = Optional.of(relType);
+        return this;
+    }
+
+    public GraphLoaderBuilder withNodeProperties(PropertyMappings nodeProperties) {
+        this.nodeProperties = nodeProperties;
+        return this;
+    }
+
+    public GraphLoaderBuilder withRelProperties(PropertyMappings relProperties) {
+        this.relProperties = relProperties;
+        return this;
+    }
+
+    public GraphLoaderBuilder withDirection(Direction direction) {
+        this.direction = direction;
+        return this;
+    }
+
+    public GraphLoaderBuilder withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
+        this.maybeDeduplicationStrategy = Optional.of(deduplicationStrategy);
+        return this;
+    }
+
+    public Graph load() {
         try (Transaction ignored = db.beginTx()) {
-            return initLoader(db, graphFactory, null, null).load(graphFactory);
+            return build().load(graphFactory);
         }
     }
 
-    public static GraphLoader initLoader(GraphDatabaseAPI db, Class<? extends GraphFactory> graphFactory, String label, String relType) {
-        return initLoader(
-            db,
-            graphFactory,
-            label != null ? Optional.of(label) : Optional.empty(),
-            relType != null ? Optional.of(relType) : Optional.empty(),
-            PropertyMappings.EMPTY,
-            PropertyMappings.EMPTY);
-    }
-
-    public static GraphLoader initLoader(
-        GraphDatabaseAPI db,
-        Class<? extends GraphFactory> graphFactory,
-        Optional<String> maybeLabel,
-        Optional<String> maybeRelType,
-        PropertyMappings nodeProperties,
-        PropertyMappings relProperties) {
-
-        GraphLoader graphLoader = new GraphLoader(db);
+    public GraphLoader build() {
+        GraphLoader graphLoader = new GraphLoader(db).withDirection(direction);
 
         String nodeQueryTemplate = "MATCH (n%s) RETURN id(n) AS id%s";
         String relsQueryTemplate = "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s";
@@ -88,11 +122,12 @@ public final class GraphLoaderUtil {
                 : "";
 
             String relsQuery = String.format(relsQueryTemplate, relTypeString, relPropertiesString);
-            graphLoader.withRelationshipType(relsQuery).withDeduplicationStrategy(DeduplicationStrategy.SKIP);
+            graphLoader.withRelationshipType(relsQuery);
         } else {
             maybeLabel.ifPresent(graphLoader::withLabel);
             maybeRelType.ifPresent(graphLoader::withRelationshipType);
         }
+        graphLoader.withDeduplicationStrategy(maybeDeduplicationStrategy.orElse(DeduplicationStrategy.SKIP));
         graphLoader.withRelationshipProperties(relProperties);
         graphLoader.withOptionalNodeProperties(nodeProperties);
 

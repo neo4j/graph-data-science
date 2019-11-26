@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.GraphLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -31,16 +32,12 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.GraphLoaderUtil.initLoader;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
@@ -71,22 +68,19 @@ class GraphLoaderTest {
 
     @AllGraphTypesTest
     void testAnyLabel(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = initLoader(db, graphFactory);
+        Graph graph = GraphLoaderBuilder.from(db, graphFactory).load();
         assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
     }
 
     @AllGraphTypesTest
     void testWithLabel(Class<? extends GraphFactory> graphFactory) {
-        Graph graph;
-        try (Transaction tx = db.beginTx()) {
-            graph = initLoader(db,graphFactory, "Node1", null).load(graphFactory);
-        }
+        Graph graph = GraphLoaderBuilder.from(db, graphFactory).withLabel("Node1").load();
         assertGraphEquals(graph, fromGdl("()"));
     }
 
     @AllGraphTypesTest
     void testAnyRelation(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = initLoader(db, graphFactory);
+        Graph graph = GraphLoaderBuilder.from(db, graphFactory).load();
         assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
     }
 
@@ -94,29 +88,21 @@ class GraphLoaderTest {
     void testWithBothWeightedRelationship(Class<? extends GraphFactory> graphFactory) {
         PropertyMappings relPropertyMappings = PropertyMappings.of(PropertyMapping.of("weight", 1.0));
 
-        Graph graph;
-        try (Transaction tx = db.beginTx()) {
-            graph = initLoader(
-                    db,
-                    graphFactory,
-                    Optional.empty(),
-                    Optional.of("REL3"),
-                    PropertyMappings.EMPTY,
-                    relPropertyMappings)
-                    .withDirection(Direction.OUTGOING)
-                    .load(graphFactory);
-        }
+        Graph graph = GraphLoaderBuilder.from(db, graphFactory)
+            .withRelType("REL3")
+            .withRelProperties(relPropertyMappings)
+            .withDirection(Direction.OUTGOING)
+            .load();
+
         assertGraphEquals(graph, fromGdl("(), ()-[{w:1337}]->()"));
     }
 
     @AllGraphTypesTest
     void testWithOutgoingRelationship(Class<? extends GraphFactory> graphFactory) {
-        Graph graph;
-        try (Transaction tx = db.beginTx()) {
-            graph = initLoader(db, graphFactory, null, "REL3")
-                    .withDirection(Direction.OUTGOING)
-                    .load(graphFactory);
-        }
+        Graph graph = GraphLoaderBuilder.from(db, graphFactory)
+            .withRelType("REL3")
+            .withDirection(Direction.OUTGOING)
+            .load();
         assertGraphEquals(graph, fromGdl("(), ()-->()"));
     }
 
@@ -127,17 +113,11 @@ class GraphLoaderTest {
                 PropertyMapping.of("prop2", "prop2", 0D),
                 PropertyMapping.of("prop3", "prop3", 0D));
 
-        Graph graph;
-        try (Transaction tx = db.beginTx()) {
-            graph = initLoader(
-                    db,
-                    graphFactory,
-                    Optional.empty(),
-                    Optional.empty(),
-                    nodePropertyMappings,
-                    PropertyMappings.EMPTY)
-                    .load(graphFactory);
-        }
+        Graph graph = GraphLoaderBuilder
+            .from(db, graphFactory)
+            .withNodeProperties(nodePropertyMappings)
+            .load();
+
         assertGraphEquals(graph, fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
                                          "(b {prop1: 0, prop2: 2, prop3: 0})" +
                                          "(c {prop1: 0, prop2: 0, prop3: 3})" +
@@ -147,16 +127,9 @@ class GraphLoaderTest {
     @AllGraphTypesTest
     void testWithRelationshipProperty(Class<? extends GraphFactory> graphFactory) {
         PropertyMappings relPropertyMappings = PropertyMappings.of(PropertyMapping.of("prop1", 1337.42));
-        Graph graph;
-        try (Transaction tx = db.beginTx()) {
-            graph = initLoader(
-                    db,
-                    graphFactory,
-                    Optional.empty(),
-                    Optional.empty(),
-                    PropertyMappings.EMPTY,
-                    relPropertyMappings).load(graphFactory);
-        }
+        Graph graph = GraphLoaderBuilder.from(db, graphFactory)
+            .withRelProperties(relPropertyMappings)
+            .load();
         assertGraphEquals(graph, fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 1337.42D}]->(c), (b)-[{w: 1337.42D}]->(c)"));
     }
 
