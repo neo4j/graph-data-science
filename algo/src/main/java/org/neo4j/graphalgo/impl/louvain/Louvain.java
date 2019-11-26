@@ -232,7 +232,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
     @Override
     public void release() {
-        // TODO implement
+        this.rootGraph.releaseTopology();
     }
 
     @Override
