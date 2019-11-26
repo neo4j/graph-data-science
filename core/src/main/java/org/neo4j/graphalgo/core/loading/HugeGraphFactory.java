@@ -62,15 +62,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
     }
 
     public static MemoryEstimation getMemoryEstimation(GraphSetup setup, GraphDimensions dimensions) {
-        return getMemoryEstimation(setup, dimensions, false);
-    }
-
-    public static MemoryEstimation getMemoryEstimation(
-        GraphSetup setup,
-        GraphDimensions dimensions,
-        boolean nonExistingGraph
-    ) {
-        return getMemoryEstimation(setup.loadOutgoing, setup.loadIncoming, setup.loadAsUndirected, dimensions);
+        return getMemoryEstimation(setup.loadOutgoing, setup.loadIncoming, setup.loadAsUndirected, dimensions, false);
     }
 
     public static MemoryEstimation getMemoryEstimation(
@@ -85,14 +77,12 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
             .add("nodeIdMap", IdMap.memoryEstimation());
 
         // Node properties
-        if (dimensions.nodeProperties() != null) {
-            for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
-                // for estimations based on node/rel-counts, unresolved PropertyMappings should not throw on calling `exists()`
+        for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
+            // for estimations based on node/rel-counts, unresolved PropertyMappings should not throw on calling `exists()`
             if (nonExistingGraph ||propertyMapping.exists()) {
-                    builder.add(propertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
-                } else {
-                    builder.add(propertyMapping.propertyKey(), NullPropertyMap.MEMORY_USAGE);
-                }
+                builder.add(propertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
+            } else {
+                builder.add(propertyMapping.propertyKey(), NullPropertyMap.MEMORY_USAGE);
             }
         }
 

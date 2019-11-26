@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -56,27 +55,21 @@ import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEFAULT_LOUVAIN_DI
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-/**
- * modularity based community detection algorithm
- *
- * @author mknblch
- */
 public class LouvainProc extends BaseAlgoProc<Louvain> {
 
-    public static final int DEFAULT_CONCURRENCY = 4;
-
     public static final String LEVELS_KEY = "levels";
-    public static final int DEFAULT_LEVELS = 10;
+    public static final int LEVELS_DEFAULT = 10;
     public static final String INNER_ITERATIONS_KEY = "innerIterations";
-    public static final int DEFAULT_INNER_ITERATIONS = 10;
+    public static final int INNER_ITERATIONS_DEFAULT = 10;
     public static final String INCLUDE_INTERMEDIATE_COMMUNITIES_KEY = "includeIntermediateCommunities";
-    public static final boolean DEFAULT_INCLUDE_INTERMEDIATE_COMMUNITIES = false;
+    public static final boolean INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT = false;
+    public static final String LEGACY_COMMUNITY_PROPERTY_KEY = "communityProperty";
 
     @Procedure(value = "algo.beta.louvain", mode = WRITE)
     @Description("CALL algo.beta.louvain(label:String, relationship:String, " +
-                 "{levels: 10, innerIterations: 10, tolerance: 0.00001, weightProperty:'weight', seedProperty: 'seed', write: true, writeProperty:'community', includeIntermediateCommunities: false, concurrency:4 }) " +
-                 "YIELD nodes, communityCount, levels, modularity, modularities, write, writerProperty, includeIntermediateCommunities, loadMillis, computeMillis, writeMillis, postProcessingMillis")
-    public Stream<WriteResult> louvain(
+                 "{levels: 10, innerIterations: 10, tolerance: 0.00001, weightProperty: 'weight', seedProperty: 'seed', write: true, writeProperty: 'community', includeIntermediateCommunities: false, concurrency: 4 }) " +
+                 "YIELD nodes, communityCount, levels, modularity, modularities, write, writeProperty, includeIntermediateCommunities, loadMillis, computeMillis, writeMillis, postProcessingMillis")
+    public Stream<WriteResult> louvainWrite(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipTypes,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -85,8 +78,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     @Procedure(value = "algo.beta.louvain.stream", mode = READ)
     @Description("CALL algo.beta.louvain.stream(label:String, relationship:String, " +
-                 "{levels: 10, innerIterations: 10, tolerance: 0.00001, weightProperty:'weight', seedProperty: 'seed', includeIntermediateCommunities: false, concurrency:4 }) " +
-                 "YIELD nodeId, community, communities - yields a setId to each node id")
+                 "{levels: 10, innerIterations: 10, tolerance: 0.00001, weightProperty: 'weight', seedProperty: 'seed', includeIntermediateCommunities: false, concurrency: 4 }) " +
+                 "YIELD nodeId, community, communities - yields a community id for each node id")
     public Stream<StreamResult> louvainStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipTypes,
@@ -97,24 +90,24 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     @Procedure(value = "algo.louvain", mode = WRITE)
     @Description("CALL algo.louvain(label:String, relationship:String, " +
-                 "{weightProperty:'weight', defaultValue:1.0, write: true, writeProperty:'community', concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic'}) " +
+                 "{weightProperty: 'weight', defaultValue: 1.0, write: true, writeProperty: 'community', concurrency: 4, communityProperty: 'propertyOfPredefinedCommunity', innerIterations: 10, communitySelection: 'classic'}) " +
                  "YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis")
-    public Stream<LouvainLegacy.LegacyWriteResult> louvainLegacy(
+    public Stream<LegacyWriteResult> writeLegacy(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipTypes,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        Object communityProperty = config.get("communityProperty");
+        Object communityProperty = config.get(LEGACY_COMMUNITY_PROPERTY_KEY);
         config.put(SEED_PROPERTY_KEY, communityProperty);
 
         Stream<WriteResult> resultStream = run(label, relationshipTypes, config);
-        return resultStream.map(LouvainLegacy.LegacyWriteResult::fromWriteResult);
+        return resultStream.map(LegacyWriteResult::fromWriteResult);
     }
 
     @Procedure(value = "algo.louvain.stream", mode = READ)
     @Description("CALL algo.louvain.stream(label:String, relationship:String, " +
-                 "{levels: 10, innerIterations: 10, weightProperty:'weight', seedProperty: 'seed', includeIntermediateCommunities: false, concurrency:4 }) " +
-                 "YIELD nodeId, community, communities - yields a setId to each node id")
+                 "{levels: 10, innerIterations: 10, weightProperty: 'weight', seedProperty: 'seed', includeIntermediateCommunities: false, concurrency: 4}) " +
+                 "YIELD nodeId, community, communities - yields a community id for each node id")
     public Stream<StreamResult> louvainStreamLegacy(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipTypes,
@@ -194,14 +187,12 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         return LongStream.range(0, setup.graph.nodeCount())
             .mapToObj(nodeId -> {
                 long neoNodeId = setup.graph.toOriginalNodeId(nodeId);
-                return new LouvainProc.StreamResult(neoNodeId, louvain.getCommunities(nodeId), louvain.getCommunity(nodeId) );
+                return new LouvainProc.StreamResult(neoNodeId, louvain.getCommunities(nodeId), louvain.getCommunity(nodeId));
             });
     }
 
     @Override
-    protected GraphLoader configureGraphLoader(
-        GraphLoader loader, ProcedureConfiguration config
-    ) {
+    protected GraphLoader configureGraphLoader(GraphLoader loader, ProcedureConfiguration config) {
         final String seedProperty = config.getString(SEED_PROPERTY_KEY, null);
         if (seedProperty != null) {
             loader.withOptionalNodeProperties(PropertyMapping.of(seedProperty, -1));
@@ -213,10 +204,10 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     @Override
     protected AlgorithmFactory<Louvain> algorithmFactory(ProcedureConfiguration config) {
         Louvain.Config louvainConfig = new Louvain.Config(
-            config.getInt(LEVELS_KEY, DEFAULT_LEVELS),
-            config.getInt(INNER_ITERATIONS_KEY, DEFAULT_INNER_ITERATIONS),
+            config.getInt(LEVELS_KEY, LEVELS_DEFAULT),
+            config.getInt(INNER_ITERATIONS_KEY, INNER_ITERATIONS_DEFAULT),
             config.get(TOLERANCE_KEY, TOLERANCE_DEFAULT),
-            config.getBool(INCLUDE_INTERMEDIATE_COMMUNITIES_KEY, DEFAULT_INCLUDE_INTERMEDIATE_COMMUNITIES),
+            config.getBool(INCLUDE_INTERMEDIATE_COMMUNITIES_KEY, INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT),
             config.getString(SEED_PROPERTY_KEY)
         );
 

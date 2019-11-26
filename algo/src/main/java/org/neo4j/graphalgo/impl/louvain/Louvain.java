@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -28,22 +27,24 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.logging.NullLog;
+import org.neo4j.logging.Log;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 public final class Louvain extends Algorithm<Louvain> {
 
-    private final NodeProperties seedingValues;
-    private final Direction direction;
-    private final ExecutorService pool;
     private final int concurrency;
-    private final AllocationTracker tracker;
     private final Graph rootGraph;
     private final Config config;
+    private final NodeProperties seedingValues;
+    private final Direction direction;
+    private final ExecutorService executorService;
+    private final Log log;
+    private final AllocationTracker tracker;
 
     // results
     private HugeLongArray[] dendrograms;
@@ -54,15 +55,17 @@ public final class Louvain extends Algorithm<Louvain> {
         Graph graph,
         Config config,
         Direction direction,
-        ExecutorService pool,
+        ExecutorService executorService,
         int concurrency,
+        Log log,
         AllocationTracker tracker
     ) {
         this.config = config;
         this.rootGraph = graph;
+        this.log = log;
         this.seedingValues = config.maybeSeedPropertyKey.map(graph::nodeProperties).orElse(null);
         this.direction = direction;
-        this.pool = pool;
+        this.executorService = executorService;
         this.concurrency = concurrency;
         this.tracker = tracker;
         this.dendrograms = new HugeLongArray[config.maxLevel];
@@ -72,13 +75,13 @@ public final class Louvain extends Algorithm<Louvain> {
     public Louvain compute() {
 
         Graph workingGraph = rootGraph;
-        NodeProperties seed = seedingValues;
+        NodeProperties nextSeedingValues = seedingValues;
 
         long oldNodeCount = rootGraph.nodeCount();
         for (ranLevels = 0; ranLevels < config.maxLevel; ranLevels++) {
             assertRunning();
 
-            ModularityOptimization modularityOptimization = runModularityOptimization(workingGraph, seed);
+            ModularityOptimization modularityOptimization = runModularityOptimization(workingGraph, nextSeedingValues);
             modularityOptimization.release();
 
             modularities[ranLevels] = modularityOptimization.getModularity();
@@ -86,7 +89,7 @@ public final class Louvain extends Algorithm<Louvain> {
             long maxCommunityId = buildDendrogram(workingGraph, ranLevels, modularityOptimization);
 
             workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
-            seed = new OriginalIdNodeProperties(workingGraph);
+            nextSeedingValues = new OriginalIdNodeProperties(workingGraph);
 
             if (workingGraph.nodeCount() == oldNodeCount
                 || workingGraph.nodeCount() == 1
@@ -118,20 +121,18 @@ public final class Louvain extends Algorithm<Louvain> {
         int level,
         ModularityOptimization modularityOptimization
     ) {
-        MutableLong maxCommunityId = new MutableLong(0L);
+        AtomicLong maxCommunityId = new AtomicLong(0L);
         ParallelUtil.parallelForEachNode(rootGraph, (nodeId) -> {
             long prevId = level == 0
                 ? nodeId
                 : workingGraph.toMappedNodeId(dendrograms[level - 1].get(nodeId));
 
             final long communityId = modularityOptimization.getCommunityId(prevId);
-            if (communityId > maxCommunityId.getValue()) {
-                maxCommunityId.setValue(communityId);
-            }
+            maxCommunityId.updateAndGet(currentMaxId -> Math.max(communityId, currentMaxId));
             dendrograms[level].set(nodeId, communityId);
         });
 
-        return maxCommunityId.getValue();
+        return maxCommunityId.get();
     }
 
     private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodeProperties seed) {
@@ -143,9 +144,9 @@ public final class Louvain extends Algorithm<Louvain> {
             seed,
             concurrency,
             DEFAULT_BATCH_SIZE,
-            pool,
+            executorService,
             tracker,
-            NullLog.getInstance()
+            log
         )
             .withProgressLogger(progressLogger)
             .withTerminationFlag(terminationFlag)
@@ -175,8 +176,8 @@ public final class Louvain extends Algorithm<Louvain> {
 
         workingGraph.forEachNode((nodeId) -> {
             long communityId = modularityOptimization.getCommunityId(nodeId);
-            workingGraph.forEachRelationship(nodeId, direction, 1.0, (s, t, w) -> {
-                relImporter.add(communityId, modularityOptimization.getCommunityId(t), w);
+            workingGraph.forEachRelationship(nodeId, direction, 1.0, (source, target, weight) -> {
+                relImporter.add(communityId, modularityOptimization.getCommunityId(target), weight);
                 return true;
             });
             return true;
@@ -190,9 +191,9 @@ public final class Louvain extends Algorithm<Louvain> {
             return false;
         }
 
-        double oldModularity = modularities[ranLevels - 1];
+        double previousModularity = modularities[ranLevels - 1];
         double currentModularity = modularities[ranLevels];
-        return !(currentModularity > oldModularity && Math.abs(currentModularity - oldModularity) > config.tolerance);
+        return !(currentModularity > previousModularity && Math.abs(currentModularity - previousModularity) > config.tolerance);
     }
 
     public Config config() {
@@ -208,7 +209,7 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     public long getCommunity(long nodeId) {
-        return dendrograms[levels() -1 ].get(nodeId);
+        return dendrograms[levels() - 1].get(nodeId);
     }
 
     public long[] getCommunities(long nodeId) {
@@ -239,7 +240,7 @@ public final class Louvain extends Algorithm<Louvain> {
         return this;
     }
 
-    class OriginalIdNodeProperties implements NodeProperties {
+    static class OriginalIdNodeProperties implements NodeProperties {
         private final Graph graph;
 
         public OriginalIdNodeProperties(Graph graph) {

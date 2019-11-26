@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -45,17 +44,20 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
 
     @Override
     public Louvain build(
-            final Graph graph,
-            final ProcedureConfiguration configuration,
-            final AllocationTracker tracker,
-            final Log log) {
-
-        return new Louvain(graph,
-                config,
-                configuration.getDirection(DEFAULT_LOUVAIN_DIRECTION),
-                Pools.DEFAULT,
-                configuration.getConcurrency(),
-                tracker);
+        final Graph graph,
+        final ProcedureConfiguration configuration,
+        final AllocationTracker tracker,
+        final Log log
+    ) {
+        return new Louvain(
+            graph,
+            config,
+            configuration.getDirection(DEFAULT_LOUVAIN_DIRECTION),
+            Pools.DEFAULT,
+            configuration.getConcurrency(),
+            log,
+            tracker
+        );
     }
 
     @Override
@@ -63,17 +65,17 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
         ModularityOptimizationFactory modularityOptimizationFactory = new ModularityOptimizationFactory();
         return MemoryEstimations.builder(Louvain.class)
             .add("modularityOptimization()", modularityOptimizationFactory.memoryEstimation())
-            .rangePerGraphDimension("subGraph", (graphDim, concurency) -> {
+            .rangePerGraphDimension("subGraph", (graphDimensions, concurrency) -> {
                 long maxGraphSize = HugeGraphFactory
-                    .getMemoryEstimation(true, true, false, graphDim)
-                    .estimate(graphDim, concurency)
+                    .getMemoryEstimation(true, true, false, graphDimensions)
+                    .estimate(graphDimensions, concurrency)
                     .memoryUsage()
                     .max;
                 return MemoryRange.of(1L, maxGraphSize); // rough estimate of graph size
             })
             .rangePerNode("dendrograms", (nodeCount) -> MemoryRange.of(
                 HugeLongArray.memoryEstimation(nodeCount),
-                HugeLongArray.memoryEstimation(nodeCount * config.maxLevel)
+                HugeLongArray.memoryEstimation(nodeCount) * config.maxLevel
             ))
             .build();
     }

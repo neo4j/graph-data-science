@@ -203,7 +203,7 @@ public final class MemoryUsage {
         return sizeOfLongArray(numWords) + sizeOfInstance(BitSet.class);
     }
 
-    public static long sizeOfLongDoubeHashMap(final long length) {
+    public static long sizeOfLongDoubleHashMap(long length) {
         long keyArraySize = sizeOfLongArray((int) Math.ceil(length * 1.25));
         long valueArraySize = sizeOfLongArray((int) Math.ceil(length * 1.25));
 

@@ -40,7 +40,6 @@ import org.neo4j.logging.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 
 /**
@@ -176,13 +175,13 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         final long maxSeedCommunity = seedProperty.getMaxPropertyValue().orElse(0);
 
         HugeLongLongMap communityMapping = new HugeLongLongMap(nodeCount, tracker);
-        AtomicLong nextAvailableInternalCommunityId = new AtomicLong(-1);
+        long nextAvailableInternalCommunityId = -1;
 
-        for (long  nodeId = 0; nodeId < nodeCount; nodeId++) {
-            long seedCommunity = (long) seedProperty.nodeProperty(nodeId,-1);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            long seedCommunity = (long) seedProperty.nodeProperty(nodeId, -1);
             seedCommunity = seedCommunity >= 0 ? seedCommunity : graph.toOriginalNodeId(nodeId) + maxSeedCommunity;
-            if(communityMapping.getOrDefault(seedCommunity, -1) < 0 ) {
-                communityMapping.addTo(seedCommunity, nextAvailableInternalCommunityId.incrementAndGet());
+            if (communityMapping.getOrDefault(seedCommunity, -1) < 0 ) {
+                communityMapping.addTo(seedCommunity, ++nextAvailableInternalCommunityId);
             };
 
             currentCommunities.set(nodeId, communityMapping.getOrDefault(seedCommunity, -1));

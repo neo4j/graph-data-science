@@ -79,7 +79,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
 
     @Procedure(value = "algo.beta.modularityOptimization.memrec")
     @Description("CALL algo.beta.modularityOptimization.memrec(label:String, relationship:String, {...properties}) " +
-                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for LabelPropagation")
+                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for Modularity Optimization")
     public Stream<MemRecResult> modularityOptimizationMemrec(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,

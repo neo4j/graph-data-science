@@ -25,40 +25,44 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 import java.util.function.Consumer;
 
-abstract class ProcTestBaseExtentions extends ProcTestBase {
+interface ProcTestBaseExtensions {
 
-    <A extends Algorithm<A>, P extends BaseAlgoProc<A>, F extends AlgorithmFactory<A>> void getAlgoFactory(
+    default <A extends Algorithm<A>, P extends BaseAlgoProc<A>, F extends AlgorithmFactory<A>> void getAlgorithmFactory(
         Class<? extends P> procClazz,
+        GraphDatabaseAPI db,
         String nodeLabels,
         String relTypes,
         Map<String, Object> config,
         Consumer<F> func
     ) {
-        getAlgoProc(procClazz, proc -> {
+        getAlgorithmProc(procClazz, db, proc -> {
             ProcedureConfiguration procedureConfiguration = proc.newConfig(nodeLabels, relTypes, config);
             func.accept((F) proc.algorithmFactory(procedureConfiguration));
         });
     }
 
-    <A extends Algorithm<A>, P extends BaseAlgoProc<A>> void getGraphSetup(
+    default <A extends Algorithm<A>, P extends BaseAlgoProc<A>> void getGraphSetup(
         Class<? extends P> procClazz,
+        GraphDatabaseAPI db,
         String nodeLabels,
         String relTypes,
         Map<String, Object> config,
         Consumer<GraphSetup> func
     ) {
-        getAlgoProc(procClazz, (proc) -> {
+        getAlgorithmProc(procClazz, db, (proc) -> {
             ProcedureConfiguration procedureConfiguration = proc.newConfig(nodeLabels, relTypes, config);
             func.accept(proc.newLoader(procedureConfiguration, AllocationTracker.EMPTY).toSetup());
         });
     }
 
-    private <A extends Algorithm<A>, P extends BaseAlgoProc<A>> void getAlgoProc(
+    default <A extends Algorithm<A>, P extends BaseAlgoProc<A>> void getAlgorithmProc(
         Class<? extends P> procClazz,
+        GraphDatabaseAPI db,
         Consumer<P> func
     ) {
         new TransactionWrapper(db).accept((tx -> {

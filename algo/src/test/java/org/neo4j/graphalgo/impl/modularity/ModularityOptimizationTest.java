@@ -285,9 +285,9 @@ class ModularityOptimizationTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 5614088, 8413120),
-            arguments(4, 5617376, 14413384),
-            arguments(42, 5659024, 90416728)
+            arguments(1, 5_614_088, 8_413_120),
+            arguments(4, 5_617_376, 14_413_384),
+            arguments(42, 5_659_024, 90_416_728)
         );
     }
 }

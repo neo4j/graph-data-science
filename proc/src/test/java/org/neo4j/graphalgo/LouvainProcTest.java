@@ -38,11 +38,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
-import static org.neo4j.graphalgo.LouvainProc.DEFAULT_INCLUDE_INTERMEDIATE_COMMUNITIES;
-import static org.neo4j.graphalgo.LouvainProc.DEFAULT_INNER_ITERATIONS;
-import static org.neo4j.graphalgo.LouvainProc.DEFAULT_LEVELS;
+import static org.neo4j.graphalgo.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT;
 import static org.neo4j.graphalgo.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_KEY;
+import static org.neo4j.graphalgo.LouvainProc.INNER_ITERATIONS_DEFAULT;
 import static org.neo4j.graphalgo.LouvainProc.INNER_ITERATIONS_KEY;
+import static org.neo4j.graphalgo.LouvainProc.LEVELS_DEFAULT;
 import static org.neo4j.graphalgo.LouvainProc.LEVELS_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.GRAPH_IMPL_KEY;
@@ -50,7 +50,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 
-class LouvainProcTest extends ProcTestBaseExtentions {
+class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
     
     private static final List<List<Long>> RESULT = Arrays.asList(
         Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 14L),
@@ -270,14 +270,15 @@ class LouvainProcTest extends ProcTestBaseExtentions {
 
     @AllGraphNamesTest
     void testDefaults(String graphImpl) {
-        getAlgoFactory(
+        getAlgorithmFactory(
             LouvainProc.class,
+            db,
             "", "",
             MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
             (LouvainFactory factory) -> {
-                assertEquals(DEFAULT_INCLUDE_INTERMEDIATE_COMMUNITIES, factory.config.includeIntermediateCommunities);
-                assertEquals(DEFAULT_LEVELS, factory.config.maxLevel);
-                assertEquals(DEFAULT_INNER_ITERATIONS, factory.config.maxInnerIterations);
+                assertEquals(INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT, factory.config.includeIntermediateCommunities);
+                assertEquals(LEVELS_DEFAULT, factory.config.maxLevel);
+                assertEquals(INNER_ITERATIONS_DEFAULT, factory.config.maxInnerIterations);
                 assertEquals(TOLERANCE_DEFAULT, factory.config.tolerance);
                 assertFalse(factory.config.maybeSeedPropertyKey.isPresent());
             }
@@ -295,8 +296,9 @@ class LouvainProcTest extends ProcTestBaseExtentions {
             SEED_PROPERTY_KEY, "foobar"
         );
 
-        getAlgoFactory(
+        getAlgorithmFactory(
             LouvainProc.class,
+            db,
             "", "",
             config,
             (LouvainFactory factory) -> {
@@ -313,6 +315,7 @@ class LouvainProcTest extends ProcTestBaseExtentions {
     void testGraphLoaderDefaults(String graphImpl) {
         getGraphSetup(
             LouvainProc.class,
+            db,
             "", "",
             MapUtil.map(
                 GRAPH_IMPL_KEY, graphImpl
@@ -330,6 +333,7 @@ class LouvainProcTest extends ProcTestBaseExtentions {
     void testGraphLoaderWithSeeding(String graphImpl) {
         getGraphSetup(
             LouvainProc.class,
+            db,
             "", "",
             MapUtil.map(
                 GRAPH_IMPL_KEY, graphImpl,
@@ -347,6 +351,7 @@ class LouvainProcTest extends ProcTestBaseExtentions {
     void testGraphLoaderWithWeight(String graphImpl) {
         getGraphSetup(
             LouvainProc.class,
+            db,
             "", "",
             MapUtil.map(
                 GRAPH_IMPL_KEY, graphImpl,
@@ -379,6 +384,7 @@ class LouvainProcTest extends ProcTestBaseExtentions {
 
         getGraphSetup(
             LouvainProc.class,
+            db,
             "", "",
             config,
             setup -> {
@@ -388,8 +394,9 @@ class LouvainProcTest extends ProcTestBaseExtentions {
             }
         );
 
-        getAlgoFactory(
+        getAlgorithmFactory(
             LouvainProc.class,
+            db,
             "", "",
             config,
             (LouvainFactory factory) -> {

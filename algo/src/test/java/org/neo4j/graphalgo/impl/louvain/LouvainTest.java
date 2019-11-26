@@ -46,6 +46,7 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -148,6 +149,7 @@ class LouvainTest {
             direction,
             Pools.DEFAULT,
             1,
+            NullLog.getInstance(),
             AllocationTracker.EMPTY
         ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -185,6 +187,7 @@ class LouvainTest {
             direction,
             Pools.DEFAULT,
             1,
+            NullLog.getInstance(),
             AllocationTracker.EMPTY
         ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -224,6 +227,7 @@ class LouvainTest {
             direction,
             Pools.DEFAULT,
             1,
+            NullLog.getInstance(),
             AllocationTracker.EMPTY
         ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -264,6 +268,7 @@ class LouvainTest {
             direction,
             Pools.DEFAULT,
             1,
+            NullLog.getInstance(),
             AllocationTracker.EMPTY
         ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -288,6 +293,7 @@ class LouvainTest {
             direction,
             Pools.DEFAULT,
             1,
+            NullLog.getInstance(),
             AllocationTracker.EMPTY
         ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -324,6 +330,7 @@ class LouvainTest {
                 Direction.BOTH,
                 Pools.DEFAULT,
                 2,
+                NullLog.getInstance(),
                 AllocationTracker.EMPTY
             )
                 .withProgressLogger(TestProgressLogger.INSTANCE)
@@ -334,12 +341,12 @@ class LouvainTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1, 6414193, 16338904),
-            arguments(1, 10, 6414193, 23538904),
-            arguments(4, 1, 6417481, 22143280),
-            arguments(4, 10, 6417481, 29343280),
-            arguments(42, 1, 6459129, 98116768),
-            arguments(42, 10, 6459129, 105316768)
+            arguments(1, 1, 6_414_193, 16_338_904),
+            arguments(1, 10, 6_414_193, 23_539_264),
+            arguments(4, 1, 6_417_481, 22_143_280),
+            arguments(4, 10, 6_417_481, 29_343_640),
+            arguments(42, 1, 6_459_129, 98_116_768),
+            arguments(42, 10, 6_459_129, 105_317_128)
         );
     }
 

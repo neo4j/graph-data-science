@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.impl.coloring.K1ColoringFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
@@ -63,8 +62,8 @@ public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOp
             .perThread("ModularityOptimizationTask", MemoryEstimations.builder()
                 .rangePerNode("communityInfluences",
                     (nodeCount) -> MemoryRange.of(
-                        MemoryUsage.sizeOfLongDoubeHashMap(50),
-                        MemoryUsage.sizeOfLongDoubeHashMap(Math.max(50, nodeCount))
+                        MemoryUsage.sizeOfLongDoubleHashMap(50),
+                        MemoryUsage.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
                     )
                 )
                 .build()

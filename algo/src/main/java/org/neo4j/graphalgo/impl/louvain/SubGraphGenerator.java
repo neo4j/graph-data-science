@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.cursors.LongCursor;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -41,7 +42,6 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Collections;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
 public class SubGraphGenerator {
@@ -71,7 +71,7 @@ public class SubGraphGenerator {
         private final boolean undirected;
         private boolean loadRelationshipProperty;
         private final AllocationTracker tracker;
-        private final AtomicLong nextAvailableId;
+        private final MutableLong nextAvailableId;
         private final BitSet seenNeoIds;
 
         NodeImporter(
@@ -88,7 +88,7 @@ public class SubGraphGenerator {
             this.tracker = tracker;
 
             this.neoToInternalBuilder = SparseNodeMapping.Builder.create(maxCommunityId, tracker);
-            this.nextAvailableId = new AtomicLong(0);
+            this.nextAvailableId = new MutableLong(0);
             seenNeoIds = new BitSet(Math.min(maxCommunityId, oldNodeCount));
         }
 
@@ -102,7 +102,7 @@ public class SubGraphGenerator {
         RelImporter build() {
             SparseNodeMapping neoToInternal = neoToInternalBuilder.build();
 
-            HugeLongArray internalToNeo = HugeLongArray.newArray(nextAvailableId.get(), tracker);
+            HugeLongArray internalToNeo = HugeLongArray.newArray(nextAvailableId.getValue(), tracker);
             for (LongCursor nodeId : seenNeoIds.asLongLookupContainer()) {
                 internalToNeo.set(neoToInternal.get(nodeId.value), nodeId.value);
             }
@@ -206,7 +206,7 @@ public class SubGraphGenerator {
                 loadRelationshipProperty
             );
 
-            relationshipBuffer = new RelationshipsBatchBuffer(idMap, -1, 10_000);
+            relationshipBuffer = new RelationshipsBatchBuffer(idMap, -1, ParallelUtil.DEFAULT_BATCH_SIZE);
         }
 
         void add(long source, long target) {
