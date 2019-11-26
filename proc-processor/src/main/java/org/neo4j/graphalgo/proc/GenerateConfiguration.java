@@ -150,7 +150,7 @@ final class GenerateConfiguration {
             .constructorBuilder()
             .addModifiers(Modifier.PUBLIC);
 
-        String configParamterName = names.newName(CONFIG_VAR, CONFIG_VAR);
+        String configParameterName = names.newName(CONFIG_VAR, CONFIG_VAR);
         boolean requiredMapParameter = false;
 
         for (ConfigParser.Member member : config.members()) {
@@ -184,22 +184,22 @@ final class GenerateConfiguration {
         if (requiredMapParameter) {
             configMapConstructor.addParameter(
                 TypeName.get(CypherMapWrapper.class).annotated(NOT_NULL),
-                configParamterName
+                configParameterName
             );
         }
 
         MethodSpec primaryConstructor = configMapConstructor.build();
         MethodSpec secondaryConstructor = allParametersConstructor.build();
 
-        List<TypeName> primmaryParameters = primaryConstructor.parameters
+        List<TypeName> primaryParameters = primaryConstructor.parameters
             .stream()
             .map(p -> p.type.withoutAnnotations())
             .collect(Collectors.toList());
-        List<TypeName> secondaryParamters = secondaryConstructor.parameters
+        List<TypeName> secondaryParameters = secondaryConstructor.parameters
             .stream()
             .map(p -> p.type.withoutAnnotations())
             .collect(Collectors.toList());
-        boolean identicalSignature = primmaryParameters.equals(secondaryParamters);
+        boolean identicalSignature = primaryParameters.equals(secondaryParameters);
 
         if (identicalSignature) {
             return ImmutableList.of(primaryConstructor);
