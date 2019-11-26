@@ -71,12 +71,12 @@ public final class TestGraphLoader {
         return this;
     }
 
-    public TestGraphLoader withRelProperties(PropertyMapping... relProperties) {
+    public TestGraphLoader withRelationshipProperties(PropertyMapping... relProperties) {
         this.relProperties = PropertyMappings.of(relProperties);
         return this;
     }
 
-    public TestGraphLoader withRelProperties(PropertyMappings relProperties) {
+    public TestGraphLoader withRelationshipProperties(PropertyMappings relProperties) {
         this.relProperties = relProperties;
         return this;
     }
