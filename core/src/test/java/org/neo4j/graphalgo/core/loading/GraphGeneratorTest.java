@@ -56,7 +56,6 @@ class GraphGeneratorTest {
         int nodeCount = 4;
         GraphGenerator.NodeImporter nodeImporter = GraphGenerator.create(
             nodeCount,
-            nodeCount,
             direction,
             false,
             false,
@@ -120,7 +119,6 @@ class GraphGeneratorTest {
         int nodeCount = 4;
 
         GraphGenerator.NodeImporter nodeImporter = GraphGenerator.create(
-            nodeCount,
             nodeCount,
             outgoing,
             undirected,
