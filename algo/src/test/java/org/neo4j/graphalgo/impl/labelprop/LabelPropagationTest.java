@@ -26,18 +26,22 @@ import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.impl.labelprop.LabelPropagation.Config;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -75,15 +79,15 @@ final class LabelPropagationTest {
     @BeforeEach
     void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
+        db.execute(DB_CYPHER).close();
     }
 
     @AfterEach
     void shutdownGraphDb() {
-        if (db != null) db.shutdown();
+        db.shutdown();
     }
 
     Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
-        db.execute(DB_CYPHER).close();
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
                 .withDefaultConcurrency();
@@ -109,15 +113,39 @@ final class LabelPropagationTest {
     void testUsesNeo4jNodeIdWhenSeedPropertyIsMissing(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl);
         LabelPropagation lp = new LabelPropagation(
-                graph,
-                10000,
-                Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT,
-                AllocationTracker.EMPTY
+            graph,
+            ConfigBuilder.testDefault(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
         );
         lp.compute(Direction.OUTGOING, 1L);
         HugeLongArray labels = lp.labels();
         assertArrayEquals(new long[]{1, 1, 3, 4, 4, 1}, labels.toArray(), "Incorrect result assuming initial labels are neo4j id");
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void shouldWorkWithSeedOnExplicitlyLoadedGraph(Class<? extends GraphFactory> graphImpl) {
+
+        Graph graph = new GraphLoader(db, Pools.DEFAULT)
+            .withDirection(Direction.OUTGOING)
+            .withDefaultConcurrency()
+            .withLabel("User")
+            .withRelationshipType("FOLLOW")
+            .withOptionalNodeProperties(PropertyMapping.of("seedId", 0.0))
+            .withName(graphImpl.getSimpleName()).load(graphImpl);
+
+        LabelPropagation lp = new LabelPropagation(
+            graph,
+            new ConfigBuilder()
+                .withSeedProperty("seedId")
+                .build(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        HugeLongArray labels = lp.compute(Direction.OUTGOING, 1L).labels();
+
+        assertArrayEquals(new long[]{2, 2, 3, 4, 4, 2}, labels.toArray());
     }
 
     @AllGraphTypesTest
@@ -141,8 +169,9 @@ final class LabelPropagationTest {
     private void testLPClustering(Graph graph, int batchSize) {
         LabelPropagation lp = new LabelPropagation(
                 graph,
-                batchSize,
-                Pools.DEFAULT_CONCURRENCY,
+                new ConfigBuilder()
+                    .withBatchSize(batchSize)
+                    .build(),
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY
         );
@@ -205,13 +234,13 @@ final class LabelPropagationTest {
         assertMemoryEstimation(nodeCount, concurrency);
     }
 
-    private void assertMemoryEstimation(final long nodeCount, final int concurrency) {
+    private void assertMemoryEstimation(long nodeCount, int concurrency) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
 
-        final LabelPropagationFactory labelPropagation = new LabelPropagationFactory();
+        LabelPropagationFactory labelPropagation = new LabelPropagationFactory(new ConfigBuilder().build());
 
-        final MemoryRange actual = labelPropagation.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
-        final long min = 80L /* LabelPropagation.class */ +
+        MemoryRange actual = labelPropagation.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
+        long min = 80L /* LabelPropagation.class */ +
                          16L * concurrency /* StepRunner.class */ +
                          48L * concurrency /* InitStep.class */ +
                          56L * concurrency /* ComputeStep.class */ +
@@ -221,7 +250,7 @@ final class LabelPropagationTest {
                          56L * concurrency /* LongDoubleScatterMap.class */ +
                          (9 * 8 + 16) * concurrency /* long[] keys */ +
                          (9 * 8 + 16) * concurrency; /* double[] values */
-        final long max = 80L /* LabelPropagation.class */ +
+        long max = 80L /* LabelPropagation.class */ +
                          16L * concurrency /* StepRunner.class */ +
                          48L * concurrency /* InitStep.class */ +
                          56L * concurrency /* ComputeStep.class */ +
@@ -234,5 +263,36 @@ final class LabelPropagationTest {
 
         assertEquals(min, actual.min, "min");
         assertEquals(max, actual.max, "max");
+    }
+
+    static class ConfigBuilder {
+
+        private String seedProperty = null;
+        private String weightProperty = null;
+        private int batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
+        private int concurrency = Pools.DEFAULT_CONCURRENCY;
+
+        static Config testDefault() {
+            return new ConfigBuilder().build();
+        }
+
+        ConfigBuilder withSeedProperty(String seedProperty) {
+            this.seedProperty = seedProperty;
+            return this;
+        }
+
+        ConfigBuilder withBatchSize(int batchSize) {
+            this.batchSize = batchSize;
+            return this;
+        }
+
+        ConfigBuilder withConcurrency(int concurrency) {
+            this.concurrency = concurrency;
+            return this;
+        }
+
+        Config build() {
+            return new Config(seedProperty, weightProperty, batchSize, concurrency);
+        }
     }
 }

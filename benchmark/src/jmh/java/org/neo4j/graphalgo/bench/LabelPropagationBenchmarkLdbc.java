@@ -46,12 +46,6 @@ import org.openjdk.jmh.annotations.Warmup;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static org.neo4j.graphalgo.impl.labelprop.LabelPropagation.SEED_TYPE;
-import static org.neo4j.graphalgo.impl.labelprop.LabelPropagation.WEIGHT_TYPE;
-
-/**
- * @author mknobloch
- */
 @Threads(1)
 @Fork(value = 1, jvmArgs = {"-Xms16g", "-Xmx16g", "-XX:+UseG1GC"})
 @Warmup(iterations = 2, time = 10)
@@ -60,6 +54,9 @@ import static org.neo4j.graphalgo.impl.labelprop.LabelPropagation.WEIGHT_TYPE;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 public class LabelPropagationBenchmarkLdbc {
+
+    private static final String SEED_PROPERTY = "seed";
+    private static final String WEIGHT_PROPERTY = "weight";
 
     @Param({"15"})
     int iterations;
@@ -75,8 +72,8 @@ public class LabelPropagationBenchmarkLdbc {
                 .withAnyRelationshipType()
                 .withRelationshipProperties(PropertyMapping.of("weight", 1.0D))
                 .withOptionalNodeProperties(
-                        PropertyMapping.of(WEIGHT_TYPE, WEIGHT_TYPE, 1.0),
-                        PropertyMapping.of(SEED_TYPE, SEED_TYPE, 0.0)
+                        PropertyMapping.of(WEIGHT_PROPERTY, WEIGHT_PROPERTY, 1.0),
+                        PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, 0.0)
                 )
                 .withExecutorService(Pools.DEFAULT)
                 .load(HugeGraphFactory.class);
@@ -91,11 +88,35 @@ public class LabelPropagationBenchmarkLdbc {
     @Benchmark
     public LabelPropagation lpa() {
         return new LabelPropagation(
-                graph,
-                ParallelUtil.DEFAULT_BATCH_SIZE,
-                Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT,
-                AllocationTracker.EMPTY
+            graph,
+            new ConfigBuilder()
+                .withSeedProperty(SEED_PROPERTY)
+                .withWeightProperty(WEIGHT_PROPERTY)
+                .build(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
         ).compute(Direction.OUTGOING, iterations);
+    }
+
+    static class ConfigBuilder {
+
+        private String seedProperty = null;
+        private String weightProperty = null;
+        private int batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
+        private int concurrency = Pools.DEFAULT_CONCURRENCY;
+
+        ConfigBuilder withSeedProperty(String seedProperty) {
+            this.seedProperty = seedProperty;
+            return this;
+        }
+
+        ConfigBuilder withWeightProperty(String weightProperty) {
+            this.weightProperty = weightProperty;
+            return this;
+        }
+
+        LabelPropagation.Config build() {
+            return new LabelPropagation.Config(seedProperty, weightProperty, batchSize, concurrency);
+        }
     }
 }
