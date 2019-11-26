@@ -17,16 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package bad;
+package positive;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 
-import java.util.Map;
+@Configuration("NullableParametersConfig")
+public interface NullableParameters {
 
-@Configuration("InvalidAnnotationCombinationsConfig")
-public interface InvalidAnnotationCombinations {
-
-    @Configuration.Key("key")
     @Configuration.Parameter
-    int keyAndParamterTogetherIsNotAllowed();
+    String referenceTypesDefaultToNotNull();
+
+    @Configuration.Parameter(acceptNull = false)
+    String referenceTypesCanBeMarkedAsNotNull();
+
+    @Configuration.Parameter(acceptNull = true)
+    String referenceTypesCanBeMarkedAsNullable();
+
+    int extraValue();
 }

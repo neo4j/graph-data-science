@@ -17,35 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package good;
+package positive;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 
-import java.util.List;
-import java.util.Map;
+@Configuration("ParametersOnlyConfig")
+public interface ParametersOnly {
 
-@Configuration("FieldTypesConfig")
-public interface FieldTypes {
-
-    boolean aBoolean();
-
-    byte aByte();
-
-    short aShort();
-
-    int anInt();
-
-    long aLong();
-
-    float aFloat();
-
-    double aDouble();
-
-    Number aNumber();
-
-    String aString();
-
-    Map<String, Object> aMap();
-
-    List<Object> aList();
+    @Configuration.Parameter
+    int onlyAsParameter();
 }

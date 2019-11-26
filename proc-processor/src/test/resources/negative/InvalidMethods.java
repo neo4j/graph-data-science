@@ -17,39 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package good;
+package negative;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 
-public interface Inheritance {
-    public interface BaseConfig {
-        double inheritedValue();
+import java.util.Map;
 
-        default short inheritedDefaultValue() {
-            return 42;
-        }
+@Configuration("InvalidMethodsConfig")
+public interface InvalidMethods {
 
-        int overriddenValue();
+    char charIsNotSupported();
 
-        default long overwrittenValue() {
-            return 42;
-        }
+    void voidIsNotSupported();
 
-    }
+    int[] arraysAreNotSupported();
 
-    @Configuration("MyConfig")
-    public interface MyConfig extends BaseConfig {
-        String baseValue();
+    String parametersAreNotSupported(boolean nope);
 
-        @Override
-        default int overriddenValue() {
-            return 1337;
-        }
+    <A> A genericsAreNotSupported();
 
+    <V> Map<String, V> genericsAreNotSupported2();
 
-        @Override
-        default long overwrittenValue() {
-            return 1337;
-        }
-    }
+    int throwsDeclarationsAreNotSupported() throws Exception;
+
+    String throwsDeclarationsAreNotSupported2() throws IllegalArgumentException;
 }

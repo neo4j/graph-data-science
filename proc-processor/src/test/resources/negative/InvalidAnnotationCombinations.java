@@ -17,18 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package good;
+package negative;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 
-@Configuration("ParametersConfig")
-public interface Parameters {
+import java.util.Map;
 
+@Configuration("InvalidAnnotationCombinationsConfig")
+public interface InvalidAnnotationCombinations {
+
+    @Configuration.Key("key")
     @Configuration.Parameter
-    int keyFromParameter();
-
-    long keyFromMap();
-
-    @Configuration.Parameter
-    int parametersAreAddedFirst();
+    int keyAndParamterTogetherIsNotAllowed();
 }

@@ -17,13 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package good;
+package positive;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 
-@Configuration("ParametersOnlyConfig")
-public interface ParametersOnly {
+@Configuration("ParametersConfig")
+public interface Parameters {
 
     @Configuration.Parameter
-    int onlyAsParameter();
+    int keyFromParameter();
+
+    long keyFromMap();
+
+    @Configuration.Parameter
+    int parametersAreAddedFirst();
 }

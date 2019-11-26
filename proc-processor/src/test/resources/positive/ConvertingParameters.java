@@ -17,16 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package good;
+package positive;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 
-@Configuration("KeyRenamesConfig")
-public interface KeyRenames {
+@Configuration("ConvertingParametersConfig")
+public interface ConvertingParameters {
 
-    @Configuration.Key("key could also be an invalid identifier")
-    int lookupUnderAnotherKey();
+    @Configuration.ConvertWith("toInt")
+    @Configuration.Parameter
+    int parametersAreSubjectToConversion();
 
-    @Configuration.Key("     whitespace will be trimmed    ")
-    int whitespaceWillBeTrimmed();
+    static int toInt(String input) {
+        return Integer.parseInt(input);
+    }
 }

@@ -17,18 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package good;
+package negative;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 
-@Configuration("DefaultValuesConfig")
-public interface DefaultValues {
+@Configuration("InvalidConversionsClassesConfig")
+public interface InvalidConversionsClasses {
 
-    default int defaultInt() {
+    @Configuration.ConvertWith("")
+    int emptyConverter();
+
+    @Configuration.ConvertWith("multipleOverloads")
+    int multi();
+
+    static int multipleOverloads(String input) {
         return 42;
     }
 
-    default String defaultString() {
-        return "foo";
+    static int multipleOverloads(long input) {
+        return 42;
     }
+
+    @Configuration.ConvertWith("negative.class.does.not.exist#foo")
+    int classDoesNotExist();
+
+    @Configuration.ConvertWith("methodDoesNotExist")
+    int converterMethodDoesNotExist();
+
+    @Configuration.ConvertWith("negative.InvalidConversionsClasses#methodDoesNotExist")
+    int fullQualifiedConverterMethodDoesNotExist();
+
+    @Configuration.ConvertWith("negative.InvalidConversionsClasses#")
+    int missingMethodName();
 }

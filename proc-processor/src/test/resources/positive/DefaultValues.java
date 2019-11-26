@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package good;
+package positive;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 
-@Configuration("NamingConflictConfig")
-public interface NamingConflict {
+@Configuration("DefaultValuesConfig")
+public interface DefaultValues {
 
-    int config();
+    default int defaultInt() {
+        return 42;
+    }
 
-    @Configuration.Key("config")
-    int anotherConfig();
-
-    @Configuration.Parameter
-    int config_();
+    default String defaultString() {
+        return "foo";
+    }
 }

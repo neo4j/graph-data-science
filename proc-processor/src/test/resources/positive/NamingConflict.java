@@ -17,18 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package good;
+
+package positive;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 
-@Configuration("ConvertingParametersConfig")
-public interface ConvertingParameters {
+@Configuration("NamingConflictConfig")
+public interface NamingConflict {
 
-    @Configuration.ConvertWith("toInt")
+    int config();
+
+    @Configuration.Key("config")
+    int anotherConfig();
+
     @Configuration.Parameter
-    int parametersAreSubjectToConversion();
-
-    static int toInt(String input) {
-        return Integer.parseInt(input);
-    }
+    int config_();
 }

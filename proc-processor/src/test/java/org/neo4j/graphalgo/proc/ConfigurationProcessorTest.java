@@ -62,9 +62,9 @@ class ConfigurationProcessorTest {
         "Conversions",
         "ConvertingParameters"
     })
-    void goodTest(String className) {
+    void positiveTest(String className) {
         assertAbout(javaSource())
-            .that(forResource(String.format("good/%s.java", className)))
+            .that(forResource(String.format("positive/%s.java", className)))
             .processedWith(new ConfigurationProcessor())
             .compilesWithoutError()
             .and()
@@ -73,7 +73,7 @@ class ConfigurationProcessorTest {
 
     @Test
     void baseClassMustBeAnInterface() {
-        runBadTest(
+        runNegativeTest(
             "BaseClassIsNotAnInterface",
             e(
                 "The annotated configuration must be an interface.",
@@ -85,7 +85,7 @@ class ConfigurationProcessorTest {
 
     @Test
     void failOnUnsupportedMethods() {
-        runBadTest(
+        runNegativeTest(
             "InvalidMethods",
             e("Unsupported return type: char", 29, 10),
             e("Unsupported return type: void", 31, 10),
@@ -100,7 +100,7 @@ class ConfigurationProcessorTest {
 
     @Test
     void emptyKeyIsNotAllowed() {
-        runBadTest(
+        runNegativeTest(
             "EmptyKey",
             e("The key must not be empty", 28, 9),
             e("The key must not be empty", 31, 9)
@@ -109,7 +109,7 @@ class ConfigurationProcessorTest {
 
     @Test
     void invalidAnnotationCombinations() {
-        runBadTest(
+        runNegativeTest(
             "InvalidAnnotationCombinations",
             e("The `@Parameter` annotation cannot be used together with the `@Key` annotation", 31, 9)
         );
@@ -117,22 +117,22 @@ class ConfigurationProcessorTest {
 
     @Test
     void invalidConversionsClassTargets() {
-        runBadTest(
+        runNegativeTest(
             "InvalidConversionsClasses",
             e("Empty conversion method is not allowed", 27, 5),
             e("Multiple possible candidates found: [multipleOverloads(java.lang.String), multipleOverloads(long)]", 30, 5),
             e("Method is ambiguous and a possible candidate for [multipleOverloads]", 33, 16),
             e("Method is ambiguous and a possible candidate for [multipleOverloads]", 37, 16),
-            e("[bad.class.does.not.exist#foo] is not a valid fully qualified method name: The class [bad.class.does.not.exist] cannot be found", 41, 5),
+            e("[negative.class.does.not.exist#foo] is not a valid fully qualified method name: The class [negative.class.does.not.exist] cannot be found", 41, 5),
             e("No suitable method found that matches [methodDoesNotExist]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int]", 44, 5),
-            e("No suitable method found that matches [bad.InvalidConversionsClasses#methodDoesNotExist]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int]", 47, 5),
-            e("[bad.InvalidConversionsClasses#] is not a valid fully qualified method name: it must start with a fully qualified class name followed by a '#' and then the method name", 50, 5)
+            e("No suitable method found that matches [negative.InvalidConversionsClasses#methodDoesNotExist]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int]", 47, 5),
+            e("[negative.InvalidConversionsClasses#] is not a valid fully qualified method name: it must start with a fully qualified class name followed by a '#' and then the method name", 50, 5)
         );
     }
 
     @Test
     void invalidConversionsMethodTargets() {
-        runBadTest(
+        runNegativeTest(
             "InvalidConversionsMethods",
             e("No suitable method found that matches [nonStatic]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int]", 27, 5),
             e("Must be static", 31, 17),
@@ -152,15 +152,15 @@ class ConfigurationProcessorTest {
             e("Must return a type that is assignable to int", 87, 19),
             e("No suitable method found that matches [invalidReturnType4]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int]", 92, 5),
             e("Must return a type that is assignable to int", 95, 17),
-            e("No suitable method found that matches [bad.InvalidConversionsMethods.Inner#privateMethod]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int]", 99, 5),
+            e("No suitable method found that matches [negative.InvalidConversionsMethods.Inner#privateMethod]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int]", 99, 5),
             e("Must be public", 106, 28),
-            e("No suitable method found that matches [bad.InvalidConversionsMethods.Inner#packagePrivateMethod]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int]", 102, 5),
+            e("No suitable method found that matches [negative.InvalidConversionsMethods.Inner#packagePrivateMethod]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int]", 102, 5),
             e("Must be public", 110, 20)
         );
     }
 
-    private void runBadTest(String className, ErrorCheck... expectations) {
-        JavaFileObject file = forResource(String.format("bad/%s.java", className));
+    private void runNegativeTest(String className, ErrorCheck... expectations) {
+        JavaFileObject file = forResource(String.format("negative/%s.java", className));
 
         CompileTester.UnsuccessfulCompilationClause clause = assertAbout(javaSource())
             .that(file)

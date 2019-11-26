@@ -17,28 +17,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package bad;
+package positive;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 
+import java.util.List;
 import java.util.Map;
 
-@Configuration("InvalidMethodsConfig")
-public interface InvalidMethods {
+@Configuration("FieldTypesConfig")
+public interface FieldTypes {
 
-    char charIsNotSupported();
+    boolean aBoolean();
 
-    void voidIsNotSupported();
+    byte aByte();
 
-    int[] arraysAreNotSupported();
+    short aShort();
 
-    String parametersAreNotSupported(boolean nope);
+    int anInt();
 
-    <A> A genericsAreNotSupported();
+    long aLong();
 
-    <V> Map<String, V> genericsAreNotSupported2();
+    float aFloat();
 
-    int throwsDeclarationsAreNotSupported() throws Exception;
+    double aDouble();
 
-    String throwsDeclarationsAreNotSupported2() throws IllegalArgumentException;
+    Number aNumber();
+
+    String aString();
+
+    Map<String, Object> aMap();
+
+    List<Object> aList();
 }

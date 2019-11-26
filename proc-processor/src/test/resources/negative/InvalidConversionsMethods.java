@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package bad;
+package negative;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 
@@ -96,10 +96,10 @@ public interface InvalidConversionsMethods {
     }
 
 
-    @Configuration.ConvertWith("bad.InvalidConversionsMethods.Inner#privateMethod")
+    @Configuration.ConvertWith("negative.InvalidConversionsMethods.Inner#privateMethod")
     int foo10();
 
-    @Configuration.ConvertWith("bad.InvalidConversionsMethods.Inner#packagePrivateMethod")
+    @Configuration.ConvertWith("negative.InvalidConversionsMethods.Inner#packagePrivateMethod")
     int foo11();
 
     abstract class Inner {
