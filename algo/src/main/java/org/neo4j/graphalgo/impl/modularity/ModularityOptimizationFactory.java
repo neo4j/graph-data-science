@@ -44,9 +44,8 @@ public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOp
 
     public static final int DEFAULT_MAX_ITERATIONS = 10;
 
-    @Override
-    public MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.builder(ModularityOptimization.class)
+    public static final MemoryEstimation MEMORY_ESTIMATION =
+        MemoryEstimations.builder(ModularityOptimization.class)
             .perNode("currentCommunities", HugeLongArray::memoryEstimation)
             .perNode("nextCommunities", HugeLongArray::memoryEstimation)
             .perNode("cumulativeNodeWeights", HugeDoubleArray::memoryEstimation)
@@ -60,7 +59,8 @@ public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOp
             )
             .perNode("communityWeightUpdates", HugeAtomicDoubleArray::memoryEstimation)
             .perThread("ModularityOptimizationTask", MemoryEstimations.builder()
-                .rangePerNode("communityInfluences",
+                .rangePerNode(
+                    "communityInfluences",
                     (nodeCount) -> MemoryRange.of(
                         MemoryUsage.sizeOfLongDoubleHashMap(50),
                         MemoryUsage.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
@@ -69,6 +69,10 @@ public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOp
                 .build()
             )
             .build();
+
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        return MEMORY_ESTIMATION;
     }
 
     @Override

@@ -176,8 +176,8 @@ public final class Louvain extends Algorithm<Louvain> {
 
         workingGraph.forEachNode((nodeId) -> {
             long communityId = modularityOptimization.getCommunityId(nodeId);
-            workingGraph.forEachRelationship(nodeId, direction, 1.0, (source, target, weight) -> {
-                relImporter.add(communityId, modularityOptimization.getCommunityId(target), weight);
+            workingGraph.forEachRelationship(nodeId, direction, 1.0, (source, target, property) -> {
+                relImporter.add(communityId, modularityOptimization.getCommunityId(target), property);
                 return true;
             });
             return true;

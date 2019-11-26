@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.cursors.LongCursor;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -47,7 +46,7 @@ import java.util.concurrent.atomic.LongAdder;
 public class SubGraphGenerator {
 
     public static NodeImporter create(
-        long oldNodeCount,
+        long superGraphNodeCount,
         long maxCommunityId,
         Direction direction,
         boolean undirected,
@@ -55,7 +54,7 @@ public class SubGraphGenerator {
         AllocationTracker tracker
     ) {
         return new NodeImporter(
-            oldNodeCount,
+            superGraphNodeCount,
             maxCommunityId,
             direction,
             undirected,
@@ -66,16 +65,17 @@ public class SubGraphGenerator {
 
     static class NodeImporter {
 
-        private final SparseNodeMapping.Builder neoToInternalBuilder;
-        private Direction direction;
         private final boolean undirected;
-        private boolean loadRelationshipProperty;
-        private final AllocationTracker tracker;
-        private final MutableLong nextAvailableId;
+        private final boolean loadRelationshipProperty;
         private final BitSet seenNeoIds;
+        private final Direction direction;
+        private final AllocationTracker tracker;
+        private final SparseNodeMapping.Builder neoToInternalBuilder;
+
+        private long nextAvailableId;
 
         NodeImporter(
-            long oldNodeCount,
+            long superGraphNodeCount,
             long maxCommunityId,
             Direction direction,
             boolean undirected,
@@ -88,13 +88,13 @@ public class SubGraphGenerator {
             this.tracker = tracker;
 
             this.neoToInternalBuilder = SparseNodeMapping.Builder.create(maxCommunityId, tracker);
-            this.nextAvailableId = new MutableLong(0);
-            seenNeoIds = new BitSet(Math.min(maxCommunityId, oldNodeCount));
+            this.nextAvailableId = 0;
+            seenNeoIds = new BitSet(Math.min(maxCommunityId, superGraphNodeCount));
         }
 
         void addNode(long originalId) {
             if (!seenNeoIds.get(originalId)) {
-                neoToInternalBuilder.set(originalId, nextAvailableId.getAndIncrement());
+                neoToInternalBuilder.set(originalId, nextAvailableId++);
                 seenNeoIds.set(originalId);
             }
         }
@@ -102,7 +102,7 @@ public class SubGraphGenerator {
         RelImporter build() {
             SparseNodeMapping neoToInternal = neoToInternalBuilder.build();
 
-            HugeLongArray internalToNeo = HugeLongArray.newArray(nextAvailableId.getValue(), tracker);
+            HugeLongArray internalToNeo = HugeLongArray.newArray(nextAvailableId, tracker);
             for (LongCursor nodeId : seenNeoIds.asLongLookupContainer()) {
                 internalToNeo.set(neoToInternal.get(nodeId.value), nodeId.value);
             }
