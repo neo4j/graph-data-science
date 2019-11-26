@@ -20,12 +20,12 @@
 
 package org.neo4j.graphalgo.impl.nodesim;
 
-import org.neo4j.graphalgo.core.loading.RelationshipStreamBuilder;
+import org.neo4j.graphalgo.core.loading.GraphGenerator;
 
 import java.util.Comparator;
 import java.util.Objects;
 
-public class SimilarityResult implements Comparable<SimilarityResult>, RelationshipStreamBuilder.Relationship {
+public class SimilarityResult implements Comparable<SimilarityResult>, GraphGenerator.Relationship {
 
     static Comparator<SimilarityResult> ASCENDING = SimilarityResult::compareTo;
     static Comparator<SimilarityResult> DESCENDING = ASCENDING.reversed();

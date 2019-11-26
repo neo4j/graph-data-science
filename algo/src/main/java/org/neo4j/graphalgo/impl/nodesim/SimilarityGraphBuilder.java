@@ -21,18 +21,24 @@
 package org.neo4j.graphalgo.impl.nodesim;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.RelationshipStreamBuilder;
+import org.neo4j.graphalgo.core.loading.GraphGenerator;
+import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 class SimilarityGraphBuilder {
+
+    private final ExecutorService executorService;
+    private final AllocationTracker tracker;
 
     static MemoryEstimation memoryEstimation(int topK, int topN) {
         return MemoryEstimations.setup("", (dimensions, concurrency) -> {
@@ -69,19 +75,35 @@ class SimilarityGraphBuilder {
     }
 
     private final HugeGraph baseGraph;
-    private final RelationshipStreamBuilder relationshipStreamBuilder;
 
-    SimilarityGraphBuilder(Graph baseGraph, ExecutorService executorService, AllocationTracker tracker) {
+    SimilarityGraphBuilder(
+        Graph baseGraph,
+        ExecutorService executorService,
+        AllocationTracker tracker
+    ) {
+        this.executorService = executorService;
+        this.tracker = tracker;
+
         if (baseGraph instanceof HugeGraph) {
             this.baseGraph = (HugeGraph) baseGraph;
         } else {
             throw new IllegalArgumentException("Base graph must be a huge graph.");
         }
-
-        this.relationshipStreamBuilder = new RelationshipStreamBuilder(baseGraph, executorService, tracker);
     }
 
     Graph build(Stream<SimilarityResult> stream) {
-        return HugeGraph.create(baseGraph, relationshipStreamBuilder.loadRelationships(stream), false);
+        IdMap idMap = baseGraph.idMapping();
+        GraphGenerator.RelImporter relImporter = new GraphGenerator.RelImporter(
+            idMap,
+            Direction.OUTGOING,
+            baseGraph.isUndirected(),
+            true,
+            DeduplicationStrategy.NONE,
+            executorService,
+            tracker
+        );
+        relImporter.addFromInternal(stream);
+
+        return relImporter.build();
     }
 }
