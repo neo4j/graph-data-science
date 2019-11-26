@@ -99,12 +99,11 @@ class NonStabilizingLabelPropagationTest {
     void testLabelPropagationDoesStabilize(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl);
         LabelPropagation labelPropagation = new LabelPropagation(
-                graph,
-                new LabelPropagationTest.ConfigBuilder()
-                .withBatchSize(ParallelUtil.DEFAULT_BATCH_SIZE)
-                .build(),
-                Pools.DEFAULT,
-                AllocationTracker.EMPTY);
+            graph,
+            LabelPropagationTest.ConfigBuilder.testDefault(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
         LabelPropagation compute = labelPropagation.compute(Direction.OUTGOING, 10);
         compute.labels();
         assertTrue(compute.didConverge(), "Should converge");
