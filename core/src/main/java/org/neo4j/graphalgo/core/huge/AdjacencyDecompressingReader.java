@@ -104,16 +104,15 @@ final class AdjacencyDecompressingReader {
         }
 
         // last block
+        if(available <= 0) {
+            return AdjacencyList.DecompressingCursor.NOT_FOUND;
+        }
+
         int targetPos = findPosStrictlyGreaterInBlock(target, pos, Math.min(pos + available, CHUNK_SIZE), block);
         // we need to consume including targetPos, not to it, therefore +1
         available -= (1 + targetPos - pos);
         consumed.value = remaining - available;
         this.pos = 1 + targetPos;
-
-        if(targetPos < 0) {
-            return targetPos;
-        }
-
         return block[targetPos];
     }
 

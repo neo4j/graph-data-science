@@ -209,6 +209,7 @@ public final class AdjacencyList {
 
     public static final class DecompressingCursor extends MutableIntValue {
 
+        public static final long NOT_FOUND = -1;
         // TODO: free
         private byte[][] pages;
         private final AdjacencyDecompressingReader decompress;
@@ -282,7 +283,11 @@ public final class AdjacencyList {
          * will return {@code false}
          */
         long advance(long target) {
-            long value = decompress.advance(target, remaining(), this);
+            int targetsLeftToBeDecoded = remaining();
+            if(targetsLeftToBeDecoded <= 0) {
+                return NOT_FOUND;
+            }
+            long value = decompress.advance(target, targetsLeftToBeDecoded, this);
             this.currentTarget += this.value;
             return value;
         }

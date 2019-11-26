@@ -36,10 +36,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsIterableContaining.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class IntersectingTriangleCountTest {
+class IntersectingTriangleCountTest {
 
     @Test
-    public void noTriangles() {
+    void noTriangles() {
         long[] inputs = new long[]{1, 2};
         IdMap idMap = createIdMap(inputs);
         IdsAndProperties nodes = new IdsAndProperties(idMap, Collections.emptyMap());
@@ -62,7 +62,7 @@ public class IntersectingTriangleCountTest {
     }
 
     @Test
-    public void noRelationships() {
+    void noRelationships() {
         long[] inputs = new long[]{1, 2};
         IdMap idMap = createIdMap(inputs);
         IdsAndProperties nodes = new IdsAndProperties(idMap, Collections.emptyMap());
@@ -83,7 +83,7 @@ public class IntersectingTriangleCountTest {
     }
 
     @Test
-    public void oneTriangle() {
+    void oneTriangle() {
         long[] inputs = new long[]{1, 2, 3};
         IdMap idMap = createIdMap(inputs);
         IdsAndProperties nodes = new IdsAndProperties(idMap, Collections.emptyMap());
