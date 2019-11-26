@@ -110,8 +110,6 @@ public class PageRank extends Algorithm<PageRank> {
     private final int batchSize;
     private final AllocationTracker tracker;
     private final IdMapping idMapping;
-    private final NodeIterator nodeIterator;
-    private final Degrees degrees;
     private final double dampingFactor;
     private final int maxIterations;
     private int ranIterations;
@@ -167,8 +165,6 @@ public class PageRank extends Algorithm<PageRank> {
         this.batchSize = batchSize;
         this.tracker = tracker;
         this.idMapping = graph;
-        this.nodeIterator = graph;
-        this.degrees = graph;
         this.graph = graph;
         this.dampingFactor = algoConfig.dampingFactor;
         this.maxIterations = algoConfig.iterations;

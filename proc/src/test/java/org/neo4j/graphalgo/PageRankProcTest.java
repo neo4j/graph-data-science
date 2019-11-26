@@ -368,28 +368,31 @@ class PageRankProcTest extends ProcTestBase {
         String query;
         query = "CALL algo.pageRank(" +
                 "    'Label1', 'TYPE1', {" +
-                "        tolerance: 0.0001, batchSize: 3, graph: $graph" +
+                "        tolerance: 0.0001, batchSize: 2, graph: $graph" +
                 "     }" +
                 ") YIELD nodes, iterations";
         runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> assertEquals(20L, (long) row.getNumber("iterations")));
+
         query = "CALL algo.pageRank(" +
                 "    'Label1', 'TYPE1', {" +
-                "        tolerance: 100.0, batchSize: 3, graph: $graph" +
+                "        tolerance: 100.0, batchSize: 2, graph: $graph" +
                 "    }" +
                 ") YIELD nodes, iterations";
         runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> assertEquals(1L, (long) row.getNumber("iterations")));
+
         query = "CALL algo.pageRank(" +
                 "    'Label1', 'TYPE1', {" +
-                "        tolerance: 0.20010237991809848, batchSize: 3, graph: $graph" +
+                "        tolerance: 0.20010237991809848, batchSize: 2, graph: $graph" +
                 "    }" +
                 ") YIELD nodes, iterations";
         runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> assertEquals(4L, (long) row.getNumber("iterations")));
+
         query = "CALL algo.pageRank(" +
                 "    'Label1', 'TYPE1', {" +
-                "        tolerance: 0.20010237991809843, batchSize: 3, graph: $graph" +
+                "        tolerance: 0.20010237991809843, batchSize: 2, graph: $graph" +
                 "    }" +
                 ") YIELD nodes, iterations";
         runQuery(query, MapUtil.map("graph", graphImpl),
