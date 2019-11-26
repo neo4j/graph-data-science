@@ -37,11 +37,11 @@ import org.neo4j.graphalgo.impl.similarity.AnnTopKConsumer;
 import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 
-class HugeRelationshipsBuilder {
+public class HugeRelationshipsBuilder {
     private final IdMap idMap;
     private final RelationshipBuilder relationshipBuilder;
 
-    HugeRelationshipsBuilder(final IdsAndProperties nodes) {
+    public HugeRelationshipsBuilder(final IdsAndProperties nodes) {
         this.idMap = nodes.idMap();
         this.relationshipBuilder = new RelationshipBuilder(nodes.idMap());
     }
@@ -50,12 +50,12 @@ class HugeRelationshipsBuilder {
         return relationshipBuilder.build();
     }
 
-    HugeRelationshipsBuilderWithBuffer withBuffer() {
+    public HugeRelationshipsBuilderWithBuffer withBuffer() {
         RelationshipsBatchBuffer relBuffer = new RelationshipsBatchBuffer(idMap, -1, 10_000);
         return new HugeRelationshipsBuilderWithBuffer(idMap, relationshipBuilder, relBuffer);
     }
 
-    static class HugeRelationshipsBuilderWithBuffer {
+    public static class HugeRelationshipsBuilderWithBuffer {
         private final RelationshipBuilder builder;
         private final RelationshipsBatchBuffer buffer;
         private final IdMap idMap;
@@ -69,7 +69,7 @@ class HugeRelationshipsBuilder {
             this.buffer = buffer;
         }
 
-        void addRelationship(long source, long target) {
+        public void addRelationship(long source, long target) {
             add(source, target);
         }
 
@@ -99,7 +99,7 @@ class HugeRelationshipsBuilder {
         }
 
 
-        Relationships build() {
+        public Relationships build() {
             flushAll();
             return builder.build();
         }

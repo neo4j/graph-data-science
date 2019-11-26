@@ -53,7 +53,7 @@ public class ANNUtils {
         }
     }
 
-    static HugeGraph hugeGraph(IdsAndProperties nodes, Relationships hugeRels) {
+    public static HugeGraph hugeGraph(IdsAndProperties nodes, Relationships hugeRels) {
         return HugeGraph.create(
                 AllocationTracker.EMPTY,
                 nodes.idMap(),

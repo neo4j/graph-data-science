@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
@@ -190,5 +191,19 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
                     '}';
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Result result = (Result) o;
+            return nodeId == result.nodeId &&
+                    triangles == result.triangles &&
+                    Double.compare(result.coefficient, coefficient) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(nodeId, triangles, coefficient);
+        }
     }
 }
