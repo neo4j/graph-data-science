@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphdb.Node;
 import org.neo4j.logging.Log;
 
@@ -79,10 +80,10 @@ public class PageRankFactory extends AlgorithmFactory<PageRank> {
                     // adjust concurrency, if necessary
                     long nodeCount = dimensions.nodeCount();
                     long nodesPerThread = ceilDiv(nodeCount, concurrency);
-                    if (nodesPerThread > PageRank.Partition.MAX_NODE_COUNT) {
-                        concurrency = (int) ceilDiv(nodeCount, PageRank.Partition.MAX_NODE_COUNT);
+                    if (nodesPerThread > Partition.MAX_NODE_COUNT) {
+                        concurrency = (int) ceilDiv(nodeCount, Partition.MAX_NODE_COUNT);
                         nodesPerThread = ceilDiv(nodeCount, concurrency);
-                        while (nodesPerThread > PageRank.Partition.MAX_NODE_COUNT) {
+                        while (nodesPerThread > Partition.MAX_NODE_COUNT) {
                             concurrency++;
                             nodesPerThread = ceilDiv(nodeCount, concurrency);
                         }
