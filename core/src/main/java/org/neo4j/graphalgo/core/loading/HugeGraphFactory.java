@@ -62,7 +62,11 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
     }
 
     public static MemoryEstimation getMemoryEstimation(GraphSetup setup, GraphDimensions dimensions) {
-        return getMemoryEstimation(setup.loadOutgoing, setup.loadIncoming, setup.loadAsUndirected, dimensions, false);
+        return getMemoryEstimation(setup, dimensions, false);
+    }
+
+    public static MemoryEstimation getMemoryEstimation(GraphSetup setup, GraphDimensions dimensions, boolean nonExistingGraph) {
+        return getMemoryEstimation(setup.loadOutgoing, setup.loadIncoming, setup.loadAsUndirected, dimensions, nonExistingGraph);
     }
 
     public static MemoryEstimation getMemoryEstimation(
