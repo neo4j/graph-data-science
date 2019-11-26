@@ -103,8 +103,8 @@ final class GenerateConfiguration {
     }
 
     private TypeSpec.Builder classBuilder(ConfigParser.Spec config, String packageName, String generatedClassName) {
-        TypeSpec.Builder classBuilder = createNewClass(config, packageName, generatedClassName);
-        inheritFrom(classBuilder, config);
+        TypeSpec.Builder classBuilder = createNewClass(config, packageName, generatedClassName)
+            .addSuperinterface(TypeName.get(config.rootType()));
         addGeneratedAnnotation(classBuilder);
         return classBuilder;
     }
@@ -114,10 +114,6 @@ final class GenerateConfiguration {
             .classBuilder(ClassName.get(packageName, generatedClassName))
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .addOriginatingElement(config.root());
-    }
-
-    private void inheritFrom(TypeSpec.Builder classBuilder, ConfigParser.Spec config) {
-        classBuilder.addSuperinterface(TypeName.get(config.rootType()));
     }
 
     private void addGeneratedAnnotation(TypeSpec.Builder classBuilder) {
