@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestGraph;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithMultipleRelTypeSupportTest;
@@ -50,8 +49,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import static org.neo4j.graphalgo.GraphHelper.assertOutProperties;
-import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.DEFAULT;
@@ -77,20 +76,10 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     private GraphDatabaseAPI db;
 
-    private long id1;
-    private long id2;
-    private long id3;
-
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
-    }
-
-    private void initDatabase() {
         db.execute(DB_CYPHER);
-        id1 = db.execute("MATCH (n:Node1) RETURN id(n) AS id").<Long>columnAs("id").next();
-        id2 = db.execute("MATCH (n:Node2) RETURN id(n) AS id").<Long>columnAs("id").next();
-        id3 = db.execute("MATCH (n:Node3) RETURN id(n) AS id").<Long>columnAs("id").next();
     }
 
     @AfterEach
@@ -100,13 +89,11 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     void testLoadDuplicateRelationships(Class<? extends GraphFactory> graphFactory) {
-        initDatabase();
-
         Graph graph = TestGraphLoader.from(db)
             .withDeduplicationStrategy(DeduplicationStrategy.NONE)
             .buildGraph(graphFactory);
 
-        Graph expected = TestGraph.Builder.fromGdl(
+        Graph expected = fromGdl(
             "(n1)" +
             "(n2)" +
             "(n3)" +
@@ -121,13 +108,12 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     void testLoadDuplicateRelationshipsWithWeightsOnCypher(Class<? extends GraphFactory> graphFactory) {
-        initDatabase();
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .withDeduplicationStrategy(NONE)
             .buildGraph(graphFactory);
 
-        Graph expected = TestGraph.Builder.fromGdl(
+        Graph expected = fromGdl(
             "(n1)" +
             "(n2)" +
             "(n3)" +
@@ -155,14 +141,12 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         DeduplicationStrategy deduplicationStrategy,
         double expectedWeight
     ) {
-        initDatabase();
-
         Graph graph = TestGraphLoader.from(db)
             .withDeduplicationStrategy(deduplicationStrategy)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .buildGraph(graphFactory);
 
-        Graph expected = TestGraph.Builder.fromGdl(String.format(
+        Graph expected = fromGdl(String.format(
             "(n1)" +
             "(n2)" +
             "(n3)" +
@@ -176,8 +160,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     void testLoadDuplicateRelationshipsWithWeightsAggregation(Class<? extends GraphFactory> graphFactory) {
-        initDatabase();
-
         Graph graph = TestGraphLoader.from(db)
             .withDeduplicationStrategy(SKIP)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
@@ -191,8 +173,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             "(n1)-[{weight: 1.0d}]->(n3)" +
             "(n2)-[{weight: %fd}]->(n3)";
 
-        Graph expected1 = TestGraph.Builder.fromGdl(String.format(expectedGraph, 42.0));
-        Graph expected2 = TestGraph.Builder.fromGdl(String.format(expectedGraph, 1337.0));
+        Graph expected1 = fromGdl(String.format(expectedGraph, 42.0));
+        Graph expected2 = fromGdl(String.format(expectedGraph, 1337.0));
         TestSupport.assertGraphEquals(Arrays.asList(expected1, expected2), graph);
     }
 
@@ -200,8 +182,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     <T extends GraphFactory & MultipleRelTypesSupport>
     void testLoadMultipleRelationships(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        initDatabase();
-
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
             .withRelationshipType("REL1 | REL2")
             .buildGraphs(graphFactory);
@@ -213,17 +193,15 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         Graph rel2Graph = graphs.getGraph("REL2");
         Graph unionGraph = graphs.getGraph("REL1 | REL2");
 
-        assertOutRelationships(rel1Graph, id1, id2);
-        assertOutRelationships(rel2Graph, id1, id3);
-        assertOutRelationships(unionGraph, id1, id2, id3);
+        assertGraphEquals(fromGdl("(a)-->(b)-->(c)"), rel1Graph);
+        assertGraphEquals(fromGdl("(a)-->(c), (b)"), rel2Graph);
+        assertGraphEquals(fromGdl("(a)-->(b)-->(c)<--(a)"), unionGraph);
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport>
     void testLoadMultipleRelationshipsWithWeights(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        initDatabase();
-
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
             .withRelationshipType("REL1 | REL2")
             .withRelationshipProperties(PropertyMapping.of("prop1", 42D))
@@ -236,14 +214,15 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         Graph rel2Graph = graphs.getGraph("REL2");
         Graph unionGraph = graphs.getGraph("REL1 | REL2");
 
-        assertOutProperties(rel1Graph, id1, 1D);
-        assertOutProperties(rel2Graph, id1, 42D);
-        assertOutProperties(unionGraph, id1, 1D, 42D);
+        assertGraphEquals(fromGdl("(a)-[{w: 1.0d}]->(b)-[{w: 42.0d}]->(c)"), rel1Graph);
+        assertGraphEquals(fromGdl("(a)-[{w: 42.0d}]->(c), (b)"), rel2Graph);
+        assertGraphEquals(fromGdl("(a)-[{w: 1.0d}]->(b)-[{w: 42.0d}]->(c)<-[{w: 42.0d}]-(a)"), unionGraph);
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelProperties(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
+        db = TestDatabaseCreator.createTestDatabase();
         db.execute(
             "CREATE" +
             "  (a:Node)" +
@@ -266,31 +245,41 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
-        Graph p1 = graphs.getGraph("", Optional.of("agg1"));
-        assertEquals(4L, p1.nodeCount());
-        assertOutProperties(p1, 0, 42, 43, 44);
-        assertOutProperties(p1, 1, 45, 46);
-        assertOutProperties(p1, 2);
-        assertOutProperties(p1, 3);
+        Graph p1Graph = graphs.getGraph("", Optional.of("agg1"));
+        Graph expectedP1Graph = fromGdl(
+            "(a)-[{w: 42}]->(a)" +
+            "(a)-[{w: 43}]->(a)" +
+            "(a)-[{w: 44}]->(b)" +
+            "(b)-[{w: 45}]->(c)" +
+            "(b)-[{w: 46}]->(d)"
+        );
+        assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2 = graphs.getGraph("", Optional.of("agg2"));
-        assertEquals(4L, p2.nodeCount());
-        assertOutProperties(p2, 0, 1337, 1338, 1339);
-        assertOutProperties(p2, 1, 1340, 1341);
-        assertOutProperties(p2, 2);
-        assertOutProperties(p2, 3);
+        Graph p2Graph = graphs.getGraph("", Optional.of("agg2"));
+        Graph expectedP2Graph = fromGdl(
+            "(a)-[{w: 1337}]->(a)" +
+            "(a)-[{w: 1338}]->(a)" +
+            "(a)-[{w: 1339}]->(b)" +
+            "(b)-[{w: 1340}]->(c)" +
+            "(b)-[{w: 1341}]->(d)"
+        );
+        assertGraphEquals(expectedP2Graph, p2Graph);
 
-        Graph p3 = graphs.getGraph("", Optional.of("agg3"));
-        assertEquals(4L, p3.nodeCount());
-        assertOutProperties(p3, 0, 2, 10, 10);
-        assertOutProperties(p3, 1, 10, 10);
-        assertOutProperties(p3, 2);
-        assertOutProperties(p3, 3);
+        Graph p3Graph = graphs.getGraph("", Optional.of("agg3"));
+        Graph expectedP3Graph = fromGdl(
+            "(a)-[{w: 2}]->(a)" +
+            "(a)-[{w: 10}]->(a)" +
+            "(a)-[{w: 10}]->(b)" +
+            "(b)-[{w: 10}]->(c)" +
+            "(b)-[{w: 10}]->(d)"
+        );
+        assertGraphEquals(expectedP3Graph, p3Graph);
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelPropertiesWithDefaultValues(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
+        db = TestDatabaseCreator.createTestDatabase();
         db.execute(
             "CREATE" +
             "  (a:Node)" +
@@ -310,20 +299,26 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
-        Graph p1 = graphs.getGraph("", Optional.of("agg1"));
-        assertEquals(2L, p1.nodeCount());
-        assertOutProperties(p1, 0, 1);
-        assertOutProperties(p1, 1, 1);
+        Graph p1Graph = graphs.getGraph("", Optional.of("agg1"));
+        Graph expectedP1Graph = fromGdl(
+            "(a)-[{w: 1.0d}]->(a)" +
+            "(b)-[{w: 1.0d}]->(b)"
+        );
+        assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2 = graphs.getGraph("", Optional.of("agg2"));
-        assertEquals(2L, p2.nodeCount());
-        assertOutProperties(p2, 0, 51);
-        assertOutProperties(p2, 1, 50);
+        Graph p2Graph = graphs.getGraph("", Optional.of("agg2"));
+        Graph expectedP2Graph = fromGdl(
+            "(a)-[{w: 51.0d}]->(a)" +
+            "(b)-[{w: 50.0d}]->(b)"
+        );
+        assertGraphEquals(expectedP2Graph, p2Graph);
 
-        Graph p3 = graphs.getGraph("", Optional.of("agg3"));
-        assertEquals(2L, p3.nodeCount());
-        assertOutProperties(p3, 0, 93);
-        assertOutProperties(p3, 1, 48);
+        Graph p3Graph = graphs.getGraph("", Optional.of("agg3"));
+        Graph expectedP3Graph = fromGdl(
+            "(a)-[{w: 93.0d}]->(a)" +
+            "(b)-[{w: 48.0d}]->(b)"
+        );
+        assertGraphEquals(expectedP3Graph, p3Graph);
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
@@ -363,6 +358,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multipleAggregationsFromSameProperty(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
+        db = TestDatabaseCreator.createTestDatabase();
         db.execute(
             "CREATE" +
             "  (a:Node)" +
@@ -382,20 +378,25 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
-        Graph p1 = graphs.getGraph("", Optional.of("agg1"));
-        assertEquals(2L, p1.nodeCount());
-        assertOutProperties(p1, 0, 44);
-        assertOutProperties(p1, 1, 46);
+        Graph p1Graph = graphs.getGraph("", Optional.of("agg1"));
+        Graph expectedP1Graph = fromGdl(
+            "(a)-[{w: 44.0d}]->(a)" +
+            "(b)-[{w: 46.0d}]->(b)"
+        );
+        assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2 = graphs.getGraph("", Optional.of("agg2"));
-        assertEquals(2L, p2.nodeCount());
-        assertOutProperties(p2, 0, 42);
-        assertOutProperties(p2, 1, 45);
+        Graph p2Graph = graphs.getGraph("", Optional.of("agg2"));
+        Graph expectedP2Graph = fromGdl(
+            "(a)-[{w: 42.0d}]->(a)" +
+            "(b)-[{w: 45.0d}]->(b)"
+        );
+        assertGraphEquals(expectedP2Graph, p2Graph);
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelTypesWithSameProperty(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
+        db = TestDatabaseCreator.createTestDatabase();
         db.execute(
             "CREATE" +
             "  (a:Node)" +
@@ -413,17 +414,19 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
-        Graph g = graphs.getGraph("", Optional.of("agg"));
-        assertEquals(1L, g.nodeCount());
-        assertEquals(3L, g.relationshipCount());
-        assertOutProperties(g, 0, 42, 44, 84);
+        Graph graph = graphs.getGraph("", Optional.of("agg"));
+        assertEquals(3L, graph.relationshipCount());
+        Graph expectedGraph = fromGdl(
+            "(a)-[{w: 42.0d}]->(a)" +
+            "(a)-[{w: 44.0d}]->(a)" +
+            "(a)-[{w: 84.0d}]->(a)"
+        );
+        assertGraphEquals(expectedGraph, graph);
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelTypeGraphsCanBeReleased(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        initDatabase();
-
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
             .withRelationshipType("REL1 | REL2")
             .buildGraphs(graphFactory);
@@ -449,7 +452,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelTypeGraphsGiveCorrectElementCounts(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        initDatabase();
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
             .withRelationshipType("REL1 | REL2 | REL3")
             .withDirection(OUTGOING)
@@ -512,6 +514,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         double expectedNodeBP2
     ) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
+        db = TestDatabaseCreator.createTestDatabase();
         db.execute("" +
                    "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
                    "CREATE" +
@@ -530,15 +533,25 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
-        Graph p1 = graphs.getGraph("", Optional.of("p1"));
-        assertEquals(4L, p1.nodeCount());
-        assertOutProperties(p1, 0, expectedNodeAP1);
-        assertOutProperties(p1, 1, expectedNodeBP1);
+        Graph p1Graph = graphs.getGraph("", Optional.of("p1"));
+        Graph expectedP1Graph = fromGdl(String.format(
+            "(a)-[{w: %fd}]->(a)" +
+            "(b)-[{w: %fd}]->(b)" +
+            "(c), (d)",
+            expectedNodeAP1,
+            expectedNodeBP1
+        ));
+        assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2 = graphs.getGraph("", Optional.of("p2"));
-        assertEquals(4L, p2.nodeCount());
-        assertOutProperties(p2, 0, expectedNodeAP2);
-        assertOutProperties(p2, 1, expectedNodeBP2);
+        Graph p2Graph = graphs.getGraph("", Optional.of("p2"));
+        Graph expectedP2Graph = fromGdl(String.format(
+            "(a)-[{w: %fd}]->(a)" +
+            "(b)-[{w: %fd}]->(b)" +
+            "(c), (d)",
+            expectedNodeAP2,
+            expectedNodeBP2
+        ));
+        assertGraphEquals(expectedP2Graph, p2Graph);
     }
 
     static Stream<Arguments> localDeduplicationArguments() {
@@ -569,6 +582,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         double expectedNodeBP2
     ) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
+        db = TestDatabaseCreator.createTestDatabase();
         db.execute(
             "CREATE" +
             "  (a:Node)" +
@@ -586,14 +600,22 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
-        Graph p1 = graphs.getGraph("", Optional.of("p1"));
-        assertEquals(2L, p1.nodeCount());
-        assertOutProperties(p1, 0, expectedNodeAP1);
-        assertOutProperties(p1, 1, expectedNodeBP1);
+        Graph p1Graph = graphs.getGraph("", Optional.of("p1"));
+        Graph expectedP1Graph = fromGdl(String.format(
+            "(a)-[{w: %fd}]->(a)" +
+            "(b)-[{w: %fd}]->(b)",
+            expectedNodeAP1,
+            expectedNodeBP1
+        ));
+        assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2 = graphs.getGraph("", Optional.of("p2"));
-        assertEquals(2L, p2.nodeCount());
-        assertOutProperties(p2, 0, expectedNodeAP2);
-        assertOutProperties(p2, 1, expectedNodeBP2);
+        Graph p2Graph = graphs.getGraph("", Optional.of("p2"));
+        Graph expectedP2Graph = fromGdl(String.format(
+            "(a)-[{w: %fd}]->(a)" +
+            "(b)-[{w: %fd}]->(b)",
+            expectedNodeAP2,
+            expectedNodeBP2
+        ));
+        assertGraphEquals(expectedP2Graph, p2Graph);
     }
 }
