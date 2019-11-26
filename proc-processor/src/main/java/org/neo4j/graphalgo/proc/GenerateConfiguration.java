@@ -348,7 +348,9 @@ final class GenerateConfiguration {
         classesToSearch.addLast(classElement);
         do {
             TypeElement currentClass = classesToSearch.pollFirst();
-            assert currentClass != null;
+            if (currentClass == null) {
+                return converterError(classElement, "Inherited interface was null, this could be a bug in the JDK.");
+            }
 
             validCandidates.clear();
 
