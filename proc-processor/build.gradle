@@ -25,15 +25,15 @@ description = 'Neo4j Graph Algorithms :: Procedures Processor'
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor group: 'com.google.auto.service',  name: 'auto-service',       version: ver.'auto-service'
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.immutables
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.immutables
+    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
+    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
     compileOnly         group: 'com.google.auto.service',  name: 'auto-service',       version: ver.'auto-service'
-    compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.immutables
+    compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
 
     compile             project(':annotations')
     compile             group: 'com.google.auto',          name: 'auto-common',        version: ver.'auto-common'
-    compile             group: 'com.squareup',             name: 'javapoet',           version: ver.javapoet
+    compile             group: 'com.squareup',             name: 'javapoet',           version: ver.'javapoet'
     compile             group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
 
     def toolsJar = Jvm.current().getToolsJar()
