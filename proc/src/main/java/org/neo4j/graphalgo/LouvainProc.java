@@ -187,7 +187,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         return LongStream.range(0, setup.graph.nodeCount())
             .mapToObj(nodeId -> {
                 long neoNodeId = setup.graph.toOriginalNodeId(nodeId);
-                return new LouvainProc.StreamResult(neoNodeId, louvain.getCommunities(nodeId), louvain.getCommunity(nodeId));
+                long[] communities = louvain.config().includeIntermediateCommunities ? louvain.getCommunities(nodeId) : null;
+                return new LouvainProc.StreamResult(neoNodeId, communities, louvain.getCommunity(nodeId));
             });
     }
 
@@ -306,7 +307,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
         StreamResult(final long nodeId, final long[] communities, final long community) {
             this.nodeId = nodeId;
-            this.communities = Arrays.stream(communities).boxed().collect(Collectors.toList());
+            this.communities = communities == null ? null : Arrays.stream(communities).boxed().collect(Collectors.toList());
             this.community = community;
         }
     }
