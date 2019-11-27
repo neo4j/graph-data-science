@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.stream.Streams;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,7 +47,7 @@ public final class RelationshipProjections {
             return EMPTY;
         }
         ElementIdentifier identifier = new ElementIdentifier(type);
-        RelationshipProjection filter = RelationshipProjection.of(type);
+        RelationshipProjection filter = RelationshipProjection.fromString(type);
         return create(singletonMap(identifier, filter));
     }
 
@@ -107,7 +108,7 @@ public final class RelationshipProjections {
     }
 
     private static RelationshipProjections create(Map<ElementIdentifier, RelationshipProjection> projections) {
-        if (projections.values().stream().allMatch(RelationshipProjection::isEmpty)) {
+        if (projections.values().stream().allMatch(RelationshipProjection::isMatchAll)) {
             return EMPTY;
         }
         return new RelationshipProjections(unmodifiableMap(projections));
@@ -168,7 +169,7 @@ public final class RelationshipProjections {
             .values()
             .stream()
             .map(RelationshipProjection::type)
-            .filter(StringUtils::isNotEmpty)
+            .flatMap(Streams::ofOptional)
             .distinct()
             .collect(Collectors.joining("|"));
     }

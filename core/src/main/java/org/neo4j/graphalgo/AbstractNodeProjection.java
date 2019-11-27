@@ -20,42 +20,38 @@
 
 package org.neo4j.graphalgo;
 
-import org.apache.commons.lang3.StringUtils;
+import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.annotation.DataClass;
 
 import java.util.Map;
+import java.util.Optional;
 
-public final class NodeProjection extends ElementProjection {
+@DataClass
+@Value.Immutable(singleton = true)
+public abstract class AbstractNodeProjection extends ElementProjection {
 
-    private static final NodeProjection EMPTY = new NodeProjection("", PropertyMappings.EMPTY);
+    public abstract Optional<String> label();
+
+    @Value.Default
+    @Override
+    public PropertyMappings properties() {
+        return super.properties();
+    }
+
     private static final String LABEL_KEY = "label";
 
-    public final String label;
-
-    private NodeProjection(String label, PropertyMappings properties) {
-        super(properties);
-        this.label = label;
-    }
-
-    public static NodeProjection of(@Nullable String label) {
-        if (StringUtils.isEmpty(label)) {
-            return EMPTY;
-        }
-        return new NodeProjection(label, PropertyMappings.EMPTY);
-    }
-
-    public static NodeProjection of(Map<String, Object> map, ElementIdentifier identifier) {
-        String label = map.containsKey(LABEL_KEY) ? nonEmptyString(map, LABEL_KEY) : identifier.name;
-        return create(map, properties -> new NodeProjection(label, properties));
+    public static NodeProjection empty() {
+        return NodeProjection.of();
     }
 
     public static NodeProjection fromObject(Object object, ElementIdentifier identifier) {
         if (object instanceof String) {
-            return of((String) object);
+            return NodeProjection.fromString((String) object);
         }
         if (object instanceof Map) {
             @SuppressWarnings("unchecked") Map<String, Object> map = (Map) object;
-            return of(map, identifier);
+            return fromMap(map, identifier);
         }
         throw new IllegalArgumentException(String.format(
             "Cannot construct a node filter out of a %s",
@@ -63,8 +59,17 @@ public final class NodeProjection extends ElementProjection {
         ));
     }
 
-    public boolean isEmpty() {
-        return this == EMPTY;
+    public static NodeProjection fromString(@Nullable String label) {
+        return NodeProjection.builder().label(label).build();
+    }
+
+    public static NodeProjection fromMap(Map<String, Object> map, ElementIdentifier identifier) {
+        String label = map.containsKey(LABEL_KEY) ? nonEmptyString(map, LABEL_KEY) : identifier.name;
+        return create(map, properties -> NodeProjection.of(label, properties));
+    }
+
+    public boolean isMatchAll() {
+        return this == NodeProjection.of();
     }
 
     @Override
@@ -74,19 +79,15 @@ public final class NodeProjection extends ElementProjection {
 
     @Override
     void writeToObject(Map<String, Object> value) {
-        value.put(LABEL_KEY, label);
+        value.put(LABEL_KEY, label().orElse(""));
     }
 
     @Override
     public NodeProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
         PropertyMappings newMappings = properties().mergeWith(mappings);
         if (newMappings == properties()) {
-            return this;
+            return (NodeProjection) this;
         }
-        return new NodeProjection(label, newMappings);
-    }
-
-    public static NodeProjection empty() {
-        return EMPTY;
+        return ((NodeProjection) this).withProperties(newMappings);
     }
 }

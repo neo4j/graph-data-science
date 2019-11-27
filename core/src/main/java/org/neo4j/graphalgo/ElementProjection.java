@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo;
 
+import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
@@ -32,18 +33,20 @@ abstract class ElementProjection {
 
     private static final String PROPERTIES_KEY = "properties";
 
-    private final PropertyMappings properties;
-
-    ElementProjection(PropertyMappings properties) {
-        this.properties = properties;
+    @Value.Default
+    @Value.Parameter
+    public PropertyMappings properties() {
+        return PropertyMappings.EMPTY;
     }
 
-    public abstract boolean isEmpty();
+    public abstract ElementProjection withAdditionalPropertyMappings(PropertyMappings mappings);
+
+    public abstract boolean isMatchAll();
 
     public final Map<String, Object> toObject() {
         Map<String, Object> value = new LinkedHashMap<>();
         writeToObject(value);
-        value.put(PROPERTIES_KEY, properties.toObject(includeAggregation()));
+        value.put(PROPERTIES_KEY, properties().toObject(includeAggregation()));
         return value;
     }
 
@@ -70,10 +73,4 @@ abstract class ElementProjection {
     abstract void writeToObject(Map<String, Object> value);
 
     abstract boolean includeAggregation();
-
-    public abstract ElementProjection withAdditionalPropertyMappings(PropertyMappings mappings);
-
-    public PropertyMappings properties() {
-        return properties;
-    }
 }

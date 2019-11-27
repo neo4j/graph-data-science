@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.stream.Streams;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableMap;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
 public final class NodeProjections {
@@ -43,7 +45,7 @@ public final class NodeProjections {
             return EMPTY;
         }
         ElementIdentifier identifier = new ElementIdentifier(label);
-        NodeProjection filter = NodeProjection.of(label);
+        NodeProjection filter = NodeProjection.fromString(label);
         return create(singletonMap(identifier, filter));
     }
 
@@ -91,7 +93,7 @@ public final class NodeProjections {
     }
 
     private static NodeProjections create(Map<ElementIdentifier, NodeProjection> filters) {
-        if (filters.values().stream().allMatch(NodeProjection::isEmpty)) {
+        if (filters.values().stream().allMatch(NodeProjection::isMatchAll)) {
             return EMPTY;
         }
         if (filters.size() != 1) {
@@ -137,7 +139,13 @@ public final class NodeProjections {
         if (isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(projections.values().stream().map(f -> f.label).collect(Collectors.joining("")));
+        return Optional.of(projections
+            .values()
+            .stream()
+            .map(NodeProjection::label)
+            .flatMap(Streams::ofOptional)
+            .collect(joining(""))
+        );
     }
 
     public boolean isEmpty() {

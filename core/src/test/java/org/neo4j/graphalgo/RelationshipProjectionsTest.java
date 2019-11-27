@@ -28,7 +28,6 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.DEFAULT;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.SINGLE;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
@@ -58,10 +57,10 @@ class RelationshipProjectionsTest {
         );
         assertThat(
             projections.getFilter(ElementIdentifier.of("ANOTHER")),
-            equalTo(RelationshipProjection.of("FOO",
-                Projection.NATURAL,
-                DEFAULT,
-                PropertyMappings.of(PropertyMapping.of("prop1", Double.NaN), PropertyMapping.of("prop2", Double.NaN))
+            equalTo(RelationshipProjection
+                .builder()
+                .type("FOO")
+                .properties(PropertyMappings.of(PropertyMapping.of("prop1", Double.NaN), PropertyMapping.of("prop2", Double.NaN))
             ))
         );
         assertThat(projections.typeFilter(), equalTo("T|FOO"));
