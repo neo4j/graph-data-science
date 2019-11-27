@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
-class CypherMultiRelationshipLoader extends CypherRecordLoader<ObjectLongMap<RelationshipTypeMapping>> {
+class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<RelationshipTypeMapping>> {
 
     private final IdMap idMap;
     private final GraphDimensions dimensions;
@@ -50,7 +50,7 @@ class CypherMultiRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Rel
 
     private final Map<RelationshipTypeMapping, LongAdder> allRelationshipCounters;
 
-    CypherMultiRelationshipLoader(
+    CypherRelationshipsImporter(
         IdMap idMap,
         Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders,
         GraphDatabaseAPI api,

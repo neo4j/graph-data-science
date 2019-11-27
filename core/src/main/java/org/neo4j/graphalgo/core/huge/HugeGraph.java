@@ -104,6 +104,34 @@ public class HugeGraph implements Graph {
     private final boolean isUndirected;
 
     public static HugeGraph create(
+        AllocationTracker tracker,
+        IdMap idMapping,
+        Map<String, NodeProperties> nodeProperties,
+        AdjacencyList outAdjacencyList,
+        AdjacencyOffsets outAdjacencyOffsets,
+        AdjacencyList inAdjacencyList,
+        AdjacencyOffsets inAdjacencyOffsets,
+        long relationshipCount,
+        boolean loadAsUndirected) {
+
+        return create(
+            tracker,
+            idMapping,
+            nodeProperties,
+            relationshipCount,
+            inAdjacencyList,
+            outAdjacencyList,
+            inAdjacencyOffsets,
+            outAdjacencyOffsets,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            loadAsUndirected);
+    }
+
+    public static HugeGraph create(
         final AllocationTracker tracker,
         final IdMap idMapping,
         final Map<String, NodeProperties> nodeProperties,

@@ -207,7 +207,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        mapping -> createBuilderForRelationshipType(tracker)
+                        mapping -> createBuildersForRelationshipType(tracker)
                 ));
 
         ScanningRelationshipsImporter scanningImporter = new ScanningRelationshipsImporter(
@@ -243,7 +243,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                     long relationshipCount = relationshipCounts.getOrDefault(entry.getKey(), 0L);
 
                     if (!dimensions.relProperties().hasMappings()) {
-                        HugeGraph graph = buildGraph(
+                        HugeGraph graph = HugeGraph.create(
                                 tracker,
                                 idsAndProperties.hugeIdMap,
                                 idsAndProperties.properties,
@@ -259,7 +259,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                         return dimensions.relProperties().enumerate().map(propertyEntry -> {
                             int weightIndex = propertyEntry.getOne();
                             ResolvedPropertyMapping property = propertyEntry.getTwo();
-                            HugeGraph graph = buildGraphWithRelationshipProperty(
+                            HugeGraph graph = create(
                                     tracker,
                                     idsAndProperties.hugeIdMap,
                                     idsAndProperties.properties,
@@ -280,7 +280,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 }));
     }
 
-    private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuilderForRelationshipType(AllocationTracker tracker) {
+    private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuildersForRelationshipType(AllocationTracker tracker) {
         RelationshipsBuilder outgoingRelationshipsBuilder = null;
         RelationshipsBuilder incomingRelationshipsBuilder = null;
 
@@ -324,48 +324,20 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
         return Pair.of(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
     }
 
-    private HugeGraph buildGraph(
-            AllocationTracker tracker,
-            IdMap idMapping,
-            Map<String, NodeProperties> nodeProperties,
-            AdjacencyList outAdjacencyList,
-            AdjacencyOffsets outAdjacencyOffsets,
-            AdjacencyList inAdjacencyList,
-            AdjacencyOffsets inAdjacencyOffsets,
-            long relationshipCount,
-            boolean loadAsUndirected) {
-
-        return HugeGraph.create(
-                tracker,
-                idMapping,
-                nodeProperties,
-                relationshipCount,
-                inAdjacencyList,
-                outAdjacencyList,
-                inAdjacencyOffsets,
-                outAdjacencyOffsets,
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                loadAsUndirected);
-    }
-
-    private HugeGraph buildGraphWithRelationshipProperty(
-            AllocationTracker tracker,
-            IdMap idMapping,
-            Map<String, NodeProperties> nodeProperties,
-            RelationshipsBuilder inRelationshipsBuilder,
-            RelationshipsBuilder outRelationshipsBuilder,
-            AdjacencyList outAdjacencyList,
-            AdjacencyOffsets outAdjacencyOffsets,
-            AdjacencyList inAdjacencyList,
-            AdjacencyOffsets inAdjacencyOffsets,
-            int weightIndex,
-            ResolvedPropertyMapping weightProperty,
-            long relationshipCount,
-            boolean loadAsUndirected) {
+    private HugeGraph create(
+        AllocationTracker tracker,
+        IdMap idMapping,
+        Map<String, NodeProperties> nodeProperties,
+        RelationshipsBuilder inRelationshipsBuilder,
+        RelationshipsBuilder outRelationshipsBuilder,
+        AdjacencyList outAdjacencyList,
+        AdjacencyOffsets outAdjacencyOffsets,
+        AdjacencyList inAdjacencyList,
+        AdjacencyOffsets inAdjacencyOffsets,
+        int weightIndex,
+        ResolvedPropertyMapping weightProperty,
+        long relationshipCount,
+        boolean loadAsUndirected) {
 
         AdjacencyList outWeightList = null;
         AdjacencyOffsets outWeightOffsets = null;
@@ -394,20 +366,20 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 : Optional.of(weightProperty.defaultValue());
 
         return HugeGraph.create(
-                tracker,
-                idMapping,
-                nodeProperties,
-                relationshipCount,
-                inAdjacencyList,
-                outAdjacencyList,
-                inAdjacencyOffsets,
-                outAdjacencyOffsets,
-                maybeDefaultWeight,
-                Optional.ofNullable(inWeightList),
-                Optional.ofNullable(outWeightList),
-                Optional.ofNullable(inWeightOffsets),
-                Optional.ofNullable(outWeightOffsets),
-                loadAsUndirected);
+            tracker,
+            idMapping,
+            nodeProperties,
+            relationshipCount,
+            inAdjacencyList,
+            outAdjacencyList,
+            inAdjacencyOffsets,
+            outAdjacencyOffsets,
+            maybeDefaultWeight,
+            Optional.ofNullable(inWeightList),
+            Optional.ofNullable(outWeightList),
+            Optional.ofNullable(inWeightOffsets),
+            Optional.ofNullable(outWeightOffsets),
+            loadAsUndirected);
     }
 
 }

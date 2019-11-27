@@ -114,28 +114,26 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
         try (Revertable revertable = setReadOnlySecurityContext()) {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.startLabel, api, setup).load();
             IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
-            Map<String, Map<String, Graph>> graphs = loadGraphs(nodes, this.dimensions, setup.tracker);
+            Map<String, Map<String, Graph>> graphs = loadRelationships(nodes, this.dimensions, setup.tracker);
             progressLogger.logDone(setup.tracker);
             return GraphsByRelationshipType.of(graphs);
         }
     }
 
-    private Map<String, Map<String, Graph>> loadGraphs(
+    private Map<String, Map<String, Graph>> loadRelationships(
         IdsAndProperties idsAndProperties,
         GraphDimensions dimensions,
         AllocationTracker tracker
     ) {
-
-        // TODO: create a type for that beast
         Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders = dimensions
             .relationshipTypeMappings()
             .stream()
             .collect(Collectors.toMap(
                 Function.identity(),
-                mapping -> createBuilderForRelationshipType(tracker)
+                mapping -> createBuildersForRelationshipType(tracker)
             ));
 
-        CypherMultiRelationshipLoader cypherMultiRelationshipLoader = new CypherMultiRelationshipLoader(
+        CypherRelationshipsImporter cypherImporter = new CypherRelationshipsImporter(
             idsAndProperties.idMap(),
             allBuilders,
             api,
@@ -143,7 +141,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
             dimensions
         );
 
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = cypherMultiRelationshipLoader.load();
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = cypherImporter.load();
 
         return allBuilders.entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().typeName(),
@@ -165,7 +163,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
                 long relationshipCount = relationshipCounts.getOrDefault(entry.getKey(), 0L);
 
                 if (!dimensions.relProperties().hasMappings()) {
-                    HugeGraph graph = buildGraph(
+                    HugeGraph graph = HugeGraph.create(
                         tracker,
                         idsAndProperties.hugeIdMap,
                         idsAndProperties.properties,
@@ -181,7 +179,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
                     return dimensions.relProperties().enumerate().map(propertyEntry -> {
                         int weightIndex = propertyEntry.getKey();
                         PropertyMapping property = propertyEntry.getValue();
-                        HugeGraph graph = buildGraphWithRelationshipProperty(
+                        HugeGraph graph = create(
                             tracker,
                             idsAndProperties.hugeIdMap,
                             idsAndProperties.properties,
@@ -219,7 +217,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
     }
 
     // TODO: this could probably live on abstract GraphFactory
-    private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuilderForRelationshipType(AllocationTracker tracker) {
+    private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuildersForRelationshipType(AllocationTracker tracker) {
         RelationshipsBuilder outgoingRelationshipsBuilder = null;
         RelationshipsBuilder incomingRelationshipsBuilder = null;
 
@@ -265,37 +263,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
         return Pair.of(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
     }
 
-    // TODO: move to factory methods on HugeGraph and remove here and in HugeGraphFactory
-    private HugeGraph buildGraph(
-        AllocationTracker tracker,
-        IdMap idMapping,
-        Map<String, NodeProperties> nodeProperties,
-        AdjacencyList outAdjacencyList,
-        AdjacencyOffsets outAdjacencyOffsets,
-        AdjacencyList inAdjacencyList,
-        AdjacencyOffsets inAdjacencyOffsets,
-        long relationshipCount,
-        boolean loadAsUndirected) {
-
-        return HugeGraph.create(
-            tracker,
-            idMapping,
-            nodeProperties,
-            relationshipCount,
-            inAdjacencyList,
-            outAdjacencyList,
-            inAdjacencyOffsets,
-            outAdjacencyOffsets,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            loadAsUndirected);
-    }
-
-    // TODO: move to factory methods on HugeGraph and remove here and in HugeGraphFactory
-    private HugeGraph buildGraphWithRelationshipProperty(
+    private HugeGraph create(
         AllocationTracker tracker,
         IdMap idMapping,
         Map<String, NodeProperties> nodeProperties,
