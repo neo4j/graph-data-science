@@ -219,9 +219,9 @@ class GraphCreateProcTest extends ProcTestBase {
 
     @Test
     void failForNulls() {
-        assertError("CALL algo.beta.graph.create(null, null, null)", "No value for the key `graphName` was specified");
-        assertError("CALL algo.beta.graph.create('name', null, null)", "No value for the key `nodeProjection` was specified");
-        assertError("CALL algo.beta.graph.create('name', 'A', null)", "No value for the key `relationshipProjection` was specified");
+        assertError("CALL algo.beta.graph.create(null, null, null)", "No value specified for the mandatory configuration parameter `graphName`");
+        assertError("CALL algo.beta.graph.create('name', null, null)", "No value specified for the mandatory configuration parameter `nodeProjection`");
+        assertError("CALL algo.beta.graph.create('name', 'A', null)", "No value specified for the mandatory configuration parameter `relationshipProjection`");
     }
 
     @Test
