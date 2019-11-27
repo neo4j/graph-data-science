@@ -110,20 +110,21 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
 
     @Override
     public GraphsByRelationshipType importAllGraphs() {
+        // Temporarily override the security context to enforce read-only access during load
         try (Revertable revertable = setReadOnlySecurityContext()) {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.startLabel, api, setup).load();
             IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
-            Map<String, Map<String, Graph>> graphs = loadRelationships(this.dimensions, setup.tracker, nodes, setup.concurrency());
+            Map<String, Map<String, Graph>> graphs = loadGraphs(nodes, this.dimensions, setup.tracker);
             progressLogger.logDone(setup.tracker);
             return GraphsByRelationshipType.of(graphs);
         }
     }
 
-    private Map<String, Map<String, Graph>> loadRelationships(
-        GraphDimensions dimensions,
-        AllocationTracker tracker,
+    private Map<String, Map<String, Graph>> loadGraphs(
         IdsAndProperties idsAndProperties,
-        int concurrency) {
+        GraphDimensions dimensions,
+        AllocationTracker tracker
+    ) {
 
         // TODO: create a type for that beast
         Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders = dimensions
@@ -142,20 +143,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
             dimensions
         );
 
-        cypherMultiRelationshipLoader.load();
-
-        ScanningRelationshipsImporter scanningImporter = new ScanningRelationshipsImporter(
-            setup,
-            api,
-            dimensions,
-            progress,
-            tracker,
-            idsAndProperties.hugeIdMap,
-            allBuilders,
-            threadPool,
-            concurrency
-        );
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = scanningImporter.call(setup.log);
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = cypherMultiRelationshipLoader.load();
 
         return allBuilders.entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().typeName(),
@@ -211,7 +199,8 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
                         return Pair.of(property.propertyKey(), graph);
                     }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
                 }
-            }));
+            }
+        ));
     }
 
     private Revertable setReadOnlySecurityContext() {

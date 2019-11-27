@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.ObjectLongHashMap;
+import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
@@ -28,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
@@ -35,22 +38,17 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
-class CypherMultiRelationshipLoader extends CypherRecordLoader<Relationships> {
-
-    private static final int SINGLE_RELATIONSHIP_WEIGHT = 1;
-    private static final int NO_RELATIONSHIP_WEIGHT = 0;
-    private static final int DEFAULT_WEIGHT_PROPERTY_ID = -2;
+class CypherMultiRelationshipLoader extends CypherRecordLoader<ObjectLongMap<RelationshipTypeMapping>> {
 
     private final IdMap idMap;
-    private final Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders;
     private final GraphDimensions dimensions;
     private final int relationshipPropertyCount;
 
-    private long totalRecordsSeen = 0L;
-    private long totalRelationshipsImported = 0L;
     private final Map<RelationshipTypeMapping, SingleTypeRelationshipImporter.Builder.WithImporter> relationshipImporterBuilders;
     private final Map<String, Integer> propertyKeyIdsByName;
     private final Map<String, Double> propertyDefaultValueByName;
+
+    private final Map<RelationshipTypeMapping, LongAdder> allRelationshipCounters;
 
     CypherMultiRelationshipLoader(
         IdMap idMap,
@@ -62,7 +60,6 @@ class CypherMultiRelationshipLoader extends CypherRecordLoader<Relationships> {
         super(setup.relationshipType, idMap.nodeCount(), api, setup);
         this.idMap = idMap;
 
-        this.allBuilders = allBuilders;
         this.dimensions = dimensions;
 
         ImportSizing importSizing = ImportSizing.of(setup.concurrency, idMap.nodeCount());
@@ -71,27 +68,39 @@ class CypherMultiRelationshipLoader extends CypherRecordLoader<Relationships> {
 
         boolean importWeights = dimensions.relProperties().atLeastOneExists();
 
-        propertyKeyIdsByName = dimensions
+        this.relationshipPropertyCount = dimensions.relProperties().numberOfMappings();
+        this.propertyKeyIdsByName = dimensions
             .relProperties()
             .stream()
             .collect(toMap(PropertyMapping::neoPropertyKey, PropertyMapping::propertyKeyId));
-
-        propertyDefaultValueByName = dimensions
+        this.propertyDefaultValueByName = dimensions
             .relProperties()
             .stream()
             .collect(toMap(PropertyMapping::neoPropertyKey, PropertyMapping::defaultValue));
 
-        relationshipImporterBuilders = allBuilders
+        Map<RelationshipTypeMapping, SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
             .entrySet()
             .stream()
             .collect(toMap(
                 Map.Entry::getKey,
                 entry ->
                     createImporterBuilder(pageSize, numberOfPages, entry, setup.tracker)
-                        .loadImporter(false, true, false, importWeights)
             ));
 
-        relationshipPropertyCount = dimensions.relProperties().numberOfMappings();
+        this.allRelationshipCounters = new HashMap<>();
+        for (SingleTypeRelationshipImporter.Builder importerBuilder : importerBuilders.values()) {
+            this.allRelationshipCounters.put(importerBuilder.mapping(), importerBuilder.relationshipCounter());
+        }
+
+        this.relationshipImporterBuilders = importerBuilders
+            .entrySet()
+            .stream()
+            .collect(toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue()
+                    .loadImporter(false, true, false, importWeights)
+            ));
+
     }
 
     @Override
@@ -125,13 +134,10 @@ class CypherMultiRelationshipLoader extends CypherRecordLoader<Relationships> {
     }
 
     @Override
-    void updateCounts(BatchLoadResult result) {
-        totalRecordsSeen += result.rows();
-        totalRelationshipsImported += result.count();
-    }
+    void updateCounts(BatchLoadResult result) { }
 
     @Override
-    Relationships result() {
+    ObjectLongMap<RelationshipTypeMapping> result() {
         List<Runnable> flushTasks = relationshipImporterBuilders
             .values()
             .stream()
@@ -140,7 +146,9 @@ class CypherMultiRelationshipLoader extends CypherRecordLoader<Relationships> {
 
         ParallelUtil.run(flushTasks, setup.executor);
 
-        return null;
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(allRelationshipCounters.size());
+        allRelationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
+        return relationshipCounters;
     }
 
     private SingleTypeRelationshipImporter.Builder createImporterBuilder(
