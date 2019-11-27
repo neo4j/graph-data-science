@@ -307,7 +307,7 @@ public class ProcedureConfiguration implements BaseConfig {
         if (propertyMappings != null) {
             return PropertyMappings.fromObject(propertyMappings);
         }
-        return PropertyMappings.EMPTY;
+        return PropertyMappings.of();
     }
 
     public double getWeightPropertyDefaultValue(double defaultValue) {

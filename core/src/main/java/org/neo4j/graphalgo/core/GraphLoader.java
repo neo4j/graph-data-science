@@ -95,8 +95,8 @@ public class GraphLoader {
     private AllocationTracker tracker = AllocationTracker.EMPTY;
     private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
     private boolean undirected = false;
-    private final PropertyMappings.Builder nodePropertyMappings = new PropertyMappings.Builder();
-    private final PropertyMappings.Builder relPropertyMappings = new PropertyMappings.Builder();
+    private final PropertyMappings.Builder nodePropertyMappings = PropertyMappings.builder();
+    private final PropertyMappings.Builder relPropertyMappings = PropertyMappings.builder();
     private boolean isLoadedGraph = false;
     private GraphCreateConfig createConfig;
 
@@ -347,22 +347,22 @@ public class GraphLoader {
     }
 
     public GraphLoader withOptionalNodeProperties(PropertyMapping... nodePropertyMappings) {
-        this.nodePropertyMappings.addAllOptionalMappings(nodePropertyMappings);
+        this.nodePropertyMappings.addOptionalMappings(nodePropertyMappings);
         return this;
     }
 
     public GraphLoader withOptionalNodeProperties(PropertyMappings nodePropertyMappings) {
-        this.nodePropertyMappings.addAllOptionalMappings(nodePropertyMappings.stream());
+        this.nodePropertyMappings.addOptionalMappings(nodePropertyMappings.stream());
         return this;
     }
 
     public GraphLoader withRelationshipProperties(PropertyMapping... relPropertyMappings) {
-        this.relPropertyMappings.addAllOptionalMappings(relPropertyMappings);
+        this.relPropertyMappings.addOptionalMappings(relPropertyMappings);
         return this;
     }
 
     public GraphLoader withRelationshipProperties(PropertyMappings relPropertyMappings) {
-        this.relPropertyMappings.addAllOptionalMappings(relPropertyMappings.stream());
+        this.relPropertyMappings.addOptionalMappings(relPropertyMappings.stream());
         return this;
     }
 
@@ -483,8 +483,8 @@ public class GraphLoader {
     public GraphSetup toSetup() {
         if (createConfig == null) {
             PropertyMappings relMappings = this.relPropertyMappings.build();
-            relMappings = new PropertyMappings.Builder()
-                .addAllMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
+            relMappings = PropertyMappings.builder()
+                .addMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
                 .build();
 
             RelationshipProjections relProjections;

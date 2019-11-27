@@ -105,7 +105,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     }
 
     private PropertyMappings loadPropertyMapping(TokenRead tokenRead, PropertyMappings propertyMappings) {
-        PropertyMappings.Builder builder = new PropertyMappings.Builder();
+        PropertyMappings.Builder builder = PropertyMappings.builder();
         for (PropertyMapping mapping : propertyMappings) {
             String propertyName = mapping.neoPropertyKey();
             int key = propertyName != null ? tokenRead.propertyKey(propertyName) : TokenRead.NO_TOKEN;

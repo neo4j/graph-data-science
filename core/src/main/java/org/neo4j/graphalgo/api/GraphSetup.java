@@ -232,7 +232,7 @@ public class GraphSetup {
             .flatMap(e -> e.properties().stream())
             .collect(Collectors.groupingBy(PropertyMapping::propertyKey));
 
-        PropertyMappings.Builder builder = new PropertyMappings.Builder();
+        PropertyMappings.Builder builder = PropertyMappings.builder();
         groupedPropertyMappings.values().stream()
             .map(Iterables::first)
             .forEach(builder::addMapping);
@@ -254,7 +254,7 @@ public class GraphSetup {
             .flatMap(e -> e.properties().stream())
             .collect(Collectors.groupingBy(PropertyMapping::propertyKey));
 
-        PropertyMappings.Builder builder = new PropertyMappings.Builder();
+        PropertyMappings.Builder builder = PropertyMappings.builder();
         groupedPropertyMappings.values().stream()
             .map(Iterables::first)
             .forEach(builder::addMapping);

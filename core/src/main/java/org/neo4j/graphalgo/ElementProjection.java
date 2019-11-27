@@ -36,7 +36,7 @@ abstract class ElementProjection {
     @Value.Default
     @Value.Parameter
     public PropertyMappings properties() {
-        return PropertyMappings.EMPTY;
+        return PropertyMappings.of();
     }
 
     public abstract ElementProjection withAdditionalPropertyMappings(PropertyMappings mappings);

@@ -88,7 +88,7 @@ public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
                     ? Collections.emptySet()
                     : ProjectionParser.parse(config.getRelationshipOrQuery());
             PropertyMappings propertyMappings = graphImpl == CypherGraphFactory.class
-                    ? PropertyMappings.EMPTY
+                    ? PropertyMappings.of()
                     : config.getRelationshipProperties();
 
             if (relationshipTypes.size() > 1 && !MultipleRelTypesSupport.class.isAssignableFrom(graphImpl)) {

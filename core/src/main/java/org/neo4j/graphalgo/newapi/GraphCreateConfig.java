@@ -46,21 +46,21 @@ public interface GraphCreateConfig extends BaseConfig {
     NodeProjections nodeProjection();
 
     @Configuration.Parameter
-    @ConvertWith("org.neo4j.graphalgo.RelationshipProjections#fromObject")
+    @ConvertWith("org.neo4j.graphalgo.AbstractRelationshipProjections#fromObject")
     RelationshipProjections relationshipProjection();
 
     @Value.Default
     @Value.Parameter(false)
-    @ConvertWith("org.neo4j.graphalgo.PropertyMappings#fromObject")
+    @ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
     default PropertyMappings nodeProperties() {
-        return PropertyMappings.EMPTY;
+        return PropertyMappings.of();
     }
 
     @Value.Default
     @Value.Parameter(false)
-    @ConvertWith("org.neo4j.graphalgo.PropertyMappings#fromObject")
+    @ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
     default PropertyMappings relationshipProperties() {
-        return PropertyMappings.EMPTY;
+        return PropertyMappings.of();
     }
 
     @Value.Default
@@ -92,9 +92,9 @@ public interface GraphCreateConfig extends BaseConfig {
                 .builder()
                 .from(this)
                 .nodeProjection(nodeProjection().addPropertyMappings(nodeProperties))
-                .nodeProperties(PropertyMappings.EMPTY)
+                .nodeProperties(PropertyMappings.of())
                 .relationshipProjection(relationshipProjection().addPropertyMappings(relationshipProperties))
-                .relationshipProperties(PropertyMappings.EMPTY)
+                .relationshipProperties(PropertyMappings.of())
                 .build();
         }
         return this;

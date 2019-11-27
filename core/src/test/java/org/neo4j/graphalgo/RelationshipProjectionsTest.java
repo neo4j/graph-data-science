@@ -60,8 +60,14 @@ class RelationshipProjectionsTest {
             equalTo(RelationshipProjection
                 .builder()
                 .type("FOO")
-                .properties(PropertyMappings.of(PropertyMapping.of("prop1", Double.NaN), PropertyMapping.of("prop2", Double.NaN))
-            ))
+                .properties(PropertyMappings
+                    .builder()
+                    .addMapping(PropertyMapping.of("prop1", Double.NaN))
+                    .addMapping(PropertyMapping.of("prop2", Double.NaN))
+                    .build()
+                )
+                .build()
+            )
         );
         assertThat(projections.typeFilter(), equalTo("T|FOO"));
     }

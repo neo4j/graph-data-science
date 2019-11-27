@@ -43,8 +43,8 @@ public final class TestGraphLoader {
     private Optional<String> maybeLabel = Optional.empty();
     private Optional<String> maybeRelType = Optional.empty();
 
-    private PropertyMappings nodeProperties = PropertyMappings.EMPTY;
-    private PropertyMappings relProperties = PropertyMappings.EMPTY;
+    private PropertyMappings nodeProperties = PropertyMappings.of();
+    private PropertyMappings relProperties = PropertyMappings.of();
 
     private Direction direction = Direction.OUTGOING;
     private Optional<DeduplicationStrategy> maybeDeduplicationStrategy = Optional.empty();

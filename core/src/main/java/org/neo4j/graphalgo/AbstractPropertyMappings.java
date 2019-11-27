@@ -21,9 +21,10 @@
 package org.neo4j.graphalgo;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -35,17 +36,17 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public final class PropertyMappings implements Iterable<PropertyMapping> {
+@DataClass
+@Value.Immutable(singleton = true)
+public abstract class AbstractPropertyMappings implements Iterable<PropertyMapping> {
 
-    private final PropertyMapping[] mappings;
-
-    public static final PropertyMappings EMPTY = new PropertyMappings();
+    public abstract List<PropertyMapping> mappings();
 
     public static PropertyMappings of(PropertyMapping... mappings) {
         if (mappings == null) {
-            mappings = new PropertyMapping[0];
+            return PropertyMappings.of();
         }
-        return new PropertyMappings(mappings);
+        return PropertyMappings.of(Arrays.asList(mappings));
     }
 
     public static PropertyMappings fromObject(Object relPropertyMapping) {
@@ -56,13 +57,13 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
             String propertyMapping = (String) relPropertyMapping;
             return fromObject(Collections.singletonMap(propertyMapping, propertyMapping));
         } else if (relPropertyMapping instanceof List) {
-            Builder builder = new Builder();
+            PropertyMappings.Builder builder = PropertyMappings.builder();
             for (Object mapping : (List<?>) relPropertyMapping) {
-                builder.addAllMappings(fromObject(mapping).mappings);
+                builder.addAllMappings(fromObject(mapping).mappings());
             }
             return builder.build();
         } else if (relPropertyMapping instanceof Map) {
-            Builder builder = new Builder();
+            PropertyMappings.Builder builder = PropertyMappings.builder();
             ((Map<String, Object>) relPropertyMapping).forEach((key, spec) -> {
                 PropertyMapping propertyMapping = PropertyMapping.fromObject(key, spec);
                 builder.addMapping(propertyMapping);
@@ -70,17 +71,14 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
             return builder.build();
         } else {
             throw new IllegalArgumentException(String.format(
-                    "Expected String or Map for property mappings. Got %s.",
-                    relPropertyMapping.getClass().getSimpleName()));
+                "Expected String or Map for property mappings. Got %s.",
+                relPropertyMapping.getClass().getSimpleName()
+            ));
         }
     }
 
-    private PropertyMappings(PropertyMapping... mappings) {
-        this.mappings = mappings;
-    }
-
     public Stream<PropertyMapping> stream() {
-        return Arrays.stream(mappings);
+        return mappings().stream();
     }
 
     public Optional<PropertyMapping> head() {
@@ -88,25 +86,25 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
     }
 
     public Stream<Pair<Integer, PropertyMapping>> enumerate() {
-        return IntStream.range(0, mappings.length).mapToObj(idx -> Pair.of(idx, mappings[idx]));
+        return IntStream.range(0, mappings().size()).mapToObj(idx -> Pair.of(idx, mappings().get(idx)));
     }
 
     @Override
     public Iterator<PropertyMapping> iterator() {
-        return stream().iterator();
+        return mappings().iterator();
     }
 
     @Deprecated
     public Optional<Double> defaultWeight() {
-        return mappings.length == 0 ? Optional.empty() : Optional.of(mappings[0].defaultValue());
+        return stream().mapToDouble(PropertyMapping::defaultValue).boxed().findFirst();
     }
 
     public boolean hasMappings() {
-        return mappings.length > 0;
+        return !mappings().isEmpty();
     }
 
     public int numberOfMappings() {
-        return mappings.length;
+        return mappings().size();
     }
 
     public boolean atLeastOneExists() {
@@ -115,14 +113,14 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
 
     public int[] allPropertyKeyIds() {
         return stream()
-                .mapToInt(PropertyMapping::propertyKeyId)
-                .toArray();
+            .mapToInt(PropertyMapping::propertyKeyId)
+            .toArray();
     }
 
     public double[] allDefaultWeights() {
         return stream()
-                .mapToDouble(PropertyMapping::defaultValue)
-                .toArray();
+            .mapToDouble(PropertyMapping::defaultValue)
+            .toArray();
     }
 
     public Map<String, Object> toObject(boolean includeAggregation) {
@@ -136,65 +134,59 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
             return other;
         }
         if (!other.hasMappings()) {
-            return this;
+            return PropertyMappings.copyOf(this);
         }
-        Builder builder = new Builder();
-        builder.addAllMappings(Stream.concat(stream(), other.stream()).distinct());
+        Builder builder = PropertyMappings.builder();
+        builder.addMappings(Stream.concat(stream(), other.stream()).distinct());
         return builder.build();
     }
 
-    public static final class Builder {
-        private final List<PropertyMapping> mappings;
+    @Value.Check
+    void checkForAggregationMixing() {
+        long noneStrategyCount = stream()
+            .filter(d -> d.deduplicationStrategy == DeduplicationStrategy.NONE)
+            .count();
 
-        public Builder() {
-            mappings = new ArrayList<>();
+        if (noneStrategyCount > 0 && noneStrategyCount < numberOfMappings()) {
+            throw new IllegalArgumentException(
+                "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations.");
         }
+    }
 
-        public Builder addMapping(PropertyMapping mapping) {
-            Objects.requireNonNull(mapping, "Given PropertyMapping must not be null.");
-            mappings.add(mapping);
-            return this;
-        }
+    public interface Builder {
 
-        public Builder addOptionalMapping(PropertyMapping mapping) {
-            Objects.requireNonNull(mapping, "Given PropertyMapping must not be null.");
-            if (mapping.hasValidName()) {
-                mappings.add(mapping);
-            }
-            return this;
-        }
+        PropertyMappings build();
 
-        public Builder addAllMappings(PropertyMapping... propertyMappings) {
-            return addAllMappings(Arrays.stream(propertyMappings));
-        }
+        Builder addMapping(PropertyMapping mapping);
 
-        public Builder addAllOptionalMappings(PropertyMapping... propertyMappings) {
-            return addAllOptionalMappings(Arrays.stream(propertyMappings));
-        }
+        Builder addMappings(PropertyMapping... propertyMappings);
 
-        public Builder addAllMappings(Stream<PropertyMapping> propertyMappings) {
+        default Builder addMappings(Stream<? extends PropertyMapping> propertyMappings) {
+            Objects.requireNonNull(propertyMappings, "propertyMappings must not be null.");
             propertyMappings.forEach(this::addMapping);
             return this;
         }
 
-        public Builder addAllOptionalMappings(Stream<PropertyMapping> propertyMappings) {
-            propertyMappings.forEach(this::addOptionalMapping);
+        default Builder addOptionalMapping(PropertyMapping mapping) {
+            Objects.requireNonNull(mapping, "Given PropertyMapping must not be null.");
+            if (mapping.hasValidName()) {
+                addMapping(mapping);
+            }
             return this;
         }
 
-        public PropertyMappings build() {
-            long noneStrategyCount = this.mappings.stream()
-                    .filter(d -> d.deduplicationStrategy == DeduplicationStrategy.NONE)
-                    .count();
-
-            if (noneStrategyCount > 0 && noneStrategyCount < this.mappings.size()) {
-                throw new IllegalArgumentException(
-                        "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations.");
+        default Builder addOptionalMappings(PropertyMapping... propertyMappings) {
+            Objects.requireNonNull(propertyMappings, "propertyMappings must not be null.");
+            for (PropertyMapping propertyMapping : propertyMappings) {
+                addOptionalMapping(propertyMapping);
             }
+            return this;
+        }
 
-            PropertyMapping[] mappings = this.mappings.toArray(new PropertyMapping[0]);
-
-            return of(mappings);
+        default Builder addOptionalMappings(Stream<? extends PropertyMapping> propertyMappings) {
+            Objects.requireNonNull(propertyMappings, "propertyMappings must not be null.");
+            propertyMappings.forEach(this::addOptionalMapping);
+            return this;
         }
     }
 }
