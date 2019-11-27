@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo;
 
+import org.immutables.builder.Builder.AccessibleFields;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -131,38 +133,56 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         }
     }
 
-    public interface Builder {
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        PropertyMappings build();
+    @AccessibleFields
+    public static final class Builder extends PropertyMappings.Builder {
 
-        Builder addMapping(PropertyMapping mapping);
+        private DeduplicationStrategy deduplicationStrategy;
 
-        default Builder addMappings(Stream<? extends PropertyMapping> propertyMappings) {
-            Objects.requireNonNull(propertyMappings, "propertyMappings must not be null.");
-            propertyMappings.forEach(this::addMapping);
-            return this;
+        Builder() {
+            deduplicationStrategy = DeduplicationStrategy.DEFAULT;
         }
 
-        default Builder addOptionalMapping(PropertyMapping mapping) {
+        void addMappings(Stream<? extends PropertyMapping> propertyMappings) {
+            Objects.requireNonNull(propertyMappings, "propertyMappings must not be null.");
+            propertyMappings.forEach(this::addMapping);
+        }
+
+        void addOptionalMapping(PropertyMapping mapping) {
             Objects.requireNonNull(mapping, "Given UnresolvedPropertyMapping must not be null.");
             if (mapping.hasValidName()) {
                 addMapping(mapping);
             }
-            return this;
         }
 
-        default Builder addOptionalMappings(PropertyMapping... propertyMappings) {
+        public void addOptionalMappings(PropertyMapping... propertyMappings) {
             Objects.requireNonNull(propertyMappings, "propertyMappings must not be null.");
             for (PropertyMapping propertyMapping : propertyMappings) {
                 addOptionalMapping(propertyMapping);
             }
-            return this;
         }
 
-        default Builder addOptionalMappings(Stream<? extends PropertyMapping> propertyMappings) {
+        public void addOptionalMappings(Stream<? extends PropertyMapping> propertyMappings) {
             Objects.requireNonNull(propertyMappings, "propertyMappings must not be null.");
             propertyMappings.forEach(this::addOptionalMapping);
-            return this;
+        }
+
+        public void setGlobalDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
+            this.deduplicationStrategy = Objects.requireNonNull(deduplicationStrategy, "deduplicationStrategy must not be empty");
+        }
+
+        @Override
+        public PropertyMappings build() {
+            if (deduplicationStrategy != DeduplicationStrategy.DEFAULT && mappings != null) {
+                for (ListIterator<PropertyMapping> iter = mappings.listIterator(); iter.hasNext(); ) {
+                    PropertyMapping mapping = iter.next().setNonDefaultAggregation(deduplicationStrategy);
+                    iter.set(mapping);
+                }
+            }
+            return super.build();
         }
     }
 }

@@ -150,7 +150,12 @@ public abstract class PropertyMapping {
         return new AbstractMap.SimpleImmutableEntry<>(propertyKey(), value);
     }
 
-    public abstract PropertyMapping withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy);
+    public PropertyMapping setNonDefaultAggregation(DeduplicationStrategy deduplicationStrategy) {
+        if (deduplicationStrategy == DeduplicationStrategy.DEFAULT || deduplicationStrategy() != DeduplicationStrategy.DEFAULT) {
+            return this;
+        }
+        return ((ImmutablePropertyMapping) this).withDeduplicationStrategy(deduplicationStrategy);
+    }
 
     public final ResolvedPropertyMapping resolveWith(int propertyKeyId) {
         String propertyKey = Objects.requireNonNull(propertyKey(), "propertyKey must not be null");

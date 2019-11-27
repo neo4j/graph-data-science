@@ -6,6 +6,7 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.immutables
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.immutables
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.immutables
+    compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.immutables
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
     compileOnly         group: 'org.neo4j',                name: 'neo4j',              version: ver.neo4j
 

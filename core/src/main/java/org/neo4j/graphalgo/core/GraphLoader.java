@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core;
 import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.AbstractPropertyMappings;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
@@ -95,8 +96,8 @@ public class GraphLoader {
     private AllocationTracker tracker = AllocationTracker.EMPTY;
     private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
     private boolean undirected = false;
-    private final PropertyMappings.Builder nodePropertyMappings = PropertyMappings.builder();
-    private final PropertyMappings.Builder relPropertyMappings = PropertyMappings.builder();
+    private final AbstractPropertyMappings.Builder nodePropertyMappings = AbstractPropertyMappings.builder();
+    private final AbstractPropertyMappings.Builder relPropertyMappings = AbstractPropertyMappings.builder();
     private boolean isLoadedGraph = false;
     private GraphCreateConfig createConfig;
 
@@ -481,31 +482,11 @@ public class GraphLoader {
     }
 
     public GraphSetup toSetup() {
+        this.relPropertyMappings.setGlobalDeduplicationStrategy(deduplicationStrategy);
         if (createConfig == null) {
-            PropertyMappings relMappings = this.relPropertyMappings.build();
-            if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
-                relMappings = PropertyMappings.builder()
-                    .addMappings(relMappings.stream().map(p ->
-                        p.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
-                            ? p.withDeduplicationStrategy(deduplicationStrategy)
-                            : p
-                    ))
-                    .build();
-            }
-
-            RelationshipProjections relProjections;
+            PropertyMappings relProperties = this.relPropertyMappings.build();
+            RelationshipProjections.Builder projectionsBuilder = RelationshipProjections.builder();
             if (!undirected && direction == Direction.BOTH) {
-                RelationshipProjection outProjection = RelationshipProjection.of(
-                    relation,
-                    Projection.NATURAL,
-                    deduplicationStrategy
-                );
-                RelationshipProjection inProjection = RelationshipProjection.of(
-                    relation,
-                    Projection.REVERSE,
-                    deduplicationStrategy
-                );
-
                 String outIdentifier;
                 String inIdentifier;
                 if (StringUtils.isEmpty(relation)) {
@@ -517,27 +498,44 @@ public class GraphLoader {
                     inIdentifier = relation + "_IN";
                 }
 
-                relProjections = RelationshipProjections.pair(
-                    ElementIdentifier.of(outIdentifier),
-                    outProjection,
-                    ElementIdentifier.of(inIdentifier),
-                    inProjection
-                );
+                projectionsBuilder
+                    .putProjection(
+                        ElementIdentifier.of(outIdentifier),
+                        RelationshipProjection
+                            .builder()
+                            .type(relation)
+                            .aggregation(deduplicationStrategy)
+                            .properties(relProperties)
+                            .projection(Projection.NATURAL)
+                            .build()
+                    )
+                    .putProjection(
+                        ElementIdentifier.of(inIdentifier),
+                        RelationshipProjection
+                            .builder()
+                            .type(relation)
+                            .aggregation(deduplicationStrategy)
+                            .properties(relProperties)
+                            .projection(Projection.REVERSE)
+                            .build()
+                    );
             } else {
                 Projection projection = undirected
                     ? Projection.UNDIRECTED
                     : direction == Direction.INCOMING ? Projection.REVERSE : Projection.NATURAL;
 
-                RelationshipProjection relationshipProjection = RelationshipProjection.of(
-                    relation,
-                    projection,
-                    deduplicationStrategy
-                );
-                relProjections = RelationshipProjections.single(
-                    // TODO: fake select all
-                    ElementIdentifier.of(StringUtils.isEmpty(relation) ? "*" : relation),
-                    relationshipProjection
-                );
+                projectionsBuilder
+                    .putProjection(
+                        // TODO: fake select all
+                        ElementIdentifier.of(StringUtils.isEmpty(relation) ? "*" : relation),
+                        RelationshipProjection
+                            .builder()
+                            .type(relation)
+                            .aggregation(deduplicationStrategy)
+                            .properties(relProperties)
+                            .projection(projection)
+                            .build()
+                    );
             }
 
             NodeProjections nodeProjections = NodeProjections.of(label);
@@ -547,9 +545,8 @@ public class GraphLoader {
                 .concurrency(concurrency)
                 .username(username)
                 .nodeProperties(nodePropertyMappings.build())
-                .relationshipProperties(relMappings)
                 .nodeProjection(nodeProjections)
-                .relationshipProjection(relProjections)
+                .relationshipProjection(projectionsBuilder.build())
                 .build();
         }
 
