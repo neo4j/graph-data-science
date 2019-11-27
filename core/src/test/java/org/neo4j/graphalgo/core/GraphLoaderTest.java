@@ -78,6 +78,15 @@ class GraphLoaderTest {
         assertGraphEquals(graph, fromGdl("()"));
     }
 
+    @AllGraphTypesWithoutCypherTest
+    void testWithMultipleLabels(Class<? extends GraphFactory> graphFactory) {
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = initLoader(graphFactory, "Node1 | Node2", "").load(graphFactory);
+        }
+        assertGraphEquals(graph, fromGdl("(a)-->(b)"));
+    }
+
     @AllGraphTypesTest
     void testAnyRelation(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db).buildGraph(graphFactory);

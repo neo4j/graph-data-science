@@ -31,20 +31,21 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 final class NodesScanner extends StatementAction implements RecordScanner {
 
     static InternalImporter.CreateScanner of(
             GraphDatabaseAPI api,
             AbstractStorePageCacheScanner<NodeRecord> scanner,
-            int label,
+            Set<Integer> nodeLabelIds,
             ImportProgress progress,
             NodeImporter importer,
             TerminationFlag terminationFlag) {
         return new NodesScanner.Creator(
                 api,
                 scanner,
-                label,
+                nodeLabelIds,
                 progress,
                 importer,
                 terminationFlag);
@@ -53,7 +54,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     static final class Creator implements InternalImporter.CreateScanner {
         private final GraphDatabaseAPI api;
         private final AbstractStorePageCacheScanner<NodeRecord> scanner;
-        private final int label;
+        private final Set<Integer> nodeLabelIds;
         private final ImportProgress progress;
         private final NodeImporter importer;
         private final TerminationFlag terminationFlag;
@@ -61,13 +62,13 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         Creator(
                 GraphDatabaseAPI api,
                 AbstractStorePageCacheScanner<NodeRecord> scanner,
-                int label,
+                Set<Integer> nodeLabelIds,
                 ImportProgress progress,
                 NodeImporter importer, 
                 TerminationFlag terminationFlag) {
             this.api = api;
             this.scanner = scanner;
-            this.label = label;
+            this.nodeLabelIds = nodeLabelIds;
             this.progress = progress;
             this.importer = importer;
             this.terminationFlag = terminationFlag;
@@ -79,7 +80,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                     api,
                     terminationFlag,
                     scanner,
-                    label,
+                    nodeLabelIds,
                     index,
                     progress,
                     importer
@@ -96,7 +97,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private final TerminationFlag terminationFlag;
     private final NodeStore nodeStore;
     private final AbstractStorePageCacheScanner<NodeRecord> scanner;
-    private final int label;
+    private final Set<Integer> nodeLabelIds;
     private final int scannerIndex;
     private final ImportProgress progress;
     private final NodeImporter importer;
@@ -107,7 +108,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             GraphDatabaseAPI api,
             TerminationFlag terminationFlag,
             AbstractStorePageCacheScanner<NodeRecord> scanner,
-            int label,
+            Set<Integer> nodeLabelIds,
             int threadIndex,
             ImportProgress progress,
             NodeImporter importer) {
@@ -115,7 +116,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         this.terminationFlag = terminationFlag;
         this.nodeStore = (NodeStore) scanner.store();
         this.scanner = scanner;
-        this.label = label;
+        this.nodeLabelIds = nodeLabelIds;
         this.scannerIndex = threadIndex;
         this.progress = progress;
         this.importer = importer;
@@ -133,7 +134,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         try (AbstractStorePageCacheScanner<NodeRecord>.Cursor cursor = scanner.getCursor()) {
             NodesBatchBuffer batches = new NodesBatchBuffer(
                     nodeStore,
-                    label,
+                    nodeLabelIds,
                     cursor.bulkSize(),
                     importer.readsProperties());
             ImportProgress progress = this.progress;

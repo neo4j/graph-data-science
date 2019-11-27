@@ -45,12 +45,13 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
     final int concurrency;
 
     ScanningRecordsImporter(
-            AbstractStorePageCacheScanner.Access<Record> access,
-            String label,
-            GraphDatabaseAPI api,
-            GraphDimensions dimensions,
-            ExecutorService threadPool,
-            int concurrency) {
+        AbstractStorePageCacheScanner.Access<Record> access,
+        String label,
+        GraphDatabaseAPI api,
+        GraphDimensions dimensions,
+        ExecutorService threadPool,
+        int concurrency
+    ) {
         this.access = access;
         this.label = label;
         this.api = api;

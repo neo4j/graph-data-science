@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.core.utils.NodeLabels;
 import org.neo4j.graphalgo.core.utils.RelationshipTypes;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
 import org.neo4j.internal.kernel.api.Read;
@@ -32,7 +33,9 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.newapi.InternalReadOps;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
     private final GraphSetup setup;
@@ -51,9 +54,12 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     public GraphDimensions apply(final KernelTransaction transaction) throws RuntimeException {
         TokenRead tokenRead = transaction.tokenRead();
         Read dataRead = transaction.dataRead();
-        final int labelId = readTokens && !setup.loadAnyLabel()
-                ? tokenRead.nodeLabel(setup.nodeLabel())
-                : Read.ANY_LABEL;
+        Set<Integer> nodeLabelIds = readTokens
+            ? NodeLabels.parse(setup.nodeLabel())
+                .stream()
+                .map(tokenRead::nodeLabel)
+                .collect(Collectors.toSet())
+            : Collections.emptySet();
 
         RelationshipTypeMappings.Builder mappingsBuilder = new RelationshipTypeMappings.Builder();
         if (readTokens && !setup.loadAnyRelationshipType()) {
@@ -69,19 +75,30 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         PropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings());
         PropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
 
-        final long nodeCount = dataRead.countsForNode(labelId);
+        final long nodeCount = nodeLabelIds.isEmpty()
+            ? dataRead.countsForNode(-1)
+            : nodeLabelIds.stream().mapToLong(dataRead::countsForNode).sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
-        final long maxRelCount = relationshipTypeMappings
+        // TODO: this will double count relationships between distinct labels
+        final long maxRelCount = nodeLabelIds.isEmpty()
+            ? relationshipTypeMappings
                 .stream()
                 .filter(RelationshipTypeMapping::doesExist)
-                .mapToLong(m -> maxRelCountForLabelAndType(dataRead, labelId, m.typeId()))
-                .sum();
+                .mapToLong(m -> maxRelCountForLabelAndType(dataRead, -1, m.typeId()))
+                .sum()
+            : relationshipTypeMappings
+                .stream()
+                .filter(RelationshipTypeMapping::doesExist)
+                .flatMapToLong(relationshipTypeMapping -> nodeLabelIds.stream()
+                    .mapToLong(nodeLabelId ->
+                        maxRelCountForLabelAndType(dataRead, nodeLabelId, relationshipTypeMapping.typeId()))
+                ).sum();
 
         return new GraphDimensions.Builder()
                 .setNodeCount(nodeCount)
                 .setHighestNeoId(allNodesCount)
                 .setMaxRelCount(maxRelCount)
-                .setLabelId(labelId)
+                .setNodeLabelIds(nodeLabelIds)
                 .setNodeProperties(nodeProperties)
                 .setRelationshipTypeMappings(relationshipTypeMappings)
                 .setRelationshipProperties(relProperties)

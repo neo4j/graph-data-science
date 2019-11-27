@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,7 +48,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
     @Override
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, -1, bufferSize, true);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, Collections.emptySet(), bufferSize, true);
         NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer);
         runLoadingQuery(offset, batchSize, visitor);
         visitor.flush();

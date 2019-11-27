@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 
+import java.util.Set;
+
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
@@ -35,7 +37,7 @@ public final class GraphDimensions {
     private long nodeCount;
     private final long highestNeoId;
     private long maxRelCount;
-    private final int labelId;
+    private final Set<Integer> nodeLabelIds;
     private final PropertyMappings nodeProperties;
     private final RelationshipTypeMappings relTypeMappings;
     private final PropertyMappings relProperties;
@@ -44,7 +46,7 @@ public final class GraphDimensions {
             long nodeCount,
             long highestNeoId,
             long maxRelCount,
-            int labelId,
+            Set<Integer> nodeLabelIds,
             PropertyMappings nodeProperties,
             RelationshipTypeMappings relTypeMappings,
             PropertyMappings relProperties
@@ -52,7 +54,7 @@ public final class GraphDimensions {
         this.nodeCount = nodeCount;
         this.highestNeoId = highestNeoId;
         this.maxRelCount = maxRelCount;
-        this.labelId = labelId;
+        this.nodeLabelIds = nodeLabelIds;
         this.nodeProperties = nodeProperties;
         this.relTypeMappings = relTypeMappings;
         this.relProperties = relProperties;
@@ -78,8 +80,8 @@ public final class GraphDimensions {
         this.maxRelCount = maxRelCount;
     }
 
-    public int labelId() {
-        return labelId;
+    public Set<Integer> nodeLabelIds() {
+        return nodeLabelIds;
     }
 
     public PropertyMappings nodeProperties() {
@@ -95,8 +97,8 @@ public final class GraphDimensions {
     }
 
     public void checkValidNodePredicate(GraphSetup setup) {
-        if (isNotEmpty(setup.nodeLabel()) && labelId() == NO_SUCH_LABEL) {
-            throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.nodeLabel()));
+        if (isNotEmpty(setup.nodeLabel()) && nodeLabelIds().stream().anyMatch(id -> id == NO_SUCH_LABEL)) {
+            throw new IllegalArgumentException(String.format("Invalid node projection, one or more labels not found: '%s'", setup.nodeLabel()));
         }
     }
 
@@ -145,7 +147,7 @@ public final class GraphDimensions {
         private long nodeCount;
         private long highestNeoId;
         private long maxRelCount;
-        private int labelId;
+        private Set<Integer> nodeLabelIds;
         private PropertyMappings nodeProperties;
         private RelationshipTypeMappings relationshipTypeMappings;
         private PropertyMappings relProperties;
@@ -169,8 +171,8 @@ public final class GraphDimensions {
             return this;
         }
 
-        public Builder setLabelId(int labelId) {
-            this.labelId = labelId;
+        public Builder setNodeLabelIds(Set<Integer> nodeLabelIds) {
+            this.nodeLabelIds = nodeLabelIds;
             return this;
         }
 
@@ -194,11 +196,12 @@ public final class GraphDimensions {
                     nodeCount,
                     highestNeoId == -1 ? nodeCount : highestNeoId,
                     maxRelCount,
-                    labelId,
+                    nodeLabelIds,
                     nodeProperties == null ? PropertyMappings.EMPTY : nodeProperties,
                     relationshipTypeMappings,
                     relProperties == null ? PropertyMappings.EMPTY : relProperties
                 );
         }
+
     }
 }
