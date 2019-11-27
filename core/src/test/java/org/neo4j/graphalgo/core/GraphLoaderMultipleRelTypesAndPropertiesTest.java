@@ -107,7 +107,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    void testLoadDuplicateRelationshipsWithWeightsOnCypher(Class<? extends GraphFactory> graphFactory) {
+    void testLoadDuplicateRelationshipsWithWeights(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .withDeduplicationStrategy(NONE)
