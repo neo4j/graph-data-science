@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
@@ -79,23 +80,30 @@ public final class Louvain extends Algorithm<Louvain> {
 
         long oldNodeCount = rootGraph.nodeCount();
         for (ranLevels = 0; ranLevels < config.maxLevel; ranLevels++) {
-            assertRunning();
+            try (ProgressTimer timer = ProgressTimer.start(millis -> log.info("Louvain - Level %d finished after %dms", ranLevels + 1, millis)))  {
 
-            ModularityOptimization modularityOptimization = runModularityOptimization(workingGraph, nextSeedingValues);
-            modularityOptimization.release();
+                assertRunning();
 
-            modularities[ranLevels] = modularityOptimization.getModularity();
-            dendrograms[ranLevels] = HugeLongArray.newArray(rootGraph.nodeCount(), tracker);
-            long maxCommunityId = buildDendrogram(workingGraph, ranLevels, modularityOptimization);
+                ModularityOptimization modularityOptimization = runModularityOptimization(
+                    workingGraph,
+                    nextSeedingValues
+                );
+                modularityOptimization.release();
 
-            workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
-            nextSeedingValues = new OriginalIdNodeProperties(workingGraph);
+                modularities[ranLevels] = modularityOptimization.getModularity();
+                dendrograms[ranLevels] = HugeLongArray.newArray(rootGraph.nodeCount(), tracker);
+                long maxCommunityId = buildDendrogram(workingGraph, ranLevels, modularityOptimization);
+
+                workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
+                nextSeedingValues = new OriginalIdNodeProperties(workingGraph);
+            }
 
             if (workingGraph.nodeCount() == oldNodeCount
                 || workingGraph.nodeCount() == 1
                 || hasConverged()
             ) {
                 resizeResultArrays();
+                log.info("Louvain - Finished after %d levels", levels());
                 break;
             }
             oldNodeCount = workingGraph.nodeCount();

@@ -51,6 +51,10 @@ public class TestLog extends AbstractLog {
         return !messages.getOrDefault(level, Collections.emptyList()).isEmpty();
     }
 
+    public void printMessages() {
+        System.out.println("TestLog Messages: " + messages);
+    }
+
     @Override
     public boolean isDebugEnabled() {
         return true;
