@@ -54,12 +54,12 @@ class RelationshipProjectionsTest {
         assertThat(projections.allFilters(), hasSize(2));
         assertThat(
             projections.getFilter(ElementIdentifier.of("MY_TYPE")),
-            equalTo(RelationshipProjection.of("T", "NATURAL", SINGLE))
+            equalTo(RelationshipProjection.of("T", Projection.NATURAL, SINGLE))
         );
         assertThat(
             projections.getFilter(ElementIdentifier.of("ANOTHER")),
             equalTo(RelationshipProjection.of("FOO",
-                "NATURAL",
+                Projection.NATURAL,
                 DEFAULT,
                 PropertyMappings.of(PropertyMapping.of("prop1", Double.NaN), PropertyMapping.of("prop2", Double.NaN))
             ))

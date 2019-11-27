@@ -85,7 +85,7 @@ class GraphListProcTest extends ProcTestBase {
                     )
                 ),
                 "nodes", 2L,
-                "relationships", 2L,
+                "relationships", 1L,
                 "histogram", map(
                     "min", 0L,
                     "mean", 0.5D,
@@ -123,7 +123,7 @@ class GraphListProcTest extends ProcTestBase {
                         "properties", emptyMap()
                     )),
                 "nodes", 2L,
-                "relationships", 2L
+                "relationships", 1L
             )
         ));
     }

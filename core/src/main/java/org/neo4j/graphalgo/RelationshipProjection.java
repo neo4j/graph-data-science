@@ -34,43 +34,43 @@ public final class RelationshipProjection extends ElementProjection {
     private static final String PROJECTION_KEY = "projection";
     private static final String AGGREGATION_KEY = "aggregation";
 
-    private static final String DEFAULT_PROJECTION = "NATURAL";
+    private static final Projection DEFAULT_PROJECTION = Projection.NATURAL;
     private static final DeduplicationStrategy DEFAULT_AGGREGATION = DeduplicationStrategy.DEFAULT;
 
     private static final RelationshipProjection EMPTY = new RelationshipProjection(
         "",
-        "",
+        DEFAULT_PROJECTION,
         DEFAULT_AGGREGATION,
         PropertyMappings.EMPTY
     );
 
     private final String type;
-    private final String projection;
+    private final Projection projection;
     private final DeduplicationStrategy aggregation;
 
     private RelationshipProjection(
         String type,
-        String projection,
+        Projection projection,
         DeduplicationStrategy aggregation,
         PropertyMappings properties
     ) {
         super(properties);
         this.type = type;
         this.aggregation = aggregation;
-        this.projection = projection.isEmpty() ? DEFAULT_PROJECTION : projection;
+        this.projection = projection;
     }
 
     public static RelationshipProjection of(@Nullable String type) {
         return of(type, DEFAULT_PROJECTION);
     }
 
-    public static RelationshipProjection of(@Nullable String type, @NotNull String projection) {
+    public static RelationshipProjection of(@Nullable String type, @NotNull Projection projection) {
         return of(type, projection, DEFAULT_AGGREGATION);
     }
 
     public static RelationshipProjection of(
         @Nullable String type,
-        @NotNull String projection,
+        @NotNull Projection projection,
         @NotNull DeduplicationStrategy aggregation
     ) {
         return of(type, projection, aggregation, PropertyMappings.EMPTY);
@@ -82,22 +82,22 @@ public final class RelationshipProjection extends ElementProjection {
 
     public static RelationshipProjection of(
         @Nullable String type,
-        @NotNull String projection,
+        @NotNull Projection projection,
         @NotNull DeduplicationStrategy aggregation,
         PropertyMappings properties
     ) {
-        if (StringUtils.isEmpty(type)) {
+        if (StringUtils.isEmpty(type) && projection == DEFAULT_PROJECTION && aggregation == DEFAULT_AGGREGATION) {
             return EMPTY;
         }
-        return new RelationshipProjection(type, projection, aggregation, properties);
+        return new RelationshipProjection(StringUtils.trimToEmpty(type), projection, aggregation, properties);
     }
 
     public static RelationshipProjection of(Map<String, Object> map, ElementIdentifier identifier) {
         String type = map.containsKey(TYPE_KEY)
             ? nonEmptyString(map, TYPE_KEY)
             : identifier.name;
-        String projection = map.containsKey(PROJECTION_KEY)
-            ? nonEmptyString(map, PROJECTION_KEY)
+        Projection projection = map.containsKey(PROJECTION_KEY)
+            ? Projection.of(nonEmptyString(map, PROJECTION_KEY))
             : DEFAULT_PROJECTION;
         DeduplicationStrategy aggregation = map.containsKey(AGGREGATION_KEY)
             ? DeduplicationStrategy.valueOf(nonEmptyString(map, AGGREGATION_KEY))
@@ -138,7 +138,7 @@ public final class RelationshipProjection extends ElementProjection {
     @Override
     void writeToObject(Map<String, Object> value) {
         value.put(TYPE_KEY, type);
-        value.put(PROJECTION_KEY, projection);
+        value.put(PROJECTION_KEY, projection.name());
         value.put(AGGREGATION_KEY, aggregation.name());
     }
 
@@ -163,7 +163,7 @@ public final class RelationshipProjection extends ElementProjection {
         return type;
     }
 
-    public String projection() {
+    public Projection projection() {
         return projection;
     }
 
@@ -173,7 +173,7 @@ public final class RelationshipProjection extends ElementProjection {
         if (o == null || getClass() != o.getClass()) return false;
         RelationshipProjection that = (RelationshipProjection) o;
         return type.equals(that.type) &&
-               projection.equals(that.projection) &&
+               projection == that.projection &&
                aggregation == that.aggregation;
     }
 

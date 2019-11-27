@@ -22,9 +22,12 @@ package org.neo4j.graphalgo.core;
 import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -354,12 +357,12 @@ public class GraphLoader {
     }
 
     public GraphLoader withRelationshipProperties(PropertyMapping... relPropertyMappings) {
-        this.relPropertyMappings.addAllMappings(relPropertyMappings);
+        this.relPropertyMappings.addAllOptionalMappings(relPropertyMappings);
         return this;
     }
 
     public GraphLoader withRelationshipProperties(PropertyMappings relPropertyMappings) {
-        this.relPropertyMappings.addAllMappings(relPropertyMappings.stream());
+        this.relPropertyMappings.addAllOptionalMappings(relPropertyMappings.stream());
         return this;
     }
 
@@ -483,9 +486,42 @@ public class GraphLoader {
             relMappings = new PropertyMappings.Builder()
                 .addAllMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
                 .build();
-            RelationshipProjections relProjections = RelationshipProjections
-                .of(relation)
-                .addAggregation(deduplicationStrategy);
+
+            RelationshipProjections relProjections;
+            if (!undirected && direction == Direction.BOTH) {
+                RelationshipProjection outProjection = RelationshipProjection.of(relation, Projection.NATURAL, deduplicationStrategy);
+                RelationshipProjection inProjection = RelationshipProjection.of(relation, Projection.REVERSE, deduplicationStrategy);
+
+                String outIdentifier;
+                String inIdentifier;
+                if (StringUtils.isEmpty(relation)) {
+                    // TODO: fake select all
+                    outIdentifier = "*->";
+                    inIdentifier = "->*";
+                } else {
+                    outIdentifier = relation + "_OUT";
+                    inIdentifier = relation + "_IN";
+                }
+
+                relProjections = RelationshipProjections.pair(
+                    ElementIdentifier.of(outIdentifier),
+                    outProjection,
+                    ElementIdentifier.of(inIdentifier),
+                    inProjection
+                );
+            } else {
+                Projection projection = undirected
+                    ? Projection.UNDIRECTED
+                    : direction == Direction.INCOMING ? Projection.REVERSE : Projection.NATURAL;
+
+                RelationshipProjection relationshipProjection = RelationshipProjection.of(relation, projection, deduplicationStrategy);
+                relProjections = RelationshipProjections.single(
+                    // TODO: fake select all
+                    ElementIdentifier.of(StringUtils.isEmpty(relation) ? "*" : relation),
+                    relationshipProjection
+                );
+            }
+
             NodeProjections nodeProjections = NodeProjections.of(label);
             createConfig = ImmutableGraphCreateConfig
                 .builder()
@@ -500,13 +536,11 @@ public class GraphLoader {
         }
 
         return new GraphSetup(
-            direction,
             params,
             executorService,
             batchSize,
             log,
             logMillis,
-            undirected,
             tracker,
             terminationFlag,
             createConfig

@@ -23,8 +23,10 @@ package org.neo4j.graphalgo;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -33,8 +35,6 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableMap;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 
 public final class RelationshipProjections {
@@ -93,28 +93,24 @@ public final class RelationshipProjections {
         ));
     }
 
-    private static RelationshipProjections create(Map<ElementIdentifier, RelationshipProjection> filters) {
-        if (filters.values().stream().allMatch(RelationshipProjection::isEmpty)) {
+    public static RelationshipProjections single(ElementIdentifier identifier, RelationshipProjection projection) {
+        return create(singletonMap(identifier, projection));
+    }
+
+    public static RelationshipProjections pair(
+        ElementIdentifier identifier1,
+        RelationshipProjection projection1,
+        ElementIdentifier identifier2,
+        RelationshipProjection projection2
+    ) {
+        return create(MapUtil.genericMap(new HashMap<>(), identifier1, projection1, identifier2, projection2));
+    }
+
+    private static RelationshipProjections create(Map<ElementIdentifier, RelationshipProjection> projections) {
+        if (projections.values().stream().allMatch(RelationshipProjection::isEmpty)) {
             return EMPTY;
         }
-
-        Map<String, Long> entriesPerType = filters
-            .values()
-            .stream()
-            .collect(groupingBy(RelationshipProjection::type, counting()));
-
-        String duplicateTypes = entriesPerType.entrySet().stream()
-            .filter(entry -> entry.getValue() > 1)
-            .map(entry -> String.format("'%s'", entry.getKey()))
-            .collect(Collectors.joining(", '"));
-
-        if (!duplicateTypes.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
-                "Duplicate relationship type(s): %s",
-                duplicateTypes
-            ));
-        }
-        return new RelationshipProjections(unmodifiableMap(filters));
+        return new RelationshipProjections(unmodifiableMap(projections));
     }
 
     private final Map<ElementIdentifier, RelationshipProjection> projections;
@@ -168,7 +164,13 @@ public final class RelationshipProjections {
         if (isEmpty()) {
             return "";
         }
-        return projections.values().stream().map(f -> f.type()).collect(Collectors.joining("|"));
+        return projections
+            .values()
+            .stream()
+            .map(RelationshipProjection::type)
+            .filter(StringUtils::isNotEmpty)
+            .distinct()
+            .collect(Collectors.joining("|"));
     }
 
     public boolean isEmpty() {

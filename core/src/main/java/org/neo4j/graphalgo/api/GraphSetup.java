@@ -21,8 +21,10 @@ package org.neo4j.graphalgo.api;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -32,13 +34,16 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.logging.Log;
 import org.neo4j.stream.Streams;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 /**
  * DTO to ease the use of the GraphFactory-CTor.
@@ -47,14 +52,6 @@ import java.util.concurrent.ExecutorService;
 public class GraphSetup {
 
     private final GraphCreateConfig createConfig;
-
-    // direction for loading the graph.
-    private final Direction direction;
-    // load incoming relationships.
-    private final boolean loadIncoming;
-    // load outgoing relationships.
-    private final boolean loadOutgoing;
-    // default property is used for relationships if a property is not set.
 
     private final Map<String, Object> params;
 
@@ -68,34 +65,27 @@ public class GraphSetup {
     // batchSize for parallel computation
     private final int batchSize;
 
-    // in/out adjacencies are allowed to be merged into an undirected view of the graph
-    private final boolean loadAsUndirected;
-
     /**
      * @param executor  the executor. null means single threaded evaluation
      * @param batchSize batch size for parallel loading
      */
     public GraphSetup(
-        Direction direction,
         Map<String, Object> params,
         ExecutorService executor,
         int batchSize,
         Log log,
         long logMillis,
-        boolean loadAsUndirected,
         AllocationTracker tracker,
         TerminationFlag terminationFlag,
         GraphCreateConfig createConfig
     ) {
-        this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
-        this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
-        this.direction = direction;
+        // direction for loading the graph.
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
         this.batchSize = batchSize;
         this.log = log;
         this.logMillis = logMillis;
-        this.loadAsUndirected = loadAsUndirected;
+        // in/out adjacencies are allowed to be merged into an undirected view of the graph
         this.tracker = tracker;
         this.terminationFlag = terminationFlag;
         this.createConfig = createConfig;
@@ -153,7 +143,35 @@ public class GraphSetup {
      */
     @Deprecated
     public Direction direction() {
-        return direction;
+        Direction direction = createConfig
+            .relationshipProjection()
+            .allFilters()
+            .stream()
+            .map(RelationshipProjection::projection)
+            .reduce(null, this::accumulateDirections, (d1, d2) -> d1);
+        return direction == null ? Direction.OUTGOING : direction;
+    }
+
+    private Direction accumulateDirections(@Nullable Direction current, Projection projection) {
+        switch (projection) {
+            case NATURAL:
+                if (current == null) {
+                    return Direction.OUTGOING;
+                }
+                return current == Direction.INCOMING ? Direction.BOTH : current;
+            case UNDIRECTED:
+                if (current == null || current == Direction.OUTGOING) {
+                    return Direction.OUTGOING;
+                }
+                throw new IllegalArgumentException("Cannot mix undirection with " + projection);
+            case REVERSE:
+                if (current == null) {
+                    return Direction.INCOMING;
+                }
+                return current == Direction.OUTGOING ? Direction.BOTH : current;
+            default:
+                throw new IllegalArgumentException("Unknown projection " + projection);
+        }
     }
 
     /**
@@ -161,7 +179,7 @@ public class GraphSetup {
      */
     @Deprecated
     public boolean loadIncoming() {
-        return loadIncoming;
+        return direction() == Direction.INCOMING || direction() == Direction.BOTH;
     }
 
     /**
@@ -169,7 +187,7 @@ public class GraphSetup {
      */
     @Deprecated
     public boolean loadOutgoing() {
-        return loadOutgoing;
+        return direction() == Direction.OUTGOING || direction() == Direction.BOTH;
     }
 
     /**
@@ -177,7 +195,12 @@ public class GraphSetup {
      */
     @Deprecated
     public boolean loadAsUndirected() {
-        return loadAsUndirected;
+        return createConfig
+            .relationshipProjection()
+            .allFilters()
+            .stream()
+            .map(RelationshipProjection::projection)
+            .anyMatch(p -> p == Projection.UNDIRECTED);
     }
 
     public boolean shouldLoadRelationshipProperties() {
@@ -203,12 +226,17 @@ public class GraphSetup {
      */
     @Deprecated
     public PropertyMappings nodePropertyMappings() {
-        PropertyMapping[] propertyMappings = createConfig.nodeProjection()
+        Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.nodeProjection()
             .allFilters()
             .stream()
             .flatMap(e -> e.properties().stream())
-            .toArray(PropertyMapping[]::new);
-        return PropertyMappings.of(propertyMappings);
+            .collect(Collectors.groupingBy(PropertyMapping::propertyKey));
+
+        PropertyMappings.Builder builder = new PropertyMappings.Builder();
+        groupedPropertyMappings.values().stream()
+            .map(Iterables::first)
+            .forEach(builder::addMapping);
+        return builder.build();
     }
 
     public PropertyMappings nodePropertyMappings(ElementIdentifier identifier) {
@@ -220,12 +248,17 @@ public class GraphSetup {
      */
     @Deprecated
     public PropertyMappings relationshipPropertyMappings() {
-        PropertyMapping[] propertyMappings = createConfig.relationshipProjection()
+        Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.relationshipProjection()
             .allFilters()
             .stream()
             .flatMap(e -> e.properties().stream())
-            .toArray(PropertyMapping[]::new);
-        return PropertyMappings.of(propertyMappings);
+            .collect(Collectors.groupingBy(PropertyMapping::propertyKey));
+
+        PropertyMappings.Builder builder = new PropertyMappings.Builder();
+        groupedPropertyMappings.values().stream()
+            .map(Iterables::first)
+            .forEach(builder::addMapping);
+        return builder.build();
     }
 
     public PropertyMappings relationshipPropertyMappings(ElementIdentifier identifier) {

@@ -21,16 +21,18 @@ package org.neo4j.graphalgo.newapi;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -201,7 +203,7 @@ class GraphCreateProcTest extends ProcTestBase {
                 "nodeProjection", nodeProjection,
                 "relationshipProjection", anything(),
                 "nodes", nodeCount,
-                "relationships", 2L,
+                "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -262,7 +264,7 @@ class GraphCreateProcTest extends ProcTestBase {
                 "nodeProjection", emptyMap(),
                 "relationshipProjection", emptyMap(),
                 "nodes", nodeCount,
-                "relationships", 2L,
+                "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -306,7 +308,7 @@ class GraphCreateProcTest extends ProcTestBase {
                 "nodeProjection", desugarednodeProjection,
                 "relationshipProjection", emptyMap(),
                 "nodes", nodeCount,
-                "relationships", 2L,
+                "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -329,10 +331,10 @@ class GraphCreateProcTest extends ProcTestBase {
 
     @ParameterizedTest(name = "properties = {0}")
     @MethodSource(value = "nodeProperties")
-    void nodePropertiesInnodeProjection(Object properties, Map<String, Object> expectedProperties) {
+    void nodePropertiesInNodeProjection(Object properties, Map<String, Object> expectedProperties) {
         String name = "g";
         Map<String, Object> nodeProjection = map("B", map("label", "A", "properties", properties));
-        Map<String, Object> expectednodeProjection = map("B", map("label", "A", "properties", expectedProperties));
+        Map<String, Object> expectedNodeProjection = map("B", map("label", "A", "properties", expectedProperties));
 
 
         // TODO: check property values on graph
@@ -341,10 +343,10 @@ class GraphCreateProcTest extends ProcTestBase {
             map("name", name, "nodeProjection", nodeProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeProjection", expectednodeProjection,
+                "nodeProjection", expectedNodeProjection,
                 "relationshipProjection", emptyMap(),
                 "nodes", nodeCount,
-                "relationships", 2L,
+                "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -363,7 +365,7 @@ class GraphCreateProcTest extends ProcTestBase {
                 "nodeProjection", emptyMap(),
                 "relationshipProjection", desugaredRelProjection,
                 "nodes", nodeCount,
-                "relationships", 2L,
+                "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -371,24 +373,28 @@ class GraphCreateProcTest extends ProcTestBase {
 
     @ParameterizedTest(name = "projection={0}")
     @MethodSource("relProjectionTypes")
-    @Disabled("will activate this once projection gets implemented")
     void relFilterProjections(String projection) {
         String name = "g";
-        Map<String, Object> relFilter = map(
-            "B",
-            map("type", "REL", "projection", projection, "properties", emptyMap())
+        Map<String, Object> relProjection = map("type", "REL", "projection", projection, "properties", emptyMap());
+        Map<String, Object> expectedRelProjection = MapUtil.genericMap(
+            new HashMap<>(relProjection),
+            "aggregation",
+            DeduplicationStrategy.DEFAULT.name()
         );
+
+        Map<String, Object> relProjections = map("B", relProjection);
+        Map<String, Object> expectedRelProjections = map("B", expectedRelProjection);
 
         Long expectedRels = projection.equals("UNDIRECTED") ? relCount * 2 : relCount;
 
         // TODO: Validate reverse
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, {}, $relFilter)",
-            map("name", name, "relFilter", relFilter),
+            "CALL algo.beta.graph.create($name, {}, $relProjections)",
+            map("name", name, "relProjections", relProjections),
             singletonList(map(
                 "graphName", name,
                 "nodeProjection", emptyMap(),
-                "relationshipProjection", relFilter,
+                "relationshipProjection", expectedRelProjections,
                 "nodes", nodeCount,
                 "relationships", expectedRels,
                 "createMillis", instanceOf(Long.class)
@@ -415,7 +421,7 @@ class GraphCreateProcTest extends ProcTestBase {
                 "nodeProjection", emptyMap(),
                 "relationshipProjection", expectedRelProjection,
                 "nodes", nodeCount,
-                "relationships", 2L,
+                "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -444,7 +450,7 @@ class GraphCreateProcTest extends ProcTestBase {
                 "nodeProjection", emptyMap(),
                 "relationshipProjection", relProjection,
                 "nodes", nodeCount,
-                "relationships", 2L,
+                "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -461,17 +467,4 @@ class GraphCreateProcTest extends ProcTestBase {
             "Relationship type(s) not found: 'INVALID'"
         );
     }
-
-    @Test
-    void failsOnDuplicateNeoType() {
-        String name = "g";
-        Map<String, Object> relFilter = map("REL1", map("type", "REL"), "REL2", map("type", "REL"));
-
-        assertError(
-            "CALL algo.beta.graph.create($name, {}, $relFilter)",
-            map("name", name, "relFilter", relFilter),
-            "Duplicate relationship type(s): 'REL'"
-        );
-    }
-
 }
