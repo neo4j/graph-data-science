@@ -114,9 +114,9 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
     public RelationshipProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
         PropertyMappings newMappings = properties().mergeWith(mappings);
         if (newMappings == properties()) {
-            return (RelationshipProjection) this;
+            return RelationshipProjection.copyOf(this);
         }
-        return ((RelationshipProjection) this).withProperties(newMappings);
+        return RelationshipProjection.copyOf(this).withProperties(newMappings);
     }
 
 

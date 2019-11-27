@@ -483,14 +483,28 @@ public class GraphLoader {
     public GraphSetup toSetup() {
         if (createConfig == null) {
             PropertyMappings relMappings = this.relPropertyMappings.build();
-            relMappings = PropertyMappings.builder()
-                .addMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
-                .build();
+            if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
+                relMappings = PropertyMappings.builder()
+                    .addMappings(relMappings.stream().map(p ->
+                        p.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
+                            ? p.withDeduplicationStrategy(deduplicationStrategy)
+                            : p
+                    ))
+                    .build();
+            }
 
             RelationshipProjections relProjections;
             if (!undirected && direction == Direction.BOTH) {
-                RelationshipProjection outProjection = RelationshipProjection.of(relation, Projection.NATURAL, deduplicationStrategy);
-                RelationshipProjection inProjection = RelationshipProjection.of(relation, Projection.REVERSE, deduplicationStrategy);
+                RelationshipProjection outProjection = RelationshipProjection.of(
+                    relation,
+                    Projection.NATURAL,
+                    deduplicationStrategy
+                );
+                RelationshipProjection inProjection = RelationshipProjection.of(
+                    relation,
+                    Projection.REVERSE,
+                    deduplicationStrategy
+                );
 
                 String outIdentifier;
                 String inIdentifier;
@@ -514,7 +528,11 @@ public class GraphLoader {
                     ? Projection.UNDIRECTED
                     : direction == Direction.INCOMING ? Projection.REVERSE : Projection.NATURAL;
 
-                RelationshipProjection relationshipProjection = RelationshipProjection.of(relation, projection, deduplicationStrategy);
+                RelationshipProjection relationshipProjection = RelationshipProjection.of(
+                    relation,
+                    projection,
+                    deduplicationStrategy
+                );
                 relProjections = RelationshipProjections.single(
                     // TODO: fake select all
                     ElementIdentifier.of(StringUtils.isEmpty(relation) ? "*" : relation),

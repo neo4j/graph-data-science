@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -96,15 +97,15 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     private Map<String, NodePropertiesBuilder> propertyBuilders(long nodeCount) {
         Map<String, NodePropertiesBuilder> builders = new HashMap<>();
-        for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
-            if (propertyMapping.exists()) {
+        for (ResolvedPropertyMapping resolvedPropertyMapping : dimensions.nodeProperties()) {
+            if (resolvedPropertyMapping.exists()) {
                 NodePropertiesBuilder builder = NodePropertiesBuilder.of(
                         nodeCount,
                         tracker,
-                        propertyMapping.defaultValue(),
-                        propertyMapping.propertyKeyId(),
-                        propertyMapping.propertyKey());
-                builders.put(propertyMapping.propertyKey(), builder);
+                        resolvedPropertyMapping.defaultValue(),
+                        resolvedPropertyMapping.propertyKeyId(),
+                        resolvedPropertyMapping.propertyKey());
+                builders.put(resolvedPropertyMapping.propertyKey(), builder);
             }
         }
         return builders;

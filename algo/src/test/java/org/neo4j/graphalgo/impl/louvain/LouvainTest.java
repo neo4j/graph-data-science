@@ -308,7 +308,10 @@ class LouvainTest extends AlgoTestBase {
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
     void testMemoryEstimation(int concurrency, int levels, long min, long max) {
-        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000L).setMaxRelCount(500_000L).build();
+        GraphDimensions dimensions = new GraphDimensions.Builder()
+            .setNodeCount(100_000L)
+            .setMaxRelCount(500_000L)
+            .build();
 
         Louvain.Config config = new Louvain.Config(levels, 10, TOLERANCE_DEFAULT, false, Optional.empty());
         MemoryTree memoryTree = new LouvainFactory(config).memoryEstimation(dimensions, concurrency);
@@ -398,9 +401,9 @@ class LouvainTest extends AlgoTestBase {
         if (graphImpl == CypherGraphFactory.class) {
             direction = Direction.OUTGOING;
             loader
-                .withNodeStatement("MATCH (u:Node) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
+                .withNodeStatement("MATCH (u:Node) RETURN id(u) AS id, u.seed1 AS seed1, u.seed2 AS seed2")
                 .withRelationshipStatement("MATCH (u1:Node)-[rel]-(u2:Node) \n" +
-                                           "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight")
+                                           "RETURN id(u1) AS source, id(u2) AS target, rel.weight AS weight")
                 .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .undirected();
         } else {

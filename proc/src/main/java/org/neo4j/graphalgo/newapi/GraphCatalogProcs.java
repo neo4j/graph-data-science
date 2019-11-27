@@ -25,8 +25,8 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -111,7 +111,7 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
 
         GraphCreateResult.Builder builder = new GraphCreateResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
-            PropertyMappings propertyMappings = PropertyMappings.of();
+            ResolvedPropertyMappings propertyMappings = ResolvedPropertyMappings.of();
 
             GraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
             HugeGraphFactory graphFactory = loader.build(HugeGraphFactory.class);

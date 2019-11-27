@@ -46,6 +46,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -145,7 +146,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     }
 
     private PropertyMapping[] createPropertyMappings(String seedProperty, String weightProperty) {
-        ArrayList<PropertyMapping> propertyMappings = new ArrayList<>();
+        List<PropertyMapping> propertyMappings = new ArrayList<>();
         if (seedProperty != null) {
             propertyMappings.add(PropertyMapping.of(seedProperty, 0D));
         }

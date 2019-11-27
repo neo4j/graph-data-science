@@ -104,8 +104,8 @@ class RelationshipPropertiesImportTest {
         checkProperties(0, Direction.INCOMING, 2.0);
         checkProperties(1, Direction.INCOMING, 1.0);
 
-        checkProperties(0, Direction.BOTH, new double[]{1.0, 1.0}, 1.0, 2.0);
-        checkProperties(1, Direction.BOTH, new double[]{2.0, 2.0}, 2.0, 1.0);
+        checkProperties(0, Direction.BOTH, 1.0, 2.0);
+        checkProperties(1, Direction.BOTH, 2.0, 1.0);
     }
 
     @AllGraphTypesWithoutCypherTest
@@ -120,9 +120,9 @@ class RelationshipPropertiesImportTest {
         checkProperties(1, Direction.INCOMING, 1.0);
         checkProperties(2, Direction.INCOMING, 2.0);
 
-        checkProperties(0, Direction.BOTH, new double[]{1.0, 0.0}, 1.0, 3.0);
-        checkProperties(1, Direction.BOTH, new double[]{2.0, 0.0}, 2.0, 1.0);
-        checkProperties(2, Direction.BOTH, new double[]{3.0, 0.0}, 3.0, 2.0);
+        checkProperties(0, Direction.BOTH, 1.0, 3.0);
+        checkProperties(1, Direction.BOTH, 2.0, 1.0);
+        checkProperties(2, Direction.BOTH, 3.0, 2.0);
     }
 
     private void setup(
@@ -140,34 +140,32 @@ class RelationshipPropertiesImportTest {
     }
 
     private void checkProperties(int nodeId, Direction direction, double... expecteds) {
-        List<Executable> assertions = new ArrayList<>();
-        graph.forEachRelationship(nodeId, direction, Double.NaN, checks(direction, expecteds, expecteds, assertions));
-        assertAll(assertions);
-    }
-
-    private void checkProperties(int nodeId, Direction direction, double[] expectedFromGraph, double... expectedFromIterator) {
-        List<Executable> assertions = new ArrayList<>();
-        graph.forEachRelationship(nodeId, direction, Double.NaN, checks(direction, expectedFromIterator, expectedFromGraph, assertions));
-        assertAll(assertions);
-    }
-
-    private RelationshipWithPropertyConsumer checks(Direction direction, double[] expectedFromIterator, double[] expectedFromGraph, List<Executable> assertions) {
         AtomicInteger i = new AtomicInteger();
-        int limit = Math.min(expectedFromIterator.length, expectedFromGraph.length);
-        return (s, t, w) -> {
+        int limit = expecteds.length;
+        List<Executable> assertions = new ArrayList<>();
+
+        RelationshipWithPropertyConsumer consumer = (s, t, w) -> {
             String rel = String.format("(%d %s %d)", s, arrow(direction), t);
             if (i.get() >= limit) {
-                assertions.add(() -> assertFalse(i.get() >= limit, String.format("Unexpected relationship: %s = %.1f", rel, w)));
+                assertions.add(() -> assertFalse(
+                    i.get() >= limit,
+                    String.format("Unexpected relationship: %s = %.1f", rel, w)
+                ));
                 return false;
             }
-            double actual = (direction == Direction.INCOMING) ? graph.relationshipProperty(t, s, Double.NaN) : graph.relationshipProperty(s, t, Double.NaN);
             final int index = i.getAndIncrement();
-            double expectedIterator = expectedFromIterator[index];
-            double expectedGraph = expectedFromGraph[index];
-            assertions.add(() -> assertEquals(expectedGraph, actual, 1e-4, String.format("%s (RI+W): %.1f != %.1f", rel, actual, expectedGraph)));
-            assertions.add(() -> assertEquals(expectedIterator, w, 1e-4, String.format("%s (WRI): %.1f != %.1f", rel, w, expectedIterator)));
+            double expectedIterator = expecteds[index];
+            assertions.add(() -> assertEquals(
+                expectedIterator,
+                w,
+                1e-4,
+                String.format("%s (WRI): %.1f != %.1f", rel, w, expectedIterator)
+            ));
             return true;
         };
+
+        graph.forEachRelationship(nodeId, direction, Double.NaN, consumer);
+        assertAll(assertions);
     }
 
     private static String arrow(Direction direction) {

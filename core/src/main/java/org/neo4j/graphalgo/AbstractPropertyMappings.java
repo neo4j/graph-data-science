@@ -20,7 +20,6 @@
 
 package org.neo4j.graphalgo;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
@@ -33,7 +32,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @DataClass
@@ -85,10 +83,6 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         return stream().findFirst();
     }
 
-    public Stream<Pair<Integer, PropertyMapping>> enumerate() {
-        return IntStream.range(0, mappings().size()).mapToObj(idx -> Pair.of(idx, mappings().get(idx)));
-    }
-
     @Override
     public Iterator<PropertyMapping> iterator() {
         return mappings().iterator();
@@ -105,22 +99,6 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
 
     public int numberOfMappings() {
         return mappings().size();
-    }
-
-    public boolean atLeastOneExists() {
-        return stream().anyMatch(PropertyMapping::exists);
-    }
-
-    public int[] allPropertyKeyIds() {
-        return stream()
-            .mapToInt(PropertyMapping::propertyKeyId)
-            .toArray();
-    }
-
-    public double[] allDefaultWeights() {
-        return stream()
-            .mapToDouble(PropertyMapping::defaultValue)
-            .toArray();
     }
 
     public Map<String, Object> toObject(boolean includeAggregation) {
@@ -144,7 +122,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
     @Value.Check
     void checkForAggregationMixing() {
         long noneStrategyCount = stream()
-            .filter(d -> d.deduplicationStrategy == DeduplicationStrategy.NONE)
+            .filter(d -> d.deduplicationStrategy() == DeduplicationStrategy.NONE)
             .count();
 
         if (noneStrategyCount > 0 && noneStrategyCount < numberOfMappings()) {
@@ -159,8 +137,6 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
 
         Builder addMapping(PropertyMapping mapping);
 
-        Builder addMappings(PropertyMapping... propertyMappings);
-
         default Builder addMappings(Stream<? extends PropertyMapping> propertyMappings) {
             Objects.requireNonNull(propertyMappings, "propertyMappings must not be null.");
             propertyMappings.forEach(this::addMapping);
@@ -168,7 +144,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         }
 
         default Builder addOptionalMapping(PropertyMapping mapping) {
-            Objects.requireNonNull(mapping, "Given PropertyMapping must not be null.");
+            Objects.requireNonNull(mapping, "Given UnresolvedPropertyMapping must not be null.");
             if (mapping.hasValidName()) {
                 addMapping(mapping);
             }

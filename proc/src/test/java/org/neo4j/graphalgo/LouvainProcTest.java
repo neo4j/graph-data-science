@@ -364,8 +364,8 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
             ),
             setup -> {
                 PropertyMapping propertyMapping = setup.nodePropertyMappings().head().get();
-                assertEquals("foobar", propertyMapping.neoPropertyKey);
-                assertEquals("foobar", propertyMapping.propertyKey);
+                assertEquals("foobar", propertyMapping.neoPropertyKey());
+                assertEquals("foobar", propertyMapping.propertyKey());
             }
         );
     }
@@ -382,8 +382,8 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
             ),
             setup -> {
                 PropertyMapping propertyMapping = setup.relationshipPropertyMappings().head().get();
-                assertEquals("foobar", propertyMapping.neoPropertyKey);
-                assertEquals("foobar", propertyMapping.propertyKey);
+                assertEquals("foobar", propertyMapping.neoPropertyKey());
+                assertEquals("foobar", propertyMapping.propertyKey());
             }
         );
     }
@@ -412,8 +412,8 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
             config,
             setup -> {
                 PropertyMapping propertyMapping = setup.nodePropertyMappings().head().get();
-                assertEquals(seedProperty, propertyMapping.neoPropertyKey);
-                assertEquals(seedProperty, propertyMapping.propertyKey);
+                assertEquals(seedProperty, propertyMapping.neoPropertyKey());
+                assertEquals(seedProperty, propertyMapping.propertyKey());
             }
         );
 

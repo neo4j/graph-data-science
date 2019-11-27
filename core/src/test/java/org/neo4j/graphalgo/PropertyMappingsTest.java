@@ -40,7 +40,7 @@ class PropertyMappingsTest {
         PropertyMappings mappings = PropertyMappings.fromObject(Collections.singletonMap("foo", (Object) "bar"));
         assertEquals(mappings.numberOfMappings(), 1);
 
-        final PropertyMapping propertyMapping = mappings.iterator().next();
+        PropertyMapping propertyMapping = mappings.iterator().next();
         assertEquals(propertyMapping.propertyKey(), "foo");
         assertEquals(propertyMapping.neoPropertyKey(), "bar");
     }
@@ -59,14 +59,14 @@ class PropertyMappingsTest {
         ));
         assertEquals(mappings.numberOfMappings(), 2);
 
-        final Iterator<PropertyMapping> mappingIterator = mappings.iterator();
-        final PropertyMapping totalUsdMapping = mappingIterator.next();
+        Iterator<PropertyMapping> mappingIterator = mappings.iterator();
+        PropertyMapping totalUsdMapping = mappingIterator.next();
         assertEquals(totalUsdMapping.propertyKey(), "total_usd");
         assertEquals(totalUsdMapping.neoPropertyKey(), "usd");
         assertEquals(totalUsdMapping.deduplicationStrategy(), DeduplicationStrategy.MIN);
         assertEquals(totalUsdMapping.defaultValue(), 42.0);
 
-        final PropertyMapping transactionCountMapping = mappingIterator.next();
+        PropertyMapping transactionCountMapping = mappingIterator.next();
         assertEquals(transactionCountMapping.propertyKey(), "transaction_count");
         assertEquals(transactionCountMapping.neoPropertyKey(), "usd");
         assertEquals(transactionCountMapping.deduplicationStrategy(), DeduplicationStrategy.SUM);
@@ -75,7 +75,7 @@ class PropertyMappingsTest {
 
     @Test
     void failsOnNonStringOrMapInput() {
-        final IllegalArgumentException ex = assertThrows(
+        IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
                 () -> PropertyMappings.fromObject(5));
 

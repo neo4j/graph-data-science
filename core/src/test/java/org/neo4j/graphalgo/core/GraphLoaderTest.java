@@ -44,14 +44,14 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 class GraphLoaderTest {
 
     public static final String DB_CYPHER =
-            "CREATE" +
-            "  (n1:Node1 {prop1: 1})" +
-            ", (n2:Node2 {prop2: 2})" +
-            ", (n3:Node3 {prop3: 3})" +
-            ", (n1)-[:REL1 {prop1: 1}]->(n2)" +
-            ", (n1)-[:REL2 {prop2: 2}]->(n3)" +
-            ", (n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)" +
-            ", (n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3)";
+        "CREATE" +
+        "  (n1:Node1 {prop1: 1})" +
+        ", (n2:Node2 {prop2: 2})" +
+        ", (n3:Node3 {prop3: 3})" +
+        ", (n1)-[:REL1 {prop1: 1}]->(n2)" +
+        ", (n1)-[:REL2 {prop2: 2}]->(n3)" +
+        ", (n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)" +
+        ", (n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3)";
 
     private GraphDatabaseAPI db;
 
@@ -134,9 +134,10 @@ class GraphLoaderTest {
     @AllGraphTypesTest
     void testWithNodeProperties(Class<? extends GraphFactory> graphFactory) {
         PropertyMappings nodePropertyMappings = PropertyMappings.of(
-                PropertyMapping.of("prop1", "prop1", 0D),
-                PropertyMapping.of("prop2", "prop2", 0D),
-                PropertyMapping.of("prop3", "prop3", 0D));
+            PropertyMapping.of("prop1", "prop1", 0D),
+            PropertyMapping.of("prop2", "prop2", 0D),
+            PropertyMapping.of("prop3", "prop3", 0D)
+        );
 
         Graph graph = TestGraphLoader
             .from(db)

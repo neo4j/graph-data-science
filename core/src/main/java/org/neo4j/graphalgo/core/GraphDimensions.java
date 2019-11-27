@@ -24,6 +24,8 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
+import org.neo4j.graphalgo.ResolvedPropertyMapping;
+import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 
 import static java.util.stream.Collectors.joining;
@@ -37,18 +39,18 @@ public final class GraphDimensions {
     private final long highestNeoId;
     private long maxRelCount;
     private final LongSet nodeLabelIds;
-    private final PropertyMappings nodeProperties;
+    private final ResolvedPropertyMappings nodeProperties;
     private final RelationshipTypeMappings relTypeMappings;
-    private final PropertyMappings relProperties;
+    private final ResolvedPropertyMappings relProperties;
 
     public GraphDimensions(
             long nodeCount,
             long highestNeoId,
             long maxRelCount,
             LongSet nodeLabelIds,
-            PropertyMappings nodeProperties,
+            ResolvedPropertyMappings nodeProperties,
             RelationshipTypeMappings relTypeMappings,
-            PropertyMappings relProperties
+            ResolvedPropertyMappings relProperties
     ) {
         this.nodeCount = nodeCount;
         this.highestNeoId = highestNeoId;
@@ -83,7 +85,7 @@ public final class GraphDimensions {
         return nodeLabelIds;
     }
 
-    public PropertyMappings nodeProperties() {
+    public ResolvedPropertyMappings nodeProperties() {
         return nodeProperties;
     }
 
@@ -91,7 +93,7 @@ public final class GraphDimensions {
         return relTypeMappings;
     }
 
-    public PropertyMappings relProperties() {
+    public ResolvedPropertyMappings relProperties() {
         return relProperties;
     }
 
@@ -124,7 +126,7 @@ public final class GraphDimensions {
         checkValidProperties("Relationship", relProperties);
     }
 
-    private void checkValidProperties(String recordType, PropertyMappings mappings) {
+    private void checkValidProperties(String recordType, ResolvedPropertyMappings mappings) {
         String missingProperties = mappings
                 .stream()
                 .filter(mapping -> {
@@ -132,7 +134,7 @@ public final class GraphDimensions {
                     String propertyKey = mapping.neoPropertyKey();
                     return isNotEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
                 })
-                .map(PropertyMapping::neoPropertyKey)
+                .map(ResolvedPropertyMapping::neoPropertyKey)
                 .collect(joining("', '"));
         if (!missingProperties.isEmpty()) {
             throw new IllegalArgumentException(String.format(
@@ -147,9 +149,9 @@ public final class GraphDimensions {
         private long highestNeoId;
         private long maxRelCount;
         private LongSet nodeLabelIds;
-        private PropertyMappings nodeProperties;
+        private ResolvedPropertyMappings nodeProperties;
         private RelationshipTypeMappings relationshipTypeMappings;
-        private PropertyMappings relProperties;
+        private ResolvedPropertyMappings relProperties;
 
         public Builder() {
             this.highestNeoId = -1;
@@ -175,7 +177,7 @@ public final class GraphDimensions {
             return this;
         }
 
-        public Builder setNodeProperties(PropertyMappings nodeProperties) {
+        public Builder setNodeProperties(ResolvedPropertyMappings nodeProperties) {
             this.nodeProperties = nodeProperties;
             return this;
         }
@@ -185,7 +187,7 @@ public final class GraphDimensions {
             return this;
         }
 
-        public Builder setRelationshipProperties(PropertyMappings relProperties) {
+        public Builder setRelationshipProperties(ResolvedPropertyMappings relProperties) {
             this.relProperties = relProperties;
             return this;
         }
@@ -196,9 +198,9 @@ public final class GraphDimensions {
                     highestNeoId == -1 ? nodeCount : highestNeoId,
                     maxRelCount,
                     nodeLabelIds,
-                    nodeProperties == null ? PropertyMappings.of() : nodeProperties,
+                    nodeProperties == null ? ResolvedPropertyMappings.of() : nodeProperties,
                     relationshipTypeMappings,
-                    relProperties == null ? PropertyMappings.of() : relProperties
+                    relProperties == null ? ResolvedPropertyMappings.of() : relProperties
                 );
         }
 

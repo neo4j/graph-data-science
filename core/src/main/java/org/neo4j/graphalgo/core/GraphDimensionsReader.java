@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
+import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
@@ -75,8 +76,8 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         }
         RelationshipTypeMappings relationshipTypeMappings = mappingsBuilder.build();
 
-        PropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings());
-        PropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
+        ResolvedPropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings());
+        ResolvedPropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
 
         long nodeCount = nodeLabelIds.stream().mapToLong(dataRead::countsForNode).sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
@@ -104,8 +105,8 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .build();
     }
 
-    private PropertyMappings loadPropertyMapping(TokenRead tokenRead, PropertyMappings propertyMappings) {
-        PropertyMappings.Builder builder = PropertyMappings.builder();
+    private ResolvedPropertyMappings loadPropertyMapping(TokenRead tokenRead, PropertyMappings propertyMappings) {
+        ResolvedPropertyMappings.Builder builder = ResolvedPropertyMappings.builder();
         for (PropertyMapping mapping : propertyMappings) {
             String propertyName = mapping.neoPropertyKey();
             int key = propertyName != null ? tokenRead.propertyKey(propertyName) : TokenRead.NO_TOKEN;

@@ -33,7 +33,7 @@ class PropertyMappingTest {
 
     @Test
     void testFromObjectWithShorthandPropertyMapping() {
-        final PropertyMapping propertyMapping = PropertyMapping.fromObject("foo", "bar");
+        PropertyMapping propertyMapping = PropertyMapping.fromObject("foo", "bar");
         assertEquals(propertyMapping.propertyKey(), "foo");
         assertEquals(propertyMapping.neoPropertyKey(), "bar");
         assertEquals(propertyMapping.deduplicationStrategy(), DeduplicationStrategy.DEFAULT);
@@ -41,7 +41,7 @@ class PropertyMappingTest {
 
     @Test
     void testFromObjectWithMap() {
-        final PropertyMapping propertyMapping = PropertyMapping.fromObject("transaction_count", MapUtil.map(
+        PropertyMapping propertyMapping = PropertyMapping.fromObject("transaction_count", MapUtil.map(
                 "property", "usd",
                 "aggregation", "MIN",
                 "defaultValue", 42.0
