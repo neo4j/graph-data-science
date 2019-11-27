@@ -18,13 +18,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.impl.jaccard;
+package org.neo4j.graphalgo.impl.nodesim;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.nodesim.SimilarityResult;
+import org.neo4j.graphalgo.impl.nodesim.TopKMap;
 
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.impl.jaccard;
+package org.neo4j.graphalgo.impl.nodesim;
 
 import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.BitSet;
@@ -40,7 +40,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
+public class NodeSimilarity extends Algorithm<NodeSimilarity> {
 
     private final Graph graph;
     private final Config config;
@@ -53,7 +53,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private HugeObjectArray<long[]> vectors;
     private long nodesToCompare;
 
-    public NeighborhoodSimilarity(
+    public NodeSimilarity(
         Graph graph,
         Config config,
         ExecutorService executorService,
@@ -67,7 +67,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     @Override
-    public NeighborhoodSimilarity me() {
+    public NodeSimilarity me() {
         return this;
     }
 
@@ -119,7 +119,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private void prepare(Direction direction) {
         if (direction == Direction.BOTH) {
             throw new IllegalArgumentException(
-                "Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
+                "Direction BOTH is not supported by the NodeSimilarity algorithm.");
         }
 
         vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);

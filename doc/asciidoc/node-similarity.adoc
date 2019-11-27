@@ -1,34 +1,34 @@
-[[algorithms-neighborhood-similarity]]
-= The Neighborhood Similarity algorithm
+[[algorithms-node-similarity]]
+= The Node Similarity algorithm
 
 [abstract]
 --
-This section describes the Neighborhood Similarity (NHS) algorithm in the Neo4j Graph Algorithms library.
+This section describes the Node Similarity algorithm in the Neo4j Graph Algorithms library.
 --
 
 This topic includes:
 
-* <<algorithms-neighborhood-similarity-intro, Introduction>>
-* <<algorithms-neighborhood-similarity-syntax, Syntax>>
-* <<algorithms-neighborhood-similarity-examples, Examples>>
-** <<algorithms-neighborhood-similarity-examples-stream, Streaming results>>
-** <<algorithms-neighborhood-similarity-examples-write, Writing results>>
-** <<algorithms-neighborhood-similarity-examples-limits, Limiting results>>
-*** <<algorithms-neighborhood-similarity-examples-limits-topk-bottomk, topK and bottomK>>
-*** <<algorithms-neighborhood-similarity-examples-limits-topn-bottomn, topN and bottomN>>
-** <<algorithms-neighborhood-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
+* <<algorithms-node-similarity-intro, Introduction>>
+* <<algorithms-node-similarity-syntax, Syntax>>
+* <<algorithms-node-similarity-examples, Examples>>
+** <<algorithms-node-similarity-examples-stream, Streaming results>>
+** <<algorithms-node-similarity-examples-write, Writing results>>
+** <<algorithms-node-similarity-examples-limits, Limiting results>>
+*** <<algorithms-node-similarity-examples-limits-topk-bottomk, topK and bottomK>>
+*** <<algorithms-node-similarity-examples-limits-topn-bottomn, topN and bottomN>>
+** <<algorithms-node-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
 
 
-[[algorithms-neighborhood-similarity-intro]]
+[[algorithms-node-similarity-intro]]
 == Introduction
 
-The Neighborhood Similarity algorithm compares a set of nodes based on the nodes they are connected to.
+The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to.
 Two nodes are considered similar if they share many of the same neighbors.
-Neighborhood Similarity computes pair-wise similarities based on the Jaccard metric.
+Node Similarity computes pair-wise similarities based on the Jaccard metric.
 
 The input of this algorithm is a bipartite, connected graph containing two disjoint node sets.
 Each relationship starts from a node in the first node set and ends at a node in the second node set.
-The NHS algorithm compares all nodes from the first node set with each other based on their relationships to nodes in the second set.
+The Node Similarity algorithm compares all nodes from the first node set with each other based on their relationships to nodes in the second set.
 The complexity of this comparison grows quadratically with the number of nodes to compare.
 The algorithm reduces the complexity by ignoring disconnected nodes.
 
@@ -53,13 +53,13 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 ====
 
 
-[[algorithms-neighborhood-similarity-syntax]]
+[[algorithms-node-similarity-syntax]]
 == Syntax
 
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL algo.beta.jaccard(nodeFilter: STRING, relationshipFilter: STRING, {
+CALL algo.nodeSimilarity(nodeFilter: STRING, relationshipFilter: STRING, {
   write: BOOLEAN,
   writeProperty: STRING
   // additional configuration
@@ -124,11 +124,11 @@ YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
 | p100                  | double  | The 100 percentile of similarity scores computed.
 |===
 
-[[algorithms-neighborhood-similarity-syntax-stream]]
+[[algorithms-node-similarity-syntax-stream]]
 .The following describes the API for running the algorithm and streaming results:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream(nodeFilter: STRING, relationshipFilter: STRING, {
+CALL algo.nodeSimilarity.stream(nodeFilter: STRING, relationshipFilter: STRING, {
   // configuration
 })
 YIELD node1, node2, similarity
@@ -168,7 +168,7 @@ YIELD node1, node2, similarity
 |===
 
 
-[[algorithms-neighborhood-similarity-examples]]
+[[algorithms-node-similarity-examples]]
 == Examples
 
 Consider the graph created by the following Cypher statement:
@@ -200,9 +200,9 @@ This bipartite graph has two node sets, Person nodes and Instrument nodes.
 The two node sets are connected via LIKES relationships.
 Each relationship starts at a Person node and ends at an Instrument node.
 
-In the example, we want to use NHS to compare persons based on the instruments they like.
+In the example, we want to use the Node Similarity algorithm to compare persons based on the instruments they like.
 
-The NHS algorithm will only compute similarity for nodes that have a degree of at least 1.
+The Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1.
 In the example graph, the Eve node will not be compared to other Person nodes.
 
 The graph is bipartite, but the library does not support loading multiple node labels.
@@ -215,13 +215,13 @@ To circumvent this, a common node label like 'Node' can be added to Person and I
 ====
 
 
-[[algorithms-neighborhood-similarity-examples-stream]]
+[[algorithms-node-similarity-examples-stream]]
 === Streaming results
 
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING'
 })
 YIELD node1, node2, similarity
@@ -251,7 +251,7 @@ TopK is set to 10, topN is set to 0.
 Because of that the result set contains the top 10 similarity scores for each node.
 
 
-[[algorithms-neighborhood-similarity-examples-write]]
+[[algorithms-node-similarity-examples-write]]
 === Writing results
 
 To instead write the similarity results back to the graph in Neo4j, use the following query.
@@ -261,7 +261,7 @@ The similarity score is written as a property on the relationship.
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL algo.beta.jaccard('', 'LIKES', {
+CALL algo.nodeSimilarity('', 'LIKES', {
   direction: 'OUTGOING',
   write: true
 })
@@ -278,7 +278,7 @@ YIELD nodesCompared, relationships, write, writeProperty, writeRelationshipType;
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
 
 
-[[algorithms-neighborhood-similarity-examples-limits]]
+[[algorithms-node-similarity-examples-limits]]
 === Limiting results
 
 There are four limits that can be applied to the similarity results.
@@ -302,7 +302,7 @@ The default value for topK and bottomK is 10.
 |===
 
 
-[[algorithms-neighborhood-similarity-examples-limits-topk-bottomk]]
+[[algorithms-node-similarity-examples-limits-topk-bottomk]]
 ==== topK and bottomK
 
 TopK and bottomK are limits on the number of scores computed per node.
@@ -314,7 +314,7 @@ If neither is specified, topK is used.
 .The following will load the graph, run the algorithm, and stream the top 1 result per node:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING',
   topK: 1
 })
@@ -337,7 +337,7 @@ ORDER BY Person1
 .The following will load the graph, run the algorithm, and stream the bottom 1 result per node:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING',
   bottomK: 1
 })
@@ -358,7 +358,7 @@ ORDER BY Person1
 |===
 
 
-[[algorithms-neighborhood-similarity-examples-limits-topn-bottomn]]
+[[algorithms-node-similarity-examples-limits-topn-bottomn]]
 ==== topN and bottomN
 
 TopN and bottomN limit the number of similarity scores across all nodes.
@@ -370,7 +370,7 @@ A value of 0 means no global limit is imposed and all results from topK or botto
 .The following will load the graph, run the algorithm, and stream the 3 highest out of the top 1 results per node:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING',
   topK: 1,
   topN: 3
@@ -391,7 +391,7 @@ ORDER BY similarity DESC, Person1, Person2
 |===
 
 
-[[algorithms-neighborhood-similarity-examples-degree-similarity-cutoff]]
+[[algorithms-node-similarity-examples-degree-similarity-cutoff]]
 === Degree cutoff and similarity cutoff
 
 Degree cutoff is a lower limit on the node degree for a node to be considered in the comparisons.
@@ -400,7 +400,7 @@ This value can not be lower than 1.
 .The following will ignore nodes with less than 3 LIKES relationships:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING',
   degreeCutOff: 3
 })
@@ -429,7 +429,7 @@ Setting similarity cutoff to 0 may yield a very large result set, increased runt
 .The following will ignore node pairs with a similarty score less than 0.5:
 [source, cypher]
 ----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('', 'LIKES', {
   direction: 'OUTGOING',
   similarityCutoff: 0.5
 })

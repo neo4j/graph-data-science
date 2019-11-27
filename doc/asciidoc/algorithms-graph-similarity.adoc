@@ -8,6 +8,6 @@ This chapter provides explanations and examples for each of the graph similarity
 
 The following similarity algorithms can help calculate the similarity of nodes:
 
-* <<algorithms-neighborhood-similarity, Neighborhood Similarity>> (`algo.neighborhoodsimilarity.jaccard`)
+* <<algorithms-node-similarity, Node Similarity>> (`algo.nodeSimilarity`)
 
-include::neighborhood-similarity.adoc[leveloffset=+1]
+include::node-similarity.adoc[leveloffset=+1]

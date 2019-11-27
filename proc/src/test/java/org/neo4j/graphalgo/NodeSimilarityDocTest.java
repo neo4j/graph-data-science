@@ -28,7 +28,7 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class NeighborhoodSimilarityDocTest extends ProcTestBase {
+class NodeSimilarityDocTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
         "CREATE (alice:Person {name: 'Alice'})" +
@@ -57,7 +57,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );
         db.execute(DB_CYPHER);
-        registerProcedures(NeighborhoodSimilarityProc.class);
+        registerProcedures(NodeSimilarityProc.class);
         registerFunctions(GetNodeFunc.class);
     }
 
@@ -68,7 +68,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'" +
                        "    }" +
@@ -97,7 +97,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceWriteOutput() {
-        String query = "CALL algo.beta.jaccard('', 'LIKES', {" +
+        String query = "CALL algo.nodeSimilarity('', 'LIKES', {" +
                        "  direction: 'OUTGOING'," +
                        "  write: true" +
                        "})" +
@@ -116,7 +116,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceTopStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        topK: 1," +
@@ -140,7 +140,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceTopKStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        topK: 1" +
@@ -164,7 +164,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceBottomKStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        bottomK: 1" +
@@ -189,7 +189,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceDegreeCutoffStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        degreeCutoff: 3" +
@@ -211,7 +211,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceSimilarityCutoffStreamOutput() {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        similarityCutoff: 0.5" +

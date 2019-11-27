@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
+import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -58,7 +58,7 @@ import static org.neo4j.graphalgo.TestSupport.toArguments;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-class NeighborhoodSimilarityProcTest extends ProcTestBase {
+class NodeSimilarityProcTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -119,7 +119,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
-        registerProcedures(NeighborhoodSimilarityProc.class);
+        registerProcedures(NodeSimilarityProc.class);
     }
 
     @AfterEach
@@ -130,7 +130,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldStreamResults(String graphImpl, Direction direction) {
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +
@@ -159,7 +159,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldStreamTopResults(String graphImpl, Direction direction) {
         int topN = 2;
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +
@@ -201,7 +201,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                    " CREATE (person)-[:LIKES]->(thing)"
         );
 
-        String query = "CALL algo.beta.jaccard.stream(" +
+        String query = "CALL algo.nodeSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +
@@ -229,7 +229,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldWriteResults(String graphImpl, Direction direction) throws KernelException {
-        String query = "CALL algo.beta.jaccard(" +
+        String query = "CALL algo.nodeSimilarity(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +
@@ -349,7 +349,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
 
         IllegalArgumentException illegalArgumentException = assertThrows(
             IllegalArgumentException.class,
-            () -> new NeighborhoodSimilarityProc().config(procedureConfiguration)
+            () -> new NodeSimilarityProc().config(procedureConfiguration)
         );
         assertThat(illegalArgumentException.getMessage(), containsString(message));
     }
@@ -364,7 +364,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
 
         IllegalArgumentException illegalArgumentException = assertThrows(
             IllegalArgumentException.class,
-            () -> new NeighborhoodSimilarityProc().config(procedureConfiguration)
+            () -> new NodeSimilarityProc().config(procedureConfiguration)
         );
         assertThat(illegalArgumentException.getMessage(), is(expectedMessage));
     }
@@ -376,7 +376,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
 
         IllegalArgumentException illegalArgumentException = assertThrows(
             IllegalArgumentException.class,
-            () -> new NeighborhoodSimilarityProc().config(procedureConfiguration)
+            () -> new NodeSimilarityProc().config(procedureConfiguration)
         );
         assertThat(illegalArgumentException.getMessage(), is("Must set degree cutoff to 1 or greater"));
     }
@@ -385,7 +385,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     void shouldCreateValidDefaultAlgoConfig() {
         Map<String, Object> input = MapUtil.map();
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input, getUsername());
-        NeighborhoodSimilarity.Config config = new NeighborhoodSimilarityProc().config(procedureConfiguration);
+        NodeSimilarity.Config config = new NodeSimilarityProc().config(procedureConfiguration);
 
         assertEquals(10, config.topK());
         assertEquals(0, config.topN());
@@ -407,7 +407,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
             "batchSize", 100_000
         );
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input, getUsername());
-        NeighborhoodSimilarity.Config config = new NeighborhoodSimilarityProc().config(procedureConfiguration);
+        NodeSimilarity.Config config = new NodeSimilarityProc().config(procedureConfiguration);
 
         assertEquals(parameter.equals("top") ? 100 : -100, config.topK());
         assertEquals(parameter.equals("top") ? 1000 : -1000, config.topN());

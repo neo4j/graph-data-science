@@ -28,10 +28,10 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
-import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
-import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarityFactory;
-import org.neo4j.graphalgo.impl.jaccard.SimilarityGraphResult;
-import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
+import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
+import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityFactory;
+import org.neo4j.graphalgo.impl.nodesim.SimilarityGraphResult;
+import org.neo4j.graphalgo.impl.nodesim.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilarity> {
+public class NodeSimilarityProc extends BaseAlgoProc<NodeSimilarity> {
 
     private static final String SIMILARITY_CUTOFF_KEY = "similarityCutoff";
     private static final double SIMILARITY_CUTOFF_DEFAULT = 1E-42;
@@ -75,14 +75,14 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
     private static final Direction COMPUTE_DIRECTION_DEFAULT = OUTGOING;
 
-    @Procedure(name = "algo.beta.jaccard.stream", mode = Mode.READ)
-    @Description("CALL algo.beta.jaccard.stream(" +
+    @Procedure(name = "algo.nodeSimilarity.stream", mode = Mode.READ)
+    @Description("CALL algo.nodeSimilarity.stream(" +
                  "nodeFilter, relationshipFilter, {" +
                  "  similarityCutoff: 0.0, degreeCutoff: 0," +
                  "  topK: 10, bottomK: 10, topN: 0, bottomN: 0," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4" +
                  "}) " +
-                 "YIELD node1, node2, similarity - computes neighborhood similarities based on the Jaccard index")
+                 "YIELD node1, node2, similarity - computes node similarities based on the Jaccard index")
     public Stream<SimilarityResult> stream(
         @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
         @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,
@@ -97,25 +97,25 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             return Stream.empty();
         }
 
-        NeighborhoodSimilarity neighborhoodSimilarity = newAlgorithm(graph, configuration, tracker);
+        NodeSimilarity nodeSimilarity = newAlgorithm(graph, configuration, tracker);
 
         Direction direction = configuration.getDirection(COMPUTE_DIRECTION_DEFAULT);
         return runWithExceptionLogging(
-            "NeighborhoodSimilarity compute failed",
-            () -> neighborhoodSimilarity.computeToStream(direction)
+            "NodeSimilarity compute failed",
+            () -> nodeSimilarity.computeToStream(direction)
         );
     }
 
-    @Procedure(name = "algo.beta.jaccard", mode = Mode.WRITE)
-    @Description("CALL algo.beta.jaccard(" +
+    @Procedure(name = "algo.nodeSimilarity", mode = Mode.WRITE)
+    @Description("CALL algo.nodeSimilarity(" +
                  "nodeFilter, relationshipFilter, {" +
                  "  similarityCutoff: 0.0, degreeCutoff: 0," +
                  "  topK: 10, bottomK: 10, topN: 0, bottomN: 0," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4," +
                  "  write: 'true', writeRelationshipType: 'SIMILAR_TO', writeProperty: 'similarity', writeConcurrency: 4" +
                  "}) " +
-                 "YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty - computes neighborhood similarities based on the Jaccard index")
-    public Stream<NeighborhoodSimilarityResult> write(
+                 "YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty - computes node similarities based on the Jaccard index")
+    public Stream<NodeSimilarityResult> write(
         @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
         @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
@@ -138,12 +138,12 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             return Stream.of(resultBuilder.build());
         }
 
-        NeighborhoodSimilarity neighborhoodSimilarity = newAlgorithm(graph, configuration, tracker);
+        NodeSimilarity nodeSimilarity = newAlgorithm(graph, configuration, tracker);
 
         Direction direction = configuration.getDirection(COMPUTE_DIRECTION_DEFAULT);
         SimilarityGraphResult similarityGraphResult = runWithExceptionLogging(
-            "NeighborhoodSimilarity compute failed",
-            () -> resultBuilder.timeEval(() -> neighborhoodSimilarity.computeToGraph(direction))
+            "NodeSimilarity compute failed",
+            () -> resultBuilder.timeEval(() -> nodeSimilarity.computeToGraph(direction))
         );
         graph.releaseTopology();
 
@@ -154,11 +154,11 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
         if (configuration.isWriteFlag() && similarityGraph.relationshipCount() > 0) {
             runWithExceptionLogging(
-                "NeighborhoodSimilarity write-back failed",
+                "NodeSimilarity write-back failed",
                 () -> resultBuilder.timeWrite(
                     () -> {
                         RelationshipExporter exporter = RelationshipExporter
-                            .of(api, similarityGraph, similarityGraph.getLoadDirection(), neighborhoodSimilarity.terminationFlag)
+                            .of(api, similarityGraph, similarityGraph.getLoadDirection(), nodeSimilarity.terminationFlag)
                             .withLog(log)
                             .build();
                         if (configuration.computeHistogram()) {
@@ -200,7 +200,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         return histogram;
     }
 
-    @Procedure(value = "algo.beta.jaccard.memrec")
+    @Procedure(value = "algo.nodeSimilarity.memrec")
     public Stream<MemRecResult> memrec(
         @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
         @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,
@@ -217,16 +217,16 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
     }
 
     @Override
-    protected AlgorithmFactory<NeighborhoodSimilarity> algorithmFactory(ProcedureConfiguration config) {
+    protected AlgorithmFactory<NodeSimilarity> algorithmFactory(ProcedureConfiguration config) {
         // TODO: Should check if we are writing or streaming, but how to do that in memrec?
         boolean computesSimilarityGraph = true;
-        return new NeighborhoodSimilarityFactory(
+        return new NodeSimilarityFactory(
             config(config),
             computesSimilarityGraph
         );
     }
 
-    NeighborhoodSimilarity.Config config(ProcedureConfiguration procedureConfiguration) {
+    NodeSimilarity.Config config(ProcedureConfiguration procedureConfiguration) {
         validTopBottom(procedureConfiguration);
         int topK = validK(procedureConfiguration);
         int topN = validN(procedureConfiguration);
@@ -236,7 +236,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             .doubleValue();
         int concurrency = procedureConfiguration.getConcurrency();
         int batchSize = procedureConfiguration.getBatchSize();
-        return new NeighborhoodSimilarity.Config(similarityCutoff, degreeCutoff, topN, topK, concurrency, batchSize);
+        return new NodeSimilarity.Config(similarityCutoff, degreeCutoff, topN, topK, concurrency, batchSize);
     }
 
     private void validTopBottom(ProcedureConfiguration config) {
@@ -294,7 +294,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         return degreeCutoff;
     }
 
-    public static class NeighborhoodSimilarityResult {
+    public static class NodeSimilarityResult {
         public final long loadMillis;
         public final long computeMillis;
         public final long writeMillis;
@@ -321,7 +321,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         public final double p99;
         public final double p100;
 
-        NeighborhoodSimilarityResult(
+        NodeSimilarityResult(
             long loadMillis,
             long computeMillis,
             long writeMillis,
@@ -372,7 +372,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         }
     }
 
-    private static class WriteResultBuilder extends AbstractResultBuilder<NeighborhoodSimilarityResult> {
+    private static class WriteResultBuilder extends AbstractResultBuilder<NodeSimilarityResult> {
 
         private long nodesCompared = 0L;
 
@@ -405,8 +405,8 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         }
 
         @Override
-        public NeighborhoodSimilarityResult build() {
-            return new NeighborhoodSimilarityResult(
+        public NodeSimilarityResult build() {
+            return new NodeSimilarityResult(
                 loadMillis,
                 computeMillis,
                 writeMillis,
