@@ -22,4 +22,7 @@ dependencies {
 
     compile platform(dep.junit5bom)
     compile dep.junit5jupiter
+
+    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 }

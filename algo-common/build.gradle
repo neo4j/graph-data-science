@@ -8,4 +8,5 @@ dependencies {
     compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
 
     testCompile project(':test-utils')
+    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 }
