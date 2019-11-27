@@ -39,6 +39,9 @@ import org.neo4j.graphalgo.core.utils.Pools;
 public interface GraphCreateConfig extends BaseConfig {
 
     @Configuration.Parameter
+    String username();
+
+    @Configuration.Parameter
     String graphName();
 
     @Configuration.Parameter
@@ -123,10 +126,10 @@ public interface GraphCreateConfig extends BaseConfig {
         CypherMapWrapper config
     ) {
         GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
+            userName,
             graphName,
             nodeFilter,
             relationshipFilter,
-            userName,
             config
         );
         return graphCreateConfig.withNormalizedPropertyMappings();
