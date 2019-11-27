@@ -293,7 +293,7 @@ When components are merged, the resulting component is always the one with the l
 [NOTE]
 ====
 The algorithm assumes that nodes with the same seed value do in fact belong to the same component.
-If any two nodes in different components have the same seed, behaviour is undefined.
+If any two nodes in different components have the same seed, behavior is undefined.
 It is then recommended to run WCC without seeds.
 ====
 
