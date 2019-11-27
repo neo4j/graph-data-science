@@ -155,16 +155,15 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         while (true) {
             id1 = find(id1);
             id2 = find(id2);
-
             if (id1 == id2) {
                 return;
             }
 
-            // We need to do Union-by-Min, so the smalled ID wins.
+            // We need to do Union-by-Min, so the smaller community ID wins.
             // We also only update the entry for id1 and if that
             // is the smaller value, we need to swap ids so we update
             // only the value for id2, not id1.
-            if (id1 < id2) {
+            if (setIdOf(id1) < setIdOf(id2)) {
                 long tmp = id2;
                 id2 = id1;
                 id1 = tmp;
