@@ -159,7 +159,7 @@ public class GraphGenerator {
 
             AdjacencyBuilder outAdjacencyBuilder = null;
             AdjacencyBuilder inAdjacencyBuilder = null;
-            int[] propertyKeyIds = loadRelationshipProperty ? new int[]{1} : new int[0];
+            int[] propertyKeyIds = loadRelationshipProperty ? new int[]{-2} : new int[0];
 
             this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
             this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
@@ -227,6 +227,10 @@ public class GraphGenerator {
             relationshipStream.forEach(relationship -> addFromOriginal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property()));
         }
 
+        public synchronized void addFromOriginal(Relationship relationship) {
+            addFromOriginal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
+        }
+
         public void addFromInternal(long source, long target) {
             relationshipBuffer.add(source, target, -1L, -1L);
             if (relationshipBuffer.isFull()) {
@@ -244,7 +248,11 @@ public class GraphGenerator {
         }
 
         public <T extends Relationship> void addFromInternal(Stream<T> relationshipStream) {
-            relationshipStream.forEach(relationship -> addFromInternal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property()));
+            relationshipStream.forEach(this::addFromInternal);
+        }
+
+        public synchronized void addFromInternal(Relationship relationship) {
+            addFromInternal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
         }
 
         public HugeGraph build() {
