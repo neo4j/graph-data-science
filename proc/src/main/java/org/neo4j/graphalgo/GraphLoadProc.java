@@ -65,7 +65,10 @@ public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
             @Name(value = "relationship", defaultValue = "") String relationshipType,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
+        ProcedureConfiguration configuration = ProcedureConfiguration
+            .create(config, getUsername())
+            .setNodeLabelOrQuery(label)
+            .setRelationshipTypeOrQuery(relationshipType);
 
         GraphLoadStats stats = runWithExceptionLogging(
             "Graph loading failed",
@@ -89,7 +92,7 @@ public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
 
             PropertyMappings propertyMappings = config.getRelationshipProperties();
 
-            GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+            GraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
 
             GraphsByRelationshipType graph;
             if (!relationshipTypes.isEmpty() || propertyMappings.hasMappings()) {
@@ -116,19 +119,24 @@ public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration) {
-        ProcedureConfiguration config = newConfig(label, relationshipType, configuration);
-        GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+
+        ProcedureConfiguration config = ProcedureConfiguration
+            .create(configuration, getUsername())
+            .setNodeLabelOrQuery(label)
+            .setRelationshipTypeOrQuery(relationshipType);
+
+        GraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
         GraphDimensions dimensions = graphFactory.dimensions();;
 
-        MemoryTree memoryTree = getGraphMemoryEstimation(config, loader, graphFactory)
-            .estimate(dimensions, config.getConcurrency());
+        MemoryTree memoryTree = config.estimate(loader.toSetup(), graphFactory)
+            .estimate(dimensions, config.concurrency());
 
         return Stream.of(new MemRecResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
     }
 
     @Override
-    protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+    protected GraphLoader newConfigureLoader(GraphLoader loader, ProcedureConfiguration config) {
         final Direction direction = config.getDirection(Direction.OUTGOING);
         loader
                 .withNodeStatement(config.getNodeLabelOrQuery())

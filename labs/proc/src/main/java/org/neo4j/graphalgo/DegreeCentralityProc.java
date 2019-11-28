@@ -200,7 +200,7 @@ public final class DegreeCentralityProc extends LabsProc {
         DegreeCentrality algo = new DegreeCentrality(
                 graph,
                 Pools.DEFAULT,
-                configuration.getConcurrency(),
+                configuration.concurrency(),
                 computeDirection,
                 weightPropertyKey != null,
                 tracker

@@ -33,7 +33,7 @@ import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class NodeSimilarityFactory extends AlgorithmFactory<NodeSimilarity> {
+public class NodeSimilarityFactory extends AlgorithmFactory<NodeSimilarity, ProcedureConfiguration> {
 
     private final NodeSimilarity.Config config;
     private final boolean computesSimilarityGraph;

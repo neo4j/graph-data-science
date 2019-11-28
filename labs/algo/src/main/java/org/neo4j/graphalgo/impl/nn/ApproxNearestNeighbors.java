@@ -98,7 +98,7 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends Algorithm
         this.similarityCutoff = similarityCutoff;
         this.log = log;
         this.actualIterations = new AtomicInteger();
-        this.concurrency = configuration.getConcurrency();
+        this.concurrency = configuration.concurrency();
         this.executor = Pools.DEFAULT;
         this.rleDecoderFactory = rleDecoderFactory;
         this.similarityComputer = similarityComputer;

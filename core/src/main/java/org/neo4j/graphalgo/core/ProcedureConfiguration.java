@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -28,7 +30,9 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.newapi.BaseConfig;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -41,16 +45,20 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
+import static org.neo4j.graphalgo.core.ProcedureConstants.DEFAULT_VALUE_DEFAULT;
+import static org.neo4j.graphalgo.core.ProcedureConstants.NODECOUNT_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.NODE_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELCOUNT_KEY;
 
 /**
  * Wrapper around configuration options map
  */
-public class ProcedureConfiguration implements BaseConfig {
+public class ProcedureConfiguration implements BaseAlgoConfig {
 
     public static final String HEAVY_GRAPH_TYPE = "heavy";
     public static final String LIGHT_GRAPH_TYPE = "light";
+    public static final String ALGO_SPECIFIC_DEFAULT_WEIGHT = "algoSpecificDefaultWeight";
 
     private final CypherMapWrapper configurationMap;
 
@@ -68,6 +76,57 @@ public class ProcedureConfiguration implements BaseConfig {
         this.username = username;
         this.computeHistogram = computeHistogram;
         this.computeCommunityCount = computeCommunityCount;
+    }
+
+    @Override
+    public GraphLoader configureLoader(GraphLoader loader) {
+        if (hasWeightProperty()) {
+            loader.withRelationshipProperties(PropertyMapping.of(
+                getWeightProperty(),
+                getWeightPropertyDefaultValue(getAlgoSpecificDefaultWeightValue())
+            ));
+        }
+
+        String label = getNodeLabelOrQuery();
+        String relationship = getRelationshipOrQuery();
+        return loader.withUsername(getUsername())
+            .withName(getGraphName(null))
+            .withOptionalLabel(label)
+            .withOptionalRelationshipType(relationship)
+            .withConcurrency(getReadConcurrency())
+            .withBatchSize(getBatchSize())
+            .withDeduplicationStrategy(getDeduplicationStrategy())
+            .withParams(getParams())
+            .withLoadedGraph(getGraphImpl() == GraphCatalog.class);
+    }
+
+    private double getAlgoSpecificDefaultWeightValue() {
+        return configurationMap.getDouble(ALGO_SPECIFIC_DEFAULT_WEIGHT, DEFAULT_VALUE_DEFAULT);
+    }
+
+    public ProcedureConfiguration setAlgoSpecificDefaultWeight(double defaultWeightProperty) {
+        return new ProcedureConfiguration(configurationMap.withDouble(
+            ALGO_SPECIFIC_DEFAULT_WEIGHT,
+            defaultWeightProperty
+        ), username, computeHistogram, computeCommunityCount);
+    }
+
+    @Override
+    public MemoryEstimation estimate(GraphSetup setup, GraphFactory factory) {
+        MemoryEstimation estimation;
+
+        if (containsKey(NODECOUNT_KEY)) {
+            GraphDimensions dimensions = factory.dimensions();
+            long nodeCount = get(NODECOUNT_KEY, 0L);
+            long relCount = get(RELCOUNT_KEY, 0L);
+            dimensions.nodeCount(nodeCount);
+            dimensions.maxRelCount(relCount);
+            estimation = HugeGraphFactory
+                .getMemoryEstimation(setup, dimensions, true);
+        } else {
+            estimation = factory.memoryEstimation();
+        }
+        return estimation;
     }
 
     // Below methods are delegators that will be removed
@@ -333,11 +392,22 @@ public class ProcedureConfiguration implements BaseConfig {
         return configurationMap.getNumber(ProcedureConstants.BATCH_SIZE_KEY, ParallelUtil.DEFAULT_BATCH_SIZE).intValue();
     }
 
-    public int getConcurrency() {
-        return getConcurrency(Pools.DEFAULT_CONCURRENCY);
+    @Override
+    public int concurrency() {
+        return concurrency(Pools.DEFAULT_CONCURRENCY);
     }
 
-    public int getConcurrency(int defaultValue) {
+    @Override
+    public Optional<String> graphName() {
+        return Optional.ofNullable(getGraphName(null));
+    }
+
+    @Override
+    public Optional<GraphCreateConfig> implicitCreateConfig() {
+        return Optional.empty();
+    }
+
+    public int concurrency(int defaultValue) {
         int requestedConcurrency = configurationMap.getNumber(ProcedureConstants.CONCURRENCY_KEY, defaultValue).intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
     }

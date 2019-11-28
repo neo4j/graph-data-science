@@ -56,7 +56,7 @@ import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEFAULT_LOUVAIN_DI
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class LouvainProc extends BaseAlgoProc<Louvain> {
+public class LouvainProc extends BaseAlgoProcLegacyConfig<Louvain> {
 
     public static final String LEVELS_KEY = "levels";
     public static final int LEVELS_DEFAULT = 10;
@@ -125,7 +125,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        ProcedureConfiguration configuration = newConfig(config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
         return Stream.of(new MemRecResult(memoryEstimation));
     }
@@ -204,7 +204,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     }
 
     @Override
-    protected AlgorithmFactory<Louvain> algorithmFactory(ProcedureConfiguration config) {
+    protected AlgorithmFactory<Louvain, ProcedureConfiguration> algorithmFactory(ProcedureConfiguration config) {
         Louvain.Config louvainConfig = new Louvain.Config(
             config.getInt(LEVELS_KEY, LEVELS_DEFAULT),
             config.getInt(INNER_ITERATIONS_KEY, INNER_ITERATIONS_DEFAULT),

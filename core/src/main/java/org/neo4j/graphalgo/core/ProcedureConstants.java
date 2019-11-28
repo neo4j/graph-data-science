@@ -62,6 +62,10 @@ public final class ProcedureConstants {
     public static final String SORTED_KEY = "sorted";
     public static final String CYPHER_QUERY_KEY = "cypher";
 
+    // memrec specific params
+    public static final String NODECOUNT_KEY = "nodeCount";
+    public static final String RELCOUNT_KEY = "relationshipCount";
+
     // write specific params
     public static final String WRITE_FLAG_KEY = "write";
     public static final String WRITE_PROPERTY_KEY = "writeProperty";

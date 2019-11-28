@@ -117,7 +117,7 @@ public class MSColoringProc extends LabsProc {
 
 
         // evaluation
-        return new MSColoring(graph, Pools.DEFAULT, configuration.getConcurrency())
+        return new MSColoring(graph, Pools.DEFAULT, configuration.concurrency())
                 .compute()
                 .resultStream();
     }
@@ -136,7 +136,7 @@ public class MSColoringProc extends LabsProc {
     }
 
     private AtomicIntegerArray evaluate(Graph graph, ProcedureConfiguration config) {
-        return new MSColoring(graph, Pools.DEFAULT, config.getConcurrency())
+        return new MSColoring(graph, Pools.DEFAULT, config.concurrency())
                 .compute()
                 .getColors();
     }

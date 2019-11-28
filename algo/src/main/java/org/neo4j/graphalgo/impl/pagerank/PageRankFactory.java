@@ -37,7 +37,7 @@ import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
-public class PageRankFactory extends AlgorithmFactory<PageRank> {
+public class PageRankFactory extends AlgorithmFactory<PageRank, ProcedureConfiguration> {
 
     private final PageRankAlgorithmType algorithmType;
     private final PageRank.Config algoConfig;
@@ -58,7 +58,7 @@ public class PageRankFactory extends AlgorithmFactory<PageRank> {
             final AllocationTracker tracker,
             final Log log) {
         final int batchSize = configuration.getBatchSize();
-        final int concurrency = configuration.getConcurrency();
+        final int concurrency = configuration.concurrency();
         List<Node> sourceNodes = configuration.get("sourceNodes", Collections.emptyList());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 

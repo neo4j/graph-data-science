@@ -61,7 +61,7 @@ public final class GraphGenerateProc extends BaseProc<ProcedureConfiguration> {
             @Name(value = "averageDegree") Long averageDegree,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = newConfig(null, null, config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         GraphGenerationStats stats = runWithExceptionLogging(
                 "Graph generation failed",
                 () -> generateGraph(configuration, name, nodeCount, averageDegree));
@@ -164,15 +164,10 @@ public final class GraphGenerateProc extends BaseProc<ProcedureConfiguration> {
     }
 
     @Override
-    protected GraphLoader configureLoader(GraphLoader loader, ProcedureConfiguration config) {
-        return null;
-    }
-
-    @Override
     protected GraphLoader newConfigureLoader(
         GraphLoader loader, ProcedureConfiguration procedureConfiguration
     ) {
-        return configureLoader(loader, procedureConfiguration);
+        return loader;
     }
 
     public static class GraphGenerationStats {

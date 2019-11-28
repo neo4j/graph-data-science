@@ -166,7 +166,7 @@ public final class EigenvectorCentralityProc extends LabsProc {
 
         PageRank.Config algoConfig = new PageRank.Config(configuration.getIterations(DEFAULT_ITERATIONS), 1.0, PageRank.DEFAULT_TOLERANCE);
         final int batchSize = configuration.getBatchSize();
-        final int concurrency = configuration.getConcurrency();
+        final int concurrency = configuration.concurrency();
 
         log.debug("Computing eigenvector centrality with %d iterations.", algoConfig.iterations);
 

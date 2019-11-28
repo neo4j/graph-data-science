@@ -30,7 +30,7 @@ import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 
-public class WCCFactory<A extends WCC<A>> extends AlgorithmFactory<A> {
+public class WCCFactory<A extends WCC<A>> extends AlgorithmFactory<A, ProcedureConfiguration> {
 
     public static final String CONFIG_ALGO_TYPE = "algoType";
     public static final String CONFIG_THRESHOLD = "threshold";
@@ -51,7 +51,7 @@ public class WCCFactory<A extends WCC<A>> extends AlgorithmFactory<A> {
             final ProcedureConfiguration configuration,
             final AllocationTracker tracker,
             final Log log) {
-        int concurrency = configuration.getConcurrency();
+        int concurrency = configuration.concurrency();
         int minBatchSize = configuration.getBatchSize();
 
         NodeProperties seedProperty = configuration.getString(SEED_PROPERTY_KEY)

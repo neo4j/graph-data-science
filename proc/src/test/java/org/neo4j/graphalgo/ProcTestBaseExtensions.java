@@ -32,7 +32,11 @@ import java.util.function.Consumer;
 
 interface ProcTestBaseExtensions {
 
-    default <A extends Algorithm<A>, P extends BaseAlgoProc<A>, F extends AlgorithmFactory<A>> void getAlgorithmFactory(
+    default <
+        A extends Algorithm<A>,
+        P extends BaseAlgoProcLegacyConfig<A>,
+        F extends AlgorithmFactory<A, ProcedureConfiguration>>
+    void getAlgorithmFactory(
         Class<? extends P> procClazz,
         GraphDatabaseAPI db,
         String nodeLabels,
@@ -46,7 +50,10 @@ interface ProcTestBaseExtensions {
         });
     }
 
-    default <A extends Algorithm<A>, P extends BaseAlgoProc<A>> void getGraphSetup(
+    default <
+        A extends Algorithm<A>,
+        P extends BaseAlgoProcLegacyConfig<A>>
+    void getGraphSetup(
         Class<? extends P> procClazz,
         GraphDatabaseAPI db,
         String nodeLabels,
@@ -56,11 +63,14 @@ interface ProcTestBaseExtensions {
     ) {
         getAlgorithmProc(procClazz, db, (proc) -> {
             ProcedureConfiguration procedureConfiguration = proc.newConfig(nodeLabels, relTypes, config);
-            func.accept(proc.newLoader(procedureConfiguration, AllocationTracker.EMPTY).toSetup());
+            func.accept(proc.newLoader(AllocationTracker.EMPTY, procedureConfiguration).toSetup());
         });
     }
 
-    default <A extends Algorithm<A>, P extends BaseAlgoProc<A>> void getAlgorithmProc(
+    default <
+        A extends Algorithm<A>,
+        P extends BaseAlgoProc<A, ProcedureConfiguration>>
+    void getAlgorithmProc(
         Class<? extends P> procClazz,
         GraphDatabaseAPI db,
         Consumer<P> func

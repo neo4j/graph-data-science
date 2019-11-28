@@ -85,7 +85,7 @@ public class BetweennessCentralityProc extends LabsProc {
         }
 
         final RABrandesBetweennessCentrality algo =
-                new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, configuration.getConcurrency(), strategy(configuration, graph))
+                new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, configuration.concurrency(), strategy(configuration, graph))
                         .withTerminationFlag(TerminationFlag.wrap(transaction))
                         .withProgressLogger(ProgressLogger.wrap(log, "Randomized Approximate Brandes: BetweennessCentrality(parallel)"))
                         .withDirection(configuration.getDirection(Direction.OUTGOING))
@@ -121,7 +121,7 @@ public class BetweennessCentralityProc extends LabsProc {
             return Stream.empty();
         }
 
-        final int concurrency = configuration.getConcurrency();
+        final int concurrency = configuration.concurrency();
         if (concurrency > 1) {
             final ParallelBetweennessCentrality algo =
                     new ParallelBetweennessCentrality(graph, Pools.DEFAULT, concurrency)
@@ -150,7 +150,7 @@ public class BetweennessCentralityProc extends LabsProc {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
-        if (configuration.getConcurrency() > 1) {
+        if (configuration.concurrency() > 1) {
             return computeBetweennessParallel(label, relationship, configuration);
         } else {
             return computeBetweenness(label, relationship, configuration);
@@ -193,7 +193,7 @@ public class BetweennessCentralityProc extends LabsProc {
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         final RABrandesBetweennessCentrality.SelectionStrategy strategy = strategy(configuration, graph);
         final RABrandesBetweennessCentrality bc =
-                new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, configuration.getConcurrency(), strategy)
+                new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, configuration.concurrency(), strategy)
                         .withProgressLogger(ProgressLogger.wrap(log, "Randomized Approximate Brandes: BetweennessCentrality(parallel)"))
                         .withTerminationFlag(terminationFlag)
                         .withDirection(configuration.getDirection(Direction.OUTGOING))
@@ -308,7 +308,7 @@ public class BetweennessCentralityProc extends LabsProc {
 
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         final ParallelBetweennessCentrality bc =
-                new ParallelBetweennessCentrality(graph, Pools.DEFAULT, configuration.getConcurrency())
+                new ParallelBetweennessCentrality(graph, Pools.DEFAULT, configuration.concurrency())
                         .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality(parallel)"))
                         .withTerminationFlag(terminationFlag)
                         .withDirection(configuration.getDirection(Direction.OUTGOING));
@@ -384,7 +384,7 @@ public class BetweennessCentralityProc extends LabsProc {
                         configuration.getDirection(Direction.OUTGOING),
                         graph,
                         Pools.DEFAULT,
-                        configuration.getConcurrency());
+                        configuration.concurrency());
 
             default:
                 final double probability = configuration.getNumber(

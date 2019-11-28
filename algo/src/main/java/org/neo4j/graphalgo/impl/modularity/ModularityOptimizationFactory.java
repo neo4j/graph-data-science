@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 
-public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOptimization> {
+public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOptimization, ProcedureConfiguration> {
 
     public static final int DEFAULT_MAX_ITERATIONS = 10;
 
@@ -89,7 +89,7 @@ public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOp
             configuration.getIterations(DEFAULT_MAX_ITERATIONS),
             configuration.getNumber(TOLERANCE_KEY, TOLERANCE_DEFAULT).doubleValue(),
             seedProperty,
-            configuration.getConcurrency(),
+            configuration.concurrency(),
             configuration.getBatchSize(),
             Pools.DEFAULT,
             tracker,

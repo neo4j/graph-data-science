@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
-public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
+public class K1ColoringProc extends BaseAlgoProcLegacyConfig<K1Coloring> {
 
     public static final String COLOR_COUNT_FIELD_NAME = "colorCount";
 
@@ -164,7 +164,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
     }
 
     @Override
-    protected AlgorithmFactory<K1Coloring> algorithmFactory(ProcedureConfiguration config) {
+    protected AlgorithmFactory<K1Coloring, ProcedureConfiguration> algorithmFactory(ProcedureConfiguration config) {
         return new K1ColoringFactory();
     }
 

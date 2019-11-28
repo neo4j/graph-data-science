@@ -69,7 +69,7 @@ public class HarmonicCentralityProc extends LabsProc {
             return Stream.empty();
         }
 
-        final HarmonicCentrality algo = new HarmonicCentrality(graph, tracker, configuration.getConcurrency(), Pools.DEFAULT)
+        final HarmonicCentrality algo = new HarmonicCentrality(graph, tracker, configuration.concurrency(), Pools.DEFAULT)
                 .withProgressLogger(ProgressLogger.wrap(log, "HarmonicCentrality"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction))
                 .compute();
@@ -116,7 +116,7 @@ public class HarmonicCentralityProc extends LabsProc {
             return Stream.of(builder.build());
         }
 
-        final HarmonicCentrality algo = new HarmonicCentrality(graph, tracker, configuration.getConcurrency(), Pools.DEFAULT)
+        final HarmonicCentrality algo = new HarmonicCentrality(graph, tracker, configuration.concurrency(), Pools.DEFAULT)
                 .withProgressLogger(ProgressLogger.wrap(log, "HarmonicCentrality"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 

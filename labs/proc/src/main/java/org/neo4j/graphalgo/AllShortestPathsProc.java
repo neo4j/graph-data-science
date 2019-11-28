@@ -85,13 +85,13 @@ public class AllShortestPathsProc extends LabsProc {
             algo = new MSBFSAllShortestPaths(
                         graph,
                         tracker,
-                        configuration.getConcurrency(),
+                        configuration.concurrency(),
                         Pools.DEFAULT,
                         direction);
             algo.withProgressLogger(ProgressLogger.wrap(log, "AllShortestPaths(MultiSource)"));
         } else {
             // weighted ASP otherwise
-            algo = new WeightedAllShortestPaths(graph, Pools.DEFAULT, configuration.getConcurrency(), direction)
+            algo = new WeightedAllShortestPaths(graph, Pools.DEFAULT, configuration.concurrency(), direction)
                     .withProgressLogger(ProgressLogger.wrap(log, "WeightedAllShortestPaths)"));
         }
 

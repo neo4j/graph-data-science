@@ -82,7 +82,7 @@ public class TriangleProc extends LabsProc {
             return Stream.empty();
         }
 
-        final TriangleStream triangleStream = new TriangleStream(graph, Pools.DEFAULT, configuration.getConcurrency())
+        final TriangleStream triangleStream = new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
                 .withProgressLogger(ProgressLogger.wrap(log, "triangleStream"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 
@@ -118,7 +118,7 @@ public class TriangleProc extends LabsProc {
         return new IntersectingTriangleCount(
                 graph,
                 Pools.DEFAULT,
-                configuration.getConcurrency(),
+                configuration.concurrency(),
                 AllocationTracker.create())
                 .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction))
@@ -192,7 +192,7 @@ public class TriangleProc extends LabsProc {
             triangleCount = new IntersectingTriangleCount(
                     graph,
                     Pools.DEFAULT,
-                    configuration.getConcurrency(),
+                    configuration.concurrency(),
                     AllocationTracker.create())
                     .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction))

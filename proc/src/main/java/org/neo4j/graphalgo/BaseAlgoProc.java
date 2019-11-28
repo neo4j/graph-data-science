@@ -21,21 +21,29 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 
-public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc<ProcedureConfiguration> {
+import java.util.Optional;
+
+public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAlgoConfig> extends BaseProc<CONFIG> {
+
+    protected abstract CONFIG newConfig(
+        Optional<String> graphName,
+        CypherMapWrapper config
+    );
 
     protected final A newAlgorithm(
             final Graph graph,
-            final ProcedureConfiguration config,
+            final CONFIG config,
             final AllocationTracker tracker) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         return algorithmFactory(config)
@@ -44,42 +52,32 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc<Proc
                 .withTerminationFlag(terminationFlag);
     }
 
-    protected abstract GraphLoader configureGraphLoader(GraphLoader loader, ProcedureConfiguration config);
+    protected abstract GraphLoader configureGraphLoader(GraphLoader loader, CONFIG config);
 
-    protected abstract AlgorithmFactory<A> algorithmFactory(ProcedureConfiguration config);
+    protected abstract AlgorithmFactory<A, CONFIG> algorithmFactory(CONFIG config);
 
-    protected MemoryTreeWithDimensions memoryEstimation(final ProcedureConfiguration config) {
-        GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+    protected MemoryTreeWithDimensions memoryEstimation(final CONFIG config) {
+        GraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
         GraphDimensions dimensions = graphFactory.dimensions();
-        AlgorithmFactory<A> algorithmFactory = algorithmFactory(config);
+        AlgorithmFactory<A, CONFIG> algorithmFactory = algorithmFactory(config);
         MemoryEstimations.Builder estimationsBuilder = MemoryEstimations.builder("graph with procedure");
 
-        estimationsBuilder.add(getGraphMemoryEstimation(config, loader, graphFactory))
+        MemoryEstimation graphMemoryEstimation = config.estimate(loader.toSetup(), graphFactory);
+        estimationsBuilder.add(graphMemoryEstimation)
             .add(algorithmFactory.memoryEstimation());
 
-        MemoryTree memoryTree = estimationsBuilder.build().estimate(dimensions, config.getConcurrency());
+        MemoryTree memoryTree = estimationsBuilder.build().estimate(dimensions, config.concurrency());
 
         return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 
-    protected double getDefaultWeightProperty(ProcedureConfiguration config) {
-        return ProcedureConstants.DEFAULT_VALUE_DEFAULT;
-    }
-
     @Override
-    protected GraphLoader newConfigureLoader(GraphLoader loader, ProcedureConfiguration procedureConfiguration) {
-        return configureLoader(loader, procedureConfiguration);
-    }
-
-    @Override
-    protected GraphLoader configureLoader(GraphLoader loader, ProcedureConfiguration config) {
-        if (config.hasWeightProperty()) {
-            loader.withRelationshipProperties(PropertyMapping.of(
-                    config.getWeightProperty(),
-                    config.getWeightPropertyDefaultValue(getDefaultWeightProperty(config))
-            ));
+    protected GraphLoader newConfigureLoader(GraphLoader loader, CONFIG config) {
+        boolean implicitLoading = true;
+        if (implicitLoading) {
+            return configureGraphLoader(loader, config);
         }
-        return configureGraphLoader(loader, config);
+        return null;
     }
 }

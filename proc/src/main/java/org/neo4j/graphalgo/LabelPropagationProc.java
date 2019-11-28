@@ -58,7 +58,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
 @SuppressWarnings("unused")
-public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
+public final class LabelPropagationProc extends BaseAlgoProcLegacyConfig<LabelPropagation> {
 
     private static final String CONFIG_WEIGHT_KEY = "weightProperty";
     private static final String CONFIG_OLD_SEED_KEY = "partitionProperty";
@@ -157,9 +157,9 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation> algorithmFactory(ProcedureConfiguration config) {
+    protected AlgorithmFactory<LabelPropagation, ProcedureConfiguration> algorithmFactory(ProcedureConfiguration config) {
         int batchSize = config.getBatchSize();
-        int concurrency = config.getConcurrency();
+        int concurrency = config.concurrency();
         String seedProperty = config.getString(SEED_PROPERTY_KEY, CONFIG_OLD_SEED_KEY, null);
         String weightProperty = config.getString(CONFIG_WEIGHT_KEY, null);
         LabelPropagation.Config algoConfig = new LabelPropagation.Config(seedProperty, weightProperty, batchSize, concurrency);

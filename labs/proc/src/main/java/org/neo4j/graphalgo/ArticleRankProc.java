@@ -169,7 +169,7 @@ public final class ArticleRankProc extends LabsProc{
         );
 
         final int batchSize = configuration.getBatchSize();
-        final int concurrency = configuration.getConcurrency();
+        final int concurrency = configuration.concurrency();
 
         log.debug("Computing article rank with damping of %f and %d iterations.",
                 algoConfig.dampingFactor,

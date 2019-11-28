@@ -29,10 +29,13 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 
 @ValueClass
 @Configuration("GraphCreateConfigImpl")
@@ -101,6 +104,15 @@ public interface GraphCreateConfig extends BaseConfig {
                 .build();
         }
         return this;
+    }
+
+    @Configuration.Ignore
+    @Override
+    default MemoryEstimation estimate(
+        GraphSetup setup, GraphFactory factory
+    ) {
+        // TODO: add nodeCount / relCount config keys and if they are given, use them to build GraphDimensions
+        return factory.memoryEstimation();
     }
 
     static GraphCreateConfig legacyFactory(String graphName) {

@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
-public class K1ColoringFactory extends AlgorithmFactory<K1Coloring> {
+public class K1ColoringFactory extends AlgorithmFactory<K1Coloring, ProcedureConfiguration> {
 
     public static final int DEFAULT_ITERATIONS = 10;
     public static final Direction DEFAULT_DIRECTION = Direction.OUTGOING;
@@ -43,7 +43,7 @@ public class K1ColoringFactory extends AlgorithmFactory<K1Coloring> {
         final AllocationTracker tracker,
         final Log log
     ) {
-        int concurrency = configuration.getConcurrency();
+        int concurrency = configuration.concurrency();
         int batchSize = configuration.getBatchSize();
 
         int maxIterations = configuration.getIterations(DEFAULT_ITERATIONS);

@@ -119,6 +119,7 @@ public class GraphLoader {
         this.executorService = Objects.requireNonNull(executorService);
     }
 
+    @Deprecated
     public GraphLoader init(
         Log log,
         @Nullable String label,

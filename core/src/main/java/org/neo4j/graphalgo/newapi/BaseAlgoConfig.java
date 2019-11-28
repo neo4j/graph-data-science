@@ -21,25 +21,22 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 
-public interface BaseConfig {
-    @Configuration.Parameter
-    String username();
+import java.util.Optional;
+
+public interface BaseAlgoConfig extends BaseConfig {
+    int concurrency();
 
     @Configuration.Ignore
+    Optional<String> graphName();
+
+    @Configuration.Ignore
+    Optional<GraphCreateConfig> implicitCreateConfig();
+
+    @Override
     default GraphLoader configureLoader(GraphLoader loader) {
+        implicitCreateConfig().ifPresent(c -> c.configureLoader(loader));
         return loader;
     }
-
-    MemoryEstimation estimate(GraphSetup setup, GraphFactory factory);
-
-    @Configuration.Ignore
-    default Class<? extends GraphFactory> getGraphImpl() {
-        return HugeGraphFactory.class;
-    };
 }

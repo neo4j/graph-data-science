@@ -337,7 +337,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT,
-                configuration.getConcurrency(),
+                configuration.concurrency(),
                 configuration.getNumber("cutoff", 100_000).intValue())
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))
                 .withTerminationFlag(terminationFlag);
@@ -390,7 +390,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             return Stream.empty();
         }
         final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT,
-                configuration.getConcurrency(),
+                configuration.concurrency(),
                 configuration.getNumber("cutoff", 100_000).intValue())
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
@@ -427,7 +427,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             return Stream.empty();
         }
         final ForwardBackwardScc algo = new ForwardBackwardScc(graph, Pools.DEFAULT,
-                configuration.getConcurrency())
+                configuration.concurrency())
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(ForwardBackward)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction))
                 .compute(graph.toMappedNodeId(startNodeId));

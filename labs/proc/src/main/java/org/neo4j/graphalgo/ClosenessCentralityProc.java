@@ -70,7 +70,7 @@ public class ClosenessCentralityProc extends LabsProc {
         final MSClosenessCentrality algo = new MSClosenessCentrality(
                 graph,
                 tracker,
-                configuration.getConcurrency(),
+                configuration.concurrency(),
                 Pools.DEFAULT, configuration.get("improved", Boolean.FALSE));
         algo
                 .withProgressLogger(ProgressLogger.wrap(log, "ClosenessCentrality(MultiSource)"))
@@ -115,7 +115,7 @@ public class ClosenessCentralityProc extends LabsProc {
         final MSClosenessCentrality algo = new MSClosenessCentrality(
                 graph,
                 tracker,
-                configuration.getConcurrency(),
+                configuration.concurrency(),
                 Pools.DEFAULT,
                 configuration.get("improved", Boolean.FALSE));
         algo

@@ -46,6 +46,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
@@ -54,11 +55,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
 
     private static final String HISTOGRAM_FIELD_NAME = "histogram";
-
-    @Override
-    protected GraphLoader configureLoader(GraphLoader loader, ProcedureConfiguration config) {
-        return loader;
-    }
 
     @Override
     protected GraphLoader newConfigureLoader(

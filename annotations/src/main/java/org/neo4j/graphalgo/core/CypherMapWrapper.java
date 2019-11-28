@@ -251,4 +251,10 @@ public final class CypherMapWrapper {
         newMap.put(key, value);
         return new CypherMapWrapper(newMap);
     }
+
+    CypherMapWrapper withDouble(String key, Double value) {
+        HashMap<String, Object> newMap = new HashMap<>(config);
+        newMap.put(key, value);
+        return new CypherMapWrapper(newMap);
+    }
 }

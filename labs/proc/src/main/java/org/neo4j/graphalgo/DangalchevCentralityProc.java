@@ -68,7 +68,7 @@ public class DangalchevCentralityProc extends LabsProc {
             return Stream.empty();
         }
 
-        final DangalchevClosenessCentrality algo = new DangalchevClosenessCentrality(graph, configuration.getConcurrency(), Pools.DEFAULT)
+        final DangalchevClosenessCentrality algo = new DangalchevClosenessCentrality(graph, configuration.concurrency(), Pools.DEFAULT)
                 .withProgressLogger(ProgressLogger.wrap(log, "DangalchevCentrality"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction))
                 .compute();
@@ -110,7 +110,7 @@ public class DangalchevCentralityProc extends LabsProc {
             return Stream.of(builder.build());
         }
 
-        final DangalchevClosenessCentrality algo = new DangalchevClosenessCentrality(graph, configuration.getConcurrency(), Pools.DEFAULT)
+        final DangalchevClosenessCentrality algo = new DangalchevClosenessCentrality(graph, configuration.concurrency(), Pools.DEFAULT)
                 .withProgressLogger(ProgressLogger.wrap(log, "DangalchevCentrality"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 

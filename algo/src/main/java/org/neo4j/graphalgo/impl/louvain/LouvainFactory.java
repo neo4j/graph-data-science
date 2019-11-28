@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.impl.modularity.ModularityOptimizationFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
-public class LouvainFactory extends AlgorithmFactory<Louvain> {
+public class LouvainFactory extends AlgorithmFactory<Louvain, ProcedureConfiguration> {
 
     public static final Direction DEFAULT_LOUVAIN_DIRECTION = Direction.BOTH;
     public Louvain.Config config;
@@ -54,7 +54,7 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
             config,
             configuration.getDirection(DEFAULT_LOUVAIN_DIRECTION),
             Pools.DEFAULT,
-            configuration.getConcurrency(),
+            configuration.concurrency(),
             log,
             tracker
         );

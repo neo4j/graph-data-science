@@ -88,7 +88,7 @@ public class NodeWalkerProc extends LabsProc {
 
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
 
-        int concurrency = configuration.getConcurrency();
+        int concurrency = configuration.concurrency();
 
         Boolean returnPath = configuration.get("path", false);
 

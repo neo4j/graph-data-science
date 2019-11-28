@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
 
-public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimization> {
+public class ModularityOptimizationProc extends BaseAlgoProcLegacyConfig<ModularityOptimization> {
 
     @Procedure(name = "algo.beta.modularityOptimization.write", mode = Mode.WRITE)
     @Description("CALL algo.beta.modularityOptimization.write(" +
@@ -163,7 +163,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
     }
 
     @Override
-    protected AlgorithmFactory<ModularityOptimization> algorithmFactory(ProcedureConfiguration config) {
+    protected AlgorithmFactory<ModularityOptimization, ProcedureConfiguration> algorithmFactory(ProcedureConfiguration config) {
         return new ModularityOptimizationFactory();
     }
 

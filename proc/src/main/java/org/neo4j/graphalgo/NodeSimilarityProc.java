@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-public class NodeSimilarityProc extends BaseAlgoProc<NodeSimilarity> {
+public class NodeSimilarityProc extends BaseAlgoProcLegacyConfig<NodeSimilarity> {
 
     private static final String SIMILARITY_CUTOFF_KEY = "similarityCutoff";
     private static final double SIMILARITY_CUTOFF_DEFAULT = 1E-42;
@@ -221,7 +221,7 @@ public class NodeSimilarityProc extends BaseAlgoProc<NodeSimilarity> {
     }
 
     @Override
-    protected AlgorithmFactory<NodeSimilarity> algorithmFactory(ProcedureConfiguration config) {
+    protected AlgorithmFactory<NodeSimilarity, ProcedureConfiguration> algorithmFactory(ProcedureConfiguration config) {
         // TODO: Should check if we are writing or streaming, but how to do that in memrec?
         boolean computesSimilarityGraph = true;
         return new NodeSimilarityFactory(
@@ -238,7 +238,7 @@ public class NodeSimilarityProc extends BaseAlgoProc<NodeSimilarity> {
         double similarityCutoff = procedureConfiguration
             .getNumber(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT)
             .doubleValue();
-        int concurrency = procedureConfiguration.getConcurrency();
+        int concurrency = procedureConfiguration.concurrency();
         int batchSize = procedureConfiguration.getBatchSize();
         return new NodeSimilarity.Config(similarityCutoff, degreeCutoff, topN, topK, concurrency, batchSize);
     }

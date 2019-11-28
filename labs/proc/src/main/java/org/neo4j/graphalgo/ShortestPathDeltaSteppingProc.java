@@ -99,7 +99,7 @@ public class ShortestPathDeltaSteppingProc extends LabsProc {
         final ShortestPathDeltaStepping algo = new ShortestPathDeltaStepping(graph, delta, direction)
                 .withProgressLogger(ProgressLogger.wrap(log, "ShortestPaths(DeltaStepping)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .withExecutorService(Executors.newFixedThreadPool(configuration.getConcurrency()))
+                .withExecutorService(Executors.newFixedThreadPool(configuration.concurrency()))
                 .compute(startNode.getId());
 
         graph.release();
