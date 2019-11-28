@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core;
 
+import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongSet;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
@@ -33,9 +35,9 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.newapi.InternalReadOps;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
     private final GraphSetup setup;
@@ -54,12 +56,14 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     public GraphDimensions apply(final KernelTransaction transaction) throws RuntimeException {
         TokenRead tokenRead = transaction.tokenRead();
         Read dataRead = transaction.dataRead();
-        Set<Integer> nodeLabelIds = readTokens
-            ? NodeLabels.parse(setup.nodeLabel())
+
+        NodeLabelIds nodeLabelIds = new NodeLabelIds();
+        if (readTokens) {
+            NodeLabels.parse(setup.nodeLabel())
                 .stream()
                 .map(tokenRead::nodeLabel)
-                .collect(Collectors.toSet())
-            : Collections.emptySet();
+                .forEach(nodeLabelIds.ids::add);
+        }
 
         RelationshipTypeMappings.Builder mappingsBuilder = new RelationshipTypeMappings.Builder();
         if (readTokens && !setup.loadAnyRelationshipType()) {
@@ -75,30 +79,23 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         PropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings());
         PropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
 
-        final long nodeCount = nodeLabelIds.isEmpty()
-            ? dataRead.countsForNode(-1)
-            : nodeLabelIds.stream().mapToLong(dataRead::countsForNode).sum();
+        long nodeCount = nodeLabelIds.stream().mapToLong(dataRead::countsForNode).sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
         // TODO: this will double count relationships between distinct labels
-        final long maxRelCount = nodeLabelIds.isEmpty()
-            ? relationshipTypeMappings
-                .stream()
-                .filter(RelationshipTypeMapping::doesExist)
-                .mapToLong(m -> maxRelCountForLabelAndType(dataRead, -1, m.typeId()))
-                .sum()
-            : relationshipTypeMappings
-                .stream()
-                .filter(RelationshipTypeMapping::doesExist)
-                .flatMapToLong(relationshipTypeMapping -> nodeLabelIds.stream()
-                    .mapToLong(nodeLabelId ->
-                        maxRelCountForLabelAndType(dataRead, nodeLabelId, relationshipTypeMapping.typeId()))
-                ).sum();
+        long maxRelCount = relationshipTypeMappings
+            .stream()
+            .filter(RelationshipTypeMapping::doesExist)
+            .flatMapToLong(
+                relationshipTypeMapping -> nodeLabelIds.stream()
+                .mapToLong(nodeLabelId -> maxRelCountForLabelAndType(dataRead, nodeLabelId, relationshipTypeMapping.typeId()))
+            ).sum();
+
 
         return new GraphDimensions.Builder()
                 .setNodeCount(nodeCount)
                 .setHighestNeoId(allNodesCount)
                 .setMaxRelCount(maxRelCount)
-                .setNodeLabelIds(nodeLabelIds)
+                .setNodeLabelIds(nodeLabelIds.longSet())
                 .setNodeProperties(nodeProperties)
                 .setRelationshipTypeMappings(relationshipTypeMappings)
                 .setRelationshipProperties(relProperties)
@@ -120,6 +117,24 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 dataRead.countsForRelationshipWithoutTxState(labelId, id, Read.ANY_LABEL),
                 dataRead.countsForRelationshipWithoutTxState(Read.ANY_LABEL, id, labelId)
         );
+    }
+
+    static class NodeLabelIds {
+        Set<Integer> ids;
+
+        NodeLabelIds() {
+            this.ids = new HashSet<>();
+        }
+
+        Stream<Integer> stream() {
+            return ids.isEmpty() ? Stream.of(-1) : ids.stream();
+        }
+
+        LongSet longSet() {
+            LongSet longSet = new LongHashSet(ids.size());
+            ids.forEach(longSet::add);
+            return longSet;
+        }
     }
 
 }

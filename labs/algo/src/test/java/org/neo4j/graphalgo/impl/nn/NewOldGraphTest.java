@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.impl.nn;
 
+import com.carrotsearch.hppc.LongHashSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.loading.IdMap;
@@ -48,7 +49,7 @@ class NewOldGraphTest {
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, AllocationTracker.EMPTY);
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null);
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, Collections.emptySet(), numberOfNodes, false);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), numberOfNodes, false);
 
         for (int i = 0; i < numberOfNodes; i++) {
              buffer.add(i, -1);
@@ -79,7 +80,7 @@ class NewOldGraphTest {
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, AllocationTracker.EMPTY);
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null);
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, Collections.emptySet(), numberOfNodes, false);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), numberOfNodes, false);
 
         for (int i = 0; i < numberOfNodes; i++) {
             buffer.add(i, -1);
@@ -112,7 +113,7 @@ class NewOldGraphTest {
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, AllocationTracker.EMPTY);
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null);
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, Collections.emptySet(), numberOfNodes, false);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), numberOfNodes, false);
 
         for (int i = 0; i < numberOfNodes; i++) {
             buffer.add(i, -1);

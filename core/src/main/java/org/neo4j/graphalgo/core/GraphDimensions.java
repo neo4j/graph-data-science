@@ -19,13 +19,12 @@
  */
 package org.neo4j.graphalgo.core;
 
+import com.carrotsearch.hppc.LongSet;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
-
-import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -37,7 +36,7 @@ public final class GraphDimensions {
     private long nodeCount;
     private final long highestNeoId;
     private long maxRelCount;
-    private final Set<Integer> nodeLabelIds;
+    private final LongSet nodeLabelIds;
     private final PropertyMappings nodeProperties;
     private final RelationshipTypeMappings relTypeMappings;
     private final PropertyMappings relProperties;
@@ -46,7 +45,7 @@ public final class GraphDimensions {
             long nodeCount,
             long highestNeoId,
             long maxRelCount,
-            Set<Integer> nodeLabelIds,
+            LongSet nodeLabelIds,
             PropertyMappings nodeProperties,
             RelationshipTypeMappings relTypeMappings,
             PropertyMappings relProperties
@@ -80,7 +79,7 @@ public final class GraphDimensions {
         this.maxRelCount = maxRelCount;
     }
 
-    public Set<Integer> nodeLabelIds() {
+    public LongSet nodeLabelIds() {
         return nodeLabelIds;
     }
 
@@ -97,7 +96,7 @@ public final class GraphDimensions {
     }
 
     public void checkValidNodePredicate(GraphSetup setup) {
-        if (isNotEmpty(setup.nodeLabel()) && nodeLabelIds().stream().anyMatch(id -> id == NO_SUCH_LABEL)) {
+        if (isNotEmpty(setup.nodeLabel()) && nodeLabelIds().contains(NO_SUCH_LABEL)) {
             throw new IllegalArgumentException(String.format("Invalid node projection, one or more labels not found: '%s'", setup.nodeLabel()));
         }
     }
@@ -147,7 +146,7 @@ public final class GraphDimensions {
         private long nodeCount;
         private long highestNeoId;
         private long maxRelCount;
-        private Set<Integer> nodeLabelIds;
+        private LongSet nodeLabelIds;
         private PropertyMappings nodeProperties;
         private RelationshipTypeMappings relationshipTypeMappings;
         private PropertyMappings relProperties;
@@ -171,7 +170,7 @@ public final class GraphDimensions {
             return this;
         }
 
-        public Builder setNodeLabelIds(Set<Integer> nodeLabelIds) {
+        public Builder setNodeLabelIds(LongSet nodeLabelIds) {
             this.nodeLabelIds = nodeLabelIds;
             return this;
         }

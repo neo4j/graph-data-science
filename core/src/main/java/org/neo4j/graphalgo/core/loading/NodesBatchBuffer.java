@@ -19,26 +19,22 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.collection.primitive.Primitive;
-import org.neo4j.collection.primitive.PrimitiveLongSet;
+import com.carrotsearch.hppc.LongSet;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 
-import java.util.Set;
-
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
-    private final PrimitiveLongSet nodeLabelIds;
+    private final LongSet nodeLabelIds;
     private final NodeStore nodeStore;
 
     // property ids, consecutive
     private final long[] properties;
 
-    public NodesBatchBuffer(final NodeStore store, final Set<Integer> nodeLabelIds, int capacity, boolean readProperty) {
+    public NodesBatchBuffer(final NodeStore store, final LongSet labels, int capacity, boolean readProperty) {
         super(capacity);
-        this.nodeLabelIds = Primitive.longSet();
-        nodeLabelIds.forEach(this.nodeLabelIds::add);
+        this.nodeLabelIds = labels;
         this.nodeStore = store;
         this.properties = readProperty ? new long[capacity] : null;
     }
