@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 
 @Threads(1)
 @Fork(value = 1, jvmArgs = {"-Xms4g", "-Xmx4g", "-XX:+UseG1GC"})
-@Warmup(iterations = 10, time = 1)
+@Warmup(iterations = 5, time = 1)
 @Measurement(iterations = 10, time = 2)
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
@@ -60,6 +60,12 @@ public class GraphLoadingBenchmark {
 
     @Param({"L01"})
     String graphId;
+
+    @Param({"Comment", ""})
+    String label;
+
+    @Param({"Comment | Person"})
+    String multiLabel;
 
     private GraphDatabaseAPI db;
     private Graph graph;
@@ -80,7 +86,17 @@ public class GraphLoadingBenchmark {
     public Graph loadGraph() {
         graph = new GraphLoader(db, Pools.DEFAULT)
             .withDirection(Direction.OUTGOING)
-            .withLabel("Person")
+            .withLabel(label)
+            .load(HugeGraphFactory.class);
+        System.out.println("graph.nodeCount() = " + graph.nodeCount());
+        return graph;
+    }
+
+    @Benchmark
+    public Graph multiLabelLoadGraph() {
+        graph = new GraphLoader(db, Pools.DEFAULT)
+            .withDirection(Direction.OUTGOING)
+            .withLabel("Person | Comment")
             .load(HugeGraphFactory.class);
         System.out.println("graph.nodeCount() = " + graph.nodeCount());
         return graph;
