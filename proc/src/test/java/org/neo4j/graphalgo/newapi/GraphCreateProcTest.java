@@ -27,19 +27,25 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anything;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.helpers.collection.MapUtil.map;
@@ -336,8 +342,6 @@ class GraphCreateProcTest extends ProcTestBase {
         Map<String, Object> nodeProjection = map("B", map("label", "A", "properties", properties));
         Map<String, Object> expectedNodeProjection = map("B", map("label", "A", "properties", expectedProperties));
 
-
-        // TODO: check property values on graph
         assertCypherResult(
             "CALL algo.beta.graph.create($name, $nodeProjection, {})",
             map("name", name, "nodeProjection", nodeProjection),
@@ -350,6 +354,9 @@ class GraphCreateProcTest extends ProcTestBase {
                 "createMillis", instanceOf(Long.class)
             ))
         );
+        List<Graph> graphs = new ArrayList<>(GraphCatalog.getLoadedGraphs("").values());
+        assertThat(graphs, hasSize(1));
+        assertThat(graphs.get(0).availableNodeProperties(), contains(expectedProperties.keySet().toArray()));
     }
 
     @ParameterizedTest(name = "{0}, relFilter = {1}")
