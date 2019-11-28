@@ -139,7 +139,7 @@ public final class TestGraphLoader {
             maybeLabel.ifPresent(graphLoader::withLabel);
             maybeRelType.ifPresent(graphLoader::withRelationshipType);
         }
-        graphLoader.withDeduplicationStrategy(maybeDeduplicationStrategy.orElse(DeduplicationStrategy.SKIP));
+        graphLoader.withDeduplicationStrategy(maybeDeduplicationStrategy.orElse(DeduplicationStrategy.SINGLE));
         graphLoader.withRelationshipProperties(relProperties);
         graphLoader.withOptionalNodeProperties(nodeProperties);
 

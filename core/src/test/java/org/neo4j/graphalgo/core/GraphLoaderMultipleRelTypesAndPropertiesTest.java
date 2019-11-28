@@ -161,7 +161,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     void testLoadDuplicateRelationshipsWithWeightsAggregation(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
-            .withDeduplicationStrategy(SKIP)
+            .withDeduplicationStrategy(SINGLE)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .buildGraph(graphFactory);
 
