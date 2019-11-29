@@ -45,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.GraphGenerateProc.RELATIONSHIP_SEED_KEY;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.core.ProcedureConstants.*;
 import static org.neo4j.helpers.collection.MapUtil.map;
@@ -76,6 +77,7 @@ class GraphGenerateProcTest extends ProcTestBase {
                     assertEquals("foo", row.getString(RELATIONSHIP_PROPERTY_NAME_KEY));
                     assertEquals("UNIFORM", row.get(RELATIONSHIP_DISTRIBUTION_KEY));
                     assertNull(row.get(RELATIONSHIP_PROPERTY_KEY));
+                    assertNull(row.get(RELATIONSHIP_SEED_KEY));
                 }
         );
     }

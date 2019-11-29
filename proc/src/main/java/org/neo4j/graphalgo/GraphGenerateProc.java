@@ -53,8 +53,8 @@ public final class GraphGenerateProc extends BaseProc<ProcedureConfiguration> {
     @Procedure(name = "algo.beta.graph.generate", mode = Mode.READ)
     @Description("CALL algo.beta.graph.generate(" +
                  "name:String, nodeCount:Integer, averageDegree:Integer" +
-                 "{distribution: 'UNIFORM,RANDOM,POWERLAW', relationshipProperty: {name: '[PROPERTY_NAME]' type: 'FIXED,RANDOM', min: 0.0, max: 1.0, value: 1.0}}) " +
-                 "YIELD name, nodes, relationships, generateMillis, averageDegree, relationshipDistribution, relationshipProperty")
+                 "{distribution: 'UNIFORM,RANDOM,POWERLAW', relationshipSeed: 42, relationshipProperty: {name: '[PROPERTY_NAME]' type: 'FIXED,RANDOM', min: 0.0, max: 1.0, value: 1.0}}) " +
+                 "YIELD name, nodes, relationships, relationshipSeed, generateMillis, averageDegree, relationshipDistribution, relationshipProperty")
     public Stream<GraphGenerationStats> generate(
             @Name(value = "name") String name,
             @Name(value = "nodeCount") Long nodeCount,
@@ -178,6 +178,7 @@ public final class GraphGenerateProc extends BaseProc<ProcedureConfiguration> {
     public static class GraphGenerationStats {
         public String name;
         public long nodes, relationships, generateMillis;
+        public Long relationshipSeed;
         public double averageDegree;
         public Object relationshipDistribution, relationshipProperty;
 
@@ -186,6 +187,7 @@ public final class GraphGenerateProc extends BaseProc<ProcedureConfiguration> {
             this.averageDegree = averageDegree;
             this.relationshipDistribution = configuration.getString(RELATIONSHIP_DISTRIBUTION_KEY, "UNIFORM");
             this.relationshipProperty = configuration.get(RELATIONSHIP_PROPERTY_KEY, null);
+            this.relationshipSeed = configuration.get(RELATIONSHIP_SEED_KEY, null);
         }
     }
 }
