@@ -71,8 +71,9 @@ final class AdjacencyListBuilder {
     private long insertDefaultSizedPage(Allocator into) {
         int pageIndex = allocatedPages.getAndIncrement();
         grow(pageIndex + 1, -1);
-        into.setNewPages(pages, PageUtil.capacityFor(pageIndex, PAGE_SHIFT));
-        return pageIndex;
+        long intoIndex = PageUtil.capacityFor(pageIndex, PAGE_SHIFT);
+        into.setNewPages(pages, intoIndex);
+        return intoIndex;
     }
 
     private long insertOversizedPage(byte[] page, Allocator into) {
