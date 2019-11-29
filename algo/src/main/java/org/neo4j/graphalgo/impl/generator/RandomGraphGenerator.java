@@ -62,10 +62,15 @@ public final class RandomGraphGenerator {
     }
 
     public static Graph generate(int nodeCount, int averageDegree, RelationshipDistribution distribution) {
+        return generate(nodeCount, averageDegree, distribution, null);
+    }
+
+    public static Graph generate(int nodeCount, int averageDegree, RelationshipDistribution distribution, @Nullable Long seed) {
         return new RandomGraphGenerator(
             nodeCount,
             averageDegree,
             distribution,
+            seed,
             Optional.empty(),
             AllocationTracker.EMPTY
         ).generate();
@@ -89,6 +94,16 @@ public final class RandomGraphGenerator {
         if (seed != null) {
             this.random.setSeed(seed);
         }
+    }
+
+    public RandomGraphGenerator(
+        long nodeCount,
+        long averageDegree,
+        RelationshipDistribution relationshipDistribution,
+        Optional<RelationshipPropertyProducer> maybePropertyProducer,
+        AllocationTracker allocationTracker
+    ) {
+        this(nodeCount, averageDegree, relationshipDistribution, null, maybePropertyProducer, allocationTracker);
     }
 
     public HugeGraph generate() {
