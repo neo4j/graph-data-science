@@ -131,10 +131,6 @@ public final class RandomGraphGenerator {
         return seed;
     }
 
-    public Long getPropertySeed() {
-        return maybePropertyProducer.map(RelationshipPropertyProducer::seed).orElse(null);
-    }
-
     public Optional<RelationshipPropertyProducer> getMaybePropertyProducer() {
         return maybePropertyProducer;
     }

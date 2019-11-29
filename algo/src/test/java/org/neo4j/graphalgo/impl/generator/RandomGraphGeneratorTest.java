@@ -171,7 +171,7 @@ class RandomGraphGeneratorTest {
             avgDeg,
             RelationshipDistribution.UNIFORM,
             edgeSeed,
-            Optional.of(RelationshipPropertyProducer.random("prop", -10, 10, propertySeed)),
+            Optional.of(RelationshipPropertyProducer.random("prop", -10, 10)),
             AllocationTracker.EMPTY);
 
         RandomGraphGenerator otherRandomGenerator = new RandomGraphGenerator(
@@ -179,7 +179,7 @@ class RandomGraphGeneratorTest {
             avgDeg,
             RelationshipDistribution.UNIFORM,
             edgeSeed,
-            Optional.of(RelationshipPropertyProducer.random("prop", -10, 10, propertySeed)),
+            Optional.of(RelationshipPropertyProducer.random("prop", -10, 10)),
             AllocationTracker.EMPTY);
 
         HugeGraph graph1 = randomGraphGenerator.generate();

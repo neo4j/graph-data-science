@@ -28,19 +28,13 @@ public interface RelationshipPropertyProducer {
         return new Fixed(propertyName, value);
     }
 
-    static RelationshipPropertyProducer random(String propertyName, double min, double max, Long seed) {
-        return new Random(propertyName, min, max, seed);
-    }
-
     static RelationshipPropertyProducer random(String propertyName, double min, double max) {
-        return new Random(propertyName, min, max, null);
+        return new Random(propertyName, min, max);
     }
 
     String getPropertyName();
 
     double getPropertyValue(long source, long target);
-
-    Long seed();
 
     class Fixed implements RelationshipPropertyProducer {
         private final String propertyName;
@@ -58,11 +52,6 @@ public interface RelationshipPropertyProducer {
         @Override
         public double getPropertyValue(long source, long target) {
             return value;
-        }
-
-        @Override
-        public Long seed() {
-            return null;
         }
 
         @Override
@@ -93,21 +82,12 @@ public interface RelationshipPropertyProducer {
         private final String propertyName;
         private final double min;
         private final double max;
-        private final Long seed;
 
         public Random(String propertyName, double min, double max) {
-            this(propertyName, min, max, null);
-        }
-
-        public Random(String propertyName, double min, double max, Long seed) {
             this.propertyName = propertyName;
             this.min = min;
             this.max = max;
-            this.seed = seed;
             this.random = new java.util.Random();
-            if(seed != null) {
-                this.random.setSeed(seed);
-            }
 
             if (max <= min) {
                 throw new IllegalArgumentException("Max value must be greater than min value");
@@ -122,11 +102,6 @@ public interface RelationshipPropertyProducer {
         @Override
         public double getPropertyValue(long source, long target) {
             return min + (random.nextDouble() * (max - min));
-        }
-
-        @Override
-        public Long seed() {
-            return this.seed;
         }
 
         @Override

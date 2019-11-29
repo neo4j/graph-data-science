@@ -159,14 +159,12 @@ class GraphGenerateProcTest extends ProcTestBase {
     @Test
     void shouldBeSeedableGenerator() {
         long relationshipSeed = 4242L;
-        long propertySeed = 2323L;
 
         Map propertyMap = map(
             RELATIONSHIP_PROPERTY_NAME_KEY, "random",
             RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
             RELATIONSHIP_PROPERTY_MIN_KEY, 21.0D,
-            RELATIONSHIP_PROPERTY_MAX_KEY, 42.0D,
-            RELATIONSHIP_PROPERTY_SEED, propertySeed
+            RELATIONSHIP_PROPERTY_MAX_KEY, 42.0D
         );
 
         Map<String, Object> configMap = map("relationshipSeed", relationshipSeed, RELATIONSHIP_PROPERTY_KEY, propertyMap);
@@ -177,7 +175,6 @@ class GraphGenerateProcTest extends ProcTestBase {
         RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, procedureConfig);
 
         assertEquals(relationshipSeed, generator.getRelationshipSeed());
-        assertEquals(propertySeed, generator.getPropertySeed());
     }
 
 
