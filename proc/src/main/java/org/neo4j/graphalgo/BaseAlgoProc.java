@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -26,6 +27,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
@@ -47,14 +49,15 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAl
 
     // TODO make AlgorithmFactory have a constructor that accepts CONFIG
     protected final A newAlgorithm(
-            final Graph graph,
-            final CONFIG config,
-            final AllocationTracker tracker) {
+        final Graph graph,
+        final CONFIG config,
+        final AllocationTracker tracker
+    ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         return algorithmFactory(config)
-                .build(graph, config, tracker, log)
-                .withProgressLogger(log)
-                .withTerminationFlag(terminationFlag);
+            .build(graph, config, tracker, log)
+            .withProgressLogger(log)
+            .withTerminationFlag(terminationFlag);
     }
 
     protected abstract AlgorithmFactory<A, CONFIG> algorithmFactory(CONFIG config);
@@ -122,12 +125,12 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAl
         return Pair.of(config, graphName);
     }
 
-    protected Graph loadGraph(Pair<CONFIG, Optional<String>> configAndName) {
+    protected GraphCreateResult createGraph(Pair<CONFIG, Optional<String>> configAndName) {
         CONFIG config = configAndName.first();
         Optional<String> graphName = configAndName.other();
 
         if (graphName.isPresent()) {
-            return GraphCatalog.getLoadedGraphs(getUsername()).get(graphName.get());
+            return ImmutableGraphCreateResult.of(0, GraphCatalog.getLoadedGraphs(getUsername()).get(graphName.get()));
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
 
@@ -136,10 +139,24 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAl
                 .withGraphCreateConfig(createConfig)
                 .withAllocationTracker(AllocationTracker.EMPTY)
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
-            return loader.load(createConfig.getGraphImpl());
+
+            ImmutableGraphCreateResult.Builder builder = ImmutableGraphCreateResult.builder();
+
+            try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
+                builder.graph(loader.load(createConfig.getGraphImpl()));
+            }
+            return builder.build();
+
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
 
+    }
+
+    @ValueClass
+    interface GraphCreateResult {
+        long createMillis();
+
+        Graph graph();
     }
 }

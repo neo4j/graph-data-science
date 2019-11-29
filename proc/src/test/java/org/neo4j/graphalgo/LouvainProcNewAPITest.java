@@ -147,9 +147,9 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
                     assertEquals(2, levels, "invalid level count");
                     assertFalse(includeIntermediate, "invalid level count");
                     assertTrue(modularity > 0, "wrong modularity value");
-//                    assertTrue(createMillis >= 0, "invalid loadTime");
+                    assertTrue(createMillis >= 0, "invalid loadTime");
                     assertTrue(writeMillis >= 0, "invalid writeTime");
-//                    assertTrue(computeMillis >= 0, "invalid computeTime");
+                    assertTrue(computeMillis >= 0, "invalid computeTime");
                 }
         );
         assertWriteResult(RESULT, writeProperty);

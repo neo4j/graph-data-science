@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -90,9 +89,9 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, LouvainConfig> {
             graphNameOrConfig,
             configuration
         );
-        Graph graph = loadGraph(input);
+        GraphCreateResult graphCreateResult = createGraph(input);
 
-        return run(graph, input.first(), true);
+        return run(graphCreateResult, input.first(), true);
     }
 
     @Procedure(value = "gds.algo.louvain.stats", mode = READ)
@@ -128,9 +127,9 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, LouvainConfig> {
             @Name(value = "graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
         Pair<LouvainConfig, Optional<String>> input = processInput(graphNameOrConfig, configuration);
-        Graph graph = loadGraph(input);
+        GraphCreateResult graphCreateResult = createGraph(input);
 
-        return run(graph, input.first(), false);
+        return run(graphCreateResult, input.first(), false);
     }
 
     @Override
@@ -202,17 +201,20 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, LouvainConfig> {
         }
     }
 
-    public Stream<WriteResult> run(Graph graph, LouvainConfig config, boolean write) {
+    public Stream<WriteResult> run(GraphCreateResult graphCreateResult, LouvainConfig config, boolean write) {
+        Graph graph = graphCreateResult.graph();
         AllocationTracker tracker = AllocationTracker.create();
         WriteResultBuilder builder = new WriteResultBuilder(config, callContext, tracker);
+
+        builder.setLoadMillis(graphCreateResult.createMillis());
         builder.withNodeCount(graph.nodeCount());
 
         if (graph.isEmpty()) {
             graph.release();
             return Stream.of(builder.build());
         }
-        MutableLong computeMillis = new MutableLong(0);
-        Louvain louvain = compute(graph, config, computeMillis::setValue, tracker);
+
+        Louvain louvain = compute(graph, config, builder::setComputeMillis, tracker);
 
         builder
             .withLevels(louvain.levels())
