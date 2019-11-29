@@ -75,25 +75,36 @@ final class AdjacencyListBuilder {
 
     private long allocateNewPages(Allocator into) {
         long intoIndex = allocIdx.getAndAdd(PREFETCH_ELEMENTS);
-        grow(intoIndex + PREFETCH_ELEMENTS);
+        grow(intoIndex + PREFETCH_ELEMENTS, -1);
         into.setNewPages(pages, intoIndex);
         return intoIndex;
     }
 
-    private long allocatePage(byte[] page, Allocator into) {
+    private long insertOversizePage(byte[] page, Allocator into) {
         long intoIndex = allocIdx.getAndAdd(PAGE_SIZE);
         int pageIndex = PageUtil.pageIndex(intoIndex, PAGE_SHIFT);
-        grow(intoIndex + PAGE_SIZE, pageIndex, page);
-        tracker.add(sizeOfByteArray(page.length));
+        grow(intoIndex + PAGE_SIZE, pageIndex);
+
+        // We already increased `pages` for the oversize page in `grow()`.
+        // We need to insert the new page at the right position and
+        // remove the previously tracked memory. This has to happen
+        // within the grow lock to avoid the `pages` reference to be
+        // overwritten by another thread during `grow()`.
+        growLock.lock();
+        try {
+            tracker.add(sizeOfByteArray(page.length));
+            if (pages[pageIndex] != null) {
+                tracker.remove(PAGE_SIZE_IN_BYTES);
+            }
+            pages[pageIndex] = page;
+        } finally {
+            growLock.unlock();
+        }
         into.insertPage(page);
         return intoIndex;
     }
 
-    private void grow(final long newSize) {
-        grow(newSize, -1, null);
-    }
-
-    private void grow(final long newSize, final int skipPage, byte[] page) {
+    private void grow(final long newSize, final int skipPage) {
         assert newSize <= MAX_SIZE;
         boolean didSetSize = tryGrowSize(newSize);
         if (didSetSize) {
@@ -107,7 +118,7 @@ final class AdjacencyListBuilder {
             }
             int newNumPages = PageUtil.numPagesFor(newSize, PAGE_SHIFT, PAGE_MASK);
             long newCap = PageUtil.capacityFor(newNumPages, PAGE_SHIFT);
-            setPages(newNumPages, this.pages.length, skipPage, page);
+            setPages(newNumPages, this.pages.length, skipPage);
             capacity.set(newCap);
             size.set(newSize);
         } finally {
@@ -131,9 +142,7 @@ final class AdjacencyListBuilder {
         } while (size < newSize && !this.size.compareAndSet(size, newSize));
     }
 
-    private void setPages(int newNumPages, int currentNumPages, int skipPage, byte[] page) {
-        assert skipPage == -1L || page != null : "Trying to insert null page at skipPage index (" + skipPage +")";
-
+    private void setPages(int newNumPages, int currentNumPages, int skipPage) {
         int newPages = newNumPages - currentNumPages;
         if (newPages > 0) {
             AllocationTracker tracker = this.tracker;
@@ -143,8 +152,6 @@ final class AdjacencyListBuilder {
                 if (i != skipPage) {
                     tracker.add(PAGE_SIZE_IN_BYTES);
                     pages[i] = new byte[PAGE_SIZE];
-                } else {
-                    pages[i] = page;
                 }
             }
             this.pages = pages;
@@ -217,7 +224,7 @@ final class AdjacencyListBuilder {
          */
         private long oversizingAllocate(int size) {
             byte[] largePage = new byte[size];
-            return builder.allocatePage(largePage, this);
+            return builder.insertOversizePage(largePage, this);
         }
 
         private long prefetchAllocate(int size) {
