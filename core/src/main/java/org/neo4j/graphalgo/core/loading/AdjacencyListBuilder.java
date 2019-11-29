@@ -24,7 +24,8 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_MASK;
@@ -34,22 +35,18 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArrayElements;
 
-
 final class AdjacencyListBuilder {
 
-    private static final long MAX_SIZE = 1L << (Integer.SIZE - 1 + PAGE_SHIFT);
     private static final long PAGE_SIZE_IN_BYTES = sizeOfByteArray(PAGE_SIZE);
-    private static final int PREFETCH_PAGES = 1;
-    private static final long PREFETCH_ELEMENTS = ((long) PREFETCH_PAGES) << PAGE_SHIFT;
+    private static final AtomicReferenceFieldUpdater<AdjacencyListBuilder, byte[][]> PAGES_UPDATER =
+        AtomicReferenceFieldUpdater.newUpdater(AdjacencyListBuilder.class, byte[][].class, "pages");
 
     private final AllocationTracker tracker;
     private final ReentrantLock growLock;
+    private final AtomicInteger allocatedPages;
 
-    private final AtomicLong allocIdx;
-    private final AtomicLong size;
-    private final AtomicLong capacity;
-
-    private byte[][] pages;
+    @SuppressWarnings("FieldMayBeFinal")
+    private volatile byte[][] pages;
 
     static AdjacencyListBuilder newBuilder(AllocationTracker tracker) {
         return new AdjacencyListBuilder(tracker);
@@ -58,9 +55,7 @@ final class AdjacencyListBuilder {
     private AdjacencyListBuilder(AllocationTracker tracker) {
         this.tracker = tracker;
         growLock = new ReentrantLock(true);
-        size = new AtomicLong();
-        capacity = new AtomicLong();
-        allocIdx = new AtomicLong();
+        allocatedPages = new AtomicInteger();
         pages = new byte[0][];
         tracker.add(sizeOfObjectArray(0));
     }
@@ -73,17 +68,16 @@ final class AdjacencyListBuilder {
         return new AdjacencyList(pages);
     }
 
-    private long allocateNewPages(Allocator into) {
-        long intoIndex = allocIdx.getAndAdd(PREFETCH_ELEMENTS);
-        grow(intoIndex + PREFETCH_ELEMENTS, -1);
-        into.setNewPages(pages, intoIndex);
-        return intoIndex;
+    private long insertDefaultSizedPage(Allocator into) {
+        int pageIndex = allocatedPages.getAndIncrement();
+        grow(pageIndex + 1, -1);
+        into.setNewPages(pages, PageUtil.capacityFor(pageIndex, PAGE_SHIFT));
+        return pageIndex;
     }
 
-    private long insertOversizePage(byte[] page, Allocator into) {
-        long intoIndex = allocIdx.getAndAdd(PAGE_SIZE);
-        int pageIndex = PageUtil.pageIndex(intoIndex, PAGE_SHIFT);
-        grow(intoIndex + PAGE_SIZE, pageIndex);
+    private long insertOversizedPage(byte[] page, Allocator into) {
+        int pageIndex = allocatedPages.getAndIncrement();
+        grow(pageIndex + 1, pageIndex);
 
         // We already increased `pages` for the oversize page in `grow()`.
         // We need to insert the new page at the right position and
@@ -93,69 +87,51 @@ final class AdjacencyListBuilder {
         growLock.lock();
         try {
             tracker.add(sizeOfByteArray(page.length));
-            if (pages[pageIndex] != null) {
+            if (PAGES_UPDATER.get(this)[pageIndex] != null) {
                 tracker.remove(PAGE_SIZE_IN_BYTES);
             }
-            pages[pageIndex] = page;
+            PAGES_UPDATER.get(this)[pageIndex] = page;
         } finally {
             growLock.unlock();
         }
         into.insertPage(page);
-        return intoIndex;
+
+        return PageUtil.capacityFor(pageIndex, PAGE_SHIFT);
     }
 
-    private void grow(final long newSize, final int skipPage) {
-        assert newSize <= MAX_SIZE;
-        boolean didSetSize = tryGrowSize(newSize);
-        if (didSetSize) {
+    private void grow(int newNumPages, int skipPage) {
+        if (capacityLeft(newNumPages)) {
             return;
         }
         growLock.lock();
         try {
-            didSetSize = tryGrowSize(newSize);
-            if (didSetSize) {
+            if (capacityLeft(newNumPages)) {
                 return;
             }
-            int newNumPages = PageUtil.numPagesFor(newSize, PAGE_SHIFT, PAGE_MASK);
-            long newCap = PageUtil.capacityFor(newNumPages, PAGE_SHIFT);
-            setPages(newNumPages, this.pages.length, skipPage);
-            capacity.set(newCap);
-            size.set(newSize);
+            setPages(newNumPages, skipPage);
         } finally {
             growLock.unlock();
         }
     }
 
-    private boolean tryGrowSize(long newSize) {
-        long cap = capacity.get();
-        if (newSize > cap) {
-            return false;
-        }
-        setSize(newSize);
-        return true;
+    private boolean capacityLeft(long newNumPages) {
+        return newNumPages <= PAGES_UPDATER.get(this).length;
     }
 
-    private void setSize(long newSize) {
-        long size;
-        do {
-            size = this.size.get();
-        } while (size < newSize && !this.size.compareAndSet(size, newSize));
-    }
+    private void setPages(int newNumPages, int skipPage) {
+        byte[][] currentPages = PAGES_UPDATER.get(this);
+        tracker.add(sizeOfObjectArrayElements(newNumPages - currentPages.length));
 
-    private void setPages(int newNumPages, int currentNumPages, int skipPage) {
-        int newPages = newNumPages - currentNumPages;
-        if (newPages > 0) {
-            AllocationTracker tracker = this.tracker;
-            tracker.add(sizeOfObjectArrayElements(newPages));
-            byte[][] pages = Arrays.copyOf(this.pages, newNumPages);
-            for (int i = currentNumPages; i < newNumPages; i++) {
-                if (i != skipPage) {
-                    tracker.add(PAGE_SIZE_IN_BYTES);
-                    pages[i] = new byte[PAGE_SIZE];
-                }
+        byte[][] newPages = Arrays.copyOf(currentPages, newNumPages);
+
+        for (int i = currentPages.length; i < newNumPages; i++) {
+            // Create new page for default sized pages
+            if (i != skipPage) {
+                tracker.add(PAGE_SIZE_IN_BYTES);
+                newPages[i] = new byte[PAGE_SIZE];
             }
-            this.pages = pages;
         }
+        PAGES_UPDATER.set(this, newPages);
     }
 
     static final class Allocator {
@@ -172,13 +148,13 @@ final class AdjacencyListBuilder {
         public byte[] page;
         public int offset;
 
-        private Allocator(final AdjacencyListBuilder builder) {
+        private Allocator(AdjacencyListBuilder builder) {
             this.builder = builder;
             prevOffset = -1;
         }
 
         void prepare() {
-            top = builder.allocateNewPages(this);
+            top = builder.insertDefaultSizedPage(this);
             if (top == 0L) {
                 ++top;
                 ++offset;
@@ -224,11 +200,11 @@ final class AdjacencyListBuilder {
          */
         private long oversizingAllocate(int size) {
             byte[] largePage = new byte[size];
-            return builder.insertOversizePage(largePage, this);
+            return builder.insertOversizedPage(largePage, this);
         }
 
         private long prefetchAllocate(int size) {
-            long address = top = builder.allocateNewPages(this);
+            long address = top = builder.insertDefaultSizedPage(this);
             top += size;
             return address;
         }
@@ -257,7 +233,7 @@ final class AdjacencyListBuilder {
             assert PageUtil.indexInPage(fromIndex, PAGE_MASK) == 0;
             this.pages = pages;
             currentPageIndex = PageUtil.pageIndex(fromIndex, PAGE_SHIFT);
-            toPageIndex = currentPageIndex + PREFETCH_PAGES - 1;
+            toPageIndex = currentPageIndex;
             page = pages[currentPageIndex];
             offset = 0;
         }
