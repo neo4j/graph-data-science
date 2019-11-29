@@ -24,7 +24,9 @@ import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
+import org.neo4j.helpers.collection.MapUtil;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.LongUnaryOperator;
@@ -43,6 +45,20 @@ public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBu
 
     protected OptionalLong maybeCommunityCount = OptionalLong.empty();
     protected Optional<Histogram> maybeCommunityHistogram = Optional.empty();
+
+    protected Map<String, Object> communityHistogramOrNull() {
+        return maybeCommunityHistogram.map(histogram -> MapUtil.map(
+            "min", histogram.getMinValue(),
+            "mean", histogram.getMean(),
+            "max", histogram.getMaxValue(),
+            "p50", histogram.getValueAtPercentile(50),
+            "p75", histogram.getValueAtPercentile(75),
+            "p90", histogram.getValueAtPercentile(90),
+            "p95", histogram.getValueAtPercentile(95),
+            "p99", histogram.getValueAtPercentile(99),
+            "p999", histogram.getValueAtPercentile(99.9)
+        )).orElse(null);
+    }
 
     private final AllocationTracker tracker;
 

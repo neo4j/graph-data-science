@@ -24,6 +24,8 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -31,7 +33,10 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.helpers.collection.Pair;
 
+import java.util.Map;
 import java.util.Optional;
 
 public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAlgoConfig> extends BaseProc<CONFIG> {
@@ -74,10 +79,59 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAl
 
     @Override
     protected GraphLoader newConfigureLoader(GraphLoader loader, CONFIG config) {
-        boolean implicitLoading = true;
-        if (implicitLoading) {
-            return configureGraphLoader(loader, config);
+        return configureGraphLoader(loader, config);
+    }
+
+    protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
+
+        CONFIG config;
+        Optional<String> graphName = Optional.empty();
+
+        if (graphNameOrConfig instanceof String) {
+            graphName = Optional.of((String) graphNameOrConfig);
+            CypherMapWrapper algoConfig = CypherMapWrapper.create(configuration);
+            config = newConfig(graphName, algoConfig);
+
+            //TODO: assert that algoConfig is empty or fail
+        } else if (graphNameOrConfig instanceof Map) {
+            if (!configuration.isEmpty()) {
+                throw new IllegalArgumentException(
+                    "The second parameter can only used when a graph name is given as first parameter");
+            }
+
+            Map<String, Object> implicitConfig = (Map<String, Object>) graphNameOrConfig;
+            CypherMapWrapper implicitAndAlgoConfig = CypherMapWrapper.create(implicitConfig);
+
+            config = newConfig(Optional.empty(), implicitAndAlgoConfig);
+
+            //TODO: assert that implicitAndAlgoConfig is empty or fail
+        } else {
+            throw new IllegalArgumentException(
+                "The first parameter must be a graph name or a configuration map, but was: " + graphNameOrConfig
+            );
         }
-        return null;
+
+        return Pair.of(config, graphName);
+    }
+
+    protected Graph loadGraph(Pair<CONFIG, Optional<String>> configAndName) {
+        CONFIG config = configAndName.first();
+        Optional<String> graphName = configAndName.other();
+
+        if (graphName.isPresent()) {
+            return GraphCatalog.getLoadedGraphs(getUsername()).get(graphName.get());
+        } else if (config.implicitCreateConfig().isPresent()) {
+            GraphCreateConfig createConfig = config.implicitCreateConfig().get();
+
+            GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
+                .init(log, getUsername())
+                .withAllocationTracker(AllocationTracker.EMPTY)
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
+            loader = createConfig.configureLoader(loader);
+            return loader.load(createConfig.getGraphImpl());
+        } else {
+            throw new IllegalStateException("There must be either a graph name or an implicit create config");
+        }
+
     }
 }

@@ -18,30 +18,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.newapi;
 
-import org.neo4j.graphdb.Direction;
+import org.immutables.value.Value;
 
-public enum Projection {
+public interface WriteConfig extends BaseAlgoConfig {
 
-    NATURAL,
-    REVERSE,
-    UNDIRECTED;
+    String writeProperty();
 
-    public static Projection of(String value) {
-        return Projection.valueOf(value.toUpperCase());
+    @Value.Default
+    default int writeConcurrency() {
+        return concurrency();
     }
 
-    public static Direction parseDirection(Object object) {
-        if (object == null) {
-            return null;
-        }
-        if (object instanceof String) {
-            return Direction.valueOf((String) object);
-        }
-        if (object instanceof Direction) {
-            return (Direction) object;
-        }
-        return null;
-    }
 }

@@ -55,6 +55,8 @@ public abstract class BaseProc<CONFIG extends BaseConfig> {
         return transaction.subjectOrAnonymous().username();
     }
 
+    // TODO: remove once all algos have their own config that does this instead
+    // right now it's necessary because ProcedureConfiguration doesn't know the requirements of all algos
     protected abstract GraphLoader newConfigureLoader(GraphLoader loader, CONFIG config);
 
     protected final GraphLoader newLoader(AllocationTracker tracker, CONFIG config) {

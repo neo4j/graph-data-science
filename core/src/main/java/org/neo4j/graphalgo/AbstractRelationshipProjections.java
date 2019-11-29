@@ -46,6 +46,9 @@ public abstract class AbstractRelationshipProjections {
         if (object == null) {
             return empty();
         }
+        if (object instanceof RelationshipProjections) {
+            return (RelationshipProjections) object;
+        }
         if (object instanceof String) {
             return fromString((String) object);
         }

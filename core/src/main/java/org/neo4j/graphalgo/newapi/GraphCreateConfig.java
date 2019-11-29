@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.NodeProjections;
@@ -40,6 +41,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 @ValueClass
 @Configuration("GraphCreateConfigImpl")
 public interface GraphCreateConfig extends BaseConfig {
+
+    @NotNull String IMPLICIT_GRAPH_NAME = "";
 
     @Configuration.Parameter
     String username();
@@ -142,6 +145,28 @@ public interface GraphCreateConfig extends BaseConfig {
             graphName,
             nodeFilter,
             relationshipFilter,
+            config
+        );
+        return graphCreateConfig.withNormalizedPropertyMappings();
+    }
+
+    static GraphCreateConfig implicitCreate(
+        String userName,
+        CypherMapWrapper config
+    ) {
+        RelationshipProjections relP = RelationshipProjections.fromObject(CypherMapWrapper.failOnNull(
+            "relationshipProjection",
+            config.get("relationshipProjection", RelationshipProjections.empty())
+        ));
+        NodeProjections nodeP = NodeProjections.fromObject(CypherMapWrapper.failOnNull(
+            "nodeProjection",
+            config.get("nodeProjection", NodeProjections.empty())
+        ));
+        GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
+            userName,
+            IMPLICIT_GRAPH_NAME,
+            nodeP,
+            relP,
             config
         );
         return graphCreateConfig.withNormalizedPropertyMappings();

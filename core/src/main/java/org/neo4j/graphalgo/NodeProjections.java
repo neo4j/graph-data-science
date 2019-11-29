@@ -74,6 +74,9 @@ public final class NodeProjections {
         if (object == null) {
             return of(emptyMap());
         }
+        if (object instanceof NodeProjections) {
+            return (NodeProjections) object;
+        }
         if (object instanceof String) {
             return of((String) object);
         }

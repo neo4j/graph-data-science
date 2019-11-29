@@ -20,23 +20,23 @@
 
 package org.neo4j.graphalgo.newapi;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.utils.Pools;
 
 import java.util.Optional;
 
 public interface BaseAlgoConfig extends BaseConfig {
-    int concurrency();
 
-    @Configuration.Ignore
+    @Value.Default
+    default int concurrency() {
+        return Pools.DEFAULT_CONCURRENCY;
+    }
+
+    @Configuration.Parameter
     Optional<String> graphName();
 
-    @Configuration.Ignore
+    @Configuration.Parameter
     Optional<GraphCreateConfig> implicitCreateConfig();
 
-    @Override
-    default GraphLoader configureLoader(GraphLoader loader) {
-        implicitCreateConfig().ifPresent(c -> c.configureLoader(loader));
-        return loader;
-    }
 }
