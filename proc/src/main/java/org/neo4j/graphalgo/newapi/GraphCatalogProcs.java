@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -46,23 +45,14 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
+public class GraphCatalogProcs extends BaseProc {
 
     private static final String HISTOGRAM_FIELD_NAME = "histogram";
-
-    @Override
-    protected GraphLoader newConfigureLoader(
-        GraphLoader loader,
-        GraphCreateConfig config
-    ) {
-        return loader;
-    }
 
     @Procedure(name = "algo.beta.graph.create", mode = Mode.READ)
     @Description("CALL graph.create(" +

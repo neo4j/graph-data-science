@@ -21,7 +21,6 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -44,7 +43,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.*;
 
-public final class GraphGenerateProc extends BaseProc<ProcedureConfiguration> {
+public final class GraphGenerateProc extends BaseProc {
 
     public static final String DUMMY_RELATIONSHIP_NAME = "RELATIONSHIP";
     public static final String RELATIONSHIP_SEED_KEY = "relationshipSeed";
@@ -161,13 +160,6 @@ public final class GraphGenerateProc extends BaseProc<ProcedureConfiguration> {
                     RELATIONSHIP_PROPERTIES_KEY,
                     maybeMap.getClass().getSimpleName()));
         }
-    }
-
-    @Override
-    protected GraphLoader newConfigureLoader(
-        GraphLoader loader, ProcedureConfiguration procedureConfiguration
-    ) {
-        return loader;
     }
 
     public static class GraphGenerationStats {

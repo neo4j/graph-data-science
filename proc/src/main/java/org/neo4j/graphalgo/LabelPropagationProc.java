@@ -58,7 +58,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
 @SuppressWarnings("unused")
-public final class LabelPropagationProc extends BaseAlgoProcLegacyConfig<LabelPropagation> {
+public final class LabelPropagationProc extends LegacyBaseAlgoProc<LabelPropagation> {
 
     private static final String CONFIG_WEIGHT_KEY = "weightProperty";
     private static final String CONFIG_OLD_SEED_KEY = "partitionProperty";

@@ -23,7 +23,6 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -203,8 +202,6 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, LouvainConfig> {
         }
     }
 
-
-
     public Stream<WriteResult> run(Graph graph, LouvainConfig config, boolean write) {
         AllocationTracker tracker = AllocationTracker.create();
         WriteResultBuilder builder = new WriteResultBuilder(config, callContext, tracker);
@@ -236,11 +233,6 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, LouvainConfig> {
         }
 
         return Stream.of(builder.build());
-    }
-
-    @Override
-    protected GraphLoader configureGraphLoader(GraphLoader loader, LouvainConfig config) {
-        return loader;
     }
 
     @Override

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.wcc;
 
-import org.neo4j.graphalgo.BaseAlgoProcLegacyConfig;
+import org.neo4j.graphalgo.LegacyBaseAlgoProc;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -50,7 +50,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_ALGO_TYPE;
 import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_THRESHOLD;
 
-public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProcLegacyConfig<T> {
+public abstract class WccBaseProc<T extends WCC<T>> extends LegacyBaseAlgoProc<T> {
 
     private static final String CONFIG_WRITE_PROPERTY = "writeProperty";
     private static final String CONFIG_OLD_WRITE_PROPERTY = "partitionProperty";

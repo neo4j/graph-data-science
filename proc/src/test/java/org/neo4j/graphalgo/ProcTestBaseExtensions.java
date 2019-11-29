@@ -34,7 +34,7 @@ interface ProcTestBaseExtensions {
 
     default <
         A extends Algorithm<A>,
-        P extends BaseAlgoProcLegacyConfig<A>,
+        P extends LegacyBaseAlgoProc<A>,
         F extends AlgorithmFactory<A, ProcedureConfiguration>>
     void getAlgorithmFactory(
         Class<? extends P> procClazz,
@@ -52,7 +52,7 @@ interface ProcTestBaseExtensions {
 
     default <
         A extends Algorithm<A>,
-        P extends BaseAlgoProcLegacyConfig<A>>
+        P extends LegacyBaseAlgoProc<A>>
     void getGraphSetup(
         Class<? extends P> procClazz,
         GraphDatabaseAPI db,
@@ -63,7 +63,7 @@ interface ProcTestBaseExtensions {
     ) {
         getAlgorithmProc(procClazz, db, (proc) -> {
             ProcedureConfiguration procedureConfiguration = proc.newConfig(nodeLabels, relTypes, config);
-            func.accept(proc.newLoader(AllocationTracker.EMPTY, procedureConfiguration).toSetup());
+            func.accept(proc.getGraphLoader(procedureConfiguration, AllocationTracker.EMPTY).toSetup());
         });
     }
 

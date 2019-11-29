@@ -253,18 +253,23 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
     @AllGraphNamesTest
     void testWriteWithSeeding(String graphImpl) {
         String writeProperty = "myFancyWriteProperty";
-        String query = "CALL algo.beta.louvain(" +
-                       "    '', '', {" +
-                       "        graph: $graph," +
-                       "        seedProperty: 'seed'," +
-                       "        writeProperty: '" + writeProperty + "'" +
-                       "    } " +
-                       ") YIELD nodes, communityCount, levels";
+        String query = "CALL gds.algo.louvain.write({" +
+                       "    writeProperty: '"+ writeProperty +"'," +
+                       "    nodeProjection: ['Node']," +
+                       "    nodeProperties: ['seed']," +
+                       "    relationshipProjection: {" +
+                       "      TYPE: {" +
+                       "        type: 'TYPE'," +
+                       "        projection: 'UNDIRECTED'" +
+                       "      }" +
+                       "    }," +
+                       "    seedProperty: 'seed'"+
+                       "}) YIELD communityCount, ranLevels";
 
-        runQuery(query, MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
+        runQuery(query,
             row -> {
                 assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
-                assertEquals(1, row.getNumber("levels").longValue(), "wrong number of levels");
+                assertEquals(1, row.getNumber("ranLevels").longValue(), "wrong number of levels");
             }
         );
         assertWriteResult(RESULT, writeProperty);

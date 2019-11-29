@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -52,7 +53,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
+public final class GraphLoadProc extends BaseProc {
     @Procedure(name = "algo.graph.load", mode = Mode.READ)
     @Description("CALL algo.graph.load(" +
                  "name:String, label:String, relationship:String" +
@@ -77,6 +78,32 @@ public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
         return Stream.of(stats);
     }
 
+    @Procedure(name = "algo.graph.load.memrec")
+    @Description("CALL algo.graph.load.memrec(" +
+                 "label:String, relationship:String" +
+                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', relationshipProperties: {}, graph:'cypher/huge'}) " +
+                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for the graph")
+    public Stream<MemRecResult> loadMemRec(
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration) {
+
+        ProcedureConfiguration config = ProcedureConfiguration
+            .create(configuration, getUsername())
+            .setNodeLabelOrQuery(label)
+            .setRelationshipTypeOrQuery(relationshipType);
+
+        GraphLoader loader = getLoader(config);
+        GraphFactory graphFactory = loader.build(config.getGraphImpl());
+        GraphDimensions dimensions = graphFactory.dimensions();;
+
+        MemoryTree memoryTree = config.estimate(loader.toSetup(), graphFactory)
+            .estimate(dimensions, config.concurrency());
+
+        return Stream.of(new MemRecResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
+    }
+
+
     private GraphLoadStats loadGraph(ProcedureConfiguration config, String name) {
         GraphLoadStats stats = new GraphLoadStats(name, config);
 
@@ -92,7 +119,7 @@ public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
 
             PropertyMappings propertyMappings = config.getRelationshipProperties();
 
-            GraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
+            GraphLoader loader = getLoader(config);
 
             GraphsByRelationshipType graph;
             if (!relationshipTypes.isEmpty() || propertyMappings.hasMappings()) {
@@ -110,50 +137,29 @@ public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
         return stats;
     }
 
-    @Procedure(name = "algo.graph.load.memrec")
-    @Description("CALL algo.graph.load.memrec(" +
-                 "label:String, relationship:String" +
-                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', relationshipProperties: {}, graph:'cypher/huge'}) " +
-                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for the graph")
-    public Stream<MemRecResult> loadMemRec(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationshipType,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration) {
+    private GraphLoader getLoader(ProcedureConfiguration config) {
+        GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
+            .init(log, getUsername())
+            .withAllocationTracker(AllocationTracker.EMPTY)
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
 
-        ProcedureConfiguration config = ProcedureConfiguration
-            .create(configuration, getUsername())
-            .setNodeLabelOrQuery(label)
-            .setRelationshipTypeOrQuery(relationshipType);
-
-        GraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
-        GraphFactory graphFactory = loader.build(config.getGraphImpl());
-        GraphDimensions dimensions = graphFactory.dimensions();;
-
-        MemoryTree memoryTree = config.estimate(loader.toSetup(), graphFactory)
-            .estimate(dimensions, config.concurrency());
-
-        return Stream.of(new MemRecResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
-    }
-
-    @Override
-    protected GraphLoader newConfigureLoader(GraphLoader loader, ProcedureConfiguration config) {
         final Direction direction = config.getDirection(Direction.OUTGOING);
         loader
-                .withNodeStatement(config.getNodeLabelOrQuery())
-                .withRelationshipStatement(config.getRelationshipOrQuery())
-                .withOptionalNodeProperties(config.getNodeProperties())
-                .withRelationshipProperties(config.getRelationshipProperties())
-                .withDirection(direction);
+            .withNodeStatement(config.getNodeLabelOrQuery())
+            .withRelationshipStatement(config.getRelationshipOrQuery())
+            .withOptionalNodeProperties(config.getNodeProperties())
+            .withRelationshipProperties(config.getRelationshipProperties())
+            .withDirection(direction);
 
         if (config.containsKey(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY)) { // required to be backwards compatible with `relationshipWeight`
             loader.withRelationshipProperties(PropertyMapping.of(
-                    config.getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, null),
-                    config.getWeightPropertyDefaultValue(ProcedureConstants.DEFAULT_VALUE_DEFAULT)
+                config.getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, null),
+                config.getWeightPropertyDefaultValue(ProcedureConstants.DEFAULT_VALUE_DEFAULT)
             ));
         } else if (config.hasWeightProperty()) { // required to be backwards compatible with `weightProperty` (not documented but was possible)
             loader.withRelationshipProperties(PropertyMapping.of(
-                    config.getWeightProperty(),
-                    config.getWeightPropertyDefaultValue(ProcedureConstants.DEFAULT_VALUE_DEFAULT)));
+                config.getWeightProperty(),
+                config.getWeightPropertyDefaultValue(ProcedureConstants.DEFAULT_VALUE_DEFAULT)));
         }
 
         if (config.get(ProcedureConstants.SORTED_KEY, false)) {

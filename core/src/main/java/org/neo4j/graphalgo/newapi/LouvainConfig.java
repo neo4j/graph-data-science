@@ -21,14 +21,9 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Optional;
@@ -70,27 +65,6 @@ public interface LouvainConfig extends
     @Value.Default
     default Direction direction() {
         return Direction.OUTGOING;
-    }
-
-    @Configuration.Ignore
-    @Override
-    default GraphLoader configureLoader(GraphLoader loader) {
-        graphName().ifPresent(loader::withName);
-        final String seedProperty = seedProperty();
-
-        if (seedProperty != null) {
-            loader.withOptionalNodeProperties(PropertyMapping.of(seedProperty, -1));
-        }
-
-        return loader.withDirection(direction());
-    }
-
-    @Configuration.Ignore
-    @Override
-    default MemoryEstimation estimate(
-        GraphSetup setup, GraphFactory factory
-    ) {
-        return factory.memoryEstimation();
     }
 
     static LouvainConfig of(

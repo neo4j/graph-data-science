@@ -78,7 +78,6 @@ public class ProcedureConfiguration implements BaseAlgoConfig {
         this.computeCommunityCount = computeCommunityCount;
     }
 
-    @Override
     public GraphLoader configureLoader(GraphLoader loader) {
         if (hasWeightProperty()) {
             loader.withRelationshipProperties(PropertyMapping.of(
@@ -111,7 +110,6 @@ public class ProcedureConfiguration implements BaseAlgoConfig {
         ), username, computeHistogram, computeCommunityCount);
     }
 
-    @Override
     public MemoryEstimation estimate(GraphSetup setup, GraphFactory factory) {
         MemoryEstimation estimation;
 

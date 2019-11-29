@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-public class NodeSimilarityProc extends BaseAlgoProcLegacyConfig<NodeSimilarity> {
+public class NodeSimilarityProc extends LegacyBaseAlgoProc<NodeSimilarity> {
 
     private static final String SIMILARITY_CUTOFF_KEY = "similarityCutoff";
     private static final double SIMILARITY_CUTOFF_DEFAULT = 1E-42;

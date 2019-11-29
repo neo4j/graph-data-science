@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
@@ -39,13 +38,14 @@ import org.neo4j.helpers.collection.Pair;
 import java.util.Map;
 import java.util.Optional;
 
-public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAlgoConfig> extends BaseProc<CONFIG> {
+public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAlgoConfig> extends BaseProc {
 
     protected abstract CONFIG newConfig(
         Optional<String> graphName,
         CypherMapWrapper config
     );
 
+    // TODO make AlgorithmFactory have a constructor that accepts CONFIG
     protected final A newAlgorithm(
             final Graph graph,
             final CONFIG config,
@@ -57,33 +57,41 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAl
                 .withTerminationFlag(terminationFlag);
     }
 
-    protected abstract GraphLoader configureGraphLoader(GraphLoader loader, CONFIG config);
-
     protected abstract AlgorithmFactory<A, CONFIG> algorithmFactory(CONFIG config);
 
     protected MemoryTreeWithDimensions memoryEstimation(final CONFIG config) {
-        GraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
-        GraphFactory graphFactory = loader.build(config.getGraphImpl());
-        GraphDimensions dimensions = graphFactory.dimensions();
-        AlgorithmFactory<A, CONFIG> algorithmFactory = algorithmFactory(config);
-        MemoryEstimations.Builder estimationsBuilder = MemoryEstimations.builder("graph with procedure");
+        MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
+        GraphDimensions dimensions;
 
-        MemoryEstimation graphMemoryEstimation = config.estimate(loader.toSetup(), graphFactory);
-        estimationsBuilder.add(graphMemoryEstimation)
-            .add(algorithmFactory.memoryEstimation());
+        if (config.implicitCreateConfig().isPresent()) {
+            GraphLoader loader = newLoader(AllocationTracker.EMPTY, config.implicitCreateConfig().get());
+            GraphFactory graphFactory = loader.build(config.getGraphImpl());
+            dimensions = graphFactory.dimensions();
+            estimationBuilder.add("graph", graphFactory.memoryEstimation());
+        } else {
+            String graphName = config.graphName().get();
 
-        MemoryTree memoryTree = estimationsBuilder.build().estimate(dimensions, config.concurrency());
+            // TODO get the dimensions from the graph itself.
+            GraphCreateConfig graphCreateConfig = GraphCatalog
+                .getLoadedGraphs(getUsername())
+                .keySet()
+                .stream()
+                .filter(graph -> graph.graphName().equals(graphName))
+                .findFirst()
+                .get();
 
+            GraphLoader loader = newLoader(AllocationTracker.EMPTY, graphCreateConfig);
+            GraphFactory graphFactory = loader.build(config.getGraphImpl());
+            dimensions = graphFactory.dimensions();
+        }
+
+        estimationBuilder.add("algorithm", algorithmFactory(config).memoryEstimation());
+
+        MemoryTree memoryTree = estimationBuilder.build().estimate(dimensions, config.concurrency());
         return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 
-    @Override
-    protected GraphLoader newConfigureLoader(GraphLoader loader, CONFIG config) {
-        return configureGraphLoader(loader, config);
-    }
-
-    protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
-
+    Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
         CONFIG config;
         Optional<String> graphName = Optional.empty();
 
@@ -125,9 +133,9 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAl
 
             GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, getUsername())
+                .withGraphCreateConfig(createConfig)
                 .withAllocationTracker(AllocationTracker.EMPTY)
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
-            loader = createConfig.configureLoader(loader);
             return loader.load(createConfig.getGraphImpl());
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");

@@ -19,14 +19,11 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
-import org.neo4j.graphalgo.newapi.BaseConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -37,7 +34,7 @@ import java.util.Collection;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-public abstract class BaseProc<CONFIG extends BaseConfig> {
+public abstract class BaseProc {
 
     @Context
     public GraphDatabaseAPI api;
@@ -55,17 +52,16 @@ public abstract class BaseProc<CONFIG extends BaseConfig> {
         return transaction.subjectOrAnonymous().username();
     }
 
-    // TODO: remove once all algos have their own config that does this instead
-    // right now it's necessary because ProcedureConfiguration doesn't know the requirements of all algos
-    protected abstract GraphLoader newConfigureLoader(GraphLoader loader, CONFIG config);
 
-    protected final GraphLoader newLoader(AllocationTracker tracker, CONFIG config) {
-        GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
+    protected final GraphLoader newLoader(
+        AllocationTracker tracker,
+        GraphCreateConfig config
+    ) {
+        return new GraphLoader(api, Pools.DEFAULT)
             .init(log, getUsername())
             .withAllocationTracker(tracker)
-            .withTerminationFlag(TerminationFlag.wrap(transaction));
-        loader = config.configureLoader(loader);
-        return newConfigureLoader(loader, config);
+            .withTerminationFlag(TerminationFlag.wrap(transaction))
+            .withGraphCreateConfig(config);
     }
 
     void runWithExceptionLogging(String message, Runnable runnable) {
@@ -83,27 +79,6 @@ public abstract class BaseProc<CONFIG extends BaseConfig> {
         } catch (Exception e) {
             log.debug(message, e);
             throw e;
-        }
-    }
-
-    private Graph loadGraph(CONFIG config, AllocationTracker tracker) {
-        return runWithExceptionLogging(
-            "Loading failed",
-            () -> newLoader(tracker, config).load(config.getGraphImpl())
-        );
-    }
-
-    protected final <R> Graph loadGraph(
-        CONFIG config,
-        AllocationTracker tracker,
-        AbstractResultBuilder<R> resultBuilder
-    ) {
-        try (ProgressTimer ignored = resultBuilder.timeLoad()) {
-            Graph graph = loadGraph(config, tracker);
-            resultBuilder
-                .withNodeCount(graph.nodeCount())
-                .withRelationshipCount(graph.relationshipCount());
-            return graph;
         }
     }
 
