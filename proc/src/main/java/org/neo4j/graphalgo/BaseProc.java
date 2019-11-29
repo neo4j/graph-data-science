@@ -66,24 +66,14 @@ public abstract class BaseProc<CONFIG extends BaseConfig> {
         return transaction.subjectOrAnonymous().username();
     }
 
-    protected abstract GraphLoader configureLoader(
-        GraphLoader loader,
-        ProcedureConfiguration config
-    );
+    protected abstract GraphLoader configureLoader(GraphLoader loader, ProcedureConfiguration config);
 
-    protected GraphLoader newConfigureLoader(
-        GraphLoader loader,
-        CONFIG config
-    ) {
+    protected GraphLoader newConfigureLoader(GraphLoader loader, CONFIG config) {
         return loader;
     }
 
     // TODO: remove ProcedureConfiguration
-    protected final ProcedureConfiguration newConfig(
-        String label,
-        String relationship,
-        Map<String, Object> config
-    ) {
+    protected final ProcedureConfiguration newConfig(String label, String relationship, Map<String, Object> config) {
 
         ProcedureConfiguration configuration = (config != null)
             ? ProcedureConfiguration.create(config, getUsername())
@@ -102,10 +92,7 @@ public abstract class BaseProc<CONFIG extends BaseConfig> {
             .setComputeHistogram(OutputFieldParser.computeHistogram(returnItems));
     }
 
-    final GraphLoader newLoader(
-        ProcedureConfiguration config,
-        AllocationTracker tracker
-    ) {
+    final GraphLoader newLoader(ProcedureConfiguration config, AllocationTracker tracker) {
         String label = config.getNodeLabelOrQuery();
         String relationship = config.getRelationshipOrQuery();
         GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
@@ -115,10 +102,7 @@ public abstract class BaseProc<CONFIG extends BaseConfig> {
         return configureLoader(loader, config);
     }
 
-    protected final GraphLoader newLoader(
-        AllocationTracker tracker,
-        CONFIG config
-    ) {
+    protected final GraphLoader newLoader(AllocationTracker tracker, CONFIG config) {
         GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
             .init(log, getUsername())
             .withAllocationTracker(tracker)
@@ -145,10 +129,7 @@ public abstract class BaseProc<CONFIG extends BaseConfig> {
         }
     }
 
-    private Graph loadGraph(
-        ProcedureConfiguration config,
-        AllocationTracker tracker
-    ) {
+    private Graph loadGraph(ProcedureConfiguration config, AllocationTracker tracker) {
         return runWithExceptionLogging(
             "Loading failed",
             () -> newLoader(config, tracker).load(config.getGraphImpl())

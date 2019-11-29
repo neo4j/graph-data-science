@@ -29,10 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_AGGREGATION_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_PROPERTY_KEY;
-
 public abstract class PropertyMapping {
 
     public static final PropertyMapping EMPTY_PROPERTY = new PropertyMapping.Resolved(
@@ -42,6 +38,11 @@ public abstract class PropertyMapping {
         0.0,
         DeduplicationStrategy.DEFAULT
     );
+
+    private static final String RELATIONSHIP_PROPERTIES_PROPERTY_KEY = "property";
+    private static final String RELATIONSHIP_PROPERTIES_AGGREGATION_KEY = "aggregation";
+    private static final String RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY = "defaultValue";
+
     private static final double DEFAULT_PROPERTY_VALUE = Double.NaN;
 
     public final String propertyKey;
@@ -66,7 +67,10 @@ public abstract class PropertyMapping {
             String neoPropertyKey = (String) stringOrMap;
             return fromObject(
                 propertyKey,
-                Collections.singletonMap(RELATIONSHIP_PROPERTIES_PROPERTY_KEY, neoPropertyKey)
+                Collections.singletonMap(
+                    RELATIONSHIP_PROPERTIES_PROPERTY_KEY,
+                    neoPropertyKey
+                )
             );
         } else if (stringOrMap instanceof Map) {
             Map relPropertyMap = (Map) stringOrMap;
@@ -99,23 +103,23 @@ public abstract class PropertyMapping {
                 ));
             }
 
-            final Object defaultWeightValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY);
-            double defaultWeight;
-            if (defaultWeightValue == null) {
-                defaultWeight = HugeGraph.NO_PROPERTY_VALUE;
-            } else if (defaultWeightValue instanceof Number) {
-                defaultWeight = ((Number) defaultWeightValue).doubleValue();
+            final Object defaultPropertyValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY);
+            double defaultProperty;
+            if (defaultPropertyValue == null) {
+                defaultProperty = HugeGraph.NO_PROPERTY_VALUE;
+            } else if (defaultPropertyValue instanceof Number) {
+                defaultProperty = ((Number) defaultPropertyValue).doubleValue();
             } else {
                 throw new IllegalStateException(String.format(
                     "Expected the value of '%s' to be of type double, but was '%s'",
-                    RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY, defaultWeightValue.getClass().getSimpleName()
+                    RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY, defaultPropertyValue.getClass().getSimpleName()
                 ));
             }
 
             return PropertyMapping.of(
                 propertyKey,
                 neoPropertyKey,
-                defaultWeight,
+                defaultProperty,
                 deduplicationStrategy
             );
         } else {

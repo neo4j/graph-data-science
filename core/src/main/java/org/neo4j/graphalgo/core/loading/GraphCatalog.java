@@ -109,8 +109,8 @@ public final class GraphCatalog extends GraphFactory {
         return getUserCatalog(username).getType(graphName);
     }
 
-    public static Map<String, Graph> getLoadedGraphs(String username) {
-        return getUserCatalog(username).getLoadedGraphs();
+    public static Map<String, Graph> getLoadedGraphsByName(String username) {
+        return getUserCatalog(username).getLoadedGraphsByName();
     }
 
     private static UserCatalog getUserCatalog(String username) {
@@ -121,8 +121,8 @@ public final class GraphCatalog extends GraphFactory {
         userGraphCatalogs.clear();
     }
 
-    public static Map<GraphCreateConfig, Graph> getLoadedGraphsNew(String username) {
-        return getUserCatalog(username).getLoadedGraphsNew();
+    public static Map<GraphCreateConfig, Graph> getLoadedGraphs(String username) {
+        return getUserCatalog(username).getLoadedGraphs();
     }
 
     private static class UserCatalog {
@@ -184,14 +184,14 @@ public final class GraphCatalog extends GraphFactory {
             return graph == null ? null : graph.getGraphType();
         }
 
-        Map<String, Graph> getLoadedGraphs() {
+        Map<String, Graph> getLoadedGraphsByName() {
             return graphsByName.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> e.getValue().graph().getUnion()
             ));
         }
 
-        Map<GraphCreateConfig, Graph> getLoadedGraphsNew() {
+        Map<GraphCreateConfig, Graph> getLoadedGraphs() {
             return graphsByName.values().stream().collect(Collectors.toMap(
                 GraphWithConfig::config, gwc -> gwc.graph().getUnion()
             ));

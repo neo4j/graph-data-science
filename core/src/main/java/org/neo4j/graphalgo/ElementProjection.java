@@ -30,7 +30,7 @@ import static java.util.Collections.emptyMap;
 
 abstract class ElementProjection {
 
-    static final String PROPERTIES_KEY = "properties";
+    private static final String PROPERTIES_KEY = "properties";
 
     private final PropertyMappings properties;
 

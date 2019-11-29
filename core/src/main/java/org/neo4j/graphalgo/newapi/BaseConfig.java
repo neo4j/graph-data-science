@@ -27,5 +27,8 @@ public interface BaseConfig {
     @Configuration.Parameter
     String username();
 
-    GraphLoader configureLoader(GraphLoader loader);
+    @Configuration.Ignore
+    default GraphLoader configureLoader(GraphLoader loader) {
+        return loader;
+    }
 }

@@ -256,7 +256,7 @@ public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
                  "YIELD name, type, nodes, relationships, direction" +
                  "list all loaded graphs")
     public Stream<GraphInfo> list() {
-        Map<String, Graph> loadedGraphs = GraphCatalog.getLoadedGraphs(getUsername());
+        Map<String, Graph> loadedGraphs = GraphCatalog.getLoadedGraphsByName(getUsername());
 
         return loadedGraphs.entrySet().stream().map(entry -> {
             Graph graph = entry.getValue();

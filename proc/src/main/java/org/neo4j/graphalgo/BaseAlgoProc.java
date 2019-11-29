@@ -68,9 +68,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc<Proc
     }
 
     @Override
-    protected GraphLoader newConfigureLoader(
-        GraphLoader loader, ProcedureConfiguration procedureConfiguration
-    ) {
+    protected GraphLoader newConfigureLoader(GraphLoader loader, ProcedureConfiguration procedureConfiguration) {
         return configureLoader(loader, procedureConfiguration);
     }
 

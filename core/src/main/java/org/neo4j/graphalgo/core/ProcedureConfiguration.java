@@ -70,11 +70,6 @@ public class ProcedureConfiguration implements BaseConfig {
         this.computeCommunityCount = computeCommunityCount;
     }
 
-    @Override
-    public GraphLoader configureLoader(GraphLoader loader) {
-        return loader;
-    }
-
     // Below methods are delegators that will be removed
     // START DELEGATION
 

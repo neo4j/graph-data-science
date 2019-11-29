@@ -34,10 +34,6 @@ public final class ProcedureConstants {
     public static final String RELATIONSHIP_WEIGHT_KEY = "relationshipWeight";
     public static final String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
 
-    public static final String RELATIONSHIP_PROPERTIES_PROPERTY_KEY = "property";
-    public static final String RELATIONSHIP_PROPERTIES_AGGREGATION_KEY = "aggregation";
-    public static final String RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY = "defaultValue";
-
     // graph.generate specific
 
     // also refers to the relationship property  to be used in algorithms that make use of a property

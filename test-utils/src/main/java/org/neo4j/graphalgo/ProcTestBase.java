@@ -78,7 +78,7 @@ public class ProcTestBase {
     }
 
     protected String getUsername() {
-        return "";
+        return AuthSubject.ANONYMOUS.username();
     }
 
     protected void runQuery(String query) {

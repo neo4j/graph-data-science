@@ -96,7 +96,7 @@ class GraphCreateProcTest extends ProcTestBase {
                 singletonList("A"),
                 map("A", map("label", "A", "properties", emptyMap()))
             )
-            );
+        );
     }
 
     static Stream<Arguments> nodeProperties() {
@@ -120,7 +120,7 @@ class GraphCreateProcTest extends ProcTestBase {
         );
     }
 
-    static  Stream<Arguments> relationshipProperties() {
+    static Stream<Arguments> relationshipProperties() {
         return Stream.of(
             Arguments.of(
                 map("weight", map("property", "weight")),
@@ -146,17 +146,26 @@ class GraphCreateProcTest extends ProcTestBase {
             Arguments.of(
                 "default neo type",
                 singletonMap("REL", emptyMap()),
-                map("REL", map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap()))
+                map(
+                    "REL",
+                    map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap())
+                )
             ),
             Arguments.of(
                 "aliased rel type",
                 map("CONNECTS", map("type", "REL")),
-                map("CONNECTS", map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap()))
+                map(
+                    "CONNECTS",
+                    map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap())
+                )
             ),
             Arguments.of(
                 "rel filter as list",
                 singletonList("REL"),
-                map("REL", map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap()))
+                map(
+                    "REL",
+                    map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap())
+                )
             )
         );
     }
@@ -171,11 +180,11 @@ class GraphCreateProcTest extends ProcTestBase {
 
     static Stream<String> relAggregationTypes() {
         return Stream.of(
-          "MAX",
-          "MIN",
-          "SUM",
-          "SINGLE",
-          "NONE"
+            "MAX",
+            "MIN",
+            "SUM",
+            "SINGLE",
+            "NONE"
         );
     }
 
@@ -219,9 +228,18 @@ class GraphCreateProcTest extends ProcTestBase {
 
     @Test
     void failForNulls() {
-        assertError("CALL algo.beta.graph.create(null, null, null)", "No value specified for the mandatory configuration parameter `graphName`");
-        assertError("CALL algo.beta.graph.create('name', null, null)", "No value specified for the mandatory configuration parameter `nodeProjection`");
-        assertError("CALL algo.beta.graph.create('name', 'A', null)", "No value specified for the mandatory configuration parameter `relationshipProjection`");
+        assertError(
+            "CALL algo.beta.graph.create(null, null, null)",
+            "No value specified for the mandatory configuration parameter `graphName`"
+        );
+        assertError(
+            "CALL algo.beta.graph.create('name', null, null)",
+            "No value specified for the mandatory configuration parameter `nodeProjection`"
+        );
+        assertError(
+            "CALL algo.beta.graph.create('name', 'A', null)",
+            "No value specified for the mandatory configuration parameter `relationshipProjection`"
+        );
     }
 
     @Test
@@ -297,7 +315,10 @@ class GraphCreateProcTest extends ProcTestBase {
     @Test
     void failsOnInvalidPropertKey() {
         String name = "g";
-        Map<String, Object> nodeProjection = singletonMap("A", map("label", "A", "properties", map("property", "invalid")));
+        Map<String, Object> nodeProjection = singletonMap(
+            "A",
+            map("label", "A", "properties", map("property", "invalid"))
+        );
 
         assertError(
             "CALL algo.beta.graph.create($name, $nodeProjection, {})",
@@ -353,7 +374,10 @@ class GraphCreateProcTest extends ProcTestBase {
     @Disabled("will activate this once projection gets implemented")
     void relFilterProjections(String projection) {
         String name = "g";
-        Map<String, Object> relFilter = map("B", map("type", "REL", "projection", projection, "properties", emptyMap()));
+        Map<String, Object> relFilter = map(
+            "B",
+            map("type", "REL", "projection", projection, "properties", emptyMap())
+        );
 
         Long expectedRels = projection.equals("UNDIRECTED") ? relCount * 2 : relCount;
 
@@ -377,7 +401,10 @@ class GraphCreateProcTest extends ProcTestBase {
     void relPropertiesInRelFilter(Object properties, Map<String, Object> expectedProperties) {
         String name = "g";
         Map<String, Object> relProjection = map("B", map("type", "REL", "properties", properties));
-        Map<String, Object> expectedRelProjection = map("B", map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", expectedProperties));
+        Map<String, Object> expectedRelProjection = map(
+            "B",
+            map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", expectedProperties)
+        );
 
         // TODO: check property values on graph
         assertCypherResult(
@@ -398,8 +425,14 @@ class GraphCreateProcTest extends ProcTestBase {
     @MethodSource("relAggregationTypes")
     void relFilterPropertyAggregations(String aggregation) {
         String name = "g";
-        Map<String, Object> properties = map("weight", map("property", "weight", "aggregation", aggregation, "defaultValue", Double.NaN));
-        Map<String, Object> relProjection = map("B", map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", properties));
+        Map<String, Object> properties = map(
+            "weight",
+            map("property", "weight", "aggregation", aggregation, "defaultValue", Double.NaN)
+        );
+        Map<String, Object> relProjection = map(
+            "B",
+            map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", properties)
+        );
 
 
         // TODO: check property values on graph

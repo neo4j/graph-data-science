@@ -37,7 +37,12 @@ public final class RelationshipProjection extends ElementProjection {
     private static final String DEFAULT_PROJECTION = "NATURAL";
     private static final DeduplicationStrategy DEFAULT_AGGREGATION = DeduplicationStrategy.DEFAULT;
 
-    private static final RelationshipProjection EMPTY = new RelationshipProjection("", "", DEFAULT_AGGREGATION, PropertyMappings.EMPTY);
+    private static final RelationshipProjection EMPTY = new RelationshipProjection(
+        "",
+        "",
+        DEFAULT_AGGREGATION,
+        PropertyMappings.EMPTY
+    );
 
     private final String type;
     private final String projection;
@@ -63,7 +68,11 @@ public final class RelationshipProjection extends ElementProjection {
         return of(type, projection, DEFAULT_AGGREGATION);
     }
 
-    public static RelationshipProjection of(@Nullable String type, @NotNull String projection, @NotNull DeduplicationStrategy aggregation) {
+    public static RelationshipProjection of(
+        @Nullable String type,
+        @NotNull String projection,
+        @NotNull DeduplicationStrategy aggregation
+    ) {
         return of(type, projection, aggregation, PropertyMappings.EMPTY);
     }
 
@@ -71,7 +80,12 @@ public final class RelationshipProjection extends ElementProjection {
         return of(type, DEFAULT_PROJECTION, aggregation, PropertyMappings.EMPTY);
     }
 
-    public static RelationshipProjection of(@Nullable String type, @NotNull String projection, @NotNull DeduplicationStrategy aggregation, PropertyMappings properties) {
+    public static RelationshipProjection of(
+        @Nullable String type,
+        @NotNull String projection,
+        @NotNull DeduplicationStrategy aggregation,
+        PropertyMappings properties
+    ) {
         if (StringUtils.isEmpty(type)) {
             return EMPTY;
         }
@@ -79,10 +93,15 @@ public final class RelationshipProjection extends ElementProjection {
     }
 
     public static RelationshipProjection of(Map<String, Object> map, ElementIdentifier identifier) {
-        String type = map.containsKey(TYPE_KEY) ? nonEmptyString(map, TYPE_KEY) : identifier.name;
-        String projection = map.containsKey(PROJECTION_KEY) ? nonEmptyString(map, PROJECTION_KEY) : DEFAULT_PROJECTION;
-        DeduplicationStrategy aggregation = map.containsKey(AGGREGATION_KEY) ? DeduplicationStrategy.valueOf(
-            nonEmptyString(map, AGGREGATION_KEY)) : DEFAULT_AGGREGATION;
+        String type = map.containsKey(TYPE_KEY)
+            ? nonEmptyString(map, TYPE_KEY)
+            : identifier.name;
+        String projection = map.containsKey(PROJECTION_KEY)
+            ? nonEmptyString(map, PROJECTION_KEY)
+            : DEFAULT_PROJECTION;
+        DeduplicationStrategy aggregation = map.containsKey(AGGREGATION_KEY)
+            ? DeduplicationStrategy.valueOf(nonEmptyString(map, AGGREGATION_KEY))
+            : DEFAULT_AGGREGATION;
         return create(map, properties -> of(type, projection, aggregation, properties));
     }
 

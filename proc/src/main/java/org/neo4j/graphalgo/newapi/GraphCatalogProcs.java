@@ -128,19 +128,19 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
     }
 
     @Procedure(name = "algo.beta.graph.list", mode = Mode.READ)
-    public Stream<GraphCatalogEntry> list(@Name(value = "graphName", defaultValue = "") String graphName) {
-        AbstractConfig.throwForNull(graphName, "graphName");
+    public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = "") String graphName) {
+        CypherMapWrapper.failOnNull("graphName", graphName);
 
         boolean computeHistogram = callContext.outputFields().anyMatch(HISTOGRAM_FIELD_NAME::equals);
         Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries;
 
-        graphEntries = GraphCatalog.getLoadedGraphsNew(getUsername()).entrySet().stream();
+        graphEntries = GraphCatalog.getLoadedGraphs(getUsername()).entrySet().stream();
         if (!isEmpty(graphName)) {
             // we should only list the provided graph
             graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
         }
 
-        return graphEntries.map(e -> new GraphCatalogEntry(e.getKey(), e.getValue(), computeHistogram));
+        return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram));
     }
 
     public static class GraphCreateResult {
@@ -199,14 +199,14 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
         }
     }
 
-    public static class GraphCatalogEntry {
+    public static class GraphInfo {
 
         public final String graphName;
         public final Map<String, Object> nodeProjection, relationshipProjection;
         public final long nodes, relationships;
         public final Map<String, Object> histogram;
 
-        GraphCatalogEntry(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
+        GraphInfo(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
             this.graphName = config.graphName();
             nodeProjection = config.nodeProjection().toObject();
             relationshipProjection = config.relationshipProjection().toObject();

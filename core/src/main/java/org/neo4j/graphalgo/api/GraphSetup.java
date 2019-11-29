@@ -72,10 +72,8 @@ public class GraphSetup {
     private final boolean loadAsUndirected;
 
     /**
-     * main ctor
-     *  @param executor                   the executor. null means single threaded evaluation
-     * @param batchSize                  batch size for parallel loading
-     * @param createConfig
+     * @param executor  the executor. null means single threaded evaluation
+     * @param batchSize batch size for parallel loading
      */
     public GraphSetup(
         Direction direction,
@@ -142,11 +140,11 @@ public class GraphSetup {
         return createConfig.relationshipProjection().typeFilter();
     }
 
-    public NodeProjections nodeFilters() {
+    public NodeProjections nodeProjections() {
         return createConfig.nodeProjection();
     }
 
-    public RelationshipProjections relationshipFilters() {
+    public RelationshipProjections relationshipProjections() {
         return createConfig.relationshipProjection();
     }
 

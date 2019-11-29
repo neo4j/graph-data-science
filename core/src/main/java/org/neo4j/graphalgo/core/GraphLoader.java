@@ -73,7 +73,7 @@ public class GraphLoader {
     );
 
     private String username = AuthSubject.ANONYMOUS.username();
-    private String name = "";
+    private String graphName = "";
     private int concurrency = Pools.DEFAULT_CONCURRENCY;
     private String label = null;
     private String relation = null;
@@ -134,10 +134,6 @@ public class GraphLoader {
 
     public GraphLoader init(Log log, String username) {
         return withLog(log).withUsername(username);
-        // TODO: find a place to get/store these settings as well
-//            .withBatchSize(config.getBatchSize())
-//            .withDeduplicationStrategy(config.getDeduplicationStrategy())
-//            .withParams(config.getParams());
     }
 
     public GraphLoader withGraphCreateConfig(GraphCreateConfig createConfig) {
@@ -236,7 +232,7 @@ public class GraphLoader {
      */
     @Deprecated
     public GraphLoader withName(String name) {
-        this.name = name;
+        this.graphName = name;
         return this;
     }
 
@@ -494,7 +490,7 @@ public class GraphLoader {
             NodeProjections nodeProjections = NodeProjections.of(label);
             createConfig = ImmutableGraphCreateConfig
                 .builder()
-                .graphName(StringUtils.trimToEmpty(name))
+                .graphName(StringUtils.trimToEmpty(graphName))
                 .concurrency(concurrency)
                 .username(username)
                 .nodeProperties(nodePropertyMappings.build())
