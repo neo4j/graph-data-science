@@ -47,27 +47,21 @@ public class RelationshipStreamBuilder {
 
     private final IdMapping idMapping;
     private final ExecutorService executorService;
-    private final long nodeCount;
 
     private final int concurrency;
     private final int bufferSize;
     private final AllocationTracker tracker;
 
     public RelationshipStreamBuilder(IdMapping idMapping, ExecutorService executorService, AllocationTracker tracker) {
-        this(idMapping, idMapping.nodeCount(), executorService, tracker);
-    }
-
-    public RelationshipStreamBuilder(IdMapping idMapping, long nodeCount, ExecutorService executorService, AllocationTracker tracker) {
         this.idMapping = idMapping;
         this.concurrency = 1;
-        this.nodeCount = nodeCount;
-        this.bufferSize = (int) Math.min(nodeCount, ParallelUtil.DEFAULT_BATCH_SIZE);
+        this.bufferSize = (int) Math.min(idMapping.nodeCount(), ParallelUtil.DEFAULT_BATCH_SIZE);
         this.executorService = executorService;
         this.tracker = tracker;
     }
 
     public <T extends Relationship> Relationships loadRelationships(Stream<T> stream) {
-        ImportSizing importSizing = ImportSizing.of(concurrency, nodeCount);
+        ImportSizing importSizing = ImportSizing.of(concurrency, idMapping.nodeCount());
         int pageSize = importSizing.pageSize();
         int numberOfPages = importSizing.numberOfPages();
 

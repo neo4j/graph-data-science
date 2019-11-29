@@ -71,14 +71,14 @@ class SimilarityGraphBuilder {
     private final HugeGraph baseGraph;
     private final RelationshipStreamBuilder relationshipStreamBuilder;
 
-    SimilarityGraphBuilder(Graph baseGraph, long nodesToCompare, ExecutorService executorService, AllocationTracker tracker) {
+    SimilarityGraphBuilder(Graph baseGraph, ExecutorService executorService, AllocationTracker tracker) {
         if (baseGraph instanceof HugeGraph) {
             this.baseGraph = (HugeGraph) baseGraph;
         } else {
             throw new IllegalArgumentException("Base graph must be a huge graph.");
         }
 
-        this.relationshipStreamBuilder = new RelationshipStreamBuilder(baseGraph, nodesToCompare, executorService, tracker);
+        this.relationshipStreamBuilder = new RelationshipStreamBuilder(baseGraph, executorService, tracker);
     }
 
     Graph build(Stream<SimilarityResult> stream) {

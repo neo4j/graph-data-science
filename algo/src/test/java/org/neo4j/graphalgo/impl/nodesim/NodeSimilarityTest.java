@@ -476,6 +476,55 @@ final class NodeSimilarityTest {
 
     @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
+    void shouldComputeToGraphWithUnusedNodesInInputGraph(
+        Direction loadDirection,
+        Direction algoDirection,
+        int concurrency
+    ) {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        localDb.execute("UNWIND range(0, 1024) AS unused CREATE (:Unused)");
+        localDb.execute(DB_CYPHER);
+
+        Graph graph = new GraphLoader(localDb)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(loadDirection)
+            .load(HugeGraphFactory.class);
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
+            graph,
+            configBuilder()
+                .withConcurrency(concurrency)
+                .withTopK(100)
+                .withTopN(1)
+                .toConfig(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph(algoDirection);
+        assertEquals(
+            algoDirection == INCOMING ? COMPARED_ITEMS : COMPARED_PERSONS,
+            similarityGraphResult.comparedNodes()
+        );
+
+        Graph resultGraph = similarityGraphResult.similarityGraph();
+        String expected = algoDirection == INCOMING ? resultString(1029, 1030, 1.00000)  : resultString(1025, 1028, 1.00000);
+
+        resultGraph.forEachNode(n -> {
+            resultGraph.forEachRelationship(n, OUTGOING, -1.0, (s, t, w) -> {
+                assertEquals(expected, resultString(s, t, w));
+                return true;
+            });
+            return true;
+        });
+
+        nodeSimilarity.release();
+        resultGraph.release();
+    }
+
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @MethodSource("supportedLoadAndComputeDirections")
     void shouldIgnoreLoops(Direction loadDirection, Direction algoDirection, int concurrency) {
         // Add loops
         db.execute("" +
