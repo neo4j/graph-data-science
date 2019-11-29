@@ -45,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.core.ProcedureConstants.*;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
@@ -160,21 +161,15 @@ class GraphGenerateProcTest extends ProcTestBase {
     void shouldBeSeedableGenerator() {
         long relationshipSeed = 4242L;
 
-        Map propertyMap = map(
-            RELATIONSHIP_PROPERTY_NAME_KEY, "random",
-            RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
-            RELATIONSHIP_PROPERTY_MIN_KEY, 21.0D,
-            RELATIONSHIP_PROPERTY_MAX_KEY, 42.0D
-        );
-
-        Map<String, Object> configMap = map("relationshipSeed", relationshipSeed, RELATIONSHIP_PROPERTY_KEY, propertyMap);
+        Map<String, Object> configMap = map("relationshipSeed", relationshipSeed);
 
         ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap, getUsername());
 
         GraphGenerateProc proc = new GraphGenerateProc();
         RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, procedureConfig);
+        RandomGraphGenerator otherGenerator = proc.initializeGraphGenerator(10, 5, procedureConfig);
 
-        assertEquals(relationshipSeed, generator.getRelationshipSeed());
+        assertGraphEquals(generator.generate(), otherGenerator.generate());
     }
 
 

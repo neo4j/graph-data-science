@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.impl.generator;
 
+import java.util.Random;
 import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.graphalgo.impl.generator.DistributionHelper.gauseanSample;
@@ -29,40 +30,40 @@ import static org.neo4j.graphalgo.impl.generator.DistributionHelper.uniformSampl
 public enum RelationshipDistribution {
     UNIFORM {
         @Override
-        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Long seed) {
+        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random) {
             return (ignore) -> averageDegree;
         }
 
         @Override
-        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Long seed) {
-            return (ignore) -> uniformSample(nodeCount, seed);
+        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random) {
+            return (ignore) -> uniformSample(nodeCount, random);
         }
     },
     RANDOM {
         @Override
-        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Long seed) {
+        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random) {
             long stdDev = averageDegree / 2;
-            return (ignore) -> gauseanSample(nodeCount, averageDegree, stdDev, seed);
+            return (ignore) -> gauseanSample(nodeCount, averageDegree, stdDev, random);
         }
 
         @Override
-        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Long seed) {
-            return (ignore) -> uniformSample(nodeCount, seed);
+        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random) {
+            return (ignore) -> uniformSample(nodeCount, random);
 
         }
     },
     POWER_LAW {
         @Override
-        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Long seed) {
+        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random) {
             long stdDev = averageDegree / 2;
-            return (ignore) -> gauseanSample(nodeCount, averageDegree, stdDev, seed);
+            return (ignore) -> gauseanSample(nodeCount, averageDegree, stdDev, random);
         }
 
         @Override
-        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Long seed) {
+        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random) {
             long min = 1;
             double gamma = 1 + 1.0 / averageDegree;
-            return (ignore) -> powerLawSample(min, nodeCount - 1, gamma, seed);
+            return (ignore) -> powerLawSample(min, nodeCount - 1, gamma, random);
         }
     };
 
@@ -74,11 +75,7 @@ public enum RelationshipDistribution {
      * @param averageDegree Expected average degree in the generated graph
      * @return A unary function that accepts a node id and returns that nodes out degree
      */
-    abstract LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Long seed);
-
-    LongUnaryOperator degreeProducer(long nodeCount, long averageDegree) {
-        return degreeProducer(nodeCount, averageDegree, null);
-    }
+    abstract LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random);
 
     /**
      * Produces a unary function which accepts a node id parameter and returns another node id to wich the node will
@@ -88,9 +85,5 @@ public enum RelationshipDistribution {
      * @param averageDegree Expected average degree in the generated graph
      * @return A unary function that accepts a node id and returns another node id to wich a relationship will be created.
      */
-    abstract LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Long seed);
-
-    LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree) {
-        return relationshipProducer(nodeCount, averageDegree, null);
-    }
+    abstract LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random);
 }
