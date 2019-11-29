@@ -20,10 +20,10 @@ Graphs created by a different Neo4j user are not accessible at any time.
 
 We can load named graphs using either a <<label-relationship-type-projection, node-label and relationship-type>> or a <<cypher-projection, Cypher>> projection.
 
-.The following will load a graph with the name `my-graph`, for node label `Label` and relationship type `REL_TYPE`
+.The following will load a graph with the name 'my-graph', for node label `Label` and relationship type `REL_TYPE`
 [source,cypher]
 ----
-CALL algo.graph.load('my-graph','Label','REL_TYPE',{graph:'huge' /*, ... other config */})
+CALL algo.graph.load('my-graph', 'Label', 'REL_TYPE', {graph: 'huge' /*, ... other config */})
 YIELD name, graph, direction, undirected, sorted, nodes, loadMillis, alreadyLoaded,
       nodeProperties, relationshipProperties, relationshipWeight, loadNodes, loadRelationships;
 ----
@@ -78,22 +78,24 @@ CALL algo.pageRank(null, null, {graph: 'my-graph' /*, ... */})
 ----
 
 
-== Loading multiple relationship types
+== Loading multiple relationship types and node labels
 
-Using the `algo.graph.load` procedure it is possible to load more than one relationship type, as opposed to exactly one type or all types.
-In order to specify multiple relationship types, we can provide a relationship type description as known from Cypher `MATCH` pattern declarations.
+Using the `algo.graph.load` procedure it is possible to specify multiple relationship types and node labels.
+The loaded graph will retain the relationship type information.
+A graph loaded with multiple relationship types supports filtering subgraphs based on these types.
+Node label information is not retained in the loaded graph.
+
+Graphs loaded with an empty relationship projection, or a Cypher relationship projection query, do not retain information about relationship types.
 
 .The following example will load the graph `my-graph` with relationships that have the type `REL_TYPE1`, `REL_TYPE2` or `REL_TYPE3`:
-[source,cypher]
+[source, cypher]
 ----
 CALL algo.graph.load('my-graph', null, 'REL_TYPE1 | REL_TYPE2 | REL_TYPE3', {direction: 'OUTGOING', concurrency: 8 })
 ----
 
-Having loaded a graph with multiple relationship types gives us several options for how we can use the relationships.
-
-If we call an algorithm with no additional relationship type information, as described in the section above, the algorithm will use all loaded relationships.
-
-However, it is also possible to only use a subset of the loaded relationships by specifying the requested relationship types in the `relationship` parameter for the algorithm.
+A graph loaded with multiple relationship types supports filtering subgraphs based on these types.
+We can run an algorithm over a subset of the graph by specifying one or more of the loaded relationship types in `relationship` parameter for the algorithm.
+If the `relationship` parameter is empty, the whole graph is used.
 
 .The following example will run PageRank only on relationships of type `REL_TYPE1` or `REL_TYPE2`:
 [source,cypher]
@@ -101,22 +103,16 @@ However, it is also possible to only use a subset of the loaded relationships by
 CALL algo.pageRank(null, 'REL_TYPE1 | REL_TYPE2', {graph: 'my-graph'})
 ----
 
-[NOTE]
-====
-Using just a subset of the loaded relationships is currently only possible for a node-label and relationship-type projection.
-====
+The same syntax used to load multiple relationship types can also be used to load multiple labels.
 
-[NOTE]
-====
-Specifying a subset of relationship types in an algorithm call only works when the graph was explicitly loaded with multiple relationship types.
-If the graph was loaded with `null`, no relationship type information is retained in the graph.
-====
+.The following example will load the graph `my-graph` with nodes that have the label `Person` or `Instrument`:
+[source, cypher]
+----
+CALL algo.graph.load('my-graph', 'Person | Instrument', null, {direction: 'OUTGOING', concurrency: 8 })
+----
 
-[CAUTION]
-====
-Loading a lot of multiple relationship types can have a negative impact on performace, both during load and execution time.
-It is best to only load as few types as needed.
-====
+Unlike multiple relationship types, the node label information is not retained in the loaded graph.
+
 
 [[deduplication-of-parallel-relationships]]
 == Deduplication of parallel relationships

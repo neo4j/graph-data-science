@@ -205,15 +205,6 @@ In the example, we want to use the Node Similarity algorithm to compare persons 
 The Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1.
 In the example graph, the Eve node will not be compared to other Person nodes.
 
-The graph is bipartite, but the library does not support loading multiple node labels.
-In order to load both node sets, Persons and Instruments, we need to pass an empty node filter.
-
-[NOTE]
-====
-Loading a graph with an empty node filter means all the nodes in the Neo4j graph are loaded.
-To circumvent this, a common node label like 'Node' can be added to Person and Instrument nodes.
-====
-
 
 [[algorithms-node-similarity-examples-stream]]
 === Streaming results
@@ -221,7 +212,7 @@ To circumvent this, a common node label like 'Node' can be added to Person and I
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
   direction: 'OUTGOING'
 })
 YIELD node1, node2, similarity
@@ -261,7 +252,7 @@ The similarity score is written as a property on the relationship.
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity('', 'LIKES', {
+CALL algo.nodeSimilarity('Person | Instrument', 'LIKES', {
   direction: 'OUTGOING',
   write: true
 })
@@ -314,7 +305,7 @@ If neither is specified, topK is used.
 .The following will load the graph, run the algorithm, and stream the top 1 result per node:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
   direction: 'OUTGOING',
   topK: 1
 })
@@ -337,7 +328,7 @@ ORDER BY Person1
 .The following will load the graph, run the algorithm, and stream the bottom 1 result per node:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
   direction: 'OUTGOING',
   bottomK: 1
 })
@@ -370,7 +361,7 @@ A value of 0 means no global limit is imposed and all results from topK or botto
 .The following will load the graph, run the algorithm, and stream the 3 highest out of the top 1 results per node:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
   direction: 'OUTGOING',
   topK: 1,
   topN: 3
@@ -400,7 +391,7 @@ This value can not be lower than 1.
 .The following will ignore nodes with less than 3 LIKES relationships:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
   direction: 'OUTGOING',
   degreeCutOff: 3
 })
@@ -429,7 +420,7 @@ Setting similarity cutoff to 0 may yield a very large result set, increased runt
 .The following will ignore node pairs with a similarty score less than 0.5:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('', 'LIKES', {
+CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
   direction: 'OUTGOING',
   similarityCutoff: 0.5
 })
