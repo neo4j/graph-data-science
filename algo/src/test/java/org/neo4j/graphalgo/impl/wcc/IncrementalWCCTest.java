@@ -141,24 +141,15 @@ class IncrementalWCCTest {
             Double.NaN
         );
 
-        DisjointSetStruct result = WCCHelper.run(
+        DisjointSetStruct result = run(
             wccType,
             graph,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            Pools.DEFAULT_CONCURRENCY,
             config
         );
 
-        String actual = resultString(graph, result);
-
         // Then
-        String expected = String.format(
-            "0, 42%n" +
-            "1, 42%n" +
-            "2, 42"
-        );
-
-        assertEquals(expected, actual);
+        LongStream.range(IdMapping.START_NODE_ID, graph.nodeCount())
+            .forEach(node -> assertEquals(42, result.setIdOf(node)));
     }
 
     private void createConnection(GraphDatabaseService db, long sourceId, long targetId) {
@@ -211,11 +202,4 @@ class IncrementalWCCTest {
         return sets.cardinality();
     }
 
-    private String resultString(IdMapping idMapping, DisjointSetStruct dss) {
-        return LongStream.range(IdMapping.START_NODE_ID, idMapping.nodeCount())
-            .mapToObj(mappedId -> String.format("%d, %d",
-                idMapping.toOriginalNodeId(mappedId),
-                dss.setIdOf(mappedId))
-            ).collect(Collectors.joining(lineSeparator()));
-    }
 }
