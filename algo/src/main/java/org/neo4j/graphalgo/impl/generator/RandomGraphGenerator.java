@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.impl.generator;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
