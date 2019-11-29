@@ -45,7 +45,7 @@ public final class NodeProjection extends ElementProjection {
     }
 
     public static NodeProjection of(Map<String, Object> map, ElementIdentifier identifier) {
-        String label = map.containsKey(LABEL_KEY)? nonEmptyString(map, LABEL_KEY) : identifier.name;
+        String label = map.containsKey(LABEL_KEY) ? nonEmptyString(map, LABEL_KEY) : identifier.name;
         return create(map, properties -> new NodeProjection(label, properties));
     }
 

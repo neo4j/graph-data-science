@@ -79,7 +79,7 @@ public final class RelationshipProjection extends ElementProjection {
     }
 
     public static RelationshipProjection of(Map<String, Object> map, ElementIdentifier identifier) {
-        String type = map.containsKey(TYPE_KEY) ? nonEmptyString(map, TYPE_KEY): identifier.name;
+        String type = map.containsKey(TYPE_KEY) ? nonEmptyString(map, TYPE_KEY) : identifier.name;
         String projection = map.containsKey(PROJECTION_KEY) ? nonEmptyString(map, PROJECTION_KEY) : DEFAULT_PROJECTION;
         DeduplicationStrategy aggregation = map.containsKey(AGGREGATION_KEY) ? DeduplicationStrategy.valueOf(
             nonEmptyString(map, AGGREGATION_KEY)) : DEFAULT_AGGREGATION;
