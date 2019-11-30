@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.spanningTree;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
@@ -31,7 +32,6 @@ import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  *    (b)---(c)         (b)   (c)
  *        1
  */
-class KSpanningTreeTest {
+class KSpanningTreeTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE " +
@@ -60,17 +60,15 @@ class KSpanningTreeTest {
 
     private static final Label node = Label.label("Node");
 
-    private GraphDatabaseAPI db;
-
     @BeforeEach
     void setupGraph() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
     void shutdown() {
-        if (db != null) db.shutdown();
+        db.shutdown();
     }
 
     private Graph graph;

@@ -19,7 +19,8 @@
  */
 package org.neo4j.graphalgo.impl.wcc;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -44,12 +45,17 @@ class WCCTest extends WCCBaseTest {
     private static final int SETS_COUNT = 16;
     private static final int SET_SIZE = 10;
 
-    @BeforeAll
-    static void setupGraphDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
+    @BeforeEach
+    void setupGraphDb() {
+        db = TestDatabaseCreator.createTestDatabase();
         int[] setSizes = new int[SETS_COUNT];
         Arrays.fill(setSizes, SET_SIZE);
         createTestGraph(setSizes);
+    }
+
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     @Override
@@ -60,7 +66,7 @@ class WCCTest extends WCCBaseTest {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("parameters")
     void shouldComputeComponents(Class<? extends GraphFactory> graphFactory, WCCType unionFindType) {
-        Graph graph = new GraphLoader(DB)
+        Graph graph = new GraphLoader(db)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
                 .withRelationshipType(RELATIONSHIP_TYPE)
@@ -234,10 +240,10 @@ class WCCTest extends WCCBaseTest {
                 WCCType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 64).memoryUsage().min);
     }
 
-    private static void createTestGraph(int... setSizes) {
-        try (Transaction tx = DB.beginTx()) {
+    private void createTestGraph(int... setSizes) {
+        try (Transaction tx = db.beginTx()) {
             for (int setSize : setSizes) {
-                createLine(DB, setSize);
+                createLine(db, setSize);
             }
             tx.success();
         }

@@ -19,9 +19,10 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *  f |2 |3 |6 |2/3
  * </pre>
  */
-class ClusteringCoefficientTest {
+class ClusteringCoefficientTest extends AlgoTestBase {
 
     private static final double[] EXPECTED = {
         1.0, 1.0, 3.0/10, 1.0, 1.0, 2.0/3
@@ -65,11 +65,10 @@ class ClusteringCoefficientTest {
 
     private static final String LABEL = "Node";
 
-    private static GraphDatabaseAPI db;
     private static Graph graph;
 
-    @BeforeAll
-    static void setup() {
+    @BeforeEach
+    void setup() {
 
         String setupCypher =
                 "CREATE (a:Node {name:'a'})\n" +
@@ -94,7 +93,7 @@ class ClusteringCoefficientTest {
         db = TestDatabaseCreator.createTestDatabase();
 
         try (Transaction tx = db.beginTx()) {
-            db.execute(setupCypher);
+            runQuery(setupCypher);
             tx.success();
         }
 
@@ -104,8 +103,8 @@ class ClusteringCoefficientTest {
                 .load(HugeGraphFactory.class);
     }
 
-    @AfterAll
-    static void tearDown() {
+    @AfterEach
+    void tearDown() {
         db.shutdown();
         graph = null;
     }
@@ -113,11 +112,9 @@ class ClusteringCoefficientTest {
 
     @Test
     void test() {
-
-        final IntersectingTriangleCount algo =
-                new IntersectingTriangleCount(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
-                        .compute();
-
+        IntersectingTriangleCount algo =
+            new IntersectingTriangleCount(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
+                .compute();
         assertArrayEquals(EXPECTED, algo.getCoefficients().toArray(), 0.01);
         assertEquals(0.827, algo.getAverageCoefficient(), 0.01);
     }

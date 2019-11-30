@@ -19,8 +19,9 @@
  */
 package org.neo4j.graphalgo.impl.spanningTree;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
@@ -31,7 +32,6 @@ import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *     |       |          |      |          |       |
  *     d --6-- e          d      e          d-------e
  */
-class PrimTest {
+class PrimTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -66,22 +66,20 @@ class PrimTest {
             ", (c)-[:TYPE {cost: 5.0}]->(e)" +
             ", (d)-[:TYPE {cost: 6.0}]->(e)";
 
-    private static GraphDatabaseAPI DB;
-
     private static final Label label = Label.label("Node");
     private static int a, b, c, d, e, y, z;
 
     private Graph graph;
 
-    @BeforeAll
-    static void setupGraph() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER);
+    @BeforeEach
+    void setupGraph() {
+        db = TestDatabaseCreator.createTestDatabase();
+        runQuery(DB_CYPHER);
     }
 
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdown() {
+        db.shutdown();
     }
 
     @AllGraphTypesWithoutCypherTest
@@ -145,21 +143,21 @@ class PrimTest {
     }
 
     private void setup(Class<? extends GraphFactory> graphImpl) {
-        graph = new GraphLoader(DB)
+        graph = new GraphLoader(db)
                 .withLabel(label)
                 .withRelationshipType("TYPE")
                 .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .undirected()
                 .load(graphImpl);
 
-        try (Transaction transaction = DB.beginTx()) {
-            a = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "a").getId()));
-            b = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "b").getId()));
-            c = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "c").getId()));
-            d = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "d").getId()));
-            e = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "e").getId()));
-            y = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "y").getId()));
-            z = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "z").getId()));
+        try (Transaction transaction = db.beginTx()) {
+            a = Math.toIntExact(graph.toMappedNodeId(db.findNode(label, "name", "a").getId()));
+            b = Math.toIntExact(graph.toMappedNodeId(db.findNode(label, "name", "b").getId()));
+            c = Math.toIntExact(graph.toMappedNodeId(db.findNode(label, "name", "c").getId()));
+            d = Math.toIntExact(graph.toMappedNodeId(db.findNode(label, "name", "d").getId()));
+            e = Math.toIntExact(graph.toMappedNodeId(db.findNode(label, "name", "e").getId()));
+            y = Math.toIntExact(graph.toMappedNodeId(db.findNode(label, "name", "y").getId()));
+            z = Math.toIntExact(graph.toMappedNodeId(db.findNode(label, "name", "z").getId()));
             transaction.success();
         }
     }

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -47,9 +48,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *   \  /          b |1 |2 |1.0
  *   (d)           c |0 |1 |0.0
  */
-class ClusteringCoefficientWikiTest {
+class ClusteringCoefficientWikiTest extends AlgoTestBase {
 
-    private GraphDatabaseAPI db;
     private Graph graph;
 
     private static final double[] EXPECTED = {0.33, 1.0, 0.0, 1.0};
@@ -70,7 +70,7 @@ class ClusteringCoefficientWikiTest {
                 " (b)-[:TYPE]->(d)";
 
         try (Transaction tx = db.beginTx()) {
-            db.execute(cypher);
+            runQuery(cypher);
             tx.success();
         }
 

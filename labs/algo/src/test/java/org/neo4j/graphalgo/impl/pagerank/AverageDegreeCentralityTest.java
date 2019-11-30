@@ -19,8 +19,9 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -32,11 +33,10 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-final class AverageDegreeCentralityTest {
+final class AverageDegreeCentralityTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -99,17 +99,15 @@ final class AverageDegreeCentralityTest {
             ", (j)-[:TYPE2]->(e)" +
             ", (k)-[:TYPE2]->(e)";
 
-    private static GraphDatabaseAPI db;
-
-    @BeforeAll
-    static void setupGraphDb() {
+    @BeforeEach
+    void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
-    @AfterAll
-    static void shutdownGraphDb() {
-        if (db != null) db.shutdown();
+    @AfterEach
+    void shutdownGraphDb() {
+        db.shutdown();
     }
 
     @AllGraphTypesTest

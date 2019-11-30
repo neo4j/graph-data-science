@@ -19,8 +19,9 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
@@ -33,7 +34,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-final class ShortestPathDijkstraTest {
+final class ShortestPathDijkstraTest extends AlgoTestBase {
 
     // https://en.wikipedia.org/wiki/Shortest_path_problem#/media/File:Shortest_path_with_direct_weights.svg
     private static final String DB_CYPHER =
@@ -107,19 +107,17 @@ final class ShortestPathDijkstraTest {
             ", (n6)-[:TYPE599 {cost:23.0}]->(n7)" +
             ", (n1)-[:TYPE599 {cost:5.0}]->(n4)";
 
-    private static GraphDatabaseAPI DB;
-
-    @BeforeAll
-    static void setupGraph() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER).close();
-        DB.execute(DB_CYPHER2).close();
-        DB.execute(DB_CYPHER_599).close();
+    @BeforeEach
+    void setupGraph() {
+        db = TestDatabaseCreator.createTestDatabase();
+        runQuery(DB_CYPHER);
+        runQuery(DB_CYPHER2);
+        runQuery(DB_CYPHER_599);
     }
 
-    @AfterAll
-    static void teardownGraph() {
-        DB.shutdown();
+    @AfterEach
+    void teardownGraph() {
+        db.shutdown();
     }
 
     @AllGraphTypesWithoutCypherTest
@@ -135,7 +133,7 @@ final class ShortestPathDijkstraTest {
                 "name", "f");
         long[] nodeIds = expected.nodeIds;
 
-        final Graph graph = new GraphLoader(DB)
+        final Graph graph = new GraphLoader(db)
                 .withLabel(label)
                 .withRelationshipType(type)
                 .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
@@ -164,7 +162,7 @@ final class ShortestPathDijkstraTest {
                 "name", "7");
         long[] nodeIds = expected.nodeIds;
 
-        final Graph graph = new GraphLoader(DB)
+        final Graph graph = new GraphLoader(db)
                 .withLabel(label)
                 .withRelationshipType(type)
                 .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
@@ -194,7 +192,7 @@ final class ShortestPathDijkstraTest {
                 "id", "1", "id", "2", "id", "5",
                 "id", "6", "id", "3", "id", "4");
 
-        Graph graph = new GraphLoader(DB)
+        Graph graph = new GraphLoader(db)
                 .withLabel(label)
                 .withRelationshipType(type)
                 .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
@@ -228,7 +226,7 @@ final class ShortestPathDijkstraTest {
                 "name", "f");
         final long head = expected.nodeIds[0], tail = expected.nodeIds[expected.nodeIds.length - 1];
 
-        final Graph graph = new GraphLoader(DB)
+        final Graph graph = new GraphLoader(db)
                 .withLabel(label)
                 .withRelationshipType("TYPE1")
                 .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
@@ -244,16 +242,16 @@ final class ShortestPathDijkstraTest {
         assertEquals(expected.nodeIds.length, resultStream.count());
     }
 
-    private static ShortestPath expected(
+    private ShortestPath expected(
             Label label,
             RelationshipType type,
             String... kvPairs) {
-        try (Transaction tx = DB.beginTx()) {
+        try (Transaction tx = db.beginTx()) {
             double weight = 0.0;
             Node prev = null;
             long[] nodeIds = new long[kvPairs.length / 2];
             for (int i = 0; i < nodeIds.length; i++) {
-                Node current = DB.findNode(label, kvPairs[2 * i], kvPairs[2 * i + 1]);
+                Node current = db.findNode(label, kvPairs[2 * i], kvPairs[2 * i + 1]);
                 long id = current.getId();
                 nodeIds[i] = id;
                 if (prev != null) {

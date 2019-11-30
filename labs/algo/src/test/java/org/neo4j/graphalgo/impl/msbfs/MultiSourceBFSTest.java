@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.impl.msbfs;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -39,7 +39,6 @@ import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Pair;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,7 +56,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-final class MultiSourceBFSTest {
+final class MultiSourceBFSTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -81,21 +80,14 @@ final class MultiSourceBFSTest {
             ", (e)-[:BAR]->(c)" +
             ", (f)-[:BAR]->(d)";
 
-    private static GraphDatabaseAPI DB;
-
-    @BeforeAll
-    static void setupGraphDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
+    @BeforeEach
+    void setupGraphDb() {
+        db = TestDatabaseCreator.createTestDatabase();
     }
 
     @AfterEach
     void clearDb() {
-        DB.execute("MATCH (n) DETACH DELETE n");
-    }
-
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) DB.shutdown();
+        db.shutdown();
     }
 
     @AllGraphTypesWithoutCypherTest
@@ -322,22 +314,22 @@ final class MultiSourceBFSTest {
             String cypher,
             Consumer<? super Graph> block,
             Class<? extends GraphFactory> graphImpl) {
-        DB.execute(cypher).close();
-        block.accept(new GraphLoader(DB).load(graphImpl));
+        runQuery(cypher);
+        block.accept(new GraphLoader(db).load(graphImpl));
     }
 
     private void withGrid(
             Consumer<? super GraphBuilder<?>> build,
             Consumer<? super Graph> block,
             Class<? extends GraphFactory> graphImpl) {
-        try (Transaction tx = DB.beginTx()) {
-            DefaultBuilder graphBuilder = GraphBuilder.create(DB)
+        try (Transaction tx = db.beginTx()) {
+            DefaultBuilder graphBuilder = GraphBuilder.create(db)
                     .setLabel("Foo")
                     .setRelationship("BAR");
             build.accept(graphBuilder);
             tx.success();
         }
-        Graph graph = new GraphLoader(DB).load(graphImpl);
+        Graph graph = new GraphLoader(db).load(graphImpl);
         block.accept(graph);
     }
 

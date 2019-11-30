@@ -26,6 +26,7 @@ import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -44,7 +45,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation.Config;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 
@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-final class LabelPropagationTest {
+final class LabelPropagationTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -74,12 +74,10 @@ final class LabelPropagationTest {
             ", (nMichael)-[:FOLLOW]->(nBridget)" +
             ", (nCharles)-[:FOLLOW]->(nDoug)";
 
-    private GraphDatabaseAPI db;
-
     @BeforeEach
     void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER).close();
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach

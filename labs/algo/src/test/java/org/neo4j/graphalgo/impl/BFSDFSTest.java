@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.Traverse.ExitPredicate.Result;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 
@@ -47,9 +47,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *   1\ 2/ 1\ 2/
  *    (c)   (f)
  */
-class BFSDFSTest {
-
-    private GraphDatabaseAPI db;
+class BFSDFSTest extends AlgoTestBase {
 
     private static Graph graph;
 
@@ -74,7 +72,7 @@ class BFSDFSTest {
                 " (e)-[:TYPE {cost:2.0}]->(g),\n" +
                 " (f)-[:TYPE {cost:1.0}]->(g)";
 
-        db.execute(cypher);
+        runQuery(cypher);
 
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
@@ -92,19 +90,16 @@ class BFSDFSTest {
 
     private long id(String name) {
         final Node[] node = new Node[1];
-        db.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
-            node[0] = row.getNode("n");
-            return false;
-        });
+        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
         return node[0].getId();
     }
 
     private String name(long id) {
         final String[] node = new String[1];
-        db.execute("MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name").accept(row -> {
-            node[0] = row.getString("name");
-            return false;
-        });
+        runQuery(
+            "MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name",
+            row -> node[0] = row.getString("name")
+        );
         return node[0];
     }
 

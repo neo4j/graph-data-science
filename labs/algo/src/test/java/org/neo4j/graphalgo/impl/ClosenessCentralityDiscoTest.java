@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.DoubleConsumer;
 
@@ -46,13 +46,11 @@ import static org.mockito.Mockito.verify;
  *   (c)
  *
  */
-class ClosenessCentralityDiscoTest {
-
-    private static GraphDatabaseAPI DB;
+class ClosenessCentralityDiscoTest extends AlgoTestBase {
 
     @BeforeEach
     void setup() {
-        DB = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -67,12 +65,12 @@ class ClosenessCentralityDiscoTest {
 
                 " (d)-[:TYPE]->(e)";
 
-        DB.execute(cypher);
+        runQuery(cypher);
     }
 
     @AfterEach
     void teardown() {
-        DB.shutdown();
+        db.shutdown();
     }
 
     @Test
@@ -82,7 +80,7 @@ class ClosenessCentralityDiscoTest {
     }
 
     private Graph load(Class<? extends GraphFactory> factory) {
-        return new GraphLoader(DB, Pools.DEFAULT)
+        return new GraphLoader(db, Pools.DEFAULT)
                 .withLabel("Node")
                 .withRelationshipType("TYPE")
                 .undirected()

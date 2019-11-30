@@ -19,8 +19,9 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -29,7 +30,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
  *  ==|=============================
  * k/S| 0.4  0.57  0.67  0.57   0.4     // normalized centrality
  */
-class ClosenessCentralityTest {
+class ClosenessCentralityTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE " +
@@ -74,17 +74,16 @@ class ClosenessCentralityTest {
             ", (e)-[:TYPE]->(d)";
 
     private static final double[] EXPECTED = new double[]{0.4, 0.57, 0.66, 0.57, 0.4};
-    private static GraphDatabaseAPI DB;
 
-    @BeforeAll
-    static void setupGraph() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER);
+    @BeforeEach
+    void setupGraph() {
+        db = TestDatabaseCreator.createTestDatabase();
+        runQuery(DB_CYPHER);
     }
 
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdown() {
+        db.shutdown();
     }
 
     private Graph graph;
@@ -119,7 +118,7 @@ class ClosenessCentralityTest {
     }
 
     private void setup(Class<? extends GraphFactory> graphImpl) {
-        graph = new GraphLoader(DB)
+        graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .load(graphImpl);

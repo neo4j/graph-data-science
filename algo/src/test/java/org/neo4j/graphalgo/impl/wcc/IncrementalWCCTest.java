@@ -19,7 +19,8 @@
  */
 package org.neo4j.graphalgo.impl.wcc;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -45,17 +46,22 @@ class IncrementalWCCTest extends WCCBaseTest {
     /**
      * Create multiple communities and connect them pairwise.
      */
-    @BeforeAll
-    static void setupGraphDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = DB.beginTx()) {
+    @BeforeEach
+    void setupGraphDb() {
+        db = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = db.beginTx()) {
             for (int i = 0; i < COMMUNITY_COUNT; i = i + 2) {
-                long community1 = createLineGraph(DB);
-                long community2 = createLineGraph(DB);
-                createConnection(DB, community1, community2);
+                long community1 = createLineGraph(db);
+                long community2 = createLineGraph(db);
+                createConnection(db, community1, community2);
             }
             tx.success();
         }
+    }
+
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     private static long getCommunityId(long nodeId, int communitySize) {
@@ -72,7 +78,7 @@ class IncrementalWCCTest extends WCCBaseTest {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("parameters")
     void shouldComputeComponentsFromSeedProperty(Class<? extends GraphFactory> graphFactory, WCCType unionFindType) {
-        Graph graph = new GraphLoader(DB)
+        Graph graph = new GraphLoader(db)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
                 .withOptionalNodeProperties(PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L))
