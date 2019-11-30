@@ -93,14 +93,14 @@ class TerminationTest extends ProcTestBase {
     }
 
     // execute query as usual but also submits a termination thread which kills the tx after a timeout
-    private void executeAndKill(Result.ResultVisitor<? extends java.lang.Exception> visitor) {
+    private void executeAndKill(Result.ResultVisitor<? extends Exception> visitor) {
         final ArrayList<Runnable> runnables = new ArrayList<>();
 
         // add query runnable
         runnables.add(() -> {
             try {
                 db.execute(TerminationTest.QUERY).accept(visitor);
-            } catch (java.lang.Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }

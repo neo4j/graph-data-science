@@ -83,7 +83,7 @@ class BetweennessCentralityProcTest_148 extends ProcTestBase {
     }
 
     @Test
-    void testBCStreamDirectionBoth() throws java.lang.Exception {
+    void testBCStreamDirectionBoth() throws Exception {
 
         final Consumer mock = mock(Consumer.class);
         final String evalQuery = "CALL algo.betweenness.stream('User', 'FRIEND', {direction:'B'}) YIELD nodeId, centrality";

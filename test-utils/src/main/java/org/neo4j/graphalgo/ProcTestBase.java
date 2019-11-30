@@ -283,7 +283,7 @@ public class ProcTestBase {
         try {
             db.execute(query, queryParameters);
             fail(format("Expected an exception to be thrown by query:\n%s", query));
-        } catch (java.lang.Exception e) {
+        } catch (Exception e) {
             assertThat(e, containsMessage(messageSubstring));
         }
     }

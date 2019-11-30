@@ -97,10 +97,10 @@ class BetweennessCentralityProcTest_282 extends ProcTestBase {
     /**
      * test org.neo4j.graphalgo.impl.BetweennessCentrality
      *
-     * @throws java.lang.Exception
+     * @throws Exception
      */
     @Test
-    void testBCWriteBack() throws java.lang.Exception {
+    void testBCWriteBack() throws Exception {
 
         final String evalQuery = "CALL algo.betweenness('Node', 'EDGE', {write:true, stats:true, writeProperty:'centrality'})\n" +
                 "YIELD nodes, minCentrality, maxCentrality, sumCentrality";
@@ -136,10 +136,10 @@ class BetweennessCentralityProcTest_282 extends ProcTestBase {
     /**
      * test org.neo4j.graphalgo.impl.BetweennessCentrality
      *
-     * @throws java.lang.Exception
+     * @throws Exception
      */
     @Test
-    void testBCWriteBackParallel() throws java.lang.Exception {
+    void testBCWriteBackParallel() throws Exception {
 
         final String evalQuery = "CALL algo.betweenness('Node', 'EDGE', {write:true, stats:true, writeProperty:'centrality', concurrency:4})\n" +
                 "YIELD nodes, minCentrality, maxCentrality, sumCentrality";

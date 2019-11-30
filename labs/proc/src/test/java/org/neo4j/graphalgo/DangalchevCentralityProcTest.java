@@ -91,10 +91,10 @@ class DangalchevCentralityProcTest extends ProcTestBase {
     }
 
     @Test
-    void testClosenessStream() throws java.lang.Exception {
+    void testClosenessStream() throws Exception {
 
         db.execute("CALL algo.closeness.dangalchev.stream('Node', 'TYPE') YIELD nodeId, centrality")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     consumer.accept(
                             row.getNumber("nodeId").longValue(),
                             row.getNumber("centrality").doubleValue());
@@ -105,11 +105,11 @@ class DangalchevCentralityProcTest extends ProcTestBase {
     }
 
     @Test
-    void testClosenessWrite() throws java.lang.Exception {
+    void testClosenessWrite() throws Exception {
 
         db.execute("CALL algo.closeness.dangalchev('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
                 "nodes, loadMillis, computeMillis, writeMillis")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertNotEquals(-1L, row.getNumber("writeMillis"));
                     assertNotEquals(-1L, row.getNumber("computeMillis"));
                     assertNotEquals(-1L, row.getNumber("nodes"));

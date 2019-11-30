@@ -67,9 +67,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testUnionFindMSColoring() throws java.lang.Exception {
+    void testUnionFindMSColoring() throws Exception {
         db.execute("CALL algo.unionFind.mscoloring('', '',{graph:'" + graphImpl + "'}) YIELD nodes")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });
@@ -82,9 +82,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testStronglyConnectedComponents() throws java.lang.Exception {
+    void testStronglyConnectedComponents() throws Exception {
         db.execute("CALL algo.scc('', '',{graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("setCount"));
                     return true;
                 });
@@ -97,18 +97,18 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testStronglyConnectedComponentsMultiStep() throws java.lang.Exception {
+    void testStronglyConnectedComponentsMultiStep() throws Exception {
         db.execute("CALL algo.scc('', '',{graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("setCount"));
                     return true;
                 });
     }
 
     @Test
-    void testStronglyConnectedComponentsTunedTarjan() throws java.lang.Exception {
+    void testStronglyConnectedComponentsTunedTarjan() throws Exception {
         db.execute("CALL algo.scc.recursive.tunedTarjan('', '',{graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("setCount"));
                     return true;
                 });
@@ -139,9 +139,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testBetweennessCentrality() throws java.lang.Exception {
+    void testBetweennessCentrality() throws Exception {
         db.execute("CALL algo.betweenness('', '',{graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });
@@ -154,9 +154,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testSampledBetweennessCentrality() throws java.lang.Exception {
+    void testSampledBetweennessCentrality() throws Exception {
         db.execute("CALL algo.betweenness.sampled('', '',{graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });
@@ -169,9 +169,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testClosenessCentrality() throws java.lang.Exception {
+    void testClosenessCentrality() throws Exception {
         db.execute("CALL algo.closeness('', '',{graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });
@@ -184,9 +184,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testTriangleCount() throws java.lang.Exception {
+    void testTriangleCount() throws Exception {
         db.execute("CALL algo.triangleCount('', '',{graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodeCount"));
                     return true;
                 });
@@ -205,9 +205,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testDangelchevCentrality() throws java.lang.Exception {
+    void testDangelchevCentrality() throws Exception {
         db.execute("CALL algo.closeness.dangalchev('', '',{graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });
@@ -220,63 +220,63 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testHarmonicCentrality() throws java.lang.Exception {
+    void testHarmonicCentrality() throws Exception {
         db.execute("CALL algo.closeness.harmonic('', '',{graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
                 });
     }
 
     @Test
-    void testKSpanningTreeKMax() throws java.lang.Exception {
+    void testKSpanningTreeKMax() throws Exception {
         db.execute("CALL algo.spanningTree.kmax('', '', '', 0, 3, {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("effectiveNodeCount"));
                     return true;
                 });
     }
 
     @Test
-    void testKSpanningTreeKMin() throws java.lang.Exception {
+    void testKSpanningTreeKMin() throws Exception {
         db.execute("CALL algo.spanningTree.kmin('', '', '', 0, 3, {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("effectiveNodeCount"));
                     return true;
                 });
     }
 
     @Test
-    void testMST() throws java.lang.Exception {
+    void testMST() throws Exception {
         db.execute("CALL algo.mst('', '', '', 0, {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("effectiveNodeCount"));
                     return true;
                 });
     }
 
     @Test
-    void testSpanningTree() throws java.lang.Exception {
+    void testSpanningTree() throws Exception {
         db.execute("CALL algo.spanningTree('', '', '', 0, {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("effectiveNodeCount"));
                     return true;
                 });
     }
 
     @Test
-    void testSpanningTreeMinimum() throws java.lang.Exception {
+    void testSpanningTreeMinimum() throws Exception {
         db.execute("CALL algo.spanningTree.minimum('', '', '', 0, {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("effectiveNodeCount"));
                     return true;
                 });
     }
 
     @Test
-    void testSpanningTreeMaximum() throws java.lang.Exception {
+    void testSpanningTreeMaximum() throws Exception {
         db.execute("CALL algo.spanningTree.maximum('', '', '', 0, {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("effectiveNodeCount"));
                     return true;
                 });
@@ -295,9 +295,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testShortestPath() throws java.lang.Exception {
+    void testShortestPath() throws Exception {
         db.execute("CALL algo.shortestPath(null, null, '', {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodeCount"));
                     return true;
                 });
@@ -310,18 +310,18 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testShortestPaths() throws java.lang.Exception {
+    void testShortestPaths() throws Exception {
         db.execute("CALL algo.shortestPaths(null, '', {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodeCount"));
                     return true;
                 });
     }
 
     @Test
-    void testKShortestPaths() throws java.lang.Exception {
+    void testKShortestPaths() throws Exception {
         db.execute("CALL algo.kShortestPaths(null, null, 3, '', {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("resultCount"));
                     return true;
                 });
@@ -334,9 +334,9 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testShortestPathsDeltaStepping() throws java.lang.Exception {
+    void testShortestPathsDeltaStepping() throws Exception {
         db.execute("CALL algo.shortestPath.deltaStepping(null, '', 0, {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<java.lang.Exception>) row -> {
+                .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodeCount"));
                     return true;
                 });
