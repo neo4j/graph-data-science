@@ -22,9 +22,9 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -21,8 +21,8 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
-import org.neo4j.helpers.collection.MapUtil;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.graphalgo.compat.MapUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

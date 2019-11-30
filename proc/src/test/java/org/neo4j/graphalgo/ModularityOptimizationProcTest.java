@@ -24,8 +24,8 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.Map;
 

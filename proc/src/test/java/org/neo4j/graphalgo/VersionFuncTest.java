@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.helpers.collection.MapUtil.map;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class VersionFuncTest extends ProcTestBase {
 

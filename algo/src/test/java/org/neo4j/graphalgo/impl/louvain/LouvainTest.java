@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -46,7 +47,6 @@ import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.NullLog;
 

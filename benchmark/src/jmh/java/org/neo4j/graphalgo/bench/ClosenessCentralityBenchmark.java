@@ -20,13 +20,13 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.ClosenessCentralityProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;

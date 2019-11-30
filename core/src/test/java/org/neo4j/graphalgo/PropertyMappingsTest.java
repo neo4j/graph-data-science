@@ -21,9 +21,9 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.Collections;
 import java.util.Iterator;

@@ -33,7 +33,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.helpers.collection.MapUtil.map;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class MemRecProcTest extends ProcTestBase {
 

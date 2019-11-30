@@ -24,9 +24,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -22,9 +22,9 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
-import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.Arrays;
 import java.util.List;

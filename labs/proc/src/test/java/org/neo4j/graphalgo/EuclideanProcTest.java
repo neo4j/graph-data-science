@@ -32,7 +32,7 @@ import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.helpers.collection.MapUtil.map;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class EuclideanProcTest extends ProcTestBase {
 

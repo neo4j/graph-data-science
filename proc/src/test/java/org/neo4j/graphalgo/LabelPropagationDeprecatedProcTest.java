@@ -21,10 +21,10 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.Iterators;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;

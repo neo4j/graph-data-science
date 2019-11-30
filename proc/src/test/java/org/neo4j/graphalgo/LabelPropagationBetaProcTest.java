@@ -50,8 +50,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
-import static org.neo4j.helpers.collection.MapUtil.map;
 
 class LabelPropagationBetaProcTest extends ProcTestBase {
 

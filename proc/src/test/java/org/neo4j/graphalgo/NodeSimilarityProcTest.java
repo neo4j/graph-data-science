@@ -29,13 +29,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.Collection;
 import java.util.HashSet;

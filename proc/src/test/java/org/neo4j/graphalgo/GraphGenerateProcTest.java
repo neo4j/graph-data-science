@@ -26,12 +26,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.impl.generator.RelationshipPropertyProducer;
-import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;

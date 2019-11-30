@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphdb.Node;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserAggregationResult;
 import org.neo4j.procedure.UserAggregationUpdate;
