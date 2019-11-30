@@ -60,7 +60,7 @@ public class ForwardBackwardSccProcTest extends ProcTestBase {
 
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
-            db.execute(cypher);
+            runQuery(cypher);
             tx.success();
         }
 
@@ -99,10 +99,7 @@ public class ForwardBackwardSccProcTest extends ProcTestBase {
     public LongScatterSet call(long nodeId) {
         String cypher = String.format("CALL algo.scc.forwardBackward.stream(%d, 'Node', 'TYPE', {concurrency:4}) YIELD nodeId RETURN nodeId", nodeId);
         final LongScatterSet set = new LongScatterSet();
-        db.execute(cypher).accept(row -> {
-            set.add(row.getNumber("nodeId").longValue());
-            return true;
-        });
+        runQuery(cypher, row -> set.add(row.getNumber("nodeId").longValue()));
         return set;
     }
 }

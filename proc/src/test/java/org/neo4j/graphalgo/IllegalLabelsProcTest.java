@@ -43,7 +43,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(UnionFindProc.class);
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -55,7 +55,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
     void testUnionFindStreamWithInvalidNodeLabel(String graphName) {
         QueryExecutionException ex = assertThrows(
                 QueryExecutionException.class,
-                () -> db.execute(String.format("CALL algo.unionFind.stream('C', '',{graph:'%s'})", graphName)));
+                () -> runQuery(String.format("CALL algo.unionFind.stream('C', '',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Node label not found: 'C'"));
     }
@@ -63,7 +63,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testUnionFindStreamWithInvalidRelType(String graphName) {
         QueryExecutionException ex = assertThrows(QueryExecutionException.class, () ->
-                db.execute(String.format("CALL algo.unionFind.stream('', 'Y',{graph:'%s'})", graphName)));
+                runQuery(String.format("CALL algo.unionFind.stream('', 'Y',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Relationship type(s) not found: 'Y'"));
     }
@@ -71,7 +71,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testUnionFindStreamWithValidNodeLabelAndInvalidRelType(String graphName) {
         QueryExecutionException ex = assertThrows(QueryExecutionException.class, () ->
-                db.execute(String.format("CALL algo.unionFind.stream('A', 'Y',{graph:'%s'})", graphName)));
+                runQuery(String.format("CALL algo.unionFind.stream('A', 'Y',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Relationship type(s) not found: 'Y'"));
     }
@@ -79,7 +79,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testUnionFindStreamWithMultipleInvaludRelTypes(String graphName) {
         QueryExecutionException ex = assertThrows(QueryExecutionException.class, () ->
-                db.execute(String.format("CALL algo.unionFind.stream('A', 'Y | Z',{graph:'%s'})", graphName)));
+                runQuery(String.format("CALL algo.unionFind.stream('A', 'Y | Z',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Relationship type(s) not found: 'Y', 'Z'"));
     }

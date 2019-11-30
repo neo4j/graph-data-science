@@ -92,37 +92,27 @@ class DangalchevCentralityProcTest extends ProcTestBase {
 
     @Test
     void testClosenessStream() throws Exception {
-
-        db.execute("CALL algo.closeness.dangalchev.stream('Node', 'TYPE') YIELD nodeId, centrality")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    consumer.accept(
-                            row.getNumber("nodeId").longValue(),
-                            row.getNumber("centrality").doubleValue());
-                    return true;
-                });
+        runQuery("CALL algo.closeness.dangalchev.stream('Node', 'TYPE') YIELD nodeId, centrality", row -> consumer.accept(
+            row.getNumber("nodeId").longValue(),
+            row.getNumber("centrality").doubleValue()
+        ));
 
         verifyMock();
     }
 
     @Test
     void testClosenessWrite() throws Exception {
+        runQuery("CALL algo.closeness.dangalchev('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
+                 "nodes, loadMillis, computeMillis, writeMillis", row -> {
+            assertNotEquals(-1L, row.getNumber("writeMillis"));
+            assertNotEquals(-1L, row.getNumber("computeMillis"));
+            assertNotEquals(-1L, row.getNumber("nodes"));
+        });
 
-        db.execute("CALL algo.closeness.dangalchev('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-                "nodes, loadMillis, computeMillis, writeMillis")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertNotEquals(-1L, row.getNumber("writeMillis"));
-                    assertNotEquals(-1L, row.getNumber("computeMillis"));
-                    assertNotEquals(-1L, row.getNumber("nodes"));
-                    return true;
-                });
-
-        db.execute("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality")
-                .accept(row -> {
-                    consumer.accept(
-                            row.getNumber("id").longValue(),
-                            row.getNumber("centrality").doubleValue());
-                    return true;
-                });
+        runQuery("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality", row -> consumer.accept(
+            row.getNumber("id").longValue(),
+            row.getNumber("centrality").doubleValue()
+        ));
 
         verifyMock();
     }

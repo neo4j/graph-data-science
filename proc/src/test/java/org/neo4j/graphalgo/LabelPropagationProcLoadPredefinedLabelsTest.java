@@ -57,7 +57,7 @@ class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
                 .newGraphDatabase();
         registerProcedures(LabelPropagationProc.class);
         registerFunctions(GetNodeFunc.class);
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -77,7 +77,7 @@ class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
                        "RETURN algo.asNode(nodeId) AS id, label AS community " +
                        "ORDER BY id";
 
-        Result result = db.execute(query, parParams(parallel, graphName));
+        Result result = runQueryAndReturn(query, parParams(parallel, graphName));
 
         List<Integer> labels = result.columnAs("community").stream()
                 .mapToInt(value -> ((Long)value).intValue()).boxed().collect(Collectors.toList());

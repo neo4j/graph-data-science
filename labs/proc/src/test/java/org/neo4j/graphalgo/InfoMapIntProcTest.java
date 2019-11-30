@@ -59,7 +59,7 @@ class InfoMapIntProcTest extends ProcTestBase {
                 " (d)-[:TYPE {v:1.0}]->(f),\n" +
                 " (e)-[:TYPE {v:1.0}]->(f)";
 
-        db.execute(cypher);
+        runQuery(cypher);
         registerProcedures(InfoMapProc.class, ArticleRankProc.class);
     }
 
@@ -73,12 +73,11 @@ class InfoMapIntProcTest extends ProcTestBase {
 
         final BitSet bitSet = new BitSet(8);
 
-        db.execute("CALL algo.infoMap('Node', 'TYPE', {iterations:15, writeProperty:'c'})").close();
+        runQuery("CALL algo.infoMap('Node', 'TYPE', {iterations:15, writeProperty:'c'})");
 
-        db.execute("MATCH (n) RETURN n").accept(row -> {
+        runQuery("MATCH (n) RETURN n", row -> {
             final Node node = row.getNode("n");
             bitSet.set((Integer) node.getProperty("c"));
-            return true;
         });
 
         assertEquals(3, bitSet.cardinality());
@@ -86,14 +85,12 @@ class InfoMapIntProcTest extends ProcTestBase {
 
     @Test
     void testUnweightedStream() {
-
         final BitSet bitSet = new BitSet(8);
 
-        db.execute("CALL algo.infoMap.stream('Node', 'TYPE', {iterations:15}) YIELD nodeId, community")
-                .accept(row -> {
-                    bitSet.set(row.getNumber("community").intValue());
-                    return true;
-                });
+        runQuery(
+            "CALL algo.infoMap.stream('Node', 'TYPE', {iterations:15}) YIELD nodeId, community",
+            row -> bitSet.set(row.getNumber("community").intValue())
+        );
 
         assertEquals(3, bitSet.cardinality());
 
@@ -101,15 +98,13 @@ class InfoMapIntProcTest extends ProcTestBase {
 
     @Test
     void testWeighted() {
-
         final BitSet bitSet = new BitSet(8);
 
-        db.execute("CALL algo.infoMap('Node', 'TYPE', {weightProperty:'v', writeProperty:'c'})").close();
+        runQuery("CALL algo.infoMap('Node', 'TYPE', {weightProperty:'v', writeProperty:'c'})");
 
-        db.execute("MATCH (n) RETURN n").accept(row -> {
+        runQuery("MATCH (n) RETURN n", row -> {
             final Node node = row.getNode("n");
             bitSet.set((Integer) node.getProperty("c"));
-            return true;
         });
 
         assertEquals(2, bitSet.cardinality());
@@ -118,14 +113,12 @@ class InfoMapIntProcTest extends ProcTestBase {
 
     @Test
     void testWeightedStream() {
-
         final BitSet bitSet = new BitSet(8);
 
-        db.execute("CALL algo.infoMap.stream('Node', 'TYPE', {iterations:15, weightProperty:'v'}) YIELD nodeId, community")
-                .accept(row -> {
-                    bitSet.set(row.getNumber("community").intValue());
-                    return true;
-                });
+        runQuery(
+            "CALL algo.infoMap.stream('Node', 'TYPE', {iterations:15, weightProperty:'v'}) YIELD nodeId, community",
+            row -> bitSet.set(row.getNumber("community").intValue())
+        );
 
         assertEquals(2, bitSet.cardinality());
 
@@ -133,16 +126,14 @@ class InfoMapIntProcTest extends ProcTestBase {
 
     @Test
     void testPredefinedArticleRankStream() {
-
-        db.execute("CALL algo.articleRank('Node', 'TYPE', {writeProperty:'p', iterations:1}) YIELD nodes").close();
+        runQuery("CALL algo.articleRank('Node', 'TYPE', {writeProperty:'p', iterations:1}) YIELD nodes");
 
         final BitSet bitSet = new BitSet(8);
 
-        db.execute("CALL algo.infoMap.stream('Node', 'TYPE', {pageRankProperty:'p'}) YIELD nodeId, community")
-                .accept(row -> {
-                    bitSet.set(row.getNumber("community").intValue());
-                    return true;
-                });
+        runQuery(
+            "CALL algo.infoMap.stream('Node', 'TYPE', {pageRankProperty:'p'}) YIELD nodeId, community",
+            row -> bitSet.set(row.getNumber("community").intValue())
+        );
 
         assertEquals(3, bitSet.cardinality());
     }

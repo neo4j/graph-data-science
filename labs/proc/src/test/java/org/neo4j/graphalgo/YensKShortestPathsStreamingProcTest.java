@@ -65,8 +65,8 @@ class YensKShortestPathsStreamingProcTest extends ProcTestBase {
                 "CREATE (f)-[:TYPE {cost:4.0}]->(d)\n" +
                 "CREATE (b)-[:TYPE {cost:2.0}]->(d)\n";
 
-        db.execute(cypher);
-        db.execute("MATCH (c:Node {name: 'c'}) DELETE c");
+        runQuery(cypher);
+        runQuery("MATCH (c:Node {name: 'c'}) DELETE c");
         registerProcedures(KShortestPathsProc.class);
     }
 
@@ -94,12 +94,10 @@ class YensKShortestPathsStreamingProcTest extends ProcTestBase {
         expectedCosts.put(2L, Arrays.asList(7.0D, 3.0, 4.0));
 
         // 9 possible paths without loop
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             long rowIndex = row.getNumber("index").longValue();
             assertEquals(expectedNodes.get(rowIndex), row.get("nodeIds"));
             assertEquals(expectedCosts.get(rowIndex), row.get("costs"));
-
-            return true;
         });
     }
 
@@ -121,7 +119,7 @@ class YensKShortestPathsStreamingProcTest extends ProcTestBase {
         expectedCosts.put(1L, Arrays.asList(5.0D));
         expectedCosts.put(2L, Arrays.asList(7.0D, 3.0, 4.0));
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             Path path = (Path) row.get("path");
 
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
@@ -131,8 +129,6 @@ class YensKShortestPathsStreamingProcTest extends ProcTestBase {
             long rowIndex = row.getNumber("index").longValue();
             assertEquals(expectedNodes.get(rowIndex), actualNodes);
             assertEquals(expectedCosts.get(rowIndex), actualCosts);
-
-            return true;
         });
     }
 
@@ -154,7 +150,7 @@ class YensKShortestPathsStreamingProcTest extends ProcTestBase {
         expectedCosts.put(1L, Arrays.asList(5.0D));
         expectedCosts.put(2L, Arrays.asList(7.0D, 3.0, 4.0));
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             Path path = (Path) row.get("path");
 
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
@@ -163,8 +159,6 @@ class YensKShortestPathsStreamingProcTest extends ProcTestBase {
             assertEquals(expectedNodes.get(rowIndex), actualNodes);
 
             assertFalse(path.relationships().iterator().next().hasProperty("cost"));
-
-            return true;
         });
     }
 

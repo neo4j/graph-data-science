@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.TransactionFailureException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.query.ExecutingQuery;
@@ -93,13 +92,13 @@ class TerminationTest extends ProcTestBase {
     }
 
     // execute query as usual but also submits a termination thread which kills the tx after a timeout
-    private void executeAndKill(Result.ResultVisitor<? extends Exception> visitor) {
+    private void executeAndKill() {
         final ArrayList<Runnable> runnables = new ArrayList<>();
 
         // add query runnable
         runnables.add(() -> {
             try {
-                db.execute(TerminationTest.QUERY).accept(visitor);
+                runQuery(TerminationTest.QUERY);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
@@ -126,7 +125,7 @@ class TerminationTest extends ProcTestBase {
                 TransactionFailureException.class,
                 () -> {
                     try {
-                        executeAndKill(row -> true);
+                        executeAndKill();
                     } catch (RuntimeException e) {
                         throw e.getCause();
                     }

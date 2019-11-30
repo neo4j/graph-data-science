@@ -57,7 +57,7 @@ class UtilityProcsTest extends ProcTestBase {
                 "CREATE (e:Node {name:'e'})\n" +
                 "CREATE (f:Node {name:'f'})\n";
 
-        db.execute(cypher);
+        runQuery(cypher);
         registerProcedures(UtilityProc.class);
     }
 
@@ -72,11 +72,10 @@ class UtilityProcsTest extends ProcTestBase {
 
         List<Node> expectedNodes = getNodes("a", "b", "c");
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             Path path = (Path) row.get("path");
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
             assertEquals(expectedNodes, actualNodes);
-            return true;
         });
     }
 
@@ -87,7 +86,7 @@ class UtilityProcsTest extends ProcTestBase {
         List<Node> expectedNodes = getNodes("a", "b", "c");
         List<Double> expectedCosts = Arrays.asList(0.1, 0.2);
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             Path path = (Path) row.get("path");
 
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
@@ -96,15 +95,13 @@ class UtilityProcsTest extends ProcTestBase {
 
             assertEquals(expectedNodes, actualNodes);
             assertEquals(expectedCosts, actualCosts);
-
-            return true;
         });
     }
 
     @Test
     void shouldThrowExceptionIfNotEnoughCostsProvided() {
         String cypher = "CALL algo.asPath([0,1,2], [0.1], {cumulativeWeights: false})";
-        assertThrows(RuntimeException.class, () -> db.execute(cypher).close(), "'weights' contains 1 values, but 2 values were expected");
+        assertThrows(RuntimeException.class, () -> runQuery(cypher), "'weights' contains 1 values, but 2 values were expected");
     }
 
     @Test
@@ -114,7 +111,7 @@ class UtilityProcsTest extends ProcTestBase {
         List<Node> expectedNodes = getNodes("a", "b", "c");
         List<Double> expectedCosts = Arrays.asList(40.0, 30.0);
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             Path path = (Path) row.get("path");
 
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
@@ -123,15 +120,13 @@ class UtilityProcsTest extends ProcTestBase {
 
             assertEquals(expectedNodes, actualNodes);
             assertEquals(expectedCosts, actualCosts);
-
-            return true;
         });
     }
 
     @Test
     void shouldThrowExceptionIfNotEnoughCumulativeWeightsProvided() {
         String cypher = "CALL algo.asPath([0,1,2], [0, 40.0])";
-        assertThrows(RuntimeException.class, () -> db.execute(cypher).close(), "'weights' contains 2 values, but 3 values were expected");
+        assertThrows(RuntimeException.class, () -> runQuery(cypher), "'weights' contains 2 values, but 3 values were expected");
     }
 
     private List<Node> getNodes(String... nodes) {

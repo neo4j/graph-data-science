@@ -52,21 +52,21 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
                 .newGraphDatabase();
 
         try (Transaction tx = db.beginTx()) {
-            db.execute("CREATE CONSTRAINT ON (c:Character) " +
-                       "ASSERT c.id IS UNIQUE;").close();
+            runQuery("CREATE CONSTRAINT ON (c:Character) " +
+                       "ASSERT c.id IS UNIQUE;");
             tx.success();
         }
 
         try (Transaction tx = db.beginTx()) {
-            db.execute("LOAD CSV WITH HEADERS FROM 'file:///got-s1-nodes.csv' AS row " +
+            runQuery("LOAD CSV WITH HEADERS FROM 'file:///got-s1-nodes.csv' AS row " +
                        "MERGE (c:Character {id: row.Id}) " +
-                       "SET c.name = row.Label;").close();
+                       "SET c.name = row.Label;");
 
-            db.execute("LOAD CSV WITH HEADERS FROM 'file:///got-s1-edges.csv' AS row " +
+            runQuery("LOAD CSV WITH HEADERS FROM 'file:///got-s1-edges.csv' AS row " +
                        "MATCH (source:Character {id: row.Source}) " +
                        "MATCH (target:Character {id: row.Target}) " +
                        "MERGE (source)-[rel:INTERACTS_SEASON1]->(target) " +
-                       "SET rel.weight = toInteger(row.Weight);").close();
+                       "SET rel.weight = toInteger(row.Weight);");
 
             tx.success();
         }

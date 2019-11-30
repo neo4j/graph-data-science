@@ -52,9 +52,8 @@ public abstract class ConnectedComponentsTest extends ProcTestBase{
 
     private long getMappedNodeId(String name) {
         final Node[] node = new Node[1];
-        db.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
+        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> {
             node[0] = row.getNode("n");
-            return false;
         });
         return graph.toMappedNodeId(node[0].getId());
     }

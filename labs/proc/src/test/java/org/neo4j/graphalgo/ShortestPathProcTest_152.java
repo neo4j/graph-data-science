@@ -66,7 +66,7 @@ class ShortestPathProcTest_152 extends ProcTestBase {
                 " (e)-[:RAIL {d:20}]->(f);";
 
         registerProcedures(ShortestPathProc.class);
-        db.execute(cypher).close();
+        runQuery(cypher);
 
         try (Transaction tx = db.beginTx()) {
             startNodeId = db.findNode(Label.label("Loc"), "name", "A").getId();
@@ -136,10 +136,9 @@ class ShortestPathProcTest_152 extends ProcTestBase {
                 "CALL algo.shortestPath.stream(from, to, 'd', {relationshipQuery:'ROAD', defaultValue:999999.0}) " +
                 "YIELD nodeId, cost with nodeId, cost MATCH(n) WHERE id(n) = nodeId RETURN n.name as name, cost;";
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             System.out.println(row.get("name") + ":" + row.get("cost"));
             mock.accept(row.getNumber("cost").doubleValue());
-            return true;
         });
 
         verify(mock, times(1)).accept(eq(0.0));

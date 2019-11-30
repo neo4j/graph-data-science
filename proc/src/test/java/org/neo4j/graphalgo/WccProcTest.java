@@ -62,7 +62,7 @@ class WccProcTest extends ProcTestBase {
                 ",(nH)-[:TYPE]->(nI)";
 
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(createGraph).close();
+        runQuery(createGraph);
         registerProcedures(WccProc.class);
     }
 

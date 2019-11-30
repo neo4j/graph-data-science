@@ -69,7 +69,7 @@ class OverlapProcTest extends ProcTestBase {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(OverlapProc.class);
-        db.execute(buildDatabaseQuery()).close();
+        runQuery(buildDatabaseQuery());
     }
 
     @AfterEach
@@ -78,15 +78,15 @@ class OverlapProcTest extends ProcTestBase {
     }
 
     private void buildRandomDB(int size) {
-        db.execute("MATCH (n) DETACH DELETE n").close();
-        db.execute("UNWIND range(1,$size/10) as _ CREATE (:Person) CREATE (:Item) ",singletonMap("size",size)).close();
+        runQuery("MATCH (n) DETACH DELETE n");
+        runQuery("UNWIND range(1,$size/10) as _ CREATE (:Person) CREATE (:Item) ",singletonMap("size",size));
         String statement =
                 "MATCH (p:Person) WITH collect(p) as people " +
                 "MATCH (i:Item) WITH people, collect(i) as items " +
                 "UNWIND range(1,$size) as _ " +
                 "WITH people[toInteger(rand()*size(people))] as p, items[toInteger(rand()*size(items))] as i " +
                 "MERGE (p)-[:LIKES]->(i) RETURN count(*) ";
-        db.execute(statement,singletonMap("size",size)).close();
+        runQuery(statement,singletonMap("size",size));
     }
 
     private static String buildDatabaseQuery() {
@@ -118,10 +118,10 @@ class OverlapProcTest extends ProcTestBase {
     void overlapSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
-        Result result1 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 1)));
-        Result result2 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 2)));
-        Result result4 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 4)));
-        Result result8 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 8)));
+        Result result1 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 1)));
+        Result result2 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 2)));
+        Result result4 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 4)));
+        Result result8 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 8)));
         int count=0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
@@ -139,10 +139,10 @@ class OverlapProcTest extends ProcTestBase {
         int size = 333;
         buildRandomDB(size);
 
-        Result result1 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 1)));
-        Result result2 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 2)));
-        Result result4 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 4)));
-        Result result8 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 8)));
+        Result result1 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 1)));
+        Result result2 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 2)));
+        Result result4 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 4)));
+        Result result8 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 8)));
         int count = 0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
@@ -158,7 +158,7 @@ class OverlapProcTest extends ProcTestBase {
 
     @Test
     void topNoverlapStreamTest() {
-        Result results = db.execute(STATEMENT_STREAM, map("config",map("top",2)));
+        Result results = runQueryAndReturn(STATEMENT_STREAM, map("config",map("top",2)));
         assert10(results.next());
         assert20(results.next());
         assertFalse(results.hasNext());
@@ -166,7 +166,7 @@ class OverlapProcTest extends ProcTestBase {
 
     @Test
     void overlapStreamTest() {
-        Result results = db.execute(STATEMENT_STREAM, map("config",map("concurrency",1)));
+        Result results = runQueryAndReturn(STATEMENT_STREAM, map("config",map("concurrency",1)));
 
         assertTrue(results.hasNext());
         assert10(results.next());
@@ -190,9 +190,9 @@ class OverlapProcTest extends ProcTestBase {
 
         Map<String, Object> params = map("config", config);
 
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
 
         assertTrue(results.hasNext());
         assert10(results.next());
@@ -202,9 +202,9 @@ class OverlapProcTest extends ProcTestBase {
     @Test
     void topKoverlapStreamTest() {
         Map<String, Object> params = map("config", map( "concurrency", 1,"topK", 1));
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assertTrue(results.hasNext());
         assert10(results.next());
         assert20(results.next());
@@ -220,9 +220,9 @@ class OverlapProcTest extends ProcTestBase {
 
         );
         Map<String, Object> params = map("config", config);
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assertTrue(results.hasNext());
         assert10(results.next());
         assertFalse(results.hasNext());
@@ -245,9 +245,9 @@ class OverlapProcTest extends ProcTestBase {
     @Test
     void topK4overlapStreamTest() {
         Map<String, Object> params = map("config", map("topK", 4, "concurrency", 4, "similarityCutoff", -0.1));
-        System.out.println(db.execute(STATEMENT_STREAM,params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM,params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM,params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM,params);
         assertSameSource(results, 0, 0L);
         assertSameSource(results, 1, 1L);
         assertSameSource(results, 2, 2L);
@@ -258,9 +258,9 @@ class OverlapProcTest extends ProcTestBase {
     void topK3overlapStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3));
 
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assertSameSource(results, 0, 0L);
         assertSameSource(results, 1, 1L);
         assertSameSource(results, 2, 2L);
@@ -271,7 +271,7 @@ class OverlapProcTest extends ProcTestBase {
     void simpleoverlapTest() {
         Map<String, Object> params = map("config", map("similarityCutoff", 0.0));
 
-        Map<String, Object> row = db.execute(STATEMENT,params).next();
+        Map<String, Object> row = runQueryAndReturn(STATEMENT,params).next();
         assertEquals((double) row.get("p25"), 1.0, 0.01);
         assertEquals((double) row.get("p50"), 1.0, 0.01);
         assertEquals((double) row.get("p75"), 1.0, 0.01);
@@ -282,11 +282,11 @@ class OverlapProcTest extends ProcTestBase {
 
     @Test
     void simpleoverlapFromEmbeddingTest() {
-        db.execute(STORE_EMBEDDING_STATEMENT);
+        runQuery(STORE_EMBEDDING_STATEMENT);
 
         Map<String, Object> params = map("config", map("similarityCutoff", 0.0));
 
-        Map<String, Object> row = db.execute(EMBEDDING_STATEMENT,params).next();
+        Map<String, Object> row = runQueryAndReturn(EMBEDDING_STATEMENT,params).next();
         System.out.println("row = " + row);
         assertEquals((double) row.get("p25"), 1.0, 0.01);
         assertEquals((double) row.get("p50"), 1.0, 0.01);
@@ -307,14 +307,14 @@ class OverlapProcTest extends ProcTestBase {
     void simpleoverlapWriteTest() {
         Map<String, Object> params = map("config", map( "write",true, "similarityCutoff", 0.1));
 
-        db.execute(STATEMENT,params).close();
+        runQuery(STATEMENT,params);
 
         String checkSimilaritiesQuery = "MATCH (a)-[similar:NARROWER_THAN]->(b)" +
                 "RETURN a.name AS node1, b.name as node2, similar.score AS score " +
                 "ORDER BY id(a), id(b)";
 
-        System.out.println(db.execute(checkSimilaritiesQuery).resultAsString());
-        Result result = db.execute(checkSimilaritiesQuery);
+        System.out.println(runQueryAndReturn(checkSimilaritiesQuery).resultAsString());
+        Result result = runQueryAndReturn(checkSimilaritiesQuery);
 
         assertTrue(result.hasNext());
         Map<String, Object> row = result.next();
@@ -337,7 +337,7 @@ class OverlapProcTest extends ProcTestBase {
                 "write", true,
                 "similarityCutoff", 0.1));
 
-        Result writeResult = db.execute(STATEMENT, params);
+        Result writeResult = runQueryAndReturn(STATEMENT, params);
         Map<String, Object> writeRow = writeResult.next();
         assertEquals(-1L, (long) writeRow.get("computations"));
     }
@@ -349,7 +349,7 @@ class OverlapProcTest extends ProcTestBase {
                 "showComputations", true,
                 "similarityCutoff", 0.1));
 
-        Result writeResult = db.execute(STATEMENT, params);
+        Result writeResult = runQueryAndReturn(STATEMENT, params);
         Map<String, Object> writeRow = writeResult.next();
         assertEquals(3L, (long) writeRow.get("computations"));
     }

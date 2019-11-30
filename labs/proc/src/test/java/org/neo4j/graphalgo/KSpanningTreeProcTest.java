@@ -48,7 +48,7 @@ class KSpanningTreeProcTest extends ProcTestBase {
                 " (d)-[:TYPE {w:3.0}]->(c)";
 
         registerProcedures(KSpanningTreeProc.class);
-        db.execute(cypher);
+        runQuery(cypher);
     }
 
     @AfterEach
@@ -60,21 +60,18 @@ class KSpanningTreeProcTest extends ProcTestBase {
     void testMax() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH n CALL algo.spanningTree.kmax(null, null, 'w', id(n), 2, {graph:'huge'}) " +
                 "YIELD loadMillis, computeMillis, writeMillis RETURN loadMillis, computeMillis, writeMillis";
-        db.execute(cypher).accept(row -> {
-
+        runQuery(cypher, row -> {
             assertTrue(row.getNumber("loadMillis").longValue() >= 0);
             assertTrue(row.getNumber("writeMillis").longValue() >= 0);
             assertTrue(row.getNumber("computeMillis").longValue() >= 0);
-            return true;
         });
 
         final HashMap<String, Integer> communities = new HashMap<>();
 
-        db.execute("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p").accept(row -> {
+        runQuery("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p", row -> {
             final String name = row.getString("name");
             final int p = row.getNumber("p").intValue();
             communities.put(name, p);
-            return true;
         });
 
         assertEquals(communities.get("a"), communities.get("b"));
@@ -86,26 +83,22 @@ class KSpanningTreeProcTest extends ProcTestBase {
     void testMin() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH n CALL algo.spanningTree.kmin(null, null, 'w', id(n), 2, {graph:'huge'}) " +
                 "YIELD loadMillis, computeMillis, writeMillis RETURN loadMillis, computeMillis, writeMillis";
-        db.execute(cypher).accept(row -> {
-
+        runQuery(cypher, row -> {
             assertTrue(row.getNumber("loadMillis").longValue() >= 0);
             assertTrue(row.getNumber("writeMillis").longValue() >= 0);
             assertTrue(row.getNumber("computeMillis").longValue() >= 0);
-            return true;
         });
 
         final HashMap<String, Integer> communities = new HashMap<>();
 
-        db.execute("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p").accept(row -> {
+        runQuery("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p", row -> {
             final String name = row.getString("name");
             final int p = row.getNumber("p").intValue();
             communities.put(name, p);
-            return true;
         });
 
         assertEquals(communities.get("a"), communities.get("d"));
         assertEquals(communities.get("b"), communities.get("c"));
         assertNotEquals(communities.get("a"), communities.get("b"));
     }
-
 }

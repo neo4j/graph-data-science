@@ -112,19 +112,17 @@ public class ParallelBetweennessCentralityProcTest extends ProcTestBase {
     }
 
     void testBetweennessWrite(String cypher) {
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
             assertEquals(6.0, row.getNumber("minCentrality"));
             assertEquals(25.0, row.getNumber("maxCentrality"));
             assertEquals(85.0, row.getNumber("sumCentrality"));
-            return true;
         });
 
-        db.execute("MATCH (n:Node) WHERE exists(n.bc) RETURN id(n) as id, n.bc as bc").accept(row -> {
-            consumer.consume(row.getNumber("id").longValue(),
-                    row.getNumber("bc").doubleValue());
-            return true;
-        });
+        runQuery("MATCH (n:Node) WHERE exists(n.bc) RETURN id(n) as id, n.bc as bc", row -> consumer.consume(
+            row.getNumber("id").longValue(),
+            row.getNumber("bc").doubleValue()
+        ));
 
         verify(consumer, times(10)).consume(anyLong(), eq(6.0));
         verify(consumer, times(1)).consume(eq(centerNodeId), eq(25.0));

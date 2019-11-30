@@ -79,7 +79,7 @@ class PearsonProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(PearsonProc.class);
         registerFunctions(IsFiniteFunc.class);
-        db.execute(buildDatabaseQuery()).close();
+        runQuery(buildDatabaseQuery());
     }
 
     @AfterEach
@@ -88,15 +88,15 @@ class PearsonProcTest extends ProcTestBase {
     }
 
     private void buildRandomDB(int size) {
-        db.execute("MATCH (n) DETACH DELETE n").close();
-        db.execute("UNWIND range(1,$size/10) as _ CREATE (:Person) CREATE (:Item) ",singletonMap("size",size)).close();
+        runQuery("MATCH (n) DETACH DELETE n");
+        runQuery("UNWIND range(1,$size/10) as _ CREATE (:Person) CREATE (:Item) ",singletonMap("size",size));
         String statement =
                 "MATCH (p:Person) WITH collect(p) as people " +
                 "MATCH (i:Item) WITH people, collect(i) as items " +
                 "UNWIND range(1,$size) as _ " +
                 "WITH people[toInteger(rand()*size(people))] as p, items[toInteger(rand()*size(items))] as i " +
                 "MERGE (p)-[likes:LIKES]->(i) SET likes.stars = toInteger(rand()*$size)  RETURN count(*) ";
-        db.execute(statement,singletonMap("size",size)).close();
+        runQuery(statement,singletonMap("size",size));
     }
     private static String buildDatabaseQuery() {
         return  "CREATE (a:Person {name:'Alice'})\n" +
@@ -165,10 +165,10 @@ class PearsonProcTest extends ProcTestBase {
         buildRandomDB(size);
 
         // This is probably creating all NaN values and they're getting filtered out
-//        String text = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff", -1.0, "concurrency", 1), "missingValue", 0)).resultAsString();
+//        String text = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -1.0, "concurrency", 1), "missingValue", 0)).resultAsString();
 //        System.out.println(text);
 //
-//        text = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff", -1.0, "concurrency", 1), "missingValue", 0)).resultAsString();
+//        text = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -1.0, "concurrency", 1), "missingValue", 0)).resultAsString();
 //        System.out.println(text);
 
         // these can give different results because the arrays of item ids are being built in different orders
@@ -176,10 +176,10 @@ class PearsonProcTest extends ProcTestBase {
 
         System.out.println(STATEMENT_STREAM);
 
-        Result result1 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-1.0,"concurrency", 1), "missingValue", 0));
-        Result result2 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-1.0,"concurrency", 1), "missingValue", 0));
-        Result result4 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-1.0,"concurrency", 1), "missingValue", 0));
-        Result result8 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-1.0,"concurrency", 1), "missingValue", 0));
+        Result result1 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-1.0,"concurrency", 1), "missingValue", 0));
+        Result result2 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-1.0,"concurrency", 1), "missingValue", 0));
+        Result result4 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-1.0,"concurrency", 1), "missingValue", 0));
+        Result result8 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-1.0,"concurrency", 1), "missingValue", 0));
         int count=0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
@@ -197,10 +197,10 @@ class PearsonProcTest extends ProcTestBase {
         int size = 333;
         buildRandomDB(size);
 
-        Result result1 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 1), "missingValue", 0));
-        Result result2 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 2), "missingValue", 0));
-        Result result4 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 4), "missingValue", 0));
-        Result result8 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 8), "missingValue", 0));
+        Result result1 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 1), "missingValue", 0));
+        Result result2 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 2), "missingValue", 0));
+        Result result4 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 4), "missingValue", 0));
+        Result result8 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 8), "missingValue", 0));
         int count=0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
@@ -217,9 +217,9 @@ class PearsonProcTest extends ProcTestBase {
     void topNpearsonStreamTest() {
         Map<String, Object> params = map("config", map("top", 2), "missingValue", 0);
 
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assert01(results.next());
         assert23(results.next());
         assertFalse(results.hasNext());
@@ -229,9 +229,9 @@ class PearsonProcTest extends ProcTestBase {
     void pearsonStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1), "missingValue", 0);
 
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assertTrue(results.hasNext());
         assert01(results.next());
         assert02(results.next());
@@ -251,9 +251,9 @@ class PearsonProcTest extends ProcTestBase {
         );
         Map<String, Object> params = map("config", config, "missingValue", 0);
 
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assertTrue(results.hasNext());
         assert01(results.next());
         assertFalse(results.hasNext());
@@ -263,9 +263,9 @@ class PearsonProcTest extends ProcTestBase {
     void pearsonSkipStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "skipValue", Double.NaN), "missingValue", Double.NaN);
 
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
 
         assertTrue(results.hasNext());
         assert01Skip(results.next());
@@ -282,9 +282,9 @@ class PearsonProcTest extends ProcTestBase {
         String query = "MATCH (p:Person)-[r:LIKES]->(i) RETURN id(p) AS item, id(i) AS category, r.stars AS weight";
         Map<String, Object> params = map("config", map("concurrency", 1, "graph", "cypher", "skipValue", 0.0), "query", query);
 
-        System.out.println(db.execute(STATEMENT_CYPHER_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_CYPHER_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_CYPHER_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_CYPHER_STREAM, params);
 
         assertTrue(results.hasNext());
         assert01Skip(results.next());
@@ -300,9 +300,9 @@ class PearsonProcTest extends ProcTestBase {
     void topKPearsonStreamTest() {
         Map<String, Object> params = map("config", map( "concurrency", 1,"topK", 1), "missingValue", 0);
 
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assertTrue(results.hasNext());
         assert01(results.next());
         assert01(flip(results.next()));
@@ -321,9 +321,9 @@ class PearsonProcTest extends ProcTestBase {
         );
         Map<String, Object> params = map("config", config, "missingValue", 0);
 
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assertTrue(results.hasNext());
         assert01(results.next());
         assertFalse(results.hasNext());
@@ -353,7 +353,7 @@ class PearsonProcTest extends ProcTestBase {
     void topK4PearsonStreamTest() {
         Map<String, Object> params = map("config", map("topK", 4, "concurrency", 4, "similarityCutoff", -0.1), "missingValue", 0);
 
-        Result results = db.execute(STATEMENT_STREAM,params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM,params);
         assertSameSource(results, 3, 0L);
         assertSameSource(results, 3, 1L);
         assertSameSource(results, 3, 2L);
@@ -365,9 +365,9 @@ class PearsonProcTest extends ProcTestBase {
     void topK3PearsonStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3), "missingValue", 0);
 
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assertSameSource(results, 3, 0L);
         assertSameSource(results, 3, 1L);
         assertSameSource(results, 3, 2L);
@@ -379,9 +379,9 @@ class PearsonProcTest extends ProcTestBase {
     void simplePearsonTest() {
         Map<String, Object> params = map("config", map());
 
-        System.out.println(db.execute(STATEMENT, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT, params).resultAsString());
 
-        Map<String, Object> row = db.execute(STATEMENT,params).next();
+        Map<String, Object> row = runQueryAndReturn(STATEMENT,params).next();
         assertEquals(0.86,(double) row.get("p25"),  0.01);
         assertEquals(0.94, (double) row.get("p50"), 0.01);
         assertEquals(0.98,(double) row.get("p75"),  0.01);
@@ -393,10 +393,10 @@ class PearsonProcTest extends ProcTestBase {
 
     @Test
     void simplePearsonFromEmbeddingTest() {
-        db.execute(STORE_EMBEDDING_STATEMENT);
+        runQuery(STORE_EMBEDDING_STATEMENT);
 
         Map<String, Object> params = map("config", map());
-        Map<String, Object> row = db.execute(EMBEDDING_STATEMENT,params).next();
+        Map<String, Object> row = runQueryAndReturn(EMBEDDING_STATEMENT,params).next();
 
         assertEquals(0.86,(double) row.get("p25"),  0.01);
         assertEquals(0.94, (double) row.get("p50"), 0.01);
@@ -411,14 +411,14 @@ class PearsonProcTest extends ProcTestBase {
     void simplePearsonWriteTest() {
         Map<String, Object> params = map("config", map( "write",true, "similarityCutoff", 0.1));
 
-        db.execute(STATEMENT,params).close();
+        runQuery(STATEMENT,params);
 
         String checkSimilaritiesQuery = "MATCH (a)-[similar:SIMILAR]->(b)" +
                 "RETURN a.name AS node1, b.name as node2, similar.score AS score " +
                 "ORDER BY id(a), id(b)";
 
-        System.out.println(db.execute(checkSimilaritiesQuery).resultAsString());
-        Result result = db.execute(checkSimilaritiesQuery);
+        System.out.println(runQueryAndReturn(checkSimilaritiesQuery).resultAsString());
+        Result result = runQueryAndReturn(checkSimilaritiesQuery);
 
         assertTrue(result.hasNext());
         Map<String, Object> row = result.next();
@@ -465,7 +465,7 @@ class PearsonProcTest extends ProcTestBase {
                 "write", true,
                 "similarityCutoff", 0.1));
 
-        Result writeResult = db.execute(STATEMENT, params);
+        Result writeResult = runQueryAndReturn(STATEMENT, params);
         Map<String, Object> writeRow = writeResult.next();
         assertEquals(-1L, (long) writeRow.get("computations"));
     }
@@ -477,7 +477,7 @@ class PearsonProcTest extends ProcTestBase {
                 "showComputations", true,
                 "similarityCutoff", 0.1));
 
-        Result writeResult = db.execute(STATEMENT, params);
+        Result writeResult = runQueryAndReturn(STATEMENT, params);
         Map<String, Object> writeRow = writeResult.next();
         assertEquals(6L, (long) writeRow.get("computations"));
     }

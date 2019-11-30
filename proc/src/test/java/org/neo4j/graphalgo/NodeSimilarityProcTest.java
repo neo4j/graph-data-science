@@ -117,7 +117,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
         registerProcedures(NodeSimilarityProc.class);
     }
 
@@ -187,12 +187,12 @@ class NodeSimilarityProcTest extends ProcTestBase {
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldIgnoreParallelEdges(String graphImpl, Direction direction) {
         // Add parallel edges
-        db.execute("" +
+        runQuery("" +
                    " MATCH (person {name: 'Alice'})" +
                    " MATCH (thing {name: 'p1'})" +
                    " CREATE (person)-[:LIKES]->(thing)"
         );
-        db.execute("" +
+        runQuery("" +
                    " MATCH (person {name: 'Charlie'})" +
                    " MATCH (thing {name: 'p3'})" +
                    " CREATE (person)-[:LIKES]->(thing)" +
@@ -290,7 +290,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
         registerProcedures(GraphLoadProc.class);
         String resultGraphName = "simGraph_" + direction.name();
         String loadQuery = "CALL algo.graph.load($resultGraphName, $label, 'SIMILAR', {nodeProperties: 'id', relationshipProperties: 'score', direction: $direction})";
-        db.execute(loadQuery, MapUtil.map("resultGraphName", resultGraphName, "label", direction == INCOMING ? "Item" : "Person", "direction", direction.name()));
+        runQuery(loadQuery, MapUtil.map("resultGraphName", resultGraphName, "label", direction == INCOMING ? "Item" : "Person", "direction", direction.name()));
         Graph simGraph = GraphCatalog.getUnion(getUsername(), resultGraphName).orElse(null);
         assertNotNull(simGraph);
         assertGraphEquals(direction == INCOMING

@@ -40,7 +40,7 @@ class RandomWalkLargeResultProcTest extends ProcTestBase {
     void beforeClass() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(NodeWalkerProc.class);
-        db.execute(buildDatabaseQuery(), Collections.singletonMap("count",NODE_COUNT)).close();
+        runQuery(buildDatabaseQuery(), Collections.singletonMap("count",NODE_COUNT));
         tx = db.beginTx();
     }
 
@@ -60,7 +60,7 @@ class RandomWalkLargeResultProcTest extends ProcTestBase {
 
     @Test
     void shouldHandleLargeResults() {
-        Result results = db.execute("CALL algo.randomWalk.stream(null, 100, 100000)");
+        Result results = runQueryAndReturn("CALL algo.randomWalk.stream(null, 100, 100000)");
         assertEquals(100000,Iterators.count(results));
     }
 }

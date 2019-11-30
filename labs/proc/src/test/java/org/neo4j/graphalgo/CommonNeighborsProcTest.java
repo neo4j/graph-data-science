@@ -58,7 +58,7 @@ class CommonNeighborsProcTest extends ProcTestBase {
     void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
         registerFunctions(LinkPredictionFunc.class);
-        db.execute(DB_CYPHER).close();
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -75,7 +75,7 @@ class CommonNeighborsProcTest extends ProcTestBase {
                 "       1.0 AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             Map<String, Object> node = result.next();
             assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
         }
@@ -91,7 +91,7 @@ class CommonNeighborsProcTest extends ProcTestBase {
                         "1.0 AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             Map<String, Object> node = result.next();
             assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
         }
@@ -106,7 +106,7 @@ class CommonNeighborsProcTest extends ProcTestBase {
                         "       2.0 AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             Map<String, Object> node = result.next();
             assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
         }
@@ -121,7 +121,7 @@ class CommonNeighborsProcTest extends ProcTestBase {
                         "       0.0 AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             Map<String, Object> node = result.next();
             assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
         }
@@ -136,7 +136,7 @@ class CommonNeighborsProcTest extends ProcTestBase {
                         "       0.0 AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             Map<String, Object> node = result.next();
             assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
         }
@@ -151,11 +151,9 @@ class CommonNeighborsProcTest extends ProcTestBase {
                         "       0.0 AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             Map<String, Object> node = result.next();
             assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
         }
     }
-
-
 }

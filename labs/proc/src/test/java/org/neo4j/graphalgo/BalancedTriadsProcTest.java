@@ -59,7 +59,7 @@ class BalancedTriadsProcTest extends ProcTestBase {
                 " (f)-[:TYPE {w:-1.0}]->(g),\n" +
                 " (g)-[:TYPE {w:1.0}]->(b)";
 
-        db.execute(cypher);
+        runQuery(cypher);
         registerProcedures(BalancedTriadsProc.class);
     }
 
@@ -70,25 +70,30 @@ class BalancedTriadsProcTest extends ProcTestBase {
 
     @Test
     void testHuge() {
-        db.execute(
-                "CALL algo.balancedTriads('Node', 'TYPE', {weightProperty:'w', graph: 'huge'}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount")
-                .accept(row -> {
+        runQuery("CALL algo.balancedTriads(" +
+                 "    'Node', 'TYPE', {" +
+                 "        weightProperty: 'w', graph: 'huge'" +
+                 "    }" +
+                 ") YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount",
+                row -> {
                     assertEquals(3L, row.getNumber("balancedTriadCount"));
                     assertEquals(3L, row.getNumber("unbalancedTriadCount"));
-                    return true;
                 });
     }
 
     @Test
     void testHugeStream() {
         final BalancedTriadsConsumer mock = mock(BalancedTriadsConsumer.class);
-        db.execute("CALL algo.balancedTriads.stream('Node', 'TYPE', {weightProperty:'w', graph: 'huge'}) YIELD nodeId, balanced, unbalanced")
-                .accept(row -> {
+        runQuery("CALL algo.balancedTriads.stream(" +
+                 "    'Node', 'TYPE', {" +
+                 "        weightProperty: 'w', graph: 'huge'" +
+                 "    }" +
+                 ") YIELD nodeId, balanced, unbalanced",
+                row -> {
                     final long nodeId = row.getNumber("nodeId").longValue();
                     final double balanced = row.getNumber("balanced").doubleValue();
                     final double unbalanced = row.getNumber("unbalanced").doubleValue();
                     mock.consume(nodeId, balanced, unbalanced);
-                    return true;
                 });
         verify(mock, times(7)).consume(anyLong(), AdditionalMatchers.eq(1.0, 3.0), AdditionalMatchers.eq(1.0, 3.0));
     }

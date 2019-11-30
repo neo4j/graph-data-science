@@ -77,7 +77,7 @@ public class UnionFindProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
 
         try (Transaction tx = db.beginTx()) {
-            db.execute(createGraph).close();
+            runQuery(createGraph);
             tx.success();
         }
 
@@ -425,7 +425,7 @@ public class UnionFindProcTest extends ProcTestBase {
                            "    }" +
                            ")";
 
-        db.execute(loadQuery);
+        runQuery(loadQuery);
 
         assertComponentSizes(graphName, algoRelType, weightProperty, expectedSizes);
     }

@@ -81,7 +81,7 @@ class TriangleProcTest extends ProcTestBase {
         registerProcedures(TriangleProc.class);
 
         try (Transaction tx = db.beginTx()) {
-            db.execute(cypher);
+            runQuery(cypher);
             tx.success();
         }
 
@@ -117,7 +117,7 @@ class TriangleProcTest extends ProcTestBase {
     void testTriangleCountWriteCypher() {
         final String cypher = "CALL algo.triangleCount('Node', '', {concurrency:4, write:true}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount";
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             final long loadMillis = row.getNumber("loadMillis").longValue();
             final long computeMillis = row.getNumber("computeMillis").longValue();
             final long writeMillis = row.getNumber("writeMillis").longValue();
@@ -128,14 +128,12 @@ class TriangleProcTest extends ProcTestBase {
             assertNotEquals(-1, writeMillis);
             assertEquals(3, triangleCount);
             assertEquals(9, nodeCount);
-            return true;
         });
 
         final String request = "MATCH (n) WHERE exists(n.triangles) RETURN n.triangles as t";
-        db.execute(request).accept(row -> {
+        runQuery(request, row -> {
             final int triangles = row.getNumber("t").intValue();
             assertEquals(1, triangles);
-            return true;
         });
     }
 
@@ -144,7 +142,7 @@ class TriangleProcTest extends ProcTestBase {
     void testTriangleCountExp1WriteCypher() {
         final String cypher = "CALL algo.triangleCount.forkJoin('Node', '', {concurrency:4, write:true}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount";
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             final long loadMillis = row.getNumber("loadMillis").longValue();
             final long computeMillis = row.getNumber("computeMillis").longValue();
             final long writeMillis = row.getNumber("writeMillis").longValue();
@@ -155,14 +153,12 @@ class TriangleProcTest extends ProcTestBase {
             assertNotEquals(-1, writeMillis);
             assertEquals(3, triangleCount);
             assertEquals(9, nodeCount);
-            return true;
         });
 
         final String request = "MATCH (n) WHERE exists(n.triangles) RETURN n.triangles as t";
-        db.execute(request).accept(row -> {
+        runQuery(request, row -> {
             final int triangles = row.getNumber("t").intValue();
             assertEquals(1, triangles);
-            return true;
         });
     }
 
@@ -170,11 +166,10 @@ class TriangleProcTest extends ProcTestBase {
     void testTriangleCountStream() {
         final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
         final String cypher = "CALL algo.triangleCount.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles";
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             final long nodeId = row.getNumber("nodeId").longValue();
             final long triangles = row.getNumber("triangles").longValue();
             mock.consume(nodeId, triangles);
-            return true;
         });
         verify(mock, times(9)).consume(anyLong(), eq(1L));
     }
@@ -183,11 +178,10 @@ class TriangleProcTest extends ProcTestBase {
     void testTriangleCountExp1Stream() {
         final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
         final String cypher = "CALL algo.triangleCount.forkJoin.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles";
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             final long nodeId = row.getNumber("nodeId").longValue();
             final long triangles = row.getNumber("triangles").longValue();
             mock.consume(nodeId, triangles);
-            return true;
         });
         verify(mock, times(9)).consume(anyLong(), eq(1L));
     }
@@ -197,12 +191,11 @@ class TriangleProcTest extends ProcTestBase {
         HashSet<Integer> sums = new HashSet<>();
         final TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
         final String cypher = "CALL algo.triangle.stream('Node', '', {concurrency:4}) YIELD nodeA, nodeB, nodeC";
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             final long nodeA = row.getNumber("nodeA").longValue();
             final long nodeB = row.getNumber("nodeB").longValue();
             final long nodeC = row.getNumber("nodeC").longValue();
             consumer.consume(idToName[(int) nodeA], idToName[(int) nodeB], idToName[(int) nodeC]);
-            return true;
         });
 
         assertThat(sums, containsInAnyOrder(0 + 1 + 2, 3 + 4 + 5, 6 + 7 + 8));

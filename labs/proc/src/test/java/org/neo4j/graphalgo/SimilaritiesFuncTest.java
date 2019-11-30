@@ -57,7 +57,7 @@ public class SimilaritiesFuncTest extends ProcTestBase {
     void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerFunctions(SimilaritiesFunc.class);
-        db.execute(DB_CYPHER).close();
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -80,12 +80,12 @@ public class SimilaritiesFuncTest extends ProcTestBase {
         String bobSimilarity;
         String jimSimilarity;
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             bobSimilarity = (String) result.next().get("cosineSim");
             jimSimilarity = (String) result.next().get("cosineSim");
         }
 
-        Result result = db.execute(
+        Result result = runQueryAndReturn(
                 "MATCH (p1:Employee)-[x:HAS_SKILL]->(sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
                         "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) as v1, COLLECT(coalesce(y.proficiency, 0.0d)) as v2\n" +
                         "WITH p1.name as name, algo.similarity.cosine(v1, v2) as cosineSim ORDER BY name ASC\n" +
@@ -111,12 +111,12 @@ public class SimilaritiesFuncTest extends ProcTestBase {
         String bobSimilarity;
         String jimSimilarity;
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             bobSimilarity = (String) result.next().get("cosineSim");
             jimSimilarity = (String) result.next().get("cosineSim");
         }
 
-        Result result = db.execute(
+        Result result = runQueryAndReturn(
                 "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
                         "MATCH (p1:Employee)\n" +
                         "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
@@ -147,12 +147,12 @@ public class SimilaritiesFuncTest extends ProcTestBase {
         String bobSimilarity;
         String jimSimilarity;
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             bobSimilarity = (String) result.next().get("pearsonSim");
             jimSimilarity = (String) result.next().get("pearsonSim");
         }
 
-        Result result = db.execute(
+        Result result = runQueryAndReturn(
                 "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
                         "MATCH (p1:Employee)\n" +
                         "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
@@ -177,12 +177,12 @@ public class SimilaritiesFuncTest extends ProcTestBase {
         String bobDist;
         String jimDist;
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             bobDist = (String) result.next().get("euclidDist");
             jimDist = (String) result.next().get("euclidDist");
         }
 
-        Result result = db.execute(
+        Result result = runQueryAndReturn(
                 "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
                         "MATCH (p1:Employee)\n" +
                         "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
@@ -206,12 +206,12 @@ public class SimilaritiesFuncTest extends ProcTestBase {
         String bobSim;
         String jimSim;
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             bobSim = (String) result.next().get("jaccardSim");
             jimSim = (String) result.next().get("jaccardSim");
         }
 
-        Result result = db.execute(
+        Result result = runQueryAndReturn(
                         "MATCH (p1:Employee),(p2:Employee) WHERE p1 <> p2\n" +
                         "WITH p1, [(p1)-[:HAS_SKILL]->(sk) | id(sk)] as v1, p2, [(p2)-[:HAS_SKILL]->(sk) | id(sk)] as v2\n" +
                         "WITH p1.name as name1, p2.name as name2, algo.similarity.jaccard(v1, v2) as jaccardSim ORDER BY name1,name2\n" +
@@ -232,12 +232,12 @@ public class SimilaritiesFuncTest extends ProcTestBase {
         String bobSim;
         String jimSim;
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             bobSim = (String) result.next().get("overlapSim");
             jimSim = (String) result.next().get("overlapSim");
         }
 
-        Result result = db.execute(
+        Result result = runQueryAndReturn(
                 "MATCH (p1:Employee),(p2:Employee) WHERE p1 <> p2\n" +
                         "WITH p1, [(p1)-[:HAS_SKILL]->(sk) | id(sk)] as v1, p2, [(p2)-[:HAS_SKILL]->(sk) | id(sk)] as v2\n" +
                         "WITH p1.name as name1, p2.name as name2, algo.similarity.overlap(v1, v2) as overlapSim ORDER BY name1,name2\n" +
@@ -260,12 +260,12 @@ public class SimilaritiesFuncTest extends ProcTestBase {
         String bobSim;
         String jimSim;
         try (Transaction tx = db.beginTx()) {
-            Result result = db.execute(controlQuery);
+            Result result = runQueryAndReturn(controlQuery);
             bobSim = (String) result.next().get("euclidSim");
             jimSim = (String) result.next().get("euclidSim");
         }
 
-        Result result = db.execute(
+        Result result = runQueryAndReturn(
                 "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
                         "MATCH (p1:Employee)\n" +
                         "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +

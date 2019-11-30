@@ -56,7 +56,7 @@ class ShortestPathProcTest599 extends ProcTestBase {
     @BeforeEach
     void setupGraphDb() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
         registerProcedures(ShortestPathProc.class);
     }
 
@@ -99,7 +99,7 @@ class ShortestPathProcTest599 extends ProcTestBase {
                 is(4L), is(4.0));
         Iterator<Matcher<Number>> expected = expectedList.iterator();
 
-        final Result pathResult = db.execute(pathCommand);
+        final Result pathResult = runQueryAndReturn(pathCommand);
         pathResult.forEachRemaining(res -> {
             assertThat((Number) res.get("id"), expected.next());
             assertThat((Number) res.get("weight"), expected.next());

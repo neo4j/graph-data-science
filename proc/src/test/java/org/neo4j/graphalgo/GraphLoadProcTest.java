@@ -101,7 +101,7 @@ class GraphLoadProcTest extends ProcTestBase {
             UnionFindProc.class,
             LabelPropagationProc.class
         );
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -364,7 +364,7 @@ class GraphLoadProcTest extends ProcTestBase {
                                "        }" +
                                "    }" +
                                ")";
-            db.execute(loadQuery);
+            runQuery(loadQuery);
         });
         Throwable rootCause = ExceptionUtil.rootCause(exMissingProperty);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
@@ -384,7 +384,7 @@ class GraphLoadProcTest extends ProcTestBase {
                                "        }" +
                                "    }" +
                                ")";
-            db.execute(loadQuery);
+            runQuery(loadQuery);
         });
         Throwable rootCause = ExceptionUtil.rootCause(exMissingProperty);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
@@ -546,9 +546,9 @@ class GraphLoadProcTest extends ProcTestBase {
 
         Map<String, Object> params = singletonMap("graph", graph);
         // First load succeeds
-        assertFalse(db.execute(query, params).<Boolean>columnAs("loaded").next());
+        assertFalse(runQueryAndReturn(query, params).<Boolean>columnAs("loaded").next());
         // Second load throws exception
-        QueryExecutionException exGraphAlreadyLoaded = assertThrows(QueryExecutionException.class, () -> db.execute(query, params).next());
+        QueryExecutionException exGraphAlreadyLoaded = assertThrows(QueryExecutionException.class, () -> runQueryAndReturn(query, params).next());
         Throwable rootCause = ExceptionUtil.rootCause(exGraphAlreadyLoaded);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
         assertThat(rootCause.getMessage(), equalTo("A graph with name 'foo' is already loaded."));
@@ -573,7 +573,7 @@ class GraphLoadProcTest extends ProcTestBase {
                        "    }" +
                        ")";
 
-        db.execute(query, MapUtil.map("graph", graphImpl, "direction", loadDirection));
+        runQuery(query, MapUtil.map("graph", graphImpl, "direction", loadDirection));
 
         runQuery(
                 "CALL algo.graph.info('foo', $computeDegreeDistr)",
@@ -822,7 +822,7 @@ class GraphLoadProcTest extends ProcTestBase {
                 "    graph: 'cypher'" +
                 "  })",
                 nodeQuery, relQuery);
-        QueryExecutionException ex = assertThrows(QueryExecutionException.class, () -> db.execute(query).hasNext());
+        QueryExecutionException ex = assertThrows(QueryExecutionException.class, () -> runQueryAndReturn(query).hasNext());
         Throwable root = ExceptionUtil.rootCause(ex);
         assertTrue(root instanceof IllegalArgumentException);
         assertThat(root.getMessage(), containsString("Query must be read only. Query: "));

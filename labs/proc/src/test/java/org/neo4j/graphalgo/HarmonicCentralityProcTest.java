@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.anyLong;
@@ -94,14 +93,10 @@ class HarmonicCentralityProcTest extends ProcTestBase {
 
     @Test
     void testHarmonicStream() throws Exception {
-
-        db.execute("CALL algo.closeness.harmonic.stream('Node', 'TYPE') YIELD nodeId, centrality")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    consumer.accept(
-                            row.getNumber("nodeId").longValue(),
-                            row.getNumber("centrality").doubleValue());
-                    return true;
-                });
+        runQuery("CALL algo.closeness.harmonic.stream('Node', 'TYPE') YIELD nodeId, centrality", row -> consumer.accept(
+            row.getNumber("nodeId").longValue(),
+            row.getNumber("centrality").doubleValue()
+        ));
 
         verifyMock();
     }
@@ -109,60 +104,54 @@ class HarmonicCentralityProcTest extends ProcTestBase {
 
     @Test
     void testHugeHarmonicStream() throws Exception {
-
-        db.execute("CALL algo.closeness.harmonic.stream('Node', 'TYPE', {graph:'huge'}) YIELD nodeId, centrality")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    consumer.accept(
-                            row.getNumber("nodeId").longValue(),
-                            row.getNumber("centrality").doubleValue());
-                    return true;
-                });
+        runQuery(
+            "CALL algo.closeness.harmonic.stream('Node', 'TYPE', {graph:'huge'}) YIELD nodeId, centrality",
+            row -> consumer.accept(
+                row.getNumber("nodeId").longValue(),
+                row.getNumber("centrality").doubleValue()
+            )
+        );
 
         verifyMock();
     }
 
     @Test
     void testHarmonicWrite() throws Exception {
+        runQuery("CALL algo.closeness.harmonic('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
+                 "nodes, loadMillis, computeMillis, writeMillis", row -> {
+            assertNotEquals(-1L, row.getNumber("writeMillis"));
+            assertNotEquals(-1L, row.getNumber("computeMillis"));
+            assertNotEquals(-1L, row.getNumber("nodes"));
+        });
 
-        db.execute("CALL algo.closeness.harmonic('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-                "nodes, loadMillis, computeMillis, writeMillis")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertNotEquals(-1L, row.getNumber("writeMillis"));
-                    assertNotEquals(-1L, row.getNumber("computeMillis"));
-                    assertNotEquals(-1L, row.getNumber("nodes"));
-                    return true;
-                });
-
-        db.execute("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality")
-                .accept(row -> {
-                    consumer.accept(
-                            row.getNumber("id").longValue(),
-                            row.getNumber("centrality").doubleValue());
-                    return true;
-                });
+        runQuery("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality", row -> {
+            consumer.accept(
+                row.getNumber("id").longValue(),
+                row.getNumber("centrality").doubleValue()
+            );
+        });
 
         verifyMock();
     }
 
     @Test
     void testHugeHarmonicWrite() throws Exception {
+        runQuery(
+            "CALL algo.closeness.harmonic('','', {write:true, stats:true, writeProperty:'centrality', graph:'huge'}) YIELD " +
+            "nodes, loadMillis, computeMillis, writeMillis",
+            row -> {
+                assertNotEquals(-1L, row.getNumber("writeMillis"));
+                assertNotEquals(-1L, row.getNumber("computeMillis"));
+                assertNotEquals(-1L, row.getNumber("nodes"));
+            }
+        );
 
-        db.execute("CALL algo.closeness.harmonic('','', {write:true, stats:true, writeProperty:'centrality', graph:'huge'}) YIELD " +
-                "nodes, loadMillis, computeMillis, writeMillis")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertNotEquals(-1L, row.getNumber("writeMillis"));
-                    assertNotEquals(-1L, row.getNumber("computeMillis"));
-                    assertNotEquals(-1L, row.getNumber("nodes"));
-                    return true;
-                });
-
-        db.execute("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality")
-                .accept(row -> {
-                    consumer.accept(
-                            row.getNumber("id").longValue(),
-                            row.getNumber("centrality").doubleValue());
-                    return true;
-                });
+        runQuery("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality", row -> {
+            consumer.accept(
+                row.getNumber("id").longValue(),
+                row.getNumber("centrality").doubleValue()
+            );
+        });
 
         verifyMock();
     }

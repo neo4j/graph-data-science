@@ -38,6 +38,6 @@ public class TriangleStreamProcTest_451 extends ProcTestBase {
 
     @Test
     public void testEmptySet() {
-        db.execute("CALL algo.triangleCount.stream('', '') YIELD nodeId, triangles");
+        runQuery("CALL algo.triangleCount.stream('', '') YIELD nodeId, triangles");
     }
 }

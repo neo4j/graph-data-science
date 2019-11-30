@@ -75,7 +75,7 @@ class ClusteringCoefficientProcTest extends ProcTestBase {
         registerProcedures(TriangleProc.class);
 
         try (Transaction tx = db.beginTx()) {
-            db.execute(cypher);
+            runQuery(cypher);
             tx.success();
         }
     }
@@ -88,7 +88,7 @@ class ClusteringCoefficientProcTest extends ProcTestBase {
     @Test
     void testTriangleCountWriteCypher() {
         final String cypher = "CALL algo.triangleCount('Node', '', {concurrency:4, write:true, clusterCoefficientProperty:'c'})";
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             final long loadMillis = row.getNumber("loadMillis").longValue();
             final long computeMillis = row.getNumber("computeMillis").longValue();
             final long writeMillis = row.getNumber("writeMillis").longValue();
@@ -105,14 +105,12 @@ class ClusteringCoefficientProcTest extends ProcTestBase {
             assertEquals(0.851, coefficient, 0.1);
             assertEquals(9, nodeCount);
             assertEquals(1, p100);
-            return true;
         });
 
         final String request = "MATCH (n) WHERE exists(n.clusteringCoefficient) RETURN n.clusteringCoefficient as c";
-        db.execute(request).accept(row -> {
+        runQuery(request, row -> {
             final double triangles = row.getNumber("c").doubleValue();
             System.out.println("triangles = " + triangles);
-            return true;
         });
     }
 
@@ -120,12 +118,11 @@ class ClusteringCoefficientProcTest extends ProcTestBase {
     void testTriangleCountStream() {
         final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
         final String cypher = "CALL algo.triangleCount.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles, coefficient";
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             final long nodeId = row.getNumber("nodeId").longValue();
             final long triangles = row.getNumber("triangles").longValue();
             final double coefficient = row.getNumber("coefficient").doubleValue();
             mock.consume(nodeId, triangles, coefficient);
-            return true;
         });
         verify(mock, times(7)).consume(anyLong(), eq(1L), AdditionalMatchers.eq(1.0, 0.1));
         verify(mock, times(2)).consume(anyLong(), eq(1L), AdditionalMatchers.eq(0.333, 0.1));

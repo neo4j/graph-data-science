@@ -76,7 +76,7 @@ final class ShortestPathDeltaSteppingUndirectedProcTest extends ProcTestBase {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ShortestPathDeltaSteppingProc.class);
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -93,10 +93,9 @@ final class ShortestPathDeltaSteppingUndirectedProcTest extends ProcTestBase {
                               "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "', direction: 'OUTGOING'}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
-            return true;
         });
 
         verify(consumer, times(11)).accept(anyDouble());
@@ -112,10 +111,9 @@ final class ShortestPathDeltaSteppingUndirectedProcTest extends ProcTestBase {
                               "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "'}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
-            return true;
         });
 
         verify(consumer, times(11)).accept(anyDouble());

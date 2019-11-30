@@ -82,7 +82,7 @@ class BetweennessCentralityProcTest_282 extends ProcTestBase {
 
         try (ProgressTimer timer = ProgressTimer.start(l -> System.out.printf("Setup took %d ms%n", l))) {
             try (Transaction tx = db.beginTx()) {
-                db.execute(importQuery);
+                runQuery(importQuery);
                 tx.success();
             }
         }
@@ -105,7 +105,7 @@ class BetweennessCentralityProcTest_282 extends ProcTestBase {
         final String evalQuery = "CALL algo.betweenness('Node', 'EDGE', {write:true, stats:true, writeProperty:'centrality'})\n" +
                 "YIELD nodes, minCentrality, maxCentrality, sumCentrality";
 
-        db.execute(evalQuery).accept(row -> {
+        runQuery(evalQuery, row -> {
             final long nodes = row.getNumber("nodes").longValue();
             final double minCentrality = row.getNumber("minCentrality").doubleValue();
             final double maxCentrality = row.getNumber("maxCentrality").doubleValue();
@@ -115,19 +115,16 @@ class BetweennessCentralityProcTest_282 extends ProcTestBase {
             System.out.println("minCentrality = " + minCentrality);
             System.out.println("maxCentrality = " + maxCentrality);
             System.out.println("sumCentrality = " + sumCentrality);
-            return false;
         });
 
         final String checkQuery = "MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as c";
         final double[] result = new double[EXPECTED.length];
-        db.execute(checkQuery).accept(row -> {
+        runQuery(checkQuery, row -> {
             final int id = row.getNumber("id").intValue();
             final double c = row.getNumber("c").doubleValue();
             result[id] = c;
 
             System.out.printf("id: %2d centrality: %f%n", id, c);
-
-            return true;
         });
 
         assertArrayEquals(EXPECTED, result, 0.1);
@@ -144,7 +141,7 @@ class BetweennessCentralityProcTest_282 extends ProcTestBase {
         final String evalQuery = "CALL algo.betweenness('Node', 'EDGE', {write:true, stats:true, writeProperty:'centrality', concurrency:4})\n" +
                 "YIELD nodes, minCentrality, maxCentrality, sumCentrality";
 
-        db.execute(evalQuery).accept(row -> {
+        runQuery(evalQuery, row -> {
             final long nodes = row.getNumber("nodes").longValue();
             final double minCentrality = row.getNumber("minCentrality").doubleValue();
             final double maxCentrality = row.getNumber("maxCentrality").doubleValue();
@@ -154,16 +151,14 @@ class BetweennessCentralityProcTest_282 extends ProcTestBase {
             System.out.println("minCentrality = " + minCentrality);
             System.out.println("maxCentrality = " + maxCentrality);
             System.out.println("sumCentrality = " + sumCentrality);
-            return false;
         });
 
         final String checkQuery = "MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as c";
         final double[] result = new double[EXPECTED.length];
-        db.execute(checkQuery).accept(row -> {
+        runQuery(checkQuery, row -> {
             final int id = row.getNumber("id").intValue();
             final double c = row.getNumber("c").doubleValue();
             result[id] = c;
-            return true;
         });
 
         assertArrayEquals(EXPECTED, result, 0.1);

@@ -50,7 +50,7 @@ class K1ColoringProcTest extends ProcTestBase {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(K1ColoringProc.class, GraphLoadProc.class);
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -95,11 +95,10 @@ class K1ColoringProcTest extends ProcTestBase {
         });
 
         Map<Long, Long> coloringResult = new HashMap<>(4);
-        db.execute("MATCH (n) RETURN id(n) AS id, n.color AS color").accept(row -> {
+        runQuery("MATCH (n) RETURN id(n) AS id, n.color AS color", row -> {
             long nodeId = row.getNumber("id").longValue();
             long color = row.getNumber("color").longValue();
             coloringResult.put(nodeId, color);
-            return true;
         });
 
         assertNotEquals(coloringResult.get(0L), coloringResult.get(1L));

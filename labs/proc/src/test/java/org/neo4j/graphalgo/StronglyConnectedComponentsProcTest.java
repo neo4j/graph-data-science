@@ -51,7 +51,7 @@ class StronglyConnectedComponentsProcTest extends ProcTestBase {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
         registerProcedures(GraphLoadProc.class, StronglyConnectedComponentsProc.class);
     }
 
@@ -68,12 +68,12 @@ class StronglyConnectedComponentsProcTest extends ProcTestBase {
                            ")" +
                            "YIELD nodes, relationships";
 
-        db.execute(loadQuery, MapUtil.map("name", graphName)).accept(row -> true);
+        runQuery(loadQuery, MapUtil.map("name", graphName));
 
         String algoQuery = "CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "'}) " +
                            "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty";
 
-        db.execute(algoQuery, MapUtil.map("name", graphName)).accept(row -> {
+        runQuery(algoQuery, MapUtil.map("name", graphName), row -> {
             assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
             assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
             assertEquals(2, row.getNumber("setCount").longValue());
@@ -81,11 +81,9 @@ class StronglyConnectedComponentsProcTest extends ProcTestBase {
             assertEquals(3, row.getNumber("maxSetSize").longValue());
             assertEquals("partition", row.getString("partitionProperty"));
             assertEquals("partition", row.getString("writeProperty"));
-
-            return true;
         });
 
-        db.execute("CALL algo.graph.remove($name)", MapUtil.map("name", graphName));
+        runQuery("CALL algo.graph.remove($name)", MapUtil.map("name", graphName));
     }
 
     @AllGraphNamesTest

@@ -60,7 +60,7 @@ class DegreeCentralityProcTest extends ProcTestBase {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER).close();
+            runQuery(DB_CYPHER);
             tx.success();
         }
 

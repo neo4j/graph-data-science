@@ -48,7 +48,7 @@ class YensKShortestPathsRelationshipCostsProcTest extends ProcTestBase {
                 " (a)-[:TYPE {cost:3.0}]->(b),\n" +
                 " (b)-[:TYPE {cost:2.0}]->(c)";
 
-        db.execute(cypher);
+        runQuery(cypher);
         registerProcedures(KShortestPathsProc.class);
     }
 
@@ -64,18 +64,16 @@ class YensKShortestPathsRelationshipCostsProcTest extends ProcTestBase {
                 "CALL algo.kShortestPaths(c, a, 1, 'cost') " +
                 "YIELD resultCount RETURN resultCount";
 
-        db.execute(cypher).accept(row -> {
-            assertEquals(1, row.getNumber("resultCount").intValue());
-            return true;
-        });
+        runQuery(cypher, row -> assertEquals(1, row.getNumber("resultCount").intValue()));
 
         final String shortestPathsQuery = "MATCH p=(:Node {name: $one})-[r:PATH_0*]->(:Node {name: $two})\n" +
                 "UNWIND relationships(p) AS pair\n" +
                 "return sum(pair.weight) AS distance";
 
-        db.execute(shortestPathsQuery, MapUtil.map("one", "c", "two", "a")).accept(row -> {
-            assertEquals(5.0, row.getNumber("distance").doubleValue(), 0.01);
-            return true;
-        });
+        runQuery(
+            shortestPathsQuery,
+            MapUtil.map("one", "c", "two", "a"),
+            row -> assertEquals(5.0, row.getNumber("distance").doubleValue(), 0.01)
+        );
     }
 }

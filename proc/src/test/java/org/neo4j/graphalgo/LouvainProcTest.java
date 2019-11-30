@@ -107,7 +107,7 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
             ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
         registerProcedures(LouvainProc.class, GraphLoadProc.class);
-        db.execute(cypher);
+        runQuery(cypher);
     }
 
     @AfterEach

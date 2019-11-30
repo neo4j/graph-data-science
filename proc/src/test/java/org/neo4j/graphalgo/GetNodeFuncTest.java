@@ -51,10 +51,10 @@ class GetNodeFuncTest extends ProcTestBase {
     @Test
     void lookupNode() {
         String createNodeQuery = "CREATE (p:Person {name: 'Mark'}) RETURN p AS node";
-        Node savedNode = (Node) db.execute(createNodeQuery).next().get("node");
+        Node savedNode = (Node) runQueryAndReturn(createNodeQuery).next().get("node");
 
         Map<String, Object> params = MapUtil.map("nodeId", savedNode.getId());
-        Map<String, Object> row = db.execute("RETURN algo.asNode($nodeId) AS node", params).next();
+        Map<String, Object> row = runQueryAndReturn("RETURN algo.asNode($nodeId) AS node", params).next();
 
         Node node = (Node) row.get("node");
         assertEquals(savedNode, node);
@@ -62,7 +62,7 @@ class GetNodeFuncTest extends ProcTestBase {
 
     @Test
     void lookupNonExistentNode() {
-        Map<String, Object> row = db.execute(
+        Map<String, Object> row = runQueryAndReturn(
                 "RETURN algo.asNode(3) AS node").next();
 
         assertNull(row.get("node"));
@@ -71,12 +71,12 @@ class GetNodeFuncTest extends ProcTestBase {
     @Test
     void lookupNodes() {
         String createNodeQuery = "CREATE (p1:Person {name: 'Mark'}) CREATE (p2:Person {name: 'Arya'}) RETURN p1, p2";
-        Map<String, Object> savedRow = db.execute(createNodeQuery).next();
+        Map<String, Object> savedRow = runQueryAndReturn(createNodeQuery).next();
         Node savedNode1 = (Node) savedRow.get("p1");
         Node savedNode2 = (Node) savedRow.get("p2");
 
         Map<String, Object> params = MapUtil.map("nodeIds", Arrays.asList(savedNode1.getId(), savedNode2.getId()));
-        Map<String, Object> row = db.execute("RETURN algo.asNodes($nodeIds) AS nodes", params).next();
+        Map<String, Object> row = runQueryAndReturn("RETURN algo.asNodes($nodeIds) AS nodes", params).next();
 
         List<Node> nodes = (List<Node>) row.get("nodes");
         assertEquals(Arrays.asList(savedNode1, savedNode2), nodes);
@@ -84,7 +84,7 @@ class GetNodeFuncTest extends ProcTestBase {
 
     @Test
     void lookupNonExistentNodes() {
-        Map<String, Object> row = db.execute(
+        Map<String, Object> row = runQueryAndReturn(
                 "RETURN algo.getNodesById([3,4,5]) AS nodes").next();
 
         List<Node> nodes = (List<Node>) row.get("nodes");

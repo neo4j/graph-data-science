@@ -65,7 +65,7 @@ class MultistepSCCProcTest extends ProcTestBase{
 
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
-            db.execute(cypher);
+            runQuery(cypher);
             tx.success();
         }
 
@@ -83,8 +83,7 @@ class MultistepSCCProcTest extends ProcTestBase{
                 "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize " +
                 "RETURN loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize";
 
-        db.execute(cypher).accept(row -> {
-
+        runQuery(cypher, row -> {
             assertTrue(row.getNumber("loadMillis").longValue() > 0L);
             assertTrue(row.getNumber("computeMillis").longValue() > 0L);
             assertTrue(row.getNumber("writeMillis").longValue() > 0L);
@@ -92,8 +91,6 @@ class MultistepSCCProcTest extends ProcTestBase{
             assertEquals(3, row.getNumber("setCount").intValue());
             assertEquals(3, row.getNumber("minSetSize").intValue());
             assertEquals(3, row.getNumber("maxSetSize").intValue());
-
-            return true;
         });
     }
 
@@ -101,10 +98,7 @@ class MultistepSCCProcTest extends ProcTestBase{
     void testStream() {
         String cypher = "CALL algo.scc.multistep.stream('Node', 'TYPE', {write:true, concurrency:4, cutoff:0}) YIELD nodeId, cluster RETURN nodeId, cluster";
         final LongLongScatterMap testMap = new LongLongScatterMap();
-        db.execute(cypher).accept(row -> {
-            testMap.addTo(row.getNumber("cluster").longValue(), 1);
-            return true;
-        });
+        runQuery(cypher, row -> testMap.addTo(row.getNumber("cluster").longValue(), 1));
         // we expect 3 clusters
         assertEquals(3, testMap.size());
         // with 3 elements each

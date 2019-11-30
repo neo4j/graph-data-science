@@ -52,86 +52,82 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     public void testUnionFindStream() {
-        Result result = db.execute("CALL algo.unionFind.stream('', '',{graph:'" + graphImpl + "'})");
+        Result result = runQueryAndReturn("CALL algo.unionFind.stream('', '',{graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
     public void testUnionFind() throws Exception {
-        db.execute("CALL algo.unionFind('', '',{graph:'" + graphImpl + "'}) YIELD nodes")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(0L, row.getNumber("nodes"));
-                    return true;
-                });
+        runQuery(
+            "CALL algo.unionFind('', '',{graph:'" + graphImpl + "'}) YIELD nodes",
+            row -> assertEquals(0L, row.getNumber("nodes"))
+        );
     }
 
     @Test
     public void testWCCStream() {
-        Result result = db.execute("CALL algo.beta.wcc.stream('', '',{graph:'" + graphImpl + "'})");
+        Result result = runQueryAndReturn("CALL algo.beta.wcc.stream('', '',{graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
     public void testWCC() throws Exception {
-        db.execute("CALL algo.beta.wcc('', '',{graph:'" + graphImpl + "'}) YIELD nodes")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(0L, row.getNumber("nodes"));
-                    return true;
-                });
+        runQuery(
+            "CALL algo.beta.wcc('', '',{graph:'" + graphImpl + "'}) YIELD nodes",
+            row -> assertEquals(0L, row.getNumber("nodes"))
+        );
     }
 
     @Test
     public void testLabelPropagationStream() {
-        Result result = db.execute("CALL algo.labelPropagation.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQueryAndReturn("CALL algo.labelPropagation.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
     @Deprecated
     public void testLabelDeprecatedPropagation() throws Exception {
-        db.execute("CALL algo.labelPropagation('', '', '', {graph:'" + graphImpl + "', writeProperty:'community'})")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(0L, row.getNumber("nodes"));
-                    return true;
-                });
+        runQuery(
+            "CALL algo.labelPropagation('', '', '', {graph:'" + graphImpl + "', writeProperty:'community'})",
+            row -> assertEquals(0L, row.getNumber("nodes"))
+        );
     }
 
     @Test
     public void testLabelBetaPropagation() throws Exception {
-        db.execute("CALL algo.beta.labelPropagation('', '', {graph:'" + graphImpl + "', writeProperty:'community'})")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(0L, row.getNumber("nodes"));
-                    return true;
-                });
+        runQuery(
+            "CALL algo.beta.labelPropagation('', '', {graph:'" + graphImpl + "', writeProperty:'community'})",
+            row -> {
+                assertEquals(0L, row.getNumber("nodes"));
+            }
+        );
     }
 
     @Test
     public void testLouvainStream() {
-        Result result = db.execute("CALL algo.louvain.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQueryAndReturn("CALL algo.louvain.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
     public void testLouvain() throws Exception {
-        db.execute("CALL algo.louvain('', '', {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(0L, row.getNumber("nodes"));
-                    return true;
-                });
+        runQuery(
+            "CALL algo.louvain('', '', {graph:'" + graphImpl + "'})",
+            row -> assertEquals(0L, row.getNumber("nodes"))
+        );
     }
 
     @Test
     public void testPageRankStream() {
-        Result result = db.execute("CALL algo.pageRank.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQueryAndReturn("CALL algo.pageRank.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
     public void testPageRank() throws Exception {
-        db.execute("CALL algo.pageRank('', '', {graph:'" + graphImpl + "'})")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(0L, row.getNumber("nodes"));
-                    return true;
-                });
+        runQuery(
+            "CALL algo.pageRank('', '', {graph:'" + graphImpl + "'})",
+            row -> assertEquals(0L, row.getNumber("nodes"))
+        );
     }
 }

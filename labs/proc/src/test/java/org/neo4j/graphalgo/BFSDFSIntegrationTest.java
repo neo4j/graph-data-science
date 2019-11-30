@@ -65,7 +65,7 @@ class BFSDFSIntegrationTest extends ProcTestBase {
                 " (f)-[:TYPE {cost:1.0}]->(g)";
 
         registerProcedures(TraverseProc.class);
-        db.execute(cypher);
+        runQuery(cypher);
     }
 
     @AfterEach
@@ -75,10 +75,7 @@ class BFSDFSIntegrationTest extends ProcTestBase {
 
     private long id(String name) {
         final Node[] node = new Node[1];
-        db.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
-            node[0] = row.getNode("n");
-            return false;
-        });
+        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
         return node[0].getId();
     }
 
@@ -99,30 +96,27 @@ class BFSDFSIntegrationTest extends ProcTestBase {
     @Test
     void testFindAnyOf() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '>', s, {targetNodes:[4,5]}) YIELD nodeIds RETURN nodeIds";
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertEquals(4, nodeIds.size());
-            return true;
         });
     }
 
     @Test
     void testMaxDepthOut() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '>', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"a", "b", "c", "d"}, nodeIds);
-            return true;
         });
     }
 
     @Test
     void testMaxDepthIn() {
         final String cypher = "MATCH (n:Node {name:'g'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '<', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"g", "e", "f", "d"}, nodeIds);
-            return true;
         });
     }
 

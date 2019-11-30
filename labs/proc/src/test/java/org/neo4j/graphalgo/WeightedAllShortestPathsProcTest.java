@@ -81,7 +81,7 @@ final class WeightedAllShortestPathsProcTest extends ProcTestBase {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
         registerProcedures(AllShortestPathsProc.class);
         try (Transaction tx = db.beginTx()) {
             startNodeId = db.findNode(Label.label("Node"), "name", "s").getId();
@@ -103,7 +103,7 @@ final class WeightedAllShortestPathsProcTest extends ProcTestBase {
         final String cypher = "CALL algo.allShortestPaths.stream('', {graph:'" + graphName + "', direction: 'OUTGOING'}) " +
                               "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();
@@ -112,7 +112,6 @@ final class WeightedAllShortestPathsProcTest extends ProcTestBase {
                 assertEquals(0.0, distance, 0.1);
             }
             consumer.test(source, target, distance);
-            return true;
         });
 
         // 4 steps from start to end max
@@ -128,7 +127,7 @@ final class WeightedAllShortestPathsProcTest extends ProcTestBase {
         final String cypher = "CALL algo.allShortestPaths.stream('', {graph:'" + graphName + "', direction: 'INCOMING'}) " +
                               "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();
@@ -137,7 +136,6 @@ final class WeightedAllShortestPathsProcTest extends ProcTestBase {
                 assertEquals(0.0, distance, 0.1);
             }
             consumer.test(source, target, distance);
-            return true;
         });
 
         // 4 steps from start to end max
@@ -153,7 +151,7 @@ final class WeightedAllShortestPathsProcTest extends ProcTestBase {
         final String cypher = "CALL algo.allShortestPaths.stream('cost', {graph:'" + graphName + "', direction: 'OUTGOING'}) " +
                               "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();
@@ -163,7 +161,6 @@ final class WeightedAllShortestPathsProcTest extends ProcTestBase {
             }
             assertNotEquals(Double.POSITIVE_INFINITY, distance);
             consumer.test(source, target, distance);
-            return true;
         });
 
         verify(consumer, times(1)).test(eq(startNodeId), eq(targetNodeId), eq(8.0));

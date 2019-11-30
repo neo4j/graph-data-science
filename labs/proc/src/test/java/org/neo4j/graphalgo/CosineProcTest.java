@@ -77,7 +77,7 @@ class CosineProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(CosineProc.class);
         registerFunctions(IsFiniteFunc.class);
-        db.execute(buildDatabaseQuery()).close();
+        runQuery(buildDatabaseQuery());
     }
 
     @AfterEach
@@ -86,15 +86,15 @@ class CosineProcTest extends ProcTestBase {
     }
 
     private void buildRandomDB(int size) {
-        db.execute("MATCH (n) DETACH DELETE n").close();
-        db.execute("UNWIND range(1,$size/10) as _ CREATE (:Person) CREATE (:Item) ",singletonMap("size",size)).close();
+        runQuery("MATCH (n) DETACH DELETE n");
+        runQuery("UNWIND range(1,$size/10) as _ CREATE (:Person) CREATE (:Item) ",singletonMap("size",size));
         String statement =
                 "MATCH (p:Person) WITH collect(p) as people " +
                 "MATCH (i:Item) WITH people, collect(i) as items " +
                 "UNWIND range(1,$size) as _ " +
                 "WITH people[toInteger(rand()*size(people))] as p, items[toInteger(rand()*size(items))] as i " +
                 "MERGE (p)-[:LIKES]->(i) RETURN count(*) ";
-        db.execute(statement,singletonMap("size",size)).close();
+        runQuery(statement,singletonMap("size",size));
     }
     private static String buildDatabaseQuery() {
         return  "CREATE (a:Person {name:'Alice'})\n" +
@@ -147,10 +147,10 @@ class CosineProcTest extends ProcTestBase {
     void cosineSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
-        Result result1 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 1), "missingValue", 0));
-        Result result2 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 2), "missingValue", 0));
-        Result result4 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 4), "missingValue", 0));
-        Result result8 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 8), "missingValue", 0));
+        Result result1 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 1), "missingValue", 0));
+        Result result2 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 2), "missingValue", 0));
+        Result result4 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 4), "missingValue", 0));
+        Result result8 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 8), "missingValue", 0));
         int count=0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
@@ -168,10 +168,10 @@ class CosineProcTest extends ProcTestBase {
         int size = 333;
         buildRandomDB(size);
 
-        Result result1 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 1), "missingValue", 0));
-        Result result2 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 2), "missingValue", 0));
-        Result result4 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 4), "missingValue", 0));
-        Result result8 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 8), "missingValue", 0));
+        Result result1 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 1), "missingValue", 0));
+        Result result2 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 2), "missingValue", 0));
+        Result result4 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 4), "missingValue", 0));
+        Result result8 = runQueryAndReturn(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 8), "missingValue", 0));
         int count=0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
@@ -186,7 +186,7 @@ class CosineProcTest extends ProcTestBase {
 
     @Test
     void topNcosineStreamTest() {
-        Result results = db.execute(STATEMENT_STREAM, map("config",map("top",2), "missingValue", 0));
+        Result results = runQueryAndReturn(STATEMENT_STREAM, map("config",map("top",2), "missingValue", 0));
         assert01(results.next());
         assert02(results.next());
         assertFalse(results.hasNext());
@@ -194,7 +194,7 @@ class CosineProcTest extends ProcTestBase {
 
     @Test
     void cosineStreamTest() {
-        Result results = db.execute(STATEMENT_STREAM, map("config",map("concurrency",1), "missingValue", 0));
+        Result results = runQueryAndReturn(STATEMENT_STREAM, map("config",map("concurrency",1), "missingValue", 0));
         assertTrue(results.hasNext());
         assert01(results.next());
         assert02(results.next());
@@ -212,7 +212,7 @@ class CosineProcTest extends ProcTestBase {
                 "sourceIds", Collections.singletonList(0L),
                 "targetIds", Collections.singletonList(1L)
         );
-        Result results = db.execute(STATEMENT_STREAM, map("config", config, "missingValue", 0));
+        Result results = runQueryAndReturn(STATEMENT_STREAM, map("config", config, "missingValue", 0));
 
         assertTrue(results.hasNext());
         assert01(results.next());
@@ -221,8 +221,8 @@ class CosineProcTest extends ProcTestBase {
 
     @Test
     void cosineSkipStreamTest() {
-        Result results = db.execute(STATEMENT_STREAM,
-                map("config",map("concurrency",1, "skipValue", Double.NaN), "missingValue", Double.NaN));
+        Result results = runQueryAndReturn(STATEMENT_STREAM,
+                map("config", map("concurrency",1, "skipValue", Double.NaN), "missingValue", Double.NaN));
 
         assertTrue(results.hasNext());
         assert01Skip(results.next());
@@ -234,7 +234,7 @@ class CosineProcTest extends ProcTestBase {
     @Test
     void cosineCypherLoadingStreamTest() {
         String query = "MATCH (p:Person)-[r:LIKES]->(i) RETURN id(p) AS item, id(i) AS category, r.stars AS weight";
-        Result results = db.execute(STATEMENT_CYPHER_STREAM, map("config", map("concurrency", 1, "graph", "cypher", "skipValue", 0.0), "query", query));
+        Result results = runQueryAndReturn(STATEMENT_CYPHER_STREAM, map("config", map("concurrency", 1, "graph", "cypher", "skipValue", 0.0), "query", query));
 
         assertTrue(results.hasNext());
         assert01Skip(results.next());
@@ -246,8 +246,8 @@ class CosineProcTest extends ProcTestBase {
     @Test
     void topKCosineStreamTest() {
         Map<String, Object> params = map("config", map( "concurrency", 1,"topK", 1), "missingValue", 0);
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
-        Result results = db.execute(STATEMENT_STREAM, params);
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assertTrue(results.hasNext());
         assert02(results.next());
         assert01(flip(results.next()));
@@ -265,8 +265,8 @@ class CosineProcTest extends ProcTestBase {
 
         );
         Map<String, Object> params = map("config", config, "missingValue", 0);
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
-        Result results = db.execute(STATEMENT_STREAM, params);
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assertTrue(results.hasNext());
         assert02(results.next());
         assertFalse(results.hasNext());
@@ -296,7 +296,7 @@ class CosineProcTest extends ProcTestBase {
     void topK4cosineStreamTest() {
         Map<String, Object> params = map("config", map("topK", 4, "concurrency", 4, "similarityCutoff", -0.1), "missingValue", 0);
 
-        Result results = db.execute(STATEMENT_STREAM,params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM,params);
         assertSameSource(results, 3, 0L);
         assertSameSource(results, 3, 1L);
         assertSameSource(results, 3, 2L);
@@ -308,9 +308,9 @@ class CosineProcTest extends ProcTestBase {
     void topK3cosineStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3), "missingValue", 0);
 
-        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        System.out.println(runQueryAndReturn(STATEMENT_STREAM, params).resultAsString());
 
-        Result results = db.execute(STATEMENT_STREAM, params);
+        Result results = runQueryAndReturn(STATEMENT_STREAM, params);
         assertSameSource(results, 3, 0L);
         assertSameSource(results, 3, 1L);
         assertSameSource(results, 3, 2L);
@@ -322,7 +322,7 @@ class CosineProcTest extends ProcTestBase {
     void simpleCosineTest() {
         Map<String, Object> params = map("config", map());
 
-        Map<String, Object> row = db.execute(STATEMENT,params).next();
+        Map<String, Object> row = runQueryAndReturn(STATEMENT,params).next();
         assertEquals((double) row.get("p25"), 0.0, 0.01);
         assertEquals((double) row.get("p50"), 0, 0.01);
         assertEquals((double) row.get("p75"), 0.40, 0.01);
@@ -334,11 +334,11 @@ class CosineProcTest extends ProcTestBase {
 
     @Test
     void simpleCosineFromEmbeddingTest() {
-        db.execute(STORE_EMBEDDING_STATEMENT);
+        runQuery(STORE_EMBEDDING_STATEMENT);
 
         Map<String, Object> params = map("config", map());
 
-        Map<String, Object> row = db.execute(EMBEDDING_STATEMENT,params).next();
+        Map<String, Object> row = runQueryAndReturn(EMBEDDING_STATEMENT,params).next();
         assertEquals((double) row.get("p25"), 0.0, 0.01);
         assertEquals((double) row.get("p50"), 0, 0.01);
         assertEquals((double) row.get("p75"), 0.40, 0.01);
@@ -354,7 +354,7 @@ class CosineProcTest extends ProcTestBase {
                 "write", true,
                 "similarityCutoff", 0.1));
 
-        Result writeResult = db.execute(STATEMENT, params);
+        Result writeResult = runQueryAndReturn(STATEMENT, params);
         Map<String, Object> writeRow = writeResult.next();
         assertEquals(-1L, (long) writeRow.get("computations"));
     }
@@ -366,7 +366,7 @@ class CosineProcTest extends ProcTestBase {
                 "showComputations", true,
                 "similarityCutoff", 0.1));
 
-        Result writeResult = db.execute(STATEMENT, params);
+        Result writeResult = runQueryAndReturn(STATEMENT, params);
         Map<String, Object> writeRow = writeResult.next();
         assertEquals(6L, (long) writeRow.get("computations"));
     }
@@ -375,14 +375,14 @@ class CosineProcTest extends ProcTestBase {
     void simpleCosineWriteTest() {
         Map<String, Object> params = map("config", map( "write",true, "similarityCutoff", 0.1));
 
-        db.execute(STATEMENT, params).close();
+        runQueryAndReturn(STATEMENT, params).close();
 
         String checkSimilaritiesQuery = "MATCH (a)-[similar:SIMILAR]-(b)" +
                 "RETURN a.name AS node1, b.name as node2, similar.score AS score " +
                 "ORDER BY id(a), id(b)";
 
-        System.out.println(db.execute(checkSimilaritiesQuery).resultAsString());
-        Result result = db.execute(checkSimilaritiesQuery);
+        System.out.println(runQueryAndReturn(checkSimilaritiesQuery).resultAsString());
+        Result result = runQueryAndReturn(checkSimilaritiesQuery);
 
         assertTrue(result.hasNext());
         Map<String, Object> row = result.next();

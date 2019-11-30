@@ -55,7 +55,7 @@ class LouvainDocTest extends ProcTestBase {
 
         registerProcedures(LouvainProc.class, GraphLoadProc.class);
         registerFunctions(GetNodeFunc.class);
-        db.execute(cypher);
+        runQuery(cypher);
     }
 
     @AfterEach
@@ -87,7 +87,7 @@ class LouvainDocTest extends ProcTestBase {
             "+-------------------------------------+\n" +
             "6 rows\n";
 
-        String actual = db.execute(query).resultAsString();
+        String actual = runQueryAndReturn(query).resultAsString();
 
         assertEquals(expected, actual);
     }
@@ -109,7 +109,7 @@ class LouvainDocTest extends ProcTestBase {
             "+------------------------------------------------------------+\n" +
             "1 row\n";
 
-        String actual = db.execute(query).resultAsString();
+        String actual = runQueryAndReturn(query).resultAsString();
 
         assertEquals(expected, actual);
     }
@@ -138,7 +138,7 @@ class LouvainDocTest extends ProcTestBase {
             "+-------------------------------------+\n" +
             "6 rows\n";
 
-        String actual = db.execute(query).resultAsString();
+        String actual = runQueryAndReturn(query).resultAsString();
 
         assertEquals(expected, actual);
     }
@@ -167,15 +167,15 @@ class LouvainDocTest extends ProcTestBase {
             "+-------------------------------------+\n" +
             "6 rows\n";
 
-        String actual = db.execute(query).resultAsString();
+        String actual = runQueryAndReturn(query).resultAsString();
 
         assertEquals(expected, actual);
     }
 
     @Test
     void streamIntermidiateCommunities() {
-        db.execute("MATCH (n) DETACH DELETE n");
-        db.execute(
+        runQuery("MATCH (n) DETACH DELETE n");
+        runQuery(
             "CREATE" +
             "  (a:Node {name: 'a'})" +        // 0
             ", (b:Node {name: 'b'})" +        // 1
@@ -251,7 +251,7 @@ class LouvainDocTest extends ProcTestBase {
             "+--------------------------------+\n" +
             "15 rows\n";
 
-        String actual = db.execute(query).resultAsString();
+        String actual = runQueryAndReturn(query).resultAsString();
 
         assertEquals(expected, actual);
     }

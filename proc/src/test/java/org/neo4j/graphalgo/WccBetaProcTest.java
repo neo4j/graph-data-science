@@ -71,7 +71,7 @@ class WccBetaProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
 
         try (Transaction tx = db.beginTx()) {
-            db.execute(createGraph).close();
+            runQuery(createGraph);
             tx.success();
         }
 

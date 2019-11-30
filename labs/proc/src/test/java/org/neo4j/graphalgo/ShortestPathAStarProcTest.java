@@ -79,7 +79,7 @@ class ShortestPathAStarProcTest extends ProcTestBase {
 
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
-            db.execute(createGraph).close();
+            runQuery(createGraph);
             tx.success();
         }
         
@@ -99,18 +99,16 @@ class ShortestPathAStarProcTest extends ProcTestBase {
 				1652.0, 2392.0, 2979.0);
 		final List<String> actualNode = new ArrayList<>();
 		final List<Double> actualDistance = new ArrayList<>();
-        db.execute(
+        runQuery(
                 "MATCH (start:Node{name:'SINGAPORE'}), (end:Node{name:'CHIBA'}) " +
                         "CALL algo.shortestPath.astar.stream(start, end, 'cost') " +
-                        "YIELD nodeId, cost RETURN nodeId, cost ")
-                .accept(row -> {
+                        "YIELD nodeId, cost RETURN nodeId, cost ", row -> {
                     long nodeId = row.getNumber("nodeId").longValue();
                     Node node = db.getNodeById(nodeId);
                     String nodeName = (String) node.getProperty("name");
                     double distance = row.getNumber("cost").doubleValue();
                     actualNode.add(nodeName);
                     actualDistance.add(distance);
-                    return true;
                 });
         assertArrayEquals(expectedNode.toArray(), actualNode.toArray());
         assertArrayEquals(expectedDistance.toArray(), actualDistance.toArray());

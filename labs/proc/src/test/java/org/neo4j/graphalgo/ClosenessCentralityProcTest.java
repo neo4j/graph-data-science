@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.anyLong;
@@ -90,38 +89,34 @@ class ClosenessCentralityProcTest extends ProcTestBase {
 
     @Test
     void testClosenessStream() throws Exception {
-        db.execute("CALL algo.closeness.stream('Node', 'TYPE') YIELD nodeId, centrality")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    consumer.accept(
-                            row.getNumber("nodeId").longValue(),
-                            row.getNumber("centrality").doubleValue());
-                    return true;
-                });
+        runQuery("CALL algo.closeness.stream('Node', 'TYPE') YIELD nodeId, centrality", row -> {
+            consumer.accept(
+                row.getNumber("nodeId").longValue(),
+                row.getNumber("centrality").doubleValue()
+            );
+        });
 
         verifyMock();
     }
 
     @Test
     void testClosenessWrite() throws Exception {
-        db.execute("CALL algo.closeness('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-                   "nodes, loadMillis, computeMillis, writeMillis")
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertNotEquals(-1L, row.getNumber("writeMillis"));
-                    assertNotEquals(-1L, row.getNumber("computeMillis"));
-                    assertNotEquals(-1L, row.getNumber("nodes"));
-                    return true;
-                });
+        runQuery("CALL algo.closeness('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
+                 "nodes, loadMillis, computeMillis, writeMillis", row -> {
+            assertNotEquals(-1L, row.getNumber("writeMillis"));
+            assertNotEquals(-1L, row.getNumber("computeMillis"));
+            assertNotEquals(-1L, row.getNumber("nodes"));
+        });
 
-        db.execute("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality")
-                .accept(row -> {
-                    System.out.println(
-                            row.getNumber("id").longValue() + " " +
-                                    row.getNumber("centrality").doubleValue());
-                    consumer.accept(
-                            row.getNumber("id").longValue(),
-                            row.getNumber("centrality").doubleValue());
-                    return true;
-                });
+        runQuery("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality", row -> {
+            System.out.println(
+                row.getNumber("id").longValue() + " " +
+                row.getNumber("centrality").doubleValue());
+            consumer.accept(
+                row.getNumber("id").longValue(),
+                row.getNumber("centrality").doubleValue()
+            );
+        });
 
         verifyMock();
     }

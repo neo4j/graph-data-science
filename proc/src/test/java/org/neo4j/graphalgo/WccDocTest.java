@@ -44,7 +44,7 @@ class WccDocTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase(builder ->
                 builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );
-        db.execute(createGraph);
+        runQuery(createGraph);
         registerProcedures(UnionFindProc.class, GraphLoadProc.class);
         registerFunctions(GetNodeFunc.class);
     }
@@ -67,12 +67,12 @@ class WccDocTest extends ProcTestBase {
                 "  threshold: 1.0 " +
                 "}) " +
                 "YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName";
-        String r1 = db.execute(q1).resultAsString();
+        String r1 = runQueryAndReturn(q1).resultAsString();
 //        System.out.println(r1);
 
         String q2 = "MATCH (b:User {name: 'Bridget'}) " +
                     "CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})";
-        String r2 = db.execute(q2).resultAsString();
+        String r2 = runQueryAndReturn(q2).resultAsString();
 //        System.out.println(r2);
 
         String q3 = "CALL algo.unionFind.stream('User', 'LINK', { " +
@@ -83,7 +83,7 @@ class WccDocTest extends ProcTestBase {
                     "YIELD nodeId, setId " +
                     "RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId " +
                     "ORDER BY ComponentId, Name";
-        String r3 = db.execute(q3).resultAsString();
+        String r3 = runQueryAndReturn(q3).resultAsString();
 //        System.out.println(r3);
 
         String q4 = "CALL algo.unionFind('User', 'LINK', { " +
@@ -94,11 +94,11 @@ class WccDocTest extends ProcTestBase {
                     "  writeProperty: 'componentId' " +
                     "}) " +
                     "YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName";
-        String r4 = db.execute(q4).resultAsString();
+        String r4 = runQueryAndReturn(q4).resultAsString();
 //        System.out.println(r4);
 
         // graph end-state
-        System.out.println(db.execute("MATCH (n) RETURN n").resultAsString());
+        System.out.println(runQueryAndReturn("MATCH (n) RETURN n").resultAsString());
     }
 
     // Queries from the named graph and Cypher projection example in wcc.adoc
@@ -106,13 +106,13 @@ class WccDocTest extends ProcTestBase {
     @Test
     void namedGraphAndCypherProjection() {
         String q1 = "CALL algo.graph.load('myGraph', 'User', 'LINK');";
-        db.execute(q1).resultAsString();
+        runQueryAndReturn(q1).resultAsString();
 
         String q2 = "CALL algo.unionFind.stream(null, null, {graph: 'myGraph'}) " +
                     "YIELD nodeId, setId " +
                     "RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId " +
                     "ORDER BY ComponentId, Name;";
-//        System.out.println(db.execute(q2).resultAsString());
+//        System.out.println(runQuery(q2).resultAsString());
 
         String q3 = "CALL algo.unionFind.stream( " +
                     "  'MATCH (u:User) RETURN id(u) AS id',  " +
@@ -123,6 +123,6 @@ class WccDocTest extends ProcTestBase {
                     "YIELD nodeId, setId " +
                     "RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId " +
                     "ORDER BY ComponentId, Name";
-//        System.out.println(db.execute(q3).resultAsString());
+//        System.out.println(runQuery(q3).resultAsString());
     }
 }

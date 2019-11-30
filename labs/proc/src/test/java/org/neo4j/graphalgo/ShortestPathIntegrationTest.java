@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -55,7 +54,7 @@ class ShortestPathIntegrationTest extends ProcTestBase {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
         registerProcedures(ShortestPathProc.class);
     }
 
@@ -67,14 +66,12 @@ class ShortestPathIntegrationTest extends ProcTestBase {
     @AllGraphNamesTest
     void noWeightStream(String graphName) throws Exception {
         PathConsumer consumer = mock(PathConsumer.class);
-        db.execute(
-                String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-                        "CALL algo.shortestPath.stream(start, end, '', { graph: '%s' }) " +
-                        "YIELD nodeId, cost RETURN nodeId, cost", graphName))
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    consumer.accept((Long) row.getNumber("nodeId"), (Double) row.getNumber("cost"));
-                    return true;
-                });
+        runQuery(
+            String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
+                          "CALL algo.shortestPath.stream(start, end, '', { graph: '%s' }) " +
+                          "YIELD nodeId, cost RETURN nodeId, cost", graphName),
+            row -> consumer.accept((Long) row.getNumber("nodeId"), (Double) row.getNumber("cost"))
+        );
         verify(consumer, times(2)).accept(anyLong(), anyDouble());
         verify(consumer, times(1)).accept(anyLong(), eq(0.0));
         verify(consumer, times(1)).accept(anyLong(), eq(1.0));
@@ -82,29 +79,26 @@ class ShortestPathIntegrationTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void noWeightWrite(String graphName) throws Exception {
-        db.execute(
-                String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-                        "CALL algo.shortestPath(start, end, '', { graph: '%s' }) " +
-                        "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
-                        "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost", graphName))
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(1.0, (Double) row.getNumber("totalCost"), 0.01);
-                    assertEquals(2L, row.getNumber("nodeCount"));
-                    assertNotEquals(-1L, row.getNumber("loadMillis"));
-                    assertNotEquals(-1L, row.getNumber("evalMillis"));
-                    assertNotEquals(-1L, row.getNumber("writeMillis"));
-                    return false;
-                });
+        runQuery(
+            String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
+                          "CALL algo.shortestPath(start, end, '', { graph: '%s' }) " +
+                          "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
+                          "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost", graphName), row -> {
+                assertEquals(1.0, (Double) row.getNumber("totalCost"), 0.01);
+                assertEquals(2L, row.getNumber("nodeCount"));
+                assertNotEquals(-1L, row.getNumber("loadMillis"));
+                assertNotEquals(-1L, row.getNumber("evalMillis"));
+                assertNotEquals(-1L, row.getNumber("writeMillis"));
+            });
 
         final CostConsumer mock = mock(CostConsumer.class);
 
-        db.execute("MATCH (n) WHERE exists(n.sssp) RETURN id(n) as id, n.sssp as sssp")
-                .accept(row -> {
-                    mock.accept(
-                            row.getNumber("id").longValue(),
-                            row.getNumber("sssp").doubleValue());
-                    return true;
-                });
+        runQuery("MATCH (n) WHERE exists(n.sssp) RETURN id(n) as id, n.sssp as sssp", row -> {
+            mock.accept(
+                row.getNumber("id").longValue(),
+                row.getNumber("sssp").doubleValue()
+            );
+        });
 
         verify(mock, times(2)).accept(anyLong(), anyDouble());
 
@@ -115,14 +109,12 @@ class ShortestPathIntegrationTest extends ProcTestBase {
     @AllGraphNamesTest
     void testDijkstraStream(String graphName) throws Exception {
         PathConsumer consumer = mock(PathConsumer.class);
-        db.execute(
-                String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-                        "CALL algo.shortestPath.stream(start, end, 'cost',{graph:'%s'}) " +
-                        "YIELD nodeId, cost RETURN nodeId, cost", graphName))
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    consumer.accept((Long) row.getNumber("nodeId"), (Double) row.getNumber("cost"));
-                    return true;
-                });
+        runQuery(
+            String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
+                          "CALL algo.shortestPath.stream(start, end, 'cost',{graph:'%s'}) " +
+                          "YIELD nodeId, cost RETURN nodeId, cost", graphName),
+            row -> consumer.accept((Long) row.getNumber("nodeId"), (Double) row.getNumber("cost"))
+        );
         verify(consumer, times(4)).accept(anyLong(), anyDouble());
         verify(consumer, times(1)).accept(anyLong(), eq(0.0));
         verify(consumer, times(1)).accept(anyLong(), eq(2.0));
@@ -132,30 +124,25 @@ class ShortestPathIntegrationTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testDijkstra(String graphName) throws Exception {
-        db.execute(
-                String.format(
-                        "MATCH (start:Node {type:'start'}), (end:Node {type:'end'}) " +
-                        "CALL algo.shortestPath(start, end, 'cost',{graph:'%s', write:true, writeProperty:'cost'}) " +
-                        "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
-                        "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost", graphName))
-                .accept((Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(3.0, (Double) row.getNumber("totalCost"), 10E2);
-                    assertEquals(4L, row.getNumber("nodeCount"));
-                    assertNotEquals(-1L, row.getNumber("loadMillis"));
-                    assertNotEquals(-1L, row.getNumber("evalMillis"));
-                    assertNotEquals(-1L, row.getNumber("writeMillis"));
-                    return false;
-                });
+        runQuery(
+            String.format(
+                "MATCH (start:Node {type:'start'}), (end:Node {type:'end'}) " +
+                "CALL algo.shortestPath(start, end, 'cost',{graph:'%s', write:true, writeProperty:'cost'}) " +
+                "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
+                "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost", graphName), row -> {
+                assertEquals(3.0, (Double) row.getNumber("totalCost"), 10E2);
+                assertEquals(4L, row.getNumber("nodeCount"));
+                assertNotEquals(-1L, row.getNumber("loadMillis"));
+                assertNotEquals(-1L, row.getNumber("evalMillis"));
+                assertNotEquals(-1L, row.getNumber("writeMillis"));
+            });
 
         final CostConsumer mock = mock(CostConsumer.class);
 
-        db.execute("MATCH (n) WHERE exists(n.cost) RETURN id(n) as id, n.cost as cost")
-                .accept(row -> {
-                    mock.accept(
-                            row.getNumber("id").longValue(),
-                            row.getNumber("cost").doubleValue());
-                    return true;
-                });
+        runQuery("MATCH (n) WHERE exists(n.cost) RETURN id(n) as id, n.cost as cost", row -> mock.accept(
+            row.getNumber("id").longValue(),
+            row.getNumber("cost").doubleValue()
+        ));
 
         verify(mock, times(4)).accept(anyLong(), anyDouble());
 

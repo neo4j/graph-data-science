@@ -63,7 +63,7 @@ public class PrimProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
 
         try (Transaction tx = db.beginTx()) {
-            db.execute(cypher);
+            runQuery(cypher);
             tx.success();
         }
 
@@ -73,9 +73,9 @@ public class PrimProcTest extends ProcTestBase {
     @Test
     public void testMinimum() {
 
-        db.execute("MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree('Node', 'TYPE', 'cost', id(n), {graph:'huge', write:true, stats:true}) " +
+        runQuery("MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree('Node', 'TYPE', 'cost', id(n), {graph:'huge', write:true, stats:true}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount " +
-                "RETURN loadMillis, computeMillis, writeMillis, effectiveNodeCount").accept(res -> {
+                "RETURN loadMillis, computeMillis, writeMillis, effectiveNodeCount", res -> {
 
             System.out.println(res.get("loadMillis"));
             System.out.println(res.get("computeMillis"));
@@ -84,11 +84,9 @@ public class PrimProcTest extends ProcTestBase {
 
             assertNotEquals(-1L, res.getNumber("writeMillis").longValue());
             assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
-
-            return true;
         });
 
-        final long relCount = db.execute("MATCH (a)-[:MST]->(b) RETURN id(a) as a, id(b) as b")
+        final long relCount = runQueryAndReturn("MATCH (a)-[:MST]->(b) RETURN id(a) as a, id(b) as b")
                 .stream()
                 .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
                 .count();
@@ -99,9 +97,9 @@ public class PrimProcTest extends ProcTestBase {
     @Test
     public void testMaximum() {
 
-        db.execute("MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree.maximum('Node', 'TYPE', 'cost', id(n), {writeProperty:'MAX', graph:'huge', write:true, stats:true}) " +
+        runQuery("MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree.maximum('Node', 'TYPE', 'cost', id(n), {writeProperty:'MAX', graph:'huge', write:true, stats:true}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount " +
-                "RETURN loadMillis, computeMillis, writeMillis, effectiveNodeCount").accept(res -> {
+                "RETURN loadMillis, computeMillis, writeMillis, effectiveNodeCount", res -> {
 
             System.out.println(res.get("loadMillis"));
             System.out.println(res.get("computeMillis"));
@@ -110,11 +108,9 @@ public class PrimProcTest extends ProcTestBase {
 
             assertNotEquals(-1L, res.getNumber("writeMillis").longValue());
             assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
-
-            return true;
         });
 
-        final long relCount = db.execute("MATCH (a)-[:MAX]->(b) RETURN id(a) as a, id(b) as b")
+        final long relCount = runQueryAndReturn("MATCH (a)-[:MAX]->(b) RETURN id(a) as a, id(b) as b")
                 .stream()
                 .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
                 .count();

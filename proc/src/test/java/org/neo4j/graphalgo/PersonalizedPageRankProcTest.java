@@ -82,7 +82,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
         registerProcedures(PageRankProc.class);
 
         try (Transaction tx = db.beginTx()) {

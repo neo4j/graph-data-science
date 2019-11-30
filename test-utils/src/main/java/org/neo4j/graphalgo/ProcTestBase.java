@@ -148,6 +148,14 @@ public class ProcTestBase {
         }
     }
 
+    protected Result runQueryAndReturn(String query) {
+        return runQueryAndReturn(query, emptyMap());
+    }
+
+    protected Result runQueryAndReturn(String query, Map<String, Object> params) {
+        return db.execute(query, params);
+    }
+
     private KernelTransaction.Revertable withUsername(Transaction tx, String username) {
         InternalTransaction topLevelTransaction = (InternalTransaction) tx;
         AuthSubject subject = topLevelTransaction.securityContext().subject();

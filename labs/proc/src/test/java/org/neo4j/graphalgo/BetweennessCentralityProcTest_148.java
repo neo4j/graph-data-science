@@ -57,7 +57,7 @@ class BetweennessCentralityProcTest_148 extends ProcTestBase {
 
         try (ProgressTimer timer = ProgressTimer.start(l -> System.out.printf("Setup took %d ms%n", l))) {
             try (Transaction tx = db.beginTx()) {
-                db.execute(importQuery);
+                runQuery(importQuery);
                 tx.success();
             }
         }
@@ -71,11 +71,10 @@ class BetweennessCentralityProcTest_148 extends ProcTestBase {
 
     private String name(long id) {
         String[] name = {""};
-        db.execute("MATCH (n) WHERE id(n) = " + id + " RETURN n.name as name")
-                .accept(row -> {
-                    name[0] = row.getString("name");
-                    return false;
-                });
+        runQuery(
+            "MATCH (n) WHERE id(n) = " + id + " RETURN n.name as name",
+            row -> name[0] = row.getString("name")
+        );
         if (name[0].isEmpty()) {
             throw new IllegalArgumentException("unknown id " + id);
         }
@@ -87,11 +86,10 @@ class BetweennessCentralityProcTest_148 extends ProcTestBase {
 
         final Consumer mock = mock(Consumer.class);
         final String evalQuery = "CALL algo.betweenness.stream('User', 'FRIEND', {direction:'B'}) YIELD nodeId, centrality";
-        db.execute(evalQuery).accept(row -> {
+        runQuery(evalQuery, row -> {
             final long nodeId = row.getNumber("nodeId").longValue();
             final double centrality = row.getNumber("centrality").doubleValue();
             mock.consume(name(nodeId), centrality);
-            return true;
         });
 
         verify(mock, times(4)).consume(Matchers.anyString(), AdditionalMatchers.eq(0.0, 0.1));

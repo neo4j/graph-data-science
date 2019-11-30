@@ -79,7 +79,7 @@ final class ShortestPathDeltaSteppingProcTest extends ProcTestBase {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ShortestPathDeltaSteppingProc.class);
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -97,10 +97,9 @@ final class ShortestPathDeltaSteppingProcTest extends ProcTestBase {
                 "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "'}) " +
                 "YIELD nodeId, distance RETURN nodeId, distance";
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
-            return true;
         });
 
         verify(consumer, times(11)).accept(anyDouble());
@@ -117,10 +116,9 @@ final class ShortestPathDeltaSteppingProcTest extends ProcTestBase {
                 "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "', direction: 'INCOMING'}) " +
                 "YIELD nodeId, distance RETURN nodeId, distance";
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
-            return true;
         });
 
         verify(consumer, times(11)).accept(anyDouble());
@@ -135,20 +133,18 @@ final class ShortestPathDeltaSteppingProcTest extends ProcTestBase {
                 "WITH n CALL algo.shortestPath.deltaStepping(n, 'cost', 3.0, {write:true, writeProperty:'sp', graph:'" + graphName + "'}) " +
                 "YIELD nodeCount, loadDuration, evalDuration, writeDuration RETURN nodeCount, loadDuration, evalDuration, writeDuration";
 
-        db.execute(matchCypher).accept(row -> {
+        runQuery(matchCypher, row -> {
             long writeDuration = row.getNumber("writeDuration").longValue();
             assertNotEquals(-1L, writeDuration);
-            return false;
         });
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
         final String testCypher = "MATCH(n:Node) WHERE exists(n.sp) WITH n RETURN id(n) as id, n.sp as sp";
 
-        db.execute(testCypher).accept(row -> {
+        runQuery(testCypher, row -> {
             double sp = row.getNumber("sp").doubleValue();
             consumer.accept(sp);
-            return true;
         });
 
         verify(consumer, times(11)).accept(anyDouble());
