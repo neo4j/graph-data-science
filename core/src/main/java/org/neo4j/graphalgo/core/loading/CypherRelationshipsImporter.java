@@ -45,6 +45,7 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
     private final GraphDimensions dimensions;
     private final int relationshipPropertyCount;
 
+    private final Context importerContext;
     private final Map<RelationshipTypeMapping, SingleTypeRelationshipImporter.Builder.WithImporter> relationshipImporterBuilders;
     private final Map<String, Integer> propertyKeyIdsByName;
     private final Map<String, Double> propertyDefaultValueByName;
@@ -102,6 +103,7 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
                     .loadImporter(false, true, false, importWeights)
             ));
 
+        this.importerContext = new Context();
     }
 
     @Override
@@ -113,7 +115,7 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
             .map(entry -> {
                     RelationshipTypeMapping relationshipTypeMapping = entry.getKey();
                     SingleTypeRelationshipImporter.Builder.WithImporter builder = entry.getValue();
-                    RelationshipPropertyBatchBuffer propertyReader = new RelationshipPropertyBatchBuffer(
+                    RelationshipPropertiesBatchBuffer propertyReader = new RelationshipPropertiesBatchBuffer(
                         batchSize == CypherLoadingUtils.NO_BATCHING ? DEFAULT_BATCH_SIZE : batchSize,
                         relationshipPropertyCount
                     );
@@ -124,9 +126,10 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
 
         MultiRelationshipRowVisitor visitor = new MultiRelationshipRowVisitor(
             idMap,
-            contexts,
+            importerContext,
             propertyKeyIdsByName,
-            propertyDefaultValueByName
+            propertyDefaultValueByName,
+            bufferSize
         );
 
         runLoadingQuery(offset, batchSize, visitor);
@@ -190,5 +193,29 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
         );
 
         return new SingleTypeRelationshipImporter.Builder(mapping, importer, relationshipCounter);
+    }
+
+    static class Context {
+
+        private final Map<String, SingleTypeRelationshipImporter.Builder> importerBuildersByType;
+
+        public Context() {
+            importerBuildersByType = new HashMap<>();
+        }
+
+        public SingleTypeRelationshipImporter.Builder getOrCreateImporterBuilder(String relationshipType) {
+            SingleTypeRelationshipImporter.Builder importer;
+            if (importerBuildersByType.containsKey(relationshipType)) {
+                importer = importerBuildersByType.get(relationshipType);
+            } else {
+                importer = createImporter(relationshipType);
+                importerBuildersByType.put(relationshipType, importer);
+            }
+            return importer;
+        }
+
+        private SingleTypeRelationshipImporter.Builder createImporter(String relationshipType) {
+            return null;
+        }
     }
 }

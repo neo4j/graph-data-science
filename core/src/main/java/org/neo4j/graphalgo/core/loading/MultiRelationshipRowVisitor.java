@@ -23,9 +23,8 @@ import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
@@ -35,10 +34,13 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
     private static final String TYPE_COLUMN = "type";
 
     private final IdMap idMap;
-    private final Map<String, SingleTypeRelationshipImporter> relationshipImportersByType;
-    private final RelationshipPropertyBatchBuffer[] relationshipPropertyBatchBuffers;
     private final Map<String, Integer> propertyKeyIdsByName;
     private final Map<String, Double> propertyDefaultValueByName;
+    private final CypherRelationshipsImporter.Context importerContext;
+    private final int bufferSize;
+    private final Map<String, SingleTypeRelationshipImporter> localImporters;
+    private final Map<String, RelationshipsBatchBuffer> localRelationshipsBatchBuffers;
+    private final Map<String, RelationshipPropertiesBatchBuffer> localPropertiesBuffers;
 
     private long lastNeoSourceId = -1, lastNeoTargetId = -1;
     private long sourceId = -1, targetId = -1;
@@ -48,23 +50,19 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
 
     MultiRelationshipRowVisitor(
         IdMap idMap,
-        List<Context> relationshipImporters,
+        CypherRelationshipsImporter.Context importerContext,
         Map<String, Integer> propertyKeyIdsByName,
-        Map<String, Double> propertyDefaultValueByName
+        Map<String, Double> propertyDefaultValueByName,
+        int bufferSize
     ) {
         this.idMap = idMap;
-        this.relationshipImportersByType = relationshipImporters.stream()
-            .collect(Collectors.toMap(
-                context -> context.relationshipTypeMapping().typeName(),
-                Context::singleTypeRelationshipImporter
-            ));
-
-        relationshipPropertyBatchBuffers = relationshipImporters.stream()
-            .map(Context::relationshipPropertyBatchBuffer)
-            .toArray(RelationshipPropertyBatchBuffer[]::new);
-
         this.propertyKeyIdsByName = propertyKeyIdsByName;
         this.propertyDefaultValueByName = propertyDefaultValueByName;
+        this.importerContext = importerContext;
+        this.bufferSize = bufferSize;
+        this.localImporters = new HashMap<>();
+        this.localRelationshipsBatchBuffers = new HashMap<>();
+        this.localPropertiesBuffers = new HashMap<>();
     }
 
     public long rows() {
@@ -78,10 +76,23 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
     @Override
     public boolean visit(Result.ResultRow row) throws RuntimeException {
         rows++;
-        return visit(row, relationshipImportersByType.get(row.getString(TYPE_COLUMN)));
+        String relationshipType = row.getString(TYPE_COLUMN);
+
+        if (localImporters.containsKey(relationshipType)) {
+            return visit(row, localImporters.get(relationshipType), localPropertiesBuffers.get(relationshipType));
+        } else {
+            SingleTypeRelationshipImporter.Builder importerBuilder = importerContext
+                .getOrCreateImporterBuilder(relationshipType);
+            // TODO: build batch buffers
+            SingleTypeRelationshipImporter importer = null;
+            RelationshipPropertiesBatchBuffer propertiesBuffer = null;
+            localImporters.putIfAbsent(relationshipType, importer);
+            localPropertiesBuffers.putIfAbsent(relationshipType, propertiesBuffer);
+            return visit(row, importer, propertiesBuffer);
+        }
     }
 
-    private boolean visit(Result.ResultRow row, SingleTypeRelationshipImporter importer) {
+    private boolean visit(Result.ResultRow row, SingleTypeRelationshipImporter importer, RelationshipPropertiesBatchBuffer propertiesBuffer) {
         readSourceId(row);
         if (sourceId == -1) {
             return true;
@@ -103,7 +114,7 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
             relationshipId
         );
 
-        readPropertyValues(row, relationshipId);
+        readPropertyValues(row, relationshipId, propertiesBuffer);
 
         if (importer.buffer().isFull()) {
             flush(importer);
@@ -128,16 +139,14 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
         }
     }
 
-    private void readPropertyValues(Result.ResultRow row, int relationshipId) {
+    private void readPropertyValues(Result.ResultRow row, int relationshipId, RelationshipPropertiesBatchBuffer propertiesBuffer) {
         propertyKeyIdsByName.forEach((propertyKey, propertyKeyId) -> {
             Object property = CypherLoadingUtils.getProperty(row, propertyKey);
             double propertyValue = property instanceof Number
                 ? ((Number) property).doubleValue()
                 : propertyDefaultValueByName.get(propertyKey);
 
-            for (int i = 0; i < propertyKeyIdsByName.size(); i++) {
-                relationshipPropertyBatchBuffers[i].add(relationshipId, propertyKeyId, propertyValue);
-            }
+            propertiesBuffer.add(relationshipId, propertyKeyId, propertyValue);
         });
     }
 
@@ -145,10 +154,11 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
         long imported = importer.importRels();
         relationshipCount += RawValues.getHead(imported);
         importer.buffer().reset();
+        // TODO: maybe we need to reset the relationship property batch buffer as well
     }
 
     void flushAll() {
-        relationshipCount += relationshipImportersByType.values().stream()
+        relationshipCount += localImporters.values().stream()
             .map(SingleTypeRelationshipImporter::importRels)
             .map(RawValues::getHead)
             .reduce(Integer::sum)
@@ -157,17 +167,17 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
 
     static class Context {
         private final RelationshipTypeMapping relationshipTypeMapping;
-        private final SingleTypeRelationshipImporter singleTypeRelationshipImporter;
-        private final RelationshipPropertyBatchBuffer relationshipPropertyBatchBuffer;
+        private final SingleTypeRelationshipImporter singleTypeRelationshipImporterBuilder;
+        private final RelationshipPropertiesBatchBuffer relationshipPropertiesBatchBuffer;
 
         Context(
             RelationshipTypeMapping relationshipTypeMapping,
-            SingleTypeRelationshipImporter singleTypeRelationshipImporter,
-            RelationshipPropertyBatchBuffer relationshipPropertyBatchBuffer
+            SingleTypeRelationshipImporter singleTypeRelationshipImporterBuilder,
+            RelationshipPropertiesBatchBuffer relationshipPropertiesBatchBuffer
         ) {
             this.relationshipTypeMapping = relationshipTypeMapping;
-            this.singleTypeRelationshipImporter = singleTypeRelationshipImporter;
-            this.relationshipPropertyBatchBuffer = relationshipPropertyBatchBuffer;
+            this.singleTypeRelationshipImporterBuilder = singleTypeRelationshipImporterBuilder;
+            this.relationshipPropertiesBatchBuffer = relationshipPropertiesBatchBuffer;
         }
 
         RelationshipTypeMapping relationshipTypeMapping() {
@@ -175,11 +185,11 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
         }
 
         SingleTypeRelationshipImporter singleTypeRelationshipImporter() {
-            return singleTypeRelationshipImporter;
+            return singleTypeRelationshipImporterBuilder;
         }
 
-        RelationshipPropertyBatchBuffer relationshipPropertyBatchBuffer() {
-            return relationshipPropertyBatchBuffer;
+        RelationshipPropertiesBatchBuffer relationshipPropertyBatchBuffer() {
+            return relationshipPropertiesBatchBuffer;
         }
     }
 

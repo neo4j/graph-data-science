@@ -23,12 +23,12 @@ package org.neo4j.graphalgo.core.loading;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.BATCH_ENTRY_SIZE;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.PROPERTIES_REFERENCE_OFFSET;
 
-public class RelationshipPropertyBatchBuffer implements RelationshipImporter.PropertyReader {
+public class RelationshipPropertiesBatchBuffer implements RelationshipImporter.PropertyReader {
 
     private final long[][] buffer;
     private final int propertyCount;
 
-    RelationshipPropertyBatchBuffer(int batchSize, int propertyCount) {
+    RelationshipPropertiesBatchBuffer(int batchSize, int propertyCount) {
         this.propertyCount = propertyCount;
         this.buffer = new long[propertyCount][batchSize];
     }
