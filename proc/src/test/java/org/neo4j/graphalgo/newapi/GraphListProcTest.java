@@ -215,7 +215,7 @@ class GraphListProcTest extends ProcTestBase {
 
     @Test
     void failForNullNameArgument() {
-        assertError("CALL algo.beta.graph.list(null)", "'graphName' cannot be null");
+        assertError("CALL algo.beta.graph.list(null)", "No value specified for the mandatory configuration parameter `graphName`");
     }
 
     @Test
