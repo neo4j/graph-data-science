@@ -91,21 +91,24 @@ public final class RandomGraphGenerator {
     }
 
     public HugeGraph generate() {
-        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.create(
+        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
             nodeCount,
-            Direction.BOTH,
-            false,
-            maybePropertyProducer.isPresent(),
-            DeduplicationStrategy.NONE,
             Pools.DEFAULT,
             allocationTracker
         );
 
         generateNodes(nodeImporter);
-        GraphGenerator.RelImporter relationshipsImporter = nodeImporter.build();
+
+        GraphGenerator.RelImporter relationshipsImporter = GraphGenerator.createRelImporter(
+            nodeImporter,
+            Direction.BOTH,
+            false,
+            maybePropertyProducer.isPresent(),
+            DeduplicationStrategy.NONE
+        );
 
         generateRelationships(relationshipsImporter);
-        return relationshipsImporter.build();
+        return relationshipsImporter.buildGraph();
     }
 
     long getNodeCount() {

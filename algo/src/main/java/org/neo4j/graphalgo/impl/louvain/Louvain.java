@@ -168,12 +168,8 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     private Graph summarizeGraph(Graph workingGraph, ModularityOptimization modularityOptimization, long maxCommunityId) {
-        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.create(
+        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
             maxCommunityId,
-            direction,
-            rootGraph.isUndirected(),
-            true,
-            DeduplicationStrategy.SUM,
             executorService,
             tracker
         );
@@ -187,18 +183,24 @@ public final class Louvain extends Algorithm<Louvain> {
 
         assertRunning();
 
-        GraphGenerator.RelImporter relImporter = nodeImporter.build();
+        GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
+            nodeImporter,
+            direction,
+            rootGraph.isUndirected(),
+            true,
+            DeduplicationStrategy.SUM
+        );
 
         workingGraph.forEachNode((nodeId) -> {
             long communityId = modularityOptimization.getCommunityId(nodeId);
             workingGraph.forEachRelationship(nodeId, direction, 1.0, (source, target, property) -> {
-                relImporter.addFromOriginal(communityId, modularityOptimization.getCommunityId(target), property);
+                relImporter.add(communityId, modularityOptimization.getCommunityId(target), property);
                 return true;
             });
             return true;
         });
 
-        return relImporter.build();
+        return relImporter.buildGraph();
     }
 
     private boolean hasConverged() {

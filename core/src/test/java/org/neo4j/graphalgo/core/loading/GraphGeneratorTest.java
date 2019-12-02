@@ -54,12 +54,8 @@ class GraphGeneratorTest {
     @EnumSource(value = Direction.class)
     void unweighted(Direction direction) {
         int nodeCount = 4;
-        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.create(
+        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
             nodeCount,
-            direction,
-            false,
-            false,
-            DeduplicationStrategy.SUM,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -68,11 +64,18 @@ class GraphGeneratorTest {
             nodeImporter.addNode(i);
         }
 
-        GraphGenerator.RelImporter relImporter = nodeImporter.build();
+        GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
+            nodeImporter,
+            direction,
+            false,
+            false,
+            DeduplicationStrategy.SUM
+        );
+
         for (int i = 0; i < nodeCount; i++) {
-            relImporter.addFromOriginal(i, (i + 1) % nodeCount);
+            relImporter.add(i, (i + 1) % nodeCount);
         }
-        Graph graph = relImporter.build();
+        Graph graph = relImporter.buildGraph();
         assertGraphEquals(EXPECTED_UNWEIGHTED, graph);
     }
 
@@ -118,12 +121,8 @@ class GraphGeneratorTest {
     private Graph generateGraph(Direction outgoing, boolean undirected, DeduplicationStrategy  deduplicationStrategy) {
         int nodeCount = 4;
 
-        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.create(
+        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
             nodeCount,
-            outgoing,
-            undirected,
-            true,
-            deduplicationStrategy,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -132,11 +131,18 @@ class GraphGeneratorTest {
             nodeImporter.addNode(i);
         }
 
-        GraphGenerator.RelImporter relImporter = nodeImporter.build();
+        GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
+            nodeImporter,
+            outgoing,
+            undirected,
+            true,
+            deduplicationStrategy
+        );
+
         for (int i = 0; i < nodeCount; i++) {
-            relImporter.addFromOriginal(i, (i + 1) % nodeCount, i);
-            relImporter.addFromOriginal(i, (i + 1) % nodeCount, i);
+            relImporter.add(i, (i + 1) % nodeCount, i);
+            relImporter.add(i, (i + 1) % nodeCount, i);
         }
-        return relImporter.build();
+        return relImporter.buildGraph();
     }
 }

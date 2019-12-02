@@ -21,11 +21,11 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.cursors.LongCursor;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.RawValues;
+import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
@@ -38,51 +38,71 @@ import java.util.stream.Stream;
 
 public class GraphGenerator {
 
-    public static NodeImporter create(
+    public static NodeImporter createNodeImporter(
         long maxOriginalId,
-        Direction direction,
-        boolean undirected,
-        boolean loadRelationshipProperty,
-        DeduplicationStrategy deduplicationStrategy,
         ExecutorService executorService,
         AllocationTracker tracker
     ) {
         return new NodeImporter(
             maxOriginalId,
+            executorService,
+            tracker
+        );
+    }
+
+    public static RelImporter createRelImporter(
+        NodeImporter nodeImporter,
+        Direction direction,
+        boolean undirected,
+        boolean loadRelationshipProperty,
+        DeduplicationStrategy deduplicationStrategy
+    ) {
+        return createRelImporter(
+            nodeImporter.idMap(),
             direction,
             undirected,
             loadRelationshipProperty,
             deduplicationStrategy,
-            executorService, tracker
+            nodeImporter.executorService,
+            nodeImporter.tracker
+        );
+    }
+
+    public static RelImporter createRelImporter(
+        IdMap idMap,
+        Direction direction,
+        boolean undirected,
+        boolean loadRelationshipProperty,
+        DeduplicationStrategy deduplicationStrategy,
+        ExecutorService executorService, AllocationTracker tracker
+    ) {
+        return new RelImporter(
+            idMap,
+            direction,
+            undirected,
+            loadRelationshipProperty,
+            deduplicationStrategy,
+            executorService,
+            tracker
         );
     }
 
     public static class NodeImporter {
 
-        private final boolean undirected;
-        private final boolean loadRelationshipProperty;
+        final AllocationTracker tracker;
+        final ExecutorService executorService;
+
         private final BitSet seenOriginalIds;
-        private final Direction direction;
-        private final AllocationTracker tracker;
-        private final ExecutorService executorService;
-        private final DeduplicationStrategy deduplicationStrategy;
         private final SparseNodeMapping.Builder originalToInternalBuilder;
 
         private long nextAvailableId;
+        private IdMap idMap;
 
         NodeImporter(
             long maxOriginalId,
-            Direction direction,
-            boolean undirected,
-            boolean loadRelationshipProperty,
-            DeduplicationStrategy deduplicationStrategy,
             ExecutorService executorService,
             AllocationTracker tracker
         ) {
-            this.direction = direction;
-            this.undirected = undirected;
-            this.loadRelationshipProperty = loadRelationshipProperty;
-            this.deduplicationStrategy = deduplicationStrategy;
             this.executorService = executorService;
             this.tracker = tracker;
 
@@ -92,30 +112,35 @@ public class GraphGenerator {
         }
 
         public void addNode(long originalId) {
+            if (idMap != null) {
+                throw new UnsupportedOperationException("Cannot add new nodes after `idMap` has been called");
+            }
+
             if (!seenOriginalIds.get(originalId)) {
                 originalToInternalBuilder.set(originalId, nextAvailableId++);
                 seenOriginalIds.set(originalId);
             }
         }
 
-        public RelImporter build() {
-            SparseNodeMapping neoToInternal = originalToInternalBuilder.build();
+        public IdMap idMap() {
+            if (idMap == null) {
+                SparseNodeMapping originalToInternal = originalToInternalBuilder.build();
 
-            HugeLongArray internalToNeo = HugeLongArray.newArray(nextAvailableId, tracker);
-            for (LongCursor nodeId : seenOriginalIds.asLongLookupContainer()) {
-                internalToNeo.set(neoToInternal.get(nodeId.value), nodeId.value);
+                HugeLongArray internalToNeo = HugeLongArray.newArray(nextAvailableId, tracker);
+                new SetBitsIterable(seenOriginalIds).forEach(nodeId -> internalToNeo.set(
+                    originalToInternal.get(nodeId),
+                    nodeId
+                ));
+
+                idMap = new IdMap(internalToNeo, originalToInternal, internalToNeo.size());
             }
-
-            IdMap idMap = new IdMap(internalToNeo, neoToInternal, internalToNeo.size());
-
-            return new RelImporter(idMap, direction, undirected, loadRelationshipProperty, deduplicationStrategy,
-                executorService,
-                tracker);
+            return idMap;
         }
     }
 
     public static class RelImporter {
 
+        static final int DUMMY_PROPERTY_ID = -2;
         private RelationshipsBuilder outRelationshipsBuilder;
         private RelationshipsBuilder inRelationshipsBuilder;
         private final RelationshipImporter relationshipImporter;
@@ -159,7 +184,7 @@ public class GraphGenerator {
 
             AdjacencyBuilder outAdjacencyBuilder = null;
             AdjacencyBuilder inAdjacencyBuilder = null;
-            int[] propertyKeyIds = loadRelationshipProperty ? new int[]{-2} : new int[0];
+            int[] propertyKeyIds = loadRelationshipProperty ? new int[]{DUMMY_PROPERTY_ID} : new int[0];
 
             this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
             this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
@@ -215,20 +240,20 @@ public class GraphGenerator {
             relationshipBuffer = new RelationshipsBatchBuffer(idMap, -1, ParallelUtil.DEFAULT_BATCH_SIZE);
         }
 
-        public void addFromOriginal(long source, long target) {
+        public void add(long source, long target) {
             addFromInternal(idMap.toMappedNodeId(source), idMap.toMappedNodeId(target));
         }
 
-        public void addFromOriginal(long source, long target, double relationshipPropertyValue) {
+        public void add(long source, long target, double relationshipPropertyValue) {
             addFromInternal(idMap.toMappedNodeId(source), idMap.toMappedNodeId(target), relationshipPropertyValue);
         }
 
-        public <T extends Relationship> void addFromOriginal(Stream<T> relationshipStream) {
-            relationshipStream.forEach(relationship -> addFromOriginal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property()));
+        public <T extends Relationship> void add(Stream<T> relationshipStream) {
+            relationshipStream.forEach(this::add);
         }
 
-        public synchronized void addFromOriginal(Relationship relationship) {
-            addFromOriginal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
+        public synchronized <T extends Relationship>  void add(T relationship) {
+            add(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
         }
 
         public void addFromInternal(long source, long target) {
@@ -251,11 +276,11 @@ public class GraphGenerator {
             relationshipStream.forEach(this::addFromInternal);
         }
 
-        public synchronized void addFromInternal(Relationship relationship) {
+        public synchronized <T extends Relationship> void addFromInternal(T relationship) {
             addFromInternal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
         }
 
-        public HugeGraph build() {
+        public HugeGraph buildGraph() {
             flushBuffer();
             Relationships relationships = buildRelationships();
 

@@ -94,7 +94,7 @@ class SimilarityGraphBuilder {
     Graph build(Stream<SimilarityResult> stream) {
         IdMap idMap = baseGraph.idMapping();
 
-        GraphGenerator.RelImporter relImporter = new GraphGenerator.RelImporter(
+        GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
             idMap,
             Direction.OUTGOING,
             baseGraph.isUndirected(),
@@ -106,6 +106,6 @@ class SimilarityGraphBuilder {
 
         relImporter.addFromInternal(stream);
 
-        return relImporter.build();
+        return relImporter.buildGraph();
     }
 }
