@@ -29,7 +29,7 @@ This section includes:
 [[algorithms-pagerank-intro]]
 == Introduction
 
-The PageRank algorithm measures the importance of each page (equal to a node) within the graph, based on the number and quality of incoming relationships.
+The PageRank algorithm measures the importance of each node within the graph, based on the number and quality of incoming relationships.
 The underlying assumption is that pages of importance are more likely to receive a higher volume of links from other pages.
 
 // tag::formula[]
