@@ -23,6 +23,7 @@ This section includes:
 ** <<algorithms-pagerank-examples-unweighted, Unweighted>>
 ** <<algorithms-pagerank-examples-weighted, Weighted>>
 ** <<algorithms-pagerank-examples-personalized, Personalized>>
+** <<algorithms-pagerank-examples-projection, Named graphs and Cypher projections>>
 * <<algorithms-pagerank-usage, Usage>>
 
 [[algorithms-pagerank-intro]]
@@ -186,6 +187,8 @@ CREATE (links)-[:LINKS {weight: 0.05}]->(c)
 CREATE (links)-[:LINKS {weight: 0.05}]->(d)
 ----
 
+// TODO: small explanation of the graph
+
 [[algorithms-pagerank-examples-unweighted]]
 === Unweighted
 
@@ -205,14 +208,14 @@ ORDER BY score DESC
 [opts="header",cols="1,1"]
 |===
 | Name    | PageRank
-| Home    | 3.232
-| Product | 1.059
-| Links   | 1.059
-| About   | 1.059
-| Site A  | 0.328
-| Site B  | 0.328
-| Site C  | 0.328
-| Site D  | 0.328
+| Home    | 3.236
+| Product | 1.061
+| Links   | 1.061
+| About   | 1.061
+| Site A  | 0.329
+| Site B  | 0.329
+| Site C  | 0.329
+| Site D  | 0.329
 |===
 
 To instead write the page-rank score to a node property in the Neo4j graph, use this query:
@@ -245,9 +248,7 @@ YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, 
 CALL algo.pageRank.stream('Page', 'LINKS', {
   iterations:20,
   dampingFactor:0.85,
-  weightProperty:'weight',
-  write: true,
-  writeProperty:'pagerank'
+  weightProperty:'weight'
 })
 YIELD nodeId, score
 RETURN algo.asNode(nodeId).name AS Name, score AS PageRank
@@ -347,6 +348,77 @@ YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, 
 | Nodes | Iterations | DampingFactor | PropertyName
 | 8     | 20         | 0.85          | "pagerank"
 |===
+
+[[algorithms-pagerank-examples-projection]]
+=== Named graphs and Cypher projections
+
+In the examples above, we have relied on the _implicit_ loading of graphs for the algorithm computation.
+However, like other algorithms PageRank also accepts _named graphs_ and _Cypher projections_ as inputs.
+See <<projected-graph-model, Projected Graph Model>> for more details.
+
+.Using a named graph:
+[source, cypher]
+----
+CALL algo.graph.load('myGraph', 'Page', 'LINKS');
+
+CALL algo.pageRank.stream(null, null, {graph: 'myGraph'})
+YIELD nodeId, score
+RETURN algo.asNode(nodeId).name AS Name, score AS PageRank
+ORDER BY score DESC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| Name    | PageRank
+| Home    | 3.236
+| Product | 1.061
+| Links   | 1.061
+| About   | 1.061
+| Site A  | 0.329
+| Site B  | 0.329
+| Site C  | 0.329
+| Site D  | 0.329
+|===
+
+As we can see, the results are identical to the results in the <<algorithms-pagerank-examples-unweighted>> example.
+
+.Using a Cypher projection:
+[source, cypher]
+----
+CALL algo.pageRank.stream(
+  'MATCH (p:Page) RETURN id(p) AS id',
+  'MATCH (p1:Page)-[:LINKS]->(p2:Page)
+   RETURN id(p1) AS source, id(p2) AS target',
+   {
+    iterations:20,
+    dampingFactor:0.85,
+    graph:'cypher'
+  }
+)
+YIELD nodeId, score
+RETURN algo.asNode(nodeId).name AS Name, score AS PageRank
+ORDER BY score DESC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| Name    | PageRank
+| Home    | 3.236
+| Product | 1.061
+| Links   | 1.061
+| About   | 1.061
+| Site A  | 0.329
+| Site B  | 0.329
+| Site C  | 0.329
+| Site D  | 0.329
+|===
+
+Again, results are identical, as the Cypher projection we use mimics the behaviour of the default loading configuration.
+Of course, the Cypher projection feature enables more advanced control over which exact parts of the graph to compute over; please see <<cypher-projection>> for more details.
+
+
 
 [[algorithms-pagerank-usage]]
 == Usage

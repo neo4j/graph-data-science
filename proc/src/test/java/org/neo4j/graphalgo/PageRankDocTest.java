@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class PageRankDocTest extends ProcTestBase {
 
     @BeforeEach
@@ -87,6 +89,8 @@ class PageRankDocTest extends ProcTestBase {
         System.out.println(r2);
     }
 
+    // Queries and results match pagerank.adoc weighted example section
+    // used to test that the results are correct in the docs
     @Test
     void weighted() {
         String q1 =
@@ -124,6 +128,41 @@ class PageRankDocTest extends ProcTestBase {
             "RETURN nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, writeProperty AS PropertyName";
         String r2 = db.execute(q2).resultAsString();
         System.out.println(r2);
+    }
+
+    // Queries from the named graph and Cypher projection example in pagerank.adoc
+    // used to test that the results are correct in the docs
+    @Test
+    void namedGraphAndCypherProjection() {
+        String loadGraph = "CALL algo.graph.load('myGraph', 'Page', 'LINKS')";
+        db.execute(loadGraph);
+
+        String q1 =
+            "CALL algo.pageRank.stream(null, null, {graph: 'myGraph'})" +
+            "YIELD nodeId, score " +
+            "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
+            "ORDER BY score DESC ";
+        String r1 = db.execute(q1).resultAsString();
+        System.out.println(r1);
+
+        String q2 =
+            "CALL algo.pageRank.stream(" +
+            "  'MATCH (p:Page) RETURN id(p) AS id'," +
+            "  'MATCH (p1:Page)-[:LINKS]->(p2:Page)" +
+            "   RETURN id(p1) AS source, id(p2) AS target'," +
+            "   {" +
+            "    iterations:20," +
+            "    dampingFactor:0.85," +
+            "    graph:'cypher'" +
+            "  }" +
+            ")" +
+            "YIELD nodeId, score " +
+            "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
+            "ORDER BY score DESC";
+        String r2 = db.execute(q2).resultAsString();
+        System.out.println(r2);
+
+        assertEquals(r1, r2);
     }
 
 }
