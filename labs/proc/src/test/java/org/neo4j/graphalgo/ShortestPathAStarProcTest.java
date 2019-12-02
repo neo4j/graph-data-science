@@ -33,13 +33,13 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class ShortestPathAStarProcTest extends ProcTestBase {
 	
-	@BeforeEach
+    @BeforeEach
     void setup() throws Exception {
-		/* Singapore to Chiba
-		 * Path nA (0NM) -> nB (29NM) -> nC (723NM) -> nD (895NM) -> nE (996NM) -> nF (1353NM)
-		 * 	    nG (1652NM) -> nH (2392NM) -> nX (2979NM)
-		 * Distance = 2979 NM
-		 * */
+        /* Singapore to Chiba
+         * Path nA (0NM) -> nB (29NM) -> nC (723NM) -> nD (895NM) -> nE (996NM) -> nF (1353NM)
+         * 	    nG (1652NM) -> nH (2392NM) -> nX (2979NM)
+         * Distance = 2979 NM
+         * */
         String createGraph =
                 "CREATE (nA:Node{name:'SINGAPORE', latitude:1.304444,longitude:103.717373})\n" +
                 "CREATE (nB:Node{name:'SINGAPORE STRAIT', latitude:1.1892, longitude:103.4689})\n" +
@@ -82,34 +82,36 @@ class ShortestPathAStarProcTest extends ProcTestBase {
             runQuery(createGraph);
             tx.success();
         }
-        
+
         registerProcedures(ShortestPathProc.class);
-	}
+    }
 	
-	@AfterEach
+    @AfterEach
     void tearDown() {
         db.shutdown();
     }
 	
-	@Test
+    @Test
     void testAStarResult() {
-		final List<String> expectedNode = Arrays.asList("SINGAPORE", "SINGAPORE STRAIT", "WAYPOINT 68", 
-				"WAYPOINT 70", "WAYPOINT 74", "SOUTH CHINA SEA", "LUZON STRAIT", "WAYPOINT 87", "CHIBA");
-		final List<Double> expectedDistance = Arrays.asList(0.0, 29.0, 723.0, 895.0, 996.0, 1353.0, 
-				1652.0, 2392.0, 2979.0);
-		final List<String> actualNode = new ArrayList<>();
-		final List<Double> actualDistance = new ArrayList<>();
+        final List<String> expectedNode = Arrays.asList("SINGAPORE", "SINGAPORE STRAIT", "WAYPOINT 68",
+            "WAYPOINT 70", "WAYPOINT 74", "SOUTH CHINA SEA", "LUZON STRAIT", "WAYPOINT 87", "CHIBA"
+        );
+        final List<Double> expectedDistance = Arrays.asList(0.0, 29.0, 723.0, 895.0, 996.0, 1353.0,
+            1652.0, 2392.0, 2979.0
+        );
+        final List<String> actualNode = new ArrayList<>();
+        final List<Double> actualDistance = new ArrayList<>();
         runQuery(
-                "MATCH (start:Node{name:'SINGAPORE'}), (end:Node{name:'CHIBA'}) " +
-                        "CALL algo.shortestPath.astar.stream(start, end, 'cost') " +
-                        "YIELD nodeId, cost RETURN nodeId, cost ", row -> {
-                    long nodeId = row.getNumber("nodeId").longValue();
-                    Node node = db.getNodeById(nodeId);
-                    String nodeName = (String) node.getProperty("name");
-                    double distance = row.getNumber("cost").doubleValue();
-                    actualNode.add(nodeName);
-                    actualDistance.add(distance);
-                });
+            "MATCH (start:Node{name:'SINGAPORE'}), (end:Node{name:'CHIBA'}) " +
+            "CALL algo.shortestPath.astar.stream(start, end, 'cost') " +
+            "YIELD nodeId, cost RETURN nodeId, cost ", row -> {
+                long nodeId = row.getNumber("nodeId").longValue();
+                Node node = db.getNodeById(nodeId);
+                String nodeName = (String) node.getProperty("name");
+                double distance = row.getNumber("cost").doubleValue();
+                actualNode.add(nodeName);
+                actualDistance.add(distance);
+            });
         assertArrayEquals(expectedNode.toArray(), actualNode.toArray());
         assertArrayEquals(expectedDistance.toArray(), actualDistance.toArray());
     }

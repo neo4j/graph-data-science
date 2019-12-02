@@ -36,7 +36,7 @@ public class BaseBenchmark {
     GraphDatabaseAPI db;
 
     void registerProcedures(Class<?>... procedureClasses) throws KernelException {
-        final Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
+        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
         for (Class<?> clazz : procedureClasses) {
             procedures.registerProcedure(clazz);
         }

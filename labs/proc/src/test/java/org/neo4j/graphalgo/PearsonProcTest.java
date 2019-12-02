@@ -129,50 +129,12 @@ class PearsonProcTest extends ProcTestBase {
                 " (d)-[:LIKES {stars:2}]->(i3),\n" +
                 " (d)-[:LIKES {stars:5}]->(i4)\n";
 
-        /*
-            for (int i = 0; i < len; i++) {
-             double weight1 = vector1[i];
-             // if (weight1 == 0d) continue;
-             double weight2 = vector2[i];
-             // if (weight2 == 0d) continue;
-
-             dotProduct += weight1 * weight2;
-             xLength += weight1 * weight1;
-             yLength += weight2 * weight2;
-         }
-
-         return dotProduct / Math.sqrt(xLength * yLength);
-
-         */
-        // Expected values via scipy's pearsonr function - https://kite.com/python/examples/656/scipy-compute-the-pearson-correlation-coefficient
-        // a: 1,2,3,4
-        // b: 2,3,4,5
-        // c: 3,4,4,5
-        // d: 0,3,2,5
-
-        // a0 - b1: 1.0
-        // a0 - c2: 0.9486832980505138
-        // a0 - d3: 0.8682431421244593      0.6546536707079772
-        // b1 - c2: 0.9486832980505138
-        // b1 - d3: 0.8682431421244593      0.6546536707079772
-        // c2 - d3: 0.9805806756909202      0.944911182523068
-
     }
 
     @Test
     void pearsonSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
-
-        // This is probably creating all NaN values and they're getting filtered out
-//        String text = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -1.0, "concurrency", 1), "missingValue", 0)).resultAsString();
-//        System.out.println(text);
-//
-//        text = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -1.0, "concurrency", 1), "missingValue", 0)).resultAsString();
-//        System.out.println(text);
-
-        // these can give different results because the arrays of item ids are being built in different orders
-        // need to figure out a way to fix the order in the query
 
         System.out.println(STATEMENT_STREAM);
 

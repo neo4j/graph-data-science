@@ -35,10 +35,10 @@ import java.util.UUID;
 
 class EigenvectorCentralityNormalizationProcTest extends ProcTestBase {
 
-    private static final Map<Long, Double> expected = new HashMap<>();
-    private static final Map<Long, Double> maxNormExpected = new HashMap<>();
-    private static final Map<Long, Double> l2NormExpected = new HashMap<>();
-    private static final Map<Long, Double> l1NormExpected = new HashMap<>();
+    private final Map<Long, Double> expected = new HashMap<>();
+    private final Map<Long, Double> maxNormExpected = new HashMap<>();
+    private final Map<Long, Double> l2NormExpected = new HashMap<>();
+    private final Map<Long, Double> l1NormExpected = new HashMap<>();
 
     @AfterEach
     void tearDown() {
