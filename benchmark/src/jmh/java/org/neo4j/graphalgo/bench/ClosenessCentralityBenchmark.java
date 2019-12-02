@@ -119,7 +119,7 @@ public class ClosenessCentralityBenchmark extends BaseBenchmark {
 
     @Benchmark
     public Object _01_benchmark() {
-        return db.execute("CALL algo.closeness('','', {write:false, stats:false, graph: $graph}) YIELD " +
+        return runQueryAndReturn("CALL algo.closeness('','', {write:false, stats:false, graph: $graph}) YIELD " +
                 "nodes, loadMillis, computeMillis, writeMillis", params)
                 .stream()
                 .count();

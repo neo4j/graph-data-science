@@ -79,7 +79,7 @@ public class InfoMapBenchmarkLdbc extends BaseBenchmark {
 
     @Benchmark
     public Object _01_infoMap() {
-        return runQuery(db,
+        runQuery(
                 "CALL algo.infoMap('MATCH (c:Category) RETURN id(c) AS id',\n" +
                         "  'MATCH (c1:Category)<-[:IN_CATEGORY]-()-[:IN_CATEGORY]->(c2:Category)\n" +
                         "   WHERE id(c1) < id(c2)\n" +
@@ -93,18 +93,6 @@ public class InfoMapBenchmarkLdbc extends BaseBenchmark {
                         r.getNumber("computeMillis").longValue(),
                         r.getNumber("writeMillis").longValue())
         );
-    }
-
-    private static Object runQuery(
-            GraphDatabaseAPI db,
-            String query,
-            Consumer<Result.ResultRow> action) {
-        try (Result result = db.execute(query)) {
-            result.accept(r -> {
-                action.accept(r);
-                return true;
-            });
-        }
         return db;
     }
 }

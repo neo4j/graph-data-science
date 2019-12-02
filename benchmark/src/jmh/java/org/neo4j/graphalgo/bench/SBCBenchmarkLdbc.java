@@ -21,9 +21,7 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.BetweennessCentralityProc;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -41,7 +39,6 @@ import org.openjdk.jmh.annotations.Timeout;
 import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 @Threads(1)
 @Fork(value = 1, jvmArgs = {"-Xms4g", "-Xmx4g", "-XX:+UseG1GC"})
@@ -82,34 +79,19 @@ public class SBCBenchmarkLdbc extends BaseBenchmark {
     }
 
     @Benchmark
-    public Object _01_sbcParallel() {
-        return runQuery(
-                db,
-                "CALL algo.betweenness.sampled(null, null, {strategy:'random', probability:0.001, maxDepth:5, concurrency:" + threads + "}) "
-                        + "YIELD loadMillis, computeMillis, writeMillis"
-                , r -> {
-                    long load = r.getNumber("loadMillis").longValue();
-                    long compute = r.getNumber("computeMillis").longValue();
-                    long write = r.getNumber("writeMillis").longValue();
+    public void _01_sbcParallel() {
+        runQuery(
+            "CALL algo.betweenness.sampled(null, null, {strategy:'random', probability:0.001, maxDepth:5, concurrency:" + threads + "}) "
+            + "YIELD loadMillis, computeMillis, writeMillis",
+            row -> {
+                long load = row.getNumber("loadMillis").longValue();
+                long compute = row.getNumber("computeMillis").longValue();
+                long write = row.getNumber("writeMillis").longValue();
 
-                    System.out.println("load = " + load);
-                    System.out.println("compute = " + compute);
-                    System.out.println("write = " + write);
-
-                }
+                System.out.println("load = " + load);
+                System.out.println("compute = " + compute);
+                System.out.println("write = " + write);
+            }
         );
-    }
-
-    private static Object runQuery(
-            GraphDatabaseAPI db,
-            String query,
-            Consumer<Result.ResultRow> action) {
-        try (Result result = db.execute(query)) {
-            result.accept(r -> {
-                action.accept(r);
-                return true;
-            });
-        }
-        return db;
     }
 }

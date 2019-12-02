@@ -20,9 +20,14 @@
 
 package org.neo4j.graphalgo.bench;
 
+import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
@@ -41,4 +46,32 @@ public class BaseBenchmark {
         return db.getDependencyResolver().resolveDependency(dependency, ONLY);
     }
 
+    void runQuery(String query) {
+        runQuery(query, Collections.emptyMap());
+    }
+
+    void runQuery(String query, Consumer<Result.ResultRow> check) {
+        runQuery(query, Collections.emptyMap(), check);
+    }
+
+    protected void runQuery(String query, Map<String, Object> params) {
+        runQuery(query, params, row -> {});
+    }
+
+    protected void runQuery(String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
+        try (Result result = db.execute(query, params)) {
+            result.accept(row -> {
+                check.accept(row);
+                return true;
+            });
+        }
+    }
+
+    Result runQueryAndReturn(String query) {
+        return runQueryAndReturn(query, Collections.emptyMap());
+    }
+
+    Result runQueryAndReturn(String query, Map<String, Object> params) {
+        return db.execute(query, params);
+    }
 }
