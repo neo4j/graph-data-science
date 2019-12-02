@@ -238,7 +238,7 @@ public class BetaLabelPropagationStats {
             this.postProcessingMillis = betaLabelPropagationStats.postProcessingMillis;
             this.writeMillis = betaLabelPropagationStats.writeMillis;
             this.nodes = betaLabelPropagationStats.nodes;
-            this.communityCount = betaLabelPropagationStats.nodes;
+            this.communityCount = betaLabelPropagationStats.communityCount;
             this.p100 = betaLabelPropagationStats.p100;
             this.p99 = betaLabelPropagationStats.p99;
             this.p95 = betaLabelPropagationStats.p95;
