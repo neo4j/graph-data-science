@@ -276,7 +276,7 @@ class GraphCreateProcTest extends ProcTestBase {
         assertError(
             "CALL algo.beta.graph.create($name, $nodeProjection, {})",
             map("name", name, "nodeProjection", nodeProjection),
-            "Node label not found: 'INVALID'"
+            "Invalid node projection, one or more labels not found: 'INVALID'"
         );
     }
 

@@ -71,7 +71,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
         return NodesScanner.of(
                 api,
                 scanner,
-                dimensions.labelId(),
+                dimensions.nodeLabelIds(),
                 progress,
                 new NodeImporter(idMapBuilder, builders.values()),
                 terminationFlag

@@ -35,7 +35,7 @@ import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.RelationshipTypes;
+import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -86,7 +86,7 @@ public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
             Class<? extends GraphFactory> graphImpl = config.getGraphImpl();
             Set<String> relationshipTypes = graphImpl == CypherGraphFactory.class
                     ? Collections.emptySet()
-                    : RelationshipTypes.parse(config.getRelationshipOrQuery());
+                    : ProjectionParser.parse(config.getRelationshipOrQuery());
             PropertyMappings propertyMappings = graphImpl == CypherGraphFactory.class
                     ? PropertyMappings.EMPTY
                     : config.getRelationshipProperties();

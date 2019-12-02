@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -47,7 +48,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
     @Override
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, -1, bufferSize, true);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), bufferSize, true);
         NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer);
         runLoadingQuery(offset, batchSize, visitor);
         visitor.flush();

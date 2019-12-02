@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
+import com.carrotsearch.hppc.LongSet;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
@@ -35,7 +36,7 @@ public final class GraphDimensions {
     private long nodeCount;
     private final long highestNeoId;
     private long maxRelCount;
-    private final int labelId;
+    private final LongSet nodeLabelIds;
     private final PropertyMappings nodeProperties;
     private final RelationshipTypeMappings relTypeMappings;
     private final PropertyMappings relProperties;
@@ -44,7 +45,7 @@ public final class GraphDimensions {
             long nodeCount,
             long highestNeoId,
             long maxRelCount,
-            int labelId,
+            LongSet nodeLabelIds,
             PropertyMappings nodeProperties,
             RelationshipTypeMappings relTypeMappings,
             PropertyMappings relProperties
@@ -52,7 +53,7 @@ public final class GraphDimensions {
         this.nodeCount = nodeCount;
         this.highestNeoId = highestNeoId;
         this.maxRelCount = maxRelCount;
-        this.labelId = labelId;
+        this.nodeLabelIds = nodeLabelIds;
         this.nodeProperties = nodeProperties;
         this.relTypeMappings = relTypeMappings;
         this.relProperties = relProperties;
@@ -78,8 +79,8 @@ public final class GraphDimensions {
         this.maxRelCount = maxRelCount;
     }
 
-    public int labelId() {
-        return labelId;
+    public LongSet nodeLabelIds() {
+        return nodeLabelIds;
     }
 
     public PropertyMappings nodeProperties() {
@@ -95,8 +96,8 @@ public final class GraphDimensions {
     }
 
     public void checkValidNodePredicate(GraphSetup setup) {
-        if (isNotEmpty(setup.nodeLabel()) && labelId() == NO_SUCH_LABEL) {
-            throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.nodeLabel()));
+        if (isNotEmpty(setup.nodeLabel()) && nodeLabelIds().contains(NO_SUCH_LABEL)) {
+            throw new IllegalArgumentException(String.format("Invalid node projection, one or more labels not found: '%s'", setup.nodeLabel()));
         }
     }
 
@@ -145,7 +146,7 @@ public final class GraphDimensions {
         private long nodeCount;
         private long highestNeoId;
         private long maxRelCount;
-        private int labelId;
+        private LongSet nodeLabelIds;
         private PropertyMappings nodeProperties;
         private RelationshipTypeMappings relationshipTypeMappings;
         private PropertyMappings relProperties;
@@ -169,8 +170,8 @@ public final class GraphDimensions {
             return this;
         }
 
-        public Builder setLabelId(int labelId) {
-            this.labelId = labelId;
+        public Builder setNodeLabelIds(LongSet nodeLabelIds) {
+            this.nodeLabelIds = nodeLabelIds;
             return this;
         }
 
@@ -194,11 +195,12 @@ public final class GraphDimensions {
                     nodeCount,
                     highestNeoId == -1 ? nodeCount : highestNeoId,
                     maxRelCount,
-                    labelId,
+                    nodeLabelIds,
                     nodeProperties == null ? PropertyMappings.EMPTY : nodeProperties,
                     relationshipTypeMappings,
                     relProperties == null ? PropertyMappings.EMPTY : relProperties
                 );
         }
+
     }
 }

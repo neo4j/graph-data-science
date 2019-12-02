@@ -36,12 +36,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-class RelationshipTypesTest {
+class ProjectionParserTest {
 
     @ParameterizedTest
     @MethodSource("validInput")
     void testValidInput(String input, Collection<String> expected) {
-        Set<String> result = RelationshipTypes.parse(input);
+        Set<String> result = ProjectionParser.parse(input);
         String[] actual = result.toArray(new String[0]);
         assertArrayEquals(expected.toArray(new String[0]), actual);
     }
@@ -51,8 +51,8 @@ class RelationshipTypesTest {
     void testInValidInput(String input) {
         IllegalArgumentException error = assertThrows(
                 IllegalArgumentException.class,
-                () -> RelationshipTypes.parse(input));
-        assertTrue(error.getMessage().startsWith("Could not parse relationship types: expected letter, digit, or underscore"));
+                () -> ProjectionParser.parse(input));
+        assertTrue(error.getMessage().startsWith("Could not parse projection: expected letter, digit, or underscore"));
     }
 
     static Stream<Arguments> validInput() {
