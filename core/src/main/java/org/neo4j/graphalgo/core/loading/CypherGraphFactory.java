@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
@@ -47,7 +46,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
@@ -125,17 +123,8 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
         GraphDimensions dimensions,
         AllocationTracker tracker
     ) {
-        Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders = dimensions
-            .relationshipTypeMappings()
-            .stream()
-            .collect(Collectors.toMap(
-                Function.identity(),
-                mapping -> createBuildersForRelationshipType(tracker)
-            ));
-
         CypherRelationshipsImporter cypherImporter = new CypherRelationshipsImporter(
             idsAndProperties.idMap(),
-            allBuilders,
             api,
             setup,
             dimensions
@@ -143,7 +132,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
 
         ObjectLongMap<RelationshipTypeMapping> relationshipCounts = cypherImporter.load();
 
-        return allBuilders.entrySet().stream().collect(Collectors.toMap(
+        return cypherImporter.allBuilders().entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().typeName(),
             entry -> {
                 Pair<RelationshipsBuilder, RelationshipsBuilder> builders = entry.getValue();
@@ -214,53 +203,6 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
             // happens only in tests
             throw new IllegalStateException("Must run in a transaction.", ex);
         }
-    }
-
-    // TODO: this could probably live on abstract GraphFactory
-    private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuildersForRelationshipType(AllocationTracker tracker) {
-        RelationshipsBuilder outgoingRelationshipsBuilder = null;
-        RelationshipsBuilder incomingRelationshipsBuilder = null;
-
-        DeduplicationStrategy[] deduplicationStrategies = dimensions
-            .relProperties()
-            .stream()
-            .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
-                // TODO: was skip before, changed it for Cypher
-                ? DeduplicationStrategy.NONE
-                : property.deduplicationStrategy()
-            )
-            .toArray(DeduplicationStrategy[]::new);
-        // TODO: backwards compat code
-        if (deduplicationStrategies.length == 0) {
-            DeduplicationStrategy deduplicationStrategy =
-                setup.deduplicationStrategy == DeduplicationStrategy.DEFAULT
-                    // TODO: was skip before, changed it for Cypher
-                    ? DeduplicationStrategy.NONE
-                    : setup.deduplicationStrategy;
-            deduplicationStrategies = new DeduplicationStrategy[]{deduplicationStrategy};
-        }
-
-        if (setup.loadAsUndirected) {
-            outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                deduplicationStrategies,
-                tracker,
-                setup.relationshipPropertyMappings.numberOfMappings());
-        } else {
-            if (setup.loadOutgoing) {
-                outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                    deduplicationStrategies,
-                    tracker,
-                    setup.relationshipPropertyMappings.numberOfMappings());
-            }
-            if (setup.loadIncoming) {
-                incomingRelationshipsBuilder = new RelationshipsBuilder(
-                    deduplicationStrategies,
-                    tracker,
-                    setup.relationshipPropertyMappings.numberOfMappings());
-            }
-        }
-
-        return Pair.of(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
     }
 
     private HugeGraph create(

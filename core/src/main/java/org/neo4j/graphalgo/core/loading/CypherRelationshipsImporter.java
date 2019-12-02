@@ -25,6 +25,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -37,16 +38,13 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
-import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<RelationshipTypeMapping>> {
 
     private final IdMap idMap;
     private final GraphDimensions dimensions;
-    private final int relationshipPropertyCount;
 
     private final Context importerContext;
-    private final Map<RelationshipTypeMapping, SingleTypeRelationshipImporter.Builder.WithImporter> relationshipImporterBuilders;
     private final Map<String, Integer> propertyKeyIdsByName;
     private final Map<String, Double> propertyDefaultValueByName;
 
@@ -54,7 +52,6 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
 
     CypherRelationshipsImporter(
         IdMap idMap,
-        Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders,
         GraphDatabaseAPI api,
         GraphSetup setup,
         GraphDimensions dimensions
@@ -64,13 +61,6 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
 
         this.dimensions = dimensions;
 
-        ImportSizing importSizing = ImportSizing.of(setup.concurrency, idMap.nodeCount());
-        int pageSize = importSizing.pageSize();
-        int numberOfPages = importSizing.numberOfPages();
-
-        boolean importWeights = dimensions.relProperties().atLeastOneExists();
-
-        this.relationshipPropertyCount = dimensions.relProperties().numberOfMappings();
         this.propertyKeyIdsByName = dimensions
             .relProperties()
             .stream()
@@ -80,55 +70,18 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
             .stream()
             .collect(toMap(PropertyMapping::neoPropertyKey, PropertyMapping::defaultValue));
 
-        Map<RelationshipTypeMapping, SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
-            .entrySet()
-            .stream()
-            .collect(toMap(
-                Map.Entry::getKey,
-                entry ->
-                    createImporterBuilder(pageSize, numberOfPages, entry, setup.tracker)
-            ));
-
         this.allRelationshipCounters = new HashMap<>();
-        for (SingleTypeRelationshipImporter.Builder importerBuilder : importerBuilders.values()) {
-            this.allRelationshipCounters.put(importerBuilder.mapping(), importerBuilder.relationshipCounter());
-        }
-
-        this.relationshipImporterBuilders = importerBuilders
-            .entrySet()
-            .stream()
-            .collect(toMap(
-                Map.Entry::getKey,
-                entry -> entry.getValue()
-                    .loadImporter(false, true, false, importWeights)
-            ));
-
         this.importerContext = new Context();
     }
 
     @Override
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
-        // TODO: think about intializing the buffers once within the constructor
-        List<MultiRelationshipRowVisitor.Context> contexts = relationshipImporterBuilders
-            .entrySet()
-            .stream()
-            .map(entry -> {
-                    RelationshipTypeMapping relationshipTypeMapping = entry.getKey();
-                    SingleTypeRelationshipImporter.Builder.WithImporter builder = entry.getValue();
-                    RelationshipPropertiesBatchBuffer propertyReader = new RelationshipPropertiesBatchBuffer(
-                        batchSize == CypherLoadingUtils.NO_BATCHING ? DEFAULT_BATCH_SIZE : batchSize,
-                        relationshipPropertyCount
-                    );
-                    SingleTypeRelationshipImporter importer = builder.withBuffer(idMap, bufferSize, propertyReader);
-                    return new MultiRelationshipRowVisitor.Context(relationshipTypeMapping, importer, propertyReader);
-                }
-            ).collect(Collectors.toList());
-
         MultiRelationshipRowVisitor visitor = new MultiRelationshipRowVisitor(
             idMap,
             importerContext,
             propertyKeyIdsByName,
             propertyDefaultValueByName,
+            batchSize,
             bufferSize
         );
 
@@ -142,7 +95,7 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
 
     @Override
     ObjectLongMap<RelationshipTypeMapping> result() {
-        List<Runnable> flushTasks = relationshipImporterBuilders
+        List<Runnable> flushTasks = importerContext.importerBuildersByType
             .values()
             .stream()
             .flatMap(SingleTypeRelationshipImporter.Builder.WithImporter::flushTasks)
@@ -155,22 +108,25 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
         return relationshipCounters;
     }
 
+    Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders() {
+        return importerContext.allBuilders;
+    }
+
     private SingleTypeRelationshipImporter.Builder createImporterBuilder(
         int pageSize,
         int numberOfPages,
-        Map.Entry<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> entry,
+        RelationshipTypeMapping mapping,
+        RelationshipsBuilder outgoingRelationshipsBuilder,
+        RelationshipsBuilder incomingRelationshipsBuilder,
         AllocationTracker tracker
     ) {
-        RelationshipTypeMapping mapping = entry.getKey();
-        RelationshipsBuilder outRelationshipsBuilder = entry.getValue().getLeft();
-        RelationshipsBuilder inRelationshipsBuilder = entry.getValue().getRight();
 
         int[] weightProperties = dimensions.relProperties().allPropertyKeyIds();
         double[] defaultWeights = dimensions.relProperties().allDefaultWeights();
 
         LongAdder relationshipCounter = new LongAdder();
         AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
-            outRelationshipsBuilder,
+            outgoingRelationshipsBuilder,
             numberOfPages,
             pageSize,
             tracker,
@@ -178,7 +134,7 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
             weightProperties,
             defaultWeights);
         AdjacencyBuilder inBuilder = AdjacencyBuilder.compressing(
-            inRelationshipsBuilder,
+            incomingRelationshipsBuilder,
             numberOfPages,
             pageSize,
             tracker,
@@ -195,27 +151,104 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
         return new SingleTypeRelationshipImporter.Builder(mapping, importer, relationshipCounter);
     }
 
-    static class Context {
+    class Context {
 
-        private final Map<String, SingleTypeRelationshipImporter.Builder> importerBuildersByType;
+        private final Map<String, SingleTypeRelationshipImporter.Builder.WithImporter> importerBuildersByType;
+        private final Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders;
 
-        public Context() {
-            importerBuildersByType = new HashMap<>();
+        final int pageSize;
+        final int numberOfPages;
+        final boolean importWeights;
+
+        Context() {
+            this.importerBuildersByType = new HashMap<>();
+            this.allBuilders = new HashMap<>();
+
+            this.importWeights = dimensions.relProperties().atLeastOneExists();
+
+            ImportSizing importSizing = ImportSizing.of(setup.concurrency, idMap.nodeCount());
+            this.pageSize = importSizing.pageSize();
+            this.numberOfPages = importSizing.numberOfPages();
         }
 
-        public SingleTypeRelationshipImporter.Builder getOrCreateImporterBuilder(String relationshipType) {
-            SingleTypeRelationshipImporter.Builder importer;
+        synchronized SingleTypeRelationshipImporter.Builder.WithImporter getOrCreateImporterBuilder(String relationshipType) {
+            SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder;
             if (importerBuildersByType.containsKey(relationshipType)) {
-                importer = importerBuildersByType.get(relationshipType);
+                importerBuilder = importerBuildersByType.get(relationshipType);
             } else {
-                importer = createImporter(relationshipType);
-                importerBuildersByType.put(relationshipType, importer);
+                RelationshipTypeMapping typeMapping = RelationshipTypeMapping.of(relationshipType, -1);
+
+                importerBuilder = createImporter(typeMapping);
+                importerBuildersByType.put(relationshipType, importerBuilder);
             }
-            return importer;
+            return importerBuilder;
         }
 
-        private SingleTypeRelationshipImporter.Builder createImporter(String relationshipType) {
-            return null;
+        private SingleTypeRelationshipImporter.Builder.WithImporter createImporter(RelationshipTypeMapping typeMapping) {
+            Pair<RelationshipsBuilder, RelationshipsBuilder> buildersForRelationshipType = createBuildersForRelationshipType(
+                setup.tracker);
+
+            allBuilders.put(typeMapping, buildersForRelationshipType);
+
+            SingleTypeRelationshipImporter.Builder importerBuilder = createImporterBuilder(
+                pageSize,
+                numberOfPages,
+                typeMapping,
+                buildersForRelationshipType.getLeft(),
+                buildersForRelationshipType.getRight(),
+                setup.tracker
+            );
+            allRelationshipCounters.put(typeMapping, importerBuilder.relationshipCounter());
+            return importerBuilder.loadImporter(
+                false,
+                true,
+                false,
+                importWeights
+            );
+        }
+
+        private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuildersForRelationshipType(AllocationTracker tracker) {
+            RelationshipsBuilder outgoingRelationshipsBuilder = null;
+            RelationshipsBuilder incomingRelationshipsBuilder = null;
+
+            DeduplicationStrategy[] deduplicationStrategies = dimensions
+                .relProperties()
+                .stream()
+                .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
+                    ? DeduplicationStrategy.NONE
+                    : property.deduplicationStrategy()
+                )
+                .toArray(DeduplicationStrategy[]::new);
+            // TODO: backwards compat code
+            if (deduplicationStrategies.length == 0) {
+                DeduplicationStrategy deduplicationStrategy =
+                    setup.deduplicationStrategy == DeduplicationStrategy.DEFAULT
+                        ? DeduplicationStrategy.NONE
+                        : setup.deduplicationStrategy;
+                deduplicationStrategies = new DeduplicationStrategy[]{deduplicationStrategy};
+            }
+
+            if (setup.loadAsUndirected) {
+                outgoingRelationshipsBuilder = new RelationshipsBuilder(
+                    deduplicationStrategies,
+                    tracker,
+                    setup.relationshipPropertyMappings.numberOfMappings());
+            } else {
+                if (setup.loadOutgoing) {
+                    outgoingRelationshipsBuilder = new RelationshipsBuilder(
+                        deduplicationStrategies,
+                        tracker,
+                        setup.relationshipPropertyMappings.numberOfMappings());
+                }
+                if (setup.loadIncoming) {
+                    incomingRelationshipsBuilder = new RelationshipsBuilder(
+                        deduplicationStrategies,
+                        tracker,
+                        setup.relationshipPropertyMappings.numberOfMappings());
+                }
+            }
+
+            return Pair.of(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
         }
     }
 }

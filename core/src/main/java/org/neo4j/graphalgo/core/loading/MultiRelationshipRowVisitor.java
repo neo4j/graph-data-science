@@ -26,6 +26,8 @@ import org.neo4j.graphdb.Result;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
+
 class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     private static final long NO_RELATIONSHIP_REFERENCE = -1L;
@@ -37,9 +39,9 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
     private final Map<String, Integer> propertyKeyIdsByName;
     private final Map<String, Double> propertyDefaultValueByName;
     private final CypherRelationshipsImporter.Context importerContext;
+    private final int batchSize;
     private final int bufferSize;
     private final Map<String, SingleTypeRelationshipImporter> localImporters;
-    private final Map<String, RelationshipsBatchBuffer> localRelationshipsBatchBuffers;
     private final Map<String, RelationshipPropertiesBatchBuffer> localPropertiesBuffers;
 
     private long lastNeoSourceId = -1, lastNeoTargetId = -1;
@@ -53,15 +55,16 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
         CypherRelationshipsImporter.Context importerContext,
         Map<String, Integer> propertyKeyIdsByName,
         Map<String, Double> propertyDefaultValueByName,
+        int batchSize,
         int bufferSize
     ) {
         this.idMap = idMap;
         this.propertyKeyIdsByName = propertyKeyIdsByName;
         this.propertyDefaultValueByName = propertyDefaultValueByName;
         this.importerContext = importerContext;
+        this.batchSize = batchSize;
         this.bufferSize = bufferSize;
         this.localImporters = new HashMap<>();
-        this.localRelationshipsBatchBuffers = new HashMap<>();
         this.localPropertiesBuffers = new HashMap<>();
     }
 
@@ -81,11 +84,14 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
         if (localImporters.containsKey(relationshipType)) {
             return visit(row, localImporters.get(relationshipType), localPropertiesBuffers.get(relationshipType));
         } else {
-            SingleTypeRelationshipImporter.Builder importerBuilder = importerContext
+            SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder = importerContext
                 .getOrCreateImporterBuilder(relationshipType);
-            // TODO: build batch buffers
-            SingleTypeRelationshipImporter importer = null;
-            RelationshipPropertiesBatchBuffer propertiesBuffer = null;
+
+            RelationshipPropertiesBatchBuffer propertiesBuffer = new RelationshipPropertiesBatchBuffer(
+                batchSize == CypherLoadingUtils.NO_BATCHING ? DEFAULT_BATCH_SIZE : batchSize,
+                propertyKeyIdsByName.size()
+            );
+            SingleTypeRelationshipImporter importer = importerBuilder.withBuffer(idMap, bufferSize, propertiesBuffer);
             localImporters.putIfAbsent(relationshipType, importer);
             localPropertiesBuffers.putIfAbsent(relationshipType, propertiesBuffer);
             return visit(row, importer, propertiesBuffer);
