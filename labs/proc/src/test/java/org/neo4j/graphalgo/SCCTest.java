@@ -71,7 +71,7 @@ class SCCTest extends ConnectedComponentsTest {
     @BeforeEach
     void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach

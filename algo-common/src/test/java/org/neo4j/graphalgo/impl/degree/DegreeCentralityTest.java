@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.degree;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -41,7 +42,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-final class DegreeCentralityTest {
+final class DegreeCentralityTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -104,12 +105,10 @@ final class DegreeCentralityTest {
             ", (j)-[:TYPE2]->(e)" +
             ", (k)-[:TYPE2]->(e)";
 
-    private GraphDatabaseAPI db;
-
     @BeforeEach
     void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach

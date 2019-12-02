@@ -71,7 +71,7 @@ class SCCTunedTarjanProcTest extends ConnectedComponentsTest {
     void setupGraphDb() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(StronglyConnectedComponentsProc.class);
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -98,22 +98,18 @@ class SCCTunedTarjanProcTest extends ConnectedComponentsTest {
 
         String cypher = "CALL algo.scc.recursive.tunedTarjan('', '', {write:true}) YIELD loadMillis, computeMillis, writeMillis";
 
-        db.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             final long loadMillis = row.getNumber("loadMillis").longValue();
             final long computeMillis = row.getNumber("computeMillis").longValue();
             final long writeMillis = row.getNumber("writeMillis").longValue();
             assertNotEquals(-1, loadMillis);
             assertNotEquals(-1, computeMillis);
             assertNotEquals(-1, writeMillis);
-            return true;
         });
 
         String cypher2 = "MATCH (n) RETURN n.partition as c";
         final IntIntScatterMap testMap = new IntIntScatterMap();
-        db.execute(cypher2).accept(row -> {
-            testMap.addTo(row.getNumber("c").intValue(), 1);
-            return true;
-        });
+        runQuery(cypher2, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
 
         // 3 sets with 3 elements each
         assertEquals(3, testMap.size());
@@ -131,10 +127,7 @@ class SCCTunedTarjanProcTest extends ConnectedComponentsTest {
 
         String cypher = "CALL algo.scc.recursive.tunedTarjan.stream() YIELD nodeId, partition";
 
-        db.execute(cypher).accept(row -> {
-            testMap.addTo(row.getNumber("partition").intValue(), 1);
-            return true;
-        });
+        runQuery(cypher, row -> testMap.addTo(row.getNumber("partition").intValue(), 1));
 
         // 3 sets with 3 elements each
         assertEquals(3, testMap.size());
