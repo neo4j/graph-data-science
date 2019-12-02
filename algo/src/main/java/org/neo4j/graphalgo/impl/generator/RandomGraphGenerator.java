@@ -155,7 +155,7 @@ public final class RandomGraphGenerator {
             for (int j = 0; j < degree; j++) {
                 targetId = relationshipProducer.applyAsLong(nodeId);
                 assert (targetId < nodeCount);
-                property = relationshipPropertyProducer.getPropertyValue(nodeId, targetId);
+                property = relationshipPropertyProducer.getPropertyValue(nodeId, targetId, random);
                 relationshipsImporter.addFromInternal(nodeId, targetId, property);
             }
         }
@@ -168,7 +168,7 @@ public final class RandomGraphGenerator {
         }
 
         @Override
-        public double getPropertyValue(long source, long target) {
+        public double getPropertyValue(long source, long target, java.util.Random random) {
             return 0;
         }
     }

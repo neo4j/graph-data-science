@@ -34,7 +34,7 @@ public interface RelationshipPropertyProducer {
 
     String getPropertyName();
 
-    double getPropertyValue(long source, long target);
+    double getPropertyValue(long source, long target, java.util.Random random);
 
     class Fixed implements RelationshipPropertyProducer {
         private final String propertyName;
@@ -50,7 +50,7 @@ public interface RelationshipPropertyProducer {
         }
 
         @Override
-        public double getPropertyValue(long source, long target) {
+        public double getPropertyValue(long source, long target, java.util.Random random) {
             return value;
         }
 
@@ -78,7 +78,6 @@ public interface RelationshipPropertyProducer {
     }
 
     class Random implements RelationshipPropertyProducer {
-        private final java.util.Random random;
         private final String propertyName;
         private final double min;
         private final double max;
@@ -87,7 +86,6 @@ public interface RelationshipPropertyProducer {
             this.propertyName = propertyName;
             this.min = min;
             this.max = max;
-            this.random = new java.util.Random();
 
             if (max <= min) {
                 throw new IllegalArgumentException("Max value must be greater than min value");
@@ -100,7 +98,7 @@ public interface RelationshipPropertyProducer {
         }
 
         @Override
-        public double getPropertyValue(long source, long target) {
+        public double getPropertyValue(long source, long target, java.util.Random random) {
             return min + (random.nextDouble() * (max - min));
         }
 
