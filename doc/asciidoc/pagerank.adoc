@@ -23,6 +23,7 @@ This section includes:
 ** <<algorithms-pagerank-examples-unweighted, Unweighted>>
 ** <<algorithms-pagerank-examples-weighted, Weighted>>
 *** <<algorithms-pagerank-examples-personalized, Personalized>>
+* <<algorithms-pagerank-usage, Usage>>
 
 [[algorithms-pagerank-intro]]
 == Introduction
@@ -44,14 +45,6 @@ where,
   It is usually set to 0.85.
 * `C(A)` is defined as the number of links going out of page `A`.
 // end::formula[]
-
-
-There are some things to be aware of when using the PageRank algorithm:
-
-* If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
-* Rank sink can occur when a network of pages form an infinite cycle.
-* Dead-ends occur when pages have no out-links.
-If a page contains a link to another page which has no out-links, the link would be known as a dangling link.
 
 
 For more information on this algorithm, see:
@@ -159,8 +152,6 @@ YIELD node, score
 |===
 
 
-
-// TODO: also constraints?
 // TODO: Call out to graph loading?
 
 [[algorithms-pagerank-examples]]
@@ -356,3 +347,15 @@ YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, 
 | Nodes | Iterations | DampingFactor | PropertyName
 | 8     | 20         | 0.85          | "pagerank"
 |===
+
+[[algorithms-pagerank-usage]]
+== Usage
+
+There are some things to be aware of when using the PageRank algorithm:
+
+* If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
+* Rank sink can occur when a network of pages form an infinite cycle.
+* Dead-ends occur when pages have no out-links.
+If a page contains a link to another page which has no out-links, the link would be known as a dangling link.
+
+
