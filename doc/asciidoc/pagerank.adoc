@@ -22,7 +22,7 @@ This section includes:
 * <<algorithms-pagerank-examples, Examples>>
 ** <<algorithms-pagerank-examples-unweighted, Unweighted>>
 ** <<algorithms-pagerank-examples-weighted, Weighted>>
-*** <<algorithms-pagerank-examples-personalized, Personalized>>
+** <<algorithms-pagerank-examples-personalized, Personalized>>
 * <<algorithms-pagerank-usage, Usage>>
 
 [[algorithms-pagerank-intro]]
@@ -170,20 +170,20 @@ CREATE (b:Page {name:'Site B'})
 CREATE (c:Page {name:'Site C'})
 CREATE (d:Page {name:'Site D'})
 
-CREATE (home)-[:LINKS]->(about)
-CREATE (about)-[:LINKS]->(home)
-CREATE (product)-[:LINKS]->(home)
-CREATE (home)-[:LINKS]->(product)
-CREATE (links)-[:LINKS]->(home)
-CREATE (home)-[:LINKS]->(links)
-CREATE (links)-[:LINKS]->(a)
-CREATE (a)-[:LINKS]->(home)
-CREATE (links)-[:LINKS]->(b)
-CREATE (b)-[:LINKS]->(home)
-CREATE (links)-[:LINKS]->(c)
-CREATE (c)-[:LINKS]->(home)
-CREATE (links)-[:LINKS]->(d)
-CREATE (d)-[:LINKS]->(home)
+CREATE (home)-[:LINKS {weight: 0.2}]->(about)
+CREATE (home)-[:LINKS {weight: 0.2}]->(links)
+CREATE (home)-[:LINKS {weight: 0.6}]->(product)
+CREATE (about)-[:LINKS {weight: 1.0}]->(home)
+CREATE (product)-[:LINKS {weight: 1.0}]->(home)
+CREATE (a)-[:LINKS {weight: 1.0}]->(home)
+CREATE (b)-[:LINKS {weight: 1.0}]->(home)
+CREATE (c)-[:LINKS {weight: 1.0}]->(home)
+CREATE (d)-[:LINKS {weight: 1.0}]->(home)
+CREATE (links)-[:LINKS {weight: 0.8}]->(home)
+CREATE (links)-[:LINKS {weight: 0.05}]->(a)
+CREATE (links)-[:LINKS {weight: 0.05}]->(b)
+CREATE (links)-[:LINKS {weight: 0.05}]->(c)
+CREATE (links)-[:LINKS {weight: 0.05}]->(d)
 ----
 
 [[algorithms-pagerank-examples-unweighted]]
