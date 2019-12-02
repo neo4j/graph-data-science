@@ -14,6 +14,7 @@ This topic includes:
 ** <<algorithms-wcc-examples-unweighted, Unweighted>>
 ** <<algorithms-wcc-examples-weighted, Weighted>>
 ** <<algorithms-wcc-examples-seeding, Seeded components>>
+** <<algorithms-wcc-examples-projection, Named graphs and Cypher projections>>
 //* <<algorithms-wcc-usage-details, Usage Details>>
 
 
