@@ -93,8 +93,8 @@ Graphs loaded with an empty relationship projection, or a Cypher relationship pr
 CALL algo.graph.load('my-graph', null, 'REL_TYPE1 | REL_TYPE2 | REL_TYPE3', {direction: 'OUTGOING', concurrency: 8 })
 ----
 
-A graph loaded with multiple relationship types supports filtering subgraphs based on these types.
-We can run an algorithm over a subset of the graph by specifying one or more of the loaded relationship types in `relationship` parameter for the algorithm.
+Having loaded the graph with multiple relationship types we can run an algorithm on a filtered subgraph based on these types.
+To run an algorithm over a subset of the graph we specify one or more of the loaded relationship types in the `relationship` parameter for the algorithm.
 If the `relationship` parameter is empty, the whole graph is used.
 
 .The following example will run PageRank only on relationships of type `REL_TYPE1` or `REL_TYPE2`:
@@ -105,7 +105,7 @@ CALL algo.pageRank(null, 'REL_TYPE1 | REL_TYPE2', {graph: 'my-graph'})
 
 The same syntax used to load multiple relationship types can also be used to load multiple labels.
 
-.The following example will load the graph `my-graph` with nodes that have the label `Person` or `Instrument`:
+.The following example will load a graph `my-graph` with nodes that have either the `Person` or `Instrument` label:
 [source, cypher]
 ----
 CALL algo.graph.load('my-graph', 'Person | Instrument', null, {direction: 'OUTGOING', concurrency: 8 })

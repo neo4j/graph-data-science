@@ -26,8 +26,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.utils.NodeLabels;
-import org.neo4j.graphalgo.core.utils.RelationshipTypes;
+import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
@@ -59,7 +58,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         NodeLabelIds nodeLabelIds = new NodeLabelIds();
         if (readTokens) {
-            NodeLabels.parse(setup.nodeLabel())
+            ProjectionParser.parse(setup.nodeLabel())
                 .stream()
                 .map(tokenRead::nodeLabel)
                 .forEach(nodeLabelIds.ids::add);
@@ -67,7 +66,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         RelationshipTypeMappings.Builder mappingsBuilder = new RelationshipTypeMappings.Builder();
         if (readTokens && !setup.loadAnyRelationshipType()) {
-            Set<String> types = RelationshipTypes.parse(setup.relationshipType());
+            Set<String> types = ProjectionParser.parse(setup.relationshipType());
             for (String typeName : types) {
                 int typeId = tokenRead.relationshipType(typeName);
                 RelationshipTypeMapping typeMapping = RelationshipTypeMapping.of(typeName, typeId);
@@ -85,9 +84,12 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         long maxRelCount = relationshipTypeMappings
             .stream()
             .filter(RelationshipTypeMapping::doesExist)
-            .flatMapToLong(
-                relationshipTypeMapping -> nodeLabelIds.stream()
-                .mapToLong(nodeLabelId -> maxRelCountForLabelAndType(dataRead, nodeLabelId, relationshipTypeMapping.typeId()))
+            .flatMapToLong(relationshipTypeMapping -> nodeLabelIds.stream()
+                .mapToLong(nodeLabelId -> maxRelCountForLabelAndType(
+                    dataRead,
+                    nodeLabelId,
+                    relationshipTypeMapping.typeId()
+                ))
             ).sum();
 
 
@@ -127,7 +129,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         }
 
         Stream<Integer> stream() {
-            return ids.isEmpty() ? Stream.of(-1) : ids.stream();
+            return ids.isEmpty() ? Stream.of(Read.ANY_LABEL) : ids.stream();
         }
 
         LongSet longSet() {

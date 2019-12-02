@@ -80,7 +80,7 @@ class GraphLoaderTest {
 
     @AllGraphTypesTest
     void testWithMultipleLabels(Class<? extends GraphFactory> graphFactory) {
-        Graph  graph = TestGraphLoader.from(db).withLabel("Node1 | Node2").buildGraph(graphFactory);
+        Graph graph = TestGraphLoader.from(db).withLabel("Node1 | Node2").buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a)-->(b)"));
     }
 

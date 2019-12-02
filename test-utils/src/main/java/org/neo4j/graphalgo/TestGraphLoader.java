@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.utils.NodeLabels;
+import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -113,7 +113,7 @@ public final class TestGraphLoader {
 
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
             String labelString = maybeLabel
-                .map(s -> "WHERE " + NodeLabels.parse(s).stream().map(l -> "n:" + l).collect(Collectors.joining(" OR ")))
+                .map(s -> "WHERE " + ProjectionParser.parse(s).stream().map(l -> "n:" + l).collect(Collectors.joining(" OR ")))
                 .orElse("");
             // CypherNodeLoader not yet supports parsing node props from return items ...
             String nodePropertiesString = nodeProperties.hasMappings()

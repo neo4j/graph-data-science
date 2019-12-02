@@ -36,7 +36,7 @@ import static org.petitparser.parser.primitive.CharacterParser.of;
 import static org.petitparser.utils.Functions.withoutSeparators;
 
 
-public final class RelationshipTypes {
+public final class ProjectionParser {
 
     private static final Parser PARSER;
 
@@ -45,18 +45,18 @@ public final class RelationshipTypes {
         Parser backtick = of('`');
         Parser pipe = of('|');
         Parser colon = of(':');
-        Parser validTypeCharacter = letter().or(underscore, digit("expected letter, digit, or underscore"));
-        Parser unescapedIdentifier = validTypeCharacter.plus().flatten();
+        Parser validTokenCharacter = letter().or(underscore, digit("expected letter, digit, or underscore"));
+        Parser unescapedIdentifier = validTokenCharacter.plus().flatten();
         Parser escapedIdentifier = backtick.seq(backtick.neg().plus().flatten()).seq(backtick).pick(1);
         Parser identifier = colon.optional().seq(escapedIdentifier.or(unescapedIdentifier)).pick(1);
         PARSER = identifier.separatedBy(pipe.trim()).map(withoutSeparators()).end("expected letter, digit, or underscore");
     }
 
-    public static Set<String> parse(@Nullable String relTypes) {
-        if (relTypes == null || relTypes.isEmpty()) {
+    public static Set<String> parse(@Nullable String projection) {
+        if (projection == null || projection.isEmpty()) {
             return Collections.emptySet();
         }
-        Result result = PARSER.parse(relTypes);
+        Result result = PARSER.parse(projection);
         if (result.isSuccess()) {
             List<String> types = result.get();
             return new LinkedHashSet<>(types);
@@ -64,14 +64,14 @@ public final class RelationshipTypes {
         int errorPos = result.getPosition();
         String errorPointer = "^";
         errorPointer = StringUtils.leftPad(errorPointer, errorPos + 1, '~');
-        errorPointer = StringUtils.rightPad(errorPointer, relTypes.length(), '~');
+        errorPointer = StringUtils.rightPad(errorPointer, projection.length(), '~');
 
         throw new IllegalArgumentException(String.format(
-                "Could not parse relationship types: %s (at position %d):%n%s%n%s",
-                result.getMessage(), errorPos, relTypes, errorPointer));
+                "Could not parse projection: %s (at position %d):%n%s%n%s",
+                result.getMessage(), errorPos, projection, errorPointer));
     }
 
-    private RelationshipTypes() {
+    private ProjectionParser() {
         throw new UnsupportedOperationException("No instances");
     }
 }
