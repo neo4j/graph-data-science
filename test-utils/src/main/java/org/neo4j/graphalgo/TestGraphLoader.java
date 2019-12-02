@@ -42,6 +42,7 @@ public final class TestGraphLoader {
 
     private Optional<String> maybeLabel = Optional.empty();
     private Optional<String> maybeRelType = Optional.empty();
+    private boolean isMultiRelTypeQuery;
 
     private PropertyMappings nodeProperties = PropertyMappings.of();
     private PropertyMappings relProperties = PropertyMappings.of();
@@ -63,7 +64,12 @@ public final class TestGraphLoader {
     }
 
     public TestGraphLoader withRelationshipType(String relType) {
+        return withRelationshipType(relType, false);
+    }
+
+    public TestGraphLoader withRelationshipType(String relType, boolean isMultiRelTypeQuery) {
         this.maybeRelType = Optional.of(relType);
+        this.isMultiRelTypeQuery = isMultiRelTypeQuery;
         return this;
     }
 
@@ -108,10 +114,8 @@ public final class TestGraphLoader {
     private <T extends GraphFactory> GraphLoader loader(Class<T> graphFactory) {
         GraphLoader graphLoader = new GraphLoader(db).withDirection(direction);
 
-        String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s";
-        String relsQueryTemplate = "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s";
-
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+            String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s";
             String labelString = maybeLabel
                 .map(s -> "WHERE " + ProjectionParser.parse(s).stream().map(l -> "n:" + l).collect(Collectors.joining(" OR ")))
                 .orElse("");
@@ -126,17 +130,8 @@ public final class TestGraphLoader {
             String nodeQuery = String.format(nodeQueryTemplate, labelString, nodePropertiesString);
             graphLoader.withLabel(nodeQuery);
 
-            String relTypeString = maybeRelType.map(s -> ":" + s).orElse("");
+            String relsQuery = isMultiRelTypeQuery ? getMultiTypeRelationshipsQuery() : getAnyTypeRelationshipsQuery();
 
-            assert relProperties.numberOfMappings() <= 1;
-            String relPropertiesString = relProperties.hasMappings()
-                ? ", " + relProperties.stream()
-                .map(PropertyMapping::propertyKey)
-                .map(k -> "r." + k + " AS weight")
-                .collect(Collectors.joining(", "))
-                : "";
-
-            String relsQuery = String.format(relsQueryTemplate, relTypeString, relPropertiesString);
             graphLoader.withRelationshipType(relsQuery);
         } else {
             maybeLabel.ifPresent(graphLoader::withLabel);
@@ -147,5 +142,34 @@ public final class TestGraphLoader {
         graphLoader.withOptionalNodeProperties(nodeProperties);
 
         return graphLoader;
+    }
+
+    private String getAnyTypeRelationshipsQuery() {
+        String relsQueryTemplate = "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s";
+        String relTypeString = maybeRelType.map(s -> ":" + s).orElse("");
+
+        assert relProperties.numberOfMappings() <= 1;
+        String relPropertiesString = relProperties.hasMappings()
+            ? ", " + relProperties.stream()
+            .map(PropertyMapping::propertyKey)
+            .map(k -> "r." + k + " AS weight")
+            .collect(Collectors.joining(", "))
+            : "";
+
+        return String.format(relsQueryTemplate, relTypeString, relPropertiesString);
+    }
+
+    private String getMultiTypeRelationshipsQuery() {
+        String relsQueryTemplate = "MATCH (n)-[r%s]->(m) RETURN type(r) AS type, id(n) AS source, id(m) AS target%s";
+        String relTypeString = maybeRelType.map(s -> ":" + s).orElse("");
+
+        String relPropertiesString = relProperties.hasMappings()
+            ? ", " + relProperties.stream()
+            .map(PropertyMapping::neoPropertyKey)
+            .map(k -> "r." + k + " AS " + k)
+            .collect(Collectors.joining(", "))
+            : "";
+
+        return String.format(relsQueryTemplate, relTypeString, relPropertiesString);
     }
 }
