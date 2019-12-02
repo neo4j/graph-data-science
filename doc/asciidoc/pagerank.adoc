@@ -152,9 +152,6 @@ YIELD node, score
 | score | float | PageRank weight
 |===
 
-
-// TODO: Call out to graph loading?
-
 [[algorithms-pagerank-examples]]
 == Examples
 
@@ -187,7 +184,8 @@ CREATE (links)-[:LINKS {weight: 0.05}]->(c)
 CREATE (links)-[:LINKS {weight: 0.05}]->(d)
 ----
 
-// TODO: small explanation of the graph
+This graph represents seven pages, linking to another.
+The relationships that connect the nodes in each component have a property `weight` which determines the importance of the relationship.
 
 [[algorithms-pagerank-examples-unweighted]]
 === Unweighted
