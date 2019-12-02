@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<RelationshipTypeMapping>> {
 
@@ -113,7 +114,7 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
                     RelationshipTypeMapping relationshipTypeMapping = entry.getKey();
                     SingleTypeRelationshipImporter.Builder.WithImporter builder = entry.getValue();
                     RelationshipPropertyBatchBuffer propertyReader = new RelationshipPropertyBatchBuffer(
-                        batchSize,
+                        batchSize == CypherLoadingUtils.NO_BATCHING ? DEFAULT_BATCH_SIZE : batchSize,
                         relationshipPropertyCount
                     );
                     SingleTypeRelationshipImporter importer = builder.withBuffer(idMap, bufferSize, propertyReader);
