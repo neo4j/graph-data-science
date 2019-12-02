@@ -59,7 +59,7 @@ For more information on this algorithm, see:
 * http://infolab.stanford.edu/~backrub/google.html[The original google paper^]
 // according to java doc implantation based on
 * http://delab.csd.auth.gr/~dimitris/courses/ir_spring06/page_rank_computing/01531136.pdf[An Efficient Partition-Based Parallel PageRank Algorithm^]
-* https://arxiv.org/pdf/1407.5107.pdf[PageRank beyond the web^] for more use cases
+* https://arxiv.org/pdf/1407.5107.pdf[PageRank beyond the web^] for use cases
 
 
 [NOTE]

@@ -59,8 +59,6 @@ Random Walk is often used as part of other algorithms:
 
 You can read about more use cases in https://arxiv.org/pdf/1612.03281.pdf[Random walks and diffusion on networks^].
 
-Many of the use-cases of <<algorithms-pagerank-usecase,PageRank>> also apply to Random Walks.
-
 // end::use-case[]
 
 
