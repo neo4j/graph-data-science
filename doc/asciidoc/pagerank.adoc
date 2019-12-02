@@ -291,7 +291,7 @@ YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, 
 
 
 [[algorithms-pagerank-examples-personalized]]
-==== Personalized
+=== Personalized
 
 Personalized PageRank is a variation of PageRank which is biased towards a set of `sourceNodes`.
 This variant of PageRank is often used as part of https://www.r-bloggers.com/from-random-walks-to-personalized-pagerank/[recommender systems^].
