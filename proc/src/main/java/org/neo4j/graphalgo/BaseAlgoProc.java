@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.helpers.collection.Pair;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> extends BaseProc {
@@ -129,12 +130,14 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         return Pair.of(config, graphName);
     }
 
-    protected GraphCreateResult createGraph(Pair<CONFIG, Optional<String>> configAndName) {
+    protected Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
         CONFIG config = configAndName.first();
         Optional<String> graphName = configAndName.other();
 
         if (graphName.isPresent()) {
-            return ImmutableGraphCreateResult.of(0, GraphCatalog.getLoadedGraphs(getUsername()).get(graphName.get()));
+            return GraphCatalog.getUnion(getUsername(), graphName.get()).orElseThrow(
+                () -> new NoSuchElementException(String.format("Cannot find graph with name %s", graphName.get()))
+            );
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
 
@@ -144,17 +147,10 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 .withAllocationTracker(AllocationTracker.EMPTY)
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 
-            ImmutableGraphCreateResult.Builder builder = ImmutableGraphCreateResult.builder();
-
-            try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
-                builder.graph(loader.load(createConfig.getGraphImpl()));
-            }
-            return builder.build();
-
+            return loader.load(createConfig.getGraphImpl());
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
-
     }
 
     ComputationResult<A, RESULT, CONFIG> compute(Object graphNameOrConfig, Map<String, Object> configuration) {
@@ -163,8 +159,11 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.first();
 
-        GraphCreateResult graphCreateResult = createGraph(input);
-        Graph graph = graphCreateResult.graph();
+        Graph graph;
+        try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
+            graph = createGraph(input);
+        }
+
         AllocationTracker tracker = AllocationTracker.create();
 
         A algo = newAlgorithm(graph, config, tracker);
@@ -184,20 +183,12 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         graph.releaseTopology();
 
         return builder
-            .createMillis(graphCreateResult.createMillis())
             .graph(graph)
             .tracker(AllocationTracker.EMPTY)
             .algorithm(algo)
             .result(result)
             .config(config)
             .build();
-    }
-
-    @ValueClass
-    interface GraphCreateResult {
-        long createMillis();
-
-        Graph graph();
     }
 
     @ValueClass
