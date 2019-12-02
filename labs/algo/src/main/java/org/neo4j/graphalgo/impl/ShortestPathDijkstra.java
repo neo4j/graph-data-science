@@ -26,7 +26,7 @@ import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntScatterMap;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
@@ -45,7 +45,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  * between a given start and target-NodeId. It returns result tuples of
  * [nodeId, distance] of each node in the path.
  */
-public class ShortestPathDijkstra extends Algorithm<ShortestPathDijkstra> {
+public class ShortestPathDijkstra extends LegacyAlgorithm<ShortestPathDijkstra> {
 
     private static final int PATH_END = -1;
     public static final double NO_PATH_FOUND = -1.0;

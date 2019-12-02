@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.NonInrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
 
-public abstract class WCC<ME extends WCC<ME>> extends Algorithm<ME> {
+public abstract class WCC<ME extends WCC<ME>> extends Algorithm<ME, DisjointSetStruct> {
 
     protected Graph graph;
 
@@ -74,6 +74,7 @@ public abstract class WCC<ME extends WCC<ME>> extends Algorithm<ME> {
                 new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker);
     }
 
+    @Override
     public DisjointSetStruct compute() {
         return Double.isFinite(threshold()) ? compute(threshold()) : computeUnrestricted();
     }

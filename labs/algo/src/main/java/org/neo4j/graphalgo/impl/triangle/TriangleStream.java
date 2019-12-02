@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -46,7 +46,7 @@ import java.util.stream.StreamSupport;
  *
  * @author mknblch
  */
-public class TriangleStream extends Algorithm<TriangleStream> {
+public class TriangleStream extends LegacyAlgorithm<TriangleStream> {
 
     private Graph graph;
     private ExecutorService executorService;

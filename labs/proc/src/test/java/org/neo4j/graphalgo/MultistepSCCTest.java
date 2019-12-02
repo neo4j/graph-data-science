@@ -80,8 +80,8 @@ class MultistepSCCTest extends ConnectedComponentsTest {
     @AllGraphTypesWithoutCypherTest
     void testSequential(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT, 1, 0)
-                .compute();
+        final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT, 1, 0);
+        multistep.compute();
 
         assertCC(multistep.getConnectedComponents());
 
@@ -94,8 +94,8 @@ class MultistepSCCTest extends ConnectedComponentsTest {
     @AllGraphTypesWithoutCypherTest
     void testParallel(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT, 4, 0)
-                .compute();
+        final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT, 4, 0);
+        multistep.compute();
 
         assertCC(multistep.getConnectedComponents());
 
@@ -107,8 +107,8 @@ class MultistepSCCTest extends ConnectedComponentsTest {
     @AllGraphTypesWithoutCypherTest
     void testHighCut(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT, 4, 100_000)
-                .compute();
+        final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT, 4, 100_000);
+        multistep.compute();
 
         assertCC(multistep.getConnectedComponents());
 

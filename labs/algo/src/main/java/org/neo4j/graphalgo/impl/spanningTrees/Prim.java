@@ -21,13 +21,13 @@ package org.neo4j.graphalgo.impl.spanningTrees;
 
 import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
 import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
-import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphdb.Direction;
 
@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  *
  * @author mknblch
  */
-public class Prim extends Algorithm<Prim> {
+public class Prim extends LegacyAlgorithm<Prim> {
 
     private final RelationshipIterator relationshipIterator;
     private final int nodeCount;

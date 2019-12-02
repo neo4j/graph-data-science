@@ -50,7 +50,7 @@ import java.util.stream.LongStream;
  * Parallel Computing 47 (2015): 19-37.
  * https://arxiv.org/pdf/1410.1237.pdf
  */
-public final class ModularityOptimization extends Algorithm<ModularityOptimization> {
+public final class ModularityOptimization extends Algorithm<ModularityOptimization, ModularityOptimization> {
 
     private final int concurrency;
     private final int maxIterations;
@@ -115,6 +115,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         }
     }
 
+    @Override
     public ModularityOptimization compute() {
         try (ProgressTimer timer = ProgressTimer.start(millis -> log.info("Modularity Optimization - Initialization finished after %dms", millis))) {
             computeColoring();
@@ -157,9 +158,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             concurrency,
             executor,
             tracker
-        ).withProgressLogger(progressLogger)
-         .withTerminationFlag(terminationFlag)
-         .compute();
+        ).withProgressLogger(progressLogger).withTerminationFlag(terminationFlag);
+
+        coloring.compute();
 
         this.colors = coloring.colors();
         this.colorsUsed = coloring.usedColors();

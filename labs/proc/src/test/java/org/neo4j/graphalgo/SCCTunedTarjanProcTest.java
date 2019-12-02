@@ -83,7 +83,8 @@ class SCCTunedTarjanProcTest extends ConnectedComponentsTest {
     void testDirect(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
 
-        final SCCTunedTarjan tarjan = new SCCTunedTarjan(graph).compute();
+        final SCCTunedTarjan tarjan = new SCCTunedTarjan(graph);
+        tarjan.compute();
 
         assertCC(tarjan.getConnectedComponents());
 

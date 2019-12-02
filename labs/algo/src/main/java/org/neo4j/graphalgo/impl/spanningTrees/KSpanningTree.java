@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.spanningTrees;
 
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipProperties;
@@ -37,7 +37,7 @@ import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
  * relationships to form k spanning trees
  * @author mknblch
  */
-public class KSpanningTree extends Algorithm<KSpanningTree> {
+public class KSpanningTree extends LegacyAlgorithm<KSpanningTree> {
 
     private IdMapping idMapping;
     private RelationshipIterator relationshipIterator;

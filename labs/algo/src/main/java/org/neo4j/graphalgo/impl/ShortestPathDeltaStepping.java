@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -53,7 +53,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  *
  * @author mknblch
  */
-public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaStepping> {
+public class ShortestPathDeltaStepping extends LegacyAlgorithm<ShortestPathDeltaStepping> {
 
     // distance array
     private AtomicIntegerArray distance;

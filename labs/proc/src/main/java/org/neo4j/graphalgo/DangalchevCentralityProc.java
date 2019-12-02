@@ -70,8 +70,8 @@ public class DangalchevCentralityProc extends LabsProc {
 
         final DangalchevClosenessCentrality algo = new DangalchevClosenessCentrality(graph, configuration.concurrency(), Pools.DEFAULT)
                 .withProgressLogger(ProgressLogger.wrap(log, "DangalchevCentrality"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .compute();
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
+        algo.compute();
 
         graph.release();
 

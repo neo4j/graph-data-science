@@ -206,7 +206,7 @@ public final class DegreeCentralityProc extends LabsProc {
                 tracker
         );
         statsBuilder.timeEval(algo::compute);
-        Algorithm<?> algorithm = algo.algorithm();
+        Algorithm<?, ?> algorithm = algo.algorithm();
         algorithm.withTerminationFlag(terminationFlag);
 
         final CentralityResult result = algo.result();

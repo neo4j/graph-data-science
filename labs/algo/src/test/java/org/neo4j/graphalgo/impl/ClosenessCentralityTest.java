@@ -91,15 +91,15 @@ class ClosenessCentralityTest extends AlgoTestBase {
     @AllGraphTypesWithoutCypherTest
     void testGetCentrality(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        final double[] centrality =
-                new MSClosenessCentrality(
-                        graph,
-                        AllocationTracker.EMPTY,
-                        Pools.DEFAULT_CONCURRENCY,
-                        Pools.DEFAULT,
-                        false)
-                        .compute()
-                        .exportToArray();
+        MSClosenessCentrality algo = new MSClosenessCentrality(
+            graph,
+            AllocationTracker.EMPTY,
+            Pools.DEFAULT_CONCURRENCY,
+            Pools.DEFAULT,
+            false
+        );
+        algo.compute();
+        final double[] centrality = algo.exportToArray();
 
         assertArrayEquals(EXPECTED, centrality, 0.1);
     }
@@ -109,10 +109,16 @@ class ClosenessCentralityTest extends AlgoTestBase {
         setup(graphFactory);
         final double[] centrality = new double[(int) graph.nodeCount()];
 
-        new MSClosenessCentrality(graph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, false)
-                .compute()
-                .resultStream()
-                .forEach(r -> centrality[Math.toIntExact(graph.toMappedNodeId(r.nodeId))] = r.centrality);
+        MSClosenessCentrality algo = new MSClosenessCentrality(
+            graph,
+            AllocationTracker.EMPTY,
+            Pools.DEFAULT_CONCURRENCY,
+            Pools.DEFAULT,
+            false
+        );
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> centrality[Math.toIntExact(graph.toMappedNodeId(r.nodeId))] = r.centrality);
 
         assertArrayEquals(EXPECTED, centrality, 0.1);
     }

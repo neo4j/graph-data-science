@@ -36,11 +36,12 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class NodeSimilarity extends Algorithm<NodeSimilarity> {
+public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResult> {
 
     private final Graph graph;
     private final Config config;
@@ -52,6 +53,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity> {
 
     private HugeObjectArray<long[]> vectors;
     private long nodesToCompare;
+
+    private Stream<SimilarityResult> similarityStream;
 
     public NodeSimilarity(
         Graph graph,
@@ -80,10 +83,25 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity> {
     private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
         (currentBufferLength, elementsCount, degree) -> elementsCount + degree;
 
-    public Stream<SimilarityResult> computeToStream(Direction direction) {
+    @Override
+    public NodeSimilarityResult compute() {
+        if (config.computeToStream) {
+            return ImmutableNodeSimilarityResult.of(
+                Optional.of(computeToStream()),
+                Optional.empty()
+            );
+        } else {
+            return ImmutableNodeSimilarityResult.of(
+                Optional.empty(),
+                Optional.of(computeToGraph())
+            );
+        }
+    }
+
+    public Stream<SimilarityResult> computeToStream() {
 
         // Create a filter for which nodes to compare and calculate the neighborhood for each node
-        prepare(direction);
+        prepare();
 
         assertRunning();
 
@@ -97,27 +115,27 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity> {
         } else {
             return config.isParallel()
                 ? computeParallel()
-                : compute();
+                : computeSimilarityResultStream();
         }
     }
 
-    public SimilarityGraphResult computeToGraph(Direction direction) {
+    public SimilarityGraphResult computeToGraph() {
         Graph similarityGraph;
         if (config.hasTopK() && !config.hasTopN()) {
-            prepare(direction);
+            prepare();
             TopKMap topKMap = config.isParallel()
                 ? computeTopKMapParallel()
                 : computeTopkMap();
             similarityGraph = new TopKGraph(graph, topKMap);
         } else {
-            Stream<SimilarityResult> similarities = computeToStream(direction);
+            Stream<SimilarityResult> similarities = computeToStream();
             similarityGraph = new SimilarityGraphBuilder(graph, executorService, tracker).build(similarities);
         }
         return new SimilarityGraphResult(similarityGraph, nodesToCompare);
     }
 
-    private void prepare(Direction direction) {
-        if (direction == Direction.BOTH) {
+    private void prepare() {
+        if (config.direction == Direction.BOTH) {
             throw new IllegalArgumentException(
                 "Direction BOTH is not supported by the NodeSimilarity algorithm.");
         }
@@ -127,7 +145,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity> {
         DegreeComputer degreeComputer = new DegreeComputer();
         VectorComputer vectorComputer = new VectorComputer();
         vectors.setAll(node -> {
-            graph.forEachRelationship(node, direction, degreeComputer);
+            graph.forEachRelationship(node, config.direction, degreeComputer);
             int degree = degreeComputer.degree;
             degreeComputer.reset();
             vectorComputer.reset(degree);
@@ -135,14 +153,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity> {
                 nodesToCompare++;
                 nodeFilter.set(node);
 
-                graph.forEachRelationship(node, direction, vectorComputer);
+                graph.forEachRelationship(node, config.direction, vectorComputer);
                 return vectorComputer.targetIds.buffer;
             }
             return null;
         });
     }
 
-    private Stream<SimilarityResult> compute() {
+    private Stream<SimilarityResult> computeSimilarityResultStream() {
         return (config.hasTopK() && config.hasTopN())
             ? computeTopN(computeTopkMap())
             : (config.hasTopK())
@@ -303,13 +321,18 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity> {
         private final int concurrency;
         private final int minBatchSize;
 
+        final Direction direction;
+        final boolean computeToStream;
+
         public Config(
             double similarityCutoff,
             int degreeCutoff,
             int topN,
             int topK,
             int concurrency,
-            int minBatchSize
+            int minBatchSize,
+            Direction direction,
+            boolean computeToStream
         ) {
             this.similarityCutoff = similarityCutoff;
             // TODO: make this constraint more prominent
@@ -318,6 +341,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity> {
             this.topK = topK;
             this.concurrency = concurrency;
             this.minBatchSize = minBatchSize;
+            this.direction = direction;
+            this.computeToStream = computeToStream;
         }
 
         public int topK() {

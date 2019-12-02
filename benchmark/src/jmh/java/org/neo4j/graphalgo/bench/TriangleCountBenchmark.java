@@ -110,7 +110,9 @@ public class TriangleCountBenchmark {
 
     @Benchmark
     public Object _02_forkJoin() {
-        return new TriangleCountForkJoin(g, Pools.FJ_POOL, seqThreshold).compute().getTriangleCount();
+        TriangleCountForkJoin algo = new TriangleCountForkJoin(g, Pools.FJ_POOL, seqThreshold);
+        algo.compute();
+        return algo.getTriangleCount();
     }
 
     @Benchmark

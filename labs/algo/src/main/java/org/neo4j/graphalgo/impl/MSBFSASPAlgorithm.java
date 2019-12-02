@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 
 import java.util.stream.Stream;
 
-public abstract class MSBFSASPAlgorithm<ME extends MSBFSASPAlgorithm<ME>> extends Algorithm<ME> {
+public abstract class MSBFSASPAlgorithm<ME extends MSBFSASPAlgorithm<ME>> extends LegacyAlgorithm<ME> {
 
     public abstract Stream<WeightedAllShortestPaths.Result> resultStream();
 }

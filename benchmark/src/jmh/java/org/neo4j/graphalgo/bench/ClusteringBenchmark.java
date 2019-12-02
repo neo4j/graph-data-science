@@ -107,8 +107,17 @@ public class ClusteringBenchmark {
 
     @Benchmark
     public Object _03_infoMap() {
-        return InfoMap.unweighted(g, pageRankResult::score, InfoMap.THRESHOLD, InfoMap.TAU, Pools.FJ_POOL, concurrency,ProgressLogger.NULL_LOGGER, TerminationFlag.RUNNING_TRUE)
-                .compute()
-                .getCommunityCount();
+        InfoMap algo = InfoMap.unweighted(
+            g,
+            pageRankResult::score,
+            InfoMap.THRESHOLD,
+            InfoMap.TAU,
+            Pools.FJ_POOL,
+            concurrency,
+            ProgressLogger.NULL_LOGGER,
+            TerminationFlag.RUNNING_TRUE
+        );
+        algo.compute();
+        return algo.getCommunityCount();
     }
 }

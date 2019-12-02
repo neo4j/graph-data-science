@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -26,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Collection;
@@ -51,7 +51,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount> {
+public class IntersectingTriangleCount extends LegacyAlgorithm<IntersectingTriangleCount> {
 
     private Graph graph;
     private ExecutorService executorService;
@@ -120,7 +120,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         triangles = null;
     }
 
-    public IntersectingTriangleCount compute() {
+    public Boolean compute() {
         visitedNodes.set(0);
         queue.set(0);
         triangleCount.reset();
@@ -129,7 +129,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(graph));
         // run
         ParallelUtil.run(tasks, executorService);
-        return this;
+        return true;
     }
 
     private class IntersectTask implements Runnable, IntersectionConsumer {

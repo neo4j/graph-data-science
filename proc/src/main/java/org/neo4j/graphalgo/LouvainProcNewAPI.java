@@ -43,7 +43,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.LongConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,7 +50,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, LouvainConfig> {
+public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainConfig> {
 
     @Procedure(value = "gds.algo.louvain.write", mode = WRITE)
     @Description("CALL gds.algo.louvain.write(graphName: STRING, configuration: MAP {" +

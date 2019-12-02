@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
-public final class Louvain extends Algorithm<Louvain> {
+public final class Louvain extends Algorithm<Louvain, Louvain> {
 
     private final int concurrency;
     private final Graph rootGraph;
@@ -79,6 +79,7 @@ public final class Louvain extends Algorithm<Louvain> {
         this.direction = direction;
     }
 
+    @Override
     public Louvain compute() {
 
         Graph workingGraph = rootGraph;
@@ -150,7 +151,7 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodeProperties seed) {
-        return new ModularityOptimization(
+        ModularityOptimization modularityOptimization = new ModularityOptimization(
             louvainGraph,
             direction,
             10,
@@ -163,8 +164,11 @@ public final class Louvain extends Algorithm<Louvain> {
             log
         )
             .withProgressLogger(progressLogger)
-            .withTerminationFlag(terminationFlag)
-            .compute();
+            .withTerminationFlag(terminationFlag);
+
+        modularityOptimization.compute();
+
+        return modularityOptimization;
     }
 
     private Graph summarizeGraph(Graph workingGraph, ModularityOptimization modularityOptimization, long maxCommunityId) {

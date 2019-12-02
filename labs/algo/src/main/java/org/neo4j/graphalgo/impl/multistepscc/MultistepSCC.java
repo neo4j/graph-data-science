@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.IntLookupContainer;
 import com.carrotsearch.hppc.IntScatterSet;
 import com.carrotsearch.hppc.IntSet;
 import com.carrotsearch.hppc.procedures.IntProcedure;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.impl.traverse.ParallelLocalQueueBFS;
 import org.neo4j.graphdb.Direction;
@@ -59,7 +59,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntPredicate
  * Sequential Tarjan algorithm is then used to extract remaining SCCs of the nodeSet until
  * no more set can be build.
  */
-public class MultistepSCC extends Algorithm<MultistepSCC> {
+public class MultistepSCC extends LegacyAlgorithm<MultistepSCC> {
 
     // the graph
     private Graph graph;
@@ -101,7 +101,7 @@ public class MultistepSCC extends Algorithm<MultistepSCC> {
         connectedComponents = new int[nodeCount];
     }
 
-    public MultistepSCC compute() {
+    public Boolean compute() {
 
         minSetSize = Integer.MAX_VALUE;
         maxSetSize = 0;
@@ -129,7 +129,7 @@ public class MultistepSCC extends Algorithm<MultistepSCC> {
         });
         // nodeSet size below threshold, do sequential tarjan
         tarjan.compute(nodeSet);
-        return this;
+        return true;
     }
 
     public int[] result() {

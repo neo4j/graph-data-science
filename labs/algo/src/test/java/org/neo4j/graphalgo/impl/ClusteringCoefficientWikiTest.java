@@ -85,8 +85,8 @@ class ClusteringCoefficientWikiTest extends AlgoTestBase {
     @Test
     void test() {
         final IntersectingTriangleCount algo =
-                new IntersectingTriangleCount(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
-                        .compute();
+            new IntersectingTriangleCount(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY);
+        algo.compute();
         assertArrayEquals(EXPECTED, algo.getCoefficients().toArray(), 0.1);
         assertEquals(0.583, algo.getAverageCoefficient(), 0.01);
     }

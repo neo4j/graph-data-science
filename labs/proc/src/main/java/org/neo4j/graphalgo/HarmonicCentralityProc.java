@@ -71,8 +71,8 @@ public class HarmonicCentralityProc extends LabsProc {
 
         final HarmonicCentrality algo = new HarmonicCentrality(graph, tracker, configuration.concurrency(), Pools.DEFAULT)
                 .withProgressLogger(ProgressLogger.wrap(log, "HarmonicCentrality"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .compute();
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
+        algo.compute();
 
         graph.release();
 

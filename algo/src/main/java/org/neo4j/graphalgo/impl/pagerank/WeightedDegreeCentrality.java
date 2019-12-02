@@ -34,23 +34,26 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality> {
+public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality, WeightedDegreeCentrality> {
     private final long nodeCount;
     private Graph graph;
     private final ExecutorService executor;
     private final int concurrency;
     private volatile AtomicInteger nodeQueue = new AtomicInteger();
+    private final boolean cacheWeights;
 
     private HugeDoubleArray degrees;
     private HugeObjectArray<HugeDoubleArray> weights;
     private AllocationTracker tracker;
 
     public WeightedDegreeCentrality(
-            Graph graph,
-            ExecutorService executor,
-            int concurrency,
-            AllocationTracker tracker
+        Graph graph,
+        int concurrency,
+        boolean cacheWeights,
+        ExecutorService executor,
+        AllocationTracker tracker
     ) {
+        this.cacheWeights = cacheWeights;
         if (!graph.hasRelationshipProperty()) {
             throw new UnsupportedOperationException("WeightedDegreeCentrality requires a weight property to be loaded.");
         }
@@ -68,7 +71,8 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         weights = HugeObjectArray.newArray(HugeDoubleArray.class, nodeCount, tracker);
     }
 
-    public WeightedDegreeCentrality compute(boolean cacheWeights) {
+    @Override
+    public WeightedDegreeCentrality compute() {
         nodeQueue.set(0);
 
         long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency);

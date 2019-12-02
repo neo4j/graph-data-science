@@ -58,7 +58,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
 @SuppressWarnings("unused")
-public final class LabelPropagationProc extends LegacyBaseAlgoProc<LabelPropagation> {
+public final class LabelPropagationProc extends LegacyBaseAlgoProc<LabelPropagation, LabelPropagation> {
 
     private static final String CONFIG_WEIGHT_KEY = "weightProperty";
     private static final String CONFIG_OLD_SEED_KEY = "partitionProperty";
@@ -162,7 +162,17 @@ public final class LabelPropagationProc extends LegacyBaseAlgoProc<LabelPropagat
         int concurrency = config.concurrency();
         String seedProperty = config.getString(SEED_PROPERTY_KEY, CONFIG_OLD_SEED_KEY, null);
         String weightProperty = config.getString(CONFIG_WEIGHT_KEY, null);
-        LabelPropagation.Config algoConfig = new LabelPropagation.Config(seedProperty, weightProperty, batchSize, concurrency);
+
+        Direction procedureDirection = config.getDirection(Direction.OUTGOING);
+
+        LabelPropagation.Config algoConfig = new LabelPropagation.Config(
+            seedProperty,
+            weightProperty,
+            batchSize,
+            concurrency,
+            procedureDirection,
+            config.getIterations(DEFAULT_ITERATIONS)
+        );
         return new LabelPropagationFactory(algoConfig);
     }
 
@@ -277,12 +287,12 @@ public final class LabelPropagationProc extends LegacyBaseAlgoProc<LabelPropagat
             ));
         }
 
+        // TODO this is a hack and should be removed
+        algo.withDirection(computeDirection.get());
+
         HugeLongArray algoResult = runWithExceptionLogging(
             "LabelPropagation failed",
-            () -> setup.statsBuilder.timeEval(() -> algo.compute(
-                computeDirection.get(),
-                setup.procedureConfig.getIterations(DEFAULT_ITERATIONS)
-            ))
+            () -> setup.statsBuilder.timeEval(algo::compute)
         ).labels();
 
         setup.statsBuilder

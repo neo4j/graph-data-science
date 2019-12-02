@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.betweenness;
 
 import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntStack;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.container.Path;
 import org.neo4j.graphdb.Direction;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public class BetweennessCentrality extends Algorithm<BetweennessCentrality> {
+public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality> {
 
     private Graph graph;
 
@@ -76,10 +76,10 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality> {
      *
      * @return itself for method chaining
      */
-    public BetweennessCentrality compute() {
+    public Boolean compute() {
         Arrays.fill(centrality, 0);
         graph.forEachNode(this::compute);
-        return this;
+        return true;
     }
 
     /**

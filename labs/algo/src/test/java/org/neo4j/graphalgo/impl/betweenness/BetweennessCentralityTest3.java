@@ -77,11 +77,11 @@ class BetweennessCentralityTest3 extends AlgoTestBase {
     @AllGraphTypesWithoutCypherTest
     void testBetweennessCentralityOutgoing(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        Map<String, Double> actual = new BetweennessCentrality(graph)
-                .withDirection(Direction.OUTGOING)
-                .compute()
-                .resultStream()
-                .collect(Collectors.toMap(r -> name(r.nodeId), r -> r.centrality));
+        BetweennessCentrality algo = new BetweennessCentrality(graph).withDirection(Direction.OUTGOING);
+        algo.compute();
+        Map<String, Double> actual = algo
+            .resultStream()
+            .collect(Collectors.toMap(r -> name(r.nodeId), r -> r.centrality));
 
         Map<String, Double> expected = new HashMap<>();
         expected.put("a", 0.0);
@@ -98,10 +98,9 @@ class BetweennessCentralityTest3 extends AlgoTestBase {
     @AllGraphTypesWithoutCypherTest
     void testBetweennessCentralityIncoming(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        Map<String, Double> actual = new BetweennessCentrality(graph)
-                .withDirection(Direction.INCOMING)
-                .compute()
-                .resultStream()
+        BetweennessCentrality algo = new BetweennessCentrality(graph).withDirection(Direction.INCOMING);
+        algo.compute();
+        Map<String, Double> actual = algo.resultStream()
                 .collect(Collectors.toMap(r -> name(r.nodeId), r -> r.centrality));
 
         Map<String, Double> expected = new HashMap<>();
@@ -119,11 +118,11 @@ class BetweennessCentralityTest3 extends AlgoTestBase {
     @AllGraphTypesWithoutCypherTest
     void testBetweennessCentralityBoth(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        Map<String, Double> actual = new BetweennessCentrality(graph)
-                .withDirection(Direction.BOTH)
-                .compute()
-                .resultStream()
-                .collect(Collectors.toMap(r -> name(r.nodeId), r -> r.centrality));
+        BetweennessCentrality algo = new BetweennessCentrality(graph)
+            .withDirection(Direction.BOTH);
+        algo.compute();
+        Map<String, Double> actual = algo.resultStream()
+            .collect(Collectors.toMap(r -> name(r.nodeId), r -> r.centrality));
 
         Map<String, Double> expected = new HashMap<>();
         expected.put("a", 5.0 / 6.0);

@@ -213,11 +213,12 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             return Stream.empty();
         }
 
-        return new SCCTunedTarjan(graph)
-                .withProgressLogger(ProgressLogger.wrap(log, "SCC(TunedTarjan)"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .compute()
-                .resultStream();
+        SCCTunedTarjan sccTunedTarjan = new SCCTunedTarjan(graph)
+            .withProgressLogger(ProgressLogger.wrap(log, "SCC(TunedTarjan)"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
+
+        sccTunedTarjan.compute();
+        return sccTunedTarjan.resultStream();
     }
 
     // algo.scc.iterative
@@ -298,14 +299,14 @@ public class StronglyConnectedComponentsProc extends LabsProc {
         }
 
         final AllocationTracker tracker = AllocationTracker.create();
-        final SCCAlgorithm compute = SCCAlgorithm.iterativeTarjan(graph, tracker)
+        final SCCAlgorithm algo = SCCAlgorithm.iterativeTarjan(graph, tracker)
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(IterativeTarjan)"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .compute();
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
+        algo.compute();
 
         graph.release();
 
-        return compute.resultStream();
+        return algo.resultStream();
     }
 
 

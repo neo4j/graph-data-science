@@ -92,10 +92,11 @@ public class LabelPropagationBenchmarkLdbc {
             new ConfigBuilder()
                 .withSeedProperty(SEED_PROPERTY)
                 .withWeightProperty(WEIGHT_PROPERTY)
+                .withMaxIterations(iterations)
                 .build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
-        ).compute(Direction.OUTGOING, iterations);
+        ).compute();
     }
 
     static class ConfigBuilder {
@@ -104,6 +105,8 @@ public class LabelPropagationBenchmarkLdbc {
         private String weightProperty = null;
         private int batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
         private int concurrency = Pools.DEFAULT_CONCURRENCY;
+        private Direction direction = Direction.OUTGOING;
+        private int maxIterations = 10;
 
         ConfigBuilder withSeedProperty(String seedProperty) {
             this.seedProperty = seedProperty;
@@ -114,9 +117,25 @@ public class LabelPropagationBenchmarkLdbc {
             this.weightProperty = weightProperty;
             return this;
         }
+        ConfigBuilder withDirection(Direction direction) {
+            this.direction = direction;
+            return this;
+        }
+
+        ConfigBuilder withMaxIterations(int maxIterations) {
+            this.maxIterations = maxIterations;
+            return this;
+        }
 
         LabelPropagation.Config build() {
-            return new LabelPropagation.Config(seedProperty, weightProperty, batchSize, concurrency);
+            return new LabelPropagation.Config(
+                seedProperty,
+                weightProperty,
+                batchSize,
+                concurrency,
+                direction,
+                maxIterations
+            );
         }
     }
 }

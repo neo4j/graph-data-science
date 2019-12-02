@@ -29,7 +29,7 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.IntObjectScatterMap;
 import com.carrotsearch.hppc.IntStack;
 import com.carrotsearch.hppc.cursors.IntCursor;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
@@ -57,7 +57,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweennessCentrality> {
+public class RABrandesBetweennessCentrality extends LegacyAlgorithm<RABrandesBetweennessCentrality> {
 
     public interface SelectionStrategy {
 
@@ -135,14 +135,14 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
      *
      * @return itself for method chaining
      */
-    public RABrandesBetweennessCentrality compute() {
+    public Boolean compute() {
         nodeQueue.set(0);
         final ArrayList<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {
             futures.add(executorService.submit(new BCTask()));
         }
         ParallelUtil.awaitTermination(futures);
-        return this;
+        return true;
     }
 
     /**

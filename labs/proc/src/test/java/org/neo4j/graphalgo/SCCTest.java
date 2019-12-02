@@ -82,17 +82,17 @@ class SCCTest extends ConnectedComponentsTest {
     @AllGraphTypesWithoutCypherTest
     void testHugeIterativeScc(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        assertCC(new SCCIterativeTarjan(graph, AllocationTracker.EMPTY)
-                .compute()
-                .getConnectedComponents());
+        SCCIterativeTarjan algo = new SCCIterativeTarjan(graph, AllocationTracker.EMPTY);
+        algo.compute();
+        assertCC(algo.getConnectedComponents());
     }
 
     @AllGraphTypesWithoutCypherTest
     void testTunedTarjan(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        int[] connectedComponents = new SCCTunedTarjan(graph)
-                .compute()
-                .getConnectedComponents();
+        SCCTunedTarjan algo = new SCCTunedTarjan(graph);
+        algo.compute();
+        int[] connectedComponents = algo.getConnectedComponents();
         HugeLongArray longs = HugeLongArray.of(Arrays.stream(connectedComponents).mapToLong(i -> (long) i).toArray());
         assertCC(longs);
     }

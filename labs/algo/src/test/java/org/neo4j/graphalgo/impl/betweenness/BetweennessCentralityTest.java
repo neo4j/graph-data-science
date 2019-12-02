@@ -38,23 +38,23 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- *  (A)-->(B)-->(C)-->(D)-->(E)
- *  0.0   3.0   4.0   3.0   0.0
+ * (A)-->(B)-->(C)-->(D)-->(E)
+ * 0.0   3.0   4.0   3.0   0.0
  */
 @ExtendWith(MockitoExtension.class)
 class BetweennessCentralityTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:Node {name:'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (a)-[:TYPE]->(b)" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (c)-[:TYPE]->(d)" +
-            ", (d)-[:TYPE]->(e)";
+        "CREATE" +
+        "  (a:Node {name:'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (a)-[:TYPE]->(b)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(d)" +
+        ", (d)-[:TYPE]->(e)";
 
     private static Graph graph;
 
@@ -87,30 +87,41 @@ class BetweennessCentralityTest extends AlgoTestBase {
     @AllGraphTypesWithoutCypherTest
     void testBC(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        new BetweennessCentrality(graph)
-                .compute()
-                .resultStream()
-                .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
+        BetweennessCentrality algo = new BetweennessCentrality(graph);
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
         verifyMock(testConsumer);
     }
 
     @AllGraphTypesWithoutCypherTest
     void testRABrandesForceCompleteSampling(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, 3, new RandomSelectionStrategy(graph, 1.0))
-                .compute()
-                .resultStream()
-                .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
+        RABrandesBetweennessCentrality algo = new RABrandesBetweennessCentrality(
+            graph,
+            Pools.DEFAULT,
+            3,
+            new RandomSelectionStrategy(graph, 1.0)
+        );
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
         verifyMock(testConsumer);
     }
 
     @AllGraphTypesWithoutCypherTest
     void testRABrandesForceEmptySampling(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, 3, new RandomSelectionStrategy(graph, 0.0))
-                .compute()
-                .resultStream()
-                .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
+        RABrandesBetweennessCentrality algo = new RABrandesBetweennessCentrality(
+            graph,
+            Pools.DEFAULT,
+            3,
+            new RandomSelectionStrategy(graph, 0.0)
+        );
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
+
         verify(testConsumer, times(1)).accept(eq("a"), eq(0.0));
         verify(testConsumer, times(1)).accept(eq("b"), eq(0.0));
         verify(testConsumer, times(1)).accept(eq("c"), eq(0.0));
@@ -121,20 +132,29 @@ class BetweennessCentralityTest extends AlgoTestBase {
     @Disabled
     void testRABrandes(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, 3, new RandomSelectionStrategy(graph, 0.3, 5))
-                .compute()
-                .resultStream()
-                .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
+        RABrandesBetweennessCentrality algo = new RABrandesBetweennessCentrality(
+            graph,
+            Pools.DEFAULT,
+            3,
+            new RandomSelectionStrategy(graph, 0.3, 5)
+        );
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
         verifyMock(testConsumer);
     }
 
     @AllGraphTypesWithoutCypherTest
     void testPBC(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        new ParallelBetweennessCentrality(graph, Pools.DEFAULT, 4)
-                .compute()
-                .resultStream()
-                .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
+        ParallelBetweennessCentrality algo = new ParallelBetweennessCentrality(
+            graph,
+            Pools.DEFAULT,
+            4
+        );
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
         verifyMock(testConsumer);
     }
 

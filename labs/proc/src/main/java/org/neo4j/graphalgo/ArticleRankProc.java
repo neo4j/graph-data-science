@@ -189,7 +189,7 @@ public final class ArticleRankProc extends LabsProc{
                         tracker
                 );
 
-        Algorithm<?> algo = prAlgo
+        Algorithm<?, ?> algo = prAlgo
                 .withProgressLogger(log)
                 .withTerminationFlag(terminationFlag);
 

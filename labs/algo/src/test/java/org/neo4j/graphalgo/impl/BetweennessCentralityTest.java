@@ -79,9 +79,9 @@ class BetweennessCentralityTest extends AlgoTestBase {
 
     @Test
     void testMBC() {
-        new MaxDepthBetweennessCentrality(graph, 3)
-                .compute()
-                .resultStream()
-                .forEach(r -> System.out.println(name(r.nodeId) + " -> " + r.centrality));
+        MaxDepthBetweennessCentrality algo = new MaxDepthBetweennessCentrality(graph, 3);
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> System.out.println(name(r.nodeId) + " -> " + r.centrality));
     }
 }

@@ -19,17 +19,10 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.mem.Assessable;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
-import org.neo4j.logging.Log;
+public abstract class LegacyAlgorithm<ME extends LegacyAlgorithm<ME>> extends Algorithm<ME, Boolean> {
 
-public abstract class AlgorithmFactory<A extends Algorithm<A, ?>, C extends BaseAlgoConfig> implements Assessable {
-
-    public abstract A build(
-            final Graph graph,
-            final C configuration,
-            final AllocationTracker tracker,
-            final Log log);
+    @Override
+    public Boolean compute() {
+        return false;
+    }
 }

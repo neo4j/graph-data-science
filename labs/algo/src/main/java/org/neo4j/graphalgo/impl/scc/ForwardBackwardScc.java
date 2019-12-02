@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.impl.scc;
 
 import com.carrotsearch.hppc.IntScatterSet;
 import com.carrotsearch.hppc.IntSet;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.impl.traverse.ParallelLocalQueueBFS;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
@@ -33,7 +33,7 @@ import java.util.stream.StreamSupport;
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntPredicate;
 
-public class ForwardBackwardScc extends Algorithm<ForwardBackwardScc> {
+public class ForwardBackwardScc extends LegacyAlgorithm<ForwardBackwardScc> {
 
     private ParallelLocalQueueBFS traverse;
     private IntSet scc = new IntScatterSet();

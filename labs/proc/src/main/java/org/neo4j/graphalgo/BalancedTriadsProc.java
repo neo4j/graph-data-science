@@ -77,11 +77,18 @@ public class BalancedTriadsProc extends LabsProc {
         }
 
         // compute
-        return new BalancedTriads(graph, Pools.DEFAULT, configuration.concurrency(), AllocationTracker.create())
-                .withProgressLogger(ProgressLogger.wrap(log, "balancedTriads"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .compute()
-                .stream();
+        BalancedTriads balancedTriads = new BalancedTriads(
+            graph,
+            Pools.DEFAULT,
+            configuration.concurrency(),
+            AllocationTracker.create()
+        )
+            .withProgressLogger(ProgressLogger.wrap(log, "balancedTriads"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
+
+        balancedTriads.compute();
+
+        return balancedTriads.stream();
     }
 
 
@@ -120,8 +127,8 @@ public class BalancedTriadsProc extends LabsProc {
         try (ProgressTimer timer = builder.timeEval()) {
             balancedTriads = new BalancedTriads(graph, Pools.DEFAULT, configuration.concurrency(), AllocationTracker.create())
                     .withProgressLogger(ProgressLogger.wrap(log, "balancedTriads"))
-                    .withTerminationFlag(terminationFlag)
-                    .compute();
+                    .withTerminationFlag(terminationFlag);
+            balancedTriads.compute();
         }
 
         // write

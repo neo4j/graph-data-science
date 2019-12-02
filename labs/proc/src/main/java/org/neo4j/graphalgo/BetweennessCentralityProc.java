@@ -89,8 +89,8 @@ public class BetweennessCentralityProc extends LabsProc {
                         .withTerminationFlag(TerminationFlag.wrap(transaction))
                         .withProgressLogger(ProgressLogger.wrap(log, "Randomized Approximate Brandes: BetweennessCentrality(parallel)"))
                         .withDirection(configuration.getDirection(Direction.OUTGOING))
-                        .withMaxDepth(configuration.getNumber("maxDepth", Integer.MAX_VALUE).intValue())
-                        .compute();
+                        .withMaxDepth(configuration.getNumber("maxDepth", Integer.MAX_VALUE).intValue());
+        algo.compute();
 
         graph.release();
 
@@ -127,15 +127,15 @@ public class BetweennessCentralityProc extends LabsProc {
                     new ParallelBetweennessCentrality(graph, Pools.DEFAULT, concurrency)
                             .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality"))
                             .withTerminationFlag(TerminationFlag.wrap(transaction))
-                            .withDirection(configuration.getDirection(DEFAULT_DIRECTION))
-                            .compute();
+                            .withDirection(configuration.getDirection(DEFAULT_DIRECTION));
+            algo.compute();
             graph.release();
             return algo.resultStream();
         }
 
         final BetweennessCentrality compute = new BetweennessCentrality(graph)
-                .withDirection(configuration.getDirection(DEFAULT_DIRECTION))
-                .compute();
+            .withDirection(configuration.getDirection(DEFAULT_DIRECTION));
+        compute.compute();
         graph.release();
         return compute.resultStream();
     }

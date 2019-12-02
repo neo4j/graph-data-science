@@ -115,15 +115,16 @@ public class TriangleProc extends LabsProc {
             return Stream.empty();
         }
 
-        return new IntersectingTriangleCount(
-                graph,
-                Pools.DEFAULT,
-                configuration.concurrency(),
-                AllocationTracker.create())
-                .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .compute()
-                .resultStream();
+        IntersectingTriangleCount algo = new IntersectingTriangleCount(
+            graph,
+            Pools.DEFAULT,
+            configuration.concurrency(),
+            AllocationTracker.create()
+        )
+            .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
+        algo.compute();
+        return algo.resultStream();
     }
 
 
@@ -148,14 +149,16 @@ public class TriangleProc extends LabsProc {
                 .undirected()
                 .load(configuration.getGraphImpl());
 
-        return new TriangleCountForkJoin(
-                graph,
-                ForkJoinPool.commonPool(),
-                configuration.getNumber("threshold", 10_000).intValue())
-                .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .compute()
-                .resultStream();
+        TriangleCountForkJoin algo = new TriangleCountForkJoin(
+            graph,
+            ForkJoinPool.commonPool(),
+            configuration.getNumber("threshold", 10_000).intValue()
+        )
+            .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
+
+        algo.compute();
+        return algo.resultStream();
     }
 
 
@@ -195,8 +198,8 @@ public class TriangleProc extends LabsProc {
                     configuration.concurrency(),
                     AllocationTracker.create())
                     .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
-                    .withTerminationFlag(TerminationFlag.wrap(transaction))
-                    .compute();
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+            triangleCount.compute();
             triangleCount.getCoefficients();
         }
 
@@ -308,8 +311,8 @@ public class TriangleProc extends LabsProc {
                     ForkJoinPool.commonPool(),
                     configuration.getNumber("threshold", 10_000).intValue())
                     .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
-                    .withTerminationFlag(TerminationFlag.wrap(transaction))
-                    .compute();
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+            triangleCount.compute();
             clusteringCoefficients = triangleCount.getClusteringCoefficients();
         }
 

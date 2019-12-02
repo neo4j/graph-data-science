@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.DAMPING_FACTOR_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
-public final class PageRankProc extends LegacyBaseAlgoProc<PageRank> {
+public final class PageRankProc extends LegacyBaseAlgoProc<PageRank, PageRank> {
 
     private static final String CACHE_WEIGHTS_KEY = "cacheWeights";
     private static final Integer ITERATIONS_DEFAULT = 20;

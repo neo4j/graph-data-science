@@ -19,12 +19,12 @@
  */
 package org.neo4j.graphalgo.impl.scc;
 
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongStack;
 import org.neo4j.graphalgo.core.utils.paged.PagedSimpleBitSet;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.stream.LongStream;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
  *
  * specified in:  http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
  */
-public class SCCIterativeTarjan extends Algorithm<SCCIterativeTarjan> implements SCCAlgorithm {
+public class SCCIterativeTarjan extends LegacyAlgorithm<SCCIterativeTarjan> implements SCCAlgorithm {
 
     private enum Action {
         VISIT(0L),
@@ -79,7 +79,7 @@ public class SCCIterativeTarjan extends Algorithm<SCCIterativeTarjan> implements
      * compute scc
      * @return
      */
-    public SCCIterativeTarjan compute() {
+    public Boolean compute() {
         setCount = 0;
         minSetSize = Integer.MAX_VALUE;
         maxSetSize = 0;
@@ -89,7 +89,7 @@ public class SCCIterativeTarjan extends Algorithm<SCCIterativeTarjan> implements
         boundaries.clear();
         stack.clear();
         graph.forEachNode(this::compute);
-        return this;
+        return true;
     }
 
     @Override

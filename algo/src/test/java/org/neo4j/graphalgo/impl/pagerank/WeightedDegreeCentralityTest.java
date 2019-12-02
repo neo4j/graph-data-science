@@ -159,10 +159,11 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
                 graph,
-                Pools.DEFAULT,
-                1,
-                AllocationTracker.EMPTY);
-        degreeCentrality.compute(true);
+            1,
+            true,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY);
+        degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
@@ -188,9 +189,10 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
             new WeightedDegreeCentrality(
                     graph,
-                    Pools.DEFAULT,
-                    1,
-                    AllocationTracker.EMPTY);
+                1,
+                false,
+                Pools.DEFAULT,
+                AllocationTracker.EMPTY);
         });
 
         assertEquals(
@@ -240,10 +242,11 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
                 graph,
-                Pools.DEFAULT,
-                1,
-                AllocationTracker.EMPTY);
-        degreeCentrality.compute(false);
+            1,
+            false,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY);
+        degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {
             long nodeId = graph.toOriginalNodeId(i);
@@ -296,10 +299,11 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
                 graph,
-                Pools.DEFAULT,
-                1,
-                AllocationTracker.EMPTY);
-        degreeCentrality.compute(false);
+            1,
+            false,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY);
+        degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
@@ -360,10 +364,11 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
                 graph,
-                Pools.DEFAULT,
-                4,
-                AllocationTracker.EMPTY);
-        degreeCentrality.compute(false);
+            4,
+            false,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY);
+        degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 /**
  * Dangalchev Closeness Centrality
  */
-public class DangalchevClosenessCentrality extends Algorithm<DangalchevClosenessCentrality> {
+public class DangalchevClosenessCentrality extends LegacyAlgorithm<DangalchevClosenessCentrality> {
 
     private Graph graph;
     private AtomicDoubleArray farness;
@@ -54,7 +54,7 @@ public class DangalchevClosenessCentrality extends Algorithm<DangalchevCloseness
         farness = new AtomicDoubleArray(nodeCount);
     }
 
-    public DangalchevClosenessCentrality compute() {
+    public Boolean compute() {
 
         final ProgressLogger progressLogger = getProgressLogger();
 
@@ -67,7 +67,7 @@ public class DangalchevClosenessCentrality extends Algorithm<DangalchevCloseness
         new MultiSourceBFS(graph, graph, Direction.OUTGOING, consumer, AllocationTracker.EMPTY)
             .run(concurrency, executorService);
 
-        return this;
+        return true;
     }
 
     public Stream<Result> resultStream() {

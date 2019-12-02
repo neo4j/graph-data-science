@@ -81,10 +81,16 @@ class ClosenessCentralityIntegrationTest_546 extends AlgoTestBase {
                 .load(HugeGraphFactory.class);
 
         System.out.println("547:");
-        new MSClosenessCentrality(graph, AllocationTracker.EMPTY, 2, Pools.DEFAULT, false)
-                .compute()
-                .resultStream()
-                .forEach(this::print);
+        MSClosenessCentrality algo = new MSClosenessCentrality(
+            graph,
+            AllocationTracker.EMPTY,
+            2,
+            Pools.DEFAULT,
+            false
+        );
+        algo.compute();
+        algo.resultStream()
+            .forEach(this::print);
 
     }
 
@@ -113,10 +119,16 @@ class ClosenessCentralityIntegrationTest_546 extends AlgoTestBase {
                 .load(HugeGraphFactory.class);
 
         System.out.println("546:");
-        new MSClosenessCentrality(graph, AllocationTracker.EMPTY, 2, Pools.DEFAULT, false)
-                .compute()
-                .resultStream()
-                .forEach(this::print);
+        MSClosenessCentrality algo = new MSClosenessCentrality(
+            graph,
+            AllocationTracker.EMPTY,
+            2,
+            Pools.DEFAULT,
+            false
+        );
+        algo.compute();
+        algo.resultStream()
+            .forEach(this::print);
 
     }
 

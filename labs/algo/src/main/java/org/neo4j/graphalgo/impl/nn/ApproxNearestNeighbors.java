@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.nn;
 
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.cursors.LongCursor;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -56,7 +56,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-public class ApproxNearestNeighbors<T extends SimilarityInput> extends Algorithm<ApproxNearestNeighbors<T>> {
+public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlgorithm<ApproxNearestNeighbors<T>> {
     private T[] inputs;
     private final int topK;
     private final int iterations;
@@ -104,7 +104,7 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends Algorithm
         this.similarityComputer = similarityComputer;
     }
 
-    public void compute() {
+    public Boolean compute() {
         double sampleSize = Math.min(this.p, 1.0) * Math.abs(this.topK);
         Collection<Runnable> tasks = createInitTasks();
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
@@ -146,6 +146,7 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends Algorithm
             }
 
         }
+        return true;
     }
 
     private Collection<Runnable> setupTasks(

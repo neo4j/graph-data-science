@@ -22,10 +22,8 @@ package org.neo4j.graphalgo.impl.pagerank;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -100,7 +98,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  * [1]: <a href="http://delab.csd.auth.gr/~dimitris/courses/ir_spring06/page_rank_computing/01531136.pdf">An Efficient Partition-Based Parallel PageRank Algorithm</a><br>
  * [2]: <a href="https://www.cs.purdue.edu/homes/dgleich/publications/gleich2004-parallel.pdf">Fast Parallel PageRank: A Linear System Approach</a>
  */
-public class PageRank extends Algorithm<PageRank> {
+public class PageRank extends Algorithm<PageRank, PageRank> {
 
     public static final double DEFAULT_WEIGHT = 1.0D;
     public static final Double DEFAULT_TOLERANCE = 0.0000001D;
@@ -186,6 +184,7 @@ public class PageRank extends Algorithm<PageRank> {
     /**
      * compute pageRank for n iterations
      */
+    @Override
     public PageRank compute() {
         initializeSteps();
         computeSteps.run(maxIterations);

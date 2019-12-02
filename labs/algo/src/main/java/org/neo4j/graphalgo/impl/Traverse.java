@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.LongArrayDeque;
 import com.carrotsearch.hppc.LongArrayList;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphdb.Direction;
 
@@ -32,7 +32,7 @@ import java.util.function.ObjLongConsumer;
 
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
-public class Traverse extends Algorithm<Traverse> {
+public class Traverse extends LegacyAlgorithm<Traverse> {
 
     private final int nodeCount;
     private Graph graph;

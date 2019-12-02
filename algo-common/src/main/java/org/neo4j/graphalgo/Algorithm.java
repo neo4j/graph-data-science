@@ -23,11 +23,13 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.logging.Log;
 
-public abstract class Algorithm<ME extends Algorithm<ME>> implements TerminationFlag {
+public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implements TerminationFlag {
 
     protected ProgressLogger progressLogger = ProgressLogger.NULL_LOGGER;
 
     protected TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
+
+    public abstract RESULT compute();
 
     public abstract ME me();
 

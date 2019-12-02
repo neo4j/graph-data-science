@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.impl.scc;
 
 import com.carrotsearch.hppc.IntStack;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
@@ -37,7 +37,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntPredicate
  * <p>
  * as specified in: https://pdfs.semanticscholar.org/61db/6892a92d1d5bdc83e52cc18041613cf895fa.pdf
  */
-public class SCCTunedTarjan extends Algorithm<SCCTunedTarjan> implements SCCAlgorithm {
+public class SCCTunedTarjan extends LegacyAlgorithm<SCCTunedTarjan> implements SCCAlgorithm {
 
     private Graph graph;
     private IntStack edgeStack;
@@ -58,7 +58,7 @@ public class SCCTunedTarjan extends Algorithm<SCCTunedTarjan> implements SCCAlgo
     }
 
     // compute scc
-    public SCCTunedTarjan compute() {
+    public Boolean compute() {
         final ProgressLogger progressLogger = getProgressLogger();
         Arrays.fill(connectedComponents, -1);
         setCount = 0;
@@ -74,7 +74,7 @@ public class SCCTunedTarjan extends Algorithm<SCCTunedTarjan> implements SCCAlgo
             progressLogger.logProgress((double) node / (nodeCount - 1));
             return running();
         }));
-        return this;
+        return true;
     }
 
     /**

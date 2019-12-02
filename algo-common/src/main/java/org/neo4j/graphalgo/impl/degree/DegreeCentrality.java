@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-public class DegreeCentrality extends Algorithm<DegreeCentrality> {
+public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrality> {
     public static final double DEFAULT_WEIGHT = 0D;
     private final int nodeCount;
     private final boolean weighted;
@@ -57,7 +57,8 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
         this.result = HugeDoubleArray.newArray(nodeCount, tracker);
     }
 
-    public void compute() {
+    @Override
+    public DegreeCentrality compute() {
         int batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency);
         int taskCount = ParallelUtil.threadCount(batchSize, nodeCount);
         List<Runnable> tasks = new ArrayList<>(taskCount);
@@ -76,9 +77,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
             startNode += batchSize;
         }
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
+
+        return this;
     }
 
-    public Algorithm<?> algorithm() {
+    public Algorithm<?, ?> algorithm() {
         return this;
     }
 

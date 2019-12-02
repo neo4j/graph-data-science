@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.betweenness;
 
 import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntStack;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
@@ -52,7 +52,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public class ParallelBetweennessCentrality extends Algorithm<ParallelBetweennessCentrality> {
+public class ParallelBetweennessCentrality extends LegacyAlgorithm<ParallelBetweennessCentrality> {
 
     // the graph
     private Graph graph;
@@ -104,14 +104,14 @@ public class ParallelBetweennessCentrality extends Algorithm<ParallelBetweenness
      *
      * @return itself for method chaining
      */
-    public ParallelBetweennessCentrality compute() {
+    public Boolean compute() {
         nodeQueue.set(0); //
         final ArrayList<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {
             futures.add(executorService.submit(new BCTask()));
         }
         ParallelUtil.awaitTermination(futures);
-        return this;
+        return true;
     }
 
     /**

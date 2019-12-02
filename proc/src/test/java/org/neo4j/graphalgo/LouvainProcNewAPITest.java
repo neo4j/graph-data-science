@@ -158,7 +158,7 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
     @AllGraphNamesTest
     void testWriteIntermediateCommunities(String graphImpl) {
         String writeProperty = "myFancyCommunity";
-        String query = "CALL algo.beta.louvain(" +
+        String query = "CALL gds.algo.louvain.write(" +
                        "    '', '', {" +
                        "        graph: $graph," +
                        "        includeIntermediateCommunities: true," +
@@ -182,7 +182,7 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
 
     @AllGraphNamesTest
     void testStream(String graphImpl) {
-        String query = "CALL algo.beta.louvain.stream(" +
+        String query = "CALL gds.algo.louvain.stream(" +
                        "    '', '', {" +
                        "        graph: $graph" +
                        "    } " +
@@ -201,7 +201,7 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
 
     @AllGraphNamesTest
     void testStreamCommunities(String graphImpl) {
-        String query = "CALL algo.beta.louvain.stream(" +
+        String query = "CALL gds.algo.louvain.stream(" +
                        "    '', '', {" +
                        "        graph: $graph," +
                        "        includeIntermediateCommunities: true" +
@@ -223,7 +223,7 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
     void testRunOnLoadedGraph() {
         runQuery("CALL algo.graph.load('myGraph','','', { direction: 'BOTH' })");
 
-        String query = "CALL algo.beta.louvain.stream(" +
+        String query = "CALL gds.algo.louvain.stream(" +
                        "    '', '', {" +
                        "        graph: 'myGraph'" +
                        "    } " +

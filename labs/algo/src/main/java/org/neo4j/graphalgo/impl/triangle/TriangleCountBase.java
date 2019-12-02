@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public abstract class TriangleCountBase<Coeff, Self extends TriangleCountBase<Coeff, Self>> extends Algorithm<Self> {
+public abstract class TriangleCountBase<Coeff, Self extends TriangleCountBase<Coeff, Self>> extends LegacyAlgorithm<Self> {
 
     public static final Direction D = Direction.OUTGOING;
 
@@ -115,10 +115,10 @@ public abstract class TriangleCountBase<Coeff, Self extends TriangleCountBase<Co
      * compute triangles
      * @return
      */
-    public final Self compute() {
+    public final Boolean compute() {
         visitedNodes.set(0);
         runCompute();
-        return me();
+        return true;
     }
 
     abstract void runCompute();

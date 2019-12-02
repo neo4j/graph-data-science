@@ -33,8 +33,8 @@ import java.util.function.Consumer;
 interface ProcTestBaseExtensions {
 
     default <
-        A extends Algorithm<A>,
-        P extends LegacyBaseAlgoProc<A>,
+        A extends Algorithm<A, ?>,
+        P extends LegacyBaseAlgoProc<A, ?>,
         F extends AlgorithmFactory<A, ProcedureConfiguration>>
     void getAlgorithmFactory(
         Class<? extends P> procClazz,
@@ -51,8 +51,8 @@ interface ProcTestBaseExtensions {
     }
 
     default <
-        A extends Algorithm<A>,
-        P extends LegacyBaseAlgoProc<A>>
+        A extends Algorithm<A, ?>,
+        P extends LegacyBaseAlgoProc<A, ?>>
     void getGraphSetup(
         Class<? extends P> procClazz,
         GraphDatabaseAPI db,
@@ -68,8 +68,8 @@ interface ProcTestBaseExtensions {
     }
 
     default <
-        A extends Algorithm<A>,
-        P extends BaseAlgoProc<A, ProcedureConfiguration>>
+        A extends Algorithm<A, ?>,
+        P extends BaseAlgoProc<A, ?, ProcedureConfiguration>>
     void getAlgorithmProc(
         Class<? extends P> procClazz,
         GraphDatabaseAPI db,

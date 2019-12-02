@@ -17,19 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.mem.Assessable;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
-import org.neo4j.logging.Log;
+package org.neo4j.graphalgo.impl.nodesim;
 
-public abstract class AlgorithmFactory<A extends Algorithm<A, ?>, C extends BaseAlgoConfig> implements Assessable {
+import org.neo4j.graphalgo.annotation.ValueClass;
 
-    public abstract A build(
-            final Graph graph,
-            final C configuration,
-            final AllocationTracker tracker,
-            final Log log);
+import java.util.Optional;
+import java.util.stream.Stream;
+
+@ValueClass
+public interface NodeSimilarityResult {
+    Optional<Stream<SimilarityResult>> maybeStreamResult();
+    Optional<SimilarityGraphResult> maybeGraphResult();
 }

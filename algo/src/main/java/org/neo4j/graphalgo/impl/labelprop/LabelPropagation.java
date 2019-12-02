@@ -39,7 +39,7 @@ import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 
-public class LabelPropagation extends Algorithm<LabelPropagation> {
+public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagation> {
 
     public static final double DEFAULT_WEIGHT = 1.0;
 
@@ -104,8 +104,9 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         return labels;
     }
 
-    public LabelPropagation compute(Direction direction, long maxIterations) {
-        if (maxIterations <= 0L) {
+    @Override
+    public LabelPropagation compute() {
+        if (config.maxIterations <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
 
@@ -116,10 +117,10 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         ranIterations = 0L;
         didConverge = false;
 
-        List<StepRunner> stepRunners = stepRunners(direction);
+        List<StepRunner> stepRunners = stepRunners(config.direction);
 
         long currentIteration = 0L;
-        while (currentIteration < maxIterations) {
+        while (currentIteration < config.maxIterations) {
             ParallelUtil.runWithConcurrency(config.concurrency, stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
             ++currentIteration;
         }
@@ -174,18 +175,38 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         return tasks;
     }
 
+    public LabelPropagation withDirection(Direction direction) {
+        config.withDirection(direction);
+        return this;
+    }
+
     public static class Config {
 
         private final String seedProperty;
         private final String weightProperty;
         private final int batchSize;
         private final int concurrency;
+        private Direction direction;
+        private final long maxIterations;
 
-        public Config(String seedProperty, String weightProperty, int batchSize, int concurrency) {
+        public Config(
+            String seedProperty,
+            String weightProperty,
+            int batchSize,
+            int concurrency,
+            Direction direction,
+            long maxIterations
+        ) {
             this.seedProperty = seedProperty;
             this.weightProperty = weightProperty;
             this.batchSize = batchSize;
             this.concurrency = concurrency;
+            this.direction = direction;
+            this.maxIterations = maxIterations;
+        }
+
+        void withDirection(Direction direction) {
+            this.direction = direction;
         }
     }
 }

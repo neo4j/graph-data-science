@@ -95,10 +95,15 @@ class HarmonicCentralityTest extends AlgoTestBase {
 
         final Consumer mock = mock(Consumer.class);
 
-        new HarmonicCentrality(graph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT)
-                .compute()
-                .resultStream()
-                .forEach(r -> mock.consume(r.nodeId, r.centrality));
+        HarmonicCentrality algo = new HarmonicCentrality(
+            graph,
+            AllocationTracker.EMPTY,
+            Pools.DEFAULT_CONCURRENCY,
+            Pools.DEFAULT
+        );
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> mock.consume(r.nodeId, r.centrality));
 
         verify(mock, times(2)).consume(anyLong(), AdditionalMatchers.eq(0.375, 0.1));
         verify(mock, times(2)).consume(anyLong(), AdditionalMatchers.eq(0.25, 0.1));

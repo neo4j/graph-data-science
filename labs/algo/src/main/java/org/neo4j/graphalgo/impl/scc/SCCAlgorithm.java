@@ -38,7 +38,7 @@ public interface SCCAlgorithm {
      * compute scc's
      * @return
      */
-    SCCAlgorithm compute();
+    Boolean compute();
 
     /**
      * get number of components

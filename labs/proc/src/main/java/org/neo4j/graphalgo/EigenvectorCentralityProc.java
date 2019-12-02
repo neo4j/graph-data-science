@@ -183,7 +183,7 @@ public final class EigenvectorCentralityProc extends LabsProc {
                         sourceNodeIds,
                         tracker);
 
-        Algorithm<?> algo = prAlgo
+        Algorithm<?, ?> algo = prAlgo
                 .withProgressLogger(log)
                 .withTerminationFlag(terminationFlag);
 

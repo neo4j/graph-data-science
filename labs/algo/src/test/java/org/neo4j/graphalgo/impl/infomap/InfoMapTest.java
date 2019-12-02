@@ -133,7 +133,8 @@ class InfoMapTest extends AlgoTestBase {
                 InfoMap.TAU,
                 Pools.FJ_POOL,
                 4, TestProgressLogger.INSTANCE, TerminationFlag.RUNNING_TRUE
-        ).compute();
+        );
+        algo.compute();
 
         // should be 3 communities in each graph
         assertEquals(3, algo.getCommunityCount());

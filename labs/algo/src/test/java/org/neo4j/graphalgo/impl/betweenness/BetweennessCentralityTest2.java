@@ -41,37 +41,37 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- *   .0                 .0
- *  (a)                 (f)
- *   | \               / |
- *   |  \8.0  9.0  8.0/  |
- *   |  (c)---(d)---(e)  |
- *   |  /            \   |
- *   | /              \  |
- *  (b)                (g)
- *   .0                 .0
+ * .0                 .0
+ * (a)                 (f)
+ * | \               / |
+ * |  \8.0  9.0  8.0/  |
+ * |  (c)---(d)---(e)  |
+ * |  /            \   |
+ * | /              \  |
+ * (b)                (g)
+ * .0                 .0
  */
 @ExtendWith(MockitoExtension.class)
 class BetweennessCentralityTest2 extends AlgoTestBase {
 
     private static final String CYPHER =
-            "CREATE" +
-            "  (a:Node {name: 'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (f:Node {name: 'f'})" +
-            ", (g:Node {name: 'g'})" +
+        "CREATE" +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (f:Node {name: 'f'})" +
+        ", (g:Node {name: 'g'})" +
 
-            ", (a)-[:TYPE]->(b)" +
-            ", (a)-[:TYPE]->(c)" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (c)-[:TYPE]->(d)" +
-            ", (d)-[:TYPE]->(e)" +
-            ", (e)-[:TYPE]->(f)" +
-            ", (e)-[:TYPE]->(g)" +
-            ", (f)-[:TYPE]->(g)";
+        ", (a)-[:TYPE]->(b)" +
+        ", (a)-[:TYPE]->(c)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(d)" +
+        ", (d)-[:TYPE]->(e)" +
+        ", (e)-[:TYPE]->(f)" +
+        ", (e)-[:TYPE]->(g)" +
+        ", (f)-[:TYPE]->(g)";
 
     private static Graph graph;
 
@@ -97,10 +97,10 @@ class BetweennessCentralityTest2 extends AlgoTestBase {
     void testBC(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
 
-        new BetweennessCentrality(graph)
-                .compute()
-                .resultStream()
-                .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
+        BetweennessCentrality algo = new BetweennessCentrality(graph);
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
 
         verifyMock(testConsumer);
     }
@@ -109,10 +109,14 @@ class BetweennessCentralityTest2 extends AlgoTestBase {
     void testPBC(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
 
-        new ParallelBetweennessCentrality(graph, Pools.DEFAULT, 4)
-                .compute()
-                .resultStream()
-                .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
+        ParallelBetweennessCentrality algo = new ParallelBetweennessCentrality(
+            graph,
+            Pools.DEFAULT,
+            4
+        );
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
 
         verifyMock(testConsumer);
     }
@@ -145,9 +149,9 @@ class BetweennessCentralityTest2 extends AlgoTestBase {
 
     private void setup(Class<? extends GraphFactory> graphImpl) {
         graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .load(graphImpl);
+            .withAnyRelationshipType()
+            .withAnyLabel()
+            .load(graphImpl);
     }
 
     private String name(long id) {

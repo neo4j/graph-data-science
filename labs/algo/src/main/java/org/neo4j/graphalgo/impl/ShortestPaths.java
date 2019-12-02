@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl;
 
 import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntPredicate
  * node in the graph. {@link Double#POSITIVE_INFINITY} is returned
  * if no path exists between those nodes.
  */
-public class ShortestPaths extends Algorithm<ShortestPaths> {
+public class ShortestPaths extends LegacyAlgorithm<ShortestPaths> {
 
     private Graph graph;
     private IntDoubleMap costs;

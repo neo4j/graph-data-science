@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.impl.yens;
 
 import com.carrotsearch.hppc.IntScatterSet;
 import com.carrotsearch.hppc.LongScatterSet;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  * outgoing relationships only. Direction.BOTH leads to incorrect results and is
  * therefore not supported.
  */
-public class YensKShortestPaths extends Algorithm<YensKShortestPaths> {
+public class YensKShortestPaths extends LegacyAlgorithm<YensKShortestPaths> {
 
     private Dijkstra dijkstra;
     private Graph graph;

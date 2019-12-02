@@ -44,28 +44,28 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 class BalancedTriadsTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
-            "CREATE " +
-            "  (a:Node {name: 'a'})" + // center node
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (f:Node {name: 'f'})" +
-            ", (g:Node {name: 'g'})" +
+        "CREATE " +
+        "  (a:Node {name: 'a'})" + // center node
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (f:Node {name: 'f'})" +
+        ", (g:Node {name: 'g'})" +
 
-            ", (a)-[:TYPE {w: 1.0}]->(b)" +
-            ", (a)-[:TYPE {w: -1.0}]->(c)" +
-            ", (a)-[:TYPE {w: 1.0}]->(d)" +
-            ", (a)-[:TYPE {w: -1.0}]->(e)" +
-            ", (a)-[:TYPE {w: 1.0}]->(f)" +
-            ", (a)-[:TYPE {w: -1.0}]->(g)" +
+        ", (a)-[:TYPE {w: 1.0}]->(b)" +
+        ", (a)-[:TYPE {w: -1.0}]->(c)" +
+        ", (a)-[:TYPE {w: 1.0}]->(d)" +
+        ", (a)-[:TYPE {w: -1.0}]->(e)" +
+        ", (a)-[:TYPE {w: 1.0}]->(f)" +
+        ", (a)-[:TYPE {w: -1.0}]->(g)" +
 
-            ", (b)-[:TYPE {w: -1.0}]->(c)" +
-            ", (c)-[:TYPE {w: 1.0}]->(d)" +
-            ", (d)-[:TYPE {w: -1.0}]->(e)" +
-            ", (e)-[:TYPE {w: 1.0}]->(f)" +
-            ", (f)-[:TYPE {w: -1.0}]->(g)" +
-            ", (g)-[:TYPE {w: 1.0}]->(b)";
+        ", (b)-[:TYPE {w: -1.0}]->(c)" +
+        ", (c)-[:TYPE {w: 1.0}]->(d)" +
+        ", (d)-[:TYPE {w: -1.0}]->(e)" +
+        ", (e)-[:TYPE {w: 1.0}]->(f)" +
+        ", (f)-[:TYPE {w: -1.0}]->(g)" +
+        ", (g)-[:TYPE {w: 1.0}]->(b)";
 
     @Mock
     final BalancedTriadTestConsumer consumer = mock(BalancedTriadTestConsumer.class);
@@ -81,12 +81,12 @@ class BalancedTriadsTest extends AlgoTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
         graph = new GraphLoader(db, Pools.DEFAULT)
-                .withLabel("Node")
-                .withRelationshipStatement("TYPE")
-                .withRelationshipProperties(PropertyMapping.of("w", 0.0))
-                .sorted()
-                .undirected()
-                .load(HugeGraphFactory.class);
+            .withLabel("Node")
+            .withRelationshipStatement("TYPE")
+            .withRelationshipProperties(PropertyMapping.of("w", 0.0))
+            .sorted()
+            .undirected()
+            .load(HugeGraphFactory.class);
     }
 
     @BeforeEach
@@ -96,10 +96,9 @@ class BalancedTriadsTest extends AlgoTestBase {
 
     @Test
     void testStream() {
-        new BalancedTriads(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
-                .compute()
-                .stream()
-                .forEach(r -> consumer.accept(r.nodeId, r.balanced, r.unbalanced));
+        BalancedTriads algo = new BalancedTriads(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY);
+        algo.compute();
+        algo.stream().forEach(r -> consumer.accept(r.nodeId, r.balanced, r.unbalanced));
         verify(consumer, times(1)).accept(eq(0L), eq(3L), eq(3L));
         verify(consumer, times(6)).accept(anyLong(), eq(1L), eq(1L));
     }

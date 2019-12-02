@@ -172,7 +172,8 @@ public class InfoMapProc extends LabsProc {
                 throw new IllegalArgumentException();
         }
 
-        final int[] communities = infoMap.compute().getCommunities();
+        infoMap.compute();
+        final int[] communities = infoMap.getCommunities();
 
         return IntStream.range(0, Math.toIntExact(graph.nodeCount()))
                 .mapToObj(i -> new Result(graph.toOriginalNodeId(i), communities[i]));

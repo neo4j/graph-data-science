@@ -56,7 +56,7 @@ import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEFAULT_LOUVAIN_DI
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class LouvainProc extends LegacyBaseAlgoProc<Louvain> {
+public class LouvainProc extends LegacyBaseAlgoProc<Louvain, Louvain> {
 
     public static final String LEVELS_KEY = "levels";
     public static final int LEVELS_DEFAULT = 10;

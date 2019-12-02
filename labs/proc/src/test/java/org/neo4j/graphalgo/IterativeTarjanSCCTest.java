@@ -83,8 +83,8 @@ class IterativeTarjanSCCTest extends ConnectedComponentsTest {
     @AllGraphTypesWithoutCypherTest
     void testDirect() {
 
-        final SCCIterativeTarjan tarjan = new SCCIterativeTarjan(graph, AllocationTracker.EMPTY)
-                .compute();
+        final SCCIterativeTarjan tarjan = new SCCIterativeTarjan(graph, AllocationTracker.EMPTY);
+        tarjan.compute();
 
         assertCC(tarjan.getConnectedComponents());
         assertEquals(3, tarjan.getMaxSetSize());

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.closeness;
 
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
+public class HarmonicCentrality extends LegacyAlgorithm<HarmonicCentrality> {
 
     private Graph graph;
     private final AllocationTracker allocationTracker;
@@ -57,7 +57,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
         inverseFarness = PagedAtomicDoubleArray.newArray(nodeCount, allocationTracker);
     }
 
-    public HarmonicCentrality compute() {
+    public Boolean compute() {
         final ProgressLogger progressLogger = getProgressLogger();
         final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
             final double len = sourceNodeIds.size();
@@ -73,7 +73,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
                 allocationTracker)
                 .run(concurrency, executorService);
 
-        return this;
+        return true;
     }
 
     public Stream<Result> resultStream() {

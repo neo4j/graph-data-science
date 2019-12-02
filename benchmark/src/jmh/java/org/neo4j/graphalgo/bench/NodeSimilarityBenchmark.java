@@ -86,7 +86,16 @@ public class NodeSimilarityBenchmark {
 
     @Setup
     public void setup() {
-        config = new NodeSimilarity.Config(0, 0, topN, topK, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
+        config = new NodeSimilarity.Config(
+            0,
+            0,
+            topN,
+            topK,
+            concurrency,
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            Direction.OUTGOING,
+            true
+        );
         db = TestDatabaseCreator.createTestDatabase();
 
         createGraph(db, scaleFactor);
@@ -106,12 +115,12 @@ public class NodeSimilarityBenchmark {
 
     @Benchmark
     public void nodeSimilarityToStream(Blackhole blackhole) {
-        initAlgo(config).computeToStream(Direction.OUTGOING).forEach(blackhole::consume);
+        initAlgo(config).computeToStream().forEach(blackhole::consume);
     }
 
     @Benchmark
     public void nodeSimilarityToGraph(Blackhole blackhole) {
-        blackhole.consume(initAlgo(config).computeToGraph(Direction.OUTGOING));
+        blackhole.consume(initAlgo(config).computeToGraph());
     }
 
     @Benchmark

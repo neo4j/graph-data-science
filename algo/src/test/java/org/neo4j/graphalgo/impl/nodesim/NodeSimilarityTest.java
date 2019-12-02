@@ -118,7 +118,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
             0,
             0,
             Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            OUTGOING,
+            true
         ));
     }
 
@@ -218,13 +220,13 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).toConfig(),
+            configBuilder().withConcurrency(concurrency).withDirection(algoDirection).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream(algoDirection)
+            .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
         nodeSimilarity.release();
@@ -243,13 +245,13 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withTopN(1).toConfig(),
+            configBuilder().withConcurrency(concurrency).withTopN(1).withDirection(algoDirection).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream(algoDirection)
+            .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
         nodeSimilarity.release();
@@ -272,12 +274,12 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withTopN(-1).toConfig(),
+            configBuilder().withConcurrency(concurrency).withTopN(-1).withDirection(algoDirection).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Graph similarityGraph = nodeSimilarity.computeToGraph(algoDirection).similarityGraph();
+        Graph similarityGraph = nodeSimilarity.computeToGraph().similarityGraph();
 
         assertGraphEquals(
             algoDirection == INCOMING
@@ -300,13 +302,13 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withTopK(1).withConcurrency(concurrency).toConfig(),
+            configBuilder().withTopK(1).withConcurrency(concurrency).withDirection(algoDirection).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream(algoDirection)
+            .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
         nodeSimilarity.release();
@@ -329,12 +331,17 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withTopK(-1).toConfig(),
+            configBuilder()
+                .withConcurrency(concurrency)
+                .withTopK(-1)
+                .withDirection(algoDirection)
+                .withComputeToStream(false)
+                .toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Graph similarityGraph = nodeSimilarity.computeToGraph(algoDirection).similarityGraph();
+        Graph similarityGraph = nodeSimilarity.computeToGraph().similarityGraph();
 
         assertGraphEquals(
             algoDirection == INCOMING
@@ -361,13 +368,13 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withSimilarityCutoff(0.1).toConfig(),
+            configBuilder().withConcurrency(concurrency).withSimilarityCutoff(0.1).withDirection(algoDirection).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream(algoDirection)
+            .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
         nodeSimilarity.release();
@@ -393,13 +400,13 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withDegreeCutoff(2).withConcurrency(concurrency).toConfig(),
+            configBuilder().withDegreeCutoff(2).withConcurrency(concurrency).withDirection(algoDirection).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream(algoDirection)
+            .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
         nodeSimilarity.release();
@@ -425,7 +432,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
-        Set<SimilarityResult> result = nodeSimilarity.computeToStream(OUTGOING).collect(Collectors.toSet());
+        Set<SimilarityResult> result = nodeSimilarity.computeToStream().collect(Collectors.toSet());
         nodeSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
     }
@@ -445,12 +452,12 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).toConfig(),
+            configBuilder().withConcurrency(concurrency).withDirection(algoDirection).withComputeToStream(false).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph(algoDirection);
+        SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph();
         assertEquals(
             algoDirection == INCOMING ? COMPARED_ITEMS : COMPARED_PERSONS,
             similarityGraphResult.comparedNodes()
@@ -496,12 +503,14 @@ final class NodeSimilarityTest extends AlgoTestBase {
                 .withConcurrency(concurrency)
                 .withTopK(100)
                 .withTopN(1)
+                .withDirection(algoDirection)
+                .withComputeToStream(false)
                 .toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph(algoDirection);
+        SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph();
         assertEquals(
             algoDirection == INCOMING ? COMPARED_ITEMS : COMPARED_PERSONS,
             similarityGraphResult.comparedNodes()
@@ -540,13 +549,13 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withTopN(1).toConfig(),
+            configBuilder().withConcurrency(concurrency).withTopN(1).withDirection(algoDirection).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream(algoDirection)
+            .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
         nodeSimilarity.release();
@@ -580,13 +589,13 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).toConfig(),
+            configBuilder().withConcurrency(concurrency).withDirection(algoDirection).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
         Set<String> result = nodeSimilarity
-            .computeToStream(algoDirection)
+            .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
         nodeSimilarity.release();
@@ -607,10 +616,10 @@ final class NodeSimilarityTest extends AlgoTestBase {
             IllegalArgumentException.class,
             () -> new NodeSimilarity(
                 graph,
-                configBuilder().withConcurrency(concurrency).toConfig(),
+                configBuilder().withConcurrency(concurrency).withDirection(BOTH).toConfig(),
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY
-            ).computeToStream(BOTH)
+            ).computeToStream()
         );
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
     }
@@ -628,12 +637,12 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withTopN(100).withTopK(topK).withConcurrency(concurrency).toConfig(),
+            configBuilder().withTopN(100).withTopK(topK).withConcurrency(concurrency).withComputeToStream(false).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         ).withProgressLogger(log);
 
-        nodeSimilarity.computeToGraph(OUTGOING);
+        nodeSimilarity.computeToGraph();
 
         assertTrue(log.hasMessages(INFO));
         assertTrue(log.containsMessage(INFO, NodeSimilarity.class.getSimpleName()));
@@ -652,7 +661,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
         assertAlgorithmTermination(
             db,
             nodeSimilarity,
-            nhs -> nodeSimilarity.computeToStream(OUTGOING),
+            nhs -> nodeSimilarity.computeToStream(),
             100
         );
     }
@@ -671,7 +680,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
             0,
             topK,
             Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            OUTGOING,
+            false
         );
 
         NodeSimilarityFactory factory = new NodeSimilarityFactory(
@@ -725,7 +736,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
             100,
             topK,
             Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            OUTGOING,
+            false
         );
 
         NodeSimilarityFactory factory = new NodeSimilarityFactory(
@@ -778,6 +791,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         private int topN;
         private int degreeCutoff;
         private double similarityCutoff;
+        private Direction direction;
+        private boolean computeToStream;
 
         ConfigBuilder(NodeSimilarity.Config config) {
             this.config = config;
@@ -786,6 +801,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
             this.topK = config.topK();
             this.degreeCutoff = config.degreeCutoff();
             this.similarityCutoff = config.similarityCutoff();
+            this.direction = config.direction;
+            this.computeToStream = config.computeToStream;
         }
 
         ConfigBuilder withConcurrency(int concurrency) {
@@ -813,6 +830,16 @@ final class NodeSimilarityTest extends AlgoTestBase {
             return this;
         }
 
+        ConfigBuilder withDirection(Direction direction) {
+            this.direction = direction;
+            return this;
+        }
+
+        ConfigBuilder withComputeToStream(boolean computeToStream) {
+            this.computeToStream = computeToStream;
+            return this;
+        }
+
         NodeSimilarity.Config toConfig() {
             return new NodeSimilarity.Config(
                 similarityCutoff,
@@ -820,7 +847,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
                 topN,
                 topK,
                 concurrency,
-                config.minBatchSize()
+                config.minBatchSize(),
+                direction,
+                computeToStream
             );
         }
     }

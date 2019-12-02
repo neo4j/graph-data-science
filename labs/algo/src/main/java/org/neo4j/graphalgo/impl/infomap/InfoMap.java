@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.BitSetIterator;
 import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
 import com.carrotsearch.hppc.cursors.IntDoubleCursor;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipProperties;
@@ -46,7 +46,7 @@ import java.util.stream.LongStream;
 /**
  * Java adaptation of InfoMap from https://github.com/felixfung/InfoFlow
  */
-public class InfoMap extends Algorithm<InfoMap> {
+public class InfoMap extends LegacyAlgorithm<InfoMap> {
 
     private static final double LOG2 = Math.log(2.);
 
@@ -276,7 +276,7 @@ public class InfoMap extends Algorithm<InfoMap> {
     /**
      * minimize description length
      */
-    public InfoMap compute() {
+    public Boolean compute() {
         this.iterations = 0;
         final long start = System.currentTimeMillis();
         long ts = start;
@@ -294,7 +294,7 @@ public class InfoMap extends Algorithm<InfoMap> {
             ));
             ts = c;
         }
-        return this;
+        return true;
     }
 
     @Override

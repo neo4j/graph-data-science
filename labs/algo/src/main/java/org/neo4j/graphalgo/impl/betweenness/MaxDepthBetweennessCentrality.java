@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.impl.betweenness;
 
 import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntStack;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.container.Path;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
  * the process took to reach the node. if it exceeds
  * a given limit the dfs stops
  */
-public class MaxDepthBetweennessCentrality extends Algorithm<MaxDepthBetweennessCentrality> {
+public class MaxDepthBetweennessCentrality extends LegacyAlgorithm<MaxDepthBetweennessCentrality> {
 
     private Graph graph;
 
@@ -87,10 +87,10 @@ public class MaxDepthBetweennessCentrality extends Algorithm<MaxDepthBetweenness
      *
      * @return itself for method chaining
      */
-    public MaxDepthBetweennessCentrality compute() {
+    public Boolean compute() {
         Arrays.fill(centrality, 0);
         graph.forEachNode(this::compute);
-        return this;
+        return true;
     }
 
     /**

@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.impl.scc;
 
 import com.carrotsearch.hppc.IntStack;
+import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
@@ -39,7 +39,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntPredicate
  * within the graph. Also calculates minimum and maximum setSize as well
  * as the overall count of distinct sets.
  */
-public class SCCTarjan extends Algorithm<SCCTarjan> {
+public class SCCTarjan extends LegacyAlgorithm<SCCTarjan> {
 
     private Graph graph;
     private final int nodeCount;
@@ -66,9 +66,9 @@ public class SCCTarjan extends Algorithm<SCCTarjan> {
      * compute scc
      * @return
      */
-    public SCCTarjan compute() {
+    public Boolean compute() {
         graph.forEachNode(longToIntPredicate(this::test));
-        return this;
+        return true;
     }
 
     /**

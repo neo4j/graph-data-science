@@ -59,7 +59,8 @@ public class InfoMapYelp {
                 infoMapGraph.progressLogger,
                 TerminationFlag.RUNNING_TRUE
         );
-        return infoMap.compute();
+        infoMap.compute();
+        return infoMap;
     }
 
     public static void main(String[] args) throws RunnerException {

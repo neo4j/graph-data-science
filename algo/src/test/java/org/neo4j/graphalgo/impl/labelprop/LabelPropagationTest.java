@@ -111,11 +111,11 @@ final class LabelPropagationTest extends AlgoTestBase {
         Graph graph = loadGraph(graphImpl);
         LabelPropagation lp = new LabelPropagation(
             graph,
-            ConfigBuilder.testDefault(),
+            new ConfigBuilder().withMaxIterations(1).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
-        lp.compute(Direction.OUTGOING, 1L);
+        lp.compute();
         HugeLongArray labels = lp.labels();
         assertArrayEquals(new long[]{1, 1, 3, 4, 4, 1}, labels.toArray(), "Incorrect result assuming initial labels are neo4j id");
     }
@@ -135,12 +135,13 @@ final class LabelPropagationTest extends AlgoTestBase {
             graph,
             new ConfigBuilder()
                 .withSeedProperty("seedId")
+                .withMaxIterations(1)
                 .build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        HugeLongArray labels = lp.compute(Direction.OUTGOING, 1L).labels();
+        HugeLongArray labels = lp.compute().labels();
 
         assertArrayEquals(new long[]{2, 2, 3, 4, 4, 2}, labels.toArray());
     }
@@ -172,7 +173,7 @@ final class LabelPropagationTest extends AlgoTestBase {
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY
         );
-        lp.compute(Direction.OUTGOING, 10L);
+        lp.compute();
         HugeLongArray labels = lp.labels();
         assertNotNull(labels);
         IntObjectMap<IntArrayList> cluster = groupByPartitionInt(labels);
@@ -279,6 +280,8 @@ final class LabelPropagationTest extends AlgoTestBase {
         private String weightProperty = null;
         private int batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
         private int concurrency = Pools.DEFAULT_CONCURRENCY;
+        private Direction direction = Direction.OUTGOING;
+        private int maxIterations = 10;
 
         static Config testDefault() {
             return new ConfigBuilder().build();
@@ -299,8 +302,18 @@ final class LabelPropagationTest extends AlgoTestBase {
             return this;
         }
 
+        ConfigBuilder withDirection(Direction direction) {
+            this.direction = direction;
+            return this;
+        }
+
+        ConfigBuilder withMaxIterations(int maxIterations) {
+            this.maxIterations = maxIterations;
+            return this;
+        }
+
         Config build() {
-            return new Config(seedProperty, weightProperty, batchSize, concurrency);
+            return new Config(seedProperty, weightProperty, batchSize, concurrency, direction, maxIterations);
         }
     }
 }
