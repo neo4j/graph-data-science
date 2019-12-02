@@ -168,14 +168,13 @@ class RandomGraphGeneratorTest {
     void shouldBeSeedAble() {
         int nbrNodes = 10;
         long avgDeg = 5L;
-        long edgeSeed = 1337L;
-        long propertySeed = 1337L;
+        long seed = 1337L;
 
         RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
             nbrNodes,
             avgDeg,
             RelationshipDistribution.UNIFORM,
-            edgeSeed,
+            seed,
             Optional.empty(),
             AllocationTracker.EMPTY
         );
@@ -184,7 +183,7 @@ class RandomGraphGeneratorTest {
             nbrNodes,
             avgDeg,
             RelationshipDistribution.UNIFORM,
-            edgeSeed,
+            seed,
             Optional.empty(),
             AllocationTracker.EMPTY
         );

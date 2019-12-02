@@ -80,8 +80,7 @@ public final class RandomGraphGenerator {
         long nodeCount,
         long averageDegree,
         RelationshipDistribution relationshipDistribution,
-        @Nullable
-            Long seed,
+        @Nullable Long seed,
         Optional<RelationshipPropertyProducer> maybePropertyProducer,
         AllocationTracker allocationTracker
     ) {
