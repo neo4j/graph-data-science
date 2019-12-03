@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
 
@@ -169,34 +168,6 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
             .map(RawValues::getHead)
             .reduce(Integer::sum)
             .orElse(0);
-    }
-
-    static class Context {
-        private final RelationshipTypeMapping relationshipTypeMapping;
-        private final SingleTypeRelationshipImporter singleTypeRelationshipImporterBuilder;
-        private final RelationshipPropertiesBatchBuffer relationshipPropertiesBatchBuffer;
-
-        Context(
-            RelationshipTypeMapping relationshipTypeMapping,
-            SingleTypeRelationshipImporter singleTypeRelationshipImporterBuilder,
-            RelationshipPropertiesBatchBuffer relationshipPropertiesBatchBuffer
-        ) {
-            this.relationshipTypeMapping = relationshipTypeMapping;
-            this.singleTypeRelationshipImporterBuilder = singleTypeRelationshipImporterBuilder;
-            this.relationshipPropertiesBatchBuffer = relationshipPropertiesBatchBuffer;
-        }
-
-        RelationshipTypeMapping relationshipTypeMapping() {
-            return relationshipTypeMapping;
-        }
-
-        SingleTypeRelationshipImporter singleTypeRelationshipImporter() {
-            return singleTypeRelationshipImporterBuilder;
-        }
-
-        RelationshipPropertiesBatchBuffer relationshipPropertyBatchBuffer() {
-            return relationshipPropertiesBatchBuffer;
-        }
     }
 
 }

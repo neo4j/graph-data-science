@@ -56,7 +56,7 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
         GraphSetup setup,
         GraphDimensions dimensions
     ) {
-        super(setup.relationshipType, idMap.nodeCount(), api, setup);
+        super(setup.relationshipType(), idMap.nodeCount(), api, setup);
         this.idMap = idMap;
 
         this.dimensions = dimensions;
@@ -101,7 +101,7 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
             .flatMap(SingleTypeRelationshipImporter.Builder.WithImporter::flushTasks)
             .collect(Collectors.toList());
 
-        ParallelUtil.run(flushTasks, setup.executor);
+        ParallelUtil.run(flushTasks, setup.executor());
 
         ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(allRelationshipCounters.size());
         allRelationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
@@ -143,9 +143,9 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
             defaultWeights);
 
         RelationshipImporter importer = new RelationshipImporter(
-            setup.tracker,
+            setup.tracker(),
             outBuilder,
-            setup.loadAsUndirected ? outBuilder : inBuilder
+            setup.loadAsUndirected() ? outBuilder : inBuilder
         );
 
         return new SingleTypeRelationshipImporter.Builder(mapping, importer, relationshipCounter);
@@ -166,7 +166,7 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
 
             this.importWeights = dimensions.relProperties().atLeastOneExists();
 
-            ImportSizing importSizing = ImportSizing.of(setup.concurrency, idMap.nodeCount());
+            ImportSizing importSizing = ImportSizing.of(setup.concurrency(), idMap.nodeCount());
             this.pageSize = importSizing.pageSize();
             this.numberOfPages = importSizing.numberOfPages();
         }
@@ -186,7 +186,7 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
 
         private SingleTypeRelationshipImporter.Builder.WithImporter createImporter(RelationshipTypeMapping typeMapping) {
             Pair<RelationshipsBuilder, RelationshipsBuilder> buildersForRelationshipType = createBuildersForRelationshipType(
-                setup.tracker);
+                setup.tracker());
 
             allBuilders.put(typeMapping, buildersForRelationshipType);
 
@@ -196,7 +196,7 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
                 typeMapping,
                 buildersForRelationshipType.getLeft(),
                 buildersForRelationshipType.getRight(),
-                setup.tracker
+                setup.tracker()
             );
             allRelationshipCounters.put(typeMapping, importerBuilder.relationshipCounter());
             return importerBuilder.loadImporter(
@@ -222,29 +222,29 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
             // TODO: backwards compat code
             if (deduplicationStrategies.length == 0) {
                 DeduplicationStrategy deduplicationStrategy =
-                    setup.deduplicationStrategy == DeduplicationStrategy.DEFAULT
+                    setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
                         ? DeduplicationStrategy.NONE
-                        : setup.deduplicationStrategy;
+                        : setup.deduplicationStrategy();
                 deduplicationStrategies = new DeduplicationStrategy[]{deduplicationStrategy};
             }
 
-            if (setup.loadAsUndirected) {
+            if (setup.loadAsUndirected()) {
                 outgoingRelationshipsBuilder = new RelationshipsBuilder(
                     deduplicationStrategies,
                     tracker,
-                    setup.relationshipPropertyMappings.numberOfMappings());
+                    setup.relationshipPropertyMappings().numberOfMappings());
             } else {
-                if (setup.loadOutgoing) {
+                if (setup.loadOutgoing()) {
                     outgoingRelationshipsBuilder = new RelationshipsBuilder(
                         deduplicationStrategies,
                         tracker,
-                        setup.relationshipPropertyMappings.numberOfMappings());
+                        setup.relationshipPropertyMappings().numberOfMappings());
                 }
-                if (setup.loadIncoming) {
+                if (setup.loadIncoming()) {
                     incomingRelationshipsBuilder = new RelationshipsBuilder(
                         deduplicationStrategies,
                         tracker,
-                        setup.relationshipPropertyMappings.numberOfMappings());
+                        setup.relationshipPropertyMappings().numberOfMappings());
                 }
             }
 

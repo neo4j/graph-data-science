@@ -110,10 +110,10 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
     public GraphsByRelationshipType importAllGraphs() {
         // Temporarily override the security context to enforce read-only access during load
         try (Revertable revertable = setReadOnlySecurityContext()) {
-            BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.startLabel, api, setup).load();
+            BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.nodeLabel(), api, setup).load();
             IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
-            Map<String, Map<String, Graph>> graphs = loadRelationships(nodes, this.dimensions, setup.tracker);
-            progressLogger.logDone(setup.tracker);
+            Map<String, Map<String, Graph>> graphs = loadRelationships(nodes, this.dimensions, setup.tracker());
+            progressLogger.logDone(setup.tracker());
             return GraphsByRelationshipType.of(graphs);
         }
     }
@@ -161,7 +161,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
                         inAdjacencyList,
                         inAdjacencyOffsets,
                         relationshipCount,
-                        setup.loadAsUndirected
+                        setup.loadAsUndirected()
                     );
                     return Collections.singletonMap("", graph);
                 } else {
@@ -181,7 +181,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
                             weightIndex,
                             property,
                             relationshipCount,
-                            setup.loadAsUndirected
+                            setup.loadAsUndirected()
                         );
                         return Pair.of(property.propertyKey(), graph);
                     }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
