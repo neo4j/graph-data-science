@@ -85,15 +85,15 @@ public class ProcTestBase {
         return AuthSubject.ANONYMOUS.username();
     }
 
-    protected void runQuery(String query, Consumer<Result.ResultRow> check) {
+    protected void runQuery(@Language("Cypher") String query, Consumer<Result.ResultRow> check) {
         runQuery(query, emptyMap(), check);
     }
 
-    protected void runQuery(GraphDatabaseAPI db, String query, Consumer<Result.ResultRow> check) {
+    protected void runQuery(@Language("Cypher") GraphDatabaseAPI db, String query, Consumer<Result.ResultRow> check) {
         runQuery(db, query, emptyMap(), check);
     }
 
-    protected void runQuery(String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
+    protected void runQuery(@Language("Cypher") String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
         runQuery(db, query, params, check);
     }
 

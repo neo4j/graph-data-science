@@ -19,14 +19,18 @@
  */
 package org.neo4j.graphalgo;
 
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
+import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
@@ -36,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT;
 import static org.neo4j.graphalgo.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_KEY;
@@ -70,7 +76,7 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
 
         db = TestDatabaseCreator.createTestDatabase();
 
-        final String cypher =
+        @Language("Cypher") String cypher =
             "CREATE" +
             "  (a:Node {seed: 1})" +        // 0
             ", (b:Node {seed: 1})" +        // 1
@@ -114,8 +120,23 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
             ", (l)-[:TYPE {weight: 1.0}]->(n)" +
             ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
-        registerProcedures(LouvainProcNewAPI.class, GraphLoadProc.class);
-        db.execute(cypher);
+        registerProcedures(LouvainProcNewAPI.class, GraphLoadProc.class, GraphCatalogProcs.class);
+        runQuery(cypher);
+        runQuery("CALL algo.beta.graph.create(" +
+                 "    'myGraph'," +
+                 "    {" +
+                 "      Node: {" +
+                 "        label: 'Node'," +
+                 "        properties: ['seed']" +
+                 "      }" +
+                 "    }," +
+                 "    {" +
+                 "      TYPE: {" +
+                 "        type: 'TYPE'," +
+                 "        projection: 'UNDIRECTED'" +
+                 "      }" +
+                 "    }" +
+                 ")");
     }
 
     @AfterEach
@@ -124,18 +145,31 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
         GraphCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void testWrite() {
+    static Stream<Arguments> graphVariations() {
+        return Stream.of(
+            arguments("'myGraph', {", "explicit graph"),
+            arguments(
+                "{" +
+                "  nodeProjection: ['Node']," +
+                "  relationshipProjection: {" +
+                "    TYPE: {" +
+                "      type: 'TYPE'," +
+                "      projection: 'UNDIRECTED'" +
+                "    }" +
+                "  }," +
+                "  nodeProperties: ['seed'],",
+                "implicit graph"
+            )
+        );
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("graphVariations")
+    void testWrite(String graphSnippet, String testCaseName) {
         String writeProperty = "myFancyCommunity";
-        String query = "CALL gds.algo.louvain.write({" +
-                       "    writeProperty: $writeProp," +
-                       "    nodeProjection: ['Node']," +
-                       "    relationshipProjection: {" +
-                       "      TYPE: {" +
-                       "        type: 'TYPE'," +
-                       "        projection: 'UNDIRECTED'" +
-                       "      }" +
-                       "    }" +
+        String query = "CALL gds.algo.louvain.write(" +
+                       graphSnippet +
+                       "    writeProperty: $writeProp" +
                        "}) YIELD communityCount, modularity, modularities, ranLevels, includeIntermediateCommunities, createMillis, computeMillis, writeMillis, postProcessingMillis, communityDistribution";
 
         runQuery(query, MapUtil.map("writeProp", writeProperty),
@@ -162,19 +196,14 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
         assertWriteResult(RESULT, writeProperty);
     }
 
-    @Test
-    void testWriteIntermediateCommunities() {
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("graphVariations")
+    void testWriteIntermediateCommunities(String graphSnippet, String testCaseName) {
         String writeProperty = "myFancyCommunity";
-        String query = "CALL gds.algo.louvain.write({" +
+        String query = "CALL gds.algo.louvain.write(" +
+                       graphSnippet +
                        "    writeProperty: $writeProp," +
-                       "    includeIntermediateCommunities: true," +
-                       "    nodeProjection: ['Node']," +
-                       "    relationshipProjection: {" +
-                       "      TYPE: {" +
-                       "        type: 'TYPE'," +
-                       "        projection: 'UNDIRECTED'" +
-                       "      }" +
-                       "    }" +
+                       "    includeIntermediateCommunities: true" +
                        "}) YIELD includeIntermediateCommunities";
 
         runQuery(query, MapUtil.map("writeProp", writeProperty),
@@ -219,16 +248,11 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
         ));
     }
 
-    @Test
-    void testStream() {
-        String query = "CALL gds.algo.louvain.stream({" +
-                       "    nodeProjection: ['Node']," +
-                       "    relationshipProjection: {" +
-                       "      TYPE: {" +
-                       "        type: 'TYPE'," +
-                       "        projection: 'UNDIRECTED'" +
-                       "      }" +
-                       "    }" +
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("graphVariations")
+    void testStream(String graphSnippet, String testCaseName) {
+        String query = "CALL gds.algo.louvain.stream(" +
+                       graphSnippet.replaceAll(",$", "") +
                        "}) YIELD nodeId, communityId, communityIds";
 
         List<Long> actualCommunities = new ArrayList<>();
@@ -241,17 +265,12 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
         assertCommunities(actualCommunities, RESULT);
     }
 
-    @Test
-    void testStreamCommunities() {
-        String query = "CALL gds.algo.louvain.stream({" +
-                       "    includeIntermediateCommunities: true," +
-                       "    nodeProjection: ['Node']," +
-                       "    relationshipProjection: {" +
-                       "      TYPE: {" +
-                       "        type: 'TYPE'," +
-                       "        projection: 'UNDIRECTED'" +
-                       "      }" +
-                       "    }" +
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("graphVariations")
+    void testStreamCommunities(String graphSnippet, String testCaseName) {
+        String query = "CALL gds.algo.louvain.stream(" +
+                       graphSnippet +
+                       "    includeIntermediateCommunities: true" +
                        "}) YIELD nodeId, communityId, communityIds";
 
         runQuery(query, row -> {
@@ -263,50 +282,13 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
         });
     }
 
-    @Test
-    void testRunOnLoadedGraph() {
-        runQuery("CALL algo.graph.load('myGraph','','', { direction: 'BOTH' })");
-
-        String query = "CALL gds.algo.louvain.stream(" +
-                       "    '', '', {" +
-                       "        graph: 'myGraph'" +
-                       "    } " +
-                       ") YIELD nodeId as id, community";
-
-        List<Long> actualCommunities = new ArrayList<>();
-        runQuery(query,
-            row -> {
-                long community = row.getNumber("community").longValue();
-                int id = row.getNumber("id").intValue();
-                actualCommunities.add(id, community);
-            }
-        );
-        assertCommunities(actualCommunities, RESULT);
-
-        actualCommunities.clear();
-        runQuery(query,
-            row -> {
-                long community = row.getNumber("community").longValue();
-                int id = row.getNumber("id").intValue();
-                actualCommunities.add(id, community);
-            }
-        );
-        assertCommunities(actualCommunities, RESULT);
-    }
-
-    @Test
-    void testWriteWithSeeding() {
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("graphVariations")
+    void testWriteWithSeeding(String graphSnippet, String testCaseName) {
         String writeProperty = "myFancyWriteProperty";
-        String query = "CALL gds.algo.louvain.write({" +
+        String query = "CALL gds.algo.louvain.write(" +
+                       graphSnippet +
                        "    writeProperty: '"+ writeProperty +"'," +
-                       "    nodeProjection: ['Node']," +
-                       "    nodeProperties: ['seed']," +
-                       "    relationshipProjection: {" +
-                       "      TYPE: {" +
-                       "        type: 'TYPE'," +
-                       "        projection: 'UNDIRECTED'" +
-                       "      }" +
-                       "    }," +
                        "    seedProperty: 'seed'"+
                        "}) YIELD communityCount, ranLevels";
 
@@ -412,46 +394,6 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
                 PropertyMapping propertyMapping = setup.relationshipPropertyMappings().head().get();
                 assertEquals("foobar", propertyMapping.neoPropertyKey());
                 assertEquals("foobar", propertyMapping.propertyKey());
-            }
-        );
-    }
-
-    @Test
-    void testGraphLoaderOnLoadedGraphWithSeeds() {
-        String seedProperty = "mySeed";
-
-        runQuery(
-            "CALL algo.graph.load('myGraph','','', { " +
-            "   direction: 'BOTH'," +
-            "   nodeProperties: {" +
-            "       mySeed: 'seed'" +
-            "   }" +
-            "})");
-
-        Map<String, Object> config = MapUtil.map(
-            GRAPH_IMPL_KEY, "myGraph",
-            SEED_PROPERTY_KEY, seedProperty
-        );
-
-        getGraphSetup(
-            LouvainProc.class,
-            db,
-            "", "",
-            config,
-            setup -> {
-                PropertyMapping propertyMapping = setup.nodePropertyMappings().head().get();
-                assertEquals(seedProperty, propertyMapping.neoPropertyKey());
-                assertEquals(seedProperty, propertyMapping.propertyKey());
-            }
-        );
-
-        getAlgorithmFactory(
-            LouvainProc.class,
-            db,
-            "", "",
-            config,
-            (LouvainFactory factory) -> {
-                assertEquals(seedProperty, factory.config.maybeSeedPropertyKey.orElse("not set"));
             }
         );
     }
