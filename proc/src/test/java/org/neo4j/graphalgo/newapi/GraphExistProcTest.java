@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.stream.Stream;
@@ -40,11 +41,13 @@ class GraphExistProcTest extends ProcTestBase {
 
     @BeforeEach
     void setup() throws KernelException {
-        db = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
         registerProcedures(
             GraphCatalogProcs.class,
             GraphExistsProc.class
         );
+        registerFunctions(GraphExistsProc.class);
+
         db.execute(DB_CYPHER);
     }
 
@@ -64,6 +67,20 @@ class GraphExistProcTest extends ProcTestBase {
             map("graphName", graphNameToCheck),
             singletonList(
                 map("graphName", graphNameToCheck, "exists", exists)
+            )
+        );
+    }
+
+    @ParameterizedTest(name = "Existing Graphs: {0}, Lookup: {1}, Exists: {2}")
+    @MethodSource("graphNameExistsCombinations")
+    void existsFunctionTest(String graphNameToCreate, String graphNameToCheck, boolean exists) {
+        db.execute("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", graphNameToCreate));
+
+        assertCypherResult(
+            "RETURN algo.beta.graph.exists($graphName) AS exists",
+            map("graphName", graphNameToCheck),
+            singletonList(
+                map("exists", exists)
             )
         );
     }

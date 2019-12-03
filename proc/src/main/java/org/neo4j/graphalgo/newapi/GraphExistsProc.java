@@ -26,6 +26,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.procedure.UserFunction;
 
 import java.util.stream.Stream;
 
@@ -39,6 +40,12 @@ public class GraphExistsProc extends BaseProc {
                  "  exists: BOOLEAN")
     public Stream<GraphExistsResult> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
         return Stream.of(new GraphExistsResult(graphName, GraphCatalog.exists(getUsername(), graphName)));
+    }
+
+    @UserFunction(name = "algo.beta.graph.exists")
+    @Description("RETURN graph.exists(graphName: STRING) :: BOOLEAN")
+    public boolean existsFunction(@Name(value = "graphName") String graphName) {
+        return GraphCatalog.exists(getUsername(), graphName);
     }
 
     public static class GraphExistsResult {
