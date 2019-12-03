@@ -90,7 +90,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    void testLoadDuplicateRelationships(Class<? extends GraphFactory> graphFactory) {
+    void parallelRelationships(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withDeduplicationStrategy(DeduplicationStrategy.NONE)
             .buildGraph(graphFactory);
@@ -109,7 +109,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    void testLoadDuplicateRelationshipsWithWeights(Class<? extends GraphFactory> graphFactory) {
+    void parallelRelationshipsWithProperties(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .withDeduplicationStrategy(NONE)
@@ -138,7 +138,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @ParameterizedTest
     @MethodSource("deduplicateWithWeightsParams")
-    void testLoadDuplicateRelationshipsWithWeightsAggregation(
+    void parallelRelationshipsWithPropertiesAndAggregations(
         Class<? extends GraphFactory> graphFactory,
         DeduplicationStrategy deduplicationStrategy,
         double expectedWeight
@@ -161,7 +161,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    void testLoadDuplicateRelationshipsWithWeightsAggregation(Class<? extends GraphFactory> graphFactory) {
+    void parallelRelationshipsWithPropertiesAndSingle(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withDeduplicationStrategy(SINGLE)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
@@ -182,7 +182,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport>
-    void multipleRelationshipTypes(Class<T> graphFactory) {
+    void multipleTypes(Class<T> graphFactory) {
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
             .withRelationshipType("REL1 | REL2", true)
             .buildGraphs(graphFactory);
@@ -201,7 +201,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport>
-    void multipleRelationshipTypesWithProperties(Class<T> graphFactory) {
+    void multipleTypesWithProperties(Class<T> graphFactory) {
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
             .withRelationshipType("REL1 | REL2", true)
             .withRelationshipProperties(PropertyMapping.of("prop1", 42D))
@@ -220,7 +220,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelProperties(Class<T> graphFactory) {
+    <T extends GraphFactory & MultipleRelTypesSupport> void multipleProperties(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
@@ -277,7 +277,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelPropertiesWithDefaultValues(Class<T> graphFactory) {
+    <T extends GraphFactory & MultipleRelTypesSupport> void multiplePropertiesWithDefaultValues(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
@@ -323,7 +323,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport>
-    void multipleRelPropertiesWithIncompatibleDeduplicationStrategies(Class<T> graphFactory) {
+    void multiplePropertiesWithIncompatibleDeduplicationStrategies(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
@@ -357,7 +357,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    <T extends GraphFactory & MultipleRelTypesSupport> void multipleAggregationsFromSameProperty(Class<T> graphFactory) {
+    <T extends GraphFactory & MultipleRelTypesSupport> void singlePropertyWithMultipleDeduplications(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
@@ -395,7 +395,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelTypesWithSameProperty(Class<T> graphFactory) {
+    <T extends GraphFactory & MultipleRelTypesSupport> void multipleTypesWithSameProperty(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
@@ -425,66 +425,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         assertGraphEquals(expectedGraph, graph);
     }
 
-    @AllGraphTypesWithMultipleRelTypeSupportTest
-    <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelTypeGraphsCanBeReleased(Class<T> graphFactory) {
-        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
-            .withRelationshipType("REL1 | REL2")
-            .buildGraphs(graphFactory);
-
-        Graph rel1Graph = graphs.getGraph("REL1");
-        Graph unionGraph = graphs.getUnion();
-
-        rel1Graph.release();
-
-        assertThrows(NullPointerException.class, () -> rel1Graph.forEachNode(n -> {
-            rel1Graph.forEachRelationship(n, OUTGOING, (s, t) -> true);
-            return true;
-        }), "Graph should release");
-
-        unionGraph.release();
-
-        assertThrows(NullPointerException.class, () -> unionGraph.forEachNode(n -> {
-            unionGraph.forEachRelationship(n, OUTGOING, (s, t) -> true);
-            return true;
-        }), "UnionGraph should release");
-    }
-
-    @AllGraphTypesWithMultipleRelTypeSupportTest
-    <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelTypeGraphsGiveCorrectElementCounts(Class<T> graphFactory) {
-        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
-            .withRelationshipType("REL1 | REL2 | REL3")
-            .withDirection(OUTGOING)
-            .buildGraphs(graphFactory);
-
-        Graph rel1Graph = graphs.getGraph("REL1");
-        Graph unionGraph = graphs.getUnion();
-
-        long[] expectedCounts = new long[4];
-        runInTransaction(db, () -> {
-            expectedCounts[0] = db.getAllNodes().stream().count();
-            expectedCounts[1] = db.getAllRelationships().stream().count();
-            // The graphs share the node mapping, so we expect the node count for a subgraph
-            // to be equal to the node Count for the entire Neo4j graph
-            expectedCounts[2] = db.getAllNodes().stream().count();
-            expectedCounts[3] = db
-                .getAllRelationships()
-                .stream()
-                .filter(r -> r.isType(RelationshipType.withName("REL1")))
-                .count();
-        });
-        long unionGraphExpectedNodeCount = expectedCounts[0];
-        long unionGraphExpectedRelCount = expectedCounts[1];
-        long rel1GraphExpectedNodeCount = expectedCounts[2];
-        long rel1GraphExpectedRelCount = expectedCounts[3];
-
-        assertEquals(unionGraphExpectedNodeCount, unionGraph.nodeCount());
-        assertEquals(unionGraphExpectedRelCount, unionGraph.relationshipCount());
-        assertEquals(rel1GraphExpectedNodeCount, rel1Graph.nodeCount());
-        assertEquals(rel1GraphExpectedRelCount, rel1Graph.relationshipCount());
-    }
-
     static Stream<Arguments> globalAndLocalDeduplicationArguments() {
         return Stream.of(
             Arguments.of(MAX, DEFAULT, DEFAULT, 44, 46, 1339, 1341),
@@ -505,7 +445,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @ParameterizedTest
     @MethodSource("graphImplWithGlobalAndLocalDeduplicationArguments")
     <T extends GraphFactory & MultipleRelTypesSupport>
-    void multipleRelPropertiesWithGlobalAndLocalDeduplicationStrategy(
+    void multiplePropertiesWithGlobalAndLocalDeduplicationStrategy(
         Class<T> graphFactory,
         DeduplicationStrategy globalDeduplicationStrategy,
         DeduplicationStrategy localDeduplicationStrategy1,
@@ -575,7 +515,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @ParameterizedTest
     @MethodSource("graphImplWithLocalDeduplicationArguments")
     <T extends GraphFactory & MultipleRelTypesSupport>
-    void multipleRelPropertiesWithDeduplication(
+    void multiplePropertiesWithDeduplication(
         Class<T> graphFactory,
         DeduplicationStrategy deduplicationStrategy,
         double expectedNodeAP1,
@@ -619,5 +559,65 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             expectedNodeBP2
         ));
         assertGraphEquals(expectedP2Graph, p2Graph);
+    }
+
+    @AllGraphTypesWithMultipleRelTypeSupportTest
+    <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelTypeGraphsCanBeReleased(Class<T> graphFactory) {
+        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
+        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
+            .withRelationshipType("REL1 | REL2")
+            .buildGraphs(graphFactory);
+
+        Graph rel1Graph = graphs.getGraph("REL1");
+        Graph unionGraph = graphs.getUnion();
+
+        rel1Graph.release();
+
+        assertThrows(NullPointerException.class, () -> rel1Graph.forEachNode(n -> {
+            rel1Graph.forEachRelationship(n, OUTGOING, (s, t) -> true);
+            return true;
+        }), "Graph should release");
+
+        unionGraph.release();
+
+        assertThrows(NullPointerException.class, () -> unionGraph.forEachNode(n -> {
+            unionGraph.forEachRelationship(n, OUTGOING, (s, t) -> true);
+            return true;
+        }), "UnionGraph should release");
+    }
+
+    @AllGraphTypesWithMultipleRelTypeSupportTest
+    <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelTypeGraphsGiveCorrectElementCounts(Class<T> graphFactory) {
+        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
+        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
+            .withRelationshipType("REL1 | REL2 | REL3")
+            .withDirection(OUTGOING)
+            .buildGraphs(graphFactory);
+
+        Graph rel1Graph = graphs.getGraph("REL1");
+        Graph unionGraph = graphs.getUnion();
+
+        long[] expectedCounts = new long[4];
+        runInTransaction(db, () -> {
+            expectedCounts[0] = db.getAllNodes().stream().count();
+            expectedCounts[1] = db.getAllRelationships().stream().count();
+            // The graphs share the node mapping, so we expect the node count for a subgraph
+            // to be equal to the node Count for the entire Neo4j graph
+            expectedCounts[2] = db.getAllNodes().stream().count();
+            expectedCounts[3] = db
+                .getAllRelationships()
+                .stream()
+                .filter(r -> r.isType(RelationshipType.withName("REL1")))
+                .count();
+        });
+        long unionGraphExpectedNodeCount = expectedCounts[0];
+        long unionGraphExpectedRelCount = expectedCounts[1];
+        long rel1GraphExpectedNodeCount = expectedCounts[2];
+        long rel1GraphExpectedRelCount = expectedCounts[3];
+
+        assertEquals(unionGraphExpectedNodeCount, unionGraph.nodeCount());
+        assertEquals(unionGraphExpectedRelCount, unionGraph.relationshipCount());
+        assertEquals(rel1GraphExpectedNodeCount, rel1Graph.nodeCount());
+        assertEquals(rel1GraphExpectedRelCount, rel1Graph.relationshipCount());
     }
 }
