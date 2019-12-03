@@ -182,10 +182,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport>
-    void testLoadMultipleRelationships(Class<T> graphFactory) {
-        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
+    void multipleRelationshipTypes(Class<T> graphFactory) {
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
-            .withRelationshipType("REL1 | REL2")
+            .withRelationshipType("REL1 | REL2", true)
             .buildGraphs(graphFactory);
 
         assertEquals(2, graphs.availableRelationshipTypes().size());
@@ -202,10 +201,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport>
-    void testLoadMultipleRelationshipsWithWeights(Class<T> graphFactory) {
-        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
+    void multipleRelationshipTypesWithProperties(Class<T> graphFactory) {
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
-            .withRelationshipType("REL1 | REL2")
+            .withRelationshipType("REL1 | REL2", true)
             .withRelationshipProperties(PropertyMapping.of("prop1", 42D))
             .buildGraphs(graphFactory);
 

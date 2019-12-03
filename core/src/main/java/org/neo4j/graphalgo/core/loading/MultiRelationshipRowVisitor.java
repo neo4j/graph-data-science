@@ -44,11 +44,11 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
 
     private final Map<String, SingleTypeRelationshipImporter> localImporters;
     private final Map<String, RelationshipPropertiesBatchBuffer> localPropertiesBuffers;
+    private final Map<String, Integer> localRelationshipIds;
 
     private long lastNeoSourceId = -1, lastNeoTargetId = -1;
     private long sourceId = -1, targetId = -1;
     private long rows = 0;
-    private int relationshipId = 0;
     private long relationshipCount;
 
     MultiRelationshipRowVisitor(
@@ -68,6 +68,7 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
         this.bufferSize = bufferSize;
         this.localImporters = new HashMap<>();
         this.localPropertiesBuffers = new HashMap<>();
+        this.localRelationshipIds = new HashMap<>();
     }
 
     public long rows() {
@@ -97,12 +98,14 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
 
             localImporters.put(relationshipType, importer);
             localPropertiesBuffers.put(relationshipType, propertiesBuffer);
+            localRelationshipIds.put(relationshipType, 0);
         }
 
-        return visit(row, localImporters.get(relationshipType), localPropertiesBuffers.get(relationshipType));
+        return visit(row, relationshipType);
     }
 
-    private boolean visit(Result.ResultRow row, SingleTypeRelationshipImporter importer, RelationshipPropertiesBatchBuffer propertiesBuffer) {
+    private boolean visit(Result.ResultRow row, String relationshipType) {
+
         readSourceId(row);
         if (sourceId == -1) {
             return true;
@@ -112,7 +115,9 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
             return true;
         }
 
-        relationshipId++;
+        SingleTypeRelationshipImporter importer = localImporters.get(relationshipType);
+        RelationshipPropertiesBatchBuffer propertiesBuffer = localPropertiesBuffers.get(relationshipType);
+        int nextRelationshipId = localRelationshipIds.get(relationshipType);
 
         // We write source and target into
         // the buffer and add a reference
@@ -121,14 +126,16 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
             sourceId,
             targetId,
             NO_RELATIONSHIP_REFERENCE,
-            relationshipId
+            nextRelationshipId
         );
 
-        readPropertyValues(row, relationshipId, propertiesBuffer);
+        readPropertyValues(row, nextRelationshipId, propertiesBuffer);
 
         if (importer.buffer().isFull()) {
             flush(importer);
         }
+
+        localRelationshipIds.put(relationshipType, nextRelationshipId + 1);
 
         return true;
     }

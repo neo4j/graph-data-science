@@ -39,15 +39,16 @@ public class RelationshipPropertiesBatchBuffer implements RelationshipImporter.P
 
     @Override
     public long[][] readProperty(long[] batch, int batchLength, int[] propertyKeyIds, double[] defaultValues) {
-        long[][] resultBuffer = new long[propertyCount][batchLength];
+        int relationshipCount = batchLength / BATCH_ENTRY_SIZE;
+        long[][] resultBuffer = new long[propertyCount][relationshipCount];
 
         for (int propertyKeyId = 0; propertyKeyId < propertyCount; propertyKeyId++) {
-            long[] propertyValues = new long[batchLength];
-            for (int relationshipId = 0; relationshipId < batchLength; relationshipId += BATCH_ENTRY_SIZE) {
-                int i = (int) batch[PROPERTIES_REFERENCE_OFFSET + relationshipId];
-                propertyValues[relationshipId] = buffer[propertyKeyId][i];
-                resultBuffer[propertyKeyId] = propertyValues;
+            long[] propertyValues = new long[relationshipCount];
+            for (int relationshipOffset = 0; relationshipOffset < batchLength; relationshipOffset += BATCH_ENTRY_SIZE) {
+                int relationshipId = (int) batch[relationshipOffset + PROPERTIES_REFERENCE_OFFSET];
+                propertyValues[relationshipId] = buffer[propertyKeyId][relationshipId];
             }
+            resultBuffer[propertyKeyId] = propertyValues;
         }
 
         return resultBuffer;
