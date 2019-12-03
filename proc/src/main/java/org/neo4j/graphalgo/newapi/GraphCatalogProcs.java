@@ -134,6 +134,26 @@ public class GraphCatalogProcs extends BaseProc {
         return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram));
     }
 
+    @Procedure(name = "algo.beta.graph.exists", mode = Mode.READ)
+    @Description("CALL graph.exists(" +
+                 "  graphName: STRING" +
+                 ") YIELD" +
+                 "  graphName: STRING," +
+                 "  exists: BOOLEAN")
+    public Stream<GraphExistsResult> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
+        return Stream.of(new GraphExistsResult(graphName, GraphCatalog.exists(getUsername(), graphName)));
+    }
+
+    public static class GraphExistsResult {
+        public final String graphName;
+        public final boolean exists;
+
+        GraphExistsResult(String graphName, boolean exists) {
+            this.graphName = graphName;
+            this.exists = exists;
+        }
+    }
+
     public static class GraphCreateResult {
 
         public final String graphName;
