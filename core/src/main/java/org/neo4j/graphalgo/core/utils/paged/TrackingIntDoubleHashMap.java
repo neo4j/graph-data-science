@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.HashOrderMixing;
 import com.carrotsearch.hppc.IntDoubleHashMap;
-import com.carrotsearch.hppc.OpenHashContainers;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.DoubleStream;
@@ -41,8 +41,8 @@ final class TrackingIntDoubleHashMap extends IntDoubleHashMap {
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
             .builder(TrackingIntDoubleHashMap.class)
             .rangePerNode("map buffers", nodeCount -> {
-                int minBufferSize = OpenHashContainers.emptyBufferSize();
-                int maxBufferSize = OpenHashContainers.expectedBufferSize((int) Math.min(PagedLongDoubleMap.PAGE_SIZE, nodeCount));
+                long minBufferSize = MemoryUsage.sizeOfEmptyHashContainer();
+                long maxBufferSize = MemoryUsage.sizeOfHashContainer(Math.min(PagedLongDoubleMap.PAGE_SIZE, nodeCount));
                 long min = sizeOfIntArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
                 long max = sizeOfIntArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
                 return MemoryRange.of(min, max);

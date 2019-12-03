@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.HashOrderMixing;
 import com.carrotsearch.hppc.LongDoubleHashMap;
-import com.carrotsearch.hppc.OpenHashContainers;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import static com.carrotsearch.hppc.Containers.DEFAULT_EXPECTED_ELEMENTS;
 import static com.carrotsearch.hppc.HashContainers.DEFAULT_LOAD_FACTOR;
@@ -42,8 +42,8 @@ public final class TrackingLongDoubleHashMap extends LongDoubleHashMap {
         return MemoryEstimations
                 .builder(TrackingLongDoubleHashMap.class)
                 .rangePerNode("map buffers", nodeCount -> {
-                    int minBufferSize = OpenHashContainers.emptyBufferSize();
-                    int maxBufferSize = OpenHashContainers.expectedBufferSize((int) Math.min(pageSize, nodeCount));
+                    long minBufferSize = MemoryUsage.sizeOfEmptyHashContainer();
+                    long maxBufferSize = MemoryUsage.sizeOfHashContainer(Math.min(pageSize, nodeCount));
                     long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
                     long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
                     return MemoryRange.of(min, max);

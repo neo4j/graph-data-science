@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.ObjectLongIdentityHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -30,6 +31,9 @@ import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
+import static com.carrotsearch.hppc.Containers.DEFAULT_EXPECTED_ELEMENTS;
+import static com.carrotsearch.hppc.HashContainers.DEFAULT_LOAD_FACTOR;
+import static com.carrotsearch.hppc.HashContainers.MIN_HASH_ARRAY_LENGTH;
 import static java.lang.Integer.numberOfTrailingZeros;
 import static org.neo4j.graphalgo.core.utils.BitUtil.nextHighestPowerOfTwo;
 
@@ -158,44 +162,44 @@ public final class MemoryUsage {
         }
     }
 
-    public static long sizeOfByteArray(final int length) {
-        return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_BYTE));
+    public static long sizeOfByteArray(final long length) {
+        return alignObjectSize((long) BYTES_ARRAY_HEADER + (length << SHIFT_BYTE));
     }
 
-    public static long sizeOfCharArray(final int length) {
-        return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_CHAR));
+    public static long sizeOfCharArray(final long length) {
+        return alignObjectSize((long) BYTES_ARRAY_HEADER + (length << SHIFT_CHAR));
     }
 
-    public static long sizeOfShortArray(final int length) {
-        return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_SHORT));
+    public static long sizeOfShortArray(final long length) {
+        return alignObjectSize((long) BYTES_ARRAY_HEADER + (length << SHIFT_SHORT));
     }
 
-    public static long sizeOfIntArray(final int length) {
-        return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_INT));
+    public static long sizeOfIntArray(final long length) {
+        return alignObjectSize((long) BYTES_ARRAY_HEADER + (length << SHIFT_INT));
     }
 
-    public static long sizeOfFloatArray(final int length) {
-        return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_FLOAT));
+    public static long sizeOfFloatArray(final long length) {
+        return alignObjectSize((long) BYTES_ARRAY_HEADER + (length << SHIFT_FLOAT));
     }
 
-    public static long sizeOfLongArray(final int length) {
-        return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_LONG));
+    public static long sizeOfLongArray(final long length) {
+        return alignObjectSize((long) BYTES_ARRAY_HEADER + (length << SHIFT_LONG));
     }
 
-    public static long sizeOfDoubleArray(final int length) {
-        return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_DOUBLE));
+    public static long sizeOfDoubleArray(final long length) {
+        return alignObjectSize((long) BYTES_ARRAY_HEADER + (length << SHIFT_DOUBLE));
     }
 
-    public static long sizeOfObjectArray(final int length) {
-        return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_OBJECT_REF));
+    public static long sizeOfObjectArray(final long length) {
+        return alignObjectSize((long) BYTES_ARRAY_HEADER + (length << SHIFT_OBJECT_REF));
     }
 
-    public static long sizeOfObjectArrayElements(final int length) {
-        return alignObjectSize((long) length << SHIFT_OBJECT_REF);
+    public static long sizeOfObjectArrayElements(final long length) {
+        return alignObjectSize(length << SHIFT_OBJECT_REF);
     }
 
-    public static long sizeOfArray(final int length, final long bytesPerElement) {
-        return alignObjectSize((long) BYTES_ARRAY_HEADER + (long) length * bytesPerElement);
+    public static long sizeOfArray(final long length, final long bytesPerElement) {
+        return alignObjectSize((long) BYTES_ARRAY_HEADER + length * bytesPerElement);
     }
 
     public static long sizeOfBitset(final long length) {
@@ -208,6 +212,25 @@ public final class MemoryUsage {
         long valueArraySize = sizeOfLongArray((int) Math.ceil(length * 1.25));
 
         return keyArraySize + valueArraySize + sizeOfInstance(LongDoubleHashMap.class);
+    }
+
+    public static long sizeOfEmptyHashContainer() {
+        return sizeOfHashContainer(DEFAULT_EXPECTED_ELEMENTS);
+    }
+
+    public static long sizeOfHashContainer(final long elements) {
+        if (elements < 0) {
+            throw new IllegalArgumentException(
+                "Number of elements must be >= 0: " + elements);
+        }
+
+        long length = (long) Math.ceil(elements / (double) DEFAULT_LOAD_FACTOR);
+        if (length == elements) {
+            length++;
+        }
+        length = Math.max(MIN_HASH_ARRAY_LENGTH, BitUtil.nextHighestPowerOfTwo(length));
+
+        return length + 1;
     }
 
     /**
