@@ -50,8 +50,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
-import static org.neo4j.helpers.collection.MapUtil.map;
 
 class LabelPropagationBetaProcTest extends ProcTestBase {
 
@@ -73,10 +73,10 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
             ", (b)-[:X]->(:B {id: 11, weight: 8.0, score: 8.0, seed: 2})";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(LabelPropagationProc.class, GraphLoadProc.class);
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -110,8 +110,8 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
                 ",(c)-[:Y]->(b) " +
                 ",(c)-[:Y]->(d) ";
 
-        db.execute(testGraph);
-        db.execute("CALL algo.graph.remove('myGraph')");
+        runQuery(testGraph);
+        runQuery("CALL algo.graph.remove('myGraph')");
 
         String loadQuery = "CALL algo.graph.load(" +
                            "    'myGraph' ,'C', 'Y', {" +
@@ -159,8 +159,8 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
                 ",(c)-[:Y]->(b) " +
                 ",(c)-[:Y]->(d) ";
 
-        db.execute(testGraph);
-        db.execute("CALL algo.graph.remove('myGraph')");
+        runQuery(testGraph);
+        runQuery("CALL algo.graph.remove('myGraph')");
 
         String loadQuery = "CALL algo.graph.load(" +
                            "    'myGraph' ,'C', 'Y', {" +
@@ -455,7 +455,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
 
         // (c) will get seed 1
         // (d) will get seed id(d) + 1
-        Result initResult = db.execute(query, Collections.singletonMap("seed", seededLabel));
+        Result initResult = runQueryAndReturn(query, Collections.singletonMap("seed", seededLabel));
         long maxId = Iterators.single(initResult.<Number>columnAs("maxId")).longValue();
 
         String lpa = "CALL algo.beta.labelPropagation.stream('Pet', 'REL', {seedProperty: 'seedId'}) " +
@@ -464,11 +464,10 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
                      "RETURN pet.id AS nodeId, community";
 
         long[] sets = new long[4];
-        db.execute(lpa).accept(row -> {
+        runQuery(lpa, row -> {
             int nodeId = row.getNumber("nodeId").intValue();
             long setId = row.getNumber("community").longValue();
             sets[nodeId] = setId;
-            return true;
         });
 
         long newLabel = maxId + seededLabel + 1;

@@ -23,11 +23,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,7 +58,7 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
     );
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws Exception {
 
         db = TestDatabaseCreator.createTestDatabase();
 
@@ -108,7 +107,7 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
             ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
         registerProcedures(LouvainProc.class, GraphLoadProc.class);
-        db.execute(cypher);
+        runQuery(cypher);
     }
 
     @AfterEach

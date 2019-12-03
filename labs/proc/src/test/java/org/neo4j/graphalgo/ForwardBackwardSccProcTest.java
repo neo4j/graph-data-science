@@ -20,23 +20,18 @@
 package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.LongScatterSet;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ForwardBackwardSccProcTest {
+public class ForwardBackwardSccProcTest extends ProcTestBase {
 
-    private static GraphDatabaseAPI api;
-
-    @BeforeAll
-    static void setup() throws KernelException {
+    @BeforeEach
+    void setup() throws Exception {
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -63,26 +58,24 @@ public class ForwardBackwardSccProcTest {
                 " (h)-[:TYPE {cost:3}]->(i),\n" +
                 " (i)-[:TYPE {cost:3}]->(g)";
 
-        api = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = api.beginTx()) {
-            api.execute(cypher);
+        db = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = db.beginTx()) {
+            runQuery(cypher);
             tx.success();
         }
 
-        api.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(StronglyConnectedComponentsProc.class);
+        registerProcedures(StronglyConnectedComponentsProc.class);
     }
 
-    @AfterAll
-    static void shutdownGraph() {
-        api.shutdown();
+    @AfterEach
+    void shutdownGraph() {
+        db.shutdown();
     }
 
     private long getNodeId(String name) {
 
-        try (Transaction tx = api.beginTx()) {
-            final long id = api.findNode(Label.label("Node"), "name", name).getId();
+        try (Transaction tx = db.beginTx()) {
+            final long id = db.findNode(Label.label("Node"), "name", name).getId();
             tx.success();
             return id;
         }
@@ -106,10 +99,7 @@ public class ForwardBackwardSccProcTest {
     public LongScatterSet call(long nodeId) {
         String cypher = String.format("CALL algo.scc.forwardBackward.stream(%d, 'Node', 'TYPE', {concurrency:4}) YIELD nodeId RETURN nodeId", nodeId);
         final LongScatterSet set = new LongScatterSet();
-        api.execute(cypher).accept(row -> {
-            set.add(row.getNumber("nodeId").longValue());
-            return true;
-        });
+        runQuery(cypher, row -> set.add(row.getNumber("nodeId").longValue()));
         return set;
     }
 }

@@ -19,27 +19,22 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class PersonalizedPageRankProcTest {
+class PersonalizedPageRankProcTest extends ProcTestBase {
 
     private static final Map<Long, Double> EXPECTED = new HashMap<>();
 
@@ -84,35 +79,31 @@ class PersonalizedPageRankProcTest {
             ", (j)-[:TYPE2{foo:9.5}]->(e)" +
             ", (k)-[:TYPE2{foo:4.2}]->(e)";
 
-    private static GraphDatabaseAPI DB;
+    @BeforeEach
+    void setup() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase();
+        runQuery(DB_CYPHER);
+        registerProcedures(PageRankProc.class);
 
-    @BeforeAll
-    static void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER);
-        DB.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(PageRankProc.class);
-
-        try (Transaction tx = DB.beginTx()) {
+        try (Transaction tx = db.beginTx()) {
             final Label label = Label.label("Label1");
-            EXPECTED.put(DB.findNode(label, "name", "a").getId(), 0.243);
-            EXPECTED.put(DB.findNode(label, "name", "b").getId(), 1.844);
-            EXPECTED.put(DB.findNode(label, "name", "c").getId(), 1.777);
-            EXPECTED.put(DB.findNode(label, "name", "d").getId(), 0.218);
-            EXPECTED.put(DB.findNode(label, "name", "e").getId(), 0.243);
-            EXPECTED.put(DB.findNode(label, "name", "f").getId(), 0.218);
-            EXPECTED.put(DB.findNode(label, "name", "g").getId(), 0.150);
-            EXPECTED.put(DB.findNode(label, "name", "h").getId(), 0.150);
-            EXPECTED.put(DB.findNode(label, "name", "i").getId(), 0.150);
-            EXPECTED.put(DB.findNode(label, "name", "j").getId(), 0.150);
+            EXPECTED.put(db.findNode(label, "name", "a").getId(), 0.243);
+            EXPECTED.put(db.findNode(label, "name", "b").getId(), 1.844);
+            EXPECTED.put(db.findNode(label, "name", "c").getId(), 1.777);
+            EXPECTED.put(db.findNode(label, "name", "d").getId(), 0.218);
+            EXPECTED.put(db.findNode(label, "name", "e").getId(), 0.243);
+            EXPECTED.put(db.findNode(label, "name", "f").getId(), 0.218);
+            EXPECTED.put(db.findNode(label, "name", "g").getId(), 0.150);
+            EXPECTED.put(db.findNode(label, "name", "h").getId(), 0.150);
+            EXPECTED.put(db.findNode(label, "name", "i").getId(), 0.150);
+            EXPECTED.put(db.findNode(label, "name", "j").getId(), 0.150);
             tx.success();
         }
     }
 
-    @AfterAll
-    static void tearDown() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     @AllGraphNamesTest
@@ -180,28 +171,10 @@ class PersonalizedPageRankProcTest {
         assertMapEquals(actual);
     }
 
-    private static void runQuery(
-            String query,
-            Consumer<Result.ResultRow> check) {
-        runQuery(query, new HashMap<>(), check);
-    }
-
-    private static void runQuery(
-            String query,
-            Map<String, Object> params,
-            Consumer<Result.ResultRow> check) {
-        try (Result result = DB.execute(query, params)) {
-            result.accept(row -> {
-                check.accept(row);
-                return true;
-            });
-        }
-    }
-
     private void assertResult(final String scoreProperty) {
-        try (Transaction tx = DB.beginTx()) {
+        try (Transaction tx = db.beginTx()) {
             for (Map.Entry<Long, Double> entry : EXPECTED.entrySet()) {
-                double score = ((Number) DB
+                double score = ((Number) db
                         .getNodeById(entry.getKey())
                         .getProperty(scoreProperty)).doubleValue();
                 assertEquals(

@@ -22,23 +22,21 @@ package org.neo4j.graphalgo.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.betweenness.MaxDepthBetweennessCentrality;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 /**
  *  (A)-->(B)-->(C)-->(D)-->(E)
  *  0.0   3.0   4.0   3.0   0.0
  */
-class BetweennessCentralityTest {
+class BetweennessCentralityTest extends AlgoTestBase {
 
     private Graph graph;
-
-    private GraphDatabaseAPI db;
 
     @BeforeEach
     void setupGraph() {
@@ -59,7 +57,7 @@ class BetweennessCentralityTest {
         db = TestDatabaseCreator.createTestDatabase();
 
         try (Transaction tx = db.beginTx()) {
-            db.execute(cypher);
+            runQuery(cypher);
             tx.success();
         }
 
@@ -77,11 +75,9 @@ class BetweennessCentralityTest {
 
     private String name(long id) {
         String[] name = {""};
-        db.execute("MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name")
-                .accept(row -> {
-                    name[0] = row.getString("name");
-                    return false;
-                });
+        runQuery("MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name", row -> {
+            name[0] = row.getString("name");
+        });
         return name[0];
     }
 

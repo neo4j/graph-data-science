@@ -27,14 +27,13 @@ import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.helpers.collection.MapUtil.map;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class MemRecProcTest extends ProcTestBase {
 
@@ -54,7 +53,7 @@ class MemRecProcTest extends ProcTestBase {
     private static final long RELATIONSHIP_COUNT = 5L;
 
     @BeforeEach
-    void setUp() throws KernelException {
+    void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
                 GraphLoadProc.class,
@@ -70,7 +69,7 @@ class MemRecProcTest extends ProcTestBase {
         availableAlgoProcedures = "the available and supported procedures are {" +
                                   "beta.k1coloring, beta.modularityOptimization, beta.wcc, graph.load, labelPropagation, louvain, pageRank, unionFind, wcc" +
                                   "}.";
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -144,7 +143,7 @@ class MemRecProcTest extends ProcTestBase {
         String query = String.format(queryTemplate, s);
 
         try {
-            db.execute(query).resultAsString();
+            runQueryAndReturn(query).resultAsString();
             expectedMessage.ifPresent(value -> fail("Call should have failed with " + value));
         } catch (QueryExecutionException e) {
             if (expectedMessage.isPresent()) {
@@ -168,7 +167,7 @@ class MemRecProcTest extends ProcTestBase {
         else {
             String loadGraphQuery = "CALL algo.graph.load('foo', '', '', {nodeProperty: $nodeProperties, relationshipProperties: $relationshipProperties})";
             parameters.put("graph", "foo");
-            db.execute(loadGraphQuery, parameters);
+            runQuery(loadGraphQuery, parameters);
         }
 
         String loadedMemRecQuery = "CALL algo.memrec('', '', $algo, {" +
@@ -176,7 +175,7 @@ class MemRecProcTest extends ProcTestBase {
                                    "})" +
                                    " YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax";
 
-        Map<String, Object> memRecOnLoadedGraph = db.execute(loadedMemRecQuery, parameters).next();
+        Map<String, Object> memRecOnLoadedGraph = runQueryAndReturn(loadedMemRecQuery, parameters).next();
 
         parameters.put("nodeCount", NODE_COUNT);
         parameters.put("relationshipCount", RELATIONSHIP_COUNT);
@@ -186,7 +185,7 @@ class MemRecProcTest extends ProcTestBase {
                                   " relationshipProperties: $relationshipProperties, nodeProperties: $nodeProperties" +
                                   " }) " +
                                   "YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax";
-        Map<String, Object> memRecOnStats = db.execute(nonExistingGraph, parameters).next();
+        Map<String, Object> memRecOnStats = runQueryAndReturn(nonExistingGraph, parameters).next();
 
         assertEquals(memRecOnLoadedGraph, memRecOnStats);
     }

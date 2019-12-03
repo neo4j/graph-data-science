@@ -35,7 +35,6 @@ import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -50,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class CosineSimilarityBenchmark {
 
-    public static final int SIZE = 10_000;
+    private static final int SIZE = 10_000;
 
     private static double[] initial = generate(SIZE,-42);
     private static double[][] data = data(100);
@@ -99,14 +98,14 @@ public class CosineSimilarityBenchmark {
     }
 
     @Benchmark
-    public void cosineSquares(Blackhole bh) throws Exception {
+    public void cosineSquares(Blackhole bh) {
         for (double[] datum : data) {
             bh.consume(Intersections.cosineSquare(initial, datum,SIZE));
         }
     }
 
     @Benchmark
-    public void cosineSquaresRle(Blackhole bh) throws Exception {
+    public void cosineSquaresRle(Blackhole bh) {
         RleDecoder rleDecoder = new RleDecoder(SIZE);
         for (double[] datum : dataRle) {
             rleDecoder.reset(initialRle, datum);
@@ -117,7 +116,7 @@ public class CosineSimilarityBenchmark {
     }
 
     @Setup
-    public void setup() throws IOException {
+    public void setup() {
     }
 
     @TearDown

@@ -19,19 +19,16 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphalgo.compat.MapUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class StronglyConnectedComponentsProcTest {
+class StronglyConnectedComponentsProcTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -51,20 +48,16 @@ class StronglyConnectedComponentsProcTest {
             ", (d)-[:TYPE]->(e)" +
             ", (d)<-[:TYPE]-(e)";
 
-    private static GraphDatabaseAPI DB;
-
-    @BeforeAll
-    static void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER);
-        Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(GraphLoadProc.class);
-        procedures.registerProcedure(StronglyConnectedComponentsProc.class);
+    @BeforeEach
+    void setup() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase();
+        runQuery(DB_CYPHER);
+        registerProcedures(GraphLoadProc.class, StronglyConnectedComponentsProc.class);
     }
 
-    @AfterAll
-    static void tearDown() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     @Test
@@ -75,12 +68,12 @@ class StronglyConnectedComponentsProcTest {
                            ")" +
                            "YIELD nodes, relationships";
 
-        DB.execute(loadQuery, MapUtil.map("name", graphName)).accept(row -> true);
+        runQuery(loadQuery, MapUtil.map("name", graphName));
 
         String algoQuery = "CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "'}) " +
                            "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty";
 
-        DB.execute(algoQuery, MapUtil.map("name", graphName)).accept(row -> {
+        runQuery(algoQuery, MapUtil.map("name", graphName), row -> {
             assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
             assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
             assertEquals(2, row.getNumber("setCount").longValue());
@@ -88,16 +81,14 @@ class StronglyConnectedComponentsProcTest {
             assertEquals(3, row.getNumber("maxSetSize").longValue());
             assertEquals("partition", row.getString("partitionProperty"));
             assertEquals("partition", row.getString("writeProperty"));
-
-            return true;
         });
 
-        DB.execute("CALL algo.graph.remove($name)", MapUtil.map("name", graphName));
+        runQuery("CALL algo.graph.remove($name)", MapUtil.map("name", graphName));
     }
 
     @AllGraphNamesTest
     void testScc(String graphName) {
-        DB
+        db
                 .execute("CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "'}) " +
                          "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty")
                 .accept(row -> {
@@ -115,7 +106,7 @@ class StronglyConnectedComponentsProcTest {
 
     @AllGraphNamesTest
     void explicitWriteProperty(String graphName) {
-        DB
+        db
                 .execute("CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "', writeProperty: 'scc'}) " +
                          "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty")
                 .accept(row -> {

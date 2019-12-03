@@ -40,7 +40,6 @@ import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.helpers.Exceptions;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -54,6 +53,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
 
 /**
  * The GraphLoader provides a fluent interface and default values to configure
@@ -471,10 +472,8 @@ public class GraphLoader {
         try {
             return (GraphFactory) constructor.invoke(api, setup);
         } catch (Throwable throwable) {
-            throw Exceptions.launderedException(
-                throwable.getMessage(),
-                throwable
-            );
+            throwIfUnchecked(throwable);
+            throw new RuntimeException(throwable.getMessage(), throwable);
         }
     }
 

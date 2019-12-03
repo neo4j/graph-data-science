@@ -19,15 +19,24 @@
 package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.ShortestPathDeltaSteppingProc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.test.TestGraphDatabaseFactory;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Threads;
+import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,12 +54,12 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
-public class ShortestPathBenchmark {
+public class ShortestPathBenchmark extends BaseBenchmark {
 
-    public static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
+    private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
+    private static final Map<String, Object> params = new HashMap<>();
 
-    private static GraphDatabaseAPI db;
-    private static List<Node> lines = new ArrayList<>();
+    private List<Node> lines = new ArrayList<>();
 
 //    @Param({"1.0", "5.0", "10.0"})
 //    static double delta;
@@ -59,24 +68,17 @@ public class ShortestPathBenchmark {
     @Param({"1", "2", "4", "8"})
     static int concurrency;
 
-    private static final Map<String, Object> params = new HashMap<>();
-
     @Setup
-    public static void setup() throws KernelException {
-        db = (GraphDatabaseAPI)
-                new TestGraphDatabaseFactory()
-                        .newImpermanentDatabaseBuilder()
-                        .newGraphDatabase();
-        db.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(ShortestPathDeltaSteppingProc.class);
+    public void setup() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(ShortestPathDeltaSteppingProc.class);
         createNet(100); // 10000 nodes; 1000000 edges
         params.put("head", lines.get(0).getId());
         params.put("delta", delta);
         params.put("concurrency", concurrency);
     }
 
-    private static void createNet(int size) {
+    private void createNet(int size) {
         try (Transaction tx = db.beginTx()) {
             List<Node> temp = null;
             for (int i = 0; i < size; i++) {
@@ -97,7 +99,7 @@ public class ShortestPathBenchmark {
         }
     }
 
-    private static List<Node> createLine(int length) {
+    private List<Node> createLine(int length) {
         ArrayList<Node> nodes = new ArrayList<>();
         Node temp = db.createNode();
         nodes.add(temp);
@@ -120,12 +122,10 @@ public class ShortestPathBenchmark {
 
     @Benchmark
     public Object _01_benchmark() {
-
-        return db.execute("MATCH (n {id:$head}) WITH n CALL algo.deltaStepping.stream(n, 'cost', $delta" +
+        return runQueryAndReturn("MATCH (n {id:$head}) WITH n CALL algo.deltaStepping.stream(n, 'cost', $delta" +
                 ", {concurrency:$concurrency})" +
                 " YIELD nodeId, distance RETURN nodeId, distance", params)
                 .stream()
                 .count();
     }
-
 }

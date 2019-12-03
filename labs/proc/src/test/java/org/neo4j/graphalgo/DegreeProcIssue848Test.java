@@ -21,9 +21,8 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,10 +36,10 @@ class DegreeProcIssue848Test extends ProcTestBase {
             "CREATE (:Node {id: s})";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER).close();
+            runQuery(DB_CYPHER);
             tx.success();
         }
 

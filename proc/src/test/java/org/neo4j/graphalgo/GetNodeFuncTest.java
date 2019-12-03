@@ -19,17 +19,13 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,35 +34,27 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-class GetNodeFuncTest {
+class GetNodeFuncTest extends ProcTestBase {
 
-    private static GraphDatabaseService DB;
-
-    @BeforeAll
-    static void setUp() throws KernelException {
-        DB = new TestGraphDatabaseFactory()
-                .newImpermanentDatabaseBuilder()
-                .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")
-                .newGraphDatabase();
-
-        Procedures proceduresService = ((GraphDatabaseAPI) DB).getDependencyResolver().resolveDependency(Procedures.class);
-
-        proceduresService.registerProcedure(Procedures.class, true);
-        proceduresService.registerFunction(GetNodeFunc.class, true);
+    @BeforeEach
+    void setUp() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
+        registerProcedures(Procedures.class);
+        registerFunctions(GetNodeFunc.class);
     }
 
-    @AfterAll
-    static void tearDown() {
-        DB.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     @Test
     void lookupNode() {
         String createNodeQuery = "CREATE (p:Person {name: 'Mark'}) RETURN p AS node";
-        Node savedNode = (Node) DB.execute(createNodeQuery).next().get("node");
+        Node savedNode = (Node) runQueryAndReturn(createNodeQuery).next().get("node");
 
         Map<String, Object> params = MapUtil.map("nodeId", savedNode.getId());
-        Map<String, Object> row = DB.execute("RETURN algo.asNode($nodeId) AS node", params).next();
+        Map<String, Object> row = runQueryAndReturn("RETURN algo.asNode($nodeId) AS node", params).next();
 
         Node node = (Node) row.get("node");
         assertEquals(savedNode, node);
@@ -74,7 +62,7 @@ class GetNodeFuncTest {
 
     @Test
     void lookupNonExistentNode() {
-        Map<String, Object> row = DB.execute(
+        Map<String, Object> row = runQueryAndReturn(
                 "RETURN algo.asNode(3) AS node").next();
 
         assertNull(row.get("node"));
@@ -83,12 +71,12 @@ class GetNodeFuncTest {
     @Test
     void lookupNodes() {
         String createNodeQuery = "CREATE (p1:Person {name: 'Mark'}) CREATE (p2:Person {name: 'Arya'}) RETURN p1, p2";
-        Map<String, Object> savedRow = DB.execute(createNodeQuery).next();
+        Map<String, Object> savedRow = runQueryAndReturn(createNodeQuery).next();
         Node savedNode1 = (Node) savedRow.get("p1");
         Node savedNode2 = (Node) savedRow.get("p2");
 
         Map<String, Object> params = MapUtil.map("nodeIds", Arrays.asList(savedNode1.getId(), savedNode2.getId()));
-        Map<String, Object> row = DB.execute("RETURN algo.asNodes($nodeIds) AS nodes", params).next();
+        Map<String, Object> row = runQueryAndReturn("RETURN algo.asNodes($nodeIds) AS nodes", params).next();
 
         List<Node> nodes = (List<Node>) row.get("nodes");
         assertEquals(Arrays.asList(savedNode1, savedNode2), nodes);
@@ -96,7 +84,7 @@ class GetNodeFuncTest {
 
     @Test
     void lookupNonExistentNodes() {
-        Map<String, Object> row = DB.execute(
+        Map<String, Object> row = runQueryAndReturn(
                 "RETURN algo.getNodesById([3,4,5]) AS nodes").next();
 
         List<Node> nodes = (List<Node>) row.get("nodes");

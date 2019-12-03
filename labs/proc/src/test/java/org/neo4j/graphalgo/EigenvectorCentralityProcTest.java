@@ -21,11 +21,10 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
@@ -43,7 +42,7 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
     private static final Map<Long, Double> expected = new HashMap<>();
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         ClassLoader classLoader = EigenvectorCentralityProcTest.class.getClassLoader();
         File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
 
@@ -53,21 +52,21 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
                 .newGraphDatabase();
 
         try (Transaction tx = db.beginTx()) {
-            db.execute("CREATE CONSTRAINT ON (c:Character) " +
-                       "ASSERT c.id IS UNIQUE;").close();
+            runQuery("CREATE CONSTRAINT ON (c:Character) " +
+                       "ASSERT c.id IS UNIQUE;");
             tx.success();
         }
 
         try (Transaction tx = db.beginTx()) {
-            db.execute("LOAD CSV WITH HEADERS FROM 'file:///got-s1-nodes.csv' AS row " +
+            runQuery("LOAD CSV WITH HEADERS FROM 'file:///got-s1-nodes.csv' AS row " +
                        "MERGE (c:Character {id: row.Id}) " +
-                       "SET c.name = row.Label;").close();
+                       "SET c.name = row.Label;");
 
-            db.execute("LOAD CSV WITH HEADERS FROM 'file:///got-s1-edges.csv' AS row " +
+            runQuery("LOAD CSV WITH HEADERS FROM 'file:///got-s1-edges.csv' AS row " +
                        "MATCH (source:Character {id: row.Source}) " +
                        "MATCH (target:Character {id: row.Target}) " +
                        "MERGE (source)-[rel:INTERACTS_SEASON1]->(target) " +
-                       "SET rel.weight = toInteger(row.Weight);").close();
+                       "SET rel.weight = toInteger(row.Weight);");
 
             tx.success();
         }

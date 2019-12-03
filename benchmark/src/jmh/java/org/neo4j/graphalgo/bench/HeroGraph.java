@@ -23,8 +23,8 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.TokenWrite;
 import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
@@ -40,16 +40,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
-public class HeroGraph {
-    private static final String DATA_URL = "https://raw.githubusercontent.com/tomasonjo/neo4j-marvel/d3c39a8cc97f3e89373cd6d065d7e44e0236694e/data/edges.csv";
+public class HeroGraph extends BaseBenchmark {
 
-    final GraphDatabaseAPI db;
+    private static final String DATA_URL = "https://raw.githubusercontent.com/tomasonjo/neo4j-marvel/d3c39a8cc97f3e89373cd6d065d7e44e0236694e/data/edges.csv";
 
     public HeroGraph() {
         db = createDb();
     }
 
-    private static GraphDatabaseAPI createDb() {
+    private GraphDatabaseAPI createDb() {
         try {
             return mkDb();
         } catch (KernelException | IOException e) {
@@ -57,7 +56,7 @@ public class HeroGraph {
         }
     }
 
-    private static GraphDatabaseAPI mkDb() throws IOException, KernelException {
+    private GraphDatabaseAPI mkDb() throws IOException, KernelException {
         System.out.print("Loading graph from " + DATA_URL + " ... ");
         URL url = new URL(DATA_URL);
 
@@ -65,9 +64,7 @@ public class HeroGraph {
                 new TestGraphDatabaseFactory()
                         .newImpermanentDatabaseBuilder()
                         .newGraphDatabase();
-        ThreadToStatementContextBridge bridge = db
-                .getDependencyResolver()
-                .resolveDependency(ThreadToStatementContextBridge.class);
+        ThreadToStatementContextBridge bridge = resolveDependency(ThreadToStatementContextBridge.class);
 
         long rels = 0;
         long nodes = 0;

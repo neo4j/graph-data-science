@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.AdditionalMatchers;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -61,7 +62,7 @@ import static org.mockito.Mockito.verify;
  * instead of calculating the farness we sum the inverse
  * of each cell and multiply by 1/(n-1)
  */
-class HarmonicCentralityTest {
+class HarmonicCentralityTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE " +
@@ -74,12 +75,10 @@ class HarmonicCentralityTest {
             ", (b)-[:TYPE]->(c)" +
             ", (d)-[:TYPE]->(e)";
 
-    private GraphDatabaseAPI db;
-
     @BeforeEach
     void setupGraph() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach

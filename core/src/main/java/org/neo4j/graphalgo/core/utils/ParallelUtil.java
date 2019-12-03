@@ -23,7 +23,6 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
-import org.neo4j.helpers.Exceptions;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,6 +55,7 @@ import java.util.stream.BaseStream;
 import java.util.stream.LongStream;
 
 import static java.lang.String.format;
+import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
 
 public final class ParallelUtil {
 
@@ -830,7 +830,7 @@ public final class ParallelUtil {
                     try {
                         completionService.awaitNext();
                     } catch (ExecutionException e) {
-                        error = Exceptions.chain(error, e.getCause());
+                        error = ExceptionUtil.chain(error, e.getCause());
                     } catch (CancellationException ignore) {
                     }
                 }
@@ -856,12 +856,12 @@ public final class ParallelUtil {
                 try {
                     completionService.awaitNext();
                 } catch (ExecutionException e) {
-                    error = Exceptions.chain(error, e.getCause());
+                    error = ExceptionUtil.chain(error, e.getCause());
                 } catch (CancellationException ignore) {
                 }
             }
         } catch (InterruptedException e) {
-            error = error == null ? e : Exceptions.chain(e, error);
+            error = error == null ? e : ExceptionUtil.chain(e, error);
         } finally {
             finishRunWithConcurrency(completionService, error);
         }
@@ -875,7 +875,8 @@ public final class ParallelUtil {
         // from the termination flag
         completionService.cancelAll();
         if (error != null) {
-            throw Exceptions.launderedException(error);
+            throwIfUnchecked(error);
+            throw new RuntimeException(error);
         }
     }
 
@@ -889,14 +890,14 @@ public final class ParallelUtil {
                 } catch (ExecutionException ee) {
                     final Throwable cause = ee.getCause();
                     if (error != cause) {
-                        error = Exceptions.chain(error, cause);
+                        error = ExceptionUtil.chain(error, cause);
                     }
                 } catch (CancellationException ignore) {
                 }
             }
             done = true;
         } catch (InterruptedException e) {
-            error = Exceptions.chain(e, error);
+            error = ExceptionUtil.chain(e, error);
         } finally {
             if (!done) {
                 for (final Future<?> future : futures) {
@@ -905,7 +906,8 @@ public final class ParallelUtil {
             }
         }
         if (error != null) {
-            throw Exceptions.launderedException(error);
+            throwIfUnchecked(error);
+            throw new RuntimeException(error);
         }
     }
 
@@ -917,13 +919,13 @@ public final class ParallelUtil {
                 try {
                     futures.poll().get();
                 } catch (ExecutionException ee) {
-                    error = Exceptions.chain(error, ee.getCause());
+                    error = ExceptionUtil.chain(error, ee.getCause());
                 } catch (CancellationException ignore) {
                 }
             }
             done = true;
         } catch (InterruptedException e) {
-            error = Exceptions.chain(e, error);
+            error = ExceptionUtil.chain(e, error);
         } finally {
             if (!done) {
                 for (final Future<?> future : futures) {
@@ -932,7 +934,8 @@ public final class ParallelUtil {
             }
         }
         if (error != null) {
-            throw Exceptions.launderedException(error);
+            throwIfUnchecked(error);
+            throw new RuntimeException(error);
         }
     }
 

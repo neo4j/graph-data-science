@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
@@ -35,7 +36,6 @@ import org.neo4j.graphalgo.impl.yens.WeightedPath;
 import org.neo4j.graphalgo.impl.yens.YensKShortestPaths;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,14 +58,10 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  *       (4)--(5)--(1)
  *         \  /  \ /
  *         (3)---(2)
- *
- * @author mknblch
  */
-class YensTest {
+class YensTest extends AlgoTestBase {
 
     private static final double DELTA = 0.001;
-
-    private GraphDatabaseAPI db;
 
     private Graph graph;
 
@@ -92,7 +88,7 @@ class YensTest {
                 " (d)-[:TYPE {cost:1.0}]->(f),\n" +
                 " (e)-[:TYPE {cost:4.0}]->(f)";
 
-        db.execute(cypher);
+        runQuery(cypher);
 
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
@@ -171,10 +167,7 @@ class YensTest {
 
     private int id(String name) {
         final Node[] node = new Node[1];
-        db.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
-            node[0] = row.getNode("n");
-            return false;
-        });
+        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
         return Math.toIntExact(graph.toMappedNodeId(node[0].getId()));
     }
 }

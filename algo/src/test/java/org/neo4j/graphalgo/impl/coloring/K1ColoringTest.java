@@ -24,6 +24,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -38,7 +39,6 @@ import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -51,9 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
-class K1ColoringTest {
-
-    private GraphDatabaseAPI db;
+class K1ColoringTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraphDb() {
@@ -76,7 +74,7 @@ class K1ColoringTest {
             ",(a)-[:REL]->(b)" +
             ",(a)-[:REL]->(c)";
 
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
 
         Graph graph;
 

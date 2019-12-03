@@ -19,12 +19,10 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Node;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,13 +41,11 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * @author mknblch
  */
-class BFSDFSIntegrationTest {
+class BFSDFSIntegrationTest extends ProcTestBase {
 
-    private static GraphDatabaseAPI DB;
-
-    @BeforeAll
-    static void setupGraph() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
+    @BeforeEach
+    void setupGraph() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -68,16 +64,18 @@ class BFSDFSIntegrationTest {
                 " (e)-[:TYPE {cost:2.0}]->(g),\n" +
                 " (f)-[:TYPE {cost:1.0}]->(g)";
 
-        DB.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(TraverseProc.class);
-        DB.execute(cypher);
+        registerProcedures(TraverseProc.class);
+        runQuery(cypher);
     }
 
-    private static long id(String name) {
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
+    }
+
+    private long id(String name) {
         final Node[] node = new Node[1];
-        DB.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
-            node[0] = row.getNode("n");
-            return false;
-        });
+        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
         return node[0].getId();
     }
 
@@ -85,7 +83,7 @@ class BFSDFSIntegrationTest {
      * test if all both arrays contain the same nodes. not necessarily in
      * same order
      */
-    static void assertContains(String[] expected, List<Long> nodeIds) {
+    void assertContains(String[] expected, List<Long> nodeIds) {
         assertEquals(expected.length, nodeIds.size(), "expected " + Arrays.toString(expected) + " | given [" + nodeIds+ "]");
         for (String ex : expected) {
             final long id = id(ex);
@@ -98,30 +96,27 @@ class BFSDFSIntegrationTest {
     @Test
     void testFindAnyOf() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '>', s, {targetNodes:[4,5]}) YIELD nodeIds RETURN nodeIds";
-        DB.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertEquals(4, nodeIds.size());
-            return true;
         });
     }
 
     @Test
     void testMaxDepthOut() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '>', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
-        DB.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"a", "b", "c", "d"}, nodeIds);
-            return true;
         });
     }
 
     @Test
     void testMaxDepthIn() {
         final String cypher = "MATCH (n:Node {name:'g'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '<', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
-        DB.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"g", "e", "f", "d"}, nodeIds);
-            return true;
         });
     }
 

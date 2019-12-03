@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Node;
-import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.graphalgo.compat.MapUtil;
 
 import java.util.Arrays;
 import java.util.Collections;

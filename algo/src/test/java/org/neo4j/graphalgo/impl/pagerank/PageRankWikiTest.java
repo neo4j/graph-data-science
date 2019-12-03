@@ -19,8 +19,9 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +39,7 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-final class PageRankWikiTest {
+final class PageRankWikiTest extends AlgoTestBase {
 
     static PageRank.Config DEFAULT_CONFIG = new PageRank.Config(40, 0.85, PageRank.DEFAULT_TOLERANCE);
 
@@ -86,17 +86,15 @@ final class PageRankWikiTest {
             // k
             ", (k)-[:TYPE]->(e)";
 
-    private static GraphDatabaseAPI DB;
-
-    @BeforeAll
-    static void setupGraphDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER);
+    @BeforeEach
+    void setupGraphDb() {
+        db = TestDatabaseCreator.createTestDatabase();
+        runQuery(DB_CYPHER);
     }
 
-    @AfterAll
-    static void shutdownGraphDb() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdownGraphDb() {
+        if (db != null) db.shutdown();
     }
 
     @AllGraphTypesWithoutCypherTest
@@ -104,22 +102,22 @@ final class PageRankWikiTest {
         final Label label = Label.label("Node");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = DB.beginTx()) {
-            expected.put(DB.findNode(label, "name", "a").getId(), 0.3040965);
-            expected.put(DB.findNode(label, "name", "b").getId(), 3.5658695);
-            expected.put(DB.findNode(label, "name", "c").getId(), 3.180981);
-            expected.put(DB.findNode(label, "name", "d").getId(), 0.3625935);
-            expected.put(DB.findNode(label, "name", "e").getId(), 0.7503465);
-            expected.put(DB.findNode(label, "name", "f").getId(), 0.3625935);
-            expected.put(DB.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(DB.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(DB.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(DB.findNode(label, "name", "j").getId(), 0.15);
-            expected.put(DB.findNode(label, "name", "k").getId(), 0.15);
+        try (Transaction tx = db.beginTx()) {
+            expected.put(db.findNode(label, "name", "a").getId(), 0.3040965);
+            expected.put(db.findNode(label, "name", "b").getId(), 3.5658695);
+            expected.put(db.findNode(label, "name", "c").getId(), 3.180981);
+            expected.put(db.findNode(label, "name", "d").getId(), 0.3625935);
+            expected.put(db.findNode(label, "name", "e").getId(), 0.7503465);
+            expected.put(db.findNode(label, "name", "f").getId(), 0.3625935);
+            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
+            expected.put(db.findNode(label, "name", "k").getId(), 0.15);
             tx.success();
         }
 
-        final Graph graph = new GraphLoader(DB)
+        final Graph graph = new GraphLoader(db)
                 .withLabel("Node")
                 .withRelationshipType("TYPE")
                 .withDirection(Direction.OUTGOING)

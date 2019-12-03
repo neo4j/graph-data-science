@@ -19,12 +19,9 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.DoubleConsumer;
 
@@ -45,7 +42,7 @@ import static org.mockito.Mockito.verify;
  *
  * S->X: {S,G,H,I,X}:8, {S,D,E,F,X}:12, {S,A,B,C,X}:20
  */
-final class ShortestPathDeltaSteppingProcTest {
+final class ShortestPathDeltaSteppingProcTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -78,20 +75,16 @@ final class ShortestPathDeltaSteppingProcTest {
             ", (h)-[:TYPE {cost: 2}]->(i)" +
             ", (i)-[:TYPE {cost: 2}]->(x)";
 
-    private static GraphDatabaseAPI DB;
-
-    @BeforeAll
-    static void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(ShortestPathDeltaSteppingProc.class);
-        DB.execute(DB_CYPHER);
+    @BeforeEach
+    void setup() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(ShortestPathDeltaSteppingProc.class);
+        runQuery(DB_CYPHER);
     }
 
-    @AfterAll
-    static void shutdownGraph() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdownGraph() {
+        db.shutdown();
     }
 
     @AllGraphNamesTest
@@ -104,10 +97,9 @@ final class ShortestPathDeltaSteppingProcTest {
                 "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "'}) " +
                 "YIELD nodeId, distance RETURN nodeId, distance";
 
-        DB.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
-            return true;
         });
 
         verify(consumer, times(11)).accept(anyDouble());
@@ -124,10 +116,9 @@ final class ShortestPathDeltaSteppingProcTest {
                 "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "', direction: 'INCOMING'}) " +
                 "YIELD nodeId, distance RETURN nodeId, distance";
 
-        DB.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
-            return true;
         });
 
         verify(consumer, times(11)).accept(anyDouble());
@@ -142,20 +133,18 @@ final class ShortestPathDeltaSteppingProcTest {
                 "WITH n CALL algo.shortestPath.deltaStepping(n, 'cost', 3.0, {write:true, writeProperty:'sp', graph:'" + graphName + "'}) " +
                 "YIELD nodeCount, loadDuration, evalDuration, writeDuration RETURN nodeCount, loadDuration, evalDuration, writeDuration";
 
-        DB.execute(matchCypher).accept(row -> {
+        runQuery(matchCypher, row -> {
             long writeDuration = row.getNumber("writeDuration").longValue();
             assertNotEquals(-1L, writeDuration);
-            return false;
         });
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
         final String testCypher = "MATCH(n:Node) WHERE exists(n.sp) WITH n RETURN id(n) as id, n.sp as sp";
 
-        DB.execute(testCypher).accept(row -> {
+        runQuery(testCypher, row -> {
             double sp = row.getNumber("sp").doubleValue();
             consumer.accept(sp);
-            return true;
         });
 
         verify(consumer, times(11)).accept(anyDouble());

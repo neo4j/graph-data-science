@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -43,11 +42,9 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static java.lang.System.lineSeparator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 
@@ -86,6 +83,17 @@ class IncrementalWCCTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
+    }
+
+    private static long getCommunityId(long nodeId, int communitySize) {
+        return nodeId / communitySize;
+    }
+
+    private static void createConnection(GraphDatabaseService db, long sourceId, long targetId) {
+        final Node source = db.getNodeById(sourceId);
+        final Node target = db.getNodeById(targetId);
+
+        source.createRelationshipTo(target, RELATIONSHIP_TYPE);
     }
 
     @ParameterizedTest(name = "{0} -- {1}")
@@ -150,13 +158,6 @@ class IncrementalWCCTest {
         // Then
         LongStream.range(IdMapping.START_NODE_ID, graph.nodeCount())
             .forEach(node -> assertEquals(42, result.setIdOf(node)));
-    }
-
-    private void createConnection(GraphDatabaseService db, long sourceId, long targetId) {
-        final Node source = db.getNodeById(sourceId);
-        final Node target = db.getNodeById(targetId);
-
-        source.createRelationshipTo(target, RELATIONSHIP_TYPE);
     }
 
     /**

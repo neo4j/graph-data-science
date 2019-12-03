@@ -29,6 +29,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestSupport;
@@ -70,7 +71,7 @@ import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-final class NodeSimilarityTest {
+final class NodeSimilarityTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -195,12 +196,10 @@ final class NodeSimilarityTest {
         );
     }
 
-    private GraphDatabaseAPI db;
-
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -482,8 +481,8 @@ final class NodeSimilarityTest {
         int concurrency
     ) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        localDb.execute("UNWIND range(0, 1024) AS unused CREATE (:Unused)");
-        localDb.execute(DB_CYPHER);
+        runQuery(localDb, "UNWIND range(0, 1024) AS unused CREATE (:Unused)");
+        runQuery(localDb, DB_CYPHER);
 
         Graph graph = new GraphLoader(localDb)
             .withAnyLabel()
@@ -527,7 +526,7 @@ final class NodeSimilarityTest {
     @MethodSource("supportedLoadAndComputeDirections")
     void shouldIgnoreLoops(Direction loadDirection, Direction algoDirection, int concurrency) {
         // Add loops
-        db.execute("" +
+        runQuery("" +
                    " MATCH (alice {name: 'Alice'})" +
                    " MATCH (thing {name: 'p1'})" +
                    " CREATE (alice)-[:LIKES]->(alice), (thing)-[:LIKES]->(thing)"
@@ -559,12 +558,12 @@ final class NodeSimilarityTest {
     @MethodSource("supportedLoadAndComputeDirections")
     void shouldIgnoreParallelEdges(Direction loadDirection, Direction algoDirection, int concurrency) {
         // Add parallel edges
-        db.execute("" +
+        runQuery("" +
                    " MATCH (person {name: 'Alice'})" +
                    " MATCH (thing {name: 'p1'})" +
                    " CREATE (person)-[:LIKES]->(thing)"
         );
-        db.execute("" +
+        runQuery("" +
                    " MATCH (person {name: 'Dave'})" +
                    " MATCH (thing {name: 'p3'})" +
                    " CREATE (person)-[:LIKES]->(thing)" +

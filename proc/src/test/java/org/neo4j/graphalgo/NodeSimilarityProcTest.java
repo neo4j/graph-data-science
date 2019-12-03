@@ -29,14 +29,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -116,9 +115,9 @@ class NodeSimilarityProcTest extends ProcTestBase {
     }
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
         registerProcedures(NodeSimilarityProc.class);
     }
 
@@ -188,12 +187,12 @@ class NodeSimilarityProcTest extends ProcTestBase {
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldIgnoreParallelEdges(String graphImpl, Direction direction) {
         // Add parallel edges
-        db.execute("" +
+        runQuery("" +
                    " MATCH (person {name: 'Alice'})" +
                    " MATCH (thing {name: 'p1'})" +
                    " CREATE (person)-[:LIKES]->(thing)"
         );
-        db.execute("" +
+        runQuery("" +
                    " MATCH (person {name: 'Charlie'})" +
                    " MATCH (thing {name: 'p3'})" +
                    " CREATE (person)-[:LIKES]->(thing)" +
@@ -228,8 +227,8 @@ class NodeSimilarityProcTest extends ProcTestBase {
 
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
-    void shouldWriteResults(String graphImpl, Direction direction) throws KernelException {
-        String query = "CALL algo.nodeSimilarity(" +
+    void shouldWriteResults(String graphImpl, Direction direction) throws Exception {
+            String query = "CALL algo.nodeSimilarity(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +
@@ -291,7 +290,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
         registerProcedures(GraphLoadProc.class);
         String resultGraphName = "simGraph_" + direction.name();
         String loadQuery = "CALL algo.graph.load($resultGraphName, $label, 'SIMILAR', {nodeProperties: 'id', relationshipProperties: 'score', direction: $direction})";
-        db.execute(loadQuery, MapUtil.map("resultGraphName", resultGraphName, "label", direction == INCOMING ? "Item" : "Person", "direction", direction.name()));
+        runQuery(loadQuery, MapUtil.map("resultGraphName", resultGraphName, "label", direction == INCOMING ? "Item" : "Person", "direction", direction.name()));
         Graph simGraph = GraphCatalog.getUnion(getUsername(), resultGraphName).orElse(null);
         assertNotNull(simGraph);
         assertGraphEquals(direction == INCOMING

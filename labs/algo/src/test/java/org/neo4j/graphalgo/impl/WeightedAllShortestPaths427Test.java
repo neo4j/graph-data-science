@@ -19,9 +19,10 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.function.Executable;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CostEvaluator;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -38,7 +39,6 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +51,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WeightedAllShortestPaths427Test {
+public class WeightedAllShortestPaths427Test extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -387,22 +387,20 @@ public class WeightedAllShortestPaths427Test {
             ", (n76)-[:LINK {weight:1}]->(n65)" +
             ", (n76)-[:LINK {weight:1}]->(n66)";
 
-    private static GraphDatabaseAPI DB;
-
-    @BeforeAll
-    static void setupGraph() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER).close();
+    @BeforeEach
+    void setupGraph() {
+        db = TestDatabaseCreator.createTestDatabase();
+        runQuery(DB_CYPHER);
     }
 
-    @AfterAll
-    static void teardownGraph() {
-        DB.shutdown();
+    @AfterEach
+    void teardownGraph() {
+        db.shutdown();
     }
 
     @AllGraphTypesWithoutCypherTest
     void testWeighted(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = new GraphLoader(DB, Pools.DEFAULT)
+        Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withLabel("Node")
                 .withRelationshipType("LINK")
                 .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
@@ -419,7 +417,7 @@ public class WeightedAllShortestPaths427Test {
 
     @AllGraphTypesWithoutCypherTest
     void testMsbfs(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = new GraphLoader(DB, Pools.DEFAULT)
+        Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withLabel("Node")
                 .withRelationshipType("LINK")
                 .withDirection(Direction.OUTGOING)
@@ -438,10 +436,10 @@ public class WeightedAllShortestPaths427Test {
         List<Result> expected = new ArrayList<>();
         ShortestPathDijkstra spd = new ShortestPathDijkstra(graph);
         List<Executable> assertions = new ArrayList<>();
-        try (Transaction tx = DB.beginTx()) {
+        try (Transaction tx = db.beginTx()) {
             graph.forEachNode(algoSourceId -> {
                 long neoSourceId = graph.toOriginalNodeId(algoSourceId);
-                TestDijkstra dijkstra = new TestDijkstra(DB.getNodeById(neoSourceId), withWeights);
+                TestDijkstra dijkstra = new TestDijkstra(db.getNodeById(neoSourceId), withWeights);
                 graph.forEachNode(algoTargetId -> {
                     if (algoSourceId != algoTargetId) {
                         Result neoResult = null;
@@ -449,7 +447,7 @@ public class WeightedAllShortestPaths427Test {
 
                         dijkstra.reset();
                         long neoTargetId = graph.toOriginalNodeId(algoTargetId);
-                        Node targetNode = DB.getNodeById(neoTargetId);
+                        Node targetNode = db.getNodeById(neoTargetId);
                         List<Node> path = dijkstra.getPathAsNodes(targetNode);
 
                         if (path != null) {

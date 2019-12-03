@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.wcc;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -31,9 +32,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-abstract class WCCBaseTest {
+abstract class WCCBaseTest extends AlgoTestBase {
 
-    static GraphDatabaseAPI DB;
     static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
 
     static Stream<Arguments> parameters() {

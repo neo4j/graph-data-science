@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.procedures.IntProcedure;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -46,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *  |  1    1    1 |   (x) // unreachable
  * (a)<-(d)<-(e)<-´
  */
-public class DirectedDijkstraSPTest {
+public class DirectedDijkstraSPTest extends AlgoTestBase {
 
     public static final String DB_CYPHER =
         "CREATE (d:Node {name:'d'})\n" +
@@ -65,7 +66,6 @@ public class DirectedDijkstraSPTest {
             "  (e)-[:REL {cost:1}]->(d),\n" +
             "  (d)-[:REL {cost:1}]->(a)\n";
 
-    private GraphDatabaseAPI db;
     private Graph graph;
 
     @BeforeEach
@@ -73,7 +73,7 @@ public class DirectedDijkstraSPTest {
         db = TestDatabaseCreator.createTestDatabase();
 
         try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER);
+            runQuery(DB_CYPHER);
             tx.success();
         }
 
@@ -98,10 +98,10 @@ public class DirectedDijkstraSPTest {
 
     private String name(long id) {
         final String[] name = {""};
-        db.execute(String.format("MATCH (n:Node) WHERE id(n)=%d RETURN n.name as name", id)).accept(row -> {
-            name[0] = row.getString("name");
-            return false;
-        });
+        runQuery(
+            String.format("MATCH (n:Node) WHERE id(n)=%d RETURN n.name as name", id),
+            row -> name[0] = row.getString("name")
+        );
         return name[0];
     }
 

@@ -22,10 +22,9 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -99,7 +98,7 @@ class ListProcTest extends ProcTestBase {
     private static final List<String> ALL = Stream.concat(PROCEDURES.stream(), FUNCTIONS.stream()).collect(Collectors.toList());
 
     @BeforeEach
-    void setUp() throws KernelException {
+    void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphLoadProc.class,
@@ -149,7 +148,7 @@ class ListProcTest extends ProcTestBase {
         String query = "CALL algo.list()";
         assertEquals(
             ALL,
-            db.execute(query)
+            runQueryAndReturn(query)
                 .<String>columnAs("name")
                 .stream()
                 .collect(Collectors.toList())
@@ -158,7 +157,7 @@ class ListProcTest extends ProcTestBase {
 
     private List<String> listProcs(Object name) {
         String query = "CALL algo.list($name)";
-        return db.execute(query, MapUtil.map("name", name))
+        return runQueryAndReturn(query, MapUtil.map("name", name))
             .<String>columnAs("name")
             .stream()
             .collect(Collectors.toList());

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -31,17 +32,11 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-class ClosenessCentralityIntegrationTest_546 {
-
-    private GraphDatabaseAPI db;
+class ClosenessCentralityIntegrationTest_546 extends AlgoTestBase {
 
     private String name(long id) {
         String[] name = {""};
-        db.execute("MATCH (n) WHERE id(n) = " + id + " RETURN n.id as name")
-                .accept(row -> {
-                    name[0] = row.getString("name");
-                    return false;
-                });
+        runQuery("MATCH (n) WHERE id(n) = " + id + " RETURN n.id as name", row -> name[0] = row.getString("name"));
         if (name[0].isEmpty()) {
             throw new IllegalArgumentException("unknown id " + id);
         }
@@ -77,7 +72,7 @@ class ClosenessCentralityIntegrationTest_546 {
                 "       (will)-[:KNOWS]->(chris),\n" +
                 "       (chris)-[:KNOWS]->(karin);";
 
-        db.execute(importQuery);
+        runQuery(importQuery);
 
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withLabel("Person")
@@ -109,7 +104,7 @@ class ClosenessCentralityIntegrationTest_546 {
                         ",(nMark)-[:FRIEND]->(nMichael)\n" +
                         ",(nMark)<-[:FRIEND]-(nMichael);";
 
-        db.execute(importQuery);
+        runQuery(importQuery);
 
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withLabel("User")

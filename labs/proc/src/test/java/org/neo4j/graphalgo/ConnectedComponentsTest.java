@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,9 +29,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-public abstract class ConnectedComponentsTest {
+public abstract class ConnectedComponentsTest extends ProcTestBase{
 
-    protected GraphDatabaseAPI db;
     protected static Graph graph;
 
     private static void assertBelongSameSet(HugeLongArray data, Long... expected) {
@@ -54,9 +52,8 @@ public abstract class ConnectedComponentsTest {
 
     private long getMappedNodeId(String name) {
         final Node[] node = new Node[1];
-        db.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
+        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> {
             node[0] = row.getNode("n");
-            return false;
         });
         return graph.toMappedNodeId(node[0].getId());
     }

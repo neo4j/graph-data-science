@@ -18,6 +18,7 @@
  */
 package org.neo4j.graphalgo.bench;
 
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -25,8 +26,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.Traverse;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.test.TestGraphDatabaseFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -43,9 +42,6 @@ import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author mknblch
- */
 @Threads(1)
 @Fork(value = 1, jvmArgs = {"-Xms2g", "-Xmx2g"})
 @Warmup(iterations = 5, time = 3)
@@ -53,32 +49,28 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-public class BFSBenchmark {
+public class BFSBenchmark extends BaseBenchmark {
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
     private static final int TRIANGLE_COUNT = 500;
 
     private Graph g;
-    private GraphDatabaseAPI api;
 
     @Param({"0.2", "0.5", "0.8"})
     private double connectedness;
 
     @Setup
     public void setup() {
-        api = (GraphDatabaseAPI)
-                new TestGraphDatabaseFactory()
-                        .newImpermanentDatabaseBuilder()
-                        .newGraphDatabase();
+        db = TestDatabaseCreator.createTestDatabase();
 
-        GraphBuilder.create(api)
+        GraphBuilder.create(db)
                 .setLabel(LABEL)
                 .setRelationship(RELATIONSHIP)
                 .newCompleteGraphBuilder()
                 .createCompleteGraph(TRIANGLE_COUNT, connectedness);
 
-        g = new GraphLoader(api)
+        g = new GraphLoader(db)
                 .withLabel(LABEL)
                 .withRelationshipType(RELATIONSHIP)
                 .sorted()
@@ -86,10 +78,9 @@ public class BFSBenchmark {
                 .load(HugeGraphFactory.class);
     }
 
-
     @TearDown
     public void tearDown() {
-        if (api != null) api.shutdown();
+        db.shutdown();
         Pools.DEFAULT.shutdownNow();
     }
 

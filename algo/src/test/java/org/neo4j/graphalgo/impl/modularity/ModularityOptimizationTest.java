@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
@@ -37,7 +38,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.NullLog;
 
 import java.util.stream.Stream;
@@ -50,11 +50,9 @@ import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
-class ModularityOptimizationTest {
+class ModularityOptimizationTest extends AlgoTestBase {
 
     public static final long[][] EXPECTED_SEED_COMMUNITIES = {new long[]{0, 1}, new long[]{2, 4}, new long[]{3, 5}};
-
-    GraphDatabaseAPI db;
 
     static final String DB_CYPHER =
         "CREATE" +
@@ -75,12 +73,12 @@ class ModularityOptimizationTest {
     @BeforeEach
     void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
     void shutdownGraphDb() {
-        if (db != null) db.shutdown();
+        db.shutdown();
     }
 
     @Test

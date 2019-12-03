@@ -24,10 +24,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,10 +47,10 @@ class K1ColoringProcTest extends ProcTestBase {
         ",(a)-[:REL]->(c)";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(K1ColoringProc.class, GraphLoadProc.class);
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -96,11 +95,10 @@ class K1ColoringProcTest extends ProcTestBase {
         });
 
         Map<Long, Long> coloringResult = new HashMap<>(4);
-        db.execute("MATCH (n) RETURN id(n) AS id, n.color AS color").accept(row -> {
+        runQuery("MATCH (n) RETURN id(n) AS id, n.color AS color", row -> {
             long nodeId = row.getNumber("id").longValue();
             long color = row.getNumber("color").longValue();
             coloringResult.put(nodeId, color);
-            return true;
         });
 
         assertNotEquals(coloringResult.get(0L), coloringResult.get(1L));

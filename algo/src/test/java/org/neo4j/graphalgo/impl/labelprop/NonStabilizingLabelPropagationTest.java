@@ -19,24 +19,23 @@
  */
 package org.neo4j.graphalgo.impl.labelprop;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class NonStabilizingLabelPropagationTest {
+class NonStabilizingLabelPropagationTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -56,22 +55,20 @@ class NonStabilizingLabelPropagationTest {
             ", (c)-[:R]->(f)" +
             ", (f)-[:R]->(h)";
 
-    private static GraphDatabaseAPI DB;
-
-    @BeforeAll
-    static void setupGraphDB() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER).close();
+    @BeforeEach
+    void setupGraphDB() {
+        db = TestDatabaseCreator.createTestDatabase();
+        runQuery(DB_CYPHER);
     }
 
-    @AfterAll
-    static void shutdownGraphDb() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdownGraphDb() {
+        db.shutdown();
     }
 
 
     Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
-        GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT)
                 .undirected()
                 .withDefaultConcurrency();
 
@@ -87,7 +84,7 @@ class NonStabilizingLabelPropagationTest {
                     .withRelationshipType("R")
                     .withName(graphImpl.getSimpleName());
         }
-        try (Transaction tx = DB.beginTx()) {
+        try (Transaction tx = db.beginTx()) {
             return graphLoader.load(graphImpl);
         }
     }

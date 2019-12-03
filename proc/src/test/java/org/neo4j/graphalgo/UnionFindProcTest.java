@@ -26,13 +26,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -48,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class UnionFindProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         String createGraph =
                 "CREATE" +
                 " (nA:Label {nodeId: 0, seed: 42})" +
@@ -78,7 +77,7 @@ public class UnionFindProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
 
         try (Transaction tx = db.beginTx()) {
-            db.execute(createGraph).close();
+            runQuery(createGraph);
             tx.success();
         }
 
@@ -426,7 +425,7 @@ public class UnionFindProcTest extends ProcTestBase {
                            "    }" +
                            ")";
 
-        db.execute(loadQuery);
+        runQuery(loadQuery);
 
         assertComponentSizes(graphName, algoRelType, weightProperty, expectedSizes);
     }

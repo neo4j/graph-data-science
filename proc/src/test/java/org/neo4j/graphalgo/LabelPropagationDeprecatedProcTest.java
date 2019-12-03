@@ -21,10 +21,10 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.Iterators;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -60,10 +60,10 @@ class LabelPropagationDeprecatedProcTest extends ProcTestBase {
             ", (b)-[:X]->(:B {id: 11, weight: 8.0, score: 8.0, community: 2})";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(LabelPropagationProc.class);
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -237,7 +237,7 @@ class LabelPropagationDeprecatedProcTest extends ProcTestBase {
 
         // (c) will get seed 1
         // (d) will get seed id(d) + 1
-        Result initResult = db.execute(query, Collections.singletonMap("seed", seededLabel));
+        Result initResult = runQueryAndReturn(query, Collections.singletonMap("seed", seededLabel));
         long maxId = Iterators.single(initResult.<Number>columnAs("maxId")).longValue();
 
         String lpa = "CALL algo.labelPropagation.stream(" +
@@ -249,11 +249,10 @@ class LabelPropagationDeprecatedProcTest extends ProcTestBase {
                      "RETURN pet.id as nodeId, label AS community";
 
         long[] sets = new long[4];
-        db.execute(lpa).accept(row -> {
+        runQuery(lpa, row -> {
             int nodeId = row.getNumber("nodeId").intValue();
             long setId = row.getNumber("community").longValue();
             sets[nodeId] = setId;
-            return true;
         });
 
         long newLabel = maxId + seededLabel + 1;

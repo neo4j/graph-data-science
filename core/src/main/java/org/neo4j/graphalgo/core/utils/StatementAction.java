@@ -19,8 +19,9 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import org.neo4j.helpers.Exceptions;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+
+import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
 
 public abstract class StatementAction extends StatementApi implements RenamesCurrentThread, Runnable, StatementApi.TxConsumer {
 
@@ -33,7 +34,7 @@ public abstract class StatementAction extends StatementApi implements RenamesCur
         try (Revert ignored = RenamesCurrentThread.renameThread(threadName())) {
             acceptInTransaction(this);
         } catch (Exception e) {
-            Exceptions.throwIfUnchecked(e);
+            throwIfUnchecked(e);
             throw new RuntimeException(e);
         }
     }

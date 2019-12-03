@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -33,7 +34,6 @@ import org.neo4j.graphalgo.impl.yens.WeightedPath;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -51,12 +51,8 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  * >(a)  (d)  ((g))
  *   1\ 2/ 1\ 2/
  *    (c)   (f)
- *
- * @author mknblch
  */
-class DijkstraTest {
-
-    private GraphDatabaseAPI db;
+class DijkstraTest extends AlgoTestBase {
 
     private static Graph graph;
     private static LongArrayList edgeBlackList;
@@ -83,7 +79,7 @@ class DijkstraTest {
                 " (e)-[:TYPE {cost:2.0}]->(g),\n" +
                 " (f)-[:TYPE {cost:1.0}]->(g)";
 
-        db.execute(cypher);
+        runQuery(cypher);
 
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
@@ -101,10 +97,7 @@ class DijkstraTest {
 
     private int id(String name) {
         Node[] node = new Node[1];
-        db.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
-            node[0] = row.getNode("n");
-            return false;
-        });
+        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
         return Math.toIntExact(graph.toMappedNodeId(node[0].getId()));
     }
 

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
@@ -32,6 +33,7 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -46,8 +48,6 @@ import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
@@ -66,7 +66,7 @@ import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
-class LouvainTest {
+class LouvainTest extends AlgoTestBase {
 
     static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(
         10,
@@ -84,7 +84,6 @@ class LouvainTest {
     );
 
     Direction direction;
-    GraphDatabaseAPI db;
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -386,7 +385,7 @@ class LouvainTest {
         boolean loadRelWeight,
         String... nodeProperties
     ) {
-        db.execute(cypher);
+        runQuery(cypher);
         GraphLoader loader = new GraphLoader(db)
             .withOptionalNodeProperties(
                 Arrays.stream(nodeProperties)

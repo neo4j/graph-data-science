@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
-import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.List;
 import java.util.function.Supplier;

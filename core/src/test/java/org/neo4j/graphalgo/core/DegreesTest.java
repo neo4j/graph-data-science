@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -41,7 +42,7 @@ import static org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
  * B:     1      1      2
  * C:     0      2      2
  */
-class DegreesTest {
+class DegreesTest extends AlgoTestBase {
 
     private static final String UNI_DIRECTIONAL =
             "CREATE" +
@@ -63,8 +64,6 @@ class DegreesTest {
             ", (c)-[:TYPE]->(a)" +
             ", (b)-[:TYPE]->(c)" +
             ", (c)-[:TYPE]->(b)";
-
-    private GraphDatabaseAPI db;
 
     @BeforeEach
     void setupGraphDb() {
@@ -139,7 +138,7 @@ class DegreesTest {
             String cypher,
             Direction direction,
             Class<? extends GraphFactory> graphFactory) {
-        db.execute(cypher);
+        runQuery(cypher);
         GraphLoader graphLoader = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()

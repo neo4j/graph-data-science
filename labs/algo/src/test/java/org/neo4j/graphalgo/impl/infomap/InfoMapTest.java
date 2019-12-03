@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.stream.Stream;
 
@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * | X |     | X |    (z)
  * (c)-(d)   (g)-(h)
  */
-class InfoMapTest {
+class InfoMapTest extends AlgoTestBase {
 
     private static final String CYPHER_2x4 =
             "CREATE" +
@@ -102,8 +102,6 @@ class InfoMapTest {
         return Stream.of(CYPHER_2x4, CYPHER_2x3);
     }
 
-    private GraphDatabaseAPI db;
-
     @BeforeEach
     void setupDb() {
         db = TestDatabaseCreator.createTestDatabase();
@@ -117,7 +115,7 @@ class InfoMapTest {
     @ParameterizedTest
     @MethodSource("cypherQueries")
     void testClustering(String cypher) {
-        db.execute(cypher);
+        runQuery(cypher);
         Graph graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()

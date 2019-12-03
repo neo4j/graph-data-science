@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -45,12 +46,8 @@ import static org.mockito.Mockito.mock;
  * >(a)  (d)  (g)
  *   2\ 1/ 2\ 1/
  *    (c)   (f)
- *
- * @author mknblch
  */
-public class YensDebugTest {
-
-    private GraphDatabaseAPI db;
+public class YensDebugTest extends AlgoTestBase {
 
     private Graph graph;
 
@@ -75,7 +72,7 @@ public class YensDebugTest {
                 " (e)-[:TYPE {cost:2.0}]->(g),\n" +
                 " (f)-[:TYPE {cost:1.0}]->(g)";
 
-        db.execute(cypher);
+        runQuery(cypher);
 
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
@@ -103,10 +100,7 @@ public class YensDebugTest {
 
     private Node getNode(String name) {
         final Node[] node = new Node[1];
-        db.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
-            node[0] = row.getNode("n");
-            return false;
-        });
+        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
         return node[0];
     }
 }

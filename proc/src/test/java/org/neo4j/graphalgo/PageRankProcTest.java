@@ -22,13 +22,12 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -94,10 +93,10 @@ class PageRankProcTest extends ProcTestBase {
     }
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER).close();
+            runQuery(DB_CYPHER);
             tx.success();
         }
 
@@ -156,7 +155,7 @@ class PageRankProcTest extends ProcTestBase {
                 "    }" +
                 ")", graphName);
 
-        db.execute(loadQuery, MapUtil.map("graph", graphImpl));
+        runQuery(loadQuery, MapUtil.map("graph", graphImpl));
 
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
@@ -196,7 +195,7 @@ class PageRankProcTest extends ProcTestBase {
                 "    }" +
                 ")", graphName);
 
-        db.execute(loadQuery, MapUtil.map("graph", graphImpl));
+        runQuery(loadQuery, MapUtil.map("graph", graphImpl));
 
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
@@ -220,7 +219,7 @@ class PageRankProcTest extends ProcTestBase {
                 "    }" +
                 ")", graphName);
 
-        db.execute(loadQuery, MapUtil.map("graph", graphImpl));
+        runQuery(loadQuery, MapUtil.map("graph", graphImpl));
 
         String query = "CALL algo.pageRank.stream(" +
                        "    '', '', {" +

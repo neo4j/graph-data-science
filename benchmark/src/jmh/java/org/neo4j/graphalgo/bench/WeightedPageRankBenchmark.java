@@ -56,7 +56,7 @@ import java.util.stream.LongStream;
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
-public class WeightedPageRankBenchmark {
+public class WeightedPageRankBenchmark extends  BaseBenchmark {
 
     @Param({"5", "20", "100"})
     int iterations;
@@ -99,7 +99,7 @@ public class WeightedPageRankBenchmark {
                         .newImpermanentDatabaseBuilder()
                         .newGraphDatabase();
         try (Transaction tx = db.beginTx()) {
-            db.execute(createGraph).close();
+            runQuery(createGraph);
             tx.success();
         }
     }

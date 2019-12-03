@@ -23,10 +23,9 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.SingleAndMultiThreadedAllGraphNames;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
@@ -51,14 +50,14 @@ class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
             ", (g:G {id: 6, community: 29})";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = (GraphDatabaseAPI) new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder()
                 .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")
                 .newGraphDatabase();
         registerProcedures(LabelPropagationProc.class);
         registerFunctions(GetNodeFunc.class);
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -78,7 +77,7 @@ class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
                        "RETURN algo.asNode(nodeId) AS id, label AS community " +
                        "ORDER BY id";
 
-        Result result = db.execute(query, parParams(parallel, graphName));
+        Result result = runQueryAndReturn(query, parParams(parallel, graphName));
 
         List<Integer> labels = result.columnAs("community").stream()
                 .mapToInt(value -> ((Long)value).intValue()).boxed().collect(Collectors.toList());

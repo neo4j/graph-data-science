@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.pregel.examples;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
@@ -33,11 +34,10 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertDoubleValues;
 
-class PageRankPregelTest {
+class PageRankPregelTest extends AlgoTestBase {
 
     private static final String ID_PROPERTY = "id";
 
@@ -75,13 +75,12 @@ class PageRankPregelTest {
             ", (j)-[:REL]->(e)" +
             ", (k)-[:REL]->(e)";
 
-    private GraphDatabaseAPI db;
     private Graph graph;
 
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(TEST_GRAPH);
+        runQuery(TEST_GRAPH);
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()

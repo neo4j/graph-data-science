@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.FormattedLog;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
@@ -45,9 +44,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
 @State(Scope.Benchmark)
-public class InfoMapGraph {
+public class InfoMapGraph extends BaseBenchmark {
 
-    private GraphDatabaseAPI db;
     Graph graph;
     ProgressLogger progressLogger;
     NodeProperties pageRanks;

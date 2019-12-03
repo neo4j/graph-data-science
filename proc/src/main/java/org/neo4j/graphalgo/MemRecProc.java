@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.ProcedureHandle;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;

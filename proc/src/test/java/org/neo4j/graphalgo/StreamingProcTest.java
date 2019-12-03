@@ -28,7 +28,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.stream.Stream;
 
@@ -41,7 +40,7 @@ import static org.neo4j.graphalgo.TestSupport.toArguments;
 public class StreamingProcTest extends ProcTestBase {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             LabelPropagationProc.class,
@@ -67,7 +66,7 @@ public class StreamingProcTest extends ProcTestBase {
                 "    graph: 'cypher'" +
                 "  })",
                 proc, nodeQuery, relQuery);
-        QueryExecutionException ex = assertThrows(QueryExecutionException.class, () -> db.execute(query).hasNext());
+        QueryExecutionException ex = assertThrows(QueryExecutionException.class, () -> runQueryAndReturn(query).hasNext());
         Throwable root = ExceptionUtil.rootCause(ex);
         assertTrue(root instanceof IllegalArgumentException);
         assertThat(root.getMessage(), containsString("Query must be read only. Query: "));

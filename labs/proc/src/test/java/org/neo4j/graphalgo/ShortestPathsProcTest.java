@@ -19,15 +19,12 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Matchers;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.DoubleConsumer;
 
@@ -49,7 +46,7 @@ import static org.mockito.Mockito.verify;
  *
  * S->X: {S,G,H,I,X}:8, {S,D,E,F,X}:12, {S,A,B,C,X}:20
  */
-final class ShortestPathsProcTest {
+final class ShortestPathsProcTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -84,26 +81,23 @@ final class ShortestPathsProcTest {
 
     private static long startNode;
     private static long endNode;
-    private static GraphDatabaseAPI DB;
 
-    @BeforeAll
-    static void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(ShortestPathsProc.class);
+    @BeforeEach
+    void setup() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(ShortestPathsProc.class);
 
-        try (Transaction tx = DB.beginTx()) {
-            DB.execute(DB_CYPHER);
-            startNode = DB.findNode(Label.label("Node"), "name", "s").getId();
-            endNode = DB.findNode(Label.label("Node"), "name", "x").getId();
+        try (Transaction tx = db.beginTx()) {
+            runQuery(DB_CYPHER);
+            startNode = db.findNode(Label.label("Node"), "name", "s").getId();
+            endNode = db.findNode(Label.label("Node"), "name", "x").getId();
             tx.success();
         }
     }
 
-    @AfterAll
-    static void shutdownGraph() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdownGraph() {
+        db.shutdown();
     }
 
     @AllGraphNamesTest
@@ -115,15 +109,15 @@ final class ShortestPathsProcTest {
                               "WITH n CALL algo.shortestPaths.stream(n, 'cost',{graph:'" + graphName + "'}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
-        DB.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
             System.out.printf(
-                    "%d:%.1f, ",
-                    nodeId,
-                    distance);
-            return true;
+                "%d:%.1f, ",
+                nodeId,
+                distance
+            );
         });
 
         System.out.println();
@@ -139,24 +133,22 @@ final class ShortestPathsProcTest {
                                    "WITH n CALL algo.shortestPaths(n, 'cost', {write:true, writeProperty:'sp',graph:'" + graphName + "'}) " +
                                    "YIELD nodeCount, loadDuration, evalDuration, writeDuration RETURN nodeCount, loadDuration, evalDuration, writeDuration";
 
-        DB.execute(matchCypher).accept(row -> {
+        runQuery(matchCypher, row -> {
             System.out.println("loadDuration = " + row.getNumber("loadDuration").longValue());
             System.out.println("evalDuration = " + row.getNumber("evalDuration").longValue());
             long writeDuration = row.getNumber("writeDuration").longValue();
             System.out.println("writeDuration = " + writeDuration);
             System.out.println("nodeCount = " + row.getNumber("nodeCount").longValue());
             assertNotEquals(-1L, writeDuration);
-            return false;
         });
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
         final String testCypher = "MATCH(n:Node) WHERE exists(n.sp) WITH n RETURN id(n) as id, n.sp as sp";
 
-        DB.execute(testCypher).accept(row -> {
+        runQuery(testCypher, row -> {
             double sp = row.getNumber("sp").doubleValue();
             consumer.accept(sp);
-            return true;
         });
 
         verify(consumer, times(11)).accept(anyDouble());
@@ -172,15 +164,15 @@ final class ShortestPathsProcTest {
                               "WITH n CALL algo.shortestPaths.stream(n, 'cost', {graph:'" + graphName + "'}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
-        DB.execute(cypher).accept(row -> {
+        runQuery(cypher, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
             System.out.printf(
-                    "%d:%.1f, ",
-                    nodeId,
-                    distance);
+                "%d:%.1f, ",
+                nodeId,
+                distance
+            );
             mock.test(nodeId, distance);
-            return true;
         });
 
         System.out.println();

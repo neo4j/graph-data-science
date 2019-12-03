@@ -64,17 +64,21 @@ public class ProcTestBase {
     }
 
     void registerFunctions(Class<?>... functionClasses) throws KernelException {
-        final Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
+        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
         for (Class<?> clazz : functionClasses) {
             procedures.registerFunction(clazz);
         }
     }
 
     protected void registerProcedures(Class<?>... procedureClasses) throws KernelException {
-        final Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
+        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
         for (Class<?> clazz : procedureClasses) {
             procedures.registerProcedure(clazz);
         }
+    }
+
+    <T> T resolveDependency(Class<T> dependency) {
+        return db.getDependencyResolver().resolveDependency(dependency, ONLY);
     }
 
     protected String getUsername() {
@@ -142,6 +146,14 @@ public class ProcTestBase {
 
             });
         }
+    }
+
+    protected Result runQueryAndReturn(String query) {
+        return runQueryAndReturn(query, emptyMap());
+    }
+
+    protected Result runQueryAndReturn(String query, Map<String, Object> params) {
+        return db.execute(query, params);
     }
 
     private KernelTransaction.Revertable withUsername(Transaction tx, String username) {

@@ -19,8 +19,9 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -31,7 +32,6 @@ import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +40,7 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-final class EigenvectorCentralityTest {
+final class EigenvectorCentralityTest extends AlgoTestBase {
 
     static PageRank.Config DEFAULT_CONFIG = new PageRank.Config(40, 0.85, PageRank.DEFAULT_TOLERANCE);
 
@@ -91,17 +91,16 @@ final class EigenvectorCentralityTest {
             ",  (k)-[:TYPE2]->(e)";
 
     private static final PageRank.Config DEFAULT_EIGENVECTOR_CONFIG = new PageRank.Config(40, 1, PageRank.DEFAULT_TOLERANCE);
-    private static GraphDatabaseAPI DB;
 
-    @BeforeAll
-    static void setupGraphDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER);
+    @BeforeEach
+    void setupGraphDb() {
+        db = TestDatabaseCreator.createTestDatabase();
+        runQuery(DB_CYPHER);
     }
 
-    @AfterAll
-    static void shutdownGraphDb() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdownGraphDb() {
+        db.shutdown();
     }
 
     @AllGraphTypesTest
@@ -109,31 +108,31 @@ final class EigenvectorCentralityTest {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = DB.beginTx()) {
-            expected.put(DB.findNode(label, "name", "a").getId(), 1.762540000000000);
-            expected.put(DB.findNode(label, "name", "b").getId(), 31.156790000000008);
-            expected.put(DB.findNode(label, "name", "c").getId(), 28.694439999999993);
-            expected.put(DB.findNode(label, "name", "d").getId(), 1.7625400000000004);
-            expected.put(DB.findNode(label, "name", "e").getId(), 1.7625400000000004);
-            expected.put(DB.findNode(label, "name", "f").getId(), 1.7625400000000004);
-            expected.put(DB.findNode(label, "name", "g").getId(), 0.1);
-            expected.put(DB.findNode(label, "name", "h").getId(), 0.1);
-            expected.put(DB.findNode(label, "name", "i").getId(), 0.1);
-            expected.put(DB.findNode(label, "name", "j").getId(), 0.1);
+        try (Transaction tx = db.beginTx()) {
+            expected.put(db.findNode(label, "name", "a").getId(), 1.762540000000000);
+            expected.put(db.findNode(label, "name", "b").getId(), 31.156790000000008);
+            expected.put(db.findNode(label, "name", "c").getId(), 28.694439999999993);
+            expected.put(db.findNode(label, "name", "d").getId(), 1.7625400000000004);
+            expected.put(db.findNode(label, "name", "e").getId(), 1.7625400000000004);
+            expected.put(db.findNode(label, "name", "f").getId(), 1.7625400000000004);
+            expected.put(db.findNode(label, "name", "g").getId(), 0.1);
+            expected.put(db.findNode(label, "name", "h").getId(), 0.1);
+            expected.put(db.findNode(label, "name", "i").getId(), 0.1);
+            expected.put(db.findNode(label, "name", "j").getId(), 0.1);
             tx.success();
         }
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = DB.beginTx()) {
-                graph = new GraphLoader(DB)
+            try (Transaction tx = db.beginTx()) {
+                graph = new GraphLoader(db)
                         .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                         .withRelationshipType(
                                 "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                         .load(graphFactory);
             }
         } else {
-            graph = new GraphLoader(DB)
+            graph = new GraphLoader(db)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)

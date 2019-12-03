@@ -19,12 +19,12 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.triangle.BalancedTriads;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -42,7 +41,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @ExtendWith(MockitoExtension.class)
-class BalancedTriadsTest {
+class BalancedTriadsTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE " +
@@ -68,8 +67,6 @@ class BalancedTriadsTest {
             ", (f)-[:TYPE {w: -1.0}]->(g)" +
             ", (g)-[:TYPE {w: 1.0}]->(b)";
 
-    private static GraphDatabaseAPI DB;
-
     @Mock
     final BalancedTriadTestConsumer consumer = mock(BalancedTriadTestConsumer.class);
 
@@ -79,11 +76,11 @@ class BalancedTriadsTest {
 
     private static Graph graph;
 
-    @BeforeAll
-    static void setupGraphDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER);
-        graph = new GraphLoader(DB, Pools.DEFAULT)
+    @BeforeEach
+    void setupGraphDb() {
+        db = TestDatabaseCreator.createTestDatabase();
+        runQuery(DB_CYPHER);
+        graph = new GraphLoader(db, Pools.DEFAULT)
                 .withLabel("Node")
                 .withRelationshipStatement("TYPE")
                 .withRelationshipProperties(PropertyMapping.of("w", 0.0))
@@ -92,9 +89,9 @@ class BalancedTriadsTest {
                 .load(HugeGraphFactory.class);
     }
 
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) DB.shutdown();
+    @BeforeEach
+    void shutdown() {
+        db.shutdown();
     }
 
     @Test
