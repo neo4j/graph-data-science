@@ -42,7 +42,8 @@ class GraphExistProcTest extends ProcTestBase {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
-            GraphCatalogProcs.class
+            GraphCatalogProcs.class,
+            GraphExistsProc.class
         );
         db.execute(DB_CYPHER);
     }

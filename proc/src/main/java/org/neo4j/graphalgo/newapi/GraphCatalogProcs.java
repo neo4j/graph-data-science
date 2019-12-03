@@ -20,40 +20,29 @@
 
 package org.neo4j.graphalgo.newapi;
 
-import org.HdrHistogram.AtomicHistogram;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
-
-import static java.util.Collections.emptyMap;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class GraphCatalogProcs extends BaseProc {
 
-    private static final String HISTOGRAM_FIELD_NAME = "histogram";
+    static final String HISTOGRAM_FIELD_NAME = "histogram";
 
     @Procedure(name = "algo.beta.graph.create", mode = Mode.READ)
     @Description("CALL graph.create(" +
@@ -95,7 +84,10 @@ public class GraphCatalogProcs extends BaseProc {
 
     private GraphCreateResult createGraph(GraphCreateConfig config) {
         if (GraphCatalog.exists(config.username(), config.graphName())) {
-            throw new IllegalArgumentException(String.format("A graph with name '%s' already exists.", config.graphName()));
+            throw new IllegalArgumentException(String.format(
+                "A graph with name '%s' already exists.",
+                config.graphName()
+            ));
         }
 
         GraphCreateResult.Builder builder = new GraphCreateResult.Builder(config);
@@ -114,44 +106,6 @@ public class GraphCatalogProcs extends BaseProc {
         }
 
         return builder.build();
-    }
-
-    @Procedure(name = "algo.beta.graph.list", mode = Mode.READ)
-    public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = "null") Object graphName) {
-        if (Objects.nonNull(graphName) && !(graphName instanceof String)) {
-            throw new IllegalArgumentException("`graphName` parameter must be a STRING");
-        }
-
-        boolean computeHistogram = callContext.outputFields().anyMatch(HISTOGRAM_FIELD_NAME::equals);
-        Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries;
-
-        graphEntries = GraphCatalog.getLoadedGraphs(getUsername()).entrySet().stream();
-        if (!isEmpty((String)graphName)) {
-            // we should only list the provided graph
-            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
-        }
-
-        return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram));
-    }
-
-    @Procedure(name = "algo.beta.graph.exists", mode = Mode.READ)
-    @Description("CALL graph.exists(" +
-                 "  graphName: STRING" +
-                 ") YIELD" +
-                 "  graphName: STRING," +
-                 "  exists: BOOLEAN")
-    public Stream<GraphExistsResult> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
-        return Stream.of(new GraphExistsResult(graphName, GraphCatalog.exists(getUsername(), graphName)));
-    }
-
-    public static class GraphExistsResult {
-        public final String graphName;
-        public final boolean exists;
-
-        GraphExistsResult(String graphName, boolean exists) {
-            this.graphName = graphName;
-            this.exists = exists;
-        }
     }
 
     public static class GraphCreateResult {
@@ -207,62 +161,6 @@ public class GraphCatalogProcs extends BaseProc {
                     createMillis
                 );
             }
-        }
-    }
-
-    public static class GraphInfo {
-
-        public final String graphName;
-        public final Map<String, Object> nodeProjection, relationshipProjection;
-        public final long nodes, relationships;
-        public final Map<String, Object> histogram;
-
-        GraphInfo(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
-            this.graphName = config.graphName();
-            nodeProjection = config.nodeProjection().toObject();
-            relationshipProjection = config.relationshipProjection().toObject();
-            nodes = graph.nodeCount();
-            relationships = graph.relationshipCount();
-            histogram = computeHistogram ? computeHistogram(graph) : emptyMap();
-        }
-
-        private static final int PRECISION = 5;
-
-        private Map<String, Object> computeHistogram(Graph graph) {
-            int batchSize = Math.toIntExact(ParallelUtil.adjustedBatchSize(
-                graph.nodeCount(),
-                Pools.DEFAULT_CONCURRENCY,
-                ParallelUtil.DEFAULT_BATCH_SIZE
-            ));
-            // needs to be at least 2 due to some requirement from the AtomicHistogram, see their JavaDoc
-            long maximumDegree = Math.max(2, graph.relationshipCount());
-            AtomicHistogram histogram = new AtomicHistogram(maximumDegree, PRECISION);
-
-            ParallelUtil.readParallel(
-                Pools.DEFAULT_CONCURRENCY,
-                batchSize,
-                graph,
-                Pools.DEFAULT,
-                (nodeOffset, nodeIds) -> () -> {
-                    PrimitiveLongIterator iterator = nodeIds.iterator();
-                    while (iterator.hasNext()) {
-                        long nodeId = iterator.next();
-                        int degree = graph.degree(nodeId, Direction.OUTGOING);
-                        histogram.recordValue(degree);
-                    }
-                }
-            );
-            return MapUtil.map(
-                "min", histogram.getMinValue(),
-                "mean", histogram.getMean(),
-                "max", histogram.getMaxValue(),
-                "p50", histogram.getValueAtPercentile(50),
-                "p75", histogram.getValueAtPercentile(75),
-                "p90", histogram.getValueAtPercentile(90),
-                "p95", histogram.getValueAtPercentile(95),
-                "p99", histogram.getValueAtPercentile(99),
-                "p999", histogram.getValueAtPercentile(99.9)
-            );
         }
     }
 }

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -51,7 +50,7 @@ class GraphListProcTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphCatalogProcs.class,
-            GraphLoadProc.class
+            GraphListProc.class
         );
         runQuery(DB_CYPHER);
     }
