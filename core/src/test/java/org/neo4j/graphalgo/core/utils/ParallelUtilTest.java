@@ -318,13 +318,13 @@ final class ParallelUtilTest {
                 TransactionTerminatedException.class,
                 () -> withPool(4, pool -> {
                     Tasks tasks = new Tasks(6, 100);
-                    AtomicReference<RuntimeException> thrownException = new AtomicReference<>();
+                    AtomicReference<Throwable> thrownException = new AtomicReference<>();
                     AtomicBoolean running = new AtomicBoolean(true);
                     TerminationFlag isRunning = running::get;
                     final Thread thread = new Thread(() -> tasks.run(t ->
                             ParallelUtil.runWithConcurrency(2, t, isRunning, pool)));
 
-                    thread.setUncaughtExceptionHandler((t, e) -> thrownException.set((RuntimeException) e));
+                    thread.setUncaughtExceptionHandler((t, e) -> thrownException.set(e));
                     thread.start();
                     running.set(false);
                     thread.join();
