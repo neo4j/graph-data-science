@@ -40,6 +40,7 @@ final class AdjacencyListBuilder {
     private static final long PAGE_SIZE_IN_BYTES = sizeOfByteArray(PAGE_SIZE);
     private static final AtomicReferenceFieldUpdater<AdjacencyListBuilder, byte[][]> PAGES_UPDATER =
         AtomicReferenceFieldUpdater.newUpdater(AdjacencyListBuilder.class, byte[][].class, "pages");
+    private static final int NO_SKIP = -1;
 
     private final AllocationTracker tracker;
     private final ReentrantLock growLock;
@@ -70,7 +71,7 @@ final class AdjacencyListBuilder {
 
     private long insertDefaultSizedPage(Allocator into) {
         int pageIndex = allocatedPages.getAndIncrement();
-        grow(pageIndex + 1, -1);
+        grow(pageIndex + 1, NO_SKIP);
         long intoIndex = PageUtil.capacityFor(pageIndex, PAGE_SHIFT);
         into.setNewPages(pages, intoIndex);
         return intoIndex;
@@ -119,6 +120,12 @@ final class AdjacencyListBuilder {
         return newNumPages <= PAGES_UPDATER.get(this).length;
     }
 
+    /**
+     * Grows and re-assigns the {@code pages} representing the Adjacency List.
+     *
+     * This method is not thread-safe.
+     * Callers need to acquire the {@code growLock} before entering the method.
+     */
     private void setPages(int newNumPages, int skipPage) {
         byte[][] currentPages = PAGES_UPDATER.get(this);
         tracker.add(sizeOfObjectArrayElements(newNumPages - currentPages.length));
