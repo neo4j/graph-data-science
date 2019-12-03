@@ -42,8 +42,8 @@ public final class TrackingLongDoubleHashMap extends LongDoubleHashMap {
         return MemoryEstimations
                 .builder(TrackingLongDoubleHashMap.class)
                 .rangePerNode("map buffers", nodeCount -> {
-                    long minBufferSize = MemoryUsage.sizeOfEmptyHashContainer();
-                    long maxBufferSize = MemoryUsage.sizeOfHashContainer(Math.min(pageSize, nodeCount));
+                    long minBufferSize = MemoryUsage.sizeOfEmptyOpenHashContainer();
+                    long maxBufferSize = MemoryUsage.sizeOfOpenHashContainer(Math.min(pageSize, nodeCount));
                     long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
                     long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
                     return MemoryRange.of(min, max);

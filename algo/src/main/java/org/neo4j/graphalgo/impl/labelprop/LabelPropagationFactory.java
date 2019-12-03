@@ -68,8 +68,8 @@ public class LabelPropagationFactory extends AlgorithmFactory<LabelPropagation> 
                         .field("compute step consumer", ComputeStepConsumer.class)
                         .field("votes container", LongDoubleScatterMap.class)
                         .rangePerNode("votes", nodeCount -> {
-                            long minBufferSize = MemoryUsage.sizeOfEmptyHashContainer();
-                            long maxBufferSize = MemoryUsage.sizeOfHashContainer(nodeCount);
+                            long minBufferSize = MemoryUsage.sizeOfEmptyOpenHashContainer();
+                            long maxBufferSize = MemoryUsage.sizeOfOpenHashContainer(nodeCount);
                             if (maxBufferSize < minBufferSize) {
                                 maxBufferSize = minBufferSize;
                             }

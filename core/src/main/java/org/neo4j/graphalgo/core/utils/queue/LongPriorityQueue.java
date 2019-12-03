@@ -50,8 +50,8 @@ public abstract class LongPriorityQueue implements PrimitiveLongIterable {
             .add("costs",
                 MemoryEstimations.builder(LongDoubleScatterMap.class)
                     .rangePerNode("map buffers", nodeCount -> {
-                            long minBufferSize = MemoryUsage.sizeOfEmptyHashContainer();
-                            long maxBufferSize = MemoryUsage.sizeOfHashContainer(Math.min(capacity, nodeCount));
+                            long minBufferSize = MemoryUsage.sizeOfEmptyOpenHashContainer();
+                            long maxBufferSize = MemoryUsage.sizeOfOpenHashContainer(Math.min(capacity, nodeCount));
                             long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
                             long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
                             return MemoryRange.of(min, max);

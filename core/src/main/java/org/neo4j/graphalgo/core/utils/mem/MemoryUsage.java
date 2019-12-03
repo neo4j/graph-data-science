@@ -214,11 +214,11 @@ public final class MemoryUsage {
         return keyArraySize + valueArraySize + sizeOfInstance(LongDoubleHashMap.class);
     }
 
-    public static long sizeOfEmptyHashContainer() {
-        return sizeOfHashContainer(DEFAULT_EXPECTED_ELEMENTS);
+    public static long sizeOfEmptyOpenHashContainer() {
+        return sizeOfOpenHashContainer(DEFAULT_EXPECTED_ELEMENTS);
     }
 
-    public static long sizeOfHashContainer(final long elements) {
+    public static long sizeOfOpenHashContainer(final long elements) {
         if (elements < 0) {
             throw new IllegalArgumentException(
                 "Number of elements must be >= 0: " + elements);
