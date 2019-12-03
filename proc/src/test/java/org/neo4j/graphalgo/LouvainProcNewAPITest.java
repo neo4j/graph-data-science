@@ -158,15 +158,19 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
     @AllGraphNamesTest
     void testWriteIntermediateCommunities(String graphImpl) {
         String writeProperty = "myFancyCommunity";
-        String query = "CALL gds.algo.louvain.write(" +
-                       "    '', '', {" +
-                       "        graph: $graph," +
-                       "        includeIntermediateCommunities: true," +
-                       "        writeProperty: '" + writeProperty + "'" +
-                       "    } " +
-                       ") YIELD includeIntermediateCommunities";
+        String query = "CALL gds.algo.louvain.write({" +
+                       "    writeProperty: $writeProp," +
+                       "    includeIntermediateCommunities: true," +
+                       "    nodeProjection: ['Node']," +
+                       "    relationshipProjection: {" +
+                       "      TYPE: {" +
+                       "        type: 'TYPE'," +
+                       "        projection: 'UNDIRECTED'" +
+                       "      }" +
+                       "    }" +
+                       "}) YIELD includeIntermediateCommunities";
 
-        runQuery(query, MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
+        runQuery(query, MapUtil.map("writeProp", writeProperty),
             row -> {
                 assertTrue(row.getBoolean(INCLUDE_INTERMEDIATE_COMMUNITIES_KEY));
             }
