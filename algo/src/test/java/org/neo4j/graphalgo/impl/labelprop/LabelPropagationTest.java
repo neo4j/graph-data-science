@@ -234,7 +234,7 @@ final class LabelPropagationTest extends AlgoTestBase {
 
     @Test
     void shouldBoundMemrecToMaxSupportedDegree() {
-        LabelPropagationFactory labelPropagation = new LabelPropagationFactory();
+        LabelPropagationFactory labelPropagation = new LabelPropagationFactory(ConfigBuilder.testDefault());
         GraphDimensions largeDimensions = new GraphDimensions.Builder()
             .setNodeCount((long)Integer.MAX_VALUE + (long)Integer.MAX_VALUE)
             .build();
