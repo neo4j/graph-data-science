@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -216,7 +217,19 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     }
 
     private Louvain compute(ProcedureSetup setup) {
+        Direction procedureDirection = setup.procedureConfig.getDirection(DEFAULT_LOUVAIN_DIRECTION);
+        Optional<Direction> computeDirection = setup.graph.compatibleDirection(procedureDirection);
+        if (!computeDirection.isPresent()) {
+            throw new IllegalArgumentException(String.format(
+                "Incompatible directions between loaded graph and requested compute direction. Load direction: '%s' Compute direction: '%s'",
+                setup.graph.getLoadDirection(),
+                procedureDirection
+            ));
+        }
+
         final Louvain louvain = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
+        louvain.setDirection(computeDirection.get());
+
         runWithExceptionLogging(
             Louvain.class.getSimpleName() + " failed",
             () -> setup.builder.timeEval(louvain::compute)

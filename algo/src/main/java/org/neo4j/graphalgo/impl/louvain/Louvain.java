@@ -42,7 +42,7 @@ public final class Louvain extends Algorithm<Louvain> {
     private final Graph rootGraph;
     private final Config config;
     private final NodeProperties seedingValues;
-    private final Direction direction;
+    private Direction direction;
     private final ExecutorService executorService;
     private final Log log;
     private final AllocationTracker tracker;
@@ -71,6 +71,10 @@ public final class Louvain extends Algorithm<Louvain> {
         this.tracker = tracker;
         this.dendrograms = new HugeLongArray[config.maxLevel];
         this.modularities = new double[config.maxLevel];
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
     }
 
     public Louvain compute() {

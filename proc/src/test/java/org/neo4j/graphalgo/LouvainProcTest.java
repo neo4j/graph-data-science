@@ -25,8 +25,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +37,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT;
@@ -50,7 +53,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 
 class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
-    
+
     private static final List<List<Long>> RESULT = Arrays.asList(
         Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 14L),
         Arrays.asList(6L, 7L, 8L),
@@ -245,6 +248,27 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
             }
         );
         assertCommunities(actualCommunities, RESULT);
+    }
+
+    @Test
+    void testRunOnLoadedGraphWithDefaultDirection() {
+        runQuery("CALL algo.graph.load('myGraph','','')");
+
+        String query = "CALL algo.beta.louvain.stream(" +
+                       "    '', '', {" +
+                       "        graph: 'myGraph'" +
+                       "    } " +
+                       ") YIELD nodeId as id, community";
+
+        QueryExecutionException exception = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(query)
+        );
+        Throwable rootCause = ExceptionUtil.rootCause(exception);
+        assertEquals(
+            "Incompatible directions between loaded graph and requested compute direction. Load direction: 'OUTGOING' Compute direction: 'BOTH'",
+            rootCause.getMessage()
+        );
     }
 
     @AllGraphNamesTest
