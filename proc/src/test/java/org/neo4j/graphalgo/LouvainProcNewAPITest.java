@@ -22,10 +22,13 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -34,8 +37,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT;
@@ -44,6 +50,7 @@ import static org.neo4j.graphalgo.LouvainProc.INNER_ITERATIONS_DEFAULT;
 import static org.neo4j.graphalgo.LouvainProc.INNER_ITERATIONS_KEY;
 import static org.neo4j.graphalgo.LouvainProc.LEVELS_DEFAULT;
 import static org.neo4j.graphalgo.LouvainProc.LEVELS_KEY;
+import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
 import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.GRAPH_IMPL_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
@@ -117,8 +124,8 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
         GraphCatalog.removeAllLoadedGraphs();
     }
 
-    @AllGraphNamesTest
-    void testWrite(String graphImpl) {
+    @Test
+    void testWrite() {
         String writeProperty = "myFancyCommunity";
         String query = "CALL gds.algo.louvain.write({" +
                        "    writeProperty: $writeProp," +
@@ -155,8 +162,8 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
         assertWriteResult(RESULT, writeProperty);
     }
 
-    @AllGraphNamesTest
-    void testWriteIntermediateCommunities(String graphImpl) {
+    @Test
+    void testWriteIntermediateCommunities() {
         String writeProperty = "myFancyCommunity";
         String query = "CALL gds.algo.louvain.write({" +
                        "    writeProperty: $writeProp," +
@@ -184,43 +191,76 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
         });
     }
 
-    @AllGraphNamesTest
-    void testStream(String graphImpl) {
-        String query = "CALL gds.algo.louvain.stream(" +
-                       "    '', '', {" +
-                       "        graph: $graph" +
-                       "    } " +
-                       ") YIELD nodeId as id, community";
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "writeProperty: null,",
+        ""
+    })
+    void testWriteRequiresWritePropertyToBeSet(String writePropertyParameter) {
+        String query = "CALL gds.algo.louvain.write({" +
+                       writePropertyParameter +
+                       "    nodeProjection: ['Node']," +
+                       "    relationshipProjection: {" +
+                       "      TYPE: {" +
+                       "        type: 'TYPE'," +
+                       "        projection: 'UNDIRECTED'" +
+                       "      }" +
+                       "    }" +
+                       "}) YIELD includeIntermediateCommunities";
+
+        QueryExecutionException exception = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(query)
+        );
+
+        assertThat(exception, rootCause(
+            IllegalArgumentException.class,
+            "writeProperty must be set in write mode"
+        ));
+    }
+
+    @Test
+    void testStream() {
+        String query = "CALL gds.algo.louvain.stream({" +
+                       "    nodeProjection: ['Node']," +
+                       "    relationshipProjection: {" +
+                       "      TYPE: {" +
+                       "        type: 'TYPE'," +
+                       "        projection: 'UNDIRECTED'" +
+                       "      }" +
+                       "    }" +
+                       "}) YIELD nodeId, communityId, communityIds";
 
         List<Long> actualCommunities = new ArrayList<>();
-        runQuery(query, MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
-            row -> {
-                long community = row.getNumber("community").longValue();
-                int id = row.getNumber("id").intValue();
-                actualCommunities.add(id, community);
-            }
-        );
+        runQuery(query, row -> {
+            int id = row.getNumber("nodeId").intValue();
+            long community = row.getNumber("communityId").longValue();
+            assertNull(row.get("communityIds"));
+            actualCommunities.add(id, community);
+        });
         assertCommunities(actualCommunities, RESULT);
     }
 
-    @AllGraphNamesTest
-    void testStreamCommunities(String graphImpl) {
-        String query = "CALL gds.algo.louvain.stream(" +
-                       "    '', '', {" +
-                       "        graph: $graph," +
-                       "        includeIntermediateCommunities: true" +
-                       "    } " +
-                       ") YIELD nodeId as id, community, communities";
+    @Test
+    void testStreamCommunities() {
+        String query = "CALL gds.algo.louvain.stream({" +
+                       "    includeIntermediateCommunities: true," +
+                       "    nodeProjection: ['Node']," +
+                       "    relationshipProjection: {" +
+                       "      TYPE: {" +
+                       "        type: 'TYPE'," +
+                       "        projection: 'UNDIRECTED'" +
+                       "      }" +
+                       "    }" +
+                       "}) YIELD nodeId, communityId, communityIds";
 
-        runQuery(query, MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
-            row -> {
-                Object maybeList = row.get("communities");
-                assertTrue(maybeList instanceof List);
-                List<Long> communities = (List<Long>) maybeList;
-                assertEquals(2, communities.size());
-                assertEquals(communities.get(1), row.getNumber("community").longValue());
-            }
-        );
+        runQuery(query, row -> {
+            Object maybeList = row.get("communityIds");
+            assertTrue(maybeList instanceof List);
+            List<Long> communities = (List<Long>) maybeList;
+            assertEquals(2, communities.size());
+            assertEquals(communities.get(1), row.getNumber("communityId").longValue());
+        });
     }
 
     @Test
@@ -254,8 +294,8 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
         assertCommunities(actualCommunities, RESULT);
     }
 
-    @AllGraphNamesTest
-    void testWriteWithSeeding(String graphImpl) {
+    @Test
+    void testWriteWithSeeding() {
         String writeProperty = "myFancyWriteProperty";
         String query = "CALL gds.algo.louvain.write({" +
                        "    writeProperty: '"+ writeProperty +"'," +

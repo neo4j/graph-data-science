@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -44,7 +45,6 @@ import org.neo4j.helpers.collection.Pair;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.Function;
 
 public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> extends BaseProc {
 
@@ -104,7 +104,11 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 
-    Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
+    Pair<CONFIG, Optional<String>> processInput(
+        Object graphNameOrConfig,
+        Map<String, Object> configuration,
+        ExecutionMode executionMode
+    ) {
         CONFIG config;
         Optional<String> graphName = Optional.empty();
 
@@ -130,6 +134,20 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             throw new IllegalArgumentException(
                 "The first parameter must be a graph name or a configuration map, but was: " + graphNameOrConfig
             );
+        }
+
+        if (executionMode == ExecutionMode.WRITE) {
+            if (!(config instanceof WriteConfig)) {
+                throw new IllegalArgumentException(
+                    "Algorithm configuration does not support write mode"
+                );
+            }
+            WriteConfig writeConfig = (WriteConfig) config;
+            if (StringUtils.isEmpty(writeConfig.writeProperty())) {
+                throw new IllegalArgumentException(
+                    "writeProperty must be set in write mode"
+                );
+            }
         }
 
         return Pair.of(config, graphName);
@@ -158,10 +176,14 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         }
     }
 
-    ComputationResult<A, RESULT, CONFIG> compute(Object graphNameOrConfig, Map<String, Object> configuration) {
+    ComputationResult<A, RESULT, CONFIG> compute(
+        Object graphNameOrConfig,
+        Map<String, Object> configuration,
+        ExecutionMode executionMode
+    ) {
         ImmutableComputationResult.Builder<A, RESULT, CONFIG> builder = ImmutableComputationResult.builder();
 
-        Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
+        Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration, executionMode);
         CONFIG config = input.first();
 
         Graph graph;

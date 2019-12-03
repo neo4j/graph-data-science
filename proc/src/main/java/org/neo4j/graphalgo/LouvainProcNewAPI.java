@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -40,6 +41,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -82,7 +84,8 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
     ) {
         ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(
             graphNameOrConfig,
-            configuration
+            configuration,
+            ExecutionMode.WRITE
         );
         return write(computationResult, true);
     }
@@ -122,9 +125,34 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
     ) {
         ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(
             graphNameOrConfig,
-            configuration
+            configuration,
+            ExecutionMode.STATS
         );
         return write(computationResult, false);
+    }
+
+    @Procedure(value = "gds.algo.louvain.stream", mode = READ)
+    @Description("CALL gds.algo.louvain.stream(graphName: STRING, configuration: MAP {" +
+                 "    maxIteration: INTEGER" +
+                 "    maxLevels: INTEGER" +
+                 "    tolerance: FLOAT" +
+                 "    includeIntermediateCommunities: BOOLEAN" +
+                 "    seedProperty: STRING" +
+                 "  }" +
+                 ") YIELD" +
+                 "  nodeId: INTEGER" +
+                 "  communityId: INTEGER" +
+                 "  communityIds: LIST OF INTEGER")
+    public Stream<StreamResult> stream(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration,
+            ExecutionMode.STREAM
+        );
+        return stream(computationResult);
     }
 
     @Override
@@ -193,18 +221,30 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
         return Optional.of(translator);
     }
 
+    private Stream<StreamResult> stream(ComputationResult<Louvain, Louvain, LouvainConfig> computationResult) {
+        Graph graph = computationResult.graph();
+        Louvain louvain = computationResult.result();
+        boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
+        return LongStream.range(0, graph.nodeCount())
+            .mapToObj(nodeId -> {
+                long neoNodeId = graph.toOriginalNodeId(nodeId);
+                long[] communities = includeIntermediateCommunities ? louvain.getCommunities(nodeId) : null;
+                return new StreamResult(neoNodeId, communities, louvain.getCommunity(nodeId));
+            });
+    }
+
     public static final class StreamResult {
         public final long nodeId;
-        public final List<Long> communities;
-        public final long community;
+        public final long communityId;
+        public final List<Long> communityIds;
 
-        StreamResult(final long nodeId, final long[] communities, final long community) {
+        StreamResult(long nodeId, @Nullable long[] communityIds, long communityId) {
             this.nodeId = nodeId;
-            this.communities = communities == null ? null : Arrays
-                .stream(communities)
+            this.communityIds = communityIds == null ? null : Arrays
+                .stream(communityIds)
                 .boxed()
                 .collect(Collectors.toList());
-            this.community = community;
+            this.communityId = communityId;
         }
     }
 

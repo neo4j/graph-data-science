@@ -18,20 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.newapi;
+package org.neo4j.graphalgo;
 
-import org.immutables.value.Value;
-
-public interface WriteConfig extends BaseAlgoConfig {
-
-    @Value.Default
-    default String writeProperty() {
-        return null;
-    }
-
-    @Value.Default
-    default int writeConcurrency() {
-        return concurrency();
-    }
-
+public enum ExecutionMode {
+    WRITE,
+    STATS,
+    STREAM
 }
