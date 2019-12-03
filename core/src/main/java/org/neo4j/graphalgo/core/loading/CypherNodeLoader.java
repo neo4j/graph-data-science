@@ -25,13 +25,14 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
+import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
+class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties, Result.ResultVisitor<RuntimeException>> {
 
     private final HugeLongArrayBuilder builder;
     private final NodeImporter importer;

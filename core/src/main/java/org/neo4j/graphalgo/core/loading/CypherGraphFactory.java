@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -81,29 +82,18 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
 
     @Override
     public Graph importGraph() {
-        // Temporarily override the security context to enforce read-only access during load
-        try (Revertable revertable = setReadOnlySecurityContext()) {
-            BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.nodeLabel(), api, setup).load();
-            IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
-            Relationships relationships = new CypherRelationshipLoader(nodes.idMap(), api, setup).load();
-
-            return HugeGraph.create(
-                setup.tracker(),
-                    nodes.idMap(),
-                    nodes.properties(),
-                    relationships.relationshipCount(),
-                    relationships.inAdjacency(),
-                    relationships.outAdjacency(),
-                    relationships.inOffsets(),
-                    relationships.outOffsets(),
-                    relationships.maybeDefaultRelProperty(),
-                    Optional.ofNullable(relationships.inRelProperties()),
-                    Optional.ofNullable(relationships.outRelProperties()),
-                    Optional.ofNullable(relationships.inRelPropertyOffsets()),
-                    Optional.ofNullable(relationships.outRelPropertyOffsets()),
-                setup.loadAsUndirected()
-            );
+        RelationshipTypeMappings relationshipTypeIds = dimensions.relationshipTypeMappings();
+        if (relationshipTypeIds.isMultipleTypes()) {
+            String message = String.format(
+                "It is not possible to use multiple relationship types in implicit graph loading. Please use `algo.graph.load()` for this. Found relationship types: %s",
+                relationshipTypeIds
+                    .stream()
+                    .map(RelationshipTypeMapping::typeName)
+                    .collect(Collectors.toList()));
+            throw new IllegalArgumentException(message);
         }
+
+        return importAllGraphs().getUnion();
     }
 
     @Override
@@ -123,7 +113,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
         GraphDimensions dimensions,
         AllocationTracker tracker
     ) {
-        CypherRelationshipsImporter cypherImporter = new CypherRelationshipsImporter(
+        CypherRelationshipLoader cypherImporter = new CypherRelationshipLoader(
             idsAndProperties.idMap(),
             api,
             setup,

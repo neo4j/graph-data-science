@@ -184,7 +184,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     <T extends GraphFactory & MultipleRelTypesSupport>
     void multipleTypes(Class<T> graphFactory) {
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
-            .withRelationshipType("REL1 | REL2", true)
+            .withRelationshipType("REL1 | REL2")
             .buildGraphs(graphFactory);
 
         assertEquals(2, graphs.availableRelationshipTypes().size());
@@ -203,7 +203,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     <T extends GraphFactory & MultipleRelTypesSupport>
     void multipleTypesWithProperties(Class<T> graphFactory) {
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
-            .withRelationshipType("REL1 | REL2", true)
+            .withRelationshipType("REL1 | REL2")
             .withRelationshipProperties(PropertyMapping.of("prop1", 42D))
             .buildGraphs(graphFactory);
 
@@ -221,7 +221,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multipleProperties(Class<T> graphFactory) {
-        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -486,7 +485,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (a)-[:REL_3 {p1: 44}]->(a)");
 
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
-            .withRelationshipType("REL_1 | REL_2 | REL_3", true)
+            .withRelationshipType("REL_1 | REL_2 | REL_3")
             .withDeduplicationStrategy(MAX)
             .withRelationshipProperties(
                 PropertyMapping.of("agg", "p1", 1.0, MAX)
@@ -563,7 +562,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void graphsByRelationshipTypeCanBeReleased(Class<T> graphFactory) {
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
-            .withRelationshipType("REL1 | REL2", true)
+            .withRelationshipType("REL1 | REL2")
             .buildGraphs(graphFactory);
 
         Graph rel1Graph = graphs.getGraph("REL1");
@@ -587,7 +586,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void graphsByRelationshipTypeGiveCorrectElementCounts(Class<T> graphFactory) {
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
-            .withRelationshipType("REL1 | REL2 | REL3", true)
+            .withRelationshipType("REL1 | REL2 | REL3")
             .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 

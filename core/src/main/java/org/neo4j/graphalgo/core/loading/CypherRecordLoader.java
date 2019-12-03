@@ -32,13 +32,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-abstract class CypherRecordLoader<R> {
+abstract class CypherRecordLoader<R, V extends Result.ResultVisitor<RuntimeException>> {
 
     static final long NO_COUNT = -1L;
 
-    private final String loadQuery;
+    protected final String loadQuery;
+    protected final GraphDatabaseAPI api;
     private final long recordCount;
-    private final GraphDatabaseAPI api;
     final GraphSetup setup;
 
     CypherRecordLoader(String loadQuery, long recordCount, GraphDatabaseAPI api, GraphSetup setup) {
@@ -122,10 +122,7 @@ abstract class CypherRecordLoader<R> {
         updateCounts(result);
     }
 
-    final void runLoadingQuery(
-            long offset,
-            int batchSize,
-            Result.ResultVisitor<RuntimeException> visitor) {
+    void runLoadingQuery(long offset, int batchSize, V visitor) {
         Map<String, Object> parameters =
                 batchSize == CypherLoadingUtils.NO_BATCHING
                         ? setup.params()

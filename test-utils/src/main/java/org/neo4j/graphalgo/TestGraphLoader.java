@@ -42,7 +42,6 @@ public final class TestGraphLoader {
 
     private Optional<String> maybeLabel = Optional.empty();
     private Optional<String> maybeRelType = Optional.empty();
-    private boolean isMultiRelTypeQuery;
 
     private PropertyMappings nodeProperties = PropertyMappings.of();
     private PropertyMappings relProperties = PropertyMappings.of();
@@ -64,12 +63,7 @@ public final class TestGraphLoader {
     }
 
     public TestGraphLoader withRelationshipType(String relType) {
-        return withRelationshipType(relType, false);
-    }
-
-    public TestGraphLoader withRelationshipType(String relType, boolean isMultiRelTypeQuery) {
         this.maybeRelType = Optional.of(relType);
-        this.isMultiRelTypeQuery = isMultiRelTypeQuery;
         return this;
     }
 
@@ -129,7 +123,7 @@ public final class TestGraphLoader {
             String nodeQuery = String.format(nodeQueryTemplate, labelString, nodePropertiesString);
             graphLoader.withLabel(nodeQuery);
 
-            String relationshipQueryTemplate = isMultiRelTypeQuery
+            String relationshipQueryTemplate = maybeRelType.isPresent()
                 ? "MATCH (n)-[r%s]->(m) RETURN type(r) AS type, id(n) AS source, id(m) AS target%s"
                 : "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s";
 
