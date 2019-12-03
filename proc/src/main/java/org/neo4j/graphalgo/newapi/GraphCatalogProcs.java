@@ -45,6 +45,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
@@ -73,6 +74,8 @@ public class GraphCatalogProcs extends BaseProc {
         @Name(value = "relationshipFilter") @Nullable Object relationshipFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        CypherMapWrapper.failOnBlank("graphName", graphName);
+
         // input
         GraphCreateConfig config = GraphCreateConfig.of(
             getUsername(),
@@ -114,14 +117,16 @@ public class GraphCatalogProcs extends BaseProc {
     }
 
     @Procedure(name = "algo.beta.graph.list", mode = Mode.READ)
-    public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = "") String graphName) {
-        CypherMapWrapper.failOnNull("graphName", graphName);
+    public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = "null") Object graphName) {
+        if (Objects.nonNull(graphName) && !(graphName instanceof String)) {
+            throw new IllegalArgumentException("`graphName` parameter must be a STRING");
+        }
 
         boolean computeHistogram = callContext.outputFields().anyMatch(HISTOGRAM_FIELD_NAME::equals);
         Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries;
 
         graphEntries = GraphCatalog.getLoadedGraphs(getUsername()).entrySet().stream();
-        if (!isEmpty(graphName)) {
+        if (!isEmpty((String)graphName)) {
             // we should only list the provided graph
             graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
         }

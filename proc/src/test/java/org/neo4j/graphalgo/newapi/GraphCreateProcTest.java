@@ -33,8 +33,8 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -67,133 +67,6 @@ class GraphCreateProcTest extends BaseProcTest {
     void tearDown() {
         db.shutdown();
         GraphCatalog.removeAllLoadedGraphs();
-    }
-
-    static Stream<Map<String, Object>> nodeProjections() {
-        return Stream.of(
-            map("A", map("label", "A", "properties", emptyMap())),
-            emptyMap()
-        );
-    }
-
-    static Stream<String> relationshipProjections() {
-        return Stream.of("REL", "");
-    }
-
-    static Stream<Arguments> allNodesAndRels() {
-        return crossArguments(
-            () -> nodeProjections().map(Arguments::of),
-            () -> relationshipProjections().map(Arguments::of)
-        );
-    }
-
-    static Stream<Arguments> nodeProjectionVariants() {
-        return Stream.of(
-            Arguments.of(
-                "default neo label",
-                singletonMap("A", emptyMap()),
-                map("A", map("label", "A", "properties", emptyMap()))
-            ),
-            Arguments.of(
-                "aliased node label",
-                map("B", map("label", "A")),
-                map("B", map("label", "A", "properties", emptyMap()))
-            ),
-            Arguments.of(
-                "node filter as list",
-                singletonList("A"),
-                map("A", map("label", "A", "properties", emptyMap()))
-            )
-        );
-    }
-
-    static Stream<Arguments> nodeProperties() {
-        return Stream.of(
-            Arguments.of(
-                map("age", map("property", "age")),
-                map("age", map("property", "age", "defaultValue", Double.NaN))
-            ),
-            Arguments.of(
-                map("weight", map("property", "age", "defaultValue", 3D)),
-                map("weight", map("property", "age", "defaultValue", 3D))
-            ),
-            Arguments.of(
-                singletonList("age"),
-                map("age", map("property", "age", "defaultValue", Double.NaN))
-            ),
-            Arguments.of(
-                map("weight", "age"),
-                map("weight", map("property", "age", "defaultValue", Double.NaN))
-            )
-        );
-    }
-
-    static Stream<Arguments> relationshipProperties() {
-        return Stream.of(
-            Arguments.of(
-                map("weight", map("property", "weight")),
-                map("weight", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "DEFAULT"))
-            ),
-            Arguments.of(
-                map("score", map("property", "weight", "defaultValue", 3D)),
-                map("score", map("property", "weight", "defaultValue", 3D, "aggregation", "DEFAULT"))
-            ),
-            Arguments.of(
-                singletonList("weight"),
-                map("weight", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "DEFAULT"))
-            ),
-            Arguments.of(
-                map("score", "weight"),
-                map("score", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "DEFAULT"))
-            )
-        );
-    }
-
-    static Stream<Arguments> relFilterVariants() {
-        return Stream.of(
-            Arguments.of(
-                "default neo type",
-                singletonMap("REL", emptyMap()),
-                map(
-                    "REL",
-                    map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap())
-                )
-            ),
-            Arguments.of(
-                "aliased rel type",
-                map("CONNECTS", map("type", "REL")),
-                map(
-                    "CONNECTS",
-                    map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap())
-                )
-            ),
-            Arguments.of(
-                "rel filter as list",
-                singletonList("REL"),
-                map(
-                    "REL",
-                    map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap())
-                )
-            )
-        );
-    }
-
-    static Stream<String> relProjectionTypes() {
-        return Stream.of(
-            "NATURAL",
-            "REVERSE",
-            "UNDIRECTED"
-        );
-    }
-
-    static Stream<String> relAggregationTypes() {
-        return Stream.of(
-            "MAX",
-            "MIN",
-            "SUM",
-            "SINGLE",
-            "NONE"
-        );
     }
 
     @ParameterizedTest(name = "nodeProjection = {0}, relFilter = {1}")
@@ -238,7 +111,7 @@ class GraphCreateProcTest extends BaseProcTest {
     void failForNulls() {
         assertError(
             "CALL algo.beta.graph.create(null, null, null)",
-            "No value specified for the mandatory configuration parameter `graphName`"
+            "`graphName` can not be null or blank, but it was `null`"
         );
         assertError(
             "CALL algo.beta.graph.create('name', null, null)",
@@ -247,6 +120,16 @@ class GraphCreateProcTest extends BaseProcTest {
         assertError(
             "CALL algo.beta.graph.create('name', 'A', null)",
             "No value specified for the mandatory configuration parameter `relationshipProjection`"
+        );
+    }
+
+    @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
+    @MethodSource("blankStrings")
+    void failsOnEmptyGraphName(String graphName) {
+        assertError(
+            "CALL algo.beta.graph.create($graphName, {}, {})",
+            map("graphName", graphName),
+            String.format("`graphName` can not be null or blank, but it was `%s`", graphName)
         );
     }
 
@@ -473,5 +356,136 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "relFilter", relFilter),
             "Invalid relationship projection, one or more relationship types not found: 'INVALID'"
         );
+    }
+
+    static Stream<Map<String, Object>> nodeProjections() {
+        return Stream.of(
+            map("A", map("label", "A", "properties", emptyMap())),
+            emptyMap()
+        );
+    }
+
+    static Stream<String> relationshipProjections() {
+        return Stream.of("REL", "");
+    }
+
+    static Stream<Arguments> allNodesAndRels() {
+        return crossArguments(
+            () -> nodeProjections().map(Arguments::of),
+            () -> relationshipProjections().map(Arguments::of)
+        );
+    }
+
+    static Stream<Arguments> nodeProjectionVariants() {
+        return Stream.of(
+            Arguments.of(
+                "default neo label",
+                singletonMap("A", emptyMap()),
+                map("A", map("label", "A", "properties", emptyMap()))
+            ),
+            Arguments.of(
+                "aliased node label",
+                map("B", map("label", "A")),
+                map("B", map("label", "A", "properties", emptyMap()))
+            ),
+            Arguments.of(
+                "node filter as list",
+                singletonList("A"),
+                map("A", map("label", "A", "properties", emptyMap()))
+            )
+        );
+    }
+
+    static Stream<Arguments> nodeProperties() {
+        return Stream.of(
+            Arguments.of(
+                map("age", map("property", "age")),
+                map("age", map("property", "age", "defaultValue", Double.NaN))
+            ),
+            Arguments.of(
+                map("weight", map("property", "age", "defaultValue", 3D)),
+                map("weight", map("property", "age", "defaultValue", 3D))
+            ),
+            Arguments.of(
+                singletonList("age"),
+                map("age", map("property", "age", "defaultValue", Double.NaN))
+            ),
+            Arguments.of(
+                map("weight", "age"),
+                map("weight", map("property", "age", "defaultValue", Double.NaN))
+            )
+        );
+    }
+
+    static Stream<Arguments> relationshipProperties() {
+        return Stream.of(
+            Arguments.of(
+                map("weight", map("property", "weight")),
+                map("weight", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "DEFAULT"))
+            ),
+            Arguments.of(
+                map("score", map("property", "weight", "defaultValue", 3D)),
+                map("score", map("property", "weight", "defaultValue", 3D, "aggregation", "DEFAULT"))
+            ),
+            Arguments.of(
+                singletonList("weight"),
+                map("weight", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "DEFAULT"))
+            ),
+            Arguments.of(
+                map("score", "weight"),
+                map("score", map("property", "weight", "defaultValue", Double.NaN, "aggregation", "DEFAULT"))
+            )
+        );
+    }
+
+    static Stream<Arguments> relFilterVariants() {
+        return Stream.of(
+            Arguments.of(
+                "default neo type",
+                singletonMap("REL", emptyMap()),
+                map(
+                    "REL",
+                    map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap())
+                )
+            ),
+            Arguments.of(
+                "aliased rel type",
+                map("CONNECTS", map("type", "REL")),
+                map(
+                    "CONNECTS",
+                    map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap())
+                )
+            ),
+            Arguments.of(
+                "rel filter as list",
+                singletonList("REL"),
+                map(
+                    "REL",
+                    map("type", "REL", "projection", "NATURAL", "aggregation", "DEFAULT", "properties", emptyMap())
+                )
+            )
+        );
+    }
+
+    static Stream<String> relProjectionTypes() {
+        return Stream.of(
+            "NATURAL",
+            "REVERSE",
+            "UNDIRECTED"
+        );
+    }
+
+    static Stream<String> relAggregationTypes() {
+        return Stream.of(
+            "MAX",
+            "MIN",
+            "SUM",
+            "SINGLE",
+            "NONE"
+        );
+    }
+
+    static Stream<String> blankStrings() {
+        return Stream.of("", "   ", "           ", "\r\n\t", null);
     }
 }

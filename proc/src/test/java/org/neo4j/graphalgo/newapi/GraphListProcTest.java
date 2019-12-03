@@ -197,7 +197,7 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "name argument: {0}")
-    @ValueSource(strings = {"", "''"})
+    @ValueSource(strings = {"", "null"})
     void listAllGraphsWhenCalledWithoutArgumentOrAnEmptyArgument(String argument) {
         String[] names = {"a", "b", "c"};
         for (String name : names) {
@@ -213,9 +213,10 @@ class GraphListProcTest extends BaseProcTest {
         assertThat(actualNames, containsInAnyOrder(names));
     }
 
-    @Test
-    void failForNullNameArgument() {
-        assertError("CALL algo.beta.graph.list(null)", "No value specified for the mandatory configuration parameter `graphName`");
+    @ParameterizedTest(name = "Invalid Graph Name: {0}")
+    @ValueSource(strings = {"{ a: 'b' }", "[]", "1", "true", "false", "[1, 2, 3]", "1.4"})
+    void failForInvalidGraphNameParameter(String graphName) {
+        assertError(String.format("CALL algo.beta.graph.list(%s)", graphName), "`graphName` parameter must be a STRING");
     }
 
     @Test

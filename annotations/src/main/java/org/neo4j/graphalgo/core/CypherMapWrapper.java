@@ -221,6 +221,12 @@ public final class CypherMapWrapper {
         return value;
     }
 
+    public static void failOnBlank(String key, String value) {
+        if (value == null || value.trim().isEmpty()) {
+            throw blankValueFor(key, value);
+        }
+    }
+
     static <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
         if (!expectedType.isInstance(value)) {
             String message = String.format(
@@ -238,6 +244,14 @@ public final class CypherMapWrapper {
         return new IllegalArgumentException(String.format(
             "No value specified for the mandatory configuration parameter `%s`",
             key
+        ));
+    }
+
+    private static IllegalArgumentException blankValueFor(String key, @Nullable String value) {
+        return new IllegalArgumentException(String.format(
+            "`%s` can not be null or blank, but it was `%s`",
+            key,
+            value
         ));
     }
 
