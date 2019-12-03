@@ -25,8 +25,6 @@ import org.neo4j.graphdb.Result;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
-
 class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     private static final long NO_RELATIONSHIP_REFERENCE = -1L;
@@ -38,7 +36,6 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
     private final Map<String, Integer> propertyKeyIdsByName;
     private final Map<String, Double> propertyDefaultValueByName;
     private final CypherRelationshipsImporter.Context importerContext;
-    private final int batchSize;
     private final int bufferSize;
     private final int propertyCount;
 
@@ -56,7 +53,6 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
         CypherRelationshipsImporter.Context importerContext,
         Map<String, Integer> propertyKeyIdsByName,
         Map<String, Double> propertyDefaultValueByName,
-        int batchSize,
         int bufferSize
     ) {
         this.idMap = idMap;
@@ -64,7 +60,6 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
         this.propertyDefaultValueByName = propertyDefaultValueByName;
         this.propertyCount = propertyKeyIdsByName.size();
         this.importerContext = importerContext;
-        this.batchSize = batchSize;
         this.bufferSize = bufferSize;
         this.localImporters = new HashMap<>();
         this.localPropertiesBuffers = new HashMap<>();
@@ -90,7 +85,7 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
                 .getOrCreateImporterBuilder(relationshipType);
             // Create thread-local buffer for relationship properties
             RelationshipPropertiesBatchBuffer propertiesBuffer = new RelationshipPropertiesBatchBuffer(
-                batchSize == CypherLoadingUtils.NO_BATCHING ? DEFAULT_BATCH_SIZE : batchSize,
+                bufferSize,
                 propertyCount
             );
             // Create thread-local relationship importer
@@ -131,11 +126,12 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
 
         readPropertyValues(row, nextRelationshipId, propertiesBuffer);
 
+        localRelationshipIds.put(relationshipType, nextRelationshipId + 1);
+
         if (importer.buffer().isFull()) {
             flush(importer);
+            reset(relationshipType, importer);
         }
-
-        localRelationshipIds.put(relationshipType, nextRelationshipId + 1);
 
         return true;
     }
@@ -170,8 +166,11 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
     private void flush(SingleTypeRelationshipImporter importer) {
         long imported = importer.importRels();
         relationshipCount += RawValues.getHead(imported);
+    }
+
+    private void reset(String relationshipType, SingleTypeRelationshipImporter importer) {
         importer.buffer().reset();
-        // TODO: maybe we need to reset the relationship property batch buffer as well
+        localRelationshipIds.put(relationshipType, 0);
     }
 
     void flushAll() {

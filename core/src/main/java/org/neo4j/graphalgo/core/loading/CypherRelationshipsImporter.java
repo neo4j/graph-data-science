@@ -88,7 +88,6 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
             importerContext,
             propertyKeyIdsByName,
             propertyDefaultValueByName,
-            batchSize,
             bufferSize
         );
 
