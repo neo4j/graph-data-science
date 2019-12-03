@@ -79,6 +79,33 @@ class GraphLoaderTest {
     }
 
     @AllGraphTypesTest
+    void testWithMultipleLabels(Class<? extends GraphFactory> graphFactory) {
+        Graph graph = TestGraphLoader.from(db).withLabel("Node1 | Node2").buildGraph(graphFactory);
+        assertGraphEquals(graph, fromGdl("(a)-->(b)"));
+    }
+
+    @AllGraphTypesTest
+    void testWithMultipleLabelsAndProperties(Class<? extends GraphFactory> graphFactory) {
+        PropertyMappings properties = PropertyMappings.of(PropertyMapping.of("prop1", 42.0));
+        PropertyMappings multipleProperties = PropertyMappings.of(
+            PropertyMapping.of("prop1", 42.0),
+            PropertyMapping.of("prop2", 42.0)
+        );
+
+        Graph graph = TestGraphLoader.from(db)
+            .withLabel("Node1 | Node2")
+            .withNodeProperties(properties)
+            .buildGraph(graphFactory);
+        assertGraphEquals(graph, fromGdl("(a {prop1: 1.0})-->(b {prop1: 42.0})"));
+
+        graph = TestGraphLoader.from(db)
+            .withLabel("Node1 | Node2")
+            .withNodeProperties(multipleProperties)
+            .buildGraph(graphFactory);
+        assertGraphEquals(graph, fromGdl("(a {prop1: 1.0, prop2: 42.0})-->(b {prop1: 42.0, prop2: 2.0})"));
+    }
+
+    @AllGraphTypesTest
     void testAnyRelation(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db).buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));

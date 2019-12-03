@@ -28,7 +28,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_PROPERTY_KEY;
 
 class PropertyMappingTest {
 
@@ -71,9 +70,6 @@ class PropertyMappingTest {
 
         assertThat(
                 ex.getMessage(),
-                containsString(String.format(
-                        "Expected a 'property', but no such entry found for 'property'.",
-                        RELATIONSHIP_PROPERTIES_PROPERTY_KEY)));
-
+                containsString("Expected a 'property', but no such entry found for 'property'."));
     }
 }

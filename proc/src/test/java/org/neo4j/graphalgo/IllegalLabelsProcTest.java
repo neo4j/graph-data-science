@@ -57,7 +57,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
                 QueryExecutionException.class,
                 () -> runQuery(String.format("CALL algo.unionFind.stream('C', '',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
-        assertThat(ex.getMessage(), containsString("Node label not found: 'C'"));
+        assertThat(ex.getMessage(), containsString("Invalid node projection, one or more labels not found: 'C'"));
     }
 
     @AllGraphNamesTest

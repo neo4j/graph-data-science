@@ -33,6 +33,14 @@ public class AlgoTestBase {
     }
 
     protected void runQuery(String query, Consumer<Result.ResultRow> check) {
+        runQuery(db, query, check);
+    }
+
+    protected void runQuery(GraphDatabaseAPI db, String query) {
+        runQuery(db, query, row -> {});
+    }
+
+    protected void runQuery(GraphDatabaseAPI db, String query, Consumer<Result.ResultRow> check) {
         try (Result result = db.execute(query)) {
             result.accept(row -> {
                 check.accept(row);

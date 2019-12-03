@@ -35,11 +35,12 @@ import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.RelationshipTypes;
+import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -52,7 +53,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public final class GraphLoadProc extends BaseProc {
+public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
     @Procedure(name = "algo.graph.load", mode = Mode.READ)
     @Description("CALL algo.graph.load(" +
                  "name:String, label:String, relationship:String" +
@@ -66,9 +67,11 @@ public final class GraphLoadProc extends BaseProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
+
         GraphLoadStats stats = runWithExceptionLogging(
-                "Graph loading failed",
-                () -> loadGraph(configuration, name));
+            "Graph loading failed",
+            () -> this.loadGraph(configuration, name)
+        );
         return Stream.of(stats);
     }
 
@@ -83,7 +86,7 @@ public final class GraphLoadProc extends BaseProc {
             Class<? extends GraphFactory> graphImpl = config.getGraphImpl();
             Set<String> relationshipTypes = graphImpl == CypherGraphFactory.class
                     ? Collections.emptySet()
-                    : RelationshipTypes.parse(config.getRelationshipOrQuery());
+                    : ProjectionParser.parse(config.getRelationshipOrQuery());
             PropertyMappings propertyMappings = graphImpl == CypherGraphFactory.class
                     ? PropertyMappings.EMPTY
                     : config.getRelationshipProperties();
@@ -105,7 +108,7 @@ public final class GraphLoadProc extends BaseProc {
             stats.nodes = graph.nodeCount();
             stats.relationships = graph.relationshipCount();
 
-            GraphCatalog.set(getUsername(), name, graph);
+            GraphCatalog.set(GraphCreateConfig.emptyWithName(getUsername(), name), graph);
         }
 
         return stats;
@@ -253,7 +256,7 @@ public final class GraphLoadProc extends BaseProc {
                  "YIELD name, type, nodes, relationships, direction" +
                  "list all loaded graphs")
     public Stream<GraphInfo> list() {
-        Map<String, Graph> loadedGraphs = GraphCatalog.getLoadedGraphs(getUsername());
+        Map<String, Graph> loadedGraphs = GraphCatalog.getLoadedGraphsByName(getUsername());
 
         return loadedGraphs.entrySet().stream().map(entry -> {
             Graph graph = entry.getValue();

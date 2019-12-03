@@ -86,6 +86,7 @@ class LabelPropagationDeprecatedProcTest extends ProcTestBase {
                     assertEquals("weight", row.getString("weightProperty"));
                     assertEquals("community", row.getString("seedProperty"));
                     assertEquals("lpa", row.getString("writeProperty"));
+                    assertEquals(2, row.getNumber("communityCount").intValue());
                     assertTrue(row.getBoolean("write"));
                 }
         );
@@ -102,6 +103,7 @@ class LabelPropagationDeprecatedProcTest extends ProcTestBase {
                     assertEquals("weight", row.getString("weightProperty"));
                     assertEquals("community", row.getString("seedProperty"));
                     assertEquals("lpa", row.getString("writeProperty"));
+                    assertEquals(2, row.getNumber("communityCount").intValue());
                     assertTrue(row.getBoolean("write"));
                 }
         );

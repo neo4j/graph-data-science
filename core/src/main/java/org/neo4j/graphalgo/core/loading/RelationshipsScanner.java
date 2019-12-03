@@ -48,9 +48,9 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         List<SingleTypeRelationshipImporter.Builder.WithImporter> builders = importerBuilders
                 .stream()
                 .map(relImporter -> relImporter.loadImporter(
-                        setup.loadAsUndirected,
-                        setup.loadOutgoing,
-                        setup.loadIncoming,
+                    setup.loadAsUndirected(),
+                    setup.loadOutgoing(),
+                    setup.loadIncoming(),
                         loadWeights
                 ))
                 .filter(Objects::nonNull)
@@ -64,7 +64,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                 idMap,
                 scanner,
                 builders,
-                setup.terminationFlag
+            setup.terminationFlag()
         );
     }
 

@@ -321,9 +321,9 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
             ),
             setup -> {
                 assertTrue(setup.loadAnyLabel());
-                assertEquals(Direction.BOTH, setup.direction);
-                assertFalse(setup.nodePropertyMappings.head().isPresent());
-                assertFalse(setup.relationshipPropertyMappings.head().isPresent());
+                assertEquals(Direction.BOTH, setup.direction());
+                assertFalse(setup.nodePropertyMappings().head().isPresent());
+                assertFalse(setup.relationshipPropertyMappings().head().isPresent());
             }
         );
     }
@@ -339,7 +339,7 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
                 SEED_PROPERTY_KEY, "foobar"
             ),
             setup -> {
-                PropertyMapping propertyMapping = setup.nodePropertyMappings.head().get();
+                PropertyMapping propertyMapping = setup.nodePropertyMappings().head().get();
                 assertEquals("foobar", propertyMapping.neoPropertyKey);
                 assertEquals("foobar", propertyMapping.propertyKey);
             }
@@ -357,7 +357,7 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
                 DEPRECATED_RELATIONSHIP_PROPERTY_KEY, "foobar"
             ),
             setup -> {
-                PropertyMapping propertyMapping = setup.relationshipPropertyMappings.head().get();
+                PropertyMapping propertyMapping = setup.relationshipPropertyMappings().head().get();
                 assertEquals("foobar", propertyMapping.neoPropertyKey);
                 assertEquals("foobar", propertyMapping.propertyKey);
             }
@@ -387,7 +387,7 @@ class LouvainProcTest extends ProcTestBase implements ProcTestBaseExtensions {
             "", "",
             config,
             setup -> {
-                PropertyMapping propertyMapping = setup.nodePropertyMappings.head().get();
+                PropertyMapping propertyMapping = setup.nodePropertyMappings().head().get();
                 assertEquals(seedProperty, propertyMapping.neoPropertyKey);
                 assertEquals(seedProperty, propertyMapping.propertyKey);
             }

@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.impl.generator;
 
+import java.util.Random;
 import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.graphalgo.impl.generator.DistributionHelper.gauseanSample;
@@ -29,40 +30,40 @@ import static org.neo4j.graphalgo.impl.generator.DistributionHelper.uniformSampl
 public enum RelationshipDistribution {
     UNIFORM {
         @Override
-        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree) {
+        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random) {
             return (ignore) -> averageDegree;
         }
 
         @Override
-        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree) {
-            return (ignore) -> uniformSample(nodeCount);
+        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random) {
+            return (ignore) -> uniformSample(nodeCount, random);
         }
     },
     RANDOM {
         @Override
-        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree) {
+        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random) {
             long stdDev = averageDegree / 2;
-            return (ignore) -> gauseanSample(nodeCount, averageDegree, stdDev);
+            return (ignore) -> gauseanSample(nodeCount, averageDegree, stdDev, random);
         }
 
         @Override
-        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree) {
-            return (ignore) -> uniformSample(nodeCount);
+        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random) {
+            return (ignore) -> uniformSample(nodeCount, random);
 
         }
     },
     POWER_LAW {
         @Override
-        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree) {
+        public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random) {
             long stdDev = averageDegree / 2;
-            return (ignore) -> gauseanSample(nodeCount, averageDegree, stdDev);
+            return (ignore) -> gauseanSample(nodeCount, averageDegree, stdDev, random);
         }
 
         @Override
-        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree) {
+        public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random) {
             long min = 1;
             double gamma = 1 + 1.0 / averageDegree;
-            return (ignore) -> powerLawSample(min, nodeCount - 1, gamma);
+            return (ignore) -> powerLawSample(min, nodeCount - 1, gamma, random);
         }
     };
 
@@ -72,9 +73,10 @@ public enum RelationshipDistribution {
      *
      * @param nodeCount Expected number of nodes in the generated graph
      * @param averageDegree Expected average degree in the generated graph
+     * @param random Random instance to be used to generate the number of outgoing relationships
      * @return A unary function that accepts a node id and returns that nodes out degree
      */
-    abstract LongUnaryOperator degreeProducer(long nodeCount, long averageDegree);
+    abstract LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random);
 
     /**
      * Produces a unary function which accepts a node id parameter and returns another node id to wich the node will
@@ -82,7 +84,8 @@ public enum RelationshipDistribution {
      *
      * @param nodeCount Expected number of nodes in the generated graph
      * @param averageDegree Expected average degree in the generated graph
+     * @param random Random instance to be used to generate the other node id
      * @return A unary function that accepts a node id and returns another node id to wich a relationship will be created.
      */
-    abstract LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree);
+    abstract LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random);
 }

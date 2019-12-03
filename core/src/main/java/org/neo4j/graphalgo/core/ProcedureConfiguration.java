@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.newapi.BaseConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -46,7 +47,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIE
 /**
  * Wrapper around configuration options map
  */
-public class ProcedureConfiguration {
+public class ProcedureConfiguration implements BaseConfig {
 
     public static final String HEAVY_GRAPH_TYPE = "heavy";
     public static final String LIGHT_GRAPH_TYPE = "light";
@@ -123,6 +124,11 @@ public class ProcedureConfiguration {
     // END DELEGATION
 
     public String getUsername() {
+        return username();
+    }
+
+    @Override
+    public String username() {
         return username;
     }
 

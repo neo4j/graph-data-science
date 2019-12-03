@@ -215,7 +215,7 @@ class CypherGraphFactoryTest {
                 "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop AS weight ";
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
 
-        loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.SKIP, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.SINGLE, parallel);
     }
 
     private void loadAndTestGraph(String nodeStatement, String relStatement, DeduplicationStrategy strategy, boolean parallel) {

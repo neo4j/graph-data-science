@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.impl.nn;
 
 import com.carrotsearch.hppc.LongArrayList;
+import com.carrotsearch.hppc.LongHashSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -129,7 +130,7 @@ class HugeRelationshipsBuilderTest {
     private IdsAndProperties createNodes(int numberOfNodes) {
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, AllocationTracker.EMPTY);
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null);
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, -1, numberOfNodes, false);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), numberOfNodes, false);
 
         for (int i = 0; i < numberOfNodes; i++) {
             buffer.add(i, -1);
@@ -145,7 +146,7 @@ class HugeRelationshipsBuilderTest {
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null);
         long maxNodeId = 0L;
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, -1, inputs.length, false);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), inputs.length, false);
 
         for (WeightedInput input : inputs) {
             if (input.getId() > maxNodeId) {

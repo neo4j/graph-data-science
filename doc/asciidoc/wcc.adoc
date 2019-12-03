@@ -280,7 +280,7 @@ As we can see from the results, the node named 'Bridget' is now in its own compo
 === Seeded components
 
 It is possible to define preliminary component IDs for nodes using the `seedProperty` configuration parameter.
-This is helpful if we want to retain components from a previous run.
+This is helpful if we want to retain components from a previous run and it is known that no components have been split by removing relationships.
 The property value needs to be a number.
 
 The algorithm first checks if there is a seeded component ID assigned to the node.
@@ -289,6 +289,13 @@ Otherwise, a new unique component ID is assigned to the node.
 
 Once every node belongs to a component, the algorithm merges components of connected nodes.
 When components are merged, the resulting component is always the one with the lower component ID.
+
+[NOTE]
+====
+The algorithm assumes that nodes with the same seed value do in fact belong to the same component.
+If any two nodes in different components have the same seed, behavior is undefined.
+It is then recommended to run WCC without seeds.
+====
 
 To show this in practice, we will run the algorithm, then add another node to our graph, then run the algorithm again with the `seedProperty` configuration parameter.
 We will use the weighted variant of WCC.

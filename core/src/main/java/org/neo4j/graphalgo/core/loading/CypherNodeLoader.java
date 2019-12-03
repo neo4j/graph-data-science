@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -38,16 +39,16 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
     private long maxNodeId;
 
     CypherNodeLoader(long nodeCount, GraphDatabaseAPI api, GraphSetup setup) {
-        super(setup.startLabel, nodeCount, api, setup);
+        super(setup.nodeLabel(), nodeCount, api, setup);
         maxNodeId = 0L;
         nodePropertyBuilders = nodeProperties(nodeCount, setup);
-        builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker);
+        builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker());
         importer = new NodeImporter(builder, nodePropertyBuilders.values());
     }
 
     @Override
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, -1, bufferSize, true);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), bufferSize, true);
         NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer);
         runLoadingQuery(offset, batchSize, visitor);
         visitor.flush();
@@ -63,7 +64,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
     @Override
     IdsAndProperties result() {
-        IdMap idMap = IdMapBuilder.build(builder, maxNodeId, setup.concurrency, setup.tracker);
+        IdMap idMap = IdMapBuilder.build(builder, maxNodeId, setup.concurrency(), setup.tracker());
         Map<String, NodeProperties> nodeProperties = nodePropertyBuilders.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().propertyKey(), e -> e.getValue().build()));
         return new IdsAndProperties(idMap, nodeProperties);
@@ -71,7 +72,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
     private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties(long capacity, GraphSetup setup) {
         Map<PropertyMapping, NodePropertiesBuilder> nodeProperties = new HashMap<>();
-        for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
+        for (PropertyMapping propertyMapping : setup.nodePropertyMappings()) {
             nodeProperties.put(
                     propertyMapping,
                     NodePropertiesBuilder.of(

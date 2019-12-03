@@ -68,7 +68,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
     @Test
     void shouldProduceStreamOutput() {
         String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    '', 'LIKES', {" +
+                       "    'Person | Instrument', 'LIKES', {" +
                        "        direction: 'OUTGOING'" +
                        "    }" +
                        ") YIELD node1, node2, similarity " +
@@ -96,7 +96,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceWriteOutput() {
-        String query = "CALL algo.nodeSimilarity('', 'LIKES', {" +
+        String query = "CALL algo.nodeSimilarity('Person | Instrument', 'LIKES', {" +
                        "  direction: 'OUTGOING'," +
                        "  write: true" +
                        "})" +
@@ -116,7 +116,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
     @Test
     void shouldProduceTopStreamOutput() {
         String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    '', 'LIKES', {" +
+                       "    'Person | Instrument', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        topK: 1," +
                        "        topN: 3" +
@@ -140,7 +140,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
     @Test
     void shouldProduceTopKStreamOutput() {
         String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    '', 'LIKES', {" +
+                       "    'Person | Instrument', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        topK: 1" +
                        "    }" +
@@ -164,7 +164,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
     @Test
     void shouldProduceBottomKStreamOutput() {
         String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    '', 'LIKES', {" +
+                       "    'Person | Instrument', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        bottomK: 1" +
                        "    }" +
@@ -189,7 +189,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
     @Test
     void shouldProduceDegreeCutoffStreamOutput() {
         String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    '', 'LIKES', {" +
+                       "    'Person | Instrument', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        degreeCutoff: 3" +
                        "    }" +
@@ -211,7 +211,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
     @Test
     void shouldProduceSimilarityCutoffStreamOutput() {
         String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    '', 'LIKES', {" +
+                       "    'Person | Instrument', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        similarityCutoff: 0.5" +
                        "    }" +

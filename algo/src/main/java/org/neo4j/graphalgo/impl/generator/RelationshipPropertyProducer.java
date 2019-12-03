@@ -29,7 +29,7 @@ public interface RelationshipPropertyProducer {
     }
 
     static RelationshipPropertyProducer random(String propertyName, double min, double max) {
-            return new Random(propertyName, min, max);
+        return new Random(propertyName, min, max);
     }
 
     String getPropertyName();

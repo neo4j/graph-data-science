@@ -23,21 +23,27 @@ import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.kernel.api.StatementConstants;
 
+import java.util.AbstractMap;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_AGGREGATION_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_PROPERTY_KEY;
+import java.util.Objects;
 
 public abstract class PropertyMapping {
 
     public static final PropertyMapping EMPTY_PROPERTY = new PropertyMapping.Resolved(
-            -1,
-            "",
-            "",
-            0.0,
-            DeduplicationStrategy.DEFAULT);
+        -1,
+        "",
+        "",
+        0.0,
+        DeduplicationStrategy.DEFAULT
+    );
+
+    private static final String ELEMENT_PROPERTIES_PROPERTY_KEY = "property";
+    private static final String ELEMENT_PROPERTIES_AGGREGATION_KEY = "aggregation";
+    private static final String ELEMENT_PROPERTIES_DEFAULT_VALUE_KEY = "defaultValue";
+
+    private static final double DEFAULT_PROPERTY_VALUE = Double.NaN;
 
     public final String propertyKey;
     public final String neoPropertyKey;
@@ -45,10 +51,11 @@ public abstract class PropertyMapping {
     public final DeduplicationStrategy deduplicationStrategy;
 
     public PropertyMapping(
-            String propertyKey,
-            String neoPropertyKey,
-            double defaultValue,
-            DeduplicationStrategy deduplicationStrategy) {
+        String propertyKey,
+        String neoPropertyKey,
+        double defaultValue,
+        DeduplicationStrategy deduplicationStrategy
+    ) {
         this.propertyKey = propertyKey;
         this.neoPropertyKey = neoPropertyKey;
         this.defaultValue = defaultValue;
@@ -58,24 +65,32 @@ public abstract class PropertyMapping {
     public static PropertyMapping fromObject(String propertyKey, Object stringOrMap) {
         if (stringOrMap instanceof String) {
             String neoPropertyKey = (String) stringOrMap;
-            return fromObject(propertyKey, Collections.singletonMap(RELATIONSHIP_PROPERTIES_PROPERTY_KEY, neoPropertyKey));
+            return fromObject(
+                propertyKey,
+                Collections.singletonMap(
+                    ELEMENT_PROPERTIES_PROPERTY_KEY,
+                    neoPropertyKey
+                )
+            );
         } else if (stringOrMap instanceof Map) {
             Map relPropertyMap = (Map) stringOrMap;
 
-            final Object propertyNameValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_PROPERTY_KEY);
+            final Object propertyNameValue = relPropertyMap.get(ELEMENT_PROPERTIES_PROPERTY_KEY);
             if (propertyNameValue == null) {
                 throw new IllegalArgumentException(String.format(
-                        "Expected a '%s', but no such entry found for '%s'.",
-                        RELATIONSHIP_PROPERTIES_PROPERTY_KEY, RELATIONSHIP_PROPERTIES_PROPERTY_KEY));
+                    "Expected a '%s', but no such entry found for '%s'.",
+                    ELEMENT_PROPERTIES_PROPERTY_KEY, ELEMENT_PROPERTIES_PROPERTY_KEY
+                ));
             }
             if (!(propertyNameValue instanceof String)) {
                 throw new IllegalArgumentException(String.format(
-                        "Expected the value of '%s' to be of type String, but was '%s'.",
-                        RELATIONSHIP_PROPERTIES_PROPERTY_KEY, propertyNameValue.getClass().getSimpleName()));
+                    "Expected the value of '%s' to be of type String, but was '%s'.",
+                    ELEMENT_PROPERTIES_PROPERTY_KEY, propertyNameValue.getClass().getSimpleName()
+                ));
             }
             String neoPropertyKey = (String) propertyNameValue;
 
-            final Object aggregationValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_AGGREGATION_KEY);
+            final Object aggregationValue = relPropertyMap.get(ELEMENT_PROPERTIES_AGGREGATION_KEY);
             DeduplicationStrategy deduplicationStrategy;
             if (aggregationValue == null) {
                 deduplicationStrategy = DeduplicationStrategy.DEFAULT;
@@ -83,31 +98,35 @@ public abstract class PropertyMapping {
                 deduplicationStrategy = DeduplicationStrategy.lookup(((String) aggregationValue).toUpperCase());
             } else {
                 throw new IllegalStateException(String.format(
-                        "Expected the value of '%s' to be of type String, but was '%s'",
-                        RELATIONSHIP_PROPERTIES_AGGREGATION_KEY, aggregationValue.getClass().getSimpleName()));
+                    "Expected the value of '%s' to be of type String, but was '%s'",
+                    ELEMENT_PROPERTIES_AGGREGATION_KEY, aggregationValue.getClass().getSimpleName()
+                ));
             }
 
-            final Object defaultWeightValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY);
-            double defaultWeight;
-            if (defaultWeightValue == null) {
-                defaultWeight = HugeGraph.NO_PROPERTY_VALUE;
-            } else if (defaultWeightValue instanceof Number) {
-                defaultWeight = ((Number) defaultWeightValue).doubleValue();
+            final Object defaultPropertyValue = relPropertyMap.get(ELEMENT_PROPERTIES_DEFAULT_VALUE_KEY);
+            double defaultProperty;
+            if (defaultPropertyValue == null) {
+                defaultProperty = HugeGraph.NO_PROPERTY_VALUE;
+            } else if (defaultPropertyValue instanceof Number) {
+                defaultProperty = ((Number) defaultPropertyValue).doubleValue();
             } else {
                 throw new IllegalStateException(String.format(
-                        "Expected the value of '%s' to be of type double, but was '%s'",
-                        RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY, defaultWeightValue.getClass().getSimpleName()));
+                    "Expected the value of '%s' to be of type double, but was '%s'",
+                    ELEMENT_PROPERTIES_DEFAULT_VALUE_KEY, defaultPropertyValue.getClass().getSimpleName()
+                ));
             }
 
             return PropertyMapping.of(
-                    propertyKey,
-                    neoPropertyKey,
-                    defaultWeight,
-                    deduplicationStrategy);
+                propertyKey,
+                neoPropertyKey,
+                defaultProperty,
+                deduplicationStrategy
+            );
         } else {
             throw new IllegalStateException(String.format(
-                    "Expected stringOrMap to be of type String or Map, but got %s",
-                    stringOrMap.getClass().getSimpleName()));
+                "Expected stringOrMap to be of type String or Map, but got %s",
+                stringOrMap.getClass().getSimpleName()
+            ));
         }
     }
 
@@ -153,6 +172,16 @@ public abstract class PropertyMapping {
         return copyWithDeduplicationStrategy(deduplicationStrategy);
     }
 
+    public Map.Entry<String, Object> toObject(boolean includeAggregation) {
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put(ELEMENT_PROPERTIES_PROPERTY_KEY, neoPropertyKey);
+        value.put(ELEMENT_PROPERTIES_DEFAULT_VALUE_KEY, defaultValue);
+        if (includeAggregation) {
+            value.put(ELEMENT_PROPERTIES_AGGREGATION_KEY, deduplicationStrategy.name());
+        }
+        return new AbstractMap.SimpleImmutableEntry<>(propertyKey, value);
+    }
+
     abstract PropertyMapping copyWithDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy);
 
     public abstract PropertyMapping resolveWith(int propertyKeyId);
@@ -160,10 +189,11 @@ public abstract class PropertyMapping {
     private static final class Unresolved extends PropertyMapping {
 
         private Unresolved(
-                String propertyKey,
-                String neoPropertyKey,
-                double defaultValue,
-                DeduplicationStrategy deduplicationStrategy) {
+            String propertyKey,
+            String neoPropertyKey,
+            double defaultValue,
+            DeduplicationStrategy deduplicationStrategy
+        ) {
             super(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
         }
 
@@ -180,11 +210,28 @@ public abstract class PropertyMapping {
         @Override
         public PropertyMapping resolveWith(int propertyKeyId) {
             return new Resolved(
-                    propertyKeyId,
-                    propertyKey(),
-                    neoPropertyKey(),
-                    defaultValue(),
-                    deduplicationStrategy());
+                propertyKeyId,
+                propertyKey(),
+                neoPropertyKey(),
+                defaultValue(),
+                deduplicationStrategy()
+            );
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Unresolved that = (Unresolved) o;
+            return propertyKey.equals(that.propertyKey) &&
+                   neoPropertyKey.equals(that.neoPropertyKey) &&
+                   deduplicationStrategy == that.deduplicationStrategy &&
+                   Double.compare(that.defaultValue, defaultValue) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
         }
     }
 
@@ -192,11 +239,12 @@ public abstract class PropertyMapping {
         private final int propertyKeyId;
 
         private Resolved(
-                int propertyKeyId,
-                String propertyKey,
-                String neoPropertyKey,
-                double defaultValue,
-                DeduplicationStrategy deduplicationStrategy) {
+            int propertyKeyId,
+            String propertyKey,
+            String neoPropertyKey,
+            double defaultValue,
+            DeduplicationStrategy deduplicationStrategy
+        ) {
             super(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
             this.propertyKeyId = propertyKeyId;
         }
@@ -209,22 +257,42 @@ public abstract class PropertyMapping {
         @Override
         PropertyMapping copyWithDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
             return new Resolved(
-                    propertyKeyId,
-                    propertyKey(),
-                    neoPropertyKey(),
-                    defaultValue(),
-                    deduplicationStrategy);
+                propertyKeyId,
+                propertyKey(),
+                neoPropertyKey(),
+                defaultValue(),
+                deduplicationStrategy
+            );
         }
 
         @Override
         public PropertyMapping resolveWith(int propertyKeyId) {
             if (propertyKeyId != this.propertyKeyId) {
                 throw new IllegalArgumentException(String.format(
-                        "Different PropertyKeyIds: %d != %d",
-                        this.propertyKeyId,
-                        propertyKeyId));
+                    "Different PropertyKeyIds: %d != %d",
+                    this.propertyKeyId,
+                    propertyKeyId
+                ));
             }
             return this;
+        }
+
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Resolved that = (Resolved) o;
+            return propertyKeyId == that.propertyKeyId &&
+                   propertyKey.equals(that.propertyKey) &&
+                   neoPropertyKey.equals(that.neoPropertyKey) &&
+                   deduplicationStrategy == that.deduplicationStrategy &&
+                   Double.compare(that.defaultValue, defaultValue) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(propertyKeyId, propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
         }
     }
 
@@ -240,10 +308,26 @@ public abstract class PropertyMapping {
     }
 
     public static PropertyMapping of(
-            String propertyKey,
-            String neoPropertyKey,
-            double defaultValue,
-            DeduplicationStrategy deduplicationStrategy) {
+        String propertyKey,
+        double defaultValue,
+        DeduplicationStrategy deduplicationStrategy
+    ) {
+        return new Unresolved(propertyKey, propertyKey, defaultValue, deduplicationStrategy);
+    }
+
+    public static PropertyMapping of(
+        String propertyKey,
+        DeduplicationStrategy deduplicationStrategy
+    ) {
+        return new Unresolved(propertyKey, propertyKey, DEFAULT_PROPERTY_VALUE, deduplicationStrategy);
+    }
+
+    public static PropertyMapping of(
+        String propertyKey,
+        String neoPropertyKey,
+        double defaultValue,
+        DeduplicationStrategy deduplicationStrategy
+    ) {
         return new Unresolved(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
     }
 }

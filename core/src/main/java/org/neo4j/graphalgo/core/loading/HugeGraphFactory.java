@@ -66,7 +66,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
     }
 
     public static MemoryEstimation getMemoryEstimation(GraphSetup setup, GraphDimensions dimensions, boolean nonExistingGraph) {
-        return getMemoryEstimation(setup.loadOutgoing, setup.loadIncoming, setup.loadAsUndirected, dimensions, nonExistingGraph);
+        return getMemoryEstimation(setup.loadOutgoing(), setup.loadIncoming(), setup.loadAsUndirected(), dimensions, nonExistingGraph);
     }
 
     public static MemoryEstimation getMemoryEstimation(
@@ -134,16 +134,16 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
         long relOperations = LOAD_DEGREES ? dimensions.maxRelCount() : 0L;
 
         // batching for undirected double the amount of rels imported
-        if (setup.loadIncoming || setup.loadAsUndirected) {
+        if (setup.loadIncoming() || setup.loadAsUndirected()) {
             relOperations += dimensions.maxRelCount();
         }
-        if (setup.loadOutgoing || setup.loadAsUndirected) {
+        if (setup.loadOutgoing() || setup.loadAsUndirected()) {
             relOperations += dimensions.maxRelCount();
         }
 
         return new ApproximatedImportProgress(
                 progressLogger,
-                setup.tracker,
+            setup.tracker(),
                 dimensions.nodeCount(),
                 relOperations
         );
@@ -171,7 +171,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
 
         GraphDimensions dimensions = this.dimensions;
         int concurrency = setup.concurrency();
-        AllocationTracker tracker = setup.tracker;
+        AllocationTracker tracker = setup.tracker();
         IdsAndProperties mappingAndProperties = loadIdMap(tracker, concurrency);
         Map<String, Map<String, Graph>> graphs = loadRelationships(
                 dimensions,
@@ -189,11 +189,12 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 dimensions,
                 progress,
                 tracker,
-                setup.terminationFlag,
+            setup.terminationFlag(),
                 threadPool,
                 concurrency,
-                setup.nodePropertyMappings)
-                .call(setup.log);
+            setup.nodePropertyMappings()
+        )
+                .call(setup.log());
     }
 
     private Map<String, Map<String, Graph>> loadRelationships(
@@ -220,7 +221,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 threadPool,
                 concurrency
         );
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = scanningImporter.call(setup.log);
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = scanningImporter.call(setup.log());
 
         return allBuilders.entrySet().stream().collect(Collectors.toMap(
                 entry -> entry.getKey().typeName(),
@@ -251,7 +252,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                                 inAdjacencyList,
                                 inAdjacencyOffsets,
                                 relationshipCount,
-                                setup.loadAsUndirected
+                            setup.loadAsUndirected()
                         );
                         return Collections.singletonMap("", graph);
                     } else {
@@ -271,7 +272,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                                     weightIndex,
                                     property,
                                     relationshipCount,
-                                    setup.loadAsUndirected
+                                setup.loadAsUndirected()
                             );
                             return Pair.of(property.propertyKey(), graph);
                         }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
@@ -287,36 +288,36 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 .relProperties()
                 .stream()
                 .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
-                        ? DeduplicationStrategy.SKIP
+                        ? DeduplicationStrategy.SINGLE
                         : property.deduplicationStrategy()
                 )
                 .toArray(DeduplicationStrategy[]::new);
         // TODO: backwards compat code
         if (deduplicationStrategies.length == 0) {
             DeduplicationStrategy deduplicationStrategy =
-                    setup.deduplicationStrategy == DeduplicationStrategy.DEFAULT
-                            ? DeduplicationStrategy.SKIP
-                            : setup.deduplicationStrategy;
+                setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
+                            ? DeduplicationStrategy.SINGLE
+                            : setup.deduplicationStrategy();
             deduplicationStrategies = new DeduplicationStrategy[]{deduplicationStrategy};
         }
 
-        if (setup.loadAsUndirected) {
+        if (setup.loadAsUndirected()) {
             outgoingRelationshipsBuilder = new RelationshipsBuilder(
                     deduplicationStrategies,
                     tracker,
-                    setup.relationshipPropertyMappings.numberOfMappings());
+                    setup.relationshipPropertyMappings().numberOfMappings());
         } else {
-            if (setup.loadOutgoing) {
+            if (setup.loadOutgoing()) {
                 outgoingRelationshipsBuilder = new RelationshipsBuilder(
                         deduplicationStrategies,
                         tracker,
-                        setup.relationshipPropertyMappings.numberOfMappings());
+                        setup.relationshipPropertyMappings().numberOfMappings());
             }
-            if (setup.loadIncoming) {
+            if (setup.loadIncoming()) {
                 incomingRelationshipsBuilder = new RelationshipsBuilder(
                         deduplicationStrategies,
                         tracker,
-                        setup.relationshipPropertyMappings.numberOfMappings());
+                        setup.relationshipPropertyMappings().numberOfMappings());
             }
         }
 

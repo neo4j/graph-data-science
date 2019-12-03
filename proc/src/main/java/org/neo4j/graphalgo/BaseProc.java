@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.newapi.BaseConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -44,7 +45,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public abstract class BaseProc {
+public abstract class BaseProc<CONFIG extends BaseConfig> {
 
     public static final String NODECOUNT_KEY = "nodeCount";
     public static final String RELCOUNT_KEY = "relationshipCount";
@@ -65,16 +66,14 @@ public abstract class BaseProc {
         return transaction.subjectOrAnonymous().username();
     }
 
-    protected abstract GraphLoader configureLoader(
-        GraphLoader loader,
-        ProcedureConfiguration config
-    );
+    protected abstract GraphLoader configureLoader(GraphLoader loader, ProcedureConfiguration config);
 
-    protected final ProcedureConfiguration newConfig(
-        String label,
-        String relationship,
-        Map<String, Object> config
-    ) {
+    protected GraphLoader newConfigureLoader(GraphLoader loader, CONFIG config) {
+        return loader;
+    }
+
+    // TODO: remove ProcedureConfiguration
+    protected final ProcedureConfiguration newConfig(String label, String relationship, Map<String, Object> config) {
 
         ProcedureConfiguration configuration = (config != null)
             ? ProcedureConfiguration.create(config, getUsername())
@@ -93,10 +92,7 @@ public abstract class BaseProc {
             .setComputeHistogram(OutputFieldParser.computeHistogram(returnItems));
     }
 
-    final GraphLoader newLoader(
-        ProcedureConfiguration config,
-        AllocationTracker tracker
-    ) {
+    final GraphLoader newLoader(ProcedureConfiguration config, AllocationTracker tracker) {
         String label = config.getNodeLabelOrQuery();
         String relationship = config.getRelationshipOrQuery();
         GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
@@ -104,6 +100,15 @@ public abstract class BaseProc {
             .withAllocationTracker(tracker)
             .withTerminationFlag(TerminationFlag.wrap(transaction));
         return configureLoader(loader, config);
+    }
+
+    protected final GraphLoader newLoader(AllocationTracker tracker, CONFIG config) {
+        GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
+            .init(log, getUsername())
+            .withAllocationTracker(tracker)
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
+        loader = config.configureLoader(loader);
+        return newConfigureLoader(loader, config);
     }
 
     void runWithExceptionLogging(String message, Runnable runnable) {
@@ -124,10 +129,7 @@ public abstract class BaseProc {
         }
     }
 
-    private Graph loadGraph(
-        ProcedureConfiguration config,
-        AllocationTracker tracker
-    ) {
+    private Graph loadGraph(ProcedureConfiguration config, AllocationTracker tracker) {
         return runWithExceptionLogging(
             "Loading failed",
             () -> newLoader(config, tracker).load(config.getGraphImpl())

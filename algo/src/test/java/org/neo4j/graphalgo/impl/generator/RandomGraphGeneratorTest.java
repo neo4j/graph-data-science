@@ -31,6 +31,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class RandomGraphGeneratorTest {
 
@@ -40,11 +41,13 @@ class RandomGraphGeneratorTest {
         long avgDeg = 5L;
 
         RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-                nbrNodes,
-                avgDeg,
-                RelationshipDistribution.UNIFORM,
-                Optional.empty(),
-                AllocationTracker.EMPTY);
+            nbrNodes,
+            avgDeg,
+            RelationshipDistribution.UNIFORM,
+            null,
+            Optional.empty(),
+            AllocationTracker.EMPTY
+        );
         HugeGraph graph = randomGraphGenerator.generate();
 
         assertEquals(graph.nodeCount(), nbrNodes);
@@ -69,11 +72,12 @@ class RandomGraphGeneratorTest {
         long avgDeg = 5L;
 
         RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-                nbrNodes,
-                avgDeg,
-                RelationshipDistribution.POWER_LAW,
-                Optional.empty(),
-                AllocationTracker.EMPTY);
+            nbrNodes,
+            avgDeg,
+            RelationshipDistribution.POWER_LAW,
+            Optional.empty(),
+            AllocationTracker.EMPTY
+        );
         HugeGraph graph = randomGraphGenerator.generate();
 
         assertEquals(graph.nodeCount(), nbrNodes);
@@ -86,11 +90,12 @@ class RandomGraphGeneratorTest {
         long avgDeg = 5L;
 
         RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-                nbrNodes,
-                avgDeg,
-                RelationshipDistribution.RANDOM,
-                Optional.empty(),
-                AllocationTracker.EMPTY);
+            nbrNodes,
+            avgDeg,
+            RelationshipDistribution.RANDOM,
+            Optional.empty(),
+            AllocationTracker.EMPTY
+        );
         HugeGraph graph = randomGraphGenerator.generate();
 
         assertEquals(graph.nodeCount(), nbrNodes);
@@ -118,11 +123,12 @@ class RandomGraphGeneratorTest {
         long avgDeg = 5L;
 
         RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-                nbrNodes,
-                avgDeg,
-                RelationshipDistribution.UNIFORM,
-                Optional.of(RelationshipPropertyProducer.fixed("prop", 42D)),
-                AllocationTracker.EMPTY);
+            nbrNodes,
+            avgDeg,
+            RelationshipDistribution.UNIFORM,
+            Optional.of(RelationshipPropertyProducer.fixed("prop", 42D)),
+            AllocationTracker.EMPTY
+        );
         HugeGraph graph = randomGraphGenerator.generate();
 
         graph.forEachNode((nodeId) -> {
@@ -140,11 +146,12 @@ class RandomGraphGeneratorTest {
         long avgDeg = 5L;
 
         RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-                nbrNodes,
-                avgDeg,
-                RelationshipDistribution.UNIFORM,
-                Optional.of(RelationshipPropertyProducer.random("prop", -10, 10)),
-                AllocationTracker.EMPTY);
+            nbrNodes,
+            avgDeg,
+            RelationshipDistribution.UNIFORM,
+            Optional.of(RelationshipPropertyProducer.random("prop", -10, 10)),
+            AllocationTracker.EMPTY
+        );
         HugeGraph graph = randomGraphGenerator.generate();
 
         graph.forEachNode((nodeId) -> {
@@ -155,5 +162,35 @@ class RandomGraphGeneratorTest {
             });
             return true;
         });
+    }
+
+    @Test
+    void shouldBeSeedAble() {
+        int nbrNodes = 10;
+        long avgDeg = 5L;
+        long seed = 1337L;
+
+        RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
+            nbrNodes,
+            avgDeg,
+            RelationshipDistribution.UNIFORM,
+            seed,
+            Optional.empty(),
+            AllocationTracker.EMPTY
+        );
+
+        RandomGraphGenerator otherRandomGenerator = new RandomGraphGenerator(
+            nbrNodes,
+            avgDeg,
+            RelationshipDistribution.UNIFORM,
+            seed,
+            Optional.empty(),
+            AllocationTracker.EMPTY
+        );
+
+        HugeGraph graph1 = randomGraphGenerator.generate();
+        HugeGraph graph2 = otherRandomGenerator.generate();
+
+        assertGraphEquals(graph1, graph2);
     }
 }

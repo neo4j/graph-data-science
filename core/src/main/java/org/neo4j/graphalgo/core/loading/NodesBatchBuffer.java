@@ -19,22 +19,22 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.internal.kernel.api.Read;
+import com.carrotsearch.hppc.LongSet;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
-    private final int label;
+    private final LongSet nodeLabelIds;
     private final NodeStore nodeStore;
 
     // property ids, consecutive
     private final long[] properties;
 
-    public NodesBatchBuffer(final NodeStore store, final int label, int capacity, boolean readProperty) {
+    public NodesBatchBuffer(final NodeStore store, final LongSet labels, int capacity, boolean readProperty) {
         super(capacity);
-        this.label = label;
+        this.nodeLabelIds = labels;
         this.nodeStore = store;
         this.properties = readProperty ? new long[capacity] : null;
     }
@@ -56,13 +56,12 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
     // TODO: something label scan store
     private boolean hasCorrectLabel(final NodeRecord record) {
-        if (label == Read.ANY_LABEL) {
+        if (nodeLabelIds.isEmpty()) {
             return true;
         }
         final long[] labels = NodeLabelsField.get(record, nodeStore);
-        long label = this.label;
         for (long l : labels) {
-            if (l == label) {
+            if (nodeLabelIds.contains(l)) {
                 return true;
             }
         }

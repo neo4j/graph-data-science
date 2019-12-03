@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.impl.generator.RelationshipPropertyProducer;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -41,25 +42,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_DISTRIBUTION_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MAX_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MIN_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_NAME_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_TYPE_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_VALUE_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.*;
 
-public final class GraphGenerateProc extends BaseProc {
+public final class GraphGenerateProc extends BaseProc<ProcedureConfiguration> {
 
     public static final String DUMMY_RELATIONSHIP_NAME = "RELATIONSHIP";
+    public static final String RELATIONSHIP_SEED_KEY = "relationshipSeed";
 
 
     @Procedure(name = "algo.beta.graph.generate", mode = Mode.READ)
     @Description("CALL algo.beta.graph.generate(" +
                  "name:String, nodeCount:Integer, averageDegree:Integer" +
-                 "{distribution: 'UNIFORM,RANDOM,POWERLAW', relationshipProperty: {name: '[PROPERTY_NAME]' type: 'FIXED,RANDOM', min: 0.0, max: 1.0, value: 1.0}}) " +
-                 "YIELD name, nodes, relationships, generateMillis, averageDegree, relationshipDistribution, relationshipProperty")
+                 "{distribution: 'UNIFORM,RANDOM,POWERLAW', relationshipSeed: 42, relationshipProperty: {name: '[PROPERTY_NAME]' type: 'FIXED,RANDOM', min: 0.0, max: 1.0, value: 1.0}}) " +
+                 "YIELD name, nodes, relationships, relationshipSeed, generateMillis, averageDegree, relationshipDistribution, relationshipProperty")
     public Stream<GraphGenerationStats> generate(
             @Name(value = "name") String name,
             @Name(value = "nodeCount") Long nodeCount,
@@ -104,7 +99,7 @@ public final class GraphGenerateProc extends BaseProc {
 
             stats.nodes = graphFromType.nodeCount();
             stats.relationships = graphFromType.relationshipCount();
-            GraphCatalog.set(getUsername(), name, graphFromType);
+            GraphCatalog.set(GraphCreateConfig.emptyWithName(getUsername(), name), graphFromType);
         }
 
         return stats;
@@ -115,6 +110,7 @@ public final class GraphGenerateProc extends BaseProc {
                 nodeCount,
                 averageDegree,
                 getRelationshipDistribution(config),
+                config.get(RELATIONSHIP_SEED_KEY, null),
                 getRelationshipPropertyProducer(config),
                 AllocationTracker.EMPTY
         );
@@ -172,9 +168,17 @@ public final class GraphGenerateProc extends BaseProc {
         return null;
     }
 
+    @Override
+    protected GraphLoader newConfigureLoader(
+        GraphLoader loader, ProcedureConfiguration procedureConfiguration
+    ) {
+        return configureLoader(loader, procedureConfiguration);
+    }
+
     public static class GraphGenerationStats {
         public String name;
         public long nodes, relationships, generateMillis;
+        public Long relationshipSeed;
         public double averageDegree;
         public Object relationshipDistribution, relationshipProperty;
 
@@ -183,6 +187,7 @@ public final class GraphGenerateProc extends BaseProc {
             this.averageDegree = averageDegree;
             this.relationshipDistribution = configuration.getString(RELATIONSHIP_DISTRIBUTION_KEY, "UNIFORM");
             this.relationshipProperty = configuration.get(RELATIONSHIP_PROPERTY_KEY, null);
+            this.relationshipSeed = configuration.get(RELATIONSHIP_SEED_KEY, null);
         }
     }
 }

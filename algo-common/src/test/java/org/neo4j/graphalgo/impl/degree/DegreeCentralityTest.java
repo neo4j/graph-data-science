@@ -257,7 +257,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
                 graph = new GraphLoader(db)
                         .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
                         .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                        .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
+                        .withDeduplicationStrategy(DeduplicationStrategy.SINGLE)
                         .load(graphFactory);
             }
         } else {

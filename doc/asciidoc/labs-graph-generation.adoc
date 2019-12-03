@@ -51,6 +51,7 @@ YIELD name, nodes, relationships, generateMillis, averageDegree, relationshipDis
 |===
 | Name                      | Type      | Default  | Optional | Description
 | relationshipDistribution  | string    | UNIFORM  | yes      | The probablity distribution method used to connect generated nodes. For more information see <<labs-graph-generation-distribution>>.
+| relationshipSeed  | long    | null  | yes      | The seed used for generating relationships.
 | relationshipProperty      | map       | {}       | yes      | Describes the method used to generate a relationship property. By default no relationship property is generated. For more information see <<labs-graph-generation-relationship-property>>.
 |===
 
@@ -64,6 +65,7 @@ YIELD name, nodes, relationships, generateMillis, averageDegree, relationshipDis
 | generateMillis            | int        | Milliseconds for generating the graph.
 | averageDegree             | double     | The average out degree of the generated nodes.
 | relationshipDistribution  | string     | The probablity distribution method used to connect generated nodes.
+| relationshipSeed  | long    | null  | yes      | The seed used for generating relationships.
 | relationshipProperty      | string     | The configuration of the generated relationship property.
 |===
 
@@ -76,6 +78,14 @@ Currently there are three supported methods:
 * `UNIFORM` - Distributes the outgoing relationships evenly, i.e., every node has exactly the same out degree (equal to the average degree). The target nodes are selected randomly.
 * `RANDOM` - Distributes the outgoing relationships using a normal distribution with an average of `averageDegree` and a standard deviation of `2 * averageDegree`. The target nodes are selected randomly.
 * `POWER_LAW` - Distributes the incoming relationships using a power law distribution. The out degree is based on a normal distribution.
+
+
+[[labs-graph-generation-seed]]
+== Relationship Seed
+
+The `relationshipSeed` parameter allows, to generate graphs with the same relationships, if they have no property.
+Currently the `relationshipProperty` is not seeded, therefore the generated graphs can differ in their property values.
+Hence generated graphs based on the same `relationshipSeed` are not identical.
 
 [[labs-graph-generation-relationship-property]]
 == Relationship Property

@@ -23,7 +23,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
-import org.neo4j.graphalgo.core.utils.RelationshipTypes;
+import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.helpers.collection.Iterables;
 
 import java.util.ArrayList;
@@ -122,7 +122,7 @@ public interface GraphsByRelationshipType {
 
         @Override
         public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
-            Set<String> types = RelationshipTypes.parse(relationshipType);
+            Set<String> types = ProjectionParser.parse(relationshipType);
 
             if (types.isEmpty() && !maybeRelationshipProperty.isPresent()) {
                 return getUnion();

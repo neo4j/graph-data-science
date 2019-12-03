@@ -57,7 +57,7 @@ import static org.neo4j.graphalgo.core.DeduplicationStrategy.DEFAULT;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.MAX;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.MIN;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.NONE;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.SKIP;
+import static org.neo4j.graphalgo.core.DeduplicationStrategy.SINGLE;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.SUM;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 import static org.neo4j.helpers.collection.Iterables.asSet;
@@ -161,7 +161,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     void testLoadDuplicateRelationshipsWithWeightsAggregation(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
-            .withDeduplicationStrategy(SKIP)
+            .withDeduplicationStrategy(SINGLE)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .buildGraph(graphFactory);
 
@@ -556,7 +556,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     static Stream<Arguments> localDeduplicationArguments() {
         return Stream.of(
-            Arguments.of(SKIP, 43, 45, 1338, 1340),
+            Arguments.of(SINGLE, 43, 45, 1338, 1340),
             Arguments.of(MIN, 42, 45, 1337, 1340),
             Arguments.of(MAX, 44, 46, 1339, 1341),
             Arguments.of(SUM, 129, 91, 4014, 2681)

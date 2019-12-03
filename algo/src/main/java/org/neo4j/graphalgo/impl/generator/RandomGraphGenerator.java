@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.impl.generator;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -37,6 +38,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongUnaryOperator;
 
@@ -51,6 +53,7 @@ public final class RandomGraphGenerator {
     private final AllocationTracker allocationTracker;
     private final long nodeCount;
     private final long averageDegree;
+    private final Random random;
     private final RelationshipDistribution relationshipDistribution;
     private final Optional<RelationshipPropertyProducer> maybePropertyProducer;
 
@@ -59,26 +62,47 @@ public final class RandomGraphGenerator {
     }
 
     public static Graph generate(int nodeCount, int averageDegree, RelationshipDistribution distribution) {
+        return generate(nodeCount, averageDegree, distribution, null);
+    }
+
+    public static Graph generate(int nodeCount, int averageDegree, RelationshipDistribution distribution, @Nullable Long seed) {
         return new RandomGraphGenerator(
             nodeCount,
             averageDegree,
             distribution,
+            seed,
             Optional.empty(),
             AllocationTracker.EMPTY
         ).generate();
     }
 
     public RandomGraphGenerator(
-            long nodeCount,
-            long averageDegree,
-            RelationshipDistribution relationshipDistribution,
-            Optional<RelationshipPropertyProducer> maybePropertyProducer,
-            AllocationTracker allocationTracker) {
+        long nodeCount,
+        long averageDegree,
+        RelationshipDistribution relationshipDistribution,
+        @Nullable Long seed,
+        Optional<RelationshipPropertyProducer> maybePropertyProducer,
+        AllocationTracker allocationTracker
+    ) {
         this.relationshipDistribution = relationshipDistribution;
         this.maybePropertyProducer = maybePropertyProducer;
         this.allocationTracker = allocationTracker;
         this.nodeCount = nodeCount;
         this.averageDegree = averageDegree;
+        this.random = new Random();
+        if (seed != null) {
+            this.random.setSeed(seed);
+        }
+    }
+
+    public RandomGraphGenerator(
+        long nodeCount,
+        long averageDegree,
+        RelationshipDistribution relationshipDistribution,
+        Optional<RelationshipPropertyProducer> maybePropertyProducer,
+        AllocationTracker allocationTracker
+    ) {
+        this(nodeCount, averageDegree, relationshipDistribution, null, maybePropertyProducer, allocationTracker);
     }
 
     public HugeGraph generate() {
@@ -137,10 +161,14 @@ public final class RandomGraphGenerator {
     private Relationships generateRelationships(IdMap idMap) {
         RelImporter relImporter = new RelImporter(
                 idMap,
-                relationshipDistribution.degreeProducer(nodeCount, averageDegree),
-                relationshipDistribution.relationshipProducer(nodeCount, averageDegree),
+                relationshipDistribution.degreeProducer(nodeCount, averageDegree, random),
+                relationshipDistribution.relationshipProducer(nodeCount, averageDegree, random),
                 maybePropertyProducer);
         return relImporter.generate();
+    }
+
+    Random getRandom() {
+        return this.random;
     }
 
     class RelImporter {
