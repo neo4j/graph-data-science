@@ -28,18 +28,23 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.LouvainConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -63,7 +68,10 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 
-class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensions {
+class LouvainProcNewAPITest extends ProcTestBase implements
+    ProcTestBaseExtensions,
+    WriteConfigTests<LouvainConfig>,
+    BaseProcWriteTests<LouvainProcNewAPI, Louvain, LouvainConfig> {
 
     private static final List<List<Long>> RESULT = Arrays.asList(
         Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 14L),
@@ -173,25 +181,25 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
                        "}) YIELD communityCount, modularity, modularities, ranLevels, includeIntermediateCommunities, createMillis, computeMillis, writeMillis, postProcessingMillis, communityDistribution";
 
         runQuery(query, MapUtil.map("writeProp", writeProperty),
-                row -> {
-                    long communityCount = row.getNumber("communityCount").longValue();
-                    double modularity = row.getNumber("modularity").doubleValue();
-                    List<Double> modularities = (List<Double>) row.get("modularities");
-                    long levels = row.getNumber("ranLevels").longValue();
-                    boolean includeIntermediate = row.getBoolean("includeIntermediateCommunities");
-                    long createMillis = row.getNumber("createMillis").longValue();
-                    long computeMillis = row.getNumber("computeMillis").longValue();
-                    long writeMillis = row.getNumber("writeMillis").longValue();
+            row -> {
+                long communityCount = row.getNumber("communityCount").longValue();
+                double modularity = row.getNumber("modularity").doubleValue();
+                List<Double> modularities = (List<Double>) row.get("modularities");
+                long levels = row.getNumber("ranLevels").longValue();
+                boolean includeIntermediate = row.getBoolean("includeIntermediateCommunities");
+                long createMillis = row.getNumber("createMillis").longValue();
+                long computeMillis = row.getNumber("computeMillis").longValue();
+                long writeMillis = row.getNumber("writeMillis").longValue();
 
-                    assertEquals(3, communityCount, "wrong community count");
-                    assertEquals(2, modularities.size(), "invalud modularities");
-                    assertEquals(2, levels, "invalid level count");
-                    assertFalse(includeIntermediate, "invalid level count");
-                    assertTrue(modularity > 0, "wrong modularity value");
-                    assertTrue(createMillis >= 0, "invalid loadTime");
-                    assertTrue(writeMillis >= 0, "invalid writeTime");
-                    assertTrue(computeMillis >= 0, "invalid computeTime");
-                }
+                assertEquals(3, communityCount, "wrong community count");
+                assertEquals(2, modularities.size(), "invalud modularities");
+                assertEquals(2, levels, "invalid level count");
+                assertFalse(includeIntermediate, "invalid level count");
+                assertTrue(modularity > 0, "wrong modularity value");
+                assertTrue(createMillis >= 0, "invalid loadTime");
+                assertTrue(writeMillis >= 0, "invalid writeTime");
+                assertTrue(computeMillis >= 0, "invalid computeTime");
+            }
         );
         assertWriteResult(RESULT, writeProperty);
     }
@@ -212,7 +220,7 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
             }
         );
 
-        runQuery(String.format("MATCH (n) RETURN n.%s as %s", writeProperty, writeProperty), row ->{
+        runQuery(String.format("MATCH (n) RETURN n.%s as %s", writeProperty, writeProperty), row -> {
             Object maybeList = row.get(writeProperty);
             assertTrue(maybeList instanceof long[]);
             long[] communities = (long[]) maybeList;
@@ -288,17 +296,74 @@ class LouvainProcNewAPITest extends ProcTestBase implements ProcTestBaseExtensio
         String writeProperty = "myFancyWriteProperty";
         String query = "CALL gds.algo.louvain.write(" +
                        graphSnippet +
-                       "    writeProperty: '"+ writeProperty +"'," +
-                       "    seedProperty: 'seed'"+
+                       "    writeProperty: '" + writeProperty + "'," +
+                       "    seedProperty: 'seed'" +
                        "}) YIELD communityCount, ranLevels";
 
-        runQuery(query,
+        runQuery(
+            query,
             row -> {
                 assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
                 assertEquals(1, row.getNumber("ranLevels").longValue(), "wrong number of levels");
             }
         );
         assertWriteResult(RESULT, writeProperty);
+    }
+
+    @Test
+    void testCreateConfigWithDefaults() {
+        LouvainConfig louvainConfig = LouvainConfig.of(
+            "",
+            Optional.empty(),
+            Optional.empty(),
+            CypherMapWrapper.empty()
+        );
+        assertEquals(null, louvainConfig.writeProperty());
+        assertEquals(false, louvainConfig.includeIntermediateCommunities());
+        assertEquals(10, louvainConfig.maxLevels());
+        assertEquals(10, louvainConfig.maxIterations());
+        assertEquals(0.0001D, louvainConfig.tolerance());
+        assertEquals(null, louvainConfig.seedProperty());
+        assertEquals(null, louvainConfig.weightProperty());
+    }
+
+    @Test
+    void testCreateConfig() {
+        LouvainConfig louvainConfig = LouvainConfig.of(
+            "",
+            Optional.empty(),
+            Optional.empty(),
+            CypherMapWrapper.create(MapUtil.map(
+                "writeProperty", "writeProperty"
+            ))
+        );
+        assertEquals("writeProperty", louvainConfig.writeProperty());
+        assertEquals(false, louvainConfig.includeIntermediateCommunities());
+        assertEquals(10, louvainConfig.maxLevels());
+        assertEquals(10, louvainConfig.maxIterations());
+        assertEquals(0.0001D, louvainConfig.tolerance());
+        assertEquals(null, louvainConfig.seedProperty());
+        assertEquals(null, louvainConfig.weightProperty());
+    }
+
+    @Override
+    public LouvainConfig createConfig(CypherMapWrapper mapWrapper) {
+        return LouvainConfig.of(
+            "",
+            Optional.empty(),
+            Optional.empty(),
+            mapWrapper
+        );
+    }
+
+    @Override
+    public GraphDatabaseAPI graphDb() {
+        return db;
+    }
+
+    @Override
+    public LouvainProcNewAPI createProcedure() {
+        return new LouvainProcNewAPI();
     }
 
     @AllGraphNamesTest
