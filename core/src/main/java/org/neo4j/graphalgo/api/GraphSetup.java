@@ -121,7 +121,7 @@ public class GraphSetup {
     }
 
     public @NotNull String nodeLabel() {
-        return createConfig.nodeProjection().labelFilter().orElse("");
+        return createConfig.nodeProjection().labelProjection().orElse("");
     }
 
     public @NotNull String relationshipType() {
@@ -225,7 +225,7 @@ public class GraphSetup {
     @Deprecated
     public PropertyMappings nodePropertyMappings() {
         Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.nodeProjection()
-            .allFilters()
+            .allProjections()
             .stream()
             .flatMap(e -> e.properties().stream())
             .collect(Collectors.groupingBy(PropertyMapping::propertyKey));
@@ -238,7 +238,7 @@ public class GraphSetup {
     }
 
     public PropertyMappings nodePropertyMappings(ElementIdentifier identifier) {
-        return createConfig.nodeProjection().getFilter(identifier).properties();
+        return createConfig.nodeProjection().getProjection(identifier).properties();
     }
 
     /**

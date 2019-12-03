@@ -69,14 +69,14 @@ class GraphCreateProcTest extends BaseProcTest {
         GraphCatalog.removeAllLoadedGraphs();
     }
 
-    @ParameterizedTest(name = "nodeProjection = {0}, relFilter = {1}")
+    @ParameterizedTest(name = "nodeProjection = {0}, relProjection = {1}")
     @MethodSource(value = "allNodesAndRels")
-    void createGraph(Map<String, Object> nodeProjection, String relFilter) {
+    void createGraph(Map<String, Object> nodeProjection, String relProjection) {
         String name = "name";
 
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, $nodeProjection, $relFilter)",
-            map("name", name, "nodeProjection", nodeProjection, "relFilter", relFilter),
+            "CALL algo.beta.graph.create($name, $nodeProjection, $relProjection)",
+            map("name", name, "nodeProjection", nodeProjection, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
                 "nodeProjection", nodeProjection,
@@ -179,7 +179,7 @@ class GraphCreateProcTest extends BaseProcTest {
         assertError(
             "CALL algo.beta.graph.create($name, $nodeProjection, {})",
             map("name", name, "nodeProjection", nodeProjection),
-            "Only one node filter is supported."
+            "Only one node projection is supported."
         );
     }
 
@@ -242,9 +242,9 @@ class GraphCreateProcTest extends BaseProcTest {
         assertThat(graphs.get(0).availableNodeProperties(), contains(expectedProperties.keySet().toArray()));
     }
 
-    @ParameterizedTest(name = "{0}, relFilter = {1}")
-    @MethodSource("relFilterVariants")
-    void testRelFilterVariants(String descr, Object relProjection, Map<String, Object> desugaredRelProjection) {
+    @ParameterizedTest(name = "{0}, relProjection = {1}")
+    @MethodSource("relProjectionVariants")
+    void testRelProjectionVariants(String descr, Object relProjection, Map<String, Object> desugaredRelProjection) {
         String name = "g";
 
         assertCypherResult(
@@ -263,7 +263,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "projection={0}")
     @MethodSource("relProjectionTypes")
-    void relFilterProjections(String projection) {
+    void relProjectionProjections(String projection) {
         String name = "g";
         Map<String, Object> relProjection = map("type", "REL", "projection", projection, "properties", emptyMap());
         Map<String, Object> expectedRelProjection = MapUtil.genericMap(
@@ -294,7 +294,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "properties = {0}")
     @MethodSource(value = "relationshipProperties")
-    void relPropertiesInRelFilter(Object properties, Map<String, Object> expectedProperties) {
+    void relPropertiesInRelProjection(Object properties, Map<String, Object> expectedProperties) {
         String name = "g";
         Map<String, Object> relProjection = map("B", map("type", "REL", "properties", properties));
         Map<String, Object> expectedRelProjection = map(
@@ -319,7 +319,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "aggregation={0}")
     @MethodSource("relAggregationTypes")
-    void relFilterPropertyAggregations(String aggregation) {
+    void relProjectionPropertyAggregations(String aggregation) {
         String name = "g";
         Map<String, Object> properties = map(
             "weight",
@@ -349,11 +349,11 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failsOnInvalidNeoType() {
         String name = "g";
-        Map relFilter = map("REL", map("type", "INVALID"));
+        Map relProjection = map("REL", map("type", "INVALID"));
 
         assertError(
-            "CALL algo.beta.graph.create($name, {}, $relFilter)",
-            map("name", name, "relFilter", relFilter),
+            "CALL algo.beta.graph.create($name, {}, $relProjection)",
+            map("name", name, "relProjection", relProjection),
             "Invalid relationship projection, one or more relationship types not found: 'INVALID'"
         );
     }
@@ -389,7 +389,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 map("B", map("label", "A", "properties", emptyMap()))
             ),
             Arguments.of(
-                "node filter as list",
+                "node projection as list",
                 singletonList("A"),
                 map("A", map("label", "A", "properties", emptyMap()))
             )
@@ -438,7 +438,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
-    static Stream<Arguments> relFilterVariants() {
+    static Stream<Arguments> relProjectionVariants() {
         return Stream.of(
             Arguments.of(
                 "default neo type",
@@ -457,7 +457,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 )
             ),
             Arguments.of(
-                "rel filter as list",
+                "rel projection as list",
                 singletonList("REL"),
                 map(
                     "REL",

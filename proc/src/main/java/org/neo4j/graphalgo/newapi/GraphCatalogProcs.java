@@ -47,20 +47,20 @@ public class GraphCatalogProcs extends BaseProc {
     @Procedure(name = "algo.beta.graph.create", mode = Mode.READ)
     @Description("CALL graph.create(" +
                  "  graphName: STRING," +
-                 "  nodeFilter: MAP," +
-                 "  relationshipFilter: MAP," +
+                 "  nodeProjection: MAP," +
+                 "  relationshipProjection: MAP," +
                  "  configuration: MAP" +
                  ") YIELD" +
                  "  graphName: STRING," +
-                 "  nodeFilter: MAP," +
-                 "  relationshipFilter: MAP," +
+                 "  nodeProjection: MAP," +
+                 "  relationshipProjection: MAP," +
                  "  nodes: INTEGER," +
                  "  relationships: INTEGER," +
                  "  createMillis: INTEGER")
     public Stream<GraphCreateResult> create(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeFilter") @Nullable Object nodeFilter,
-        @Name(value = "relationshipFilter") @Nullable Object relationshipFilter,
+        @Name(value = "nodeProjection") @Nullable Object nodeProjection,
+        @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
@@ -69,8 +69,8 @@ public class GraphCatalogProcs extends BaseProc {
         GraphCreateConfig config = GraphCreateConfig.of(
             getUsername(),
             graphName,
-            nodeFilter,
-            relationshipFilter,
+            nodeProjection,
+            relationshipProjection,
             CypherMapWrapper.create(configuration)
         );
         // computation
