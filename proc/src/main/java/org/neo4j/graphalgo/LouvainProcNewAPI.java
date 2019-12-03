@@ -22,18 +22,13 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactoryNew;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.LouvainConfig;
-import org.neo4j.helpers.collection.Pair;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -42,8 +37,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -82,13 +77,13 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
                  "  didConverge: LIST OF BOOLEAN," +
                  "  communityDistribution: MAP")
     public Stream<WriteResult> write(
-            @Name(value = "graphName") Object graphNameOrConfig,
-            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
-        Pair<LouvainConfig, Optional<String>> input = processInput(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(graphNameOrConfig, configuration);
         return write(computationResult, true);
     }
 
@@ -122,9 +117,13 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
                  "  didConverge: LIST OF BOOLEAN," +
                  "  communityDistribution: MAP")
     public Stream<WriteResult> stats(
-            @Name(value = "graphName") Object graphNameOrConfig,
-            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
-        ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(graphNameOrConfig, configuration);
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
         return write(computationResult, false);
     }
 
@@ -168,53 +167,30 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
             .withCommunityFunction(louvain::getCommunity);
 
         if (write && !config.writeProperty().isEmpty()) {
-            write(
-                builder::timeWrite,
-                graph,
-                config,
-                louvain,
-                louvain.terminationFlag
-            );
-
+            writeNodeProperties(builder, computeResult);
             graph.releaseProperties();
         }
 
         return Stream.of(builder.build());
     }
 
-    private void write(
-        Supplier<ProgressTimer> timer,
-        Graph graph,
-        LouvainConfig config,
-        Louvain louvain,
-        TerminationFlag terminationFlag
-    ) {
-        try (ProgressTimer ignored = timer.get()) {
-            log.debug("Writing results");
-
-            NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, terminationFlag)
-                .withLog(log)
-                .parallel(Pools.DEFAULT, config.writeConcurrency())
-                .build();
-
-            Optional<NodeProperties> seed = louvain.config().maybeSeedPropertyKey.map(graph::nodeProperties);
-            PropertyTranslator<Louvain> translator;
-            if (!louvain.config().includeIntermediateCommunities) {
-                if (seed.isPresent() && config.seedProperty().equals(config.writeProperty())) {
-                    translator = new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
-                } else {
-                    translator = CommunityTranslator.INSTANCE;
-                }
+    @Override
+    Optional<PropertyTranslator<Louvain>> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainConfig> computationResult) {
+        Graph graph = computationResult.graph();
+        Louvain louvain = computationResult.result();
+        LouvainConfig config = computationResult.config();
+        Optional<NodeProperties> seed = louvain.config().maybeSeedPropertyKey.map(graph::nodeProperties);
+        PropertyTranslator<Louvain> translator;
+        if (!louvain.config().includeIntermediateCommunities) {
+            if (seed.isPresent() && Objects.equals(config.seedProperty(), config.writeProperty())) {
+                translator = new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
             } else {
-                translator = CommunitiesTranslator.INSTANCE;
+                translator = CommunityTranslator.INSTANCE;
             }
-
-            exporter.write(
-                config.writeProperty(),
-                louvain,
-                translator
-            );
+        } else {
+            translator = CommunitiesTranslator.INSTANCE;
         }
+        return Optional.of(translator);
     }
 
     public static final class StreamResult {
@@ -224,7 +200,10 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
 
         StreamResult(final long nodeId, final long[] communities, final long community) {
             this.nodeId = nodeId;
-            this.communities = communities == null ? null : Arrays.stream(communities).boxed().collect(Collectors.toList());
+            this.communities = communities == null ? null : Arrays
+                .stream(communities)
+                .boxed()
+                .collect(Collectors.toList());
             this.community = community;
         }
     }
@@ -345,7 +324,7 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
         }
     }
 
-    static final class CommunityTranslator implements PropertyTranslator.OfLong<Louvain>  {
+    static final class CommunityTranslator implements PropertyTranslator.OfLong<Louvain> {
         public static final CommunityTranslator INSTANCE = new CommunityTranslator();
 
         @Override

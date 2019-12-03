@@ -33,13 +33,18 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.helpers.collection.Pair;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Function;
 
 public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> extends BaseProc {
 
@@ -189,6 +194,48 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             .result(result)
             .config(config)
             .build();
+    }
+
+    Optional<PropertyTranslator<RESULT>> nodePropertyTranslator(
+        ComputationResult<A, RESULT, CONFIG> computationResult
+    ) {
+        return Optional.empty();
+    }
+
+    protected void writeNodeProperties(
+        AbstractResultBuilder<?> writeBuilder,
+        ComputationResult<A, RESULT, CONFIG> computationResult
+    ) {
+        Optional<PropertyTranslator<RESULT>> resultPropertyTranslator = nodePropertyTranslator(computationResult);
+        if (!resultPropertyTranslator.isPresent()) {
+            return;
+        }
+
+        CONFIG config = computationResult.config();
+        if (!(config instanceof WriteConfig)) {
+            throw new IllegalArgumentException(String.format(
+                "Can only write results if the config implements %s.",
+                WriteConfig.class
+            ));
+        }
+
+        WriteConfig writeConfig = (WriteConfig) config;
+        try (ProgressTimer ignored = writeBuilder.timeWrite()) {
+            log.debug("Writing results");
+
+            Graph graph = computationResult.graph();
+            TerminationFlag terminationFlag = computationResult.algorithm().getTerminationFlag();
+            NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, terminationFlag)
+                .withLog(log)
+                .parallel(Pools.DEFAULT, writeConfig.writeConcurrency())
+                .build();
+
+            exporter.write(
+                writeConfig.writeProperty(),
+                computationResult.result(),
+                resultPropertyTranslator.get()
+            );
+        }
     }
 
     @ValueClass
