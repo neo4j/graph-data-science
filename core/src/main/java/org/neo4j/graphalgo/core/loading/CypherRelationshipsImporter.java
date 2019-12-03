@@ -67,11 +67,11 @@ class CypherRelationshipsImporter extends CypherRecordLoader<ObjectLongMap<Relat
         this.propertyKeyIdsByName = dimensions
             .relProperties()
             .stream()
-            .collect(toMap(PropertyMapping::neoPropertyKey, PropertyMapping::propertyKeyId));
+            .collect(toMap(PropertyMapping::propertyKey, PropertyMapping::propertyKeyId));
         this.propertyDefaultValueByName = dimensions
             .relProperties()
             .stream()
-            .collect(toMap(PropertyMapping::neoPropertyKey, PropertyMapping::defaultValue));
+            .collect(toMap(PropertyMapping::propertyKey, PropertyMapping::defaultValue));
 
         this.allRelationshipCounters = new HashMap<>();
         this.importerContext = new Context();
