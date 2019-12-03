@@ -40,6 +40,8 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
     private final CypherRelationshipsImporter.Context importerContext;
     private final int batchSize;
     private final int bufferSize;
+    private final int propertyCount;
+
     private final Map<String, SingleTypeRelationshipImporter> localImporters;
     private final Map<String, RelationshipPropertiesBatchBuffer> localPropertiesBuffers;
 
@@ -60,6 +62,7 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
         this.idMap = idMap;
         this.propertyKeyIdsByName = propertyKeyIdsByName;
         this.propertyDefaultValueByName = propertyDefaultValueByName;
+        this.propertyCount = propertyKeyIdsByName.size();
         this.importerContext = importerContext;
         this.batchSize = batchSize;
         this.bufferSize = bufferSize;
@@ -80,21 +83,23 @@ class MultiRelationshipRowVisitor implements Result.ResultVisitor<RuntimeExcepti
         rows++;
         String relationshipType = row.getString(TYPE_COLUMN);
 
-        if (localImporters.containsKey(relationshipType)) {
-            return visit(row, localImporters.get(relationshipType), localPropertiesBuffers.get(relationshipType));
-        } else {
+        if (!localImporters.containsKey(relationshipType)) {
+            // Lazily init relationship importer builder
             SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder = importerContext
                 .getOrCreateImporterBuilder(relationshipType);
-
+            // Create thread-local buffer for relationship properties
             RelationshipPropertiesBatchBuffer propertiesBuffer = new RelationshipPropertiesBatchBuffer(
                 batchSize == CypherLoadingUtils.NO_BATCHING ? DEFAULT_BATCH_SIZE : batchSize,
-                propertyKeyIdsByName.size()
+                propertyCount
             );
+            // Create thread-local relationship importer
             SingleTypeRelationshipImporter importer = importerBuilder.withBuffer(idMap, bufferSize, propertiesBuffer);
-            localImporters.putIfAbsent(relationshipType, importer);
-            localPropertiesBuffers.putIfAbsent(relationshipType, propertiesBuffer);
-            return visit(row, importer, propertiesBuffer);
+
+            localImporters.put(relationshipType, importer);
+            localPropertiesBuffers.put(relationshipType, propertiesBuffer);
         }
+
+        return visit(row, localImporters.get(relationshipType), localPropertiesBuffers.get(relationshipType));
     }
 
     private boolean visit(Result.ResultRow row, SingleTypeRelationshipImporter importer, RelationshipPropertiesBatchBuffer propertiesBuffer) {
