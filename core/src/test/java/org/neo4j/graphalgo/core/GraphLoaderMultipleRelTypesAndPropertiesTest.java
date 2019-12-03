@@ -277,7 +277,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multiplePropertiesWithDefaultValues(Class<T> graphFactory) {
-        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -323,7 +322,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport>
     void multiplePropertiesWithIncompatibleDeduplicationStrategies(Class<T> graphFactory) {
-        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -357,7 +355,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void singlePropertyWithMultipleDeduplications(Class<T> graphFactory) {
-        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +

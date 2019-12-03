@@ -113,16 +113,16 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
         GraphDimensions dimensions,
         AllocationTracker tracker
     ) {
-        CypherRelationshipLoader cypherImporter = new CypherRelationshipLoader(
+        CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
             idsAndProperties.idMap(),
             api,
             setup,
             dimensions
         );
 
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = cypherImporter.load();
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = relationshipLoader.load();
 
-        return cypherImporter.allBuilders().entrySet().stream().collect(Collectors.toMap(
+        return relationshipLoader.allBuilders().entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().typeName(),
             entry -> {
                 Pair<RelationshipsBuilder, RelationshipsBuilder> builders = entry.getValue();
