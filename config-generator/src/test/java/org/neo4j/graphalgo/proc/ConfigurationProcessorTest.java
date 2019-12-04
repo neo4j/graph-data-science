@@ -58,6 +58,7 @@ class ConfigurationProcessorTest {
         "KeyRenames",
         "Parameters",
         "ParametersOnly",
+        "NullableFields",
         "NullableParameters",
         "Conversions",
         "ConvertingParameters"

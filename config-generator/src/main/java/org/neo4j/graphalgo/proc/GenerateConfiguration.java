@@ -133,7 +133,7 @@ final class GenerateConfiguration {
         ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
         config.members().stream().map(member ->
             FieldSpec.builder(
-                TypeName.get(member.method().getReturnType()),
+                member.typeSpec(),
                 names.newName(member.methodName(), member),
                 Modifier.PRIVATE, Modifier.FINAL
             ).build()
@@ -225,13 +225,24 @@ final class GenerateConfiguration {
         for (UnaryOperator<CodeBlock> converter : definition.converters()) {
             codeBlock = converter.apply(codeBlock);
         }
-        if (definition.fieldType().getKind() == TypeKind.DECLARED) {
-            codeBlock = CodeBlock.of(
-                "$T.failOnNull($S, $L)",
-                CypherMapWrapper.class,
-                definition.configKey(),
-                codeBlock
-            );
+        TypeMirror fieldType = definition.fieldType();
+        if (fieldType.getKind() == TypeKind.DECLARED) {
+            boolean isNullable = fieldType
+                .getAnnotationMirrors()
+                .stream()
+                .anyMatch(am ->
+                    asType(am.getAnnotationType().asElement())
+                        .getQualifiedName()
+                        .contentEquals(Nullable.class.getName()));
+
+            if (!isNullable) {
+                codeBlock = CodeBlock.of(
+                    "$T.failOnNull($S, $L)",
+                    CypherMapWrapper.class,
+                    definition.configKey(),
+                    codeBlock
+                );
+            }
         }
 
         constructor.addStatement("this.$N = $L", definition.fieldName(), codeBlock);
@@ -508,8 +519,8 @@ final class GenerateConfiguration {
                     "$T.super.$N()",
                     member.owner().asType(),
                     member.methodName()
-                )
-            );
+                    )
+                );
         }
 
         return Optional.of(builder.build());
@@ -518,6 +529,7 @@ final class GenerateConfiguration {
     private Iterable<MethodSpec> defineGetters(ConfigParser.Spec config, NameAllocator names) {
         return config.members().stream().map(member -> MethodSpec
             .overriding(member.method())
+            .returns(member.typeSpec())
             .addStatement("return this.$N", names.get(member))
             .build()
         ).collect(Collectors.toList());

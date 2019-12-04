@@ -21,6 +21,8 @@
 package org.neo4j.graphalgo.proc;
 
 import com.google.common.collect.Streams;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.TypeName;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration.Ignore;
 import org.neo4j.graphalgo.annotation.Configuration.Key;
@@ -38,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asTypeElement;
@@ -164,6 +167,16 @@ final class ConfigParser {
         @Value.Derived
         public String methodName() {
             return method().getSimpleName().toString();
+        }
+
+        @Value.Derived
+        public TypeName typeSpec() {
+            TypeName typeName = TypeName.get(method().getReturnType());
+            List<AnnotationSpec> annotationsToAddToType = method().getReturnType()
+                .getAnnotationMirrors().stream()
+                .map(AnnotationSpec::get)
+                .collect(Collectors.toList());
+            return typeName.annotated(annotationsToAddToType);
         }
 
         @Value.Check
