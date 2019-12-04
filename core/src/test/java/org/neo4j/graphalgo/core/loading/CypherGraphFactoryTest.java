@@ -65,12 +65,11 @@ class CypherGraphFactoryTest {
         db.shutdown();
     }
 
-
     @Test
     void testLoadCypher() {
         db = TestDatabaseCreator.createTestDatabase();
 
-        String query = " CREATE (n1 {partition: 6})-[:REL {prop:1}]->(n2 {foo: 4})-[:REL {prop: 2}]->(n3)" +
+        String query = " CREATE (n1 {partition: 6})-[:REL {prop: 1}]->(n2 {foo: 4})-[:REL {prop: 2}]->(n3)" +
                        " CREATE (n1)-[:REL {prop: 3}]->(n3)"+
                        " RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3";
         runQuery(db, query).accept( row -> {
@@ -223,7 +222,7 @@ class CypherGraphFactoryTest {
         GraphLoader loader = new GraphLoader(db)
                 .withBatchSize(1000)
                 .withDeduplicationStrategy(strategy)
-                .withRelationshipProperties(PropertyMapping.of("prop", 0D))
+                .withRelationshipProperties(PropertyMapping.of("weight", "prop", 0D))
                 .withLabel(nodeStatement)
                 .withRelationshipType(relStatement);
         if (parallel) {

@@ -25,14 +25,13 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties, Result.ResultVisitor<RuntimeException>> {
+class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
     private final HugeLongArrayBuilder builder;
     private final NodeImporter importer;
@@ -51,7 +50,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties, Result.Resul
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
         NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), bufferSize, true);
         NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer);
-        runLoadingQuery(offset, batchSize, visitor);
+        runLoadingQuery(offset, batchSize).accept(visitor);
         visitor.flush();
         return new BatchLoadResult(offset, visitor.rows(), visitor.maxId(), visitor.rows());
     }

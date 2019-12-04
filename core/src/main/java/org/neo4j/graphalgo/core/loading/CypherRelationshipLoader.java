@@ -43,7 +43,7 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toMap;
 
-class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<RelationshipTypeMapping>, RelationshipRowVisitor> {
+class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<RelationshipTypeMapping>> {
 
     private final IdMap idMap;
     private final GraphDimensions dimensions;
@@ -57,6 +57,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
     private Map<String, Double> propertyDefaultValueByName;
     private int[] propertyKeyIds;
     private double[] propertyDefaultValues;
+    private boolean importWeights;
 
     private final Map<RelationshipTypeMapping, LongAdder> allRelationshipCounters;
     private final DeduplicationStrategy[] deduplicationStrategies;
@@ -73,6 +74,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
         this.dimensions = dimensions;
 
         MutableInt propertyKeyId = new MutableInt(0);
+
+        this.importWeights = dimensions.relProperties().atLeastOneExists();
 
         this.propertyKeyIdsByName = dimensions
             .relProperties()
@@ -93,21 +96,12 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
     }
 
     @Override
-    void runLoadingQuery(long offset, int batchSize, RelationshipRowVisitor visitor) {
-        Map<String, Object> parameters =
-            batchSize == CypherLoadingUtils.NO_BATCHING
-                ? setup.params()
-                : CypherLoadingUtils.params(setup.params(), offset, batchSize);
-        Result result = api.execute(loadQuery, parameters);
+    BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
+        Result result = runLoadingQuery(offset, batchSize);
 
         List<String> allColumns = result.columns();
 
         boolean isAnyRelTypeQuery = !allColumns.contains(RelationshipRowVisitor.TYPE_COLUMN);
-        visitor.isAnyTypeResult(isAnyRelTypeQuery);
-
-        if (isAnyRelTypeQuery) {
-            loaderContext.getOrCreateImporterBuilder(RelationshipTypeMapping.all());
-        }
 
         // If the user specifies property mappings,
         // we use those. Otherwise, we create new
@@ -135,26 +129,26 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
             propertyKeyIds = IntStream.range(0, propertyColumns.size()).toArray();
             propertyDefaultValues = IntStream.range(0, propertyColumns.size()).mapToDouble(i -> defaultValue).toArray();
 
+            importWeights = propertyKeyIds.length > 0;
+
             // TODO: we need to set the duplication strategies to NONE
         }
 
-        result.accept(visitor);
-    }
+        if (isAnyRelTypeQuery) {
+            loaderContext.getOrCreateImporterBuilder(RelationshipTypeMapping.all());
+        }
 
-    @Override
-    BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
             idMap,
             loaderContext,
             propertyKeyIdsByName,
             propertyDefaultValueByName,
-            bufferSize
+            bufferSize,
+            isAnyRelTypeQuery
         );
 
-        runLoadingQuery(offset, batchSize, visitor);
-
+        result.accept(visitor);
         visitor.flushAll();
-
         return new BatchLoadResult(offset, visitor.rows(), -1L, visitor.relationshipCount());
     }
 
@@ -207,13 +201,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
 
         final int pageSize;
         final int numberOfPages;
-        final boolean importWeights;
 
         Context() {
             this.importerBuildersByType = new HashMap<>();
             this.allBuilders = new HashMap<>();
-
-            this.importWeights = dimensions.relProperties().atLeastOneExists();
 
             ImportSizing importSizing = ImportSizing.of(setup.concurrency(), idMap.nodeCount());
             this.pageSize = importSizing.pageSize();
@@ -263,21 +254,21 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
                 outgoingRelationshipsBuilder = new RelationshipsBuilder(
                     deduplicationStrategies,
                     tracker,
-                    setup.relationshipPropertyMappings().numberOfMappings()
+                    propertyKeyIds.length
                 );
             } else {
                 if (setup.loadOutgoing()) {
                     outgoingRelationshipsBuilder = new RelationshipsBuilder(
                         deduplicationStrategies,
                         tracker,
-                        setup.relationshipPropertyMappings().numberOfMappings()
+                        propertyKeyIds.length
                     );
                 }
                 if (setup.loadIncoming()) {
                     incomingRelationshipsBuilder = new RelationshipsBuilder(
                         deduplicationStrategies,
                         tracker,
-                        setup.relationshipPropertyMappings().numberOfMappings()
+                        propertyKeyIds.length
                     );
                 }
             }

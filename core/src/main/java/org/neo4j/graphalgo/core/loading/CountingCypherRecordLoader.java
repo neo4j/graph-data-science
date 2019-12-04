@@ -20,10 +20,9 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult, Result.ResultVisitor<RuntimeException>> {
+class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
 
     private long total;
 
@@ -34,7 +33,7 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult, Res
     @Override
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
         ResultCountingVisitor visitor = new ResultCountingVisitor();
-        runLoadingQuery(offset, batchSize, visitor);
+        runLoadingQuery(offset, batchSize).accept(visitor);
         return new BatchLoadResult(offset, visitor.rows(), -1L, -1L);
     }
 

@@ -46,19 +46,20 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private final Map<String, SingleTypeRelationshipImporter> localImporters;
     private final Map<String, RelationshipPropertiesBatchBuffer> localPropertiesBuffers;
     private final Map<String, Integer> localRelationshipIds;
+    private final boolean isAnyRelTypeQuery;
 
     private long lastNeoSourceId = -1, lastNeoTargetId = -1;
     private long sourceId = -1, targetId = -1;
     private long rows = 0;
     private long relationshipCount;
-    private boolean isAnyTypeResult;
 
     RelationshipRowVisitor(
         IdMap idMap,
         CypherRelationshipLoader.Context loaderContext,
         Map<String, Integer> propertyKeyIdsByName,
         Map<String, Double> propertyDefaultValueByName,
-        int bufferSize
+        int bufferSize,
+        boolean isAnyRelTypeQuery
     ) {
         this.idMap = idMap;
         this.propertyKeyIdsByName = propertyKeyIdsByName;
@@ -69,10 +70,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         this.localImporters = new HashMap<>();
         this.localPropertiesBuffers = new HashMap<>();
         this.localRelationshipIds = new HashMap<>();
-    }
-
-    void isAnyTypeResult(boolean isAnyTypeResult) {
-        this.isAnyTypeResult = isAnyTypeResult;
+        this.isAnyRelTypeQuery = isAnyRelTypeQuery;
     }
 
     public long rows() {
@@ -87,7 +85,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     public boolean visit(Result.ResultRow row) throws RuntimeException {
         rows++;
 
-        RelationshipTypeMapping relationshipType = isAnyTypeResult
+        RelationshipTypeMapping relationshipType = isAnyRelTypeQuery
             ? RelationshipTypeMapping.all()
             : RelationshipTypeMapping.of(row.getString(TYPE_COLUMN), -1);
 
