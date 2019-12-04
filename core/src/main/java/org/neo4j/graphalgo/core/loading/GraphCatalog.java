@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -31,6 +31,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class GraphCatalog extends GraphFactory {
@@ -106,11 +108,24 @@ public final class GraphCatalog extends GraphFactory {
         return getUserCatalog(username).exists(graphName);
     }
 
-    public static Graph remove(String username, String graphName) {
-        return getUserCatalog(username).remove(graphName);
+    public static @Nullable Graph remove(String username, String graphName) {
+        return Optional
+            .ofNullable(getUserCatalog(username).remove(graphName))
+            .orElse(null);
     }
 
-    public static String getType(String username, String graphName) {
+    public static void remove(String username, String graphName, Consumer<GraphWithConfig> graphRemovedConsumer) {
+        GraphWithConfig graphWithConfig = Optional.ofNullable(getUserCatalog(username).removeWithoutRelease(graphName))
+            .orElseThrow(failOnNonExistentGraph(graphName));
+
+        graphRemovedConsumer.accept(graphWithConfig);
+
+        Graph graph = graphWithConfig.getGraph();
+        graph.canRelease(true);
+        graph.release();
+    }
+
+    public static @Nullable String getType(String username, String graphName) {
         return getUserCatalog(username).getType(graphName);
     }
 
@@ -128,6 +143,13 @@ public final class GraphCatalog extends GraphFactory {
 
     public static Map<GraphCreateConfig, Graph> getLoadedGraphs(String username) {
         return getUserCatalog(username).getLoadedGraphs();
+    }
+
+    private static Supplier<RuntimeException> failOnNonExistentGraph(String graphName) {
+        return () -> new IllegalArgumentException(String.format(
+            "Graph with name `%s` does not exist and can't be removed.",
+            graphName
+        ));
     }
 
     private static class UserCatalog {
@@ -163,13 +185,14 @@ public final class GraphCatalog extends GraphFactory {
          * This method returns the union of all subgraphs refered to by the given name.
          */
         Optional<Graph> getUnion(String graphName) {
-            return !exists(graphName) ? Optional.empty() : Optional.of(graphsByName.get(graphName).graph().getUnion());
+            return !exists(graphName) ? Optional.empty() : Optional.of(graphsByName.get(graphName).getGraph());
         }
 
         boolean exists(String graphName) {
             return graphName != null && graphsByName.containsKey(graphName);
         }
 
+        @Nullable
         Graph remove(String graphName) {
             if (!exists(graphName)) {
                 // remove is allowed to return null if the graph does not exist
@@ -177,12 +200,25 @@ public final class GraphCatalog extends GraphFactory {
                 // that can deal with missing graphs
                 return null;
             }
-            Graph graph = graphsByName.remove(graphName).graph().getUnion();
+            GraphWithConfig graphWithConfig = graphsByName.remove(graphName);
+            Graph graph = graphWithConfig.getGraph();
             graph.canRelease(true);
             graph.release();
             return graph;
         }
 
+        @Nullable
+        GraphWithConfig removeWithoutRelease(String graphName) {
+            if (!exists(graphName)) {
+                // remove is allowed to return null if the graph does not exist
+                // as it's being used by algo.graph.info or algo.graph.remove,
+                // that can deal with missing graphs
+                return null;
+            }
+            return graphsByName.remove(graphName);
+        }
+
+        @Nullable
         String getType(String graphName) {
             if (graphName == null) return null;
             GraphsByRelationshipType graph = graphsByName.get(graphName).graph();
@@ -192,21 +228,15 @@ public final class GraphCatalog extends GraphFactory {
         Map<String, Graph> getLoadedGraphsByName() {
             return graphsByName.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
-                e -> e.getValue().graph().getUnion()
+                e -> e.getValue().getGraph()
             ));
         }
 
         Map<GraphCreateConfig, Graph> getLoadedGraphs() {
             return graphsByName.values().stream().collect(Collectors.toMap(
-                GraphWithConfig::config, gwc -> gwc.graph().getUnion()
+                GraphWithConfig::config, GraphWithConfig::getGraph
             ));
         }
     }
 
-    @ValueClass
-    interface GraphWithConfig {
-        GraphsByRelationshipType graph();
-
-        GraphCreateConfig config();
-    }
 }

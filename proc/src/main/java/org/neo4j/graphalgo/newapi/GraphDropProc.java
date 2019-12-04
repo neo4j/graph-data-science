@@ -21,37 +21,32 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.neo4j.graphalgo.newapi.GraphCatalogProcs.HISTOGRAM_FIELD_NAME;
 
-public class GraphListProc extends BaseProc {
+public class GraphDropProc extends BaseProc {
 
-    @Procedure(name = "algo.beta.graph.list", mode = Mode.READ)
-    public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = "null") Object graphName) {
-        if (Objects.nonNull(graphName) && !(graphName instanceof String)) {
-            throw new IllegalArgumentException("`graphName` parameter must be a STRING");
-        }
+    // TODO: Add Description
+    @Procedure(name = "algo.beta.graph.drop", mode = Mode.READ)
+    public Stream<GraphInfo> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
+        CypherMapWrapper.failOnBlank("graphName", graphName);
 
         boolean computeHistogram = callContext.outputFields().anyMatch(HISTOGRAM_FIELD_NAME::equals);
-        Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries;
 
-        graphEntries = GraphCatalog.getLoadedGraphs(getUsername()).entrySet().stream();
-        if (!isEmpty((String)graphName)) {
-            // we should only list the provided graph
-            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
-        }
+        AtomicReference<GraphInfo> result = new AtomicReference<>();
+        GraphCatalog.remove(getUsername(), graphName, (removedGraph) -> {
+            result.set(new GraphInfo(removedGraph.config(), removedGraph.getGraph(), computeHistogram));
+        });
 
-        return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram));
+        return Stream.of(result.get());
     }
 
 }
