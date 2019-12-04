@@ -133,7 +133,7 @@ final class GenerateConfiguration {
         ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
         config.members().stream().map(member ->
             FieldSpec.builder(
-                member.typeSpec(),
+                member.typeSpecWithAnnotation(Nullable.class),
                 names.newName(member.methodName(), member),
                 Modifier.PRIVATE, Modifier.FINAL
             ).build()
@@ -227,13 +227,7 @@ final class GenerateConfiguration {
         }
         TypeMirror fieldType = definition.fieldType();
         if (fieldType.getKind() == TypeKind.DECLARED) {
-            boolean isNullable = fieldType
-                .getAnnotationMirrors()
-                .stream()
-                .anyMatch(am ->
-                    asType(am.getAnnotationType().asElement())
-                        .getQualifiedName()
-                        .contentEquals(Nullable.class.getName()));
+            boolean isNullable = !definition.member().annotations(Nullable.class).isEmpty();
 
             if (!isNullable) {
                 codeBlock = CodeBlock.of(
@@ -470,6 +464,7 @@ final class GenerateConfiguration {
     ) {
         ImmutableMemberDefinition.Builder builder = ImmutableMemberDefinition
             .builder()
+            .member(member)
             .fieldName(names.get(member))
             .configParamName(names.get(CONFIG_VAR))
             .configKey(member.lookupKey())
@@ -529,7 +524,7 @@ final class GenerateConfiguration {
     private Iterable<MethodSpec> defineGetters(ConfigParser.Spec config, NameAllocator names) {
         return config.members().stream().map(member -> MethodSpec
             .overriding(member.method())
-            .returns(member.typeSpec())
+            .returns(member.typeSpecWithAnnotation(Nullable.class))
             .addStatement("return this.$N", names.get(member))
             .build()
         ).collect(Collectors.toList());
@@ -563,6 +558,8 @@ final class GenerateConfiguration {
 
     @ValueClass
     interface MemberDefinition {
+        ConfigParser.Member member();
+
         TypeMirror fieldType();
 
         TypeMirror parameterType();

@@ -30,18 +30,24 @@ import org.neo4j.graphalgo.annotation.Configuration.Parameter;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import javax.annotation.processing.Messager;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
+import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -169,11 +175,26 @@ final class ConfigParser {
             return method().getSimpleName().toString();
         }
 
-        @Value.Derived
-        public TypeName typeSpec() {
+        public Set<AnnotationMirror> annotations(Class<? extends Annotation> annotationType) {
+            return Stream.concat(
+                method().getReturnType().getAnnotationMirrors().stream(),
+                method().getAnnotationMirrors().stream()
+            )
+                .filter(am ->
+                    asType(am.getAnnotationType().asElement())
+                        .getQualifiedName()
+                        .contentEquals(annotationType.getName()))
+                .distinct()
+                .collect(Collectors.toCollection(() -> new TreeSet<>(
+                    Comparator.comparing(am -> asType(am.getAnnotationType().asElement()).getQualifiedName().toString())
+                )));
+        }
+
+        public TypeName typeSpecWithAnnotation(Class<? extends Annotation> annotationType) {
+            Set<AnnotationMirror> annotations = annotations(annotationType);
             TypeName typeName = TypeName.get(method().getReturnType());
-            List<AnnotationSpec> annotationsToAddToType = method().getReturnType()
-                .getAnnotationMirrors().stream()
+            List<AnnotationSpec> annotationsToAddToType = annotations
+                .stream()
                 .map(AnnotationSpec::get)
                 .collect(Collectors.toList());
             return typeName.annotated(annotationsToAddToType);
