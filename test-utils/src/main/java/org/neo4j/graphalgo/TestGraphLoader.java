@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -116,6 +117,7 @@ public final class TestGraphLoader {
                     .collect(Collectors.joining(" OR ")))
                 .orElse("");
             // CypherNodeLoader not yet supports parsing node props from return items ...
+            nodeProperties = getUniquePropertyMappings(nodeProperties);
             String nodePropertiesString = getPropertiesString(nodeProperties, "n");
 
             String nodeQuery = String.format(nodeQueryTemplate, labelString, nodePropertiesString);
@@ -126,6 +128,7 @@ public final class TestGraphLoader {
                 : "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s";
 
             String relTypeString = maybeRelType.map(s -> ":" + s).orElse("");
+            relProperties = getUniquePropertyMappings(relProperties);
             String relPropertiesString = getPropertiesString(relProperties, "r");
 
             graphLoader.withRelationshipType(String.format(
@@ -144,12 +147,40 @@ public final class TestGraphLoader {
         return graphLoader;
     }
 
+    private PropertyMappings getUniquePropertyMappings(PropertyMappings propertyMappings) {
+        MutableInt mutableInt = new MutableInt(0);
+        return PropertyMappings.of(propertyMappings.stream()
+            .map(mapping -> PropertyMapping.of(
+                mapping.propertyKey,
+                addSuffix(mapping.neoPropertyKey, mutableInt.getAndIncrement()),
+                mapping.defaultValue,
+                mapping.deduplicationStrategy
+            ))
+            .toArray(PropertyMapping[]::new)
+        );
+    }
+
     private String getPropertiesString(PropertyMappings propertyMappings, String entityVar) {
         return propertyMappings.hasMappings()
             ? ", " + propertyMappings
             .stream()
-            .map(mapping -> String.format("%s.%s AS %s", entityVar, mapping.neoPropertyKey, mapping.propertyKey))
+            .map(mapping -> String.format(
+                "%s.%s AS %s",
+                entityVar,
+                removeSuffix(mapping.neoPropertyKey),
+                mapping.neoPropertyKey
+            ))
             .collect(Collectors.joining(", "))
             : "";
+    }
+
+    private static final String SUFFIX = "___";
+
+    private String addSuffix(String propertyKey, int id) {
+        return String.format("%s%s%d", propertyKey, SUFFIX, id);
+    }
+
+    private String removeSuffix(String propertyKey) {
+        return propertyKey.substring(0, propertyKey.indexOf(SUFFIX));
     }
 }

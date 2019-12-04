@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -848,7 +847,7 @@ class GraphLoadProcTest extends ProcTestBase {
         assertThat(root.getMessage(), containsString("Query must be read only. Query: "));
     }
 
-    @Disabled
+    @Test
     void shouldPreferRelationshipPropertiesForCypherLoading() {
         String nodeQuery = ALL_NODES_QUERY.replaceAll("'", "");
         String relationshipQuery = "MATCH (s)-[r:Z]->(t) RETURN id(s) AS source, id(t) AS target " +

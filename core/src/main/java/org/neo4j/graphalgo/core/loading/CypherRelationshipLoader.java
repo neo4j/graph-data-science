@@ -96,11 +96,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         this.propertyKeyIdsByName = dimensions
             .relProperties()
             .stream()
-            .collect(toMap(PropertyMapping::propertyKey, unused -> propertyKeyId.getAndIncrement()));
+            .collect(toMap(PropertyMapping::neoPropertyKey, unused -> propertyKeyId.getAndIncrement()));
         this.propertyDefaultValueByName = dimensions
             .relProperties()
             .stream()
-            .collect(toMap(PropertyMapping::propertyKey, PropertyMapping::defaultValue));
+            .collect(toMap(PropertyMapping::neoPropertyKey, PropertyMapping::defaultValue));
 
         // We can not rely on what the token store gives us.
         // We need to resolve the given property mappings
@@ -113,7 +113,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
                     propertyMapping.defaultValue,
                     propertyMapping.deduplicationStrategy
                 ))
-                .map(propertyMapping -> propertyMapping.resolveWith(propertyKeyIdsByName.get(propertyMapping.propertyKey)))
+                .map(propertyMapping -> propertyMapping.resolveWith(propertyKeyIdsByName.get(propertyMapping.neoPropertyKey)))
                 .toArray(PropertyMapping[]::new)))
             .build();
 
