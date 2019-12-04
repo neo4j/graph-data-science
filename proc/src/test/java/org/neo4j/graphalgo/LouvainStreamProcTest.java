@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.LouvainConfigBase;
-import org.neo4j.graphalgo.newapi.LouvainStreamConfig;
+import org.neo4j.graphalgo.louvain.LouvainConfigBase;
+import org.neo4j.graphalgo.louvain.LouvainStreamConfig;
 
 import java.util.ArrayList;
 import java.util.List;

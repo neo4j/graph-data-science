@@ -18,25 +18,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.newapi;
+package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.WriteConfig;
 
 import java.util.Optional;
 
 @ValueClass
-@Configuration("LouvainStreamConfigImpl")
-public interface LouvainStreamConfig extends LouvainConfigBase {
+@Configuration("LouvainWriteConfigImpl")
+public interface LouvainWriteConfig extends LouvainConfigBase, WriteConfig {
 
-    static LouvainStreamConfig of(
+    static LouvainWriteConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new LouvainStreamConfigImpl(
+        return new LouvainWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

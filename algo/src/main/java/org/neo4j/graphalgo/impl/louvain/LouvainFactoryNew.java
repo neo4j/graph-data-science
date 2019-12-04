@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimizationFactory;
-import org.neo4j.graphalgo.newapi.LouvainConfigBase;
+import org.neo4j.graphalgo.louvain.LouvainConfigBase;
 import org.neo4j.logging.Log;
 
 public class LouvainFactoryNew<CONFIG extends LouvainConfigBase> extends AlgorithmFactory<Louvain, CONFIG> {

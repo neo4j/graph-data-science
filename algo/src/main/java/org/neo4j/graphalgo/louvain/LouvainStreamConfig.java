@@ -18,45 +18,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.newapi;
+package org.neo4j.graphalgo.louvain;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
-public interface LouvainConfigBase extends
-    BaseAlgoConfig,
-    SeedConfig,
-    WeightConfig,
-    ToleranceConfig,
-    IterationsConfig {
+import java.util.Optional;
 
-    @Value.Default
-    @Override
-    default double tolerance() {
-        return 0.0001;
-    }
+@ValueClass
+@Configuration("LouvainStreamConfigImpl")
+public interface LouvainStreamConfig extends LouvainConfigBase {
 
-    @Value.Default
-    @Override
-    default int maxIterations() {
-        return 10;
-    }
-
-    @Value.Default
-    default int maxLevels() {
-        return 10;
-    }
-
-    @Value.Default
-    default boolean includeIntermediateCommunities() {
-        return false;
-    }
-
-    //TODO remove later
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return Direction.OUTGOING;
+    static LouvainStreamConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        return new LouvainStreamConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            config
+        );
     }
 }
