@@ -60,7 +60,7 @@ class RandomWalkLargeResultProcTest extends ProcTestBase {
 
     @Test
     void shouldHandleLargeResults() {
-        Result results = runQueryAndReturn("CALL algo.randomWalk.stream(null, 100, 100000)");
+        Result results = runQuery("CALL algo.randomWalk.stream(null, 100, 100000)");
         assertEquals(100000,Iterators.count(results));
     }
 }

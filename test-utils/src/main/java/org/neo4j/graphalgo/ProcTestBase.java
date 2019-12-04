@@ -85,43 +85,25 @@ public class ProcTestBase {
         return AuthSubject.ANONYMOUS.username();
     }
 
-    protected void runQuery(String query) {
-        runQuery(query, row -> {});
-    }
-
-    protected void runQuery(String query, Map<String, Object> params) {
-        runQuery(query, params, row -> {});
-    }
-
     protected void runQuery(String query, Consumer<Result.ResultRow> check) {
         runQuery(query, emptyMap(), check);
     }
 
-    protected void runQuery(String query, GraphDatabaseAPI db, Consumer<Result.ResultRow> check) {
-        runQuery(query, db, emptyMap(), check);
+    protected void runQuery(GraphDatabaseAPI db, String query, Consumer<Result.ResultRow> check) {
+        runQuery(db, query, emptyMap(), check);
     }
 
     protected void runQuery(String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
-        try (Result result = db.execute(query, params)) {
-            result.accept(row -> {
-                check.accept(row);
-                return true;
-            });
-        }
+        runQuery(db, query, params, check);
     }
 
     protected void runQuery(
-        String query,
         GraphDatabaseAPI db,
+        String query,
         Map<String, Object> params,
         Consumer<Result.ResultRow> check
     ) {
-        try (Result result = db.execute(query, params)) {
-            result.accept(row -> {
-                check.accept(row);
-                return true;
-            });
-        }
+        QueryRunner.runQuery(db, query, params, check);
     }
 
     protected void runQuery(
@@ -129,38 +111,33 @@ public class ProcTestBase {
         String query,
         Consumer<Result.ResultRow> check
     ) {
-        runQuery(username, query, emptyMap(), check);
+        runQuery(db, username, query, emptyMap(), check);
+    }
+
+    protected Result runQuery(
+        String username,
+        String query,
+        Map<String, Object> params
+    ) {
+        return QueryRunner.runQuery(db, username, query, params);
     }
 
     protected void runQuery(
+        GraphDatabaseAPI db,
         String username,
         String query,
         Map<String, Object> params,
         Consumer<Result.ResultRow> check
     ) {
-        try (KernelTransaction.Revertable ignored = withUsername(db.beginTx(), username)) {
-            Result result = db.execute(query, params);
-            result.accept(row -> {
-                check.accept(row);
-                return true;
-
-            });
-        }
+        QueryRunner.runQuery(db, username, query, params, check);
     }
 
-    protected Result runQueryAndReturn(String query) {
-        return runQueryAndReturn(query, emptyMap());
+    protected Result runQuery(String query) {
+        return runQuery(query, emptyMap());
     }
 
-    protected Result runQueryAndReturn(String query, Map<String, Object> params) {
-        return db.execute(query, params);
-    }
-
-    private KernelTransaction.Revertable withUsername(Transaction tx, String username) {
-        InternalTransaction topLevelTransaction = (InternalTransaction) tx;
-        AuthSubject subject = topLevelTransaction.securityContext().subject();
-        SecurityContext securityContext = new SecurityContext(new CustomUserNameAuthSubject(username, subject), READ);
-        return topLevelTransaction.overrideWith(securityContext);
+    protected Result runQuery(String query, Map<String, Object> params) {
+        return QueryRunner.runQuery(db, query, params);
     }
 
     protected void assertEmptyResult(String query) {
@@ -296,39 +273,4 @@ public class ProcTestBase {
         }
     }
 
-    private static class CustomUserNameAuthSubject implements AuthSubject {
-
-        private final String username;
-        private final AuthSubject authSubject;
-
-        CustomUserNameAuthSubject(String username, AuthSubject authSubject) {
-            this.username = username;
-            this.authSubject = authSubject;
-        }
-
-        @Override
-        public void logout() {
-            authSubject.logout();
-        }
-
-        @Override
-        public AuthenticationResult getAuthenticationResult() {
-            return authSubject.getAuthenticationResult();
-        }
-
-        @Override
-        public void setPasswordChangeNoLongerRequired() {
-            authSubject.setPasswordChangeNoLongerRequired();
-        }
-
-        @Override
-        public boolean hasUsername(String username) {
-            return this.username.equals(username);
-        }
-
-        @Override
-        public String username() {
-            return username;
-        }
-    }
 }

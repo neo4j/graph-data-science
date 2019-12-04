@@ -237,7 +237,7 @@ class LabelPropagationDeprecatedProcTest extends ProcTestBase {
 
         // (c) will get seed 1
         // (d) will get seed id(d) + 1
-        Result initResult = runQueryAndReturn(query, Collections.singletonMap("seed", seededLabel));
+        Result initResult = runQuery(query, Collections.singletonMap("seed", seededLabel));
         long maxId = Iterators.single(initResult.<Number>columnAs("maxId")).longValue();
 
         String lpa = "CALL algo.labelPropagation.stream(" +

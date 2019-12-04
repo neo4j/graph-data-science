@@ -62,7 +62,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testUnionFindMSColoringStream() {
-        Result result = runQueryAndReturn("CALL algo.unionFind.mscoloring.stream('', '',{graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.unionFind.mscoloring.stream('', '',{graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -73,7 +73,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testStronglyConnectedComponentsStream() {
-        Result result = runQueryAndReturn("CALL algo.scc.stream('', '',{graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.scc.stream('', '',{graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -84,7 +84,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testStronglyConnectedComponentsMultiStepStream() {
-        Result result = runQueryAndReturn("CALL algo.scc.stream('', '',{graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.scc.stream('', '',{graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -100,25 +100,25 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testStronglyConnectedComponentsTunedTarjanStream() {
-        Result result = runQueryAndReturn("CALL algo.scc.recursive.tunedTarjan.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.scc.recursive.tunedTarjan.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
     void testForwardBackwardStronglyConnectedComponentsStream() {
-        Result result = runQueryAndReturn("CALL algo.scc.forwardBackward.stream(0, '', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.scc.forwardBackward.stream(0, '', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
     void testAllShortestPathsStream() {
-        Result result = runQueryAndReturn("CALL algo.allShortestPaths.stream('',{graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.allShortestPaths.stream('',{graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
     void testBetweennessCentralityStream() {
-        Result result = runQueryAndReturn("CALL algo.betweenness.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.betweenness.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -129,7 +129,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testSampledBetweennessCentralityStream() {
-        Result result = runQueryAndReturn("CALL algo.betweenness.sampled.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.betweenness.sampled.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -140,7 +140,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testClosenessCentralityStream() {
-        Result result = runQueryAndReturn("CALL algo.closeness.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.closeness.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -151,7 +151,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testTriangleCountStream() {
-        Result result = runQueryAndReturn("CALL algo.triangleCount.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.triangleCount.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -162,13 +162,13 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testTriangleStream() {
-        Result result = runQueryAndReturn("CALL algo.triangle.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.triangle.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
     void testDangelchevCentralityStream() {
-        Result result = runQueryAndReturn("CALL algo.closeness.dangalchev.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.closeness.dangalchev.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -179,7 +179,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testHarmonicCentralityStream() {
-        Result result = runQueryAndReturn("CALL algo.closeness.harmonic.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.closeness.harmonic.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -220,13 +220,13 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testShortestPathAStarStream() {
-        Result result = runQueryAndReturn("CALL algo.shortestPath.astar.stream(null, null, '', '', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.shortestPath.astar.stream(null, null, '', '', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
     void testShortestPathStream() {
-        Result result = runQueryAndReturn("CALL algo.shortestPath.stream(null, null, '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.shortestPath.stream(null, null, '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -237,7 +237,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testShortestPathsStream() {
-        Result result = runQueryAndReturn("CALL algo.shortestPaths.stream(null, '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.shortestPaths.stream(null, '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -253,7 +253,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     void testShortestPathsDeltaSteppingStream() {
-        Result result = runQueryAndReturn("CALL algo.shortestPath.deltaStepping.stream(null, '', 0, {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.shortestPath.deltaStepping.stream(null, '', 0, {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 

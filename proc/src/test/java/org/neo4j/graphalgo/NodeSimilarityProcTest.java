@@ -138,7 +138,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
                        ") YIELD node1, node2, similarity";
 
         Collection<String> result = new HashSet<>();
-        runQuery(query, db, MapUtil.map("graph", graphImpl, "direction", direction.name()),
+        runQuery(query, MapUtil.map("graph", graphImpl, "direction", direction.name()),
                 row -> {
                     long node1 = row.getNumber("node1").longValue();
                     long node2 = row.getNumber("node2").longValue();
@@ -167,7 +167,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
                        ") YIELD node1, node2, similarity";
 
         Collection<String> result = new HashSet<>();
-        runQuery(query, db, MapUtil.map("graph", graphImpl, "direction", direction.name(), "topN", topN),
+        runQuery(query, MapUtil.map("graph", graphImpl, "direction", direction.name(), "topN", topN),
             row -> {
                 long node1 = row.getNumber("node1").longValue();
                 long node2 = row.getNumber("node2").longValue();
@@ -209,7 +209,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
                        ") YIELD node1, node2, similarity";
 
         Collection<String> result = new HashSet<>();
-        runQuery(query, db, MapUtil.map("graph", graphImpl, "direction", direction.name()),
+        runQuery(query, MapUtil.map("graph", graphImpl, "direction", direction.name()),
             row -> {
                 long node1 = row.getNumber("node1").longValue();
                 long node2 = row.getNumber("node2").longValue();

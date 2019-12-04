@@ -73,7 +73,7 @@ class AdamicAdarProcTest extends ProcTestBase {
                 "       1/log(3) AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
-            Result result = runQueryAndReturn(controlQuery);
+            Result result = runQuery(controlQuery);
             Map<String, Object> node = result.next();
             assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
         }
@@ -89,7 +89,7 @@ class AdamicAdarProcTest extends ProcTestBase {
                         "1/log(2) AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
-            Result result = runQueryAndReturn(controlQuery);
+            Result result = runQuery(controlQuery);
             Map<String, Object> node = result.next();
             assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
         }
@@ -104,7 +104,7 @@ class AdamicAdarProcTest extends ProcTestBase {
                         "       1/log(2) + 1/log(2) AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
-            Result result = runQueryAndReturn(controlQuery);
+            Result result = runQuery(controlQuery);
             Map<String, Object> node = result.next();
             assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
         }
@@ -119,7 +119,7 @@ class AdamicAdarProcTest extends ProcTestBase {
                         "       0.0 AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
-            Result result = runQueryAndReturn(controlQuery);
+            Result result = runQuery(controlQuery);
             Map<String, Object> node = result.next();
             assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
         }
@@ -134,7 +134,7 @@ class AdamicAdarProcTest extends ProcTestBase {
                         "       0.0 AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
-            Result result = runQueryAndReturn(controlQuery);
+            Result result = runQuery(controlQuery);
             Map<String, Object> node = result.next();
             assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
         }

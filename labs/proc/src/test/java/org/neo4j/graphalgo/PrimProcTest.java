@@ -86,7 +86,7 @@ public class PrimProcTest extends ProcTestBase {
             assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
         });
 
-        final long relCount = runQueryAndReturn("MATCH (a)-[:MST]->(b) RETURN id(a) as a, id(b) as b")
+        final long relCount = runQuery("MATCH (a)-[:MST]->(b) RETURN id(a) as a, id(b) as b")
                 .stream()
                 .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
                 .count();
@@ -110,7 +110,7 @@ public class PrimProcTest extends ProcTestBase {
             assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
         });
 
-        final long relCount = runQueryAndReturn("MATCH (a)-[:MAX]->(b) RETURN id(a) as a, id(b) as b")
+        final long relCount = runQuery("MATCH (a)-[:MAX]->(b) RETURN id(a) as a, id(b) as b")
                 .stream()
                 .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
                 .count();

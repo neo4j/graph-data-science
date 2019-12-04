@@ -23,10 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.io.IOException;
 
@@ -35,7 +33,7 @@ class InfoMapYelpTest extends ProcTestBase {
     @BeforeEach
     void setUp() throws IOException, KernelException {
         db = LdbcDownloader.openDb("Yelp");
-        Procedures proceduresService = ((GraphDatabaseAPI) db).getDependencyResolver().resolveDependency(Procedures.class);
+        Procedures proceduresService = db.getDependencyResolver().resolveDependency(Procedures.class);
         proceduresService.registerProcedure(InfoMapProc.class, true);
     }
 

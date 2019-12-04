@@ -80,7 +80,7 @@ class IsFiniteFuncTest extends ProcTestBase {
 
     @Test
     void testInfinityAndNaN() {
-        double[] actual = runQueryAndReturn(
+        double[] actual = runQuery(
                 "WITH [42, algo.Infinity(), 13.37, 0, algo.NaN(), 1.7976931348623157e308, -13] AS values RETURN filter(x IN values WHERE algo.isFinite(x)) as xs")
                 .<List<Number>>columnAs("xs")
                 .stream()
@@ -100,7 +100,7 @@ class IsFiniteFuncTest extends ProcTestBase {
 
     private boolean call(Number value, String fun) {
         String query = "RETURN " + fun + "($value) as x";
-        return runQueryAndReturn(query, singletonMap("value", value))
+        return runQuery(query, singletonMap("value", value))
                 .<Boolean>columnAs("x")
                 .stream()
                 .allMatch(Boolean::valueOf);

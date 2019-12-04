@@ -87,7 +87,7 @@ class LouvainDocTest extends ProcTestBase {
             "+-------------------------------------+\n" +
             "6 rows\n";
 
-        String actual = runQueryAndReturn(query).resultAsString();
+        String actual = runQuery(query).resultAsString();
 
         assertEquals(expected, actual);
     }
@@ -109,7 +109,7 @@ class LouvainDocTest extends ProcTestBase {
             "+------------------------------------------------------------+\n" +
             "1 row\n";
 
-        String actual = runQueryAndReturn(query).resultAsString();
+        String actual = runQuery(query).resultAsString();
 
         assertEquals(expected, actual);
     }
@@ -138,7 +138,7 @@ class LouvainDocTest extends ProcTestBase {
             "+-------------------------------------+\n" +
             "6 rows\n";
 
-        String actual = runQueryAndReturn(query).resultAsString();
+        String actual = runQuery(query).resultAsString();
 
         assertEquals(expected, actual);
     }
@@ -167,7 +167,7 @@ class LouvainDocTest extends ProcTestBase {
             "+-------------------------------------+\n" +
             "6 rows\n";
 
-        String actual = runQueryAndReturn(query).resultAsString();
+        String actual = runQuery(query).resultAsString();
 
         assertEquals(expected, actual);
     }
@@ -251,7 +251,7 @@ class LouvainDocTest extends ProcTestBase {
             "+--------------------------------+\n" +
             "15 rows\n";
 
-        String actual = runQueryAndReturn(query).resultAsString();
+        String actual = runQuery(query).resultAsString();
 
         assertEquals(expected, actual);
     }

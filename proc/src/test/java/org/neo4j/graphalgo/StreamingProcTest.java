@@ -66,7 +66,7 @@ public class StreamingProcTest extends ProcTestBase {
                 "    graph: 'cypher'" +
                 "  })",
                 proc, nodeQuery, relQuery);
-        QueryExecutionException ex = assertThrows(QueryExecutionException.class, () -> runQueryAndReturn(query).hasNext());
+        QueryExecutionException ex = assertThrows(QueryExecutionException.class, () -> runQuery(query).hasNext());
         Throwable root = ExceptionUtil.rootCause(ex);
         assertTrue(root instanceof IllegalArgumentException);
         assertThat(root.getMessage(), containsString("Query must be read only. Query: "));

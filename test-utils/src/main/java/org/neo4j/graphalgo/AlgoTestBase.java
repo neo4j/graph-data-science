@@ -22,30 +22,26 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collections;
 import java.util.function.Consumer;
 
 public class AlgoTestBase {
 
     public GraphDatabaseAPI db;
 
-    protected void runQuery(String query) {
-        runQuery(query, row -> {});
+    protected Result runQuery(String query) {
+        return runQuery(db, query);
     }
 
     protected void runQuery(String query, Consumer<Result.ResultRow> check) {
         runQuery(db, query, check);
     }
 
-    protected void runQuery(GraphDatabaseAPI db, String query) {
-        runQuery(db, query, row -> {});
+    protected Result runQuery(GraphDatabaseAPI db, String query) {
+        return QueryRunner.runQuery(db, query);
     }
 
     protected void runQuery(GraphDatabaseAPI db, String query, Consumer<Result.ResultRow> check) {
-        try (Result result = db.execute(query)) {
-            result.accept(row -> {
-                check.accept(row);
-                return true;
-            });
-        }
+        QueryRunner.runQuery(db, query, check);
     }
 }

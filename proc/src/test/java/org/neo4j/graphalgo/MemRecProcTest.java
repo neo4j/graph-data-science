@@ -143,7 +143,7 @@ class MemRecProcTest extends ProcTestBase {
         String query = String.format(queryTemplate, s);
 
         try {
-            runQueryAndReturn(query).resultAsString();
+            runQuery(query).resultAsString();
             expectedMessage.ifPresent(value -> fail("Call should have failed with " + value));
         } catch (QueryExecutionException e) {
             if (expectedMessage.isPresent()) {
@@ -175,7 +175,7 @@ class MemRecProcTest extends ProcTestBase {
                                    "})" +
                                    " YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax";
 
-        Map<String, Object> memRecOnLoadedGraph = runQueryAndReturn(loadedMemRecQuery, parameters).next();
+        Map<String, Object> memRecOnLoadedGraph = runQuery(loadedMemRecQuery, parameters).next();
 
         parameters.put("nodeCount", NODE_COUNT);
         parameters.put("relationshipCount", RELATIONSHIP_COUNT);
@@ -185,7 +185,7 @@ class MemRecProcTest extends ProcTestBase {
                                   " relationshipProperties: $relationshipProperties, nodeProperties: $nodeProperties" +
                                   " }) " +
                                   "YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax";
-        Map<String, Object> memRecOnStats = runQueryAndReturn(nonExistingGraph, parameters).next();
+        Map<String, Object> memRecOnStats = runQuery(nonExistingGraph, parameters).next();
 
         assertEquals(memRecOnLoadedGraph, memRecOnStats);
     }

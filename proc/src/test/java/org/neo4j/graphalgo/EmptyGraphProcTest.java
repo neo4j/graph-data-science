@@ -52,7 +52,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     public void testUnionFindStream() {
-        Result result = runQueryAndReturn("CALL algo.unionFind.stream('', '',{graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.unionFind.stream('', '',{graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -66,7 +66,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     public void testWCCStream() {
-        Result result = runQueryAndReturn("CALL algo.beta.wcc.stream('', '',{graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.beta.wcc.stream('', '',{graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -80,7 +80,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     public void testLabelPropagationStream() {
-        Result result = runQueryAndReturn("CALL algo.labelPropagation.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.labelPropagation.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -105,7 +105,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     public void testLouvainStream() {
-        Result result = runQueryAndReturn("CALL algo.louvain.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.louvain.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
@@ -119,7 +119,7 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     public void testPageRankStream() {
-        Result result = runQueryAndReturn("CALL algo.pageRank.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL algo.pageRank.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 

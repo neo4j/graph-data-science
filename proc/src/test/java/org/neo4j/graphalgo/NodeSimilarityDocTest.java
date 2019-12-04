@@ -91,7 +91,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
                                 "+----------------------------------------+\n" +
                                 "10 rows\n";
 
-        assertEquals(expectedString, runQueryAndReturn(query).resultAsString());
+        assertEquals(expectedString, runQuery(query).resultAsString());
     }
 
     @Test
@@ -109,7 +109,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
                                 "+-------------------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
-        assertEquals(expectedString, runQueryAndReturn(query).resultAsString());
+        assertEquals(expectedString, runQuery(query).resultAsString());
 
     }
 
@@ -134,7 +134,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
                                 "+----------------------------------------+\n" +
                                 "3 rows\n";
 
-        assertEquals(expectedString, runQueryAndReturn(query).resultAsString());
+        assertEquals(expectedString, runQuery(query).resultAsString());
     }
 
     @Test
@@ -158,7 +158,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
                                 "+----------------------------------------+\n" +
                                 "4 rows\n";
 
-        assertEquals(expectedString, runQueryAndReturn(query).resultAsString());
+        assertEquals(expectedString, runQuery(query).resultAsString());
     }
 
     @Test
@@ -183,7 +183,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
                                 "4 rows\n";
 
 
-        assertEquals(expectedString, runQueryAndReturn(query).resultAsString());
+        assertEquals(expectedString, runQuery(query).resultAsString());
     }
 
     @Test
@@ -205,7 +205,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
                                 "+--------------------------------+\n" +
                                 "2 rows\n";
 
-        assertEquals(expectedString, runQueryAndReturn(query).resultAsString());
+        assertEquals(expectedString, runQuery(query).resultAsString());
     }
 
     @Test
@@ -231,6 +231,6 @@ class NodeSimilarityDocTest extends ProcTestBase {
                                 "+----------------------------------------+\n" +
                                 "6 rows\n";
 
-        assertEquals(expectedString, runQueryAndReturn(query).resultAsString());
+        assertEquals(expectedString, runQuery(query).resultAsString());
     }
 }

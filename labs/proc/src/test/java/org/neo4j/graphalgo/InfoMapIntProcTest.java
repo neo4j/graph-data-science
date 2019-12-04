@@ -126,7 +126,9 @@ class InfoMapIntProcTest extends ProcTestBase {
 
     @Test
     void testPredefinedArticleRankStream() {
-        runQuery("CALL algo.articleRank('Node', 'TYPE', {writeProperty:'p', iterations:1}) YIELD nodes");
+        // TODO: This test fails if we don't pass in a consumer.
+        //       This is true also if we execute the query with `db.execute` directly.
+        runQuery("CALL algo.articleRank('Node', 'TYPE', {writeProperty:'p', iterations:1}) YIELD nodes", row -> {});
 
         final BitSet bitSet = new BitSet(8);
 

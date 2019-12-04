@@ -148,7 +148,7 @@ class ListProcTest extends ProcTestBase {
         String query = "CALL algo.list()";
         assertEquals(
             ALL,
-            runQueryAndReturn(query)
+            runQuery(query)
                 .<String>columnAs("name")
                 .stream()
                 .collect(Collectors.toList())
@@ -157,7 +157,7 @@ class ListProcTest extends ProcTestBase {
 
     private List<String> listProcs(Object name) {
         String query = "CALL algo.list($name)";
-        return runQueryAndReturn(query, MapUtil.map("name", name))
+        return runQuery(query, MapUtil.map("name", name))
             .<String>columnAs("name")
             .stream()
             .collect(Collectors.toList());
