@@ -120,7 +120,9 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
             dimensions
         );
 
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = relationshipLoader.load();
+        Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>> result = relationshipLoader.load();
+
+        GraphDimensions resultDimensions = result.getLeft();
 
         return relationshipLoader.allBuilders().entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().typeName(),
@@ -139,9 +141,9 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
                 AdjacencyOffsets inAdjacencyOffsets = incomingRelationshipsBuilder != null
                     ? incomingRelationshipsBuilder.globalAdjacencyOffsets : null;
 
-                long relationshipCount = relationshipCounts.getOrDefault(entry.getKey(), 0L);
+                long relationshipCount = result.getRight().getOrDefault(entry.getKey(), 0L);
 
-                if (!dimensions.relProperties().hasMappings()) {
+                if (!resultDimensions.relProperties().hasMappings()) {
                     HugeGraph graph = HugeGraph.create(
                         tracker,
                         idsAndProperties.hugeIdMap,
@@ -155,7 +157,7 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
                     );
                     return Collections.singletonMap("", graph);
                 } else {
-                    return dimensions.relProperties().enumerate().map(propertyEntry -> {
+                    return resultDimensions.relProperties().enumerate().map(propertyEntry -> {
                         int weightIndex = propertyEntry.getKey();
                         PropertyMapping property = propertyEntry.getValue();
                         HugeGraph graph = create(

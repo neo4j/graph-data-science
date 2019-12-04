@@ -44,12 +44,14 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.NONE;
 
-class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<RelationshipTypeMapping>> {
+class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>>> {
 
     private final IdMap idMap;
     private final Context loaderContext;
     private final GraphDimensions outerDimensions;
     private final boolean hasExplicitPropertyMappings;
+    private final DeduplicationStrategy globalDeduplicationStrategy;
+    private final double globalDefaultPropertyValue;
 
     // Property mappings are either defined upfront in
     // the procedure configuration or during load time
@@ -61,6 +63,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
     private double[] propertyDefaultValues;
     private DeduplicationStrategy[] deduplicationStrategies;
     private boolean initializedFromResult;
+
+    private GraphDimensions resultDimensions;
 
     private final Map<RelationshipTypeMapping, LongAdder> allRelationshipCounters;
 
@@ -76,7 +80,13 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
         this.loaderContext = new Context();
 
         this.outerDimensions = dimensions;
+        this.resultDimensions = dimensions;
         this.hasExplicitPropertyMappings = dimensions.relProperties().hasMappings();
+
+        this.globalDeduplicationStrategy = setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
+            ? NONE
+            : setup.deduplicationStrategy();
+        this.globalDefaultPropertyValue = setup.relationshipDefaultPropertyValue().orElse(Double.NaN);
 
         initFromDimension(dimensions);
     }
@@ -99,7 +109,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
         this.propertyDefaultValues = dimensions.relProperties().allDefaultWeights();
 
         this.deduplicationStrategies = getDeduplicationStrategies(dimensions);
-
     }
 
     @Override
@@ -118,7 +127,12 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
 
             PropertyMapping[] propertyMappings = propertyColumns
                 .stream()
-                .map(propertyColumn -> PropertyMapping.of(propertyColumn, propertyColumn, 0D, NONE))
+                .map(propertyColumn -> PropertyMapping.of(
+                    propertyColumn,
+                    propertyColumn,
+                    globalDefaultPropertyValue,
+                    globalDeduplicationStrategy
+                ))
                 .toArray(PropertyMapping[]::new);
 
             GraphDimensions innerDimensions = new GraphDimensions.Builder(outerDimensions)
@@ -126,6 +140,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
                 .build();
 
             initFromDimension(innerDimensions);
+
+            resultDimensions = innerDimensions;
             initializedFromResult = true;
         }
 
@@ -153,7 +169,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
     void updateCounts(BatchLoadResult result) { }
 
     @Override
-    ObjectLongMap<RelationshipTypeMapping> result() {
+    Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>> result() {
         List<Runnable> flushTasks = loaderContext.importerBuildersByType
             .values()
             .stream()
@@ -164,7 +180,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
 
         ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(allRelationshipCounters.size());
         allRelationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
-        return relationshipCounters;
+        return Pair.of(resultDimensions, relationshipCounters);
     }
 
     Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders() {
@@ -182,11 +198,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
             .toArray(DeduplicationStrategy[]::new);
         // TODO: backwards compat code
         if (deduplicationStrategies.length == 0) {
-            DeduplicationStrategy deduplicationStrategy =
-                setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
-                    ? NONE
-                    : setup.deduplicationStrategy();
-            deduplicationStrategies = new DeduplicationStrategy[]{deduplicationStrategy};
+            deduplicationStrategies = new DeduplicationStrategy[]{globalDeduplicationStrategy};
         }
         return deduplicationStrategies;
     }
