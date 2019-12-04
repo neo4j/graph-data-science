@@ -21,11 +21,12 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 
 public interface WeightConfig {
 
     @Value.Default
-    default String weightProperty() {
+    default @Nullable String weightProperty() {
         return null;
     }
 }
