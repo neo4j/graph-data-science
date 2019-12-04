@@ -18,40 +18,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.newapi;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.BaseConfigTests;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
-import org.neo4j.graphalgo.newapi.SeedConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public interface SeedConfigTests<CONFIG extends SeedConfig & BaseAlgoConfig> extends BaseConfigTests<CONFIG> {
-
+public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig> extends BaseConfigTests<CONFIG> {
     @Test
-    default void testDefaultSeedPropertyIsNull() {
+    default void testDefaultWeightPropertyIsNull() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.empty();
         CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
-        assertNull(config.seedProperty());
+        assertNull(config.weightProperty());
     }
 
     @Test
-    default void testSeedPropertyFromConfig() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", "foo"));
+    default void testWeightPropertyFromConfig() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("weightProperty", "weight"));
         CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
-        assertEquals("foo", config.seedProperty());
+        assertEquals("weight", config.weightProperty());
     }
 
     @ParameterizedTest
     @MethodSource("emptyStringPropertyValues")
-    default void testEmptySeedPropertyValues(String seedPropertyParameter) {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", seedPropertyParameter));
+    default void testEmptyWeightPropertyValues(String weightPropertyParameter) {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("weightProperty", weightPropertyParameter));
         CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
-        assertNull(config.seedProperty());
+        assertNull(config.weightProperty());
     }
 }

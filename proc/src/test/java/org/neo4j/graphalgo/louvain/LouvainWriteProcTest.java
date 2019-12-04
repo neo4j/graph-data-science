@@ -17,20 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.louvain;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.WriteConfigTests;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
-import org.neo4j.graphalgo.louvain.LouvainConfigBase;
-import org.neo4j.graphalgo.louvain.LouvainProc;
-import org.neo4j.graphalgo.louvain.LouvainWriteConfig;
-import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
@@ -58,8 +56,12 @@ import static org.neo4j.graphalgo.louvain.LouvainProc.INNER_ITERATIONS_KEY;
 import static org.neo4j.graphalgo.louvain.LouvainProc.LEVELS_KEY;
 
 class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> implements
-    WriteConfigTests<LouvainWriteConfig>,
-    BaseProcWriteTests<LouvainWriteProc, Louvain, LouvainWriteConfig> {
+    WriteConfigTests<LouvainWriteConfig> {
+
+    @Override
+    public Class<? extends BaseAlgoProc<?, ?, LouvainWriteConfig>> getProcedureClazz() {
+        return LouvainWriteProc.class;
+    }
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("graphVariations")
@@ -167,6 +169,7 @@ class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> imple
         assertWriteResult(RESULT, writeProperty);
     }
 
+    // TODO: add a variation of the below with non-defaults
     @Test
     void testCreateConfigWithDefaults() {
         LouvainConfigBase louvainConfig = LouvainWriteConfig.of(
@@ -200,16 +203,6 @@ class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> imple
         return mapWrapper;
     }
 
-    @Override
-    public GraphDatabaseAPI graphDb() {
-        return db;
-    }
-
-    @Override
-    public LouvainWriteProc createProcedure() {
-        return new LouvainWriteProc();
-    }
-
     @AllGraphNamesTest
     void testOverwritingDefaults(String graphImpl) {
         Map<String, Object> config = MapUtil.map(
@@ -219,74 +212,6 @@ class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> imple
             INNER_ITERATIONS_KEY, 42,
             TOLERANCE_KEY, 0.42,
             SEED_PROPERTY_KEY, "foobar"
-        );
-
-        getAlgorithmFactory(
-            LouvainProc.class,
-            db,
-            "", "",
-            config,
-            (LouvainFactory factory) -> {
-                assertTrue(factory.config.includeIntermediateCommunities);
-                assertEquals(42, factory.config.maxLevel);
-                assertEquals(42, factory.config.maxInnerIterations);
-                assertEquals(0.42, factory.config.tolerance);
-                assertEquals("foobar", factory.config.maybeSeedPropertyKey.orElse("not_set"));
-            }
-        );
-    }
-
-    @AllGraphNamesTest
-    void testGraphLoaderDefaults(String graphImpl) {
-        getGraphSetup(
-            LouvainProc.class,
-            db,
-            "", "",
-            MapUtil.map(
-                GRAPH_IMPL_KEY, graphImpl
-            ),
-            setup -> {
-                assertTrue(setup.loadAnyLabel());
-                assertEquals(Direction.BOTH, setup.direction());
-                assertFalse(setup.nodePropertyMappings().head().isPresent());
-                assertFalse(setup.relationshipPropertyMappings().head().isPresent());
-            }
-        );
-    }
-
-    @AllGraphNamesTest
-    void testGraphLoaderWithSeeding(String graphImpl) {
-        getGraphSetup(
-            LouvainProc.class,
-            db,
-            "", "",
-            MapUtil.map(
-                GRAPH_IMPL_KEY, graphImpl,
-                SEED_PROPERTY_KEY, "foobar"
-            ),
-            setup -> {
-                PropertyMapping propertyMapping = setup.nodePropertyMappings().head().get();
-                assertEquals("foobar", propertyMapping.neoPropertyKey());
-                assertEquals("foobar", propertyMapping.propertyKey());
-            }
-        );
-    }
-
-    @AllGraphNamesTest
-    void testGraphLoaderWithWeight(String graphImpl) {
-        getGraphSetup(
-            LouvainProc.class,
-            db,
-            "", "",
-            MapUtil.map(
-                GRAPH_IMPL_KEY, graphImpl,
-                DEPRECATED_RELATIONSHIP_PROPERTY_KEY, "foobar"
-            ),
-            setup -> {
-                PropertyMapping propertyMapping = setup.relationshipPropertyMappings().head().get();
-                assertEquals("foobar", propertyMapping.neoPropertyKey());
-                assertEquals("foobar", propertyMapping.propertyKey());
-            }
         );
     }
 

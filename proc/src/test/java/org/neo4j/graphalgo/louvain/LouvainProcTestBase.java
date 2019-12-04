@@ -17,18 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.louvain;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.graphalgo.BaseConfigTests;
+import org.neo4j.graphalgo.GraphLoadProc;
+import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.ProcTestBaseExtensions;
+import org.neo4j.graphalgo.SeedConfigTests;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.louvain.LouvainConfigBase;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.IterationsConfigTest;
+import org.neo4j.graphalgo.newapi.WeightConfigTest;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,8 +47,11 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class LouvainProcTestBase<CONFIG extends LouvainConfigBase> extends ProcTestBase implements
-    ProcTestBaseExtensions,
-    SeedConfigTests<CONFIG>
+    BaseConfigTests<CONFIG>,
+    SeedConfigTests<CONFIG>,
+    IterationsConfigTest<CONFIG>,
+    WeightConfigTest<CONFIG>,
+    ToleranceConfigTest<CONFIG>
 {
 
     static final List<List<Long>> RESULT = Arrays.asList(
@@ -46,6 +59,11 @@ abstract class LouvainProcTestBase<CONFIG extends LouvainConfigBase> extends Pro
         Arrays.asList(6L, 7L, 8L),
         Arrays.asList(9L, 10L, 11L, 12L, 13L)
     );
+
+    @Override
+    public GraphDatabaseAPI graphDb() {
+        return db;
+    }
 
     @BeforeEach
     void setupGraph() throws KernelException {

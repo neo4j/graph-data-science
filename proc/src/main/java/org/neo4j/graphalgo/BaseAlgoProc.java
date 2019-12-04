@@ -51,7 +51,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         return this.getClass().getSimpleName();
     }
 
-    protected abstract CONFIG newConfig(
+    public abstract CONFIG newConfig(
         Optional<String> graphName,
         CypherMapWrapper config
     );

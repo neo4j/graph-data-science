@@ -22,13 +22,14 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.helpers.collection.MapUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public interface WriteConfigTests<CONFIG extends WriteConfig> extends BaseConfigTests<CONFIG> {
+public interface WriteConfigTests<CONFIG extends WriteConfig & BaseAlgoConfig> extends BaseConfigTests<CONFIG> {
 
     @Test
     default void testMissingWritePropertyFails() {

@@ -18,13 +18,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.newapi;
 
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
-import org.neo4j.graphalgo.newapi.WriteConfig;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseConfigTests;
+import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-public interface BaseProcWriteTests<PROC extends BaseAlgoProc<ALGO, ?, CONFIG>, ALGO extends Algorithm<ALGO, ?>, CONFIG extends BaseAlgoConfig & WriteConfig> {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    PROC createProcedure();
+public interface IterationsConfigTest <CONFIG extends IterationsConfig & BaseAlgoConfig> extends BaseConfigTests<CONFIG>{
+    @Test
+    default void testIterationsPropertyFromConfig() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("maxIterations", 42));
+        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        assertEquals(42, config.maxIterations());
+    }
 }

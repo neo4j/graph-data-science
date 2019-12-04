@@ -63,7 +63,7 @@ public class ProcTestBase {
         GraphCatalog.removeAllLoadedGraphs();
     }
 
-    void registerFunctions(Class<?>... functionClasses) throws KernelException {
+    protected void registerFunctions(Class<?>... functionClasses) throws KernelException {
         Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
         for (Class<?> clazz : functionClasses) {
             procedures.registerFunction(clazz);

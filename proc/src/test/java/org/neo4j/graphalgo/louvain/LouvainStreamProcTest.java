@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.louvain;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.louvain.LouvainConfigBase;
-import org.neo4j.graphalgo.louvain.LouvainStreamConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
 class LouvainStreamProcTest extends LouvainProcTestBase<LouvainStreamConfig> {
+    @Override
+    public Class<? extends BaseAlgoProc<?, ?, LouvainStreamConfig>> getProcedureClazz() {
+        return LouvainStreamProc.class;
+    }
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("graphVariations")

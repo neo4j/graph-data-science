@@ -21,26 +21,69 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.SeedConfig;
+import org.neo4j.graphalgo.core.utils.TransactionWrapper;
+import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public interface BaseConfigTests<CONFIG> {
+public interface BaseConfigTests<CONFIG extends BaseAlgoConfig> {
 
     static Stream<String> emptyStringPropertyValues() {
         return Stream.of(null, "");
     }
 
+    Class<? extends BaseAlgoProc<?, ?, CONFIG>> getProcedureClazz();
+
+    GraphDatabaseAPI graphDb();
+
     CONFIG createConfig(CypherMapWrapper mapWrapper);
 
     default CypherMapWrapper createMinimallyValidConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper;
+    }
+
+    default void applyOnProcedure(
+        Consumer<? super BaseAlgoProc<?, ?, CONFIG>> func
+    ) {
+        new TransactionWrapper(graphDb()).accept((tx -> {
+            BaseAlgoProc<?, ?, CONFIG> proc;
+            try {
+                proc = getProcedureClazz().newInstance();
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException("Could not instantiate Procedure Class " + getProcedureClazz().getSimpleName());
+            }
+
+            proc.transaction = tx;
+            proc.api = graphDb();
+            proc.callContext = ProcedureCallContext.EMPTY;
+            proc.log = new TestLog();
+
+            func.accept(proc);
+        }));
+    }
+
+    @Test
+    default void testImplicitGraphLoading() {
+        CypherMapWrapper wrapper = createMinimallyValidConfig(CypherMapWrapper.empty());
+        applyOnProcedure(proc -> {
+            CONFIG config = proc.newConfig(Optional.empty(), wrapper);
+            assertEquals(Optional.empty(), config.graphName());
+            Optional<GraphCreateConfig> maybeGraphCreateConfig = config.implicitCreateConfig();
+            assertTrue(maybeGraphCreateConfig.isPresent());
+            GraphCreateConfig graphCreateConfig = maybeGraphCreateConfig.get();
+            graphCreateConfig = ImmutableGraphCreateConfig.copyOf(graphCreateConfig);
+            assertEquals(GraphCreateConfig.emptyWithName("", ""), graphCreateConfig);
+        });
     }
 }

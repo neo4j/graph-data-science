@@ -104,7 +104,7 @@ public abstract class LegacyBaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT>
     }
 
     @Override
-    protected ProcedureConfiguration newConfig(Optional<String> graphName, CypherMapWrapper config) {
+    public ProcedureConfiguration newConfig(Optional<String> graphName, CypherMapWrapper config) {
         ProcedureConfiguration configuration = (config != null)
             ? ProcedureConfiguration.create(config, getUsername())
             : ProcedureConfiguration.create(getUsername());

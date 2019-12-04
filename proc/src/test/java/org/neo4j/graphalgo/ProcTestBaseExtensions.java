@@ -30,7 +30,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Map;
 import java.util.function.Consumer;
 
-interface ProcTestBaseExtensions {
+public interface ProcTestBaseExtensions {
 
     default <
         A extends Algorithm<A, ?>,

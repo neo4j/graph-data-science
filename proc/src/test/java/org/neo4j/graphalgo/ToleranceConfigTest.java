@@ -20,11 +20,19 @@
 
 package org.neo4j.graphalgo;
 
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
-import org.neo4j.graphalgo.newapi.WriteConfig;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphalgo.newapi.ToleranceConfig;
 
-public interface BaseProcWriteTests<PROC extends BaseAlgoProc<ALGO, ?, CONFIG>, ALGO extends Algorithm<ALGO, ?>, CONFIG extends BaseAlgoConfig & WriteConfig> {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    PROC createProcedure();
+public interface ToleranceConfigTest <CONFIG extends ToleranceConfig & BaseAlgoConfig> extends BaseConfigTests<CONFIG> {
+    @Test
+    default void testToleranceFromConfig() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("tolerance", 42.42));
+        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        assertEquals(42.42, config.tolerance());
+    }
 }

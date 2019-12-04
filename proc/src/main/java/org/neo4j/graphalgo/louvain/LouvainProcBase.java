@@ -37,7 +37,7 @@ abstract class LouvainProcBase<CONFIG extends LouvainConfigBase> extends BaseAlg
     );
 
     @Override
-    protected final CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
+    public final CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
         Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
         if (!graphName.isPresent()) {
             // we should do implicit loading
