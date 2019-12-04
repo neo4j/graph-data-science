@@ -56,6 +56,11 @@ public final class GraphCatalog extends GraphFactory {
     }
 
     @Override
+    public GraphsByRelationshipType importAllGraphs() {
+        return GraphsByRelationshipType.of(importGraph());
+    }
+
+    @Override
     public Graph build() {
         return importGraph();
     }

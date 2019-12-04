@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -47,7 +46,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class HugeGraphFactory extends GraphFactory implements MultipleRelTypesSupport {
+public final class HugeGraphFactory extends GraphFactory {
 
     // TODO: make this configurable from somewhere
     private static final boolean LOAD_DEGREES = false;

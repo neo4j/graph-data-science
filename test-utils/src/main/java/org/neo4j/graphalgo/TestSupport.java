@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -61,11 +60,11 @@ public final class TestSupport {
 
     @Retention(RetentionPolicy.RUNTIME)
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.TestSupport#allTypesWithMultipleRelTypeSupport")
-    public @interface AllGraphTypesWithMultipleRelTypeSupportTest {}
+    @MethodSource("org.neo4j.graphalgo.TestSupport#allTypes")
+    public @interface AllGraphTypesTest {}
 
-    public static <T extends GraphFactory & MultipleRelTypesSupport> Stream<Class<T>> allTypesWithMultipleRelTypeSupport() {
-        return Stream.of((Class<T>) HugeGraphFactory.class, (Class<T>) CypherGraphFactory.class);
+    public static Stream<Class<? extends GraphFactory>> allTypes() {
+        return Stream.of(HugeGraphFactory.class, CypherGraphFactory.class);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -74,18 +73,7 @@ public final class TestSupport {
     public @interface AllGraphTypesWithoutCypherTest {}
 
     public static Stream<Class<? extends GraphFactory>> allTypesWithoutCypher() {
-        return Stream.of(
-                HugeGraphFactory.class
-        );
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @ParameterizedTest(name = "graph: {0}")
-    @MethodSource({"org.neo4j.graphalgo.TestSupport#allTypesWithoutCypher", "org.neo4j.graphalgo.TestSupport#cypherType"})
-    public @interface AllGraphTypesTest {}
-
-    public static Stream<Class<? extends GraphFactory>> cypherType() {
-        return Stream.of(CypherGraphFactory.class);
+        return Stream.of(HugeGraphFactory.class);
     }
 
     @Retention(RetentionPolicy.RUNTIME)

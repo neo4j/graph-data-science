@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -51,7 +50,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
-public class CypherGraphFactory extends GraphFactory implements MultipleRelTypesSupport {
+public class CypherGraphFactory extends GraphFactory {
 
     public static final String TYPE = "cypher";
 

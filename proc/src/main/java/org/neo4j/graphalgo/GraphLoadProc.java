@@ -24,7 +24,6 @@ import org.HdrHistogram.Histogram;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -91,16 +90,11 @@ public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
                     ? PropertyMappings.of()
                     : config.getRelationshipProperties();
 
-            if (relationshipTypes.size() > 1 && !MultipleRelTypesSupport.class.isAssignableFrom(graphImpl)) {
-                throw new IllegalArgumentException(
-                        "Only the huge graph supports multiple relationships, please specify {graph:'huge'}.");
-            }
-
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
 
             GraphsByRelationshipType graph;
             if (!relationshipTypes.isEmpty() || propertyMappings.hasMappings()) {
-                graph = ((MultipleRelTypesSupport) loader.build(graphImpl)).importAllGraphs();
+                graph = loader.build(graphImpl).importAllGraphs();
             } else {
                 graph = GraphsByRelationshipType.of(loader.load(graphImpl));
             }

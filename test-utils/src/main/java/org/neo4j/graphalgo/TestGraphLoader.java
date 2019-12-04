@@ -23,7 +23,6 @@ package org.neo4j.graphalgo;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
@@ -98,8 +97,7 @@ public final class TestGraphLoader {
         }
     }
 
-    // TODO: remove type constraints when we merge MultipleRelTypesSupport into GraphFactory
-    public <T extends GraphFactory & MultipleRelTypesSupport> GraphsByRelationshipType buildGraphs(Class<T> graphFactory) {
+    public <T extends GraphFactory> GraphsByRelationshipType buildGraphs(Class<T> graphFactory) {
         try (Transaction ignored = db.beginTx()) {
             return loader(graphFactory).build(graphFactory).importAllGraphs();
         }
