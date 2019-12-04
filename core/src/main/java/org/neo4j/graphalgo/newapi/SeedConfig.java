@@ -22,10 +22,12 @@ package org.neo4j.graphalgo.newapi;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.annotation.Configuration;
 
 public interface SeedConfig {
 
     @Value.Default
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     default @Nullable String seedProperty() {
         return null;
     }
