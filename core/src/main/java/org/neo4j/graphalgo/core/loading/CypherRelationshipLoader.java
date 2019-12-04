@@ -80,7 +80,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         this.loaderContext = new Context();
 
         this.outerDimensions = dimensions;
-        this.resultDimensions = dimensions;
         this.hasExplicitPropertyMappings = dimensions.relProperties().hasMappings();
 
         this.globalDeduplicationStrategy = setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
@@ -88,13 +87,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
             : setup.deduplicationStrategy();
         this.globalDefaultPropertyValue = setup.relationshipDefaultPropertyValue().orElse(Double.NaN);
 
-        initFromDimension(dimensions);
+        this.resultDimensions = initFromDimension(dimensions);
     }
 
-    private void initFromDimension(GraphDimensions dimensions) {
+    private GraphDimensions initFromDimension(GraphDimensions dimensions) {
         MutableInt propertyKeyId = new MutableInt(0);
-
-        this.importWeights = dimensions.relProperties().atLeastOneExists();
 
         this.propertyKeyIdsByName = dimensions
             .relProperties()
@@ -105,10 +102,28 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
             .stream()
             .collect(toMap(PropertyMapping::propertyKey, PropertyMapping::defaultValue));
 
-        this.propertyKeyIds = dimensions.relProperties().allPropertyKeyIds();
-        this.propertyDefaultValues = dimensions.relProperties().allDefaultWeights();
+        // We need to resolve the given property mappings
+        // using our newly created property key identifiers.
+        GraphDimensions newGraphDimensions = new GraphDimensions.Builder(dimensions)
+            .setRelationshipProperties(PropertyMappings.of(dimensions.relProperties().stream()
+                .map(propertyMapping -> PropertyMapping.of(
+                    propertyMapping.propertyKey,
+                    propertyMapping.neoPropertyKey,
+                    propertyMapping.defaultValue,
+                    propertyMapping.deduplicationStrategy
+                ))
+                .map(propertyMapping -> propertyMapping.resolveWith(propertyKeyIdsByName.get(propertyMapping.propertyKey)))
+                .toArray(PropertyMapping[]::new)))
+            .build();
 
-        this.deduplicationStrategies = getDeduplicationStrategies(dimensions);
+        this.importWeights = newGraphDimensions.relProperties().atLeastOneExists();
+
+        this.propertyKeyIds = newGraphDimensions.relProperties().allPropertyKeyIds();
+        this.propertyDefaultValues = newGraphDimensions.relProperties().allDefaultWeights();
+
+        this.deduplicationStrategies = getDeduplicationStrategies(newGraphDimensions);
+
+        return newGraphDimensions;
     }
 
     @Override
@@ -139,9 +154,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
                 .setRelationshipProperties(PropertyMappings.of(propertyMappings))
                 .build();
 
-            initFromDimension(innerDimensions);
+            resultDimensions = initFromDimension(innerDimensions);
 
-            resultDimensions = innerDimensions;
             initializedFromResult = true;
         }
 
