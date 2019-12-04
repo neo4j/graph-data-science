@@ -86,9 +86,8 @@ public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
             Set<String> relationshipTypes = graphImpl == CypherGraphFactory.class
                     ? Collections.emptySet()
                     : ProjectionParser.parse(config.getRelationshipOrQuery());
-            PropertyMappings propertyMappings = graphImpl == CypherGraphFactory.class
-                    ? PropertyMappings.of()
-                    : config.getRelationshipProperties();
+
+            PropertyMappings propertyMappings = config.getRelationshipProperties();
 
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
 

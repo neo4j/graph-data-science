@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -48,6 +49,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Stream;
@@ -844,5 +846,37 @@ class GraphLoadProcTest extends ProcTestBase {
         Throwable root = ExceptionUtil.rootCause(ex);
         assertTrue(root instanceof IllegalArgumentException);
         assertThat(root.getMessage(), containsString("Query must be read only. Query: "));
+    }
+
+    @Disabled
+    void shouldPreferRelationshipPropertiesForCypherLoading() {
+        String nodeQuery = ALL_NODES_QUERY.replaceAll("'", "");
+        String relationshipQuery = "MATCH (s)-[r:Z]->(t) RETURN id(s) AS source, id(t) AS target " +
+                                   " , 23 AS foo, 42 AS bar, 1984 AS baz, r.weight AS weight";
+
+        String query = "CALL algo.graph.load(" +
+                       "    'testGraph', $nodeQuery, $relationshipQuery, {" +
+                       "        graph: 'cypher'," +
+                       "        relationshipProperties: {" +
+                       "            foobar : 'foo'," +
+                       "            foobaz : 'baz'," +
+                       "            raboof : 'weight'" +
+                       "        }" +
+                       "    }" +
+                       ")";
+
+        runQuery(query, MapUtil.map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery));
+
+        Graph foobarGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("foobar"));
+        Graph foobazGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("foobaz"));
+        Graph raboofGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("raboof"));
+
+        Graph expectedFoobarGraph = TestGraph.Builder.fromGdl("()-[{w: 23.0D}]->(),()-[{w: 23.0D}]->(),(),(),(),(),(),(),(),()");
+        Graph expectedFoobazGraph = TestGraph.Builder.fromGdl("()-[{w: 1984.0D}]->(),()-[{w: 1984.0D}]->(),(),(),(),(),(),(),(),()");
+        Graph expectedRaboofGraph = TestGraph.Builder.fromGdl("()-[{w: 1.0D}]->(),()-[{w: 42.0D}]->(),(),(),(),(),(),(),(),()");
+
+        TestSupport.assertGraphEquals(expectedFoobarGraph, foobarGraph);
+        TestSupport.assertGraphEquals(expectedFoobazGraph, foobazGraph);
+        TestSupport.assertGraphEquals(expectedRaboofGraph, raboofGraph);
     }
 }
