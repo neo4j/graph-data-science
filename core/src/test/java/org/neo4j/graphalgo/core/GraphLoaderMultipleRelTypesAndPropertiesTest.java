@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithMultipleRelTypeSupportTe
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -48,7 +47,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
@@ -90,7 +88,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    void parallelRelationships(Class<? extends GraphFactory> graphFactory) {
+    void parallelRelationshipsWithoutProperties(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withDeduplicationStrategy(DeduplicationStrategy.NONE)
             .buildGraph(graphFactory);
@@ -109,7 +107,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    void parallelRelationshipsWithProperties(Class<? extends GraphFactory> graphFactory) {
+    void parallelRelationships(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .withDeduplicationStrategy(NONE)
@@ -138,7 +136,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @ParameterizedTest
     @MethodSource("deduplicateWithWeightsParams")
-    void parallelRelationshipsWithPropertiesAndAggregations(
+    void parallelRelationshipsWithDeduplication(
         Class<? extends GraphFactory> graphFactory,
         DeduplicationStrategy deduplicationStrategy,
         double expectedWeight
@@ -161,7 +159,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    void parallelRelationshipsWithPropertiesAndSingle(Class<? extends GraphFactory> graphFactory) {
+    void parallelRelationshipsWithDeduplication_SINGLE(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withDeduplicationStrategy(SINGLE)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
@@ -354,7 +352,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
-    <T extends GraphFactory & MultipleRelTypesSupport> void singlePropertyWithMultipleDeduplications(Class<T> graphFactory) {
+    <T extends GraphFactory & MultipleRelTypesSupport> void singlePropertyWithDeduplications(Class<T> graphFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -394,15 +392,12 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         return Stream.of(
             Arguments.of(MAX, DEFAULT, DEFAULT, 44, 46, 1339, 1341),
             Arguments.of(MIN, DEFAULT, MAX, 42, 45, 1339, 1341),
-            Arguments.of(DEFAULT, DEFAULT, DEFAULT, 42, 45, 1337, 1340),
-            Arguments.of(DEFAULT, DEFAULT, SUM, 42, 45, 4014, 2681),
-            Arguments.of(DEFAULT, MAX, SUM, 44, 46, 4014, 2681)
+            Arguments.of(MIN, MAX, SUM, 44, 46, 4014, 2681)
         );
     }
 
     static Stream<Arguments> localDeduplicationArguments() {
         return Stream.of(
-            Arguments.of(SINGLE, 43, 45, 1338, 1340),
             Arguments.of(MIN, 42, 45, 1337, 1340),
             Arguments.of(MAX, 44, 46, 1339, 1341),
             Arguments.of(SUM, 129, 91, 4014, 2681)
@@ -429,7 +424,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         double expectedNodeAP2,
         double expectedNodeBP2
     ) {
-        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(db, "" +
                    "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
@@ -518,7 +512,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         double expectedNodeAP2,
         double expectedNodeBP2
     ) {
-        assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -554,6 +547,40 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             expectedNodeBP2
         ));
         assertGraphEquals(expectedP2Graph, p2Graph);
+    }
+
+    @AllGraphTypesWithMultipleRelTypeSupportTest
+    <T extends GraphFactory & MultipleRelTypesSupport>
+    void multiplePropertiesWithDeduplication_SINGLE(Class<T> graphFactory) {
+        db = TestDatabaseCreator.createTestDatabase();
+        db.execute(
+            "CREATE" +
+            "  (a:Node)" +
+            ", (b:Node) " +
+            ", (a)-[:REL {p1: 43, p2: 1338}]->(a)" +
+            ", (a)-[:REL {p1: 42, p2: 1337}]->(a)" +
+            ", (b)-[:REL {p1: 46, p2: 1341}]->(b)");
+        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
+            .withRelationshipProperties(
+                PropertyMapping.of("p1", "p1", 1.0, SINGLE),
+                PropertyMapping.of("p2", "p2", 2.0, SINGLE)
+            )
+            .withDirection(OUTGOING)
+            .buildGraphs(graphFactory);
+
+        String expectedGraphTemplate =
+            "(a)-[{w: %fd}]->(a)" +
+            "(b)-[{w: %fd}]->(b)";
+
+        Graph p1Graph = graphs.getGraph("", Optional.of("p1"));
+        Graph expectedP1GraphOption1 = fromGdl(String.format(expectedGraphTemplate, 43D, 46D));
+        Graph expectedP1GraphOption2 = fromGdl(String.format(expectedGraphTemplate, 42D, 46D));
+        assertGraphEquals(Arrays.asList(expectedP1GraphOption1, expectedP1GraphOption2), p1Graph);
+
+        Graph p2Graph = graphs.getGraph("", Optional.of("p2"));
+        Graph expectedP2GraphOption1 = fromGdl(String.format(expectedGraphTemplate, 1338D, 1341D));
+        Graph expectedP2GraphOption2 = fromGdl(String.format(expectedGraphTemplate, 1337D, 1341D));
+        assertGraphEquals(Arrays.asList(expectedP2GraphOption1, expectedP2GraphOption2), p2Graph);
     }
 
     @AllGraphTypesWithMultipleRelTypeSupportTest
