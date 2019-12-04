@@ -32,6 +32,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 /**
  *
@@ -61,7 +62,7 @@ class RelationshipPredicateTest {
     @BeforeEach
     void setupGraph() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(db, DB_CYPHER);
         try (Transaction tx = db.beginTx()) {
             nodeA = db.findNode(LABEL, "name", "a").getId();
             nodeB = db.findNode(LABEL, "name", "b").getId();

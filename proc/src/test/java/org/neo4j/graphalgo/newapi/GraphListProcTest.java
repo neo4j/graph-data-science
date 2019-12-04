@@ -53,7 +53,7 @@ class GraphListProcTest extends ProcTestBase {
             GraphCatalogProcs.class,
             GraphLoadProc.class
         );
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -65,7 +65,7 @@ class GraphListProcTest extends ProcTestBase {
     @Test
     void listASingleGraph() {
         String name = "name";
-        db.execute("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
 
         assertCypherResult("CALL algo.beta.graph.list()", singletonList(
             map(
@@ -104,7 +104,7 @@ class GraphListProcTest extends ProcTestBase {
     @Test
     void histogramComputationIsOptOut() {
         String name = "name";
-        db.execute("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
 
         assertCypherResult("CALL algo.beta.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodes, relationships", singletonList(
             map(
@@ -131,7 +131,7 @@ class GraphListProcTest extends ProcTestBase {
     @Test
     void calculateHistogramForUndirectedNodesWhenAskedTo() {
         String name = "name";
-        db.execute("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
 
         assertCypherResult("CALL algo.beta.graph.list() YIELD histogram", singletonList(
             map(
@@ -154,7 +154,7 @@ class GraphListProcTest extends ProcTestBase {
     @Test
     void calculateHistogramForOutgoingRelationshipsWhenAskedTo() {
         String name = "name";
-        db.execute("CALL algo.beta.graph.create($name, 'A', 'REL>')", map("name", name));
+        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL>')", map("name", name));
 
         assertCypherResult("CALL algo.beta.graph.list() YIELD histogram", singletonList(
             map(
@@ -177,7 +177,7 @@ class GraphListProcTest extends ProcTestBase {
     @Test
     void calculateHistogramForIncomingRelationshipsWhenAskedTo() {
         String name = "name";
-        db.execute("CALL algo.beta.graph.create($name, 'A', '<REL')", map("name", name));
+        runQuery("CALL algo.beta.graph.create($name, 'A', '<REL')", map("name", name));
 
         assertCypherResult("CALL algo.beta.graph.list() YIELD histogram", singletonList(
             map(
@@ -201,7 +201,7 @@ class GraphListProcTest extends ProcTestBase {
     void listAllGraphsWhenCalledWithoutArgumentOrAnEmptyArgument(String argument) {
         String[] names = {"a", "b", "c"};
         for (String name : names) {
-            db.execute("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+            runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
         }
 
         List<String> actualNames = db
@@ -222,7 +222,7 @@ class GraphListProcTest extends ProcTestBase {
     void filterOnExactMatchUsingTheFirstArgument() {
         String[] names = {"b", "bb", "ab", "ba", "B", "ʙ"};
         for (String name : names) {
-            db.execute("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+            runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
         }
 
         String name = names[0];
@@ -251,7 +251,7 @@ class GraphListProcTest extends ProcTestBase {
     void returnEmptyStreamWhenNoGraphMatchesTheFilterArgument(String argument) {
         String[] names = {"a", "b", "c"};
         for (String name : names) {
-            db.execute("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+            runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
         }
 
         long numberOfRows = db

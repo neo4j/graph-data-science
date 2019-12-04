@@ -32,6 +32,7 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 final class HugeGraphNoPropertiesTest {
 
@@ -58,7 +59,7 @@ final class HugeGraphNoPropertiesTest {
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(db, DB_CYPHER);
     }
 
     @AfterEach

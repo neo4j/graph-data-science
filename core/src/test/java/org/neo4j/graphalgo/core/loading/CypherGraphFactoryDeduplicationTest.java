@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -38,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 class CypherGraphFactoryDeduplicationTest {
 
@@ -47,7 +47,7 @@ class CypherGraphFactoryDeduplicationTest {
                                            "CREATE (n2)-[:REL {weight: 10}]->(n1) " +
                                            "RETURN id(n1) AS id1, id(n2) AS id2";
 
-    private GraphDatabaseService db;
+    private GraphDatabaseAPI db;
 
     private static int id1;
     private static int id2;
@@ -55,7 +55,7 @@ class CypherGraphFactoryDeduplicationTest {
     @BeforeEach
     void setUp() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER ).accept(row -> {
+        runQuery(db, DB_CYPHER).accept(row -> {
             id1 = row.getNumber("id1").intValue();
             id2 = row.getNumber("id2").intValue();
             return true;

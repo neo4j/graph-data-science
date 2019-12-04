@@ -32,6 +32,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 final class UndirectedLoopsTest {
 
@@ -57,7 +58,7 @@ final class UndirectedLoopsTest {
     @BeforeEach
     void setUp() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER).close();
+        runQuery(db, DB_CYPHER);
     }
 
     @Test

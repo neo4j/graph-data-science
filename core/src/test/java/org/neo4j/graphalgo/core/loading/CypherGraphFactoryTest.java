@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 class CypherGraphFactoryTest {
 
@@ -56,7 +57,7 @@ class CypherGraphFactoryTest {
     @BeforeEach
     void setUp() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER, MapUtil.map("count", COUNT));
+        runQuery(db, DB_CYPHER, MapUtil.map("count", COUNT));
     }
 
     @AfterEach
@@ -72,7 +73,7 @@ class CypherGraphFactoryTest {
         String query = " CREATE (n1 {partition: 6})-[:REL {prop:1}]->(n2 {foo: 4})-[:REL {prop: 2}]->(n3)" +
                        " CREATE (n1)-[:REL {prop: 3}]->(n3)"+
                        " RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3";
-        db.execute(query).accept( row -> {
+        runQuery(db, query).accept( row -> {
             id1 = row.getNumber("id1").intValue();
             id2 = row.getNumber("id2").intValue();
             id3 = row.getNumber("id3").intValue();

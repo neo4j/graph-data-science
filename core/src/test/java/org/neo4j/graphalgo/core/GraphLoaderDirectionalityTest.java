@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -34,6 +35,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.GraphHelper.assertInRelationships;
 import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 class GraphLoaderDirectionalityTest {
 
@@ -266,7 +268,7 @@ class GraphLoaderDirectionalityTest {
             Direction direction,
             DeduplicationStrategy deduplicationStrategy,
             boolean undirected) {
-        db.execute(dbQuery);
+        runQuery(db, dbQuery);
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
 
         if (graphImpl == CypherGraphFactory.class) {

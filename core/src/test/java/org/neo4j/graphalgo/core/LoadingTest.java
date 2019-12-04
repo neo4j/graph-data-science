@@ -34,6 +34,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 final class LoadingTest {
 
@@ -58,7 +59,7 @@ final class LoadingTest {
     @BeforeEach
     void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(db, DB_CYPHER);
     }
 
     @AfterEach

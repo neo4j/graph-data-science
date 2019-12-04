@@ -36,6 +36,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 final class CypherExporterTest {
 
@@ -57,7 +58,7 @@ final class CypherExporterTest {
         db = TestDatabaseCreator.createTestDatabase();
 
         try (Transaction tx = db.beginTx()) {
-            db.execute(createGraph).close();
+            runQuery(db, createGraph);
             tx.success();
         }
     }

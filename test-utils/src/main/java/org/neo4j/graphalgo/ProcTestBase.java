@@ -214,7 +214,7 @@ public class ProcTestBase {
     ) {
         try (Transaction tx = db.beginTx()) {
             List<Map<String, Object>> actual = new ArrayList<>();
-            Result result = db.execute(query, queryParameters);
+            Result result = runQuery(query, queryParameters);
             result.accept(row -> {
                 Map<String, Object> _row = new HashMap<>();
                 for (String column : result.columns()) {
@@ -266,7 +266,7 @@ public class ProcTestBase {
         String messageSubstring
     ) {
         try {
-            db.execute(query, queryParameters);
+            runQuery(query, queryParameters);
             fail(format("Expected an exception to be thrown by query:\n%s", query));
         } catch (Exception e) {
             assertThat(e, containsMessage(messageSubstring));

@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 class RelationshipPropertiesImportTest {
 
@@ -129,7 +130,7 @@ class RelationshipPropertiesImportTest {
             String cypher,
             Direction direction,
             Class<? extends GraphFactory> graphFactory) {
-        db.execute(cypher);
+        runQuery(db, cypher);
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()

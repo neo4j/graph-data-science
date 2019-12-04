@@ -49,6 +49,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
@@ -79,7 +80,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(DB_CYPHER);
+        runQuery(db, DB_CYPHER);
     }
 
     @AfterEach
@@ -222,8 +223,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelProperties(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        db = TestDatabaseCreator.createTestDatabase();
-        db.execute(
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        runQuery(localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -236,7 +237,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (b)-[:REL {p1: 46, p2: 1341, p3: 10}]->(d)"
         );
 
-        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
+        GraphsByRelationshipType graphs = TestGraphLoader.from(localDb)
             .withRelationshipProperties(
                 PropertyMapping.of("agg1", "p1", 1.0, DeduplicationStrategy.NONE),
                 PropertyMapping.of("agg2", "p2", 2.0, DeduplicationStrategy.NONE),
@@ -279,8 +280,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelPropertiesWithDefaultValues(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        db = TestDatabaseCreator.createTestDatabase();
-        db.execute(
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        runQuery(localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -290,7 +291,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (b)-[:REL {p1: 45}]->(b)" +
             ", (b)-[:REL]->(b)"
         );
-        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
+        GraphsByRelationshipType graphs = TestGraphLoader.from(localDb)
             .withRelationshipProperties(
                 PropertyMapping.of("agg1", "p1", 1.0, MIN),
                 PropertyMapping.of("agg2", "p1", 50.0, MAX),
@@ -325,7 +326,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     <T extends GraphFactory & MultipleRelTypesSupport>
     void multipleRelPropertiesWithIncompatibleDeduplicationStrategies(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        db.execute(
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        runQuery(localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -339,7 +341,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         );
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            TestGraphLoader.from(db)
+            TestGraphLoader.from(localDb)
                 .withRelationshipProperties(
                     PropertyMapping.of("p1", "p1", 1.0, DeduplicationStrategy.NONE),
                     PropertyMapping.of("p2", "p2", 2.0, SUM)
@@ -358,8 +360,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multipleAggregationsFromSameProperty(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        db = TestDatabaseCreator.createTestDatabase();
-        db.execute(
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        runQuery(localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -370,7 +372,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (b)-[:REL {p1: 46}]->(b)"
         );
 
-        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
+        GraphsByRelationshipType graphs = TestGraphLoader.from(localDb)
             .withRelationshipProperties(
                 PropertyMapping.of("agg1", "p1", 1.0, MAX),
                 PropertyMapping.of("agg2", "p1", 2.0, MIN)
@@ -396,8 +398,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesWithMultipleRelTypeSupportTest
     <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelTypesWithSameProperty(Class<T> graphFactory) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        db = TestDatabaseCreator.createTestDatabase();
-        db.execute(
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        runQuery(localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (a)-[:REL_1 {p1: 43}]->(a)" +
@@ -405,7 +407,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (a)-[:REL_2 {p1: 42}]->(a)" +
             ", (a)-[:REL_3 {p1: 44}]->(a)");
 
-        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
+        GraphsByRelationshipType graphs = TestGraphLoader.from(localDb)
             .withRelationshipType("REL_1 | REL_2 | REL_3")
             .withDeduplicationStrategy(MAX)
             .withRelationshipProperties(
@@ -515,7 +517,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     ) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute("" +
+        runQuery(db, "" +
                    "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
                    "CREATE" +
                    " (a)-[:REL {p1: 42, p2: 1337}]->(a)," +
@@ -582,8 +584,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         double expectedNodeBP2
     ) {
         assumeFalse(graphFactory.equals(CypherGraphFactory.class));
-        db = TestDatabaseCreator.createTestDatabase();
-        db.execute(
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        runQuery(localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node) " +
@@ -592,7 +594,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (a)-[:REL {p1: 44, p2: 1339}]->(a)" +
             ", (b)-[:REL {p1: 45, p2: 1340}]->(b)" +
             ", (b)-[:REL {p1: 46, p2: 1341}]->(b)");
-        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
+        GraphsByRelationshipType graphs = TestGraphLoader.from(localDb)
             .withRelationshipProperties(
                 PropertyMapping.of("p1", "p1", 1.0, deduplicationStrategy),
                 PropertyMapping.of("p2", "p2", 2.0, deduplicationStrategy)
