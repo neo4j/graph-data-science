@@ -185,7 +185,7 @@ public final class GraphCatalog extends GraphFactory {
          * This method returns the union of all subgraphs refered to by the given name.
          */
         Optional<Graph> getUnion(String graphName) {
-            return !exists(graphName) ? Optional.empty() : Optional.of(graphsByName.get(graphName).getGraph());
+            return !exists(graphName) ? Optional.empty() : Optional.of(graphsByName.get(graphName).graph().getUnion());
         }
 
         boolean exists(String graphName) {
