@@ -225,6 +225,14 @@ final class GenerateConfiguration {
         for (UnaryOperator<CodeBlock> converter : definition.converters()) {
             codeBlock = converter.apply(codeBlock);
         }
+        if (definition.fieldType().getKind() == TypeKind.DECLARED) {
+            codeBlock = CodeBlock.of(
+                "$T.failOnNull($S, $L)",
+                CypherMapWrapper.class,
+                definition.configKey(),
+                codeBlock
+            );
+        }
 
         constructor.addStatement("this.$N = $L", definition.fieldName(), codeBlock);
     }

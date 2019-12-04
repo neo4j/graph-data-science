@@ -38,7 +38,7 @@ public final class MyConfig implements Inheritance.MyConfig {
     private final short inheritedDefaultValue;
 
     public MyConfig(@NotNull CypherMapWrapper config) {
-        this.baseValue = config.requireString("baseValue");
+        this.baseValue = CypherMapWrapper.failOnNull("baseValue", config.requireString("baseValue"));
         this.overriddenValue = config.getInt("overriddenValue", Inheritance.MyConfig.super.overriddenValue());
         this.overwrittenValue = config.getLong("overwrittenValue", Inheritance.MyConfig.super.overwrittenValue());
         this.inheritedValue = config.requireDouble("inheritedValue");

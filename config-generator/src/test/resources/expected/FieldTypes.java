@@ -59,10 +59,10 @@ public final class FieldTypesConfig implements FieldTypes {
         this.aLong = config.requireLong("aLong");
         this.aFloat = config.requireNumber("aFloat").floatValue();
         this.aDouble = config.requireDouble("aDouble");
-        this.aNumber = config.requireNumber("aNumber");
-        this.aString = config.requireString("aString");
-        this.aMap = config.requireChecked("aMap", Map.class);
-        this.aList = config.requireChecked("aList", List.class);
+        this.aNumber = CypherMapWrapper.failOnNull("aNumber", config.requireNumber("aNumber"));
+        this.aString = CypherMapWrapper.failOnNull("aString", config.requireString("aString"));
+        this.aMap = CypherMapWrapper.failOnNull("aMap", config.requireChecked("aMap", Map.class));
+        this.aList = CypherMapWrapper.failOnNull("aList", config.requireChecked("aList", List.class));
     }
 
     public FieldTypesConfig(

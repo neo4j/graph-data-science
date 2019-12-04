@@ -33,7 +33,7 @@ public final class DefaultValuesConfig implements DefaultValues {
 
     public DefaultValuesConfig(@NotNull CypherMapWrapper config) {
         this.defaultInt = config.getInt("defaultInt", DefaultValues.super.defaultInt());
-        this.defaultString = config.getString("defaultString", DefaultValues.super.defaultString());
+        this.defaultString = CypherMapWrapper.failOnNull("defaultString", config.getString("defaultString", DefaultValues.super.defaultString()));
     }
 
     public DefaultValuesConfig(int defaultInt, @NotNull String defaultString) {

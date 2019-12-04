@@ -48,8 +48,15 @@ public interface Conversions {
         @Configuration.ConvertWith("positive.Conversions.OtherConversion#toIntQual")
         int qualifiedMethod();
 
+        @Configuration.ConvertWith("add42")
+        String referenceTypeAsResult();
+
         static int toInt(String input) {
             return Integer.parseInt(input);
+        }
+
+        static String add42(String input) {
+            return input + "42";
         }
     }
 }
