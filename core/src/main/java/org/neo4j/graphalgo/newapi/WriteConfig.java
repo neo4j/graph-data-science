@@ -21,9 +21,11 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
 
 public interface WriteConfig extends BaseAlgoConfig {
 
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String writeProperty();
 
     @Value.Default
