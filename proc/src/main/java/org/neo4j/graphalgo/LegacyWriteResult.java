@@ -20,6 +20,8 @@
 
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.louvain.LouvainProc;
+
 import java.util.ArrayList;
 import java.util.List;
 

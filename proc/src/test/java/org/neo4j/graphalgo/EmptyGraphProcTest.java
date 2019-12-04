@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.louvain.LouvainProc;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.Result;

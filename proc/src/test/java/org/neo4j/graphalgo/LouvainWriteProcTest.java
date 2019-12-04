@@ -19,48 +19,40 @@
  */
 package org.neo4j.graphalgo;
 
-import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
-import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
-import org.neo4j.graphalgo.newapi.LouvainConfig;
+import org.neo4j.graphalgo.louvain.LouvainProc;
+import org.neo4j.graphalgo.louvain.LouvainWriteProc;
+import org.neo4j.graphalgo.newapi.LouvainConfigBase;
+import org.neo4j.graphalgo.newapi.LouvainWriteConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
-import static org.neo4j.graphalgo.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT;
-import static org.neo4j.graphalgo.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_KEY;
-import static org.neo4j.graphalgo.LouvainProc.INNER_ITERATIONS_DEFAULT;
-import static org.neo4j.graphalgo.LouvainProc.INNER_ITERATIONS_KEY;
-import static org.neo4j.graphalgo.LouvainProc.LEVELS_DEFAULT;
-import static org.neo4j.graphalgo.LouvainProc.LEVELS_KEY;
+import static org.neo4j.graphalgo.louvain.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT;
+import static org.neo4j.graphalgo.louvain.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_KEY;
+import static org.neo4j.graphalgo.louvain.LouvainProc.INNER_ITERATIONS_DEFAULT;
+import static org.neo4j.graphalgo.louvain.LouvainProc.INNER_ITERATIONS_KEY;
+import static org.neo4j.graphalgo.louvain.LouvainProc.LEVELS_DEFAULT;
+import static org.neo4j.graphalgo.louvain.LouvainProc.LEVELS_KEY;
 import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
 import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.GRAPH_IMPL_KEY;
@@ -68,108 +60,9 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 
-class LouvainProcNewAPITest extends ProcTestBase implements
-    ProcTestBaseExtensions,
-    WriteConfigTests<LouvainConfig>,
-    BaseProcWriteTests<LouvainProcNewAPI, Louvain, LouvainConfig> {
-
-    private static final List<List<Long>> RESULT = Arrays.asList(
-        Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 14L),
-        Arrays.asList(6L, 7L, 8L),
-        Arrays.asList(9L, 10L, 11L, 12L, 13L)
-    );
-
-    @BeforeEach
-    void setupGraph() throws KernelException {
-
-        db = TestDatabaseCreator.createTestDatabase();
-
-        @Language("Cypher") String cypher =
-            "CREATE" +
-            "  (a:Node {seed: 1})" +        // 0
-            ", (b:Node {seed: 1})" +        // 1
-            ", (c:Node {seed: 1})" +        // 2
-            ", (d:Node {seed: 1})" +        // 3
-            ", (e:Node {seed: 1})" +        // 4
-            ", (f:Node {seed: 1})" +        // 5
-            ", (g:Node {seed: 2})" +        // 6
-            ", (h:Node {seed: 2})" +        // 7
-            ", (i:Node {seed: 2})" +        // 8
-            ", (j:Node {seed: 42})" +       // 9
-            ", (k:Node {seed: 42})" +       // 10
-            ", (l:Node {seed: 42})" +       // 11
-            ", (m:Node {seed: 42})" +       // 12
-            ", (n:Node {seed: 42})" +       // 13
-            ", (x:Node {seed: 1})" +        // 14
-
-            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
-            ", (a)-[:TYPE {weight: 1.0}]->(d)" +
-            ", (a)-[:TYPE {weight: 1.0}]->(f)" +
-            ", (b)-[:TYPE {weight: 1.0}]->(d)" +
-            ", (b)-[:TYPE {weight: 1.0}]->(x)" +
-            ", (b)-[:TYPE {weight: 1.0}]->(g)" +
-            ", (b)-[:TYPE {weight: 1.0}]->(e)" +
-            ", (c)-[:TYPE {weight: 1.0}]->(x)" +
-            ", (c)-[:TYPE {weight: 1.0}]->(f)" +
-            ", (d)-[:TYPE {weight: 1.0}]->(k)" +
-            ", (e)-[:TYPE {weight: 1.0}]->(x)" +
-            ", (e)-[:TYPE {weight: 0.01}]->(f)" +
-            ", (e)-[:TYPE {weight: 1.0}]->(h)" +
-            ", (f)-[:TYPE {weight: 1.0}]->(g)" +
-            ", (g)-[:TYPE {weight: 1.0}]->(h)" +
-            ", (h)-[:TYPE {weight: 1.0}]->(i)" +
-            ", (h)-[:TYPE {weight: 1.0}]->(j)" +
-            ", (i)-[:TYPE {weight: 1.0}]->(k)" +
-            ", (j)-[:TYPE {weight: 1.0}]->(k)" +
-            ", (j)-[:TYPE {weight: 1.0}]->(m)" +
-            ", (j)-[:TYPE {weight: 1.0}]->(n)" +
-            ", (k)-[:TYPE {weight: 1.0}]->(m)" +
-            ", (k)-[:TYPE {weight: 1.0}]->(l)" +
-            ", (l)-[:TYPE {weight: 1.0}]->(n)" +
-            ", (m)-[:TYPE {weight: 1.0}]->(n)";
-
-        registerProcedures(LouvainProcNewAPI.class, GraphLoadProc.class, GraphCatalogProcs.class);
-        runQuery(cypher);
-        runQuery("CALL algo.beta.graph.create(" +
-                 "    'myGraph'," +
-                 "    {" +
-                 "      Node: {" +
-                 "        label: 'Node'," +
-                 "        properties: ['seed']" +
-                 "      }" +
-                 "    }," +
-                 "    {" +
-                 "      TYPE: {" +
-                 "        type: 'TYPE'," +
-                 "        projection: 'UNDIRECTED'" +
-                 "      }" +
-                 "    }" +
-                 ")");
-    }
-
-    @AfterEach
-    void clearCommunities() {
-        db.shutdown();
-        GraphCatalog.removeAllLoadedGraphs();
-    }
-
-    static Stream<Arguments> graphVariations() {
-        return Stream.of(
-            arguments("'myGraph', {", "explicit graph"),
-            arguments(
-                "{" +
-                "  nodeProjection: ['Node']," +
-                "  relationshipProjection: {" +
-                "    TYPE: {" +
-                "      type: 'TYPE'," +
-                "      projection: 'UNDIRECTED'" +
-                "    }" +
-                "  }," +
-                "  nodeProperties: ['seed'],",
-                "implicit graph"
-            )
-        );
-    }
+class LouvainWriteProcTest extends LouvainProcTestBase implements
+    WriteConfigTests<LouvainWriteConfig>,
+    BaseProcWriteTests<LouvainWriteProc, Louvain, LouvainWriteConfig> {
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("graphVariations")
@@ -230,8 +123,9 @@ class LouvainProcNewAPITest extends ProcTestBase implements
 
     @ParameterizedTest
     @ValueSource(strings = {
+        "",
         "writeProperty: null,",
-        ""
+        "writeProperty: '',",
     })
     void testWriteRequiresWritePropertyToBeSet(String writePropertyParameter) {
         String query = "CALL gds.algo.louvain.write({" +
@@ -252,42 +146,8 @@ class LouvainProcNewAPITest extends ProcTestBase implements
 
         assertThat(exception, rootCause(
             IllegalArgumentException.class,
-            "writeProperty must be set in write mode"
+            "No value specified for the mandatory configuration parameter `writeProperty`"
         ));
-    }
-
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("graphVariations")
-    void testStream(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.algo.louvain.stream(" +
-                       graphSnippet.replaceAll(",$", "") +
-                       "}) YIELD nodeId, communityId, communityIds";
-
-        List<Long> actualCommunities = new ArrayList<>();
-        runQuery(query, row -> {
-            int id = row.getNumber("nodeId").intValue();
-            long community = row.getNumber("communityId").longValue();
-            assertNull(row.get("communityIds"));
-            actualCommunities.add(id, community);
-        });
-        assertCommunities(actualCommunities, RESULT);
-    }
-
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("graphVariations")
-    void testStreamCommunities(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.algo.louvain.stream(" +
-                       graphSnippet +
-                       "    includeIntermediateCommunities: true" +
-                       "}) YIELD nodeId, communityId, communityIds";
-
-        runQuery(query, row -> {
-            Object maybeList = row.get("communityIds");
-            assertTrue(maybeList instanceof List);
-            List<Long> communities = (List<Long>) maybeList;
-            assertEquals(2, communities.size());
-            assertEquals(communities.get(1), row.getNumber("communityId").longValue());
-        });
     }
 
     @ParameterizedTest(name = "{1}")
@@ -312,43 +172,19 @@ class LouvainProcNewAPITest extends ProcTestBase implements
 
     @Test
     void testCreateConfigWithDefaults() {
-        LouvainConfig louvainConfig = LouvainConfig.of(
+        LouvainConfigBase louvainConfig = LouvainWriteConfig.of(
             "",
             Optional.empty(),
             Optional.empty(),
-            CypherMapWrapper.empty()
+            CypherMapWrapper.create(MapUtil.map("writeProperty", "writeProperty"))
         );
-        assertEquals(null, louvainConfig.writeProperty());
         assertEquals(false, louvainConfig.includeIntermediateCommunities());
         assertEquals(10, louvainConfig.maxLevels());
-        assertEquals(10, louvainConfig.maxIterations());
-        assertEquals(0.0001D, louvainConfig.tolerance());
-        assertEquals(null, louvainConfig.seedProperty());
-        assertEquals(null, louvainConfig.weightProperty());
-    }
-
-    @Test
-    void testCreateConfig() {
-        LouvainConfig louvainConfig = LouvainConfig.of(
-            "",
-            Optional.empty(),
-            Optional.empty(),
-            CypherMapWrapper.create(MapUtil.map(
-                "writeProperty", "writeProperty"
-            ))
-        );
-        assertEquals("writeProperty", louvainConfig.writeProperty());
-        assertEquals(false, louvainConfig.includeIntermediateCommunities());
-        assertEquals(10, louvainConfig.maxLevels());
-        assertEquals(10, louvainConfig.maxIterations());
-        assertEquals(0.0001D, louvainConfig.tolerance());
-        assertEquals(null, louvainConfig.seedProperty());
-        assertEquals(null, louvainConfig.weightProperty());
     }
 
     @Override
-    public LouvainConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LouvainConfig.of(
+    public LouvainWriteConfig createConfig(CypherMapWrapper mapWrapper) {
+        return LouvainWriteConfig.of(
             "",
             Optional.empty(),
             Optional.empty(),
@@ -362,8 +198,8 @@ class LouvainProcNewAPITest extends ProcTestBase implements
     }
 
     @Override
-    public LouvainProcNewAPI createProcedure() {
-        return new LouvainProcNewAPI();
+    public LouvainWriteProc createProcedure() {
+        return new LouvainWriteProc();
     }
 
     @AllGraphNamesTest

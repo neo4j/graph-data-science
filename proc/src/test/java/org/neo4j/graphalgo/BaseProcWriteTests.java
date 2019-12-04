@@ -20,42 +20,11 @@
 
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 public interface BaseProcWriteTests<PROC extends BaseAlgoProc<ALGO, ?, CONFIG>, ALGO extends Algorithm<ALGO, ?>, CONFIG extends BaseAlgoConfig & WriteConfig> {
-
-    @Test
-    default void testWriteProcThrowsErrorIfWritePropertyIsMissing() {
-        PROC procedure = createProcedure();
-        GraphDatabaseAPI db = graphDb();
-        new TransactionWrapper(db).accept((tx -> {
-            procedure.transaction = tx;
-            procedure.api = db;
-            procedure.callContext = ProcedureCallContext.EMPTY;
-            procedure.log = new TestLog();
-
-            IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> procedure.processInput(
-                    "graphName",
-                    Collections.emptyMap(),
-                    ExecutionMode.WRITE
-                )
-            );
-
-            assertEquals("writeProperty must be set in write mode", exception.getMessage());
-        }));
-    }
 
     GraphDatabaseAPI graphDb();
 

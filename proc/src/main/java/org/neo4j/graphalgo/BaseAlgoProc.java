@@ -176,7 +176,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         }
     }
 
-    ComputationResult<A, RESULT, CONFIG> compute(
+    protected ComputationResult<A, RESULT, CONFIG> compute(
         Object graphNameOrConfig,
         Map<String, Object> configuration,
         ExecutionMode executionMode
@@ -218,7 +218,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             .build();
     }
 
-    Optional<PropertyTranslator<RESULT>> nodePropertyTranslator(
+    protected Optional<PropertyTranslator<RESULT>> nodePropertyTranslator(
         ComputationResult<A, RESULT, CONFIG> computationResult
     ) {
         return Optional.empty();
@@ -261,7 +261,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     @ValueClass
-    interface ComputationResult<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> {
+    public interface ComputationResult<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> {
         long createMillis();
 
         long computeMillis();

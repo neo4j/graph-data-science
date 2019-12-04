@@ -22,20 +22,25 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.helpers.collection.MapUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public interface WriteConfigTests<CONFIG extends WriteConfig> {
 
     @Test
-    default void testWriteConfigDefaults() {
+    default void testMissingWritePropertyFails() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.empty();
-        CONFIG config = createConfig(mapWrapper);
-        assertEquals(null, config.writeProperty());
-        assertEquals(Pools.DEFAULT_CONCURRENCY, config.writeConcurrency());
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> createConfig(mapWrapper)
+        );
+        assertEquals(
+            "No value specified for the mandatory configuration parameter `writeProperty`",
+            exception.getMessage()
+        );
     }
 
     @Test

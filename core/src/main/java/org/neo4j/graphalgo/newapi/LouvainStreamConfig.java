@@ -20,15 +20,27 @@
 
 package org.neo4j.graphalgo.newapi;
 
-import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-public interface WriteConfig extends BaseAlgoConfig {
+import java.util.Optional;
 
-    String writeProperty();
+@ValueClass
+@Configuration("LouvainStreamConfigImpl")
+public interface LouvainStreamConfig extends LouvainConfigBase {
 
-    @Value.Default
-    default int writeConcurrency() {
-        return concurrency();
+    static LouvainStreamConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        return new LouvainStreamConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            config
+        );
     }
-
 }

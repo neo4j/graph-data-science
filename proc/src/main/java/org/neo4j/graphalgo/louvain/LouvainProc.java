@@ -17,8 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.louvain;
 
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.LegacyBaseAlgoProc;
+import org.neo4j.graphalgo.LegacyWriteResult;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -160,7 +164,7 @@ public class LouvainProc extends LegacyBaseAlgoProc<Louvain, Louvain> {
                 louvain,
                 setup.procedureConfig,
                 writeProperty.get(),
-                louvain.terminationFlag,
+                louvain.getTerminationFlag(),
                 setup.tracker
             );
 

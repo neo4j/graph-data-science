@@ -22,19 +22,12 @@ package org.neo4j.graphalgo.newapi;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.Direction;
 
-import java.util.Optional;
-
-@ValueClass
-@Configuration("LouvainConfigImpl")
-public interface LouvainConfig extends
+public interface LouvainConfigBase extends
     BaseAlgoConfig,
     SeedConfig,
     WeightConfig,
-    WriteConfig,
     ToleranceConfig,
     IterationsConfig {
 
@@ -65,19 +58,5 @@ public interface LouvainConfig extends
     @Value.Default
     default Direction direction() {
         return Direction.OUTGOING;
-    }
-
-    static LouvainConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    ) {
-        return new LouvainConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            username,
-            config
-        );
     }
 }

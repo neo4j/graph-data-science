@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.louvain;
 
-import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.ExecutionMode;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
-import org.neo4j.graphalgo.impl.louvain.LouvainFactoryNew;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.LouvainConfig;
+import org.neo4j.graphalgo.newapi.LouvainWriteConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,13 +40,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainConfig> {
+public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
 
     @Procedure(value = "gds.algo.louvain.write", mode = WRITE)
     @Description("CALL gds.algo.louvain.write(graphName: STRING, configuration: MAP {" +
@@ -82,7 +80,7 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(
+        ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult = compute(
             graphNameOrConfig,
             configuration,
             ExecutionMode.WRITE
@@ -123,7 +121,7 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(
+        ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult = compute(
             graphNameOrConfig,
             configuration,
             ExecutionMode.STATS
@@ -131,55 +129,11 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
         return write(computationResult, false);
     }
 
-    @Procedure(value = "gds.algo.louvain.stream", mode = READ)
-    @Description("CALL gds.algo.louvain.stream(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodeId: INTEGER" +
-                 "  communityId: INTEGER" +
-                 "  communityIds: LIST OF INTEGER")
-    public Stream<StreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    private Stream<WriteResult> write(
+        ComputationResult<Louvain, Louvain, LouvainWriteConfig> computeResult,
+        boolean write
     ) {
-        ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration,
-            ExecutionMode.STREAM
-        );
-        return stream(computationResult);
-    }
-
-    @Override
-    protected LouvainConfig newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
-        if (!graphName.isPresent()) {
-            // we should do implicit loading
-            maybeImplicitCreate = Optional.of(GraphCreateConfig.implicitCreate(getUsername(), config));
-        }
-        return LouvainConfig.of(getUsername(), graphName, maybeImplicitCreate, config);
-    }
-
-    @Override
-    protected LouvainFactoryNew algorithmFactory(LouvainConfig config) {
-        Louvain.Config louvainConfig = new Louvain.Config(
-            config.maxLevels(),
-            config.maxIterations(),
-            config.tolerance(),
-            config.includeIntermediateCommunities(),
-            Optional.ofNullable(config.seedProperty())
-        );
-
-        return new LouvainFactoryNew(louvainConfig);
-    }
-
-    private Stream<WriteResult> write(ComputationResult<Louvain, Louvain, LouvainConfig> computeResult, boolean write) {
-        LouvainConfig config = computeResult.config();
+        LouvainWriteConfig config = computeResult.config();
         Graph graph = computeResult.graph();
         Louvain louvain = computeResult.algorithm();
 
@@ -203,10 +157,10 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
     }
 
     @Override
-    Optional<PropertyTranslator<Louvain>> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainConfig> computationResult) {
+    protected Optional<PropertyTranslator<Louvain>> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
         Graph graph = computationResult.graph();
         Louvain louvain = computationResult.result();
-        LouvainConfig config = computationResult.config();
+        LouvainWriteConfig config = computationResult.config();
         Optional<NodeProperties> seed = louvain.config().maybeSeedPropertyKey.map(graph::nodeProperties);
         PropertyTranslator<Louvain> translator;
         if (!louvain.config().includeIntermediateCommunities) {
@@ -221,31 +175,14 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
         return Optional.of(translator);
     }
 
-    private Stream<StreamResult> stream(ComputationResult<Louvain, Louvain, LouvainConfig> computationResult) {
-        Graph graph = computationResult.graph();
-        Louvain louvain = computationResult.result();
-        boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
-        return LongStream.range(0, graph.nodeCount())
-            .mapToObj(nodeId -> {
-                long neoNodeId = graph.toOriginalNodeId(nodeId);
-                long[] communities = includeIntermediateCommunities ? louvain.getCommunities(nodeId) : null;
-                return new StreamResult(neoNodeId, communities, louvain.getCommunity(nodeId));
-            });
-    }
-
-    public static final class StreamResult {
-        public final long nodeId;
-        public final long communityId;
-        public final List<Long> communityIds;
-
-        StreamResult(long nodeId, @Nullable long[] communityIds, long communityId) {
-            this.nodeId = nodeId;
-            this.communityIds = communityIds == null ? null : Arrays
-                .stream(communityIds)
-                .boxed()
-                .collect(Collectors.toList());
-            this.communityId = communityId;
-        }
+    @Override
+    LouvainWriteConfig newConfig(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        return LouvainWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     public static final class WriteResult {
@@ -270,7 +207,7 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
         public Map<String, Object> communityDistribution;
 
         WriteResult(
-            LouvainConfig config,
+            LouvainWriteConfig config,
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
@@ -308,14 +245,14 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
 
     public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
 
-        private final LouvainConfig config;
+        private final LouvainWriteConfig config;
 
         private long levels = -1;
         private long ranIterations;
         private double[] modularities = new double[]{};
         private double modularity = -1;
 
-        WriteResultBuilder(LouvainConfig config, ProcedureCallContext context, AllocationTracker tracker) {
+        WriteResultBuilder(LouvainWriteConfig config, ProcedureCallContext context, AllocationTracker tracker) {
             super(
                 // TODO: factor these out to OutputFieldParser
                 context.outputFields().anyMatch(s -> s.equalsIgnoreCase("communityDistribution")),
@@ -325,22 +262,22 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
             this.config = config;
         }
 
-        LouvainProcNewAPI.WriteResultBuilder ranIterations(long iterations) {
+        LouvainWriteProc.WriteResultBuilder ranIterations(long iterations) {
             this.ranIterations = iterations;
             return this;
         }
 
-        LouvainProcNewAPI.WriteResultBuilder withLevels(long levels) {
+        LouvainWriteProc.WriteResultBuilder withLevels(long levels) {
             this.levels = levels;
             return this;
         }
 
-        LouvainProcNewAPI.WriteResultBuilder withModularities(double[] modularities) {
+        LouvainWriteProc.WriteResultBuilder withModularities(double[] modularities) {
             this.modularities = modularities;
             return this;
         }
 
-        LouvainProcNewAPI.WriteResultBuilder withModularity(double modularity) {
+        LouvainWriteProc.WriteResultBuilder withModularity(double modularity) {
             this.modularity = modularity;
             return this;
         }
