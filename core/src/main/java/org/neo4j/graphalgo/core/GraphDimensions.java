@@ -157,6 +157,16 @@ public final class GraphDimensions {
             this.highestNeoId = -1;
         }
 
+        public Builder(GraphDimensions other) {
+            nodeCount = other.nodeCount;
+            highestNeoId = other.highestNeoId;
+            maxRelCount = other.maxRelCount;
+            nodeLabelIds = other.nodeLabelIds;
+            nodeProperties = other.nodeProperties;
+            relationshipTypeMappings = other.relTypeMappings;
+            relProperties = other.relProperties;
+        }
+
         public Builder setNodeCount(long nodeCount) {
             this.nodeCount = nodeCount;
             return this;

@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
@@ -39,28 +40,29 @@ import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toMap;
+import static org.neo4j.graphalgo.core.DeduplicationStrategy.NONE;
 
 class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<RelationshipTypeMapping>> {
 
     private final IdMap idMap;
-    private final GraphDimensions dimensions;
-
     private final Context loaderContext;
+    private final GraphDimensions outerDimensions;
+    private final boolean hasExplicitPropertyMappings;
 
     // Property mappings are either defined upfront in
     // the procedure configuration or during load time
     // by looking at the columns returned by the query.
     private Map<String, Integer> propertyKeyIdsByName;
     private Map<String, Double> propertyDefaultValueByName;
+    private boolean importWeights;
     private int[] propertyKeyIds;
     private double[] propertyDefaultValues;
-    private boolean importWeights;
+    private DeduplicationStrategy[] deduplicationStrategies;
+    private boolean initializedFromResult;
 
     private final Map<RelationshipTypeMapping, LongAdder> allRelationshipCounters;
-    private final DeduplicationStrategy[] deduplicationStrategies;
 
     CypherRelationshipLoader(
         IdMap idMap,
@@ -70,9 +72,16 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
     ) {
         super(setup.relationshipType(), idMap.nodeCount(), api, setup);
         this.idMap = idMap;
+        this.allRelationshipCounters = new HashMap<>();
+        this.loaderContext = new Context();
 
-        this.dimensions = dimensions;
+        this.outerDimensions = dimensions;
+        this.hasExplicitPropertyMappings = dimensions.relProperties().hasMappings();
 
+        initFromDimension(dimensions);
+    }
+
+    private void initFromDimension(GraphDimensions dimensions) {
         MutableInt propertyKeyId = new MutableInt(0);
 
         this.importWeights = dimensions.relProperties().atLeastOneExists();
@@ -89,50 +98,38 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
         this.propertyKeyIds = dimensions.relProperties().allPropertyKeyIds();
         this.propertyDefaultValues = dimensions.relProperties().allDefaultWeights();
 
-        this.allRelationshipCounters = new HashMap<>();
-        this.loaderContext = new Context();
+        this.deduplicationStrategies = getDeduplicationStrategies(dimensions);
 
-        this.deduplicationStrategies = getDeduplicationStrategies();
     }
 
     @Override
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
-        Result result = runLoadingQuery(offset, batchSize);
+        Result queryResult = runLoadingQuery(offset, batchSize);
 
-        List<String> allColumns = result.columns();
+        List<String> allColumns = queryResult.columns();
+
+
+        // If the user specifies property mappings, we use those.
+        // Otherwise, we create new property mappings from the result columns.
+        // We do that only once, as each batch has the same columns.
+        if (!hasExplicitPropertyMappings && !initializedFromResult) {
+            Predicate<String> contains = RelationshipRowVisitor.RESERVED_COLUMNS::contains;
+            List<String> propertyColumns = allColumns.stream().filter(contains.negate()).collect(Collectors.toList());
+
+            PropertyMapping[] propertyMappings = propertyColumns
+                .stream()
+                .map(propertyColumn -> PropertyMapping.of(propertyColumn, propertyColumn, 0D, NONE))
+                .toArray(PropertyMapping[]::new);
+
+            GraphDimensions innerDimensions = new GraphDimensions.Builder(outerDimensions)
+                .setRelationshipProperties(PropertyMappings.of(propertyMappings))
+                .build();
+
+            initFromDimension(innerDimensions);
+            initializedFromResult = true;
+        }
 
         boolean isAnyRelTypeQuery = !allColumns.contains(RelationshipRowVisitor.TYPE_COLUMN);
-
-        // If the user specifies property mappings,
-        // we use those. Otherwise, we create new
-        // property mappings from the result columns.
-        if (!dimensions.relProperties().hasMappings()) {
-            Predicate<String> contains = RelationshipRowVisitor.RESERVED_COLUMNS::contains;
-            MutableInt propertyKeyId = new MutableInt(0);
-            List<String> propertyColumns = allColumns.stream().filter(contains.negate()).collect(Collectors.toList());
-            double defaultValue = 0D;
-
-            propertyKeyIdsByName = propertyColumns
-                .stream()
-                .collect(Collectors.toMap(
-                    propertyColumn -> propertyColumn,
-                    propertyColumn -> propertyKeyId.getAndIncrement()
-                ));
-
-            propertyDefaultValueByName = propertyColumns
-                .stream()
-                .collect(Collectors.toMap(
-                    propertyColumn -> propertyColumn,
-                    propertyColumn -> defaultValue
-                ));
-
-            propertyKeyIds = IntStream.range(0, propertyColumns.size()).toArray();
-            propertyDefaultValues = IntStream.range(0, propertyColumns.size()).mapToDouble(i -> defaultValue).toArray();
-
-            importWeights = propertyKeyIds.length > 0;
-
-            // TODO: we need to set the duplication strategies to NONE
-        }
 
         if (isAnyRelTypeQuery) {
             loaderContext.getOrCreateImporterBuilder(RelationshipTypeMapping.all());
@@ -147,7 +144,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
             isAnyRelTypeQuery
         );
 
-        result.accept(visitor);
+        queryResult.accept(visitor);
         visitor.flushAll();
         return new BatchLoadResult(offset, visitor.rows(), -1L, visitor.relationshipCount());
     }
@@ -174,12 +171,12 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
         return loaderContext.allBuilders;
     }
 
-    private DeduplicationStrategy[] getDeduplicationStrategies() {
+    private DeduplicationStrategy[] getDeduplicationStrategies(GraphDimensions dimensions) {
         DeduplicationStrategy[] deduplicationStrategies = dimensions
             .relProperties()
             .stream()
             .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
-                ? DeduplicationStrategy.NONE
+                ? NONE
                 : property.deduplicationStrategy()
             )
             .toArray(DeduplicationStrategy[]::new);
@@ -187,7 +184,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
         if (deduplicationStrategies.length == 0) {
             DeduplicationStrategy deduplicationStrategy =
                 setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
-                    ? DeduplicationStrategy.NONE
+                    ? NONE
                     : setup.deduplicationStrategy();
             deduplicationStrategies = new DeduplicationStrategy[]{deduplicationStrategy};
         }
@@ -211,7 +208,9 @@ class CypherRelationshipLoader extends CypherRecordLoader<ObjectLongMap<Relation
             this.numberOfPages = importSizing.numberOfPages();
         }
 
-        synchronized SingleTypeRelationshipImporter.Builder.WithImporter getOrCreateImporterBuilder(RelationshipTypeMapping relationshipTypeMapping) {
+        synchronized SingleTypeRelationshipImporter.Builder.WithImporter getOrCreateImporterBuilder(
+            RelationshipTypeMapping relationshipTypeMapping
+        ) {
             SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder;
             if (importerBuildersByType.containsKey(relationshipTypeMapping)) {
                 importerBuilder = importerBuildersByType.get(relationshipTypeMapping);
