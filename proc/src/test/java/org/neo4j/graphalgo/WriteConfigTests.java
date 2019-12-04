@@ -28,11 +28,14 @@ import org.neo4j.helpers.collection.MapUtil;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public interface WriteConfigTests<CONFIG extends WriteConfig> {
+public interface WriteConfigTests<CONFIG extends WriteConfig> extends BaseConfigTests<CONFIG> {
 
     @Test
     default void testMissingWritePropertyFails() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.empty();
+        CypherMapWrapper mapWrapper =
+            createMinimallyValidConfig(CypherMapWrapper.empty())
+                .withoutEntry("writeProperty");
+
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
             () -> createConfig(mapWrapper)
@@ -49,10 +52,8 @@ public interface WriteConfigTests<CONFIG extends WriteConfig> {
             "writeProperty", "writeProperty",
             "writeConcurrency", 42
         ));
-        CONFIG config = createConfig(mapWrapper);
+        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
         assertEquals("writeProperty", config.writeProperty());
         assertEquals(42, config.writeConcurrency());
     }
-
-    CONFIG createConfig(CypherMapWrapper mapWrapper);
 }

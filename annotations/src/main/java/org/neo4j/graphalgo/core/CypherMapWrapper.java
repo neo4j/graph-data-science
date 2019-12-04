@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 
@@ -36,7 +37,7 @@ public final class CypherMapWrapper {
     private final Map<String, Object> config;
 
     private CypherMapWrapper(Map<String, Object> config) {
-        this.config = new HashMap<>(config);
+        this.config = config;
     }
 
     /**
@@ -239,16 +240,29 @@ public final class CypherMapWrapper {
         if (config == null) {
             return empty();
         }
-        return new CypherMapWrapper(config);
+        Map<String, Object> filteredConfig = config.entrySet()
+            .stream()
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return new CypherMapWrapper(filteredConfig);
     }
 
     public static CypherMapWrapper empty() {
         return new CypherMapWrapper(emptyMap());
     }
 
-    CypherMapWrapper withString(String key, String value) {
+    public CypherMapWrapper withString(String key, String value) {
         HashMap<String, Object> newMap = new HashMap<>(config);
         newMap.put(key, value);
+        return new CypherMapWrapper(newMap);
+    }
+
+    public CypherMapWrapper withoutEntry(String key) {
+        if (!containsKey(key)) {
+            return this;
+        }
+        HashMap<String, Object> newMap = new HashMap<>(config);
+        newMap.remove(key);
         return new CypherMapWrapper(newMap);
     }
 

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.louvain.LouvainConfigBase;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
@@ -35,7 +36,10 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-class LouvainProcTestBase extends ProcTestBase implements ProcTestBaseExtensions {
+abstract class LouvainProcTestBase<CONFIG extends LouvainConfigBase> extends ProcTestBase implements
+    ProcTestBaseExtensions,
+    SeedConfigTests<CONFIG>
+{
 
     static final List<List<Long>> RESULT = Arrays.asList(
         Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 14L),

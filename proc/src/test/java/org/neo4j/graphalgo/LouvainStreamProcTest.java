@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
-class LouvainStreamProcTest extends LouvainProcTestBase {
+class LouvainStreamProcTest extends LouvainProcTestBase<LouvainStreamConfig> {
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("graphVariations")
@@ -81,5 +81,10 @@ class LouvainStreamProcTest extends LouvainProcTestBase {
         );
         assertEquals(false, louvainConfig.includeIntermediateCommunities());
         assertEquals(10, louvainConfig.maxLevels());
+    }
+
+    @Override
+    public LouvainStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return LouvainStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 }

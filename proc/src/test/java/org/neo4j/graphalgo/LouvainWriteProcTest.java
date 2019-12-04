@@ -27,10 +27,10 @@ import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
-import org.neo4j.graphalgo.louvain.LouvainProc;
-import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphalgo.louvain.LouvainConfigBase;
+import org.neo4j.graphalgo.louvain.LouvainProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteConfig;
+import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
@@ -44,23 +44,20 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
-import static org.neo4j.graphalgo.louvain.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT;
-import static org.neo4j.graphalgo.louvain.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_KEY;
-import static org.neo4j.graphalgo.louvain.LouvainProc.INNER_ITERATIONS_DEFAULT;
-import static org.neo4j.graphalgo.louvain.LouvainProc.INNER_ITERATIONS_KEY;
-import static org.neo4j.graphalgo.louvain.LouvainProc.LEVELS_DEFAULT;
-import static org.neo4j.graphalgo.louvain.LouvainProc.LEVELS_KEY;
 import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
 import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.GRAPH_IMPL_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
+import static org.neo4j.graphalgo.louvain.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_KEY;
+import static org.neo4j.graphalgo.louvain.LouvainProc.INNER_ITERATIONS_KEY;
+import static org.neo4j.graphalgo.louvain.LouvainProc.LEVELS_KEY;
 
-class LouvainWriteProcTest extends LouvainProcTestBase implements
+class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> implements
     WriteConfigTests<LouvainWriteConfig>,
     BaseProcWriteTests<LouvainWriteProc, Louvain, LouvainWriteConfig> {
 
@@ -176,10 +173,13 @@ class LouvainWriteProcTest extends LouvainProcTestBase implements
             "",
             Optional.empty(),
             Optional.empty(),
-            CypherMapWrapper.create(MapUtil.map("writeProperty", "writeProperty"))
+            createMinimallyValidConfig(CypherMapWrapper.empty())
         );
-        assertEquals(false, louvainConfig.includeIntermediateCommunities());
+        assertFalse(louvainConfig.includeIntermediateCommunities());
         assertEquals(10, louvainConfig.maxLevels());
+        assertEquals(10, louvainConfig.maxIterations());
+        assertEquals(0.0001D, louvainConfig.tolerance());
+        assertNull(louvainConfig.seedProperty());
     }
 
     @Override
@@ -193,6 +193,14 @@ class LouvainWriteProcTest extends LouvainProcTestBase implements
     }
 
     @Override
+    public CypherMapWrapper createMinimallyValidConfig(CypherMapWrapper mapWrapper) {
+        if (!mapWrapper.containsKey("writeProperty")) {
+            return mapWrapper.withString("writeProperty", "writeProperty");
+        }
+        return mapWrapper;
+    }
+
+    @Override
     public GraphDatabaseAPI graphDb() {
         return db;
     }
@@ -200,23 +208,6 @@ class LouvainWriteProcTest extends LouvainProcTestBase implements
     @Override
     public LouvainWriteProc createProcedure() {
         return new LouvainWriteProc();
-    }
-
-    @AllGraphNamesTest
-    void testDefaults(String graphImpl) {
-        getAlgorithmFactory(
-            LouvainProc.class,
-            db,
-            "", "",
-            MapUtil.map(GRAPH_IMPL_KEY, graphImpl),
-            (LouvainFactory factory) -> {
-                assertEquals(INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT, factory.config.includeIntermediateCommunities);
-                assertEquals(LEVELS_DEFAULT, factory.config.maxLevel);
-                assertEquals(INNER_ITERATIONS_DEFAULT, factory.config.maxInnerIterations);
-                assertEquals(TOLERANCE_DEFAULT, factory.config.tolerance);
-                assertFalse(factory.config.maybeSeedPropertyKey.isPresent());
-            }
-        );
     }
 
     @AllGraphNamesTest
