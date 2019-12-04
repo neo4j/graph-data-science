@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.core.loading;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -41,9 +42,9 @@ public class RelationshipImporter {
     private final AdjacencyBuilder inAdjacency;
 
     public RelationshipImporter(
-            AllocationTracker tracker,
-            AdjacencyBuilder outAdjacency,
-            AdjacencyBuilder inAdjacency) {
+        AllocationTracker tracker,
+        @Nullable AdjacencyBuilder outAdjacency,
+        @Nullable AdjacencyBuilder inAdjacency) {
         this.tracker = tracker;
         this.outAdjacency = outAdjacency;
         this.inAdjacency = inAdjacency;

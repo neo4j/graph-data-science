@@ -127,19 +127,12 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
         return relationshipLoader.allBuilders().entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().typeName(),
             entry -> {
-                Pair<RelationshipsBuilder, RelationshipsBuilder> builders = entry.getValue();
-                RelationshipsBuilder outgoingRelationshipsBuilder = builders.getLeft();
-                RelationshipsBuilder incomingRelationshipsBuilder = builders.getRight();
+                RelationshipsBuilder outgoingRelationshipsBuilder = entry.getValue();
 
                 AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder != null
                     ? outgoingRelationshipsBuilder.adjacency.build() : null;
                 AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder != null
                     ? outgoingRelationshipsBuilder.globalAdjacencyOffsets : null;
-
-                AdjacencyList inAdjacencyList = incomingRelationshipsBuilder != null
-                    ? incomingRelationshipsBuilder.adjacency.build() : null;
-                AdjacencyOffsets inAdjacencyOffsets = incomingRelationshipsBuilder != null
-                    ? incomingRelationshipsBuilder.globalAdjacencyOffsets : null;
 
                 long relationshipCount = result.getRight().getOrDefault(entry.getKey(), 0L);
 
@@ -150,8 +143,8 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
                         idsAndProperties.properties,
                         outAdjacencyList,
                         outAdjacencyOffsets,
-                        inAdjacencyList,
-                        inAdjacencyOffsets,
+                        null,
+                        null,
                         relationshipCount,
                         setup.loadAsUndirected()
                     );
@@ -164,12 +157,9 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
                             tracker,
                             idsAndProperties.hugeIdMap,
                             idsAndProperties.properties,
-                            incomingRelationshipsBuilder,
                             outgoingRelationshipsBuilder,
                             outAdjacencyList,
                             outAdjacencyOffsets,
-                            inAdjacencyList,
-                            inAdjacencyOffsets,
                             weightIndex,
                             property,
                             relationshipCount,
@@ -201,12 +191,9 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
         AllocationTracker tracker,
         IdMap idMapping,
         Map<String, NodeProperties> nodeProperties,
-        RelationshipsBuilder inRelationshipsBuilder,
-        RelationshipsBuilder outRelationshipsBuilder,
-        AdjacencyList outAdjacencyList,
-        AdjacencyOffsets outAdjacencyOffsets,
-        AdjacencyList inAdjacencyList,
-        AdjacencyOffsets inAdjacencyOffsets,
+        RelationshipsBuilder relationshipsBuilder,
+        AdjacencyList adjacencyList,
+        AdjacencyOffsets adjacencyOffsets,
         int weightIndex,
         PropertyMapping weightProperty,
         long relationshipCount,
@@ -214,22 +201,11 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
 
         AdjacencyList outWeightList = null;
         AdjacencyOffsets outWeightOffsets = null;
-        if (outRelationshipsBuilder != null) {
+        if (relationshipsBuilder != null) {
             if (weightProperty.propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                outWeightOffsets = outRelationshipsBuilder.globalWeightOffsets[weightIndex];
+                outWeightOffsets = relationshipsBuilder.globalWeightOffsets[weightIndex];
                 if (outWeightOffsets != null) {
-                    outWeightList = outRelationshipsBuilder.weights[weightIndex].build();
-                }
-            }
-        }
-
-        AdjacencyList inWeightList = null;
-        AdjacencyOffsets inWeightOffsets = null;
-        if (inRelationshipsBuilder != null) {
-            if (weightProperty.propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                inWeightOffsets = inRelationshipsBuilder.globalWeightOffsets[weightIndex];
-                if (inWeightOffsets != null) {
-                    inWeightList = inRelationshipsBuilder.weights[weightIndex].build();
+                    outWeightList = relationshipsBuilder.weights[weightIndex].build();
                 }
             }
         }
@@ -243,15 +219,16 @@ public class CypherGraphFactory extends GraphFactory implements MultipleRelTypes
             idMapping,
             nodeProperties,
             relationshipCount,
-            inAdjacencyList,
-            outAdjacencyList,
-            inAdjacencyOffsets,
-            outAdjacencyOffsets,
+            null,
+            adjacencyList,
+            null,
+            adjacencyOffsets,
             maybeDefaultWeight,
-            Optional.ofNullable(inWeightList),
+            Optional.empty(),
             Optional.ofNullable(outWeightList),
-            Optional.ofNullable(inWeightOffsets),
+            Optional.empty(),
             Optional.ofNullable(outWeightOffsets),
-            loadAsUndirected);
+            loadAsUndirected
+        );
     }
 }

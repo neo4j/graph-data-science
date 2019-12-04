@@ -102,6 +102,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
             .stream()
             .collect(toMap(PropertyMapping::propertyKey, PropertyMapping::defaultValue));
 
+        // We can not rely on what the token store gives us.
         // We need to resolve the given property mappings
         // using our newly created property key identifiers.
         GraphDimensions newGraphDimensions = new GraphDimensions.Builder(dimensions)
@@ -131,7 +132,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         Result queryResult = runLoadingQuery(offset, batchSize);
 
         List<String> allColumns = queryResult.columns();
-
 
         // If the user specifies property mappings, we use those.
         // Otherwise, we create new property mappings from the result columns.
@@ -197,7 +197,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         return Pair.of(resultDimensions, relationshipCounters);
     }
 
-    Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders() {
+    Map<RelationshipTypeMapping, RelationshipsBuilder> allBuilders() {
         return loaderContext.allBuilders;
     }
 
@@ -220,7 +220,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
     class Context {
 
         private final Map<RelationshipTypeMapping, SingleTypeRelationshipImporter.Builder.WithImporter> importerBuildersByType;
-        private final Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders;
+        private final Map<RelationshipTypeMapping, RelationshipsBuilder> allBuilders;
 
         final int pageSize;
         final int numberOfPages;
@@ -248,16 +248,19 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         }
 
         private SingleTypeRelationshipImporter.Builder.WithImporter createImporter(RelationshipTypeMapping typeMapping) {
-            Pair<RelationshipsBuilder, RelationshipsBuilder> builders = createBuildersForRelationshipType(setup.tracker());
+            RelationshipsBuilder builder = new RelationshipsBuilder(
+                deduplicationStrategies,
+                setup.tracker(),
+                propertyKeyIds.length
+            );
 
-            allBuilders.put(typeMapping, builders);
+            allBuilders.put(typeMapping, builder);
 
             SingleTypeRelationshipImporter.Builder importerBuilder = createImporterBuilder(
                 pageSize,
                 numberOfPages,
                 typeMapping,
-                builders.getLeft(),
-                builders.getRight(),
+                builder,
                 setup.tracker()
             );
 
@@ -271,56 +274,16 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
             );
         }
 
-        private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuildersForRelationshipType(AllocationTracker tracker) {
-            RelationshipsBuilder outgoingRelationshipsBuilder = null;
-            RelationshipsBuilder incomingRelationshipsBuilder = null;
-
-            if (setup.loadAsUndirected()) {
-                outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                    deduplicationStrategies,
-                    tracker,
-                    propertyKeyIds.length
-                );
-            } else {
-                if (setup.loadOutgoing()) {
-                    outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                        deduplicationStrategies,
-                        tracker,
-                        propertyKeyIds.length
-                    );
-                }
-                if (setup.loadIncoming()) {
-                    incomingRelationshipsBuilder = new RelationshipsBuilder(
-                        deduplicationStrategies,
-                        tracker,
-                        propertyKeyIds.length
-                    );
-                }
-            }
-
-            return Pair.of(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
-        }
-
         private SingleTypeRelationshipImporter.Builder createImporterBuilder(
             int pageSize,
             int numberOfPages,
             RelationshipTypeMapping mapping,
-            RelationshipsBuilder outgoingRelationshipsBuilder,
-            RelationshipsBuilder incomingRelationshipsBuilder,
+            RelationshipsBuilder relationshipsBuilder,
             AllocationTracker tracker
         ) {
             LongAdder relationshipCounter = new LongAdder();
-            AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
-                outgoingRelationshipsBuilder,
-                numberOfPages,
-                pageSize,
-                tracker,
-                relationshipCounter,
-                propertyKeyIds,
-                propertyDefaultValues
-            );
-            AdjacencyBuilder inBuilder = AdjacencyBuilder.compressing(
-                incomingRelationshipsBuilder,
+            AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
+                relationshipsBuilder,
                 numberOfPages,
                 pageSize,
                 tracker,
@@ -329,13 +292,13 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
                 propertyDefaultValues
             );
 
-            RelationshipImporter importer = new RelationshipImporter(
+            RelationshipImporter relationshipImporter = new RelationshipImporter(
                 setup.tracker(),
-                outBuilder,
-                setup.loadAsUndirected() ? outBuilder : inBuilder
+                adjacencyBuilder,
+                null
             );
 
-            return new SingleTypeRelationshipImporter.Builder(mapping, importer, relationshipCounter);
+            return new SingleTypeRelationshipImporter.Builder(mapping, relationshipImporter, relationshipCounter);
         }
     }
 }
