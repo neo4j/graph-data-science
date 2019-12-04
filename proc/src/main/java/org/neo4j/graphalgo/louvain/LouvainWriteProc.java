@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.louvain;
 
-import org.neo4j.graphalgo.ExecutionMode;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -81,8 +80,7 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
     ) {
         ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult = compute(
             graphNameOrConfig,
-            configuration,
-            ExecutionMode.WRITE
+            configuration
         );
         return write(computationResult, true);
     }
@@ -122,8 +120,7 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
     ) {
         ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult = compute(
             graphNameOrConfig,
-            configuration,
-            ExecutionMode.STATS
+            configuration
         );
         return write(computationResult, false);
     }

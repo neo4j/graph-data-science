@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.ExecutionMode;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
@@ -59,8 +58,7 @@ public class LouvainStreamProc extends LouvainProcBase<LouvainStreamConfig> {
     ) {
         ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult = compute(
             graphNameOrConfig,
-            configuration,
-            ExecutionMode.STREAM
+            configuration
         );
         return stream(computationResult);
     }
