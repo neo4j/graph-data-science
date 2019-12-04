@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.core.loading;
 
+import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.BATCH_ENTRY_SHIFT_SIZE;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.BATCH_ENTRY_SIZE;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.PROPERTIES_REFERENCE_OFFSET;
 
@@ -46,7 +47,10 @@ public class RelationshipPropertiesBatchBuffer implements RelationshipImporter.P
             long[] propertyValues = new long[relationshipCount];
             for (int relationshipOffset = 0; relationshipOffset < batchLength; relationshipOffset += BATCH_ENTRY_SIZE) {
                 int relationshipId = (int) batch[relationshipOffset + PROPERTIES_REFERENCE_OFFSET];
-                propertyValues[relationshipId] = buffer[propertyKeyId][relationshipId];
+                // We need to fill this consecutively indexed
+                // in the same order as the relationships are
+                // stored in the batch.
+                propertyValues[relationshipOffset >>> BATCH_ENTRY_SHIFT_SIZE] = buffer[propertyKeyId][relationshipId];
             }
             resultBuffer[propertyKeyId] = propertyValues;
         }

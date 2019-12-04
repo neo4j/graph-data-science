@@ -31,6 +31,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     public static final int RELATIONSHIP_REFERENCE_OFFSET = 2;
     public static final int PROPERTIES_REFERENCE_OFFSET = 3;
     public static final int BATCH_ENTRY_SIZE = 4;
+    public static final int BATCH_ENTRY_SHIFT_SIZE = BATCH_ENTRY_SIZE / 2;
 
     private final IdMapping idMap;
     private final int type;
