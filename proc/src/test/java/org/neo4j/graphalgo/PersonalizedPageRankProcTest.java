@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +32,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 class PersonalizedPageRankProcTest extends ProcTestBase {
 
@@ -85,7 +85,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
         runQuery(DB_CYPHER);
         registerProcedures(PageRankProc.class);
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             final Label label = Label.label("Label1");
             EXPECTED.put(db.findNode(label, "name", "a").getId(), 0.243);
             EXPECTED.put(db.findNode(label, "name", "b").getId(), 1.844);
@@ -97,8 +97,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
             EXPECTED.put(db.findNode(label, "name", "h").getId(), 0.150);
             EXPECTED.put(db.findNode(label, "name", "i").getId(), 0.150);
             EXPECTED.put(db.findNode(label, "name", "j").getId(), 0.150);
-            tx.success();
-        }
+        });
     }
 
     @AfterEach
@@ -172,7 +171,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
     }
 
     private void assertResult(final String scoreProperty) {
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             for (Map.Entry<Long, Double> entry : EXPECTED.entrySet()) {
                 double score = ((Number) db
                         .getNodeById(entry.getKey())
@@ -183,8 +182,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
                         0.1,
                         "score for " + entry.getKey());
             }
-            tx.success();
-        }
+        });
     }
 
     private static void assertMapEquals(Map<Long, Double> actual) {

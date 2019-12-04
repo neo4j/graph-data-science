@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -32,6 +31,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 /**         5     5      5
  *      (1)---(2)---(3)----.
@@ -83,11 +83,10 @@ final class WeightedAllShortestPathsProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
         registerProcedures(AllShortestPathsProc.class);
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             startNodeId = db.findNode(Label.label("Node"), "name", "s").getId();
             targetNodeId = db.findNode(Label.label("Node"), "name", "x").getId();
-            tx.success();
-        }
+        });
     }
 
     @AfterEach

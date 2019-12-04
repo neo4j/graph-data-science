@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Pair;
 
 import java.util.ArrayList;
@@ -54,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
 final class MultiSourceBFSTest extends AlgoTestBase {
@@ -322,13 +322,12 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             Consumer<? super GraphBuilder<?>> build,
             Consumer<? super Graph> block,
             Class<? extends GraphFactory> graphImpl) {
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             DefaultBuilder graphBuilder = GraphBuilder.create(db)
                     .setLabel("Foo")
                     .setRelationship("BAR");
             build.accept(graphBuilder);
-            tx.success();
-        }
+        });
         Graph graph = new GraphLoader(db).load(graphImpl);
         block.accept(graph);
     }

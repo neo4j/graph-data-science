@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +38,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class ArticleRankTest extends AlgoTestBase {
 
@@ -106,7 +106,7 @@ final class ArticleRankTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 0.2071625);
             expected.put(db.findNode(label, "name", "b").getId(), 0.4706795);
             expected.put(db.findNode(label, "name", "c").getId(), 0.3605195);
@@ -117,18 +117,18 @@ final class ArticleRankTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.15);
             expected.put(db.findNode(label, "name", "i").getId(), 0.15);
             expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.success();
-        }
+        });
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                        .load(graphFactory);
-            }
+            graph = runInTransaction(
+                db,
+                () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                    .withRelationshipType(
+                        "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                    .load(graphFactory)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)

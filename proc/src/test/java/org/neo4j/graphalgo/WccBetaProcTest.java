@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.List;
 
@@ -69,12 +68,7 @@ class WccBetaProcTest extends ProcTestBase {
                              ",(nH)-[:TYPE]->(nI)";
 
         db = TestDatabaseCreator.createTestDatabase();
-
-        try (Transaction tx = db.beginTx()) {
-            runQuery(createGraph);
-            tx.success();
-        }
-
+        runQuery(createGraph);
         registerProcedures(WccProc.class, GraphLoadProc.class);
     }
 

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +33,7 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 /**
  * Graph:
@@ -130,12 +130,10 @@ class UtilityProcsTest extends ProcTestBase {
     }
 
     private List<Node> getNodes(String... nodes) {
-        List<Node> nodeIds;
-        try (Transaction tx = db.beginTx()) {
-            nodeIds = Arrays.stream(nodes)
-                    .map(name -> db.findNode(Label.label("Node"), "name", name))
-                    .collect(toList());
-        }
-        return nodeIds;
+        return runInTransaction(db, () ->
+            Arrays.stream(nodes)
+                .map(name -> db.findNode(Label.label("Node"), "name", name))
+                .collect(toList())
+        );
     }
 }

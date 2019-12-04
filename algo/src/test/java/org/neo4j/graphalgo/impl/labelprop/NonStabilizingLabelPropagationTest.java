@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.labelprop;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -84,9 +85,7 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
                     .withRelationshipType("R")
                     .withName(graphImpl.getSimpleName());
         }
-        try (Transaction tx = db.beginTx()) {
-            return graphLoader.load(graphImpl);
-        }
+        return QueryRunner.runInTransaction(db, () -> graphLoader.load(graphImpl));
     }
 
     // According to "Near linear time algorithm to detect community structures in large-scale networks"[1], for a graph of this shape

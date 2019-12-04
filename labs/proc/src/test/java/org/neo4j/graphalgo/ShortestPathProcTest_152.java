@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.ShortestPathDijkstra;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.function.DoubleConsumer;
 
@@ -37,6 +36,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 class ShortestPathProcTest_152 extends ProcTestBase {
 
@@ -67,12 +67,10 @@ class ShortestPathProcTest_152 extends ProcTestBase {
 
         registerProcedures(ShortestPathProc.class);
         runQuery(cypher);
-
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             startNodeId = db.findNode(Label.label("Loc"), "name", "A").getId();
             endNodeId = db.findNode(Label.label("Loc"), "name", "F").getId();
-            tx.success();
-        }
+        });
     }
 
     @AfterEach

@@ -49,6 +49,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -462,22 +463,23 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         Graph rel1Graph = graphs.getGraph("REL1");
         Graph unionGraph = graphs.getUnion();
 
-        long unionGraphExpectedNodeCount;
-        long unionGraphExpectedRelCount;
-        long rel1GraphExpectedNodeCount;
-        long rel1GraphExpectedRelCount;
-        try (Transaction tx = db.beginTx()) {
-            unionGraphExpectedNodeCount = db.getAllNodes().stream().count();
-            unionGraphExpectedRelCount = db.getAllRelationships().stream().count();
+        long[] expectedCounts = new long[4];
+        runInTransaction(db, () -> {
+            expectedCounts[0] = db.getAllNodes().stream().count();
+            expectedCounts[1] = db.getAllRelationships().stream().count();
             // The graphs share the node mapping, so we expect the node count for a subgraph
             // to be equal to the node Count for the entire Neo4j graph
-            rel1GraphExpectedNodeCount = db.getAllNodes().stream().count();
-            rel1GraphExpectedRelCount = db
+            expectedCounts[2] = db.getAllNodes().stream().count();
+            expectedCounts[3] = db
                 .getAllRelationships()
                 .stream()
                 .filter(r -> r.isType(RelationshipType.withName("REL1")))
                 .count();
-        }
+        });
+        long unionGraphExpectedNodeCount = expectedCounts[0];
+        long unionGraphExpectedRelCount = expectedCounts[1];
+        long rel1GraphExpectedNodeCount = expectedCounts[2];
+        long rel1GraphExpectedRelCount = expectedCounts[3];
 
         assertEquals(unionGraphExpectedNodeCount, unionGraph.nodeCount());
         assertEquals(unionGraphExpectedRelCount, unionGraph.relationshipCount());

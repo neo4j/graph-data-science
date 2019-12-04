@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.util.Map;
@@ -64,11 +63,9 @@ class TotalNeighborsFuncTest extends ProcTestBase {
                 "RETURN algo.linkprediction.totalNeighbors(p1, p2) AS score, " +
                 "       2.0 AS cypherScore";
 
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            Map<String, Object> node = result.next();
-            assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
-        }
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
+        assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
@@ -79,11 +76,9 @@ class TotalNeighborsFuncTest extends ProcTestBase {
                 "RETURN algo.linkprediction.totalNeighbors(p1, p2) AS score, " +
                 "       3.0 AS cypherScore";
 
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            Map<String, Object> node = result.next();
-            assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
-        }
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
+        assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
@@ -94,10 +89,8 @@ class TotalNeighborsFuncTest extends ProcTestBase {
                 "RETURN algo.linkprediction.totalNeighbors(p1, p2) AS score, " +
                 "       4.0 AS cypherScore";
 
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            Map<String, Object> node = result.next();
-            assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
-        }
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
+        assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 }

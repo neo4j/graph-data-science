@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +34,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 class PageRankProcTest extends ProcTestBase {
 
@@ -95,14 +95,11 @@ class PageRankProcTest extends ProcTestBase {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            runQuery(DB_CYPHER);
-            tx.success();
-        }
+        runQuery(DB_CYPHER);
 
         registerProcedures(GraphLoadProc.class, PageRankProc.class);
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             final Label label = Label.label("Label1");
             expected.put(db.findNode(label, "name", "a").getId(), 0.243);
             expected.put(db.findNode(label, "name", "b").getId(), 1.844);
@@ -125,8 +122,7 @@ class PageRankProcTest extends ProcTestBase {
             weightedExpected.put(db.findNode(label, "name", "h").getId(), 0.150);
             weightedExpected.put(db.findNode(label, "name", "i").getId(), 0.150);
             weightedExpected.put(db.findNode(label, "name", "j").getId(), 0.150);
-            tx.success();
-        }
+        });
     }
 
     @AllGraphNamesTest

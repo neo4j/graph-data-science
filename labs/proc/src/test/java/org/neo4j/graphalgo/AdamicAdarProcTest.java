@@ -30,6 +30,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 class AdamicAdarProcTest extends ProcTestBase {
 
@@ -72,11 +73,9 @@ class AdamicAdarProcTest extends ProcTestBase {
                 "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
                 "       1/log(3) AS cypherScore";
 
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            Map<String, Object> node = result.next();
-            assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
-        }
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
+        assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
@@ -88,11 +87,9 @@ class AdamicAdarProcTest extends ProcTestBase {
                         "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
                         "1/log(2) AS cypherScore";
 
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            Map<String, Object> node = result.next();
-            assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
-        }
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
+        assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
@@ -103,11 +100,9 @@ class AdamicAdarProcTest extends ProcTestBase {
                         "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
                         "       1/log(2) + 1/log(2) AS cypherScore";
 
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            Map<String, Object> node = result.next();
-            assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
-        }
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
+        assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
@@ -118,11 +113,9 @@ class AdamicAdarProcTest extends ProcTestBase {
                         "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            Map<String, Object> node = result.next();
-            assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
-        }
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
+        assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
@@ -133,10 +126,8 @@ class AdamicAdarProcTest extends ProcTestBase {
                         "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            Map<String, Object> node = result.next();
-            assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
-        }
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
+        assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 }

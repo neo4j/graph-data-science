@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +43,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class WeightedDegreeCentralityTest extends AlgoTestBase {
 
@@ -111,10 +111,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
     @BeforeEach
     void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            runQuery(DB_CYPHER);
-            tx.success();
-        }
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -127,7 +124,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, double[]> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), new double[]{});
             expected.put(db.findNode(label, "name", "b").getId(), new double[]{2.0});
             expected.put(db.findNode(label, "name", "c").getId(), new double[]{2.0});
@@ -138,19 +135,19 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), new double[]{});
             expected.put(db.findNode(label, "name", "i").getId(), new double[]{});
             expected.put(db.findNode(label, "name", "j").getId(), new double[]{});
-            tx.success();
-        }
+        });
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, type.weight AS weight")
-                        .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                        .load(graphFactory);
-            }
+            graph = runInTransaction(
+                db,
+                () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                    .withRelationshipType(
+                        "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, type.weight AS weight")
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                    .load(graphFactory)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
@@ -207,7 +204,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 0.0);
             expected.put(db.findNode(label, "name", "b").getId(), 2.0);
             expected.put(db.findNode(label, "name", "c").getId(), 2.0);
@@ -218,20 +215,20 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.0);
             expected.put(db.findNode(label, "name", "i").getId(), 0.0);
             expected.put(db.findNode(label, "name", "j").getId(), 0.0);
-            tx.success();
-        }
+        });
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
-                        .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                        .withDirection(Direction.OUTGOING)
-                        .load(graphFactory);
-            }
+            graph = runInTransaction(
+                db,
+                () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                    .withRelationshipType(
+                        "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                    .withDirection(Direction.OUTGOING)
+                    .load(graphFactory)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
@@ -264,7 +261,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 0.0);
             expected.put(db.findNode(label, "name", "b").getId(), 2.0);
             expected.put(db.findNode(label, "name", "c").getId(), 2.0);
@@ -275,27 +272,26 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.0);
             expected.put(db.findNode(label, "name", "i").getId(), 0.0);
             expected.put(db.findNode(label, "name", "j").getId(), 0.0);
-            tx.success();
-        }
+        });
 
         final Graph graph;
 
-        try (Transaction tx = db.beginTx()) {
-            if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)-[type:TYPE3]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
-                        .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                        .load(graphFactory);
-            } else {
-                graph = new GraphLoader(db)
-                        .withLabel(label)
-                        .withRelationshipType("TYPE3")
-                        .withDirection(Direction.OUTGOING)
-                        .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                        .load(graphFactory);
-            }
+        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+            graph = runInTransaction(
+                db, () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                    .withRelationshipType(
+                        "MATCH (n:Label1)-[type:TYPE3]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                    .load(graphFactory)
+            );
+        } else {
+            graph = new GraphLoader(db)
+                .withLabel(label)
+                .withRelationshipType("TYPE3")
+                .withDirection(Direction.OUTGOING)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                .load(graphFactory);
         }
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
@@ -321,7 +317,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 5.0);
             expected.put(db.findNode(label, "name", "b").getId(), 8.0);
             expected.put(db.findNode(label, "name", "c").getId(), 2.0);
@@ -332,10 +328,9 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.0);
             expected.put(db.findNode(label, "name", "i").getId(), 0.0);
             expected.put(db.findNode(label, "name", "j").getId(), 0.0);
-            tx.success();
-        }
+        });
 
-        Direction direction = Direction.INCOMING;
+        final Direction direction;
 
         Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
@@ -343,16 +338,18 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
             // handle the direction in the Cypher query
             direction = Direction.OUTGOING;
 
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)<-[t:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target, t.weight AS weight")
-                        .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                        .withDirection(direction)
-                        .load(graphFactory);
-            }
+            graph = runInTransaction(
+                db, () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                    .withRelationshipType(
+                        "MATCH (n:Label1)<-[t:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target, t.weight AS weight")
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                    .withDirection(direction)
+                    .load(graphFactory)
+            );
         } else {
+            direction = Direction.INCOMING;
+
             graph = new GraphLoader(db)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")

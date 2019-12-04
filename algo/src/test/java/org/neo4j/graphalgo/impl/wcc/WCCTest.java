@@ -34,11 +34,11 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 class WCCTest extends WCCBaseTest {
 
@@ -241,12 +241,11 @@ class WCCTest extends WCCBaseTest {
     }
 
     private void createTestGraph(int... setSizes) {
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             for (int setSize : setSizes) {
                 createLine(db, setSize);
             }
-            tx.success();
-        }
+        });
     }
 
     private static void createLine(GraphDatabaseService db, int setSize) {

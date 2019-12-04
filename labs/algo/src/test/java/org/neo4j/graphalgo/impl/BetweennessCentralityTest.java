@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.betweenness.MaxDepthBetweennessCentrality;
-import org.neo4j.graphdb.Transaction;
 
 /**
  *  (A)-->(B)-->(C)-->(D)-->(E)
@@ -56,10 +55,7 @@ class BetweennessCentralityTest extends AlgoTestBase {
 
         db = TestDatabaseCreator.createTestDatabase();
 
-        try (Transaction tx = db.beginTx()) {
-            runQuery(cypher);
-            tx.success();
-        }
+        runQuery(cypher);
 
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()

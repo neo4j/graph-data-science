@@ -27,10 +27,9 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 
 /**
@@ -150,8 +149,6 @@ class DegreesTest extends AlgoTestBase {
     }
 
     private long nodeId(String name) {
-        try (Transaction ignored = db.beginTx()) {
-            return graph.toMappedNodeId(db.findNodes(Label.label("Node"), "name", name).next().getId());
-        }
+        return runInTransaction(db, () -> graph.toMappedNodeId(db.findNodes(Label.label("Node"), "name", name).next().getId()));
     }
 }

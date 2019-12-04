@@ -24,9 +24,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 public class ForwardBackwardSccProcTest extends ProcTestBase {
 
@@ -59,11 +59,7 @@ public class ForwardBackwardSccProcTest extends ProcTestBase {
                 " (i)-[:TYPE {cost:3}]->(g)";
 
         db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            runQuery(cypher);
-            tx.success();
-        }
-
+        runQuery(cypher);
         registerProcedures(StronglyConnectedComponentsProc.class);
     }
 
@@ -73,12 +69,7 @@ public class ForwardBackwardSccProcTest extends ProcTestBase {
     }
 
     private long getNodeId(String name) {
-
-        try (Transaction tx = db.beginTx()) {
-            final long id = db.findNode(Label.label("Node"), "name", name).getId();
-            tx.success();
-            return id;
-        }
+        return runInTransaction(db, () -> db.findNode(Label.label("Node"), "name", name).getId());
     }
 
     @Test

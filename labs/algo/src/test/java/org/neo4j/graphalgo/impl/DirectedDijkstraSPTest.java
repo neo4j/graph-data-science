@@ -31,10 +31,9 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 /**
  * expected path OUTGOING:  abcf
@@ -72,10 +71,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
 
-        try (Transaction tx = db.beginTx()) {
-            runQuery(DB_CYPHER);
-            tx.success();
-        }
+        runQuery(DB_CYPHER);
 
         graph = new GraphLoader(db)
                 .withNodeStatement("Node")
@@ -91,9 +87,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     }
 
     private long id(String name) {
-        try (Transaction transaction = db.beginTx()) {
-            return db.findNode(Label.label("Node"), "name", name).getId();
-        }
+        return runInTransaction(db, () -> db.findNode(Label.label("Node"), "name", name).getId());
     }
 
     private String name(long id) {

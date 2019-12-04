@@ -20,16 +20,19 @@
 
 package org.neo4j.graphalgo.beta.pregel.examples;
 
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class ComputationTestUtil {
 
@@ -43,12 +46,11 @@ final class ComputationTestUtil {
             HugeDoubleArray computedValues,
             final long... values) {
         Map<Long, Long> expectedValues = new HashMap<>();
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             for (int i = 0; i < values.length; i++) {
                 expectedValues.put(db.findNode(nodeLabel, idProperty, i).getId(), values[i]);
             }
-            tx.success();
-        }
+        });
         expectedValues.forEach((idProp, expectedValue) -> {
             long neoId = graph.toOriginalNodeId(idProp);
             long computedValue = (long) computedValues.get(neoId);
@@ -68,12 +70,11 @@ final class ComputationTestUtil {
             double delta,
             final double... values) {
         Map<Long, Double> expectedValues = new HashMap<>();
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             for (int i = 0; i < values.length; i++) {
                 expectedValues.put(db.findNode(nodeLabel, idProperty, i).getId(), values[i]);
             }
-            tx.success();
-        }
+        });
 
         expectedValues.forEach((idProp, expectedValue) -> {
             long neoId = graph.toOriginalNodeId(idProp);

@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.IntIntScatterMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 class MSColoringTest {
 
@@ -80,19 +82,16 @@ class MSColoringTest {
     }
 
     private Runnable createRing(RelationshipType type) {
-        return () -> {
-            try (Transaction tx = db.beginTx()) {
-                Node node = db.createNode();
-                Node start = node;
-                for (int i = 1; i < SET_SIZE; i++) {
-                    Node temp = db.createNode();
-                    node.createRelationshipTo(temp, type);
-                    node = temp;
-                }
-                node.createRelationshipTo(start, type);
-                tx.success();
+        return () -> runInTransaction(db, () -> {
+            Node node = db.createNode();
+            Node start = node;
+            for (int i = 1; i < SET_SIZE; i++) {
+                Node temp = db.createNode();
+                node.createRelationshipTo(temp, type);
+                node = temp;
             }
-        };
+            node.createRelationshipTo(start, type);
+        });
     }
 
     @Test

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -50,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.canRunInParallel;
 
 class K1ColoringTest extends AlgoTestBase {
 
@@ -91,9 +93,7 @@ class K1ColoringTest extends AlgoTestBase {
                 .withName("cypher");
         }
 
-        try (Transaction tx = db.beginTx()) {
-            graph = graphLoader.load(graphImpl);
-        }
+        graph = QueryRunner.runInTransaction(db, () -> graphLoader.load(graphImpl));
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,

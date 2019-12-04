@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Matchers;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.function.DoubleConsumer;
 
@@ -86,13 +85,11 @@ final class ShortestPathsProcTest extends ProcTestBase {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ShortestPathsProc.class);
-
-        try (Transaction tx = db.beginTx()) {
-            runQuery(DB_CYPHER);
+        runQuery(DB_CYPHER);
+        QueryRunner.runInTransaction(db, () -> {
             startNode = db.findNode(Label.label("Node"), "name", "s").getId();
             endNode = db.findNode(Label.label("Node"), "name", "x").getId();
-            tx.success();
-        }
+        });
     }
 
     @AfterEach

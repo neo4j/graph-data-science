@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphdb.Transaction;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
@@ -81,10 +80,7 @@ class BetweennessCentralityProcTest_282 extends ProcTestBase {
                         "(g)-[:EDGE]->(h)";
 
         try (ProgressTimer timer = ProgressTimer.start(l -> System.out.printf("Setup took %d ms%n", l))) {
-            try (Transaction tx = db.beginTx()) {
-                runQuery(importQuery);
-                tx.success();
-            }
+            runQuery(importQuery);
         }
 
     }

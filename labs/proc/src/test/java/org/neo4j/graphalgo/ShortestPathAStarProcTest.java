@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,11 +77,7 @@ class ShortestPathAStarProcTest extends ProcTestBase {
                 "  (nP)-[:TYPE {cost:847.0}]->(nX)";
 
         db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            runQuery(createGraph);
-            tx.success();
-        }
-
+        runQuery(createGraph);
         registerProcedures(ShortestPathProc.class);
     }
 	

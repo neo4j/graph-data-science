@@ -25,7 +25,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.function.Consumer;
 
@@ -64,11 +63,7 @@ class MultistepSCCProcTest extends ProcTestBase{
                 " (i)-[:TYPE {cost:3}]->(g)";
 
         db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            runQuery(cypher);
-            tx.success();
-        }
-
+        runQuery(cypher);
         registerProcedures(StronglyConnectedComponentsProc.class);
     }
 

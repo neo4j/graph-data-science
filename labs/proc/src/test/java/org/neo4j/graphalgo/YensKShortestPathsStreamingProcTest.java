@@ -36,6 +36,7 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 /**
  * Graph:
@@ -163,23 +164,17 @@ class YensKShortestPathsStreamingProcTest extends ProcTestBase {
     }
 
     private List<Long> getNodeIds(String... nodes) {
-        List<Long> nodeIds;
-        try (Transaction tx = db.beginTx()) {
-            nodeIds = Arrays.stream(nodes)
-                    .map(name -> db.findNode(Label.label("Node"), "name", name).getId())
-                    .collect(toList());
-        }
-        return nodeIds;
+        return runInTransaction(db, () ->
+            Arrays.stream(nodes)
+                .map(name -> db.findNode(Label.label("Node"), "name", name).getId())
+                .collect(toList())
+        );
     }
     private List<Node> getNodes(String... nodes) {
-        List<Node> nodeIds;
-        try (Transaction tx = db.beginTx()) {
-            nodeIds = Arrays.stream(nodes)
-                    .map(name -> db.findNode(Label.label("Node"), "name", name))
-                    .collect(toList());
-        }
-        return nodeIds;
-
+        return runInTransaction(db, () ->
+            Arrays.stream(nodes)
+                .map(name -> db.findNode(Label.label("Node"), "name", name))
+                .collect(toList())
+        );
     }
-
 }

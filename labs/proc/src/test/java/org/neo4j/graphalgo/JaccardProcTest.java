@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.Collections;
 import java.util.Map;
@@ -36,7 +35,6 @@ import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class JaccardProcTest extends ProcTestBase {
 
-    private Transaction tx;
     private static final String STATEMENT_STREAM =
             " MATCH (p:Person)-[:LIKES]->(i:Item)" +
             " WITH {item:id(p), categories: collect(DISTINCT id(i))} AS userData" +
@@ -71,12 +69,10 @@ class JaccardProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(JaccardProc.class);
         runQuery(buildDatabaseQuery());
-        tx = db.beginTx();
     }
 
     @AfterEach
     void tearDown() {
-        tx.close();
         db.shutdown();
     }
 

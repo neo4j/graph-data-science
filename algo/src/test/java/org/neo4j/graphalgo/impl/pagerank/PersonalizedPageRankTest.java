@@ -41,6 +41,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class PersonalizedPageRankTest extends AlgoTestBase {
 
@@ -88,8 +89,7 @@ final class PersonalizedPageRankTest extends AlgoTestBase {
         Label productLabel = Label.label("Product");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-
+        runInTransaction(db, () -> {
             expected.put(db.findNode(personLabel, "name", "John").getId(), 0.24851499999999993);
             expected.put(db.findNode(personLabel, "name", "Jill").getId(), 0.12135449999999998);
             expected.put(db.findNode(personLabel, "name", "Mary").getId(), 0.12135449999999998);
@@ -100,18 +100,15 @@ final class PersonalizedPageRankTest extends AlgoTestBase {
             expected.put(db.findNode(productLabel, "name", "Fitbit Flex Wireless").getId(), 0.08085200000000001);
             expected.put(db.findNode(productLabel, "name", "Harry Potter").getId(), 0.01224);
             expected.put(db.findNode(productLabel, "name", "Hobbit").getId(), 0.01224);
-
-            tx.success();
-        }
+        });
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n) RETURN id(n) as id")
-                        .withRelationshipType("MATCH (n)-[:PURCHASED]-(m) RETURN id(n) as source,id(m) as target")
-                        .load(graphFactory);
-            }
+            graph = runInTransaction(db, () -> new GraphLoader(db)
+                .withLabel("MATCH (n) RETURN id(n) as id")
+                .withRelationshipType("MATCH (n)-[:PURCHASED]-(m) RETURN id(n) as source,id(m) as target")
+                .load(graphFactory)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withDirection(Direction.BOTH)
@@ -120,12 +117,10 @@ final class PersonalizedPageRankTest extends AlgoTestBase {
                     .load(graphFactory);
         }
 
-        LongStream sourceNodeIds;
-        try (Transaction tx = db.beginTx()) {
+        LongStream sourceNodeIds = runInTransaction(db, () -> {
             Node node = db.findNode(personLabel, "name", "John");
-            sourceNodeIds = LongStream.of(node.getId());
-            tx.success();
-        }
+            return LongStream.of(node.getId());
+        });
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
                 .create(graph, Pools.DEFAULT, 2, 1, DEFAULT_CONFIG, sourceNodeIds)

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
@@ -35,6 +34,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 
 class EigenvectorCentralityProcTest extends ProcTestBase {
@@ -51,29 +51,22 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
                 .setConfig(GraphDatabaseSettings.load_csv_file_url_root,file.getParent())
                 .newGraphDatabase();
 
-        try (Transaction tx = db.beginTx()) {
-            runQuery("CREATE CONSTRAINT ON (c:Character) " +
-                       "ASSERT c.id IS UNIQUE;");
-            tx.success();
-        }
+        runQuery("CREATE CONSTRAINT ON (c:Character) " +
+                 "ASSERT c.id IS UNIQUE;");
 
-        try (Transaction tx = db.beginTx()) {
-            runQuery("LOAD CSV WITH HEADERS FROM 'file:///got-s1-nodes.csv' AS row " +
-                       "MERGE (c:Character {id: row.Id}) " +
-                       "SET c.name = row.Label;");
+        runQuery("LOAD CSV WITH HEADERS FROM 'file:///got-s1-nodes.csv' AS row " +
+                 "MERGE (c:Character {id: row.Id}) " +
+                 "SET c.name = row.Label;");
 
-            runQuery("LOAD CSV WITH HEADERS FROM 'file:///got-s1-edges.csv' AS row " +
-                       "MATCH (source:Character {id: row.Source}) " +
-                       "MATCH (target:Character {id: row.Target}) " +
-                       "MERGE (source)-[rel:INTERACTS_SEASON1]->(target) " +
-                       "SET rel.weight = toInteger(row.Weight);");
-
-            tx.success();
-        }
+        runQuery("LOAD CSV WITH HEADERS FROM 'file:///got-s1-edges.csv' AS row " +
+                 "MATCH (source:Character {id: row.Source}) " +
+                 "MATCH (target:Character {id: row.Target}) " +
+                 "MERGE (source)-[rel:INTERACTS_SEASON1]->(target) " +
+                 "SET rel.weight = toInteger(row.Weight);");
 
         registerProcedures(EigenvectorCentralityProc.class);
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             final Label label = Label.label("Character");
             expected.put(db.findNode(label, "name", "Ned").getId(),     111.68570401574802);
             expected.put(db.findNode(label, "name", "Robert").getId(),  88.09448401574804);
@@ -85,8 +78,7 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
             expected.put(db.findNode(label, "name", "Arya").getId(),    73.32532401574804);
             expected.put(db.findNode(label, "name", "Petyr").getId(),   72.26733401574802);
             expected.put(db.findNode(label, "name", "Sansa").getId(),   71.56470401574803);
-            tx.success();
-        }
+        });
     }
 
     @AfterEach

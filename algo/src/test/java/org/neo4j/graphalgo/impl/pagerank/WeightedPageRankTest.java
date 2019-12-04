@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +39,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class WeightedPageRankTest extends AlgoTestBase {
 
@@ -126,7 +126,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 0.15);
             expected.put(db.findNode(label, "name", "b").getId(), 0.15);
             expected.put(db.findNode(label, "name", "c").getId(), 0.15);
@@ -137,19 +137,19 @@ final class WeightedPageRankTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.15);
             expected.put(db.findNode(label, "name", "i").getId(), 0.15);
             expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.success();
-        }
+        });
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                        .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                        .load(graphFactory);
-            }
+            graph = runInTransaction(
+                db,
+                () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                    .withRelationshipType(
+                        "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
+                    .load(graphFactory)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
@@ -180,7 +180,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 0.243007);
             expected.put(db.findNode(label, "name", "b").getId(), 1.9183995);
             expected.put(db.findNode(label, "name", "c").getId(), 1.7806315);
@@ -191,19 +191,19 @@ final class WeightedPageRankTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.15);
             expected.put(db.findNode(label, "name", "i").getId(), 0.15);
             expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.success();
-        }
+        });
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                        .withRelationshipProperties(PropertyMapping.of("weight", 1))
-                        .load(graphFactory);
-            }
+            graph = runInTransaction(
+                db,
+                () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                    .withRelationshipType(
+                        "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1))
+                    .load(graphFactory)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
@@ -234,7 +234,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 0.243007);
             expected.put(db.findNode(label, "name", "b").getId(), 1.9183995);
             expected.put(db.findNode(label, "name", "c").getId(), 1.7806315);
@@ -245,19 +245,19 @@ final class WeightedPageRankTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.15);
             expected.put(db.findNode(label, "name", "i").getId(), 0.15);
             expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.success();
-        }
+        });
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)-[r:TYPE2]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
-                        .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                        .load(graphFactory);
-            }
+            graph = runInTransaction(
+                db,
+                () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                    .withRelationshipType(
+                        "MATCH (n:Label1)-[r:TYPE2]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
+                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
+                    .load(graphFactory)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
@@ -288,7 +288,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 0.1900095);
             expected.put(db.findNode(label, "name", "b").getId(), 2.2152279);
             expected.put(db.findNode(label, "name", "c").getId(), 2.0325884);
@@ -299,19 +299,19 @@ final class WeightedPageRankTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.15);
             expected.put(db.findNode(label, "name", "i").getId(), 0.15);
             expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.success();
-        }
+        });
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
+            graph = runInTransaction(
+                db,
+                () -> new GraphLoader(db)
                         .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                         .withRelationshipType(
-                                "MATCH (n:Label1)-[r:TYPE3]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
+                            "MATCH (n:Label1)-[r:TYPE3]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
                         .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                        .load(graphFactory);
-            }
+                        .load(graphFactory)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
@@ -342,7 +342,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 0.1900095);
             expected.put(db.findNode(label, "name", "b").getId(), 2.2152279);
             expected.put(db.findNode(label, "name", "c").getId(), 2.0325884);
@@ -353,19 +353,19 @@ final class WeightedPageRankTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.15);
             expected.put(db.findNode(label, "name", "i").getId(), 0.15);
             expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.success();
-        }
+        });
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)-[r:TYPE4]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
-                        .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                        .load(graphFactory);
-            }
+            graph = runInTransaction(
+                db,
+                () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                    .withRelationshipType(
+                        "MATCH (n:Label1)-[r:TYPE4]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
+                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
+                    .load(graphFactory)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)

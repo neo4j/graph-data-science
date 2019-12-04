@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -44,6 +45,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class PageRankTest extends AlgoTestBase {
 
@@ -106,7 +108,7 @@ final class PageRankTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 0.243007);
             expected.put(db.findNode(label, "name", "b").getId(), 1.9183995);
             expected.put(db.findNode(label, "name", "c").getId(), 1.7806315);
@@ -117,17 +119,16 @@ final class PageRankTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.15);
             expected.put(db.findNode(label, "name", "i").getId(), 0.15);
             expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-        }
+        });
 
         final Graph graph;
         if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                        .load(graphImpl);
-            }
+            graph = runInTransaction(db, () -> new GraphLoader(db)
+                .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                .withRelationshipType(
+                    "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                .load(graphImpl)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
@@ -157,7 +158,7 @@ final class PageRankTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 0.15);
             expected.put(db.findNode(label, "name", "b").getId(), 0.3386727);
             expected.put(db.findNode(label, "name", "c").getId(), 0.2219679);
@@ -168,19 +169,17 @@ final class PageRankTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.15);
             expected.put(db.findNode(label, "name", "i").getId(), 0.15);
             expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.close();
-        }
+        });
 
         final Graph graph;
         final CentralityResult rankResult;
         if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source,id(m) AS target")
-                        .load(graphImpl);
-            }
+            graph = runInTransaction(db, () -> new GraphLoader(db)
+                .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                .withRelationshipType(
+                    "MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source,id(m) AS target")
+                .load(graphImpl)
+            );
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
                     .create(graph, DEFAULT_CONFIG, LongStream.empty())
                     .compute()
@@ -214,13 +213,12 @@ final class PageRankTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Graph graph;
         if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                        .load(graphImpl);
-            }
+            graph = runInTransaction(db, () -> new GraphLoader(db)
+                .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                .withRelationshipType(
+                    "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                .load(graphImpl)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)

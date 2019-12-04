@@ -34,12 +34,12 @@ import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class HugeGraphWeightTest {
 
@@ -91,7 +91,7 @@ final class HugeGraphWeightTest {
     private void mkDb(int nodes, int relsPerNode) {
         long[] nodeIds = new long[nodes];
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             for (int i = 0; i < nodes; i++) {
                 nodeIds[i] = db.createNode().getId();
             }
@@ -114,8 +114,7 @@ final class HugeGraphWeightTest {
                     }
                 }
             }
-            tx.success();
-        }
+        });
     }
 
     private Graph loadGraph(final GraphDatabaseAPI db) {

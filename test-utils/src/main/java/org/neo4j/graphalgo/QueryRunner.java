@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -31,6 +32,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
@@ -80,16 +82,31 @@ public final class QueryRunner {
         );
     }
 
+    public static <T> T runInTransaction(GraphDatabaseService db, Supplier<T> supplier) {
+        try (Transaction tx = db.beginTx()) {
+            T t = supplier.get();
+            tx.success();
+            return t;
+        }
+    }
+
+    public static void runInTransaction(GraphDatabaseService db, Runnable runnable) {
+        try (Transaction tx = db.beginTx()) {
+            runnable.run();
+            tx.success();
+        }
+    }
+
     private static KernelTransaction.Revertable withUsername(Transaction tx, String username) {
         InternalTransaction topLevelTransaction = (InternalTransaction) tx;
         AuthSubject subject = topLevelTransaction.securityContext().subject();
         SecurityContext securityContext = new SecurityContext(new CustomUserNameAuthSubject(username, subject), READ);
         return topLevelTransaction.overrideWith(securityContext);
     }
-
     private static class CustomUserNameAuthSubject implements AuthSubject {
 
         private final String username;
+
         private final AuthSubject authSubject;
 
         CustomUserNameAuthSubject(String username, AuthSubject authSubject) {
@@ -116,10 +133,11 @@ public final class QueryRunner {
         public boolean hasUsername(String username) {
             return this.username.equals(username);
         }
-
         @Override
         public String username() {
             return username;
         }
+
     }
+
 }

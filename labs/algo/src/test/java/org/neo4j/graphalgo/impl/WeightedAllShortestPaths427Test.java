@@ -25,6 +25,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CostEvaluator;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -38,7 +39,6 @@ import org.neo4j.graphalgo.impl.util.DoubleEvaluator;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -436,8 +436,9 @@ public class WeightedAllShortestPaths427Test extends AlgoTestBase {
         List<Result> expected = new ArrayList<>();
         ShortestPathDijkstra spd = new ShortestPathDijkstra(graph);
         List<Executable> assertions = new ArrayList<>();
-        try (Transaction tx = db.beginTx()) {
-            graph.forEachNode(algoSourceId -> {
+        QueryRunner.runInTransaction(
+            db,
+            () -> graph.forEachNode(algoSourceId -> {
                 long neoSourceId = graph.toOriginalNodeId(algoSourceId);
                 TestDijkstra dijkstra = new TestDijkstra(db.getNodeById(neoSourceId), withWeights);
                 graph.forEachNode(algoTargetId -> {
@@ -453,8 +454,8 @@ public class WeightedAllShortestPaths427Test extends AlgoTestBase {
                         if (path != null) {
                             Double cost = dijkstra.getCalculatedCost(targetNode);
                             long[] pathIds = path.stream()
-                                    .mapToLong(Node::getId)
-                                    .toArray();
+                                .mapToLong(Node::getId)
+                                .toArray();
                             neoResult = new Result(neoSourceId, neoTargetId, cost, pathIds);
                             expected.add(neoResult);
                         }
@@ -464,28 +465,27 @@ public class WeightedAllShortestPaths427Test extends AlgoTestBase {
                             double totalCost = spd.getTotalCost();
                             if (totalCost != ShortestPathDijkstra.NO_PATH_FOUND) {
                                 long[] pathIds = Arrays.stream(spd.getFinalPath().toArray())
-                                        .mapToLong(graph::toOriginalNodeId)
-                                        .toArray();
+                                    .mapToLong(graph::toOriginalNodeId)
+                                    .toArray();
                                 algoResult = new Result(neoSourceId, neoTargetId, totalCost, pathIds);
                             }
 
                             final Result expect = neoResult;
                             final Result actual = algoResult;
                             assertions.add(
-                                    () -> assertEquals(
-                                            expect,
-                                            actual,
-                                            String.format("Neo vs Algo (%d)-[*]->(%d)", neoSourceId, neoTargetId)
-                                    )
+                                () -> assertEquals(
+                                    expect,
+                                    actual,
+                                    String.format("Neo vs Algo (%d)-[*]->(%d)", neoSourceId, neoTargetId)
+                                )
                             );
                         }
                     }
                     return true;
                 });
                 return true;
-            });
-            tx.success();
-        }
+            })
+        );
         assertAll(assertions);
 
         expected.sort(Comparator.naturalOrder());
@@ -494,28 +494,28 @@ public class WeightedAllShortestPaths427Test extends AlgoTestBase {
 
     private void compare(MSBFSASPAlgorithm<?> asp, List<Result> expected) {
         List<Result> results = asp.resultStream()
-                .filter(r -> r.sourceNodeId != r.targetNodeId)
-                .map(r -> new Result(
-                        r.sourceNodeId,
-                        r.targetNodeId,
-                        r.distance,
-                        null))
-                .sorted()
-                .collect(toList());
+            .filter(r -> r.sourceNodeId != r.targetNodeId)
+            .map(r -> new Result(
+                r.sourceNodeId,
+                r.targetNodeId,
+                r.distance,
+                null
+            ))
+            .sorted()
+            .collect(toList());
 
         assertAll(
-                IntStream.range(0, expected.size())
-                        .mapToObj((i) -> {
-                            Result expect = expected.get(i);
-                            Result actual = results.get(i);
-                            return () -> assertEquals(
-                                    expect,
-                                    actual,
-                                    String.format("Neo vs wASP (%d)-[*]->(%d)", expect.source, expect.target)
-                            );
-                        })
+            IntStream.range(0, expected.size())
+                .mapToObj((i) -> {
+                    Result expect = expected.get(i);
+                    Result actual = results.get(i);
+                    return () -> assertEquals(
+                        expect,
+                        actual,
+                        String.format("Neo vs wASP (%d)-[*]->(%d)", expect.source, expect.target)
+                    );
+                })
         );
-
     }
 
     private static final class TestDijkstra extends SingleSourceShortestPathDijkstra<Double> {

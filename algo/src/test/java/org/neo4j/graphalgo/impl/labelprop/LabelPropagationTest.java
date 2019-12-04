@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
@@ -102,9 +103,7 @@ final class LabelPropagationTest extends AlgoTestBase {
                     .withRelationshipType("FOLLOW")
                     .withName(graphImpl.getSimpleName());
         }
-        try (Transaction tx = db.beginTx()) {
-            return graphLoader.load(graphImpl);
-        }
+        return QueryRunner.runInTransaction(db, () -> graphLoader.load(graphImpl));
     }
 
     @AllGraphTypesTest

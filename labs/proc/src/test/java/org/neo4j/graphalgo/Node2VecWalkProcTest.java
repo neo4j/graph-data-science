@@ -28,7 +28,6 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Iterators;
 
 import java.util.Collections;
@@ -41,24 +40,21 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 class Node2VecWalkProcTest extends ProcTestBase {
 
     private static final int NODE_COUNT = 54;
-
-    private Transaction tx;
 
     @BeforeEach
     void beforeClass() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(NodeWalkerProc.class);
         runQuery(buildDatabaseQuery(), Collections.singletonMap("count",NODE_COUNT-4));
-        tx = db.beginTx();
     }
 
     @AfterEach
     void AfterClass() {
-        tx.close();
         db.shutdown();
     }
 
@@ -104,17 +100,19 @@ class Node2VecWalkProcTest extends ProcTestBase {
     @Test
     void shouldHaveSameTypesForStartNodesRandom() {
         // TODO: make this test predictable (i.e. set random seed)
-        ResourceIterator<Path> results = runQuery("CALL algo.randomWalk.stream('Fred', 2, 5,{path:true})").columnAs("path");
-        int count = 0;
-        while (results.hasNext()) {
-            Path path = results.next();
-            assertTrue(path.startNode().hasLabel(Label.label("Fred")), "Nodes should be of type 'Fred'.");
-            assertEquals(2, path.length());
-            Relationship firstRel = path.relationships().iterator().next();
-            assertEquals(path.startNode(), firstRel.getStartNode());
-            count ++;
-        }
-        assertEquals(5, count);
+        runInTransaction(db, () -> {
+            ResourceIterator<Path> results = runQuery("CALL algo.randomWalk.stream('Fred', 2, 5,{path:true})").columnAs("path");
+            int count = 0;
+            while (results.hasNext()) {
+                Path path = results.next();
+                assertTrue(path.startNode().hasLabel(Label.label("Fred")), "Nodes should be of type 'Fred'.");
+                assertEquals(2, path.length());
+                Relationship firstRel = path.relationships().iterator().next();
+                assertEquals(path.startNode(), firstRel.getStartNode());
+                count++;
+            }
+            assertEquals(5, count);
+        });
     }
 
     @Test

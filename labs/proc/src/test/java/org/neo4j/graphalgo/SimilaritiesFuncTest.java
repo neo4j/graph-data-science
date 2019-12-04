@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -77,21 +76,17 @@ public class SimilaritiesFuncTest extends ProcTestBase {
                         "ORDER BY name ASC\n" +
                         "WITH name, toFloat(cosineSim*10000.0) AS cosineSim\n" +
                         "RETURN name, toString(toInteger(cosineSim)/10000.0) as cosineSim";
-        String bobSimilarity;
-        String jimSimilarity;
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            bobSimilarity = (String) result.next().get("cosineSim");
-            jimSimilarity = (String) result.next().get("cosineSim");
-        }
+        Result result1 = runQuery(controlQuery);
+        String bobSimilarity = (String) result1.next().get("cosineSim");
+        String jimSimilarity = (String) result1.next().get("cosineSim");
 
-        Result result = runQuery(
+        Result result2 = runQuery(
                 "MATCH (p1:Employee)-[x:HAS_SKILL]->(sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
                         "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) as v1, COLLECT(coalesce(y.proficiency, 0.0d)) as v2\n" +
                         "WITH p1.name as name, algo.similarity.cosine(v1, v2) as cosineSim ORDER BY name ASC\n" +
                         "RETURN name, toString(toInteger(cosineSim*10000)/10000.0) as cosineSim");
-        assertEquals(bobSimilarity, result.next().get("cosineSim"));
-        assertEquals(jimSimilarity, result.next().get("cosineSim"));
+        assertEquals(bobSimilarity, result2.next().get("cosineSim"));
+        assertEquals(jimSimilarity, result2.next().get("cosineSim"));
     }
 
     @Test
@@ -108,15 +103,11 @@ public class SimilaritiesFuncTest extends ProcTestBase {
                         "ORDER BY name ASC\n" +
                         "WITH name, toFloat(cosineSim*10000.0) AS cosineSim\n" +
                         "RETURN name, toString(toInteger(cosineSim)/10000.0) as cosineSim";
-        String bobSimilarity;
-        String jimSimilarity;
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            bobSimilarity = (String) result.next().get("cosineSim");
-            jimSimilarity = (String) result.next().get("cosineSim");
-        }
+        Result result1 = runQuery(controlQuery);
+        String bobSimilarity = (String) result1.next().get("cosineSim");
+        String jimSimilarity = (String) result1.next().get("cosineSim");
 
-        Result result = runQuery(
+        Result result2 = runQuery(
                 "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
                         "MATCH (p1:Employee)\n" +
                         "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
@@ -124,8 +115,8 @@ public class SimilaritiesFuncTest extends ProcTestBase {
                         "WITH p1.name as name, algo.similarity.cosine(v1, v2) as cosineSim ORDER BY name ASC\n" +
                         "RETURN name, toString(toInteger(cosineSim*10000)/10000.0) as cosineSim");
 
-        assertEquals(bobSimilarity, result.next().get("cosineSim"));
-        assertEquals(jimSimilarity, result.next().get("cosineSim"));
+        assertEquals(bobSimilarity, result2.next().get("cosineSim"));
+        assertEquals(jimSimilarity, result2.next().get("cosineSim"));
     }
 
     @Test
@@ -144,15 +135,11 @@ public class SimilaritiesFuncTest extends ProcTestBase {
                         "WITH p1.name AS name, nom/denom AS pearson ORDER BY name ASC "+
                 "RETURN name, toString(toInteger(pearson*10000)/10000.0) as pearsonSim";
 
-        String bobSimilarity;
-        String jimSimilarity;
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            bobSimilarity = (String) result.next().get("pearsonSim");
-            jimSimilarity = (String) result.next().get("pearsonSim");
-        }
+        Result result1 = runQuery(controlQuery);
+        String bobSimilarity = (String) result1.next().get("pearsonSim");
+        String jimSimilarity = (String) result1.next().get("pearsonSim");
 
-        Result result = runQuery(
+        Result result2 = runQuery(
                 "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
                         "MATCH (p1:Employee)\n" +
                         "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
@@ -160,8 +147,8 @@ public class SimilaritiesFuncTest extends ProcTestBase {
                         "WITH p1.name as name, algo.similarity.pearson(v1, v2) as pearsonSim ORDER BY name ASC\n" +
                         "RETURN name, toString(toInteger(pearsonSim*10000)/10000.0) as pearsonSim");
 
-        assertEquals(bobSimilarity, result.next().get("pearsonSim"));
-        assertEquals(jimSimilarity, result.next().get("pearsonSim"));
+        assertEquals(bobSimilarity, result2.next().get("pearsonSim"));
+        assertEquals(jimSimilarity, result2.next().get("pearsonSim"));
 
     }
 
@@ -174,15 +161,11 @@ public class SimilaritiesFuncTest extends ProcTestBase {
                         "WITH SQRT(SUM((coalesce(x.proficiency,0) - coalesce(y.proficiency, 0))^2)) AS euclidDist, p1, p2\n" +
                         "ORDER BY p1.name ASC\n" +
                         "RETURN p1.name, toString(toInteger(euclidDist*10000)/10000.0) as euclidDist";
-        String bobDist;
-        String jimDist;
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            bobDist = (String) result.next().get("euclidDist");
-            jimDist = (String) result.next().get("euclidDist");
-        }
+        Result result1 = runQuery(controlQuery);
+        String bobDist = (String) result1.next().get("euclidDist");
+        String jimDist = (String) result1.next().get("euclidDist");
 
-        Result result = runQuery(
+        Result result2 = runQuery(
                 "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
                         "MATCH (p1:Employee)\n" +
                         "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
@@ -190,9 +173,8 @@ public class SimilaritiesFuncTest extends ProcTestBase {
                         "WITH p1.name as name, algo.similarity.euclideanDistance(v1, v2) as euclidDist ORDER BY name ASC\n" +
                         "RETURN name, toString(toInteger(euclidDist*10000)/10000.0) as euclidDist");
 
-        assertEquals(bobDist, result.next().get("euclidDist"));
-        assertEquals(jimDist, result.next().get("euclidDist"));
-
+        assertEquals(bobDist, result2.next().get("euclidDist"));
+        assertEquals(jimDist, result2.next().get("euclidDist"));
     }
 
     @Test
@@ -203,22 +185,18 @@ public class SimilaritiesFuncTest extends ProcTestBase {
                 "WITH p1.name as name1, p2.name as name2, toFloat(intersection) / (d1+d2-intersection) as jaccardSim\n" +
                 "ORDER BY name1,name2\n" +
                 "RETURN name1,name2, toString(toInteger(jaccardSim*10000)/10000.0) as jaccardSim";
-        String bobSim;
-        String jimSim;
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            bobSim = (String) result.next().get("jaccardSim");
-            jimSim = (String) result.next().get("jaccardSim");
-        }
+        Result result1 = runQuery(controlQuery);
+        String bobSim = (String) result1.next().get("jaccardSim");
+        String jimSim = (String) result1.next().get("jaccardSim");
 
-        Result result = runQuery(
+        Result result2 = runQuery(
                         "MATCH (p1:Employee),(p2:Employee) WHERE p1 <> p2\n" +
                         "WITH p1, [(p1)-[:HAS_SKILL]->(sk) | id(sk)] as v1, p2, [(p2)-[:HAS_SKILL]->(sk) | id(sk)] as v2\n" +
                         "WITH p1.name as name1, p2.name as name2, algo.similarity.jaccard(v1, v2) as jaccardSim ORDER BY name1,name2\n" +
                         "RETURN name1, name2, toString(toInteger(jaccardSim*10000)/10000.0) as jaccardSim");
 
-        assertEquals(bobSim, result.next().get("jaccardSim"));
-        assertEquals(jimSim, result.next().get("jaccardSim"));
+        assertEquals(bobSim, result2.next().get("jaccardSim"));
+        assertEquals(jimSim, result2.next().get("jaccardSim"));
     }
     
     @Test
@@ -229,22 +207,18 @@ public class SimilaritiesFuncTest extends ProcTestBase {
                         "WITH p1.name as name1, p2.name as name2, toFloat(intersection) / CASE WHEN d1 > d2 THEN d2 ELSE d1 END as overlapSim\n" +
                         "ORDER BY name1,name2\n" +
                         "RETURN name1,name2, toString(toInteger(overlapSim*10000)/10000.0) as overlapSim";
-        String bobSim;
-        String jimSim;
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            bobSim = (String) result.next().get("overlapSim");
-            jimSim = (String) result.next().get("overlapSim");
-        }
+        Result results = runQuery(controlQuery);
+        String bobSim = (String) results.next().get("overlapSim");
+        String jimSim = (String) results.next().get("overlapSim");
 
-        Result result = runQuery(
+        Result result2 = runQuery(
                 "MATCH (p1:Employee),(p2:Employee) WHERE p1 <> p2\n" +
                         "WITH p1, [(p1)-[:HAS_SKILL]->(sk) | id(sk)] as v1, p2, [(p2)-[:HAS_SKILL]->(sk) | id(sk)] as v2\n" +
                         "WITH p1.name as name1, p2.name as name2, algo.similarity.overlap(v1, v2) as overlapSim ORDER BY name1,name2\n" +
                         "RETURN name1, name2, toString(toInteger(overlapSim*10000)/10000.0) as overlapSim");
 
-        assertEquals(bobSim, result.next().get("overlapSim"));
-        assertEquals(jimSim, result.next().get("overlapSim"));
+        assertEquals(bobSim, result2.next().get("overlapSim"));
+        assertEquals(jimSim, result2.next().get("overlapSim"));
     }
 
     @Test
@@ -257,15 +231,11 @@ public class SimilaritiesFuncTest extends ProcTestBase {
                         "WITH p1.name as name, 1 / (1 + euclidDist) as euclidSim\n" +
                         "ORDER BY name ASC\n" +
                         "RETURN name, toString(toInteger(euclidSim*10000)/10000.0) as euclidSim";
-        String bobSim;
-        String jimSim;
-        try (Transaction tx = db.beginTx()) {
-            Result result = runQuery(controlQuery);
-            bobSim = (String) result.next().get("euclidSim");
-            jimSim = (String) result.next().get("euclidSim");
-        }
+        Result result1 = runQuery(controlQuery);
+        String bobSim = (String) result1.next().get("euclidSim");
+        String jimSim = (String) result1.next().get("euclidSim");
 
-        Result result = runQuery(
+        Result result2 = runQuery(
                 "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
                         "MATCH (p1:Employee)\n" +
                         "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
@@ -273,7 +243,7 @@ public class SimilaritiesFuncTest extends ProcTestBase {
                         "WITH p1.name as name, algo.similarity.euclidean(v1, v2) as euclidSim ORDER BY name ASC\n" +
                         "RETURN name, toString(toInteger(euclidSim*10000)/10000.0) as euclidSim");
 
-        assertEquals(bobSim, result.next().get("euclidSim"));
-        assertEquals(jimSim, result.next().get("euclidSim"));
+        assertEquals(bobSim, result2.next().get("euclidSim"));
+        assertEquals(jimSim, result2.next().get("euclidSim"));
     }
 }

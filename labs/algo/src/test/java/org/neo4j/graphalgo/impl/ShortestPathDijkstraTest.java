@@ -33,13 +33,13 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class ShortestPathDijkstraTest extends AlgoTestBase {
 
@@ -246,7 +246,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
             Label label,
             RelationshipType type,
             String... kvPairs) {
-        try (Transaction tx = db.beginTx()) {
+        return runInTransaction(db, () -> {
             double weight = 0.0;
             Node prev = null;
             long[] nodeIds = new long[kvPairs.length / 2];
@@ -264,9 +264,8 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 }
                 prev = current;
             }
-            tx.success();
             return new ShortestPath(nodeIds, weight);
-        }
+        });
     }
 
     private static final class ShortestPath {

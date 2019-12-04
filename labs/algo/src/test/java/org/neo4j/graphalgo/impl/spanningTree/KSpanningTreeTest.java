@@ -31,10 +31,10 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 /**
  *          1
@@ -110,13 +110,12 @@ class KSpanningTreeTest extends AlgoTestBase {
                 .undirected()
                 .load(graphImpl);
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             a = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "a").getId()));
             b = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "b").getId()));
             c = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "c").getId()));
             d = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "d").getId()));
             x = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "x").getId()));
-            tx.success();
-        }
+        });
     }
 }

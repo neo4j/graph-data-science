@@ -38,7 +38,6 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -46,6 +45,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 
 class IncrementalWCCTest {
@@ -70,14 +70,13 @@ class IncrementalWCCTest {
     @BeforeEach
     void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             for (int i = 0; i < COMMUNITY_COUNT; i = i + 2) {
                 long community1 = createLineGraph(db);
                 long community2 = createLineGraph(db);
                 createConnection(db, community1, community2);
             }
-            tx.success();
-        }
+        });
     }
 
     @AfterEach

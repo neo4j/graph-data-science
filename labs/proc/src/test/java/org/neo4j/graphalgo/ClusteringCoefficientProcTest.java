@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
-import org.neo4j.graphdb.Transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -74,10 +73,7 @@ class ClusteringCoefficientProcTest extends ProcTestBase {
 
         registerProcedures(TriangleProc.class);
 
-        try (Transaction tx = db.beginTx()) {
-            runQuery(cypher);
-            tx.success();
-        }
+        runQuery(cypher);
     }
 
     @AfterEach

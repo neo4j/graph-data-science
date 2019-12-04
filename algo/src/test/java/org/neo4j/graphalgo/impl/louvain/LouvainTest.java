@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
@@ -413,8 +414,6 @@ class LouvainTest extends AlgoTestBase {
                 .withLabel("Node");
         }
         loader.withDirection(direction);
-        try (Transaction tx = db.beginTx()) {
-            return loader.load(graphImpl);
-        }
+        return QueryRunner.runInTransaction(db, () -> loader.load(graphImpl));
     }
 }

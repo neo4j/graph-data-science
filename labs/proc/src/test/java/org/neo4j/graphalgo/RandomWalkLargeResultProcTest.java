@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Iterators;
 
 import java.util.Collections;
@@ -34,19 +33,15 @@ class RandomWalkLargeResultProcTest extends ProcTestBase {
 
     private static final int NODE_COUNT = 20000;
 
-    private Transaction tx;
-
     @BeforeEach
     void beforeClass() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(NodeWalkerProc.class);
         runQuery(buildDatabaseQuery(), Collections.singletonMap("count",NODE_COUNT));
-        tx = db.beginTx();
     }
 
     @AfterEach
     void AfterClass() {
-        tx.close();
         db.shutdown();
     }
 

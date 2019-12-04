@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphdb.Transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -61,12 +60,7 @@ public class PrimProcTest extends ProcTestBase {
                 "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
 
         db = TestDatabaseCreator.createTestDatabase();
-
-        try (Transaction tx = db.beginTx()) {
-            runQuery(cypher);
-            tx.success();
-        }
-
+        runQuery(cypher);
         registerProcedures(PrimProc.class);
     }
 

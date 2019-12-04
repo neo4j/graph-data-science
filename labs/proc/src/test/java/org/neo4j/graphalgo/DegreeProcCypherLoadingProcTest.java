@@ -24,13 +24,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 class DegreeProcCypherLoadingProcTest extends ProcTestBase {
 
@@ -66,17 +66,14 @@ class DegreeProcCypherLoadingProcTest extends ProcTestBase {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            runQuery(DB_CYPHER);
-            tx.success();
-        }
+        runQuery(DB_CYPHER);
 
         graphImpl = "cypher";
 
         registerProcedures(DegreeCentralityProc.class);
 
-        try (Transaction tx = db.beginTx()) {
-            final Label label = Label.label("Label1");
+        runInTransaction(db, () -> {
+            Label label = Label.label("Label1");
             incomingExpected.put(db.findNode(label, "name", "a").getId(), 0.0);
             incomingExpected.put(db.findNode(label, "name", "b").getId(), 1.0);
             incomingExpected.put(db.findNode(label, "name", "c").getId(), 2.0);
@@ -100,9 +97,7 @@ class DegreeProcCypherLoadingProcTest extends ProcTestBase {
             outgoingWeightedExpected.put(db.findNode(label, "name", "a").getId(), 12.2);
             outgoingWeightedExpected.put(db.findNode(label, "name", "b").getId(), 5.0);
             outgoingWeightedExpected.put(db.findNode(label, "name", "c").getId(), 0.0);
-
-            tx.success();
-        }
+        });
     }
 
     @Test

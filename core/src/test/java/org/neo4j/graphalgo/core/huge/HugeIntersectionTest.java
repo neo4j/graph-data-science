@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -36,6 +35,7 @@ import java.util.PrimitiveIterator;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class HugeIntersectionTest {
 
@@ -53,8 +53,7 @@ final class HugeIntersectionTest {
         db = TestDatabaseCreator.createTestDatabase();
         Random random = new Random(0L);
         long[] neoStarts = new long[2];
-        long[] neoTargets;
-        try (Transaction tx = db.beginTx()) {
+        long[] neoTargets = runInTransaction(db, () -> {
             Node start1 = db.createNode();
             Node start2 = db.createNode();
             Node start3 = db.createNode();
@@ -72,9 +71,8 @@ final class HugeIntersectionTest {
                     targets[some++] = target.getId();
                 }
             }
-            tx.success();
-            neoTargets = Arrays.copyOf(targets, some);
-        }
+            return Arrays.copyOf(targets, some);
+        });
 
         final Graph graph = new GraphLoader(db).undirected().load(HugeGraphFactory.class);
         INTERSECT = graph.intersection();

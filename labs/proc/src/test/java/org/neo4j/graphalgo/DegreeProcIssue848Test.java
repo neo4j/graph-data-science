@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,11 +37,7 @@ class DegreeProcIssue848Test extends ProcTestBase {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            runQuery(DB_CYPHER);
-            tx.success();
-        }
-
+        runQuery(DB_CYPHER);
         registerProcedures(DegreeCentralityProc.class);
     }
 

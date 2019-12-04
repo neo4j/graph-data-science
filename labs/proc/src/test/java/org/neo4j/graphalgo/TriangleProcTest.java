@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.HashSet;
 
@@ -77,23 +76,17 @@ class TriangleProcTest extends ProcTestBase {
                 " (i)-[:TYPE]->(g)";
 
         db = TestDatabaseCreator.createTestDatabase();
-
         registerProcedures(TriangleProc.class);
-
-        try (Transaction tx = db.beginTx()) {
-            runQuery(cypher);
-            tx.success();
-        }
+        runQuery(cypher);
 
         idToName = new String[9];
 
-        try (Transaction tx = db.beginTx()) {
+        QueryRunner.runInTransaction(db, () -> {
             for (int i = 0; i < 9; i++) {
                 final String name = (String) db.getNodeById(i).getProperty("name");
                 idToName[i] = name;
             }
-            tx.success();
-        }
+        });
     }
 
     @AfterEach

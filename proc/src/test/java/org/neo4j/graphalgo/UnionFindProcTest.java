@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -75,12 +74,7 @@ public class UnionFindProcTest extends ProcTestBase {
                 ",(nI)-[:TYPE_1]->(nJ)";
 
         db = TestDatabaseCreator.createTestDatabase();
-
-        try (Transaction tx = db.beginTx()) {
-            runQuery(createGraph);
-            tx.success();
-        }
-
+        runQuery(createGraph);
         registerProcedures(UnionFindProc.class, GraphLoadProc.class);
     }
 

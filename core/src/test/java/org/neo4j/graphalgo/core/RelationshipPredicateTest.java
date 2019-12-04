@@ -27,11 +27,11 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 /**
@@ -63,12 +63,11 @@ class RelationshipPredicateTest {
     void setupGraph() {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(db, DB_CYPHER);
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             nodeA = db.findNode(LABEL, "name", "a").getId();
             nodeB = db.findNode(LABEL, "name", "b").getId();
             nodeC = db.findNode(LABEL, "name", "c").getId();
-            tx.success();
-        }
+        });
     }
 
     @AfterEach

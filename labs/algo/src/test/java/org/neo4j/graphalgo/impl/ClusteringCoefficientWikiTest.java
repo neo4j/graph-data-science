@@ -30,8 +30,6 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,10 +67,7 @@ class ClusteringCoefficientWikiTest extends AlgoTestBase {
                 " (a)-[:TYPE]->(d),\n" +
                 " (b)-[:TYPE]->(d)";
 
-        try (Transaction tx = db.beginTx()) {
-            runQuery(cypher);
-            tx.success();
-        }
+        runQuery(cypher);
 
         graph = new GraphLoader(db)
                 .withAnyLabel()

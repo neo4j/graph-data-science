@@ -31,10 +31,10 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class HugeGraphLoadingTest {
 
@@ -73,13 +73,12 @@ final class HugeGraphLoadingTest {
         // something larger than one batch
         int nodeCount = 60_000;
         Label label = Label.label("Foo");
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             for (int j = 0; j < nodeCount; j++) {
                 Node node = db.createNode(label);
                 node.setProperty("bar", node.getId());
             }
-            tx.success();
-        }
+        });
 
         Graph graph = new GraphLoader(db)
                 .withDirection(Direction.OUTGOING)
@@ -112,12 +111,11 @@ final class HugeGraphLoadingTest {
         final int pages = 10;
         int nodeCount = recordsPerPage * pages;
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             for (int i = 0; i < nodeCount; i++) {
                 db.createNode();
             }
-            tx.success();
-        }
+        });
 
         final Graph graph = new GraphLoader(db).load(HugeGraphFactory.class);
 
@@ -130,7 +128,7 @@ final class HugeGraphLoadingTest {
         int nodeCount = 1_000;
         int parallelEdgeCount = 10;
 
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             Node n0 = db.createNode();
             Node n1 = db.createNode();
             Node last = null;
@@ -143,8 +141,7 @@ final class HugeGraphLoadingTest {
             for (int i = 0; i < parallelEdgeCount; i++) {
                 n0.createRelationshipTo(last, fooRelType);
             }
-            tx.success();
-        }
+        });
 
         final Graph graph = new GraphLoader(db)
                 .withDirection(Direction.OUTGOING)

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.degree;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -33,14 +34,13 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class DegreeCentralityTest extends AlgoTestBase {
 
@@ -121,29 +121,30 @@ final class DegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "b").getId(), 1.0);
-            expected.put(db.findNode(label, "name", "c").getId(), 1.0);
-            expected.put(db.findNode(label, "name", "d").getId(), 2.0);
-            expected.put(db.findNode(label, "name", "e").getId(), 3.0);
-            expected.put(db.findNode(label, "name", "f").getId(), 2.0);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.0);
-            tx.success();
-        }
+        runInTransaction(db, () -> {
+                expected.put(db.findNode(label, "name", "a").getId(), 0.0);
+                expected.put(db.findNode(label, "name", "b").getId(), 1.0);
+                expected.put(db.findNode(label, "name", "c").getId(), 1.0);
+                expected.put(db.findNode(label, "name", "d").getId(), 2.0);
+                expected.put(db.findNode(label, "name", "e").getId(), 3.0);
+                expected.put(db.findNode(label, "name", "f").getId(), 2.0);
+                expected.put(db.findNode(label, "name", "g").getId(), 0.0);
+                expected.put(db.findNode(label, "name", "h").getId(), 0.0);
+                expected.put(db.findNode(label, "name", "i").getId(), 0.0);
+                expected.put(db.findNode(label, "name", "j").getId(), 0.0);
+            }
+        );
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                        .load(graphFactory);
-            }
+            graph = QueryRunner.runInTransaction(
+                db,
+                () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                    .withRelationshipType(
+                        "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target")
+                    .load(graphFactory)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
@@ -177,38 +178,38 @@ final class DegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 1.0);
-            expected.put(db.findNode(label, "name", "b").getId(), 4.0);
-            expected.put(db.findNode(label, "name", "c").getId(), 1.0);
-            expected.put(db.findNode(label, "name", "d").getId(), 1.0);
-            expected.put(db.findNode(label, "name", "e").getId(), 1.0);
-            expected.put(db.findNode(label, "name", "f").getId(), 1.0);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.0);
-            tx.success();
-        }
+        runInTransaction(db, () -> {
+                expected.put(db.findNode(label, "name", "a").getId(), 1.0);
+                expected.put(db.findNode(label, "name", "b").getId(), 4.0);
+                expected.put(db.findNode(label, "name", "c").getId(), 1.0);
+                expected.put(db.findNode(label, "name", "d").getId(), 1.0);
+                expected.put(db.findNode(label, "name", "e").getId(), 1.0);
+                expected.put(db.findNode(label, "name", "f").getId(), 1.0);
+                expected.put(db.findNode(label, "name", "g").getId(), 0.0);
+                expected.put(db.findNode(label, "name", "h").getId(), 0.0);
+                expected.put(db.findNode(label, "name", "i").getId(), 0.0);
+                expected.put(db.findNode(label, "name", "j").getId(), 0.0);
+            }
+        );
 
-        Direction direction = Direction.INCOMING;
-
+        final Direction direction;
         final Graph graph;
 
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
             // For Cypher we always treat the graph as outgoing, and let the user
             // handle the direction in the Cypher query
             direction = Direction.OUTGOING;
-
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                        .withRelationshipType(
-                                "MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                        .withDirection(direction)
-                        .load(graphFactory);
-            }
+            graph = QueryRunner.runInTransaction(
+                db,
+                () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                    .withRelationshipType(
+                        "MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
+                    .withDirection(direction)
+                    .load(graphFactory)
+            );
         } else {
+            direction = Direction.INCOMING;
             graph = new GraphLoader(db)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
@@ -237,7 +238,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
 
         // if there are 2 relationships between a pair of nodes these get squashed into a single relationship
         // when we use an undirected graph
-        try (Transaction tx = db.beginTx()) {
+        runInTransaction(db, () -> {
             expected.put(db.findNode(label, "name", "a").getId(), 1.0);
             expected.put(db.findNode(label, "name", "b").getId(), 4.0);
             expected.put(db.findNode(label, "name", "c").getId(), 1.0);
@@ -248,18 +249,18 @@ final class DegreeCentralityTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "h").getId(), 0.0);
             expected.put(db.findNode(label, "name", "i").getId(), 0.0);
             expected.put(db.findNode(label, "name", "j").getId(), 0.0);
-            tx.success();
-        }
+        });
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            try (Transaction tx = db.beginTx()) {
-                graph = new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                        .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                        .withDeduplicationStrategy(DeduplicationStrategy.SINGLE)
-                        .load(graphFactory);
-            }
+            graph = QueryRunner.runInTransaction(
+                db,
+                () -> new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                    .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
+                    .withDeduplicationStrategy(DeduplicationStrategy.SINGLE)
+                    .load(graphFactory)
+            );
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
