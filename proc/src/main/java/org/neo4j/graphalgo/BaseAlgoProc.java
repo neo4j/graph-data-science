@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
+import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -162,16 +164,29 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         Map<String, Object> configuration
     ) {
         ImmutableComputationResult.Builder<A, RESULT, CONFIG> builder = ImmutableComputationResult.builder();
+        AllocationTracker tracker = AllocationTracker.create();
 
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.first();
 
         Graph graph;
+
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
             graph = createGraph(input);
         }
 
-        AllocationTracker tracker = AllocationTracker.create();
+        if (graph.isEmpty()) {
+            return builder
+                .isEmpty(true)
+                .graph(graph)
+                .config(config)
+                .tracker(tracker)
+                .computeMillis(0)
+                .result(null)
+                .algorithm(null)
+                .build();
+        }
+
 
         A algo = newAlgorithm(graph, config, tracker);
 
@@ -246,8 +261,10 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
         long computeMillis();
 
+        @Nullable
         A algorithm();
 
+        @Nullable
         RESULT result();
 
         Graph graph();
@@ -255,5 +272,10 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         AllocationTracker tracker();
 
         CONFIG config();
+
+        @Value.Default
+        default Boolean isEmpty() {
+            return false;
+        }
     }
 }

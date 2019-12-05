@@ -108,15 +108,15 @@ class EmptyGraphProcTest extends ProcTestBase {
 
     @Test
     public void testLouvainStream() {
-        Result result = runQuery("CALL algo.louvain.stream('', '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL gds.algo.louvain.stream({})");
         assertFalse(result.hasNext());
     }
 
     @Test
     public void testLouvain() throws Exception {
         runQuery(
-            "CALL algo.louvain('', '', {graph:'" + graphImpl + "'})",
-            row -> assertEquals(0L, row.getNumber("nodes"))
+            "CALL gds.algo.louvain.write({writeProperty: 'foo'})",
+            row -> assertEquals(0L, row.getNumber("nodePropertiesWritten"))
         );
     }
 
