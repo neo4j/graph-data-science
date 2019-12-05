@@ -30,8 +30,10 @@ import org.neo4j.kernel.api.exceptions.Status;
 
 import java.util.AbstractCollection;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -289,17 +291,30 @@ final class ParallelUtilTest {
         assertEquals(1, tasks.requested());
     }
 
+    static final class OutstandingAssertions {
+        final Object expected;
+        final Object actual;
+
+        OutstandingAssertions(Object expected, Object actual) {
+            this.expected = expected;
+            this.actual = actual;
+        }
+    }
+
     @Test
     void shouldBailOnThreadInterrupt() {
         withPool(4, pool -> {
             Tasks tasks = new Tasks(6, 10);
+            Collection<OutstandingAssertions> assertions = new ConcurrentLinkedQueue<>();
             final Thread thread = new Thread(() -> tasks.run(t ->
                     ParallelUtil.runWithConcurrency(2, t, pool)));
             thread.setUncaughtExceptionHandler((t, e) -> {
-                assertEquals("Unexpected Exception", e.getMessage());
-                assertEquals(
-                        InterruptedException.class,
-                        e.getCause().getClass());
+                assertions.add(new OutstandingAssertions(
+                    "java.lang.InterruptedException", e.getMessage()
+                ));
+                assertions.add(new OutstandingAssertions(
+                    InterruptedException.class, e.getCause().getClass()
+                ));
             });
 
             thread.start();
@@ -309,6 +324,10 @@ final class ParallelUtilTest {
             assertTrue(tasks.started() <= 2);
             assertTrue(tasks.maxRunning() <= 2);
             assertTrue(tasks.requested() <= 2);
+
+            for (OutstandingAssertions assertion : assertions) {
+                assertEquals(assertion.expected, assertion.actual);
+            }
         });
     }
 
