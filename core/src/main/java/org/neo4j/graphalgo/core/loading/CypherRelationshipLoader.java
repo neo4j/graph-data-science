@@ -52,6 +52,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
     private final boolean hasExplicitPropertyMappings;
     private final DeduplicationStrategy globalDeduplicationStrategy;
     private final double globalDefaultPropertyValue;
+    private final Map<RelationshipTypeMapping, LongAdder> relationshipCounters;
 
     // Property mappings are either defined upfront in
     // the procedure configuration or during load time
@@ -66,8 +67,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
 
     private GraphDimensions resultDimensions;
 
-    private final Map<RelationshipTypeMapping, LongAdder> allRelationshipCounters;
-
     CypherRelationshipLoader(
         IdMap idMap,
         GraphDatabaseAPI api,
@@ -76,10 +75,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
     ) {
         super(setup.relationshipType(), idMap.nodeCount(), api, setup);
         this.idMap = idMap;
-        this.allRelationshipCounters = new HashMap<>();
-        this.loaderContext = new Context();
-
         this.outerDimensions = dimensions;
+        this.loaderContext = new Context();
+        this.relationshipCounters = new HashMap<>();
+
         this.hasExplicitPropertyMappings = dimensions.relProperties().hasMappings();
 
         this.globalDeduplicationStrategy = setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
@@ -93,11 +92,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
     private GraphDimensions initFromDimension(GraphDimensions dimensions) {
         MutableInt propertyKeyId = new MutableInt(0);
 
-        this.propertyKeyIdsByName = dimensions
+        propertyKeyIdsByName = dimensions
             .relProperties()
             .stream()
             .collect(toMap(PropertyMapping::neoPropertyKey, unused -> propertyKeyId.getAndIncrement()));
-        this.propertyDefaultValueByName = dimensions
+        propertyDefaultValueByName = dimensions
             .relProperties()
             .stream()
             .collect(toMap(PropertyMapping::neoPropertyKey, PropertyMapping::defaultValue));
@@ -105,26 +104,19 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         // We can not rely on what the token store gives us.
         // We need to resolve the given property mappings
         // using our newly created property key identifiers.
-        GraphDimensions newGraphDimensions = new GraphDimensions.Builder(dimensions)
+        GraphDimensions newDimensions = new GraphDimensions.Builder(dimensions)
             .setRelationshipProperties(PropertyMappings.of(dimensions.relProperties().stream()
-                .map(propertyMapping -> PropertyMapping.of(
-                    propertyMapping.propertyKey,
-                    propertyMapping.neoPropertyKey,
-                    propertyMapping.defaultValue,
-                    propertyMapping.deduplicationStrategy
-                ))
-                .map(propertyMapping -> propertyMapping.resolveWith(propertyKeyIdsByName.get(propertyMapping.neoPropertyKey)))
+                .map(PropertyMapping::copyFrom)
+                .map(mapping -> mapping.resolveWith(propertyKeyIdsByName.get(mapping.neoPropertyKey)))
                 .toArray(PropertyMapping[]::new)))
             .build();
 
-        this.importWeights = newGraphDimensions.relProperties().atLeastOneExists();
+        importWeights = newDimensions.relProperties().atLeastOneExists();
+        propertyKeyIds = newDimensions.relProperties().allPropertyKeyIds();
+        propertyDefaultValues = newDimensions.relProperties().allDefaultWeights();
+        deduplicationStrategies = getDeduplicationStrategies(newDimensions);
 
-        this.propertyKeyIds = newGraphDimensions.relProperties().allPropertyKeyIds();
-        this.propertyDefaultValues = newGraphDimensions.relProperties().allDefaultWeights();
-
-        this.deduplicationStrategies = getDeduplicationStrategies(newGraphDimensions);
-
-        return newGraphDimensions;
+        return newDimensions;
     }
 
     @Override
@@ -192,8 +184,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
 
         ParallelUtil.run(flushTasks, setup.executor());
 
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(allRelationshipCounters.size());
-        allRelationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
+        this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
         return Pair.of(resultDimensions, relationshipCounters);
     }
 
@@ -222,8 +214,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         private final Map<RelationshipTypeMapping, SingleTypeRelationshipImporter.Builder.WithImporter> importerBuildersByType;
         private final Map<RelationshipTypeMapping, RelationshipsBuilder> allBuilders;
 
-        final int pageSize;
-        final int numberOfPages;
+        private final int pageSize;
+        private final int numberOfPages;
 
         Context() {
             this.importerBuildersByType = new HashMap<>();
@@ -264,7 +256,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
                 setup.tracker()
             );
 
-            allRelationshipCounters.put(typeMapping, importerBuilder.relationshipCounter());
+            relationshipCounters.put(typeMapping, importerBuilder.relationshipCounter());
 
             return importerBuilder.loadImporter(
                 false,
