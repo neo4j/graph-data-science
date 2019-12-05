@@ -41,9 +41,6 @@ public interface GraphCreateConfig extends BaseConfig {
     @NotNull String IMPLICIT_GRAPH_NAME = "";
 
     @Configuration.Parameter
-    String username();
-
-    @Configuration.Parameter
     String graphName();
 
     @Configuration.Parameter
@@ -116,10 +113,10 @@ public interface GraphCreateConfig extends BaseConfig {
         CypherMapWrapper config
     ) {
         GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
-            userName,
             graphName,
             nodeFilter,
             relationshipFilter,
+            userName,
             config
         );
         return graphCreateConfig.withNormalizedPropertyMappings();
@@ -138,10 +135,10 @@ public interface GraphCreateConfig extends BaseConfig {
             config.get("nodeProjection", NodeProjections.empty())
         ));
         GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
-            userName,
             IMPLICIT_GRAPH_NAME,
             nodeP,
             relP,
+            userName,
             config
         );
         return graphCreateConfig.withNormalizedPropertyMappings();
