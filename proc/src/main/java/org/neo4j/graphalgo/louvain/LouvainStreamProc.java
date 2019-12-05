@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -61,6 +62,30 @@ public class LouvainStreamProc extends LouvainProcBase<LouvainStreamConfig> {
             configuration
         );
         return stream(computationResult);
+    }
+
+    @Procedure(value = "gds.algo.louvain.stream.estimate", mode = READ)
+    @Description("CALL gds.algo.louvain.stream.estimate(graphName: STRING, configuration: MAP {" +
+                 "    maxIteration: INTEGER" +
+                 "    maxLevels: INTEGER" +
+                 "    tolerance: FLOAT" +
+                 "    includeIntermediateCommunities: BOOLEAN" +
+                 "    seedProperty: STRING" +
+                 "    weightProperty: STRING" +
+                 "  }" +
+                 ") YIELD" +
+                 "  nodes: INTEGER, "+
+                 "  relationships: INTEGER," +
+                 "  bytesMin: INTEGER," +
+                 "  bytesMax: INTEGER," +
+                 "  requiredMemory: STRING," +
+                 "  mapView: MAP," +
+                 "  treeView: STRING")
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeMemoryEstimate(graphNameOrConfig, configuration);
     }
 
     private Stream<StreamResult> stream(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {

@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
@@ -46,6 +47,7 @@ import org.neo4j.helpers.collection.Pair;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> extends BaseProc {
 
@@ -105,7 +107,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 
-    Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
+    protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
         CONFIG config;
         Optional<String> graphName = Optional.empty();
 
@@ -253,6 +255,18 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 resultPropertyTranslator.get()
             );
         }
+    }
+
+    protected Stream<MemoryEstimateResult> computeMemoryEstimate(Object graphNameOrConfig, Map<String, Object> configuration) {
+        Pair<CONFIG, Optional<String>> configAndGraphName = processInput(
+            graphNameOrConfig,
+            configuration
+        );
+
+        MemoryTreeWithDimensions memoryTreeWithDimensions = memoryEstimation(configAndGraphName.first());
+        return Stream.of(
+            new MemoryEstimateResult(memoryTreeWithDimensions)
+        );
     }
 
     @ValueClass

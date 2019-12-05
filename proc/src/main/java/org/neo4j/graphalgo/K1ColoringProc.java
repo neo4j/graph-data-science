@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.coloring.K1Coloring;
 import org.neo4j.graphalgo.impl.coloring.K1ColoringFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
-import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -82,14 +82,14 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
     @Procedure(value = "algo.beta.k1coloring.memrec", mode = READ)
     @Description("CALL algo.beta.k1coloring.memrec(label:String, relationship:String, {...properties}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for K1Coloring")
-    public Stream<MemRecResult> betaK1ColoringMemrec(
+    public Stream<MemoryEstimateResult> betaK1ColoringMemrec(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
-        return Stream.of(new MemRecResult(memoryEstimation));
+        return Stream.of(new MemoryEstimateResult(memoryEstimation));
     }
 
     public Stream<WriteResult> run(String label, String relationshipType, Map<String, Object> config) {

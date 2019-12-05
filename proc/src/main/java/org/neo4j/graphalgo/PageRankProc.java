@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
-import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.impl.results.PageRankScore;
 import org.neo4j.graphalgo.impl.utils.CentralityUtils;
 import org.neo4j.graphdb.Direction;
@@ -113,14 +113,14 @@ public final class PageRankProc extends LegacyBaseAlgoProc<PageRank, PageRank> {
     @Procedure(value = "algo.pageRank.memrec", mode = READ)
     @Description("CALL algo.pageRank.memrec(label:String, relationship:String, {...properties}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for PageRank")
-    public Stream<MemRecResult> pageRankMemrec(
+    public Stream<MemoryEstimateResult> pageRankMemrec(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
-        return Stream.of(new MemRecResult(memoryEstimation));
+        return Stream.of(new MemoryEstimateResult(memoryEstimation));
     }
 
     @Override

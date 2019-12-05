@@ -39,7 +39,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
@@ -83,7 +83,7 @@ public final class GraphLoadProc extends BaseProc {
                  "label:String, relationship:String" +
                  "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', relationshipProperties: {}, graph:'cypher/huge'}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for the graph")
-    public Stream<MemRecResult> loadMemRec(
+    public Stream<MemoryEstimateResult> loadMemRec(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration) {
@@ -100,7 +100,7 @@ public final class GraphLoadProc extends BaseProc {
         MemoryTree memoryTree = config.estimate(loader.toSetup(), graphFactory)
             .estimate(dimensions, config.concurrency());
 
-        return Stream.of(new MemRecResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
+        return Stream.of(new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
     }
 
 

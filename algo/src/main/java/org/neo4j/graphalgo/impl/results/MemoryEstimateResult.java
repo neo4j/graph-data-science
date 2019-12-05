@@ -27,22 +27,22 @@ import org.neo4j.graphdb.Result;
 
 import java.util.Map;
 
-public class MemRecResult {
+public class MemoryEstimateResult {
     public final String requiredMemory;
     public final String treeView;
     public final Map<String, Object> mapView;
     public final long bytesMin, bytesMax;
-    public long nodes, relationships;
+    public long nodeCount, relationshipCount;
 
-    public MemRecResult(final MemoryTreeWithDimensions memory) {
+    public MemoryEstimateResult(final MemoryTreeWithDimensions memory) {
         this(memory.memoryTree, memory.graphDimensions);
     }
 
-    private MemRecResult(final MemoryTree memory, final GraphDimensions dimensions) {
+    private MemoryEstimateResult(final MemoryTree memory, final GraphDimensions dimensions) {
         this(memory.render(), memory.renderMap(), memory.memoryUsage(), dimensions);
     }
 
-    private MemRecResult(
+    private MemoryEstimateResult(
             final String treeView,
             final Map<String, Object> mapView,
             final MemoryRange estimateMemoryUsage,
@@ -58,32 +58,33 @@ public class MemRecResult {
         );
     }
 
-    private MemRecResult(
+    private MemoryEstimateResult(
             final String requiredMemory,
             final String treeView,
             final Map<String, Object> mapView,
             final long bytesMin,
             final long bytesMax,
-            final long nodes,
-            final long relationships) {
+            final long nodeCount,
+            final long relationshipCount
+    ) {
         this.requiredMemory = requiredMemory;
         this.treeView = treeView;
         this.mapView = mapView;
         this.bytesMin = bytesMin;
         this.bytesMax = bytesMax;
-        this.nodes = nodes;
-        this.relationships = relationships;
+        this.nodeCount = nodeCount;
+        this.relationshipCount = relationshipCount;
     }
 
-    public MemRecResult(final Result.ResultRow row) {
+    public MemoryEstimateResult(final Result.ResultRow row) {
         this(
                 row.getString("requiredMemory"),
                 row.getString("treeView"),
                 (Map<String, Object>) row.get("mapView"),
                 row.getNumber("bytesMin").longValue(),
                 row.getNumber("bytesMax").longValue(),
-                row.getNumber("nodes").longValue(),
-                row.getNumber("relationships").longValue()
+                row.getNumber("nodeCount").longValue(),
+                row.getNumber("relationshipCount").longValue()
         );
     }
 }

@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityGraphResult;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
-import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -206,14 +206,14 @@ public class NodeSimilarityProc extends LegacyBaseAlgoProc<NodeSimilarity, NodeS
     }
 
     @Procedure(value = "algo.nodeSimilarity.memrec")
-    public Stream<MemRecResult> memrec(
+    public Stream<MemoryEstimateResult> memrec(
         @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
         @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
         ProcedureConfiguration configuration = newConfig(nodeFilter, relationshipFilter, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
-        return Stream.of(new MemRecResult(memoryEstimation));
+        return Stream.of(new MemoryEstimateResult(memoryEstimation));
     }
 
     @Override

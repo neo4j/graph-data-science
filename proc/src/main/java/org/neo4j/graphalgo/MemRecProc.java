@@ -21,7 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.ProcedureHandle;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
@@ -63,7 +63,7 @@ public final class MemRecProc {
             "CALL algo.memrec(label:String, relationship:String, algo:String, " +
             "{weightProperty:'weight', concurrency:4, ...properties })" +
             "YIELD requiredMemory")
-    public Stream<MemRecResult> memrec(
+    public Stream<MemoryEstimateResult> memrec(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "algo", defaultValue = "") String algo,
@@ -86,13 +86,13 @@ public final class MemRecProc {
             if (proc != null) {
                 String query = " CALL " + proc.signature().name() + "($label, $relationship, $config)";
 
-                Stream.Builder<MemRecResult> builder = Stream.builder();
+                Stream.Builder<MemoryEstimateResult> builder = Stream.builder();
                 api.execute(query, MapUtil.map(
                         "label", label,
                         "relationship", relationship,
                         "config", configMap
                 )).accept(row -> {
-                    builder.add(new MemRecResult(row));
+                    builder.add(new MemoryEstimateResult(row));
                     return true;
                 });
                 return builder.build();

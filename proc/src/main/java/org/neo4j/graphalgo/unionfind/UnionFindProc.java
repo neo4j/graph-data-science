@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.unionfind;
 
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.impl.wcc.WCC;
 import org.neo4j.graphalgo.impl.wcc.WCCType;
 import org.neo4j.graphalgo.wcc.WccBaseProc;
@@ -67,14 +67,14 @@ public class UnionFindProc<T extends WCC<T>> extends WccBaseProc<T> {
     @Procedure(value = "algo.unionFind.memrec", mode = READ, deprecatedBy = "algo.wcc.memrec")
     @Description("CALL algo.unionFind.memrec(label:String, relationship:String, {...properties}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for UnionFind")
-    public Stream<MemRecResult> unionFindMemRec(
+    public Stream<MemoryEstimateResult> unionFindMemRec(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
-        return Stream.of(new MemRecResult(memoryEstimation));
+        return Stream.of(new MemoryEstimateResult(memoryEstimation));
     }
 
     @Deprecated

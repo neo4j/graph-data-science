@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.impl.wcc.WCC;
 import org.neo4j.graphalgo.impl.wcc.WCCType;
 import org.neo4j.procedure.Description;
@@ -61,14 +61,14 @@ public class WccProc<T extends WCC<T>> extends WccBaseProc<T> {
     @Procedure(value = "algo.wcc.memrec", mode = Mode.READ)
     @Description("CALL algo.wcc.memrec(label:String, relationship:String, {...properties}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for WCC")
-    public Stream<MemRecResult> wccMemRec(
+    public Stream<MemoryEstimateResult> wccMemRec(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
-        return Stream.of(new MemRecResult(memoryEstimation));
+        return Stream.of(new MemoryEstimateResult(memoryEstimation));
     }
 
     @Procedure(value = "algo.beta.wcc", mode = Mode.WRITE)
@@ -98,14 +98,14 @@ public class WccProc<T extends WCC<T>> extends WccBaseProc<T> {
     @Procedure(value = "algo.beta.wcc.memrec", mode = Mode.READ)
     @Description("CALL algo.beta.wcc.memrec(label:String, relationship:String, {...properties}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for WCC")
-    public Stream<MemRecResult> betaWccMemRec(
+    public Stream<MemoryEstimateResult> betaWccMemRec(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
-        return Stream.of(new MemRecResult(memoryEstimation));
+        return Stream.of(new MemoryEstimateResult(memoryEstimation));
     }
 
     @Procedure(value = "algo.beta.wcc.pregel", mode = Mode.WRITE)

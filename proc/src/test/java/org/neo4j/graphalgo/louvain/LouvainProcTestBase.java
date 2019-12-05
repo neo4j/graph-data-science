@@ -22,7 +22,9 @@ package org.neo4j.graphalgo.louvain;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseConfigTests;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.ProcTestBase;
@@ -43,6 +45,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class LouvainProcTestBase<CONFIG extends LouvainConfigBase> extends ProcTestBase implements
@@ -154,6 +159,19 @@ abstract class LouvainProcTestBase<CONFIG extends LouvainConfigBase> extends Pro
                 "implicit graph"
             )
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"stream", "write", "stats"})
+    void testEstimate(String mode) {
+        String config = mode.equals("stream") ? "{}" : "{writeProperty: 'foo'}";
+        runQuery(String.format("CALL gds.algo.louvain.%s.estimate(%s)", mode, config), row -> {
+            assertTrue(row.getNumber("nodeCount").longValue() > 0);
+            assertTrue(row.getNumber("bytesMin").longValue() > 0);
+            assertTrue(row.getNumber("bytesMax").longValue() > 0);
+            assertNotNull(row.get("mapView"));
+            assertFalse(row.getString("treeView").isEmpty());
+        });
     }
 
     @Override

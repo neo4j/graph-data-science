@@ -38,7 +38,7 @@ import org.neo4j.graphalgo.impl.results.BetaLabelPropagationStats;
 import org.neo4j.graphalgo.impl.results.BetaLabelPropagationStats.BetaStreamResult;
 import org.neo4j.graphalgo.impl.results.BetaLabelPropagationStats.LabelPropagationStats;
 import org.neo4j.graphalgo.impl.results.BetaLabelPropagationStats.StreamResult;
-import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -135,14 +135,14 @@ public final class LabelPropagationProc extends LegacyBaseAlgoProc<LabelPropagat
     @Procedure(value = "algo.labelPropagation.memrec")
     @Description("CALL algo.labelPropagation.memrec(label:String, relationship:String, {...properties}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for LabelPropagation")
-    public Stream<MemRecResult> labelPropagationMemrec(
+    public Stream<MemoryEstimateResult> labelPropagationMemrec(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
-        return Stream.of(new MemRecResult(memoryEstimation));
+        return Stream.of(new MemoryEstimateResult(memoryEstimation));
     }
 
     private PropertyMapping[] createPropertyMappings(String seedProperty, String weightProperty) {

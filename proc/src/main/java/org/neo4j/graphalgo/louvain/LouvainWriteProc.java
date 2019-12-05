@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
@@ -124,6 +125,54 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
             configuration
         );
         return write(computationResult, false);
+    }
+
+    @Procedure(value = "gds.algo.louvain.write.estimate", mode = READ)
+    @Description("CALL gds.algo.louvain.write.estimate(graphName: STRING, configuration: MAP {" +
+                 "    maxIteration: INTEGER" +
+                 "    maxLevels: INTEGER" +
+                 "    tolerance: FLOAT" +
+                 "    includeIntermediateCommunities: BOOLEAN" +
+                 "    seedProperty: STRING" +
+                 "    weightProperty: STRING" +
+                 "  }" +
+                 ") YIELD" +
+                 "  nodes: INTEGER, "+
+                 "  relationships: INTEGER," +
+                 "  bytesMin: INTEGER," +
+                 "  bytesMax: INTEGER," +
+                 "  requiredMemory: STRING," +
+                 "  mapView: MAP," +
+                 "  treeView: STRING")
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeMemoryEstimate(graphNameOrConfig, configuration);
+    }
+
+    @Procedure(value = "gds.algo.louvain.stats.estimate", mode = READ)
+    @Description("CALL gds.algo.louvain.stats.estimate(graphName: STRING, configuration: MAP {" +
+                 "    maxIteration: INTEGER" +
+                 "    maxLevels: INTEGER" +
+                 "    tolerance: FLOAT" +
+                 "    includeIntermediateCommunities: BOOLEAN" +
+                 "    seedProperty: STRING" +
+                 "    weightProperty: STRING" +
+                 "  }" +
+                 ") YIELD" +
+                 "  nodes: INTEGER, "+
+                 "  relationships: INTEGER," +
+                 "  bytesMin: INTEGER," +
+                 "  bytesMax: INTEGER," +
+                 "  requiredMemory: STRING," +
+                 "  mapView: MAP," +
+                 "  treeView: STRING")
+    public Stream<MemoryEstimateResult> estimateStats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeMemoryEstimate(graphNameOrConfig, configuration);
     }
 
     private Stream<WriteResult> write(
