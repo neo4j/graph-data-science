@@ -81,7 +81,7 @@ public class GraphLoader {
     private String graphName = "";
     private int concurrency = Pools.DEFAULT_CONCURRENCY;
     private String label = null;
-    private String relation = null;
+    private String relationshipType = null;
     private Direction direction = Direction.BOTH;
 
     private final GraphDatabaseAPI api;
@@ -122,14 +122,14 @@ public class GraphLoader {
     public GraphLoader init(
         Log log,
         @Nullable String label,
-        @Nullable String relationship,
+        @Nullable String relationshipType,
         ProcedureConfiguration config
     ) {
         return withLog(log)
             .withUsername(config.getUsername())
             .withName(config.getGraphName(null))
             .withOptionalLabel(label)
-            .withOptionalRelationshipType(relationship)
+            .withOptionalRelationshipType(relationshipType)
             .withConcurrency(config.getReadConcurrency())
             .withBatchSize(config.getBatchSize())
             .withDeduplicationStrategy(config.getDeduplicationStrategy())
@@ -300,7 +300,7 @@ public class GraphLoader {
      * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withRelationshipType(String relationshipType) {
-        this.relation = Objects.requireNonNull(relationshipType);
+        this.relationshipType = Objects.requireNonNull(relationshipType);
         return this;
     }
 
@@ -312,7 +312,7 @@ public class GraphLoader {
      * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withOptionalRelationshipType(String relationshipType) {
-        this.relation = relationshipType;
+        this.relationshipType = relationshipType;
         return this;
     }
 
@@ -323,7 +323,7 @@ public class GraphLoader {
      * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withRelationshipType(RelationshipType relationshipType) {
-        this.relation = Objects.requireNonNull(relationshipType).name();
+        this.relationshipType = Objects.requireNonNull(relationshipType).name();
         return this;
     }
 
@@ -333,7 +333,7 @@ public class GraphLoader {
      * @deprecated replaced with {@link #withGraphCreateConfig(GraphCreateConfig)}.
      */
     public GraphLoader withAnyRelationshipType() {
-        this.relation = null;
+        this.relationshipType = null;
         return this;
     }
 
@@ -405,7 +405,7 @@ public class GraphLoader {
      * @param relationshipStatement
      */
     public GraphLoader withRelationshipStatement(@Language("Cypher") String relationshipStatement) {
-        this.relation = relationshipStatement;
+        this.relationshipType = relationshipStatement;
         return this;
     }
 
@@ -489,13 +489,13 @@ public class GraphLoader {
             if (!undirected && direction == Direction.BOTH) {
                 String outIdentifier;
                 String inIdentifier;
-                if (StringUtils.isEmpty(relation)) {
+                if (StringUtils.isEmpty(relationshipType)) {
                     // TODO: fake select all
                     outIdentifier = "*->";
                     inIdentifier = "->*";
                 } else {
-                    outIdentifier = relation + "_OUT";
-                    inIdentifier = relation + "_IN";
+                    outIdentifier = relationshipType + "_OUT";
+                    inIdentifier = relationshipType + "_IN";
                 }
 
                 projectionsBuilder
@@ -503,7 +503,7 @@ public class GraphLoader {
                         ElementIdentifier.of(outIdentifier),
                         RelationshipProjection
                             .builder()
-                            .type(relation)
+                            .type(relationshipType)
                             .aggregation(deduplicationStrategy)
                             .properties(relProperties)
                             .projection(Projection.NATURAL)
@@ -513,7 +513,7 @@ public class GraphLoader {
                         ElementIdentifier.of(inIdentifier),
                         RelationshipProjection
                             .builder()
-                            .type(relation)
+                            .type(relationshipType)
                             .aggregation(deduplicationStrategy)
                             .properties(relProperties)
                             .projection(Projection.REVERSE)
@@ -527,10 +527,10 @@ public class GraphLoader {
                 projectionsBuilder
                     .putProjection(
                         // TODO: fake select all
-                        ElementIdentifier.of(StringUtils.isEmpty(relation) ? "*" : relation),
+                        ElementIdentifier.of(StringUtils.isEmpty(relationshipType) ? "*" : relationshipType),
                         RelationshipProjection
                             .builder()
-                            .type(relation)
+                            .type(relationshipType)
                             .aggregation(deduplicationStrategy)
                             .properties(relProperties)
                             .projection(projection)

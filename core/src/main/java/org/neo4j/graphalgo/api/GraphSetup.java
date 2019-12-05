@@ -79,13 +79,11 @@ public class GraphSetup {
         TerminationFlag terminationFlag,
         GraphCreateConfig createConfig
     ) {
-        // direction for loading the graph.
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
         this.batchSize = batchSize;
         this.log = log;
         this.logMillis = logMillis;
-        // in/out adjacencies are allowed to be merged into an undirected view of the graph
         this.tracker = tracker;
         this.terminationFlag = terminationFlag;
         this.createConfig = createConfig;

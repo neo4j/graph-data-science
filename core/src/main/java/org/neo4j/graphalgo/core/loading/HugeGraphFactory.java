@@ -257,8 +257,8 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                         return Collections.singletonMap("", graph);
                     } else {
                         return dimensions.relProperties().enumerate().map(propertyEntry -> {
-                            int weightIndex = propertyEntry.getKey();
-                            ResolvedPropertyMapping property = propertyEntry.getValue();
+                            int weightIndex = propertyEntry.getOne();
+                            ResolvedPropertyMapping property = propertyEntry.getTwo();
                             HugeGraph graph = buildGraphWithRelationshipProperty(
                                     tracker,
                                     idsAndProperties.hugeIdMap,

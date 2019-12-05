@@ -51,7 +51,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         this.buffer = buffer;
         this.idMap = idMap;
         this.hasRelationshipProperty = maybeDefaultRelProperty.isPresent();
-        this.defaultRelPropertyValue = maybeDefaultRelProperty.orElse(PropertyMapping.DEFAULT_DEFAULT_VALUE);
+        this.defaultRelPropertyValue = maybeDefaultRelProperty.orElse(PropertyMapping.DEFAULT_FALLBACK_VALUE);
         this.imports = imports;
         this.relPropertyReader = RelationshipImporter.preLoadedPropertyReader();
     }

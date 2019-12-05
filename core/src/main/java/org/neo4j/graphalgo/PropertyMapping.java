@@ -34,7 +34,7 @@ import java.util.Objects;
 @ValueClass
 public abstract class PropertyMapping {
 
-    public static final double DEFAULT_DEFAULT_VALUE = Double.NaN;
+    public static final double DEFAULT_FALLBACK_VALUE = Double.NaN;
 
     private static final String ELEMENT_PROPERTIES_PROPERTY_KEY = "property";
     private static final String ELEMENT_PROPERTIES_AGGREGATION_KEY = "aggregation";
@@ -55,7 +55,7 @@ public abstract class PropertyMapping {
 
     @Value.Default
     public double defaultValue() {
-        return DEFAULT_DEFAULT_VALUE;
+        return DEFAULT_FALLBACK_VALUE;
     }
 
     @Value.Default

@@ -198,9 +198,9 @@ public final class GraphDimensions {
                     highestNeoId == -1 ? nodeCount : highestNeoId,
                     maxRelCount,
                     nodeLabelIds,
-                    nodeProperties == null ? ResolvedPropertyMappings.of() : nodeProperties,
+                    nodeProperties == null ? ResolvedPropertyMappings.empty() : nodeProperties,
                     relationshipTypeMappings,
-                    relProperties == null ? ResolvedPropertyMappings.of() : relProperties
+                    relProperties == null ? ResolvedPropertyMappings.empty() : relProperties
                 );
         }
 

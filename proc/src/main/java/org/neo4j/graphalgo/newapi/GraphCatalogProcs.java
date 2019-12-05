@@ -111,7 +111,7 @@ public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
 
         GraphCreateResult.Builder builder = new GraphCreateResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
-            ResolvedPropertyMappings propertyMappings = ResolvedPropertyMappings.of();
+            ResolvedPropertyMappings propertyMappings = ResolvedPropertyMappings.empty();
 
             GraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
             HugeGraphFactory graphFactory = loader.build(HugeGraphFactory.class);

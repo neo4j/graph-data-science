@@ -20,18 +20,22 @@
 
 package org.neo4j.graphalgo;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.DataClass;
+import org.neo4j.graphalgo.core.utils.CollectionUtil;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @DataClass
 @Value.Immutable(singleton = true)
 public abstract class AbstractResolvedPropertyMappings implements Iterable<ResolvedPropertyMapping> {
+
+    public static ResolvedPropertyMappings empty() {
+        return ResolvedPropertyMappings.of();
+    }
 
     public abstract List<ResolvedPropertyMapping> mappings();
 
@@ -39,8 +43,8 @@ public abstract class AbstractResolvedPropertyMappings implements Iterable<Resol
         return mappings().stream();
     }
 
-    public Stream<Pair<Integer, ResolvedPropertyMapping>> enumerate() {
-        return IntStream.range(0, mappings().size()).mapToObj(idx -> Pair.of(idx, mappings().get(idx)));
+    public Stream<IntObjectPair<ResolvedPropertyMapping>> enumerate() {
+        return CollectionUtil.enumerate(mappings());
     }
 
     @Override
