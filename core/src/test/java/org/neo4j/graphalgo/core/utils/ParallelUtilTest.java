@@ -291,11 +291,11 @@ final class ParallelUtilTest {
         assertEquals(1, tasks.requested());
     }
 
-    static final class OutstandingAssertions {
+    static final class RemainingAssertions {
         final Object expected;
         final Object actual;
 
-        OutstandingAssertions(Object expected, Object actual) {
+        RemainingAssertions(Object expected, Object actual) {
             this.expected = expected;
             this.actual = actual;
         }
@@ -305,14 +305,14 @@ final class ParallelUtilTest {
     void shouldBailOnThreadInterrupt() {
         withPool(4, pool -> {
             Tasks tasks = new Tasks(6, 10);
-            Collection<OutstandingAssertions> assertions = new ConcurrentLinkedQueue<>();
+            Collection<RemainingAssertions> assertions = new ConcurrentLinkedQueue<>();
             final Thread thread = new Thread(() -> tasks.run(t ->
                     ParallelUtil.runWithConcurrency(2, t, pool)));
             thread.setUncaughtExceptionHandler((t, e) -> {
-                assertions.add(new OutstandingAssertions(
+                assertions.add(new RemainingAssertions(
                     "java.lang.InterruptedException", e.getMessage()
                 ));
-                assertions.add(new OutstandingAssertions(
+                assertions.add(new RemainingAssertions(
                     InterruptedException.class, e.getCause().getClass()
                 ));
             });
@@ -325,7 +325,7 @@ final class ParallelUtilTest {
             assertTrue(tasks.maxRunning() <= 2);
             assertTrue(tasks.requested() <= 2);
 
-            for (OutstandingAssertions assertion : assertions) {
+            for (RemainingAssertions assertion : assertions) {
                 assertEquals(assertion.expected, assertion.actual);
             }
         });
