@@ -24,15 +24,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.WriteConfigTests;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +44,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
-import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.GRAPH_IMPL_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
@@ -56,10 +52,10 @@ import static org.neo4j.graphalgo.louvain.LouvainProc.INNER_ITERATIONS_KEY;
 import static org.neo4j.graphalgo.louvain.LouvainProc.LEVELS_KEY;
 
 class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> implements
-    WriteConfigTests<LouvainWriteConfig> {
+    WriteConfigTests<LouvainWriteConfig, Louvain> {
 
     @Override
-    public Class<? extends BaseAlgoProc<?, ?, LouvainWriteConfig>> getProcedureClazz() {
+    public Class<? extends BaseAlgoProc<?, Louvain, LouvainWriteConfig>> getProcedureClazz() {
         return LouvainWriteProc.class;
     }
 

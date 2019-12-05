@@ -21,15 +21,21 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -37,27 +43,29 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public interface BaseConfigTests<CONFIG extends BaseAlgoConfig> {
+public interface BaseConfigTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
     static Stream<String> emptyStringPropertyValues() {
         return Stream.of(null, "");
     }
 
-    Class<? extends BaseAlgoProc<?, ?, CONFIG>> getProcedureClazz();
+    Class<? extends BaseAlgoProc<?, RESULT, CONFIG>> getProcedureClazz();
 
     GraphDatabaseAPI graphDb();
 
     CONFIG createConfig(CypherMapWrapper mapWrapper);
+
+    void compareResults(RESULT result1, RESULT result2);
 
     default CypherMapWrapper createMinimallyValidConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper;
     }
 
     default void applyOnProcedure(
-        Consumer<? super BaseAlgoProc<?, ?, CONFIG>> func
+        Consumer<? super BaseAlgoProc<?, RESULT, CONFIG>> func
     ) {
         new TransactionWrapper(graphDb()).accept((tx -> {
-            BaseAlgoProc<?, ?, CONFIG> proc;
+            BaseAlgoProc<?, RESULT, CONFIG> proc;
             try {
                 proc = getProcedureClazz().newInstance();
             } catch (ReflectiveOperationException e) {
@@ -84,6 +92,51 @@ public interface BaseConfigTests<CONFIG extends BaseAlgoConfig> {
             GraphCreateConfig graphCreateConfig = maybeGraphCreateConfig.get();
             graphCreateConfig = ImmutableGraphCreateConfig.copyOf(graphCreateConfig);
             assertEquals(GraphCreateConfig.emptyWithName("", ""), graphCreateConfig);
+        });
+    }
+
+    @Test
+    default void testRunOnLoadedGraph() {
+        String loadedGraphName = "loadedGraph";
+        GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
+        Graph graph = new GraphLoader(graphDb())
+            .withGraphCreateConfig(graphCreateConfig)
+            .load(HugeGraphFactory.class);
+
+        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
+
+        applyOnProcedure((proc) -> {
+            Map<String, Object> configMap = createMinimallyValidConfig(CypherMapWrapper.empty()).toMap();
+            BaseAlgoProc.ComputationResult<?, RESULT, CONFIG> resultOnLoadedGraph = proc.compute(
+                loadedGraphName,
+                configMap
+            );
+
+            BaseAlgoProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraph = proc.compute(
+                configMap,
+                Collections.emptyMap()
+            );
+
+            compareResults(resultOnImplicitGraph.result(), resultOnLoadedGraph.result());
+        });
+    }
+
+    @Test
+    default void testRunMultipleTimesOnLoadedGraph() {
+        String loadedGraphName = "loadedGraph";
+        GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
+        Graph graph = new GraphLoader(graphDb())
+            .withGraphCreateConfig(graphCreateConfig)
+            .load(HugeGraphFactory.class);
+
+        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
+
+        applyOnProcedure((proc) -> {
+            Map<String, Object> configMap = createMinimallyValidConfig(CypherMapWrapper.empty()).toMap();
+            BaseAlgoProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap);
+            BaseAlgoProc.ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(loadedGraphName, configMap);
+
+            compareResults(resultRun1.result(), resultRun2.result());
         });
     }
 }

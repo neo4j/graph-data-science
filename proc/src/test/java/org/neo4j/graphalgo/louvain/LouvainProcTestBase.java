@@ -26,14 +26,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.BaseConfigTests;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.ProcTestBase;
-import org.neo4j.graphalgo.ProcTestBaseExtensions;
 import org.neo4j.graphalgo.SeedConfigTests;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.louvain.LouvainConfigBase;
-import org.neo4j.graphalgo.louvain.LouvainStreamProc;
-import org.neo4j.graphalgo.louvain.LouvainWriteProc;
+import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
 import org.neo4j.graphalgo.newapi.IterationsConfigTest;
 import org.neo4j.graphalgo.newapi.WeightConfigTest;
@@ -44,14 +41,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class LouvainProcTestBase<CONFIG extends LouvainConfigBase> extends ProcTestBase implements
-    BaseConfigTests<CONFIG>,
-    SeedConfigTests<CONFIG>,
-    IterationsConfigTest<CONFIG>,
-    WeightConfigTest<CONFIG>,
-    ToleranceConfigTest<CONFIG>
+    BaseConfigTests<CONFIG, Louvain>,
+    SeedConfigTests<CONFIG, Louvain>,
+    IterationsConfigTest<CONFIG, Louvain>,
+    WeightConfigTest<CONFIG, Louvain>,
+    ToleranceConfigTest<CONFIG, Louvain>
 {
 
     static final List<List<Long>> RESULT = Arrays.asList(
@@ -155,5 +154,12 @@ abstract class LouvainProcTestBase<CONFIG extends LouvainConfigBase> extends Pro
                 "implicit graph"
             )
         );
+    }
+
+    @Override
+    public void compareResults(Louvain result1, Louvain result2) {
+        assertEquals(result1.levels(), result2.levels());
+        assertEquals(result1.modularities()[result1.levels() - 1], result2.modularities()[result2.levels() - 1]);
+        assertArrayEquals(result1.finalDendrogram().toArray(), result2.finalDendrogram().toArray());
     }
 }

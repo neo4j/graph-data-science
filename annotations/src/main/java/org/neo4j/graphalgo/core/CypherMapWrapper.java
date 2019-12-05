@@ -159,6 +159,13 @@ public final class CypherMapWrapper {
         return getChecked(key, defaultValue, Double.class);
     }
 
+    /**
+     * Returns a copy of the internal Map.
+     */
+    public Map<String, Object> toMap() {
+        return new HashMap<>(config);
+    }
+
     public double requireDouble(String key) {
         return requireChecked(key, Double.class);
     }

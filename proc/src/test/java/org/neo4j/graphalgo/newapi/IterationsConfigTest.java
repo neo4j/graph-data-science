@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public interface IterationsConfigTest <CONFIG extends IterationsConfig & BaseAlgoConfig> extends BaseConfigTests<CONFIG>{
+public interface IterationsConfigTest <CONFIG extends IterationsConfig & BaseAlgoConfig, RESULT> extends BaseConfigTests<CONFIG, RESULT>{
     @Test
     default void testIterationsPropertyFromConfig() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("maxIterations", 42));

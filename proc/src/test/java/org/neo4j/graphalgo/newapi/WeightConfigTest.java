@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig> extends BaseConfigTests<CONFIG> {
+public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig, RESULT> extends BaseConfigTests<CONFIG, RESULT> {
     @Test
     default void testDefaultWeightPropertyIsNull() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.empty();

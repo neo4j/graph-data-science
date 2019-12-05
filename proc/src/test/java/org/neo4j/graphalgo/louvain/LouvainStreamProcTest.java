@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.impl.louvain.Louvain;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
 class LouvainStreamProcTest extends LouvainProcTestBase<LouvainStreamConfig> {
     @Override
-    public Class<? extends BaseAlgoProc<?, ?, LouvainStreamConfig>> getProcedureClazz() {
+    public Class<? extends BaseAlgoProc<?, Louvain, LouvainStreamConfig>> getProcedureClazz() {
         return LouvainStreamProc.class;
     }
 
