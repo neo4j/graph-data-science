@@ -206,6 +206,7 @@ class GraphGenerateProcTest extends ProcTestBase {
         paramsMap = new HashMap<>();
         paramsMap.put(RELATIONSHIP_PROPERTY_NAME_KEY, "random");
         paramsMap.put(RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM");
+
         producers.add(Arguments.of(
                 paramsMap,
                 new RelationshipPropertyProducer.Random("random", 0, 1)
@@ -253,33 +254,14 @@ class GraphGenerateProcTest extends ProcTestBase {
         ));
 
         producers.add(Arguments.of(
-                "Null value for `min`",
-                map(
-                        RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
-                        RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
-                        RELATIONSHIP_PROPERTY_MIN_KEY, null
-                ),
-                asList(RELATIONSHIP_PROPERTY_MIN_KEY, "of type `Double`", "`null`")
-        ));
-
-        producers.add(Arguments.of(
                 "Invalid type for `max`",
                 map(
                         RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
                         RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
+                        RELATIONSHIP_PROPERTY_MIN_KEY, 0.0,
                         RELATIONSHIP_PROPERTY_MAX_KEY, "Zweiundvierzig"
                 ),
                 asList(RELATIONSHIP_PROPERTY_MAX_KEY, "of type `Double`", "`String`")
-        ));
-
-        producers.add(Arguments.of(
-                "Null value for `max`",
-                map(
-                        RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
-                        RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
-                        RELATIONSHIP_PROPERTY_MAX_KEY, null
-                ),
-                asList(RELATIONSHIP_PROPERTY_MAX_KEY, "of type `Double`", "`null`")
         ));
 
         producers.add(Arguments.of(
@@ -299,7 +281,7 @@ class GraphGenerateProcTest extends ProcTestBase {
                         RELATIONSHIP_PROPERTY_TYPE_KEY, "FIXED",
                         RELATIONSHIP_PROPERTY_VALUE_KEY, null
                 ),
-                asList(RELATIONSHIP_PROPERTY_VALUE_KEY, "of type `Double`", "`null`")
+                asList(RELATIONSHIP_PROPERTY_VALUE_KEY, "No value specified")
         ));
 
         producers.add(Arguments.of(
