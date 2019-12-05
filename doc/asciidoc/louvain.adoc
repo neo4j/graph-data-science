@@ -43,11 +43,7 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL algo.beta.louvain(label: STRING, relationship: STRING, {
- write: BOOLEAN,
- writeProperty: STRING
- // additional configuration
-})
+CALL gds.algo.louvain.write(graphNameOrConfig: STRING|MAP, configuration: MAP})
 YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 ----
 
@@ -71,8 +67,8 @@ YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 | seedProperty                      | string    | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
 | write                             | boolean   | `true`                    | yes      | Specifies if the result should be written back as a node property.
 | writeProperty                     | string    | `'partition'`             | yes      | The property name written back the ID of the partition particular node belongs to.
-| levels                            | int       | 10                        | yes      | The maximum number of levels in which the graph is clustered and then condensed.
-| innerIterations                   | int       | 10                        | yes      | The maximum number of iterations that the modularity optimization will run for each level.
+| maxLevels                         | int       | 10                        | yes      | The maximum number of levels in which the graph is clustered and then condensed.
+| maxIterations                     | int       | 10                        | yes      | The maximum number of iterations that the modularity optimization will run for each level.
 | tolerance                         | float     | 0.0001                    | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 | includeIntermediateCommunities    | boolean   | false                     | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
 | graph                             | string    | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with node label and relationship type parameters. Use `'cypher'` for describing the subset using Cypher queries for nodes and relationships.
@@ -111,7 +107,7 @@ YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.beta.louvain.stream(label: STRING, relationship: STRING, {
+CALL gds.algo.louvain.stream(label: STRING, relationship: STRING, {
  // configuration
 })
 YIELD nodeId, community, communities
@@ -188,24 +184,29 @@ In the following examples we will demonstrate using the Louvain algorithm on thi
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL algo.beta.louvain.stream('User', 'LINK', {
- graph: 'huge',
- direction: 'BOTH'
-}) YIELD nodeId, community, communities
-RETURN algo.asNode(nodeId).name as name, community, communities
+CALL gds.algo.louvain.stream({
+    nodeProjection: ['User'],
+    relationshipProjection: {
+        LINK: {
+            type: 'LINK',
+            projection: 'undirected'
+        }
+    }
+}) YIELD nodeId, communityId, communityIds
+RETURN algo.asNode(nodeId).name as name, communityId, communityIds
 ORDER BY name ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| name      | community | communities
-| "Alice"   | 2         | <null>
-| "Bridget" | 2         | <null>
-| "Charles" | 2         | <null>
-| "Doug"    | 5         | <null>
-| "Mark"    | 5         | <null>
-| "Michael" | 5         | <null>
+| name      | communityId   | communityIds
+| "Alice"   | 2             | <null>
+| "Bridget" | 2             | <null>
+| "Charles" | 2             | <null>
+| "Doug"    | 5             | <null>
+| "Mark"    | 5             | <null>
+| "Michael" | 5             | <null>
 |6 rows
 |===
 
@@ -223,11 +224,17 @@ For each node a property is written that holds the assigned community.
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL algo.beta.louvain('User', 'LINK', {
- graph: 'huge',
- direction: 'BOTH',
- writeProperty: 'community'
-}) YIELD communities, modularity, modularities
+CALL gds.algo.louvain.write({
+    nodeProjection: ['User'],
+    relationshipProjection: {
+        LINK: {
+            type: 'LINK',
+            projection: 'undirected',
+            aggregation: 'NONE'
+        }
+    },
+    writeProperty: 'community'
+}) YIELD communityCount, modularity, modularities
 ----
 
 .Results
@@ -250,25 +257,32 @@ The Louvain algorithm can also run on weighted graphs, taking the given relation
 .The following will load the graph, run the algorithm on a weighted graph and stream results:
 [source, cypher]
 ----
-CALL algo.beta.louvain.stream('User', 'LINK', {
- graph: 'huge',
- direction: 'BOTH',
- weightProperty: 'weight'
-}) YIELD nodeId, community, communities
-RETURN algo.asNode(nodeId).name as name, community, communities
+CALL gds.algo.louvain.stream({
+    nodeProjection: ['User'],
+    relationshipProjection: {
+        LINK: {
+            type: 'LINK',
+            projection: 'UNDIRECTED',
+            aggregation: 'NONE',
+            properties: ['weight']
+        }
+    },
+    weightProperty: 'weight'
+}) YIELD nodeId, communityId, communityIds
+RETURN algo.asNode(nodeId).name as name, communityId, communityIds
 ORDER BY name ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| name      | community | communities
-| "Alice"   | 3         | <null>
-| "Bridget" | 2         | <null>
-| "Charles" | 2         | <null>
-| "Doug"    | 3         | <null>
-| "Mark"    | 5         | <null>
-| "Michael" | 5         | <null>
+| name      | communityId   | communityIds
+| "Alice"   | 3             | <null>
+| "Bridget" | 2             | <null>
+| "Charles" | 2             | <null>
+| "Doug"    | 3             | <null>
+| "Mark"    | 5             | <null>
+| "Michael" | 5             | <null>
 |6 rows
 |===
 
@@ -285,12 +299,23 @@ The algorithm will try to keep the seeded community IDs.
 .The following will load the seeded graph, run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.beta.louvain.stream('User', 'LINK', {
- graph: 'huge',
- direction: 'BOTH',
- seedProperty: 'seed'
-}) YIELD nodeId, community, communities
-RETURN algo.asNode(nodeId).name as name, community, communities
+CALL gds.algo.louvain.stream({
+    nodeProjection: {
+        User: {
+            labels: 'User',
+            properties: ['seed']
+        }
+    },
+    relationshipProjection: {
+        LINK: {
+            type: 'LINK',
+            projection: 'UNDIRECTED',
+            aggregation: 'NONE'
+        }
+    },
+    seedProperty: 'seed'
+}) YIELD nodeId, communityId, communityIds
+RETURN algo.asNode(nodeId).name as name, communityId, communityIds
 ORDER BY name ASC
 ----
 
@@ -327,12 +352,18 @@ image::louvain-multilevel-graph.svg[align="center"]
 .The following will load the example graph, run the algorithm and stream results including the intermediate communities:
 [source, cypher]
 ----
-CALL algo.beta.louvain.stream('', '', {
- graph: 'huge',
- direction: 'BOTH',
- includeIntermediateCommunities: true
-}) YIELD nodeId, community, communities
-RETURN algo.asNode(nodeId).name as name, community, communities
+CALL gds.algo.louvain.stream({
+    nodeProjection: ['Node'],
+    relationshipProjection: {
+        TYPE: {
+            type: 'TYPE',
+            projection: 'undirected',
+            aggregation: 'NONE'
+        }
+    },
+    includeIntermediateCommunities: true
+}) YIELD nodeId, communityId, communityIds
+RETURN algo.asNode(nodeId).name as name, communityId, communityIds
 ORDER BY name ASC
 ----
 

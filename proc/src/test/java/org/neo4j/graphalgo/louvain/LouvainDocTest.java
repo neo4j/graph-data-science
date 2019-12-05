@@ -57,8 +57,7 @@ class LouvainDocTest extends ProcTestBase {
             ", (nMichael)-[:LINK {weight: 1}]->(nMark)";
 
 
-        registerProcedures(LouvainWriteProc.class, GraphLoadProc.class);
-        registerProcedures(LouvainStreamProc.class, GraphLoadProc.class);
+        registerProcedures(LouvainWriteProc.class, LouvainStreamProc.class, GraphLoadProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(cypher);
     }
@@ -72,24 +71,29 @@ class LouvainDocTest extends ProcTestBase {
     @Test
     void streamUnweighted() {
         String query =
-            "CALL algo.beta.louvain.stream('User', 'LINK', {" +
-            "   graph: 'huge'," +
-            "   direction: 'BOTH'" +
-            "}) YIELD nodeId, community, communities " +
-            "RETURN algo.asNode(nodeId).name as name, community, communities" +
-            "";
+            "CALL gds.algo.louvain.stream({" +
+                "nodeProjection: ['User']," +
+                "relationshipProjection: {" +
+                "    LINK: {" +
+                "       type: 'LINK'," +
+                "       projection: 'undirected'," +
+                "       aggregation: 'NONE'" +
+                "    }" +
+                "}" +
+            "}) YIELD nodeId, communityId, communityIds " +
+            "RETURN algo.asNode(nodeId).name as name, communityId, communityIds";
 
         String expected =
-            "+-------------------------------------+\n" +
-            "| name      | community | communities |\n" +
-            "+-------------------------------------+\n" +
-            "| \"Alice\"   | 2         | <null>      |\n" +
-            "| \"Bridget\" | 2         | <null>      |\n" +
-            "| \"Charles\" | 2         | <null>      |\n" +
-            "| \"Doug\"    | 5         | <null>      |\n" +
-            "| \"Mark\"    | 5         | <null>      |\n" +
-            "| \"Michael\" | 5         | <null>      |\n" +
-            "+-------------------------------------+\n" +
+            "+----------------------------------------+\n" +
+            "| name      | communityId | communityIds |\n" +
+            "+----------------------------------------+\n" +
+            "| \"Alice\"   | 2           | <null>       |\n" +
+            "| \"Bridget\" | 2           | <null>       |\n" +
+            "| \"Charles\" | 2           | <null>       |\n" +
+            "| \"Doug\"    | 5           | <null>       |\n" +
+            "| \"Mark\"    | 5           | <null>       |\n" +
+            "| \"Michael\" | 5           | <null>       |\n" +
+            "+----------------------------------------+\n" +
             "6 rows\n";
 
         String actual = runQuery(query).resultAsString();
@@ -100,10 +104,16 @@ class LouvainDocTest extends ProcTestBase {
     @Test
     void writeUnweighted() {
         String query =
-            "CALL algo.beta.louvain('User', 'LINK', {" +
-            "    graph: 'huge'," +
-            "    direction: 'BOTH'," +
-            "    writeProperty: 'community'" +
+            "CALL gds.algo.louvain.write({" +
+            "   nodeProjection: ['User']," +
+            "   relationshipProjection: {" +
+            "       LINK: {" +
+            "          type: 'LINK'," +
+            "          projection: 'UNDIRECTED'," +
+            "          aggregation: 'NONE'" +
+            "       }" +
+            "   }," +
+            "   writeProperty: 'community'" +
             "}) YIELD communityCount, modularity, modularities";
 
         String expected =
@@ -122,25 +132,32 @@ class LouvainDocTest extends ProcTestBase {
     @Test
     void streamWeighted() {
         String query =
-            "CALL algo.beta.louvain.stream('User', 'LINK', {" +
-            "  graph: 'huge'," +
-            "  direction: 'BOTH'," +
-            "  weightProperty: 'weight'" +
-            "}) YIELD nodeId, community, communities " +
-            "RETURN algo.asNode(nodeId).name as name, community, communities " +
+            "CALL gds.algo.louvain.stream({" +
+            "   nodeProjection: ['User']," +
+            "   relationshipProjection: {" +
+            "       LINK: {" +
+            "          type: 'LINK'," +
+            "          projection: 'UNDIRECTED'," +
+            "          aggregation: 'NONE'," +
+            "          properties: ['weight']" +
+            "       }" +
+            "   }," +
+            "   weightProperty: 'weight'" +
+            "}) YIELD nodeId, communityId, communityIds " +
+            "RETURN algo.asNode(nodeId).name as name, communityId, communityIds " +
             "ORDER BY name ASC";
 
         String expected =
-            "+-------------------------------------+\n" +
-            "| name      | community | communities |\n" +
-            "+-------------------------------------+\n" +
-            "| \"Alice\"   | 3         | <null>      |\n" +
-            "| \"Bridget\" | 2         | <null>      |\n" +
-            "| \"Charles\" | 2         | <null>      |\n" +
-            "| \"Doug\"    | 3         | <null>      |\n" +
-            "| \"Mark\"    | 5         | <null>      |\n" +
-            "| \"Michael\" | 5         | <null>      |\n" +
-            "+-------------------------------------+\n" +
+            "+----------------------------------------+\n" +
+            "| name      | communityId | communityIds |\n" +
+            "+----------------------------------------+\n" +
+            "| \"Alice\"   | 3           | <null>       |\n" +
+            "| \"Bridget\" | 2           | <null>       |\n" +
+            "| \"Charles\" | 2           | <null>       |\n" +
+            "| \"Doug\"    | 3           | <null>       |\n" +
+            "| \"Mark\"    | 5           | <null>       |\n" +
+            "| \"Michael\" | 5           | <null>       |\n" +
+            "+----------------------------------------+\n" +
             "6 rows\n";
 
         String actual = runQuery(query).resultAsString();
@@ -151,25 +168,36 @@ class LouvainDocTest extends ProcTestBase {
     @Test
     void streamSeeded() {
         String query =
-            "CALL algo.beta.louvain.stream('User', 'LINK', {" +
-            "  graph: 'huge'," +
-            "  direction: 'BOTH'," +
-            "  seedProperty: 'seed'" +
-            "}) YIELD nodeId, community, communities " +
-            "RETURN algo.asNode(nodeId).name as name, community, communities " +
+            "CALL gds.algo.louvain.stream({" +
+            "   nodeProjection: {" +
+            "       User: {" +
+            "           labels: 'User'," +
+            "           properties: ['seed']" +
+            "       }" +
+            "   }," +
+            "   relationshipProjection: {" +
+            "       LINK: {" +
+            "          type: 'LINK'," +
+            "          projection: 'UNDIRECTED'," +
+            "          aggregation: 'NONE'" +
+            "       }" +
+            "   }," +
+            "   seedProperty: 'seed'" +
+            "}) YIELD nodeId, communityId, communityIds " +
+            "RETURN algo.asNode(nodeId).name as name, communityId, communityIds " +
             "ORDER BY name ASC";
 
         String expected =
-            "+-------------------------------------+\n" +
-            "| name      | community | communities |\n" +
-            "+-------------------------------------+\n" +
-            "| \"Alice\"   | 42        | <null>      |\n" +
-            "| \"Bridget\" | 42        | <null>      |\n" +
-            "| \"Charles\" | 42        | <null>      |\n" +
-            "| \"Doug\"    | 47        | <null>      |\n" +
-            "| \"Mark\"    | 47        | <null>      |\n" +
-            "| \"Michael\" | 47        | <null>      |\n" +
-            "+-------------------------------------+\n" +
+            "+----------------------------------------+\n" +
+            "| name      | communityId | communityIds |\n" +
+            "+----------------------------------------+\n" +
+            "| \"Alice\"   | 42          | <null>       |\n" +
+            "| \"Bridget\" | 42          | <null>       |\n" +
+            "| \"Charles\" | 42          | <null>       |\n" +
+            "| \"Doug\"    | 47          | <null>       |\n" +
+            "| \"Mark\"    | 47          | <null>       |\n" +
+            "| \"Michael\" | 47          | <null>       |\n" +
+            "+----------------------------------------+\n" +
             "6 rows\n";
 
         String actual = runQuery(query).resultAsString();
@@ -226,34 +254,39 @@ class LouvainDocTest extends ProcTestBase {
         );
 
         String query =
-            "CALL algo.beta.louvain.stream('', '', {" +
-            "  graph: 'huge'," +
-            "  undirected: true," +
-            "  includeIntermediateCommunities: true" +
-            "}) YIELD nodeId, community, communities " +
-            "RETURN algo.asNode(nodeId).name as name, community, communities " +
-            "ORDER BY name ASC";
+            "CALL gds.algo.louvain.stream({" +
+            "   nodeProjection: ['Node']," +
+            "   relationshipProjection: {" +
+            "       TYPE: {" +
+            "          type: 'TYPE'," +
+            "          projection: 'undirected'," +
+            "          aggregation: 'NONE'" +
+            "       }" +
+            "   }," +
+            "   includeIntermediateCommunities: true" +
+            "}) YIELD nodeId, communityId, communityIds " +
+            "RETURN algo.asNode(nodeId).name as name, communityId, communityIds";
 
         String expected =
-            "+--------------------------------+\n" +
-            "| name | community | communities |\n" +
-            "+--------------------------------+\n" +
-            "| \"a\"  | 14        | [3,14]      |\n" +
-            "| \"b\"  | 14        | [3,14]      |\n" +
-            "| \"c\"  | 14        | [14,14]     |\n" +
-            "| \"d\"  | 14        | [3,14]      |\n" +
-            "| \"e\"  | 14        | [14,14]     |\n" +
-            "| \"f\"  | 14        | [14,14]     |\n" +
-            "| \"g\"  | 7         | [7,7]       |\n" +
-            "| \"h\"  | 7         | [7,7]       |\n" +
-            "| \"i\"  | 7         | [7,7]       |\n" +
-            "| \"j\"  | 12        | [12,12]     |\n" +
-            "| \"k\"  | 12        | [12,12]     |\n" +
-            "| \"l\"  | 12        | [12,12]     |\n" +
-            "| \"m\"  | 12        | [12,12]     |\n" +
-            "| \"n\"  | 12        | [12,12]     |\n" +
-            "| \"x\"  | 14        | [14,14]     |\n" +
-            "+--------------------------------+\n" +
+            "+-----------------------------------+\n" +
+            "| name | communityId | communityIds |\n" +
+            "+-----------------------------------+\n" +
+            "| \"a\"  | 14          | [3,14]       |\n" +
+            "| \"b\"  | 14          | [3,14]       |\n" +
+            "| \"c\"  | 14          | [14,14]      |\n" +
+            "| \"d\"  | 14          | [3,14]       |\n" +
+            "| \"e\"  | 14          | [14,14]      |\n" +
+            "| \"f\"  | 14          | [14,14]      |\n" +
+            "| \"g\"  | 7           | [7,7]        |\n" +
+            "| \"h\"  | 7           | [7,7]        |\n" +
+            "| \"i\"  | 7           | [7,7]        |\n" +
+            "| \"j\"  | 12          | [12,12]      |\n" +
+            "| \"k\"  | 12          | [12,12]      |\n" +
+            "| \"l\"  | 12          | [12,12]      |\n" +
+            "| \"m\"  | 12          | [12,12]      |\n" +
+            "| \"n\"  | 12          | [12,12]      |\n" +
+            "| \"x\"  | 14          | [14,14]      |\n" +
+            "+-----------------------------------+\n" +
             "15 rows\n";
 
         String actual = runQuery(query).resultAsString();
