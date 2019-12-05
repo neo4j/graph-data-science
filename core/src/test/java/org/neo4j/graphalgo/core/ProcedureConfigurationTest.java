@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProcedureConfigurationTest {
 
@@ -114,13 +115,6 @@ class ProcedureConfigurationTest {
         Map<String, Object> map = Collections.emptyMap();
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         assertEquals(Double.NaN, procedureConfiguration.getSkipValue(Double.NaN), 0.01);
-    }
-
-    @Test
-    void skipValueAllowNull() {
-        Map<String, Object> map = MapUtil.map("skipValue", null);
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
-        assertNull(procedureConfiguration.getSkipValue(Double.NaN));
     }
 
     @Test
