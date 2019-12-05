@@ -88,7 +88,8 @@ public class CypherGraphFactory extends GraphFactory {
                 relationshipTypeIds
                     .stream()
                     .map(RelationshipTypeMapping::typeName)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList())
+            );
             throw new IllegalArgumentException(message);
         }
 
@@ -98,20 +99,16 @@ public class CypherGraphFactory extends GraphFactory {
     @Override
     public GraphsByRelationshipType importAllGraphs() {
         // Temporarily override the security context to enforce read-only access during load
-        try (Revertable revertable = setReadOnlySecurityContext()) {
+        try (Revertable ignored = setReadOnlySecurityContext()) {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.nodeLabel(), api, setup).load();
             IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
-            Map<String, Map<String, Graph>> graphs = loadRelationships(nodes, this.dimensions, setup.tracker());
+            Map<String, Map<String, Graph>> graphs = loadRelationships(nodes);
             progressLogger.logDone(setup.tracker());
             return GraphsByRelationshipType.of(graphs);
         }
     }
 
-    private Map<String, Map<String, Graph>> loadRelationships(
-        IdsAndProperties idsAndProperties,
-        GraphDimensions dimensions,
-        AllocationTracker tracker
-    ) {
+    private Map<String, Map<String, Graph>> loadRelationships(IdsAndProperties idsAndProperties) {
         CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
             idsAndProperties.idMap(),
             api,
@@ -122,26 +119,36 @@ public class CypherGraphFactory extends GraphFactory {
         Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>> result = relationshipLoader.load();
 
         GraphDimensions resultDimensions = result.getLeft();
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = result.getRight();
 
         return relationshipLoader.allBuilders().entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().typeName(),
             entry -> {
-                RelationshipsBuilder outgoingRelationshipsBuilder = entry.getValue();
 
-                AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder != null
-                    ? outgoingRelationshipsBuilder.adjacency.build() : null;
-                AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder != null
-                    ? outgoingRelationshipsBuilder.globalAdjacencyOffsets : null;
+                RelationshipTypeMapping relationshipTypeMapping = entry.getKey();
+                RelationshipsBuilder relationshipsBuilder = entry.getValue();
 
-                long relationshipCount = result.getRight().getOrDefault(entry.getKey(), 0L);
+                if (relationshipsBuilder == null) {
+                    throw new IllegalStateException(
+                        String.format(
+                            "RelationshipsBuilder must not be `null` for relationship type `%s`.",
+                            relationshipTypeMapping.typeName()
+                        )
+                    );
+                }
+
+                AdjacencyList adjacencyList = relationshipsBuilder.adjacency.build();
+                AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets;
+
+                long relationshipCount = relationshipCounts.getOrDefault(relationshipTypeMapping, 0L);
 
                 if (!resultDimensions.relProperties().hasMappings()) {
                     HugeGraph graph = HugeGraph.create(
-                        tracker,
+                        setup.tracker(),
                         idsAndProperties.hugeIdMap,
                         idsAndProperties.properties,
-                        outAdjacencyList,
-                        outAdjacencyOffsets,
+                        adjacencyList,
+                        adjacencyOffsets,
                         null,
                         null,
                         relationshipCount,
@@ -150,40 +157,25 @@ public class CypherGraphFactory extends GraphFactory {
                     return Collections.singletonMap("", graph);
                 } else {
                     return resultDimensions.relProperties().enumerate().map(propertyEntry -> {
-                        int weightIndex = propertyEntry.getKey();
-                        PropertyMapping property = propertyEntry.getValue();
+                        int propertyKeyId = propertyEntry.getKey();
+                        PropertyMapping propertyMapping = propertyEntry.getValue();
                         HugeGraph graph = create(
-                            tracker,
+                            setup.tracker(),
                             idsAndProperties.hugeIdMap,
                             idsAndProperties.properties,
-                            outgoingRelationshipsBuilder,
-                            outAdjacencyList,
-                            outAdjacencyOffsets,
-                            weightIndex,
-                            property,
+                            relationshipsBuilder,
+                            adjacencyList,
+                            adjacencyOffsets,
+                            propertyKeyId,
+                            propertyMapping,
                             relationshipCount,
                             setup.loadAsUndirected()
                         );
-                        return Pair.of(property.propertyKey(), graph);
+                        return Pair.of(propertyMapping.propertyKey(), graph);
                     }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
                 }
             }
         ));
-    }
-
-    private Revertable setReadOnlySecurityContext() {
-        try {
-            KernelTransaction kernelTransaction = api
-                    .getDependencyResolver()
-                    .resolveDependency(ThreadToStatementContextBridge.class)
-                    .getKernelTransactionBoundToThisThread(true);
-            AuthSubject subject = kernelTransaction.securityContext().subject();
-            SecurityContext securityContext = new SecurityContext(subject, READ);
-            return kernelTransaction.overrideWith(securityContext);
-        } catch (NotInTransactionException ex) {
-            // happens only in tests
-            throw new IllegalStateException("Must run in a transaction.", ex);
-        }
     }
 
     private HugeGraph create(
@@ -193,25 +185,26 @@ public class CypherGraphFactory extends GraphFactory {
         RelationshipsBuilder relationshipsBuilder,
         AdjacencyList adjacencyList,
         AdjacencyOffsets adjacencyOffsets,
-        int weightIndex,
-        PropertyMapping weightProperty,
+        int propertyKeyId,
+        PropertyMapping propertyMapping,
         long relationshipCount,
-        boolean loadAsUndirected) {
+        boolean loadAsUndirected
+    ) {
 
-        AdjacencyList outWeightList = null;
-        AdjacencyOffsets outWeightOffsets = null;
+        AdjacencyList propertyList = null;
+        AdjacencyOffsets propertyOffsets = null;
         if (relationshipsBuilder != null) {
-            if (weightProperty.propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                outWeightOffsets = relationshipsBuilder.globalWeightOffsets[weightIndex];
-                if (outWeightOffsets != null) {
-                    outWeightList = relationshipsBuilder.weights[weightIndex].build();
+            if (propertyMapping.propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+                propertyOffsets = relationshipsBuilder.globalWeightOffsets[propertyKeyId];
+                if (propertyOffsets != null) {
+                    propertyList = relationshipsBuilder.weights[propertyKeyId].build();
                 }
             }
         }
 
-        Optional<Double> maybeDefaultWeight = weightProperty == PropertyMapping.EMPTY_PROPERTY
+        Optional<Double> maybeDefaultValue = propertyMapping == PropertyMapping.EMPTY_PROPERTY
             ? Optional.empty()
-            : Optional.of(weightProperty.defaultValue());
+            : Optional.of(propertyMapping.defaultValue());
 
         return HugeGraph.create(
             tracker,
@@ -222,12 +215,27 @@ public class CypherGraphFactory extends GraphFactory {
             adjacencyList,
             null,
             adjacencyOffsets,
-            maybeDefaultWeight,
+            maybeDefaultValue,
             Optional.empty(),
-            Optional.ofNullable(outWeightList),
+            Optional.ofNullable(propertyList),
             Optional.empty(),
-            Optional.ofNullable(outWeightOffsets),
+            Optional.ofNullable(propertyOffsets),
             loadAsUndirected
         );
+    }
+
+    private Revertable setReadOnlySecurityContext() {
+        try {
+            KernelTransaction kernelTransaction = api
+                .getDependencyResolver()
+                .resolveDependency(ThreadToStatementContextBridge.class)
+                .getKernelTransactionBoundToThisThread(true);
+            AuthSubject subject = kernelTransaction.securityContext().subject();
+            SecurityContext securityContext = new SecurityContext(subject, READ);
+            return kernelTransaction.overrideWith(securityContext);
+        } catch (NotInTransactionException ex) {
+            // happens only in tests
+            throw new IllegalStateException("Must run in a transaction.", ex);
+        }
     }
 }

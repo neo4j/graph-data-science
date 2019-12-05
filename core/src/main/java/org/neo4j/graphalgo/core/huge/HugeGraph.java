@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
@@ -107,10 +108,10 @@ public class HugeGraph implements Graph {
         AllocationTracker tracker,
         IdMap idMapping,
         Map<String, NodeProperties> nodeProperties,
-        AdjacencyList outAdjacencyList,
-        AdjacencyOffsets outAdjacencyOffsets,
-        AdjacencyList inAdjacencyList,
-        AdjacencyOffsets inAdjacencyOffsets,
+        @Nullable AdjacencyList outAdjacencyList,
+        @Nullable AdjacencyOffsets outAdjacencyOffsets,
+        @Nullable AdjacencyList inAdjacencyList,
+        @Nullable AdjacencyOffsets inAdjacencyOffsets,
         long relationshipCount,
         boolean loadAsUndirected) {
 
@@ -132,20 +133,20 @@ public class HugeGraph implements Graph {
     }
 
     public static HugeGraph create(
-        final AllocationTracker tracker,
-        final IdMap idMapping,
-        final Map<String, NodeProperties> nodeProperties,
-        final long relationshipCount,
-        final AdjacencyList inAdjacency,
-        final AdjacencyList outAdjacency,
-        final AdjacencyOffsets inOffsets,
-        final AdjacencyOffsets outOffsets,
-        final Optional<Double> defaultPropertyValue,
-        final Optional<AdjacencyList> inProperties,
-        final Optional<AdjacencyList> outProperties,
-        final Optional<AdjacencyOffsets> inPropertyOffsets,
-        final Optional<AdjacencyOffsets> outPropertyOffsets,
-        final boolean isUndirected
+        AllocationTracker tracker,
+        IdMap idMapping,
+        Map<String, NodeProperties> nodeProperties,
+        long relationshipCount,
+        @Nullable AdjacencyList inAdjacency,
+        @Nullable AdjacencyList outAdjacency,
+        @Nullable AdjacencyOffsets inOffsets,
+        @Nullable AdjacencyOffsets outOffsets,
+        Optional<Double> defaultPropertyValue,
+        Optional<AdjacencyList> inProperties,
+        Optional<AdjacencyList> outProperties,
+        Optional<AdjacencyOffsets> inPropertyOffsets,
+        Optional<AdjacencyOffsets> outPropertyOffsets,
+        boolean isUndirected
     ) {
         return new HugeGraph(
             tracker,
@@ -194,21 +195,21 @@ public class HugeGraph implements Graph {
     }
 
     public HugeGraph(
-        final AllocationTracker tracker,
-        final IdMap idMapping,
-        final Map<String, NodeProperties> nodeProperties,
-        final long relationshipCount,
-        final AdjacencyList inAdjacency,
-        final AdjacencyList outAdjacency,
-        final AdjacencyOffsets inOffsets,
-        final AdjacencyOffsets outOffsets,
-        final boolean hasRelationshipProperty,
-        final double defaultPropertyValue,
-        final AdjacencyList inProperties,
-        final AdjacencyList outProperties,
-        final AdjacencyOffsets inPropertyOffsets,
-        final AdjacencyOffsets outPropertyOffsets,
-        final boolean isUndirected
+        AllocationTracker tracker,
+        IdMap idMapping,
+        Map<String, NodeProperties> nodeProperties,
+        long relationshipCount,
+        @Nullable AdjacencyList inAdjacency,
+        @Nullable AdjacencyList outAdjacency,
+        @Nullable AdjacencyOffsets inOffsets,
+        @Nullable AdjacencyOffsets outOffsets,
+        boolean hasRelationshipProperty,
+        double defaultPropertyValue,
+        @Nullable AdjacencyList inProperties,
+        @Nullable AdjacencyList outProperties,
+        @Nullable AdjacencyOffsets inPropertyOffsets,
+        @Nullable AdjacencyOffsets outPropertyOffsets,
+        boolean isUndirected
     ) {
         this.idMapping = idMapping;
         this.tracker = tracker;
