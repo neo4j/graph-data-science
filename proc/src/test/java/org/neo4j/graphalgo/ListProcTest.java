@@ -47,8 +47,6 @@ class ListProcTest extends ProcTestBase {
         "algo.beta.k1coloring.stream",
         "algo.beta.labelPropagation",
         "algo.beta.labelPropagation.stream",
-        "algo.beta.louvain",
-        "algo.beta.louvain.stream",
         "algo.beta.wcc",
         "algo.beta.wcc.memrec",
         "algo.beta.wcc.pregel",
@@ -62,9 +60,6 @@ class ListProcTest extends ProcTestBase {
         "algo.labelPropagation",
         "algo.labelPropagation.memrec",
         "algo.labelPropagation.stream",
-        "algo.louvain",
-        "algo.louvain.memrec",
-        "algo.louvain.stream",
         "algo.memrec",
         "algo.pageRank",
         "algo.pageRank.memrec",
@@ -80,8 +75,11 @@ class ListProcTest extends ProcTestBase {
         "algo.unionFind.stream",
         "algo.wcc",
         "algo.wcc.memrec",
-        "algo.wcc.stream"
-    );
+        "algo.wcc.stream",
+        "gds.algo.louvain.stats",
+        "gds.algo.louvain.stream",
+        "gds.algo.louvain.write"
+        );
 
     private static final List<String> FUNCTIONS = Arrays.asList(
         "algo.asNode",
