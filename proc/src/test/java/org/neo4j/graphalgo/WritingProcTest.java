@@ -26,7 +26,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -38,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
 
+// TODO port to new API, Bring back Louvain
 public class WritingProcTest extends ProcTestBase {
 
     @BeforeEach
@@ -45,7 +45,6 @@ public class WritingProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             LabelPropagationProc.class,
-            LouvainWriteProc.class,
             PageRankProc.class,
             UnionFindProc.class
         );
@@ -84,8 +83,6 @@ public class WritingProcTest extends ProcTestBase {
         return Stream.of(
                 "algo.labelPropagation",
                 "algo.beta.labelPropagation",
-                "algo.louvain",
-                "algo.beta.louvain",
                 "algo.pageRank",
                 "algo.unionFind"
         );
