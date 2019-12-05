@@ -151,7 +151,7 @@ public final class TestGraphLoader {
         MutableInt mutableInt = new MutableInt(0);
         return PropertyMappings.of(propertyMappings.stream()
             .map(mapping -> PropertyMapping.of(
-                mapping.neoPropertyKey,
+                mapping.propertyKey,
                 addSuffix(mapping.neoPropertyKey, mutableInt.getAndIncrement()),
                 mapping.defaultValue,
                 mapping.deduplicationStrategy
