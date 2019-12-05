@@ -24,7 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.louvain.LouvainProc;
+import org.neo4j.graphalgo.louvain.LouvainStreamProc;
+import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -63,7 +64,8 @@ class MemRecProcTest extends ProcTestBase {
                 UnionFindProc.class,
                 LabelPropagationProc.class,
                 WccProc.class,
-                LouvainProc.class,
+                LouvainWriteProc.class,
+                LouvainStreamProc.class,
                 K1ColoringProc.class,
                 ModularityOptimizationProc.class
         );

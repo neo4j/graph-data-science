@@ -20,13 +20,18 @@
 
 package org.neo4j.graphalgo.newapi;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 public interface BaseConfig {
     @Configuration.Parameter
-    String username();
+    @Value.Default
+    default String username() {
+        return AuthSubject.ANONYMOUS.username();
+    };
 
     @Configuration.Ignore
     default Class<? extends GraphFactory> getGraphImpl() {

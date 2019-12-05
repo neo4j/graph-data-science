@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.louvain.LouvainConfigBase;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -40,11 +40,9 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 public final class Louvain extends Algorithm<Louvain, Louvain> {
 
-    private final int concurrency;
     private final Graph rootGraph;
-    private final Config config;
+    private final LouvainConfigBase config;
     private final NodeProperties seedingValues;
-    private Direction direction;
     private final ExecutorService executorService;
     private final Log log;
     private final AllocationTracker tracker;
@@ -56,27 +54,19 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
     public Louvain(
         Graph graph,
-        Config config,
-        Direction direction,
+        LouvainConfigBase config,
         ExecutorService executorService,
-        int concurrency,
         Log log,
         AllocationTracker tracker
     ) {
         this.config = config;
         this.rootGraph = graph;
         this.log = log;
-        this.seedingValues = config.maybeSeedPropertyKey.map(graph::nodeProperties).orElse(null);
-        this.direction = direction;
+        this.seedingValues = Optional.ofNullable(config.seedProperty()).map(graph::nodeProperties).orElse(null);
         this.executorService = executorService;
-        this.concurrency = concurrency;
         this.tracker = tracker;
-        this.dendrograms = new HugeLongArray[config.maxLevel];
-        this.modularities = new double[config.maxLevel];
-    }
-
-    public void setDirection(Direction direction) {
-        this.direction = direction;
+        this.dendrograms = new HugeLongArray[config.maxLevels()];
+        this.modularities = new double[config.maxLevels()];
     }
 
     @Override
@@ -86,7 +76,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         NodeProperties nextSeedingValues = seedingValues;
 
         long oldNodeCount = rootGraph.nodeCount();
-        for (ranLevels = 0; ranLevels < config.maxLevel; ranLevels++) {
+        for (ranLevels = 0; ranLevels < config.maxLevels(); ranLevels++) {
             try (ProgressTimer timer = ProgressTimer.start(millis -> log.info("Louvain - Level %d finished after %dms", ranLevels + 1, millis)))  {
 
                 assertRunning();
@@ -153,11 +143,11 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
     private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodeProperties seed) {
         ModularityOptimization modularityOptimization = new ModularityOptimization(
             louvainGraph,
-            direction,
+            config.direction(),
             10,
-            config.tolerance,
+            config.tolerance(),
             seed,
-            concurrency,
+            config.concurrency(),
             DEFAULT_BATCH_SIZE,
             executorService,
             tracker,
@@ -189,7 +179,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
             nodeImporter,
-            direction,
+            config.direction(),
             rootGraph.isUndirected(),
             true,
             DeduplicationStrategy.SUM
@@ -197,7 +187,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         workingGraph.forEachNode((nodeId) -> {
             long communityId = modularityOptimization.getCommunityId(nodeId);
-            workingGraph.forEachRelationship(nodeId, direction, 1.0, (source, target, property) -> {
+            workingGraph.forEachRelationship(nodeId, config.direction(), 1.0, (source, target, property) -> {
                 relImporter.add(communityId, modularityOptimization.getCommunityId(target), property);
                 return true;
             });
@@ -214,10 +204,10 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         double previousModularity = modularities[ranLevels - 1];
         double currentModularity = modularities[ranLevels];
-        return !(currentModularity > previousModularity && Math.abs(currentModularity - previousModularity) > config.tolerance);
+        return !(currentModularity > previousModularity && Math.abs(currentModularity - previousModularity) > config.tolerance());
     }
 
-    public Config config() {
+    public LouvainConfigBase config() {
         return this.config;
     }
 
@@ -272,28 +262,5 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         public double nodeProperty(long nodeId) {
             return graph.toOriginalNodeId(nodeId);
         }
-    }
-
-    public static class Config {
-        public final int maxLevel;
-        public final int maxInnerIterations;
-        public final double tolerance;
-        public final boolean includeIntermediateCommunities;
-        public final Optional<String> maybeSeedPropertyKey;
-
-        public Config(
-            int maxLevel,
-            int maxInnerIterations,
-            double tolerance,
-            boolean includeIntermediateCommunities,
-            Optional<String> maybeSeedPropertyKey
-        ) {
-            this.maxLevel = maxLevel;
-            this.maxInnerIterations = maxInnerIterations;
-            this.tolerance = tolerance;
-            this.includeIntermediateCommunities = includeIntermediateCommunities;
-            this.maybeSeedPropertyKey = maybeSeedPropertyKey;
-        }
-
     }
 }

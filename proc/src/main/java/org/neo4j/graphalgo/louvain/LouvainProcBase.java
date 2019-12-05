@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.louvain;
 import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
-import org.neo4j.graphalgo.impl.louvain.LouvainFactoryNew;
+import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
 import java.util.Optional;
@@ -47,15 +47,7 @@ abstract class LouvainProcBase<CONFIG extends LouvainConfigBase> extends BaseAlg
     }
 
     @Override
-    protected final LouvainFactoryNew<CONFIG> algorithmFactory(LouvainConfigBase config) {
-        Louvain.Config louvainConfig = new Louvain.Config(
-            config.maxLevels(),
-            config.maxIterations(),
-            config.tolerance(),
-            config.includeIntermediateCommunities(),
-            Optional.ofNullable(config.seedProperty())
-        );
-
-        return new LouvainFactoryNew<>(louvainConfig);
+    protected final LouvainFactory<CONFIG> algorithmFactory(LouvainConfigBase config) {
+        return new LouvainFactory<>(config);
     }
 }

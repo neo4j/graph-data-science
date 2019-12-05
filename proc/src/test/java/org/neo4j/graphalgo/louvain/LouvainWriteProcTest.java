@@ -47,9 +47,6 @@ import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
 import static org.neo4j.graphalgo.core.ProcedureConstants.GRAPH_IMPL_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
-import static org.neo4j.graphalgo.louvain.LouvainProc.INCLUDE_INTERMEDIATE_COMMUNITIES_KEY;
-import static org.neo4j.graphalgo.louvain.LouvainProc.INNER_ITERATIONS_KEY;
-import static org.neo4j.graphalgo.louvain.LouvainProc.LEVELS_KEY;
 
 class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> implements
     WriteConfigTests<LouvainWriteConfig, Louvain> {
@@ -104,7 +101,7 @@ class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> imple
 
         runQuery(query, MapUtil.map("writeProp", writeProperty),
             row -> {
-                assertTrue(row.getBoolean(INCLUDE_INTERMEDIATE_COMMUNITIES_KEY));
+                assertTrue(row.getBoolean("includeIntermediateCommunities"));
             }
         );
 
@@ -203,9 +200,9 @@ class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> imple
     void testOverwritingDefaults(String graphImpl) {
         Map<String, Object> config = MapUtil.map(
             GRAPH_IMPL_KEY, graphImpl,
-            INCLUDE_INTERMEDIATE_COMMUNITIES_KEY, true,
-            LEVELS_KEY, 42,
-            INNER_ITERATIONS_KEY, 42,
+            "includeIntermediateCommunities", true,
+            "maxLevels", 42,
+            "maxIterations", 42,
             TOLERANCE_KEY, 0.42,
             SEED_PROPERTY_KEY, "foobar"
         );

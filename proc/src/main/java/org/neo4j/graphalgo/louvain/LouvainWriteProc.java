@@ -157,9 +157,9 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
         Graph graph = computationResult.graph();
         Louvain louvain = computationResult.result();
         LouvainWriteConfig config = computationResult.config();
-        Optional<NodeProperties> seed = louvain.config().maybeSeedPropertyKey.map(graph::nodeProperties);
+        Optional<NodeProperties> seed = Optional.ofNullable(louvain.config().seedProperty()).map(graph::nodeProperties);
         PropertyTranslator<Louvain> translator;
-        if (!louvain.config().includeIntermediateCommunities) {
+        if (!louvain.config().includeIntermediateCommunities()) {
             if (seed.isPresent() && Objects.equals(config.seedProperty(), config.writeProperty())) {
                 translator = new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
             } else {

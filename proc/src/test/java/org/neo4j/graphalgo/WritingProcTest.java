@@ -26,7 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.louvain.LouvainProc;
+import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -45,7 +45,7 @@ public class WritingProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             LabelPropagationProc.class,
-            LouvainProc.class,
+            LouvainWriteProc.class,
             PageRankProc.class,
             UnionFindProc.class
         );

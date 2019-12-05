@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.louvain.LouvainProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -58,7 +57,8 @@ class LouvainDocTest extends ProcTestBase {
             ", (nMichael)-[:LINK {weight: 1}]->(nMark)";
 
 
-        registerProcedures(LouvainProc.class, GraphLoadProc.class);
+        registerProcedures(LouvainWriteProc.class, GraphLoadProc.class);
+        registerProcedures(LouvainStreamProc.class, GraphLoadProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(cypher);
     }

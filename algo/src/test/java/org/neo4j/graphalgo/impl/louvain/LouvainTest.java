@@ -47,6 +47,8 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
+import org.neo4j.graphalgo.louvain.ImmutableLouvainStreamConfig;
+import org.neo4j.graphalgo.louvain.LouvainStreamConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.logging.NullLog;
@@ -66,23 +68,24 @@ import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
+import static org.neo4j.graphdb.Direction.BOTH;
 
 class LouvainTest extends AlgoTestBase {
 
-    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(
-        10,
-        10,
-        TOLERANCE_DEFAULT,
-        true,
-        Optional.empty()
-    );
-    static final Louvain.Config DEFAULT_CONFIG_WITH_SEED = new Louvain.Config(
-        10,
-        10,
-        TOLERANCE_DEFAULT,
-        true,
-        Optional.of("seed")
-    );
+    static final ImmutableLouvainStreamConfig.Builder DEFAULT_CONFIG = ImmutableLouvainStreamConfig.builder()
+        .maxLevels(10)
+        .maxIterations(10)
+        .tolerance(TOLERANCE_DEFAULT)
+        .includeIntermediateCommunities(true)
+        .concurrency(1);
+
+    static final ImmutableLouvainStreamConfig.Builder DEFAULT_CONFIG_WITH_SEED = ImmutableLouvainStreamConfig.builder()
+        .maxLevels(10)
+        .maxIterations(10)
+        .tolerance(TOLERANCE_DEFAULT)
+        .includeIntermediateCommunities(true)
+        .seedProperty("seed")
+        .concurrency(1);
 
     Direction direction;
 
@@ -149,10 +152,8 @@ class LouvainTest extends AlgoTestBase {
 
         Louvain algorithm = new Louvain(
             graph,
-            DEFAULT_CONFIG,
-            direction,
+            DEFAULT_CONFIG.direction(direction).build(),
             Pools.DEFAULT,
-            1,
             NullLog.getInstance(),
             AllocationTracker.EMPTY
         ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
@@ -187,10 +188,8 @@ class LouvainTest extends AlgoTestBase {
 
         Louvain algorithm = new Louvain(
             graph,
-            DEFAULT_CONFIG,
-            direction,
+            DEFAULT_CONFIG.direction(direction).build(),
             Pools.DEFAULT,
-            1,
             NullLog.getInstance(),
             AllocationTracker.EMPTY
         ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
@@ -227,10 +226,8 @@ class LouvainTest extends AlgoTestBase {
 
         Louvain algorithm = new Louvain(
             graph,
-            DEFAULT_CONFIG_WITH_SEED,
-            direction,
+            DEFAULT_CONFIG_WITH_SEED.direction(direction).build(),
             Pools.DEFAULT,
-            1,
             NullLog.getInstance(),
             AllocationTracker.EMPTY
         ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
@@ -262,16 +259,15 @@ class LouvainTest extends AlgoTestBase {
 
         Louvain algorithm = new Louvain(
             graph,
-            new Louvain.Config(
-                10,
-                10,
-                2.0,
-                false,
-                Optional.empty()
-            ),
-            direction,
+            ImmutableLouvainStreamConfig.builder()
+                .maxLevels(10)
+                .maxIterations(10)
+                .tolerance(2.0)
+                .includeIntermediateCommunities(false)
+                .direction(direction)
+                .concurrency(1)
+                .build(),
             Pools.DEFAULT,
-            1,
             NullLog.getInstance(),
             AllocationTracker.EMPTY
         ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
@@ -287,16 +283,15 @@ class LouvainTest extends AlgoTestBase {
 
         Louvain algorithm = new Louvain(
             graph,
-            new Louvain.Config(
-                1,
-                10,
-                TOLERANCE_DEFAULT,
-                false,
-                Optional.empty()
-            ),
-            direction,
+            ImmutableLouvainStreamConfig.builder()
+                .maxLevels(1)
+                .maxIterations(10)
+                .tolerance(TOLERANCE_DEFAULT)
+                .includeIntermediateCommunities(false)
+                .direction(direction)
+                .concurrency(1)
+                .build(),
             Pools.DEFAULT,
-            1,
             NullLog.getInstance(),
             AllocationTracker.EMPTY
         ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
@@ -314,8 +309,16 @@ class LouvainTest extends AlgoTestBase {
             .setMaxRelCount(500_000L)
             .build();
 
-        Louvain.Config config = new Louvain.Config(levels, 10, TOLERANCE_DEFAULT, false, Optional.empty());
-        MemoryTree memoryTree = new LouvainFactory(config).memoryEstimation(dimensions, concurrency);
+        LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
+            .maxLevels(levels)
+            .maxIterations(10)
+            .tolerance(TOLERANCE_DEFAULT)
+            .includeIntermediateCommunities(false)
+            .direction(Direction.OUTGOING)
+            .concurrency(1)
+            .build();
+
+        MemoryTree memoryTree = new LouvainFactory<>(config).memoryEstimation(dimensions, concurrency);
         assertEquals(min, memoryTree.memoryUsage().min);
         assertEquals(max, memoryTree.memoryUsage().max);
     }
@@ -333,10 +336,8 @@ class LouvainTest extends AlgoTestBase {
         assertTerminates((terminationFlag) -> {
             new Louvain(
                 graph,
-                DEFAULT_CONFIG,
-                Direction.BOTH,
+                DEFAULT_CONFIG.direction(BOTH).concurrency(2).build(),
                 Pools.DEFAULT,
-                2,
                 NullLog.getInstance(),
                 AllocationTracker.EMPTY
             )
@@ -354,10 +355,8 @@ class LouvainTest extends AlgoTestBase {
 
         Louvain louvain = new Louvain(
             graph,
-            DEFAULT_CONFIG,
-            Direction.BOTH,
+            DEFAULT_CONFIG.direction(BOTH).build(),
             Pools.DEFAULT,
-            1,
             log,
             AllocationTracker.EMPTY
         );
@@ -370,12 +369,12 @@ class LouvainTest extends AlgoTestBase {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1, 6_414_193, 16_338_904),
-            arguments(1, 10, 6_414_193, 23_539_264),
-            arguments(4, 1, 6_417_481, 22_143_280),
-            arguments(4, 10, 6_417_481, 29_343_640),
-            arguments(42, 1, 6_459_129, 98_116_768),
-            arguments(42, 10, 6_459_129, 105_317_128)
+            arguments(1, 1, 6414185, 16338896),
+            arguments(1, 10, 6414185, 23539256),
+            arguments(4, 1, 6417473, 22143272),
+            arguments(4, 10, 6417473, 29343632),
+            arguments(42, 1, 6459121, 98116760),
+            arguments(42, 10, 6459121, 105317120)
         );
     }
 
@@ -412,7 +411,7 @@ class LouvainTest extends AlgoTestBase {
                 .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .undirected();
         } else {
-            direction = Direction.BOTH;
+            direction = BOTH;
             loader
                 .withAnyRelationshipType()
                 .withLabel("Node");

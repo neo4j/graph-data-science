@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -30,31 +29,28 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimizationFactory;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.louvain.LouvainConfigBase;
 import org.neo4j.logging.Log;
 
-public class LouvainFactory extends AlgorithmFactory<Louvain, ProcedureConfiguration> {
+public class LouvainFactory<CONFIG extends LouvainConfigBase> extends AlgorithmFactory<Louvain, CONFIG> {
 
-    public static final Direction DEFAULT_LOUVAIN_DIRECTION = Direction.BOTH;
-    public Louvain.Config config;
+    public LouvainConfigBase config;
 
-    public LouvainFactory(Louvain.Config config) {
+    public LouvainFactory(LouvainConfigBase config) {
         this.config = config;
     }
 
     @Override
     public Louvain build(
         final Graph graph,
-        final ProcedureConfiguration configuration,
+        final LouvainConfigBase configuration,
         final AllocationTracker tracker,
         final Log log
     ) {
         return new Louvain(
             graph,
-            config,
-            configuration.getDirection(DEFAULT_LOUVAIN_DIRECTION),
+            configuration,
             Pools.DEFAULT,
-            configuration.concurrency(),
             log,
             tracker
         );
@@ -74,7 +70,7 @@ public class LouvainFactory extends AlgorithmFactory<Louvain, ProcedureConfigura
             })
             .rangePerNode("dendrograms", (nodeCount) -> MemoryRange.of(
                 HugeLongArray.memoryEstimation(nodeCount),
-                HugeLongArray.memoryEstimation(nodeCount) * config.maxLevel
+                HugeLongArray.memoryEstimation(nodeCount) * config.maxLevels()
             ))
             .build();
     }
