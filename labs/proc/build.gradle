@@ -24,3 +24,8 @@ shadowJar {
     from licenseFile
     from generateLicensesFiles
 }
+
+task shadowCopy(type: Copy) {
+    from(shadowJar)
+    into distributionDir
+}
