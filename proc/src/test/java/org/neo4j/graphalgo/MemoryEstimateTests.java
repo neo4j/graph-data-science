@@ -27,8 +27,6 @@ import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.procedure.Procedure;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -77,14 +75,5 @@ public interface MemoryEstimateTests<CONFIG extends BaseAlgoConfig, RESULT> exte
                     }
                 });
         });
-    }
-
-    default Stream<Method> getProcedureMethods(BaseAlgoProc<?, RESULT, CONFIG> proc) {
-        return Arrays.stream(proc.getClass().getDeclaredMethods())
-            .filter(method -> method.getDeclaredAnnotation(Procedure.class) != null);
-    }
-
-    default String getProcedureMethodName(Method method) {
-        return method.getDeclaredAnnotation(Procedure.class).value();
     }
 }

@@ -33,7 +33,11 @@ import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.procedure.Procedure;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -42,7 +46,13 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * Suite of Base test that should be used for every algorithm procedure.
+ * This test assumes that the implementing test method populates the database returned by `graphDb` and clears the
+ * data after each test.
+ */
 public interface BaseProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
     static Stream<String> emptyStringPropertyValues() {
@@ -138,5 +148,47 @@ public interface BaseProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
             compareResults(resultRun1.result(), resultRun2.result());
         });
+    }
+
+    @Test
+    default void testRunOnEmptyGraph() {
+        graphDb().execute("MATCH (n) DETACH DELETE n");
+
+        applyOnProcedure((proc) -> {
+            getWriteAndStreamProcedures(proc)
+                .forEach(method -> {
+                    Map<String, Object> configMap = createMinimallyValidConfig(CypherMapWrapper.empty()).toMap();
+
+                    try {
+                        Stream<?> result = (Stream)method.invoke(proc, configMap, Collections.emptyMap());
+
+                        if(getProcedureMethodName(method).endsWith("stream")) {
+                            assertEquals(0, result.count());
+                        } else {
+                            assertEquals(1, result.count());
+                        }
+
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        fail(e);
+                    }
+                });
+        });
+    }
+
+    default Stream<Method> getProcedureMethods(BaseAlgoProc<?, RESULT, CONFIG> proc) {
+        return Arrays.stream(proc.getClass().getDeclaredMethods())
+            .filter(method -> method.getDeclaredAnnotation(Procedure.class) != null);
+    }
+
+    default String getProcedureMethodName(Method method) {
+        return method.getDeclaredAnnotation(Procedure.class).value();
+    }
+
+    default Stream<Method> getWriteAndStreamProcedures(BaseAlgoProc<?, RESULT, CONFIG> proc) {
+        return getProcedureMethods(proc)
+            .filter(method -> {
+                String procedureMethodName = getProcedureMethodName(method);
+                return procedureMethodName.endsWith("stream") || procedureMethodName.endsWith("write");
+            });
     }
 }
