@@ -77,8 +77,11 @@ class ListProcTest extends ProcTestBase {
         "algo.wcc.memrec",
         "algo.wcc.stream",
         "gds.algo.louvain.stats",
+        "gds.algo.louvain.stats.estimate",
         "gds.algo.louvain.stream",
-        "gds.algo.louvain.write"
+        "gds.algo.louvain.stream.estimate",
+        "gds.algo.louvain.write",
+        "gds.algo.louvain.write.estimate"
         );
 
     private static final List<String> FUNCTIONS = Arrays.asList(

@@ -82,7 +82,7 @@ public class StreamingProcTest extends ProcTestBase {
     private static Stream<String> procsToTest() {
         return Stream.of(
                 "algo.labelPropagation.stream",
-                "algo.louvain.stream",
+//                "algo.louvain.stream",
                 "algo.pageRank.stream",
                 "algo.unionFind.stream"
         );

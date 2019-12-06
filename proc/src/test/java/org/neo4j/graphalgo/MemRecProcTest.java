@@ -178,7 +178,7 @@ class MemRecProcTest extends ProcTestBase {
         String loadedMemRecQuery = "CALL algo.memrec('', '', $algo, {" +
                                    "graph: $graph, relationshipProperties: $relationshipProperties, nodeProperties: $nodeProperties  " +
                                    "})" +
-                                   " YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax";
+                                   " YIELD nodeCount, relationshipCount, requiredMemory, bytesMin, bytesMax";
 
         Map<String, Object> memRecOnLoadedGraph = runQuery(loadedMemRecQuery, parameters).next();
 
@@ -189,7 +189,7 @@ class MemRecProcTest extends ProcTestBase {
                                   " nodeCount: $nodeCount, relationshipCount: $relationshipCount, " +
                                   " relationshipProperties: $relationshipProperties, nodeProperties: $nodeProperties" +
                                   " }) " +
-                                  "YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax";
+                                  "YIELD nodeCount, relationshipCount, requiredMemory, bytesMin, bytesMax";
         Map<String, Object> memRecOnStats = runQuery(nonExistingGraph, parameters).next();
 
         assertEquals(memRecOnLoadedGraph, memRecOnStats);
@@ -200,8 +200,8 @@ class MemRecProcTest extends ProcTestBase {
         testAgainstLoadedGraph("graph.load", map());
         testAgainstLoadedGraph("graph.load", map("relationshipProperties", "weight"));
         testAgainstLoadedGraph("graph.load", map("relationshipProperties", "weight", "nodeProperties", "class"));
-        testAgainstLoadedGraph("louvain", map());
-        testAgainstLoadedGraph("louvain", map("relationshipProperties", "weight", "nodeProperties", "class"));
+        testAgainstLoadedGraph("wcc", map());
+        testAgainstLoadedGraph("wcc", map("relationshipProperties", "weight", "nodeProperties", "class"));
         test("algo.memrec(null, null, 'pageRank', {graph: 'myGraph', nodeCount: 10})", "Unknown impl: myGraph");
         test("algo.memrec(null, null, 'pageRank', {graph: 'cypher', nodeCount: 10})");
         test("algo.memrec(null, null, 'pageRank', {graph: 'huge', nodeCount: 10})");
