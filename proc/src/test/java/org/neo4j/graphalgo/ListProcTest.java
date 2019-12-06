@@ -84,7 +84,7 @@ class ListProcTest extends ProcTestBase {
         "algo.asNodes",
         "algo.getNodeById",
         "algo.getNodesById",
-        "algo.version"
+        "gds.version"
     );
 
     private static final List<String> PAGE_RANK = asList(
@@ -148,7 +148,7 @@ class ListProcTest extends ProcTestBase {
 
     @Test
     void listEmpty() {
-        String query = "CALL algo.list()";
+        String query = "CALL gds.list()";
         assertEquals(
             ALL,
             runQuery(query)
@@ -159,7 +159,7 @@ class ListProcTest extends ProcTestBase {
     }
 
     private List<String> listProcs(Object name) {
-        String query = "CALL algo.list($name)";
+        String query = "CALL gds.list($name)";
         return runQuery(query, MapUtil.map("name", name))
             .<String>columnAs("name")
             .stream()

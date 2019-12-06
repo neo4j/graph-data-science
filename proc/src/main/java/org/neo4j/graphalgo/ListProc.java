@@ -35,20 +35,20 @@ public class ListProc {
     private static final String QUERY =
             " CALL dbms.procedures() " +
             " YIELD name, signature, description " +
-            " WHERE (name starts with 'algo.' OR name starts with 'gds.') AND name <> 'algo.list' AND ($name IS NULL OR name CONTAINS $name) " +
+            " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.') AND name <> 'gds.list' AND ($name IS NULL OR name CONTAINS $name) " +
             " RETURN name, signature, description, 'procedure' AS type " +
             " ORDER BY name UNION " +
             " CALL dbms.functions() " +
             " YIELD name, signature, description " +
-            " WHERE name starts with 'algo.' AND ($name IS NULL OR name CONTAINS $name) " +
+            " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.') AND ($name IS NULL OR name CONTAINS $name) " +
             " RETURN name, signature, description, 'function' AS type " +
             " ORDER BY name";
 
     @Context
     public GraphDatabaseService db;
 
-    @Procedure("algo.list")
-    @Description("CALL algo.list - lists all algorithm procedures, their description and signature")
+    @Procedure("gds.list")
+    @Description("CALL gds.list - lists all algorithm procedures, their description and signature")
     public Stream<ListResult> list(@Name(value = "name", defaultValue = "") String name) {
         return db.execute(QUERY, singletonMap("name", name)).stream().map(ListResult::new);
     }
