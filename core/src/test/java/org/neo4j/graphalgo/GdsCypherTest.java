@@ -355,6 +355,20 @@ class GdsCypherTest {
         );
     }
 
+    @Test
+    void testNoYield() {
+        String query = GdsCypher
+            .call("algoName")
+            .writeMode()
+            .explicitCreation("")
+            .yields();
+
+        assertEquals(
+            "CALL gds.algo.algoName.write(\"\")",
+            query
+        );
+    }
+
     static Stream<List<String>> testYields() {
         return Stream.of(
             Collections.singletonList("foo"),
