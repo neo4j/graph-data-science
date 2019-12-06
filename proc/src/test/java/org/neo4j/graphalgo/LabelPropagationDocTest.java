@@ -96,6 +96,16 @@ class LabelPropagationDocTest extends ProcTestBase {
                     "RETURN algo.asNode(nodeId).name AS Name, label AS CommunityId " +
                     "ORDER BY CommunityId, Name";
         System.out.println(db.execute(q1).resultAsString());
+
+        String q2 = "CALL algo.labelPropagation('User', 'FOLLOW', {" +
+                    "   iterations: 10," +
+                    "   seedProperty: 'seed_label'," +
+                    "   direction: 'OUTGOING'," +
+                    "   writeProperty: 'community'," +
+                    "   write: true" +
+                    "})" +
+                    "YIELD nodes, iterations, communityCount, writeProperty;";
+        System.out.println(db.execute(q2).resultAsString());
     }
 
     // Queries from the named graph and Cypher projection example in label-propagation.adoc
