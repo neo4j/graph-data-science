@@ -16,7 +16,7 @@ publishing {
 }
 
 shadowJar {
-    baseName = "neo4j-graph-algorithms"
+    baseName = "neo4j-graph-data-science"
     classifier = "standalone"
     exclude 'META-INF/versions/**/*'
     from licenseFile

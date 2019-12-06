@@ -1,6 +1,5 @@
-description = 'Neo4j Graph Data Science :: Docs'
-
 import org.neo4j.doc.build.xslt.XsltTask
+
 import org.neo4j.doc.build.docbook.DocBookPlugin
 
 buildscript {
@@ -32,8 +31,9 @@ plugins {
     id 'org.neo4j.doc.build.docbook' version '1.0-alpha11'
 }
 
-apply plugin: 'ch.kk7.spawn'
+description = 'Neo4j Graph Data Science :: Docs'
 
+apply plugin: 'ch.kk7.spawn'
 
 ext {
     versionParts = version.split('-')

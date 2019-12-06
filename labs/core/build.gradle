@@ -1,4 +1,4 @@
-description = 'Neo4j Labs :: Graph Algorithms :: Core'
+description = 'Neo4j Labs :: Graph Data Science :: Core'
 
 dependencies {
     compile project(':core')

@@ -1,4 +1,4 @@
-description = 'Neo4j Labs :: Graph Algorithms :: Procedures'
+description = 'Neo4j Labs :: Graph Data Science :: Procedures'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 
@@ -17,7 +17,7 @@ dependencies {
 }
 
 shadowJar {
-    baseName = "neo4j-labs-graph-algorithms"
+    baseName = "neo4j-labs-graph-data-science"
     classifier = "standalone"
     minimize()
     exclude 'META-INF/versions/**/*'
