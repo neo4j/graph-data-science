@@ -1,4 +1,4 @@
-description = 'Neo4j Graph Algorithms :: Procedures'
+description = 'Neo4j Graph Data Science :: Procedures'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 

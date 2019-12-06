@@ -1,4 +1,4 @@
-description = 'Neo4j Graph Algorithms :: Benchmark'
+description = 'Neo4j Graph Data Science :: Benchmark'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'me.champeau.gradle.jmh'

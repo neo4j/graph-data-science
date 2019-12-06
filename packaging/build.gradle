@@ -1,4 +1,4 @@
-description = 'Neo4j Graph Algorithms :: Packaging'
+description = 'Neo4j Graph Data Science :: Packaging'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 

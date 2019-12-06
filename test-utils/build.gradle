@@ -1,4 +1,4 @@
-description = 'Neo4j Graph Algorithms :: Test Utils'
+description = 'Neo4j Graph Data Science :: Test Utils'
 
 dependencies {
     compile project(':algo-common')

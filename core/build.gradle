@@ -1,4 +1,4 @@
-description = 'Neo4j Graph Algorithms :: Core'
+description = 'Neo4j Graph Data Science :: Core'
 
 dependencies {
     annotationProcessor project(':annotations')
