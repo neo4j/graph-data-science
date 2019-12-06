@@ -401,9 +401,9 @@ As we can see, the results are identical to the results in the <<algorithms-labe
 [source, cypher]
 ----
 CALL algo.labelPropagation.stream(
-  'MATCH (p:User) RETURN id(p) AS id, p.weight AS weight, id(p) AS value',
+  'MATCH (p:User) RETURN id(p) AS id',
   'MATCH (p1:User)-[f:FOLLOW]->(p2:User)
-   RETURN id(p1) AS source, id(p2) AS target, f.weight AS weight', {
+   RETURN id(p1) AS source', {
   graph: 'cypher',
   direction: "OUTGOING",
   iterations: 10
