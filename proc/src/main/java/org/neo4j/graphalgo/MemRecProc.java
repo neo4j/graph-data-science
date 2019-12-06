@@ -102,12 +102,12 @@ public final class MemRecProc {
         String available = procedures.getAllProcedures().stream()
                 .filter(p -> {
                     String[] namespace = p.name().namespace();
-                    return namespace[0].equals("algo")
+                    return (namespace[0].equals("algo") || namespace[0].equals("gds"))
                            && namespace.length >= 2
-                           && p.name().name().equals("memrec");
+                           && (p.name().name().equals("memrec") || p.name().name().equals("estimate"));
                 })
                 .map(p -> p.name().namespace())
-                .map(ns -> Arrays.stream(ns).skip(1).collect(Collectors.joining(DELIMITER)))
+                .map(ns -> Arrays.stream(ns).collect(Collectors.joining(DELIMITER)))
                 .distinct()
                 .sorted()
                 .collect(Collectors.joining(", ", "{", "}"));

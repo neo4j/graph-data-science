@@ -70,7 +70,9 @@ class MemRecProcTest extends ProcTestBase {
                 ModularityOptimizationProc.class
         );
         availableAlgoProcedures = "the available and supported procedures are {" +
-                                  "beta.k1coloring, beta.modularityOptimization, beta.wcc, graph.load, labelPropagation, louvain, pageRank, unionFind, wcc" +
+                                  "algo.beta.k1coloring, algo.beta.modularityOptimization, algo.beta.wcc, algo.graph.load," +
+                                  " algo.labelPropagation, algo.pageRank, algo.unionFind, algo.wcc," +
+                                  " gds.algo.louvain.stats, gds.algo.louvain.stream, gds.algo.louvain.write" +
                                   "}.";
         runQuery(DB_CYPHER);
     }
@@ -112,10 +114,10 @@ class MemRecProcTest extends ProcTestBase {
         test("algo.wcc.memrec(null, null)");
         test("algo.wcc.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
 
-        test("algo.memrec(null, null, 'louvain')");
-        test("algo.memrec(null, null, 'louvain', {direction: 'BOTH', graph: 'huge'})");
-        test("algo.louvain.memrec(null, null)");
-        test("algo.louvain.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+//        test("algo.memrec(null, null, 'louvain')");
+//        test("algo.memrec(null, null, 'louvain', {direction: 'BOTH', graph: 'huge'})");
+        test("gds.algo.louvain.write.estimate({writeProperty: 'foo'})");
+        test("gds.algo.louvain.stream.estimate({})");
 
         test("algo.memrec(null, null, 'unionFind')");
         test("algo.memrec(null, null, 'unionFind', {direction: 'BOTH', graph: 'huge'})");
@@ -142,7 +144,7 @@ class MemRecProcTest extends ProcTestBase {
     }
 
     private void test(final String s, final Optional<String> expectedMessage) {
-        String queryTemplate = "CALL %s YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax";
+        String queryTemplate = "CALL %s YIELD nodeCount, relationshipCount, requiredMemory, bytesMin, bytesMax RETURN nodeCount, relationshipCount, requiredMemory, bytesMin, bytesMax";
         String query = String.format(queryTemplate, s);
 
         try {
