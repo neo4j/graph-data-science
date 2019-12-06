@@ -3,7 +3,6 @@ description = 'Neo4j Graph Data Science :: Packaging'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
-    compile project(path: ':labs-proc', configuration: 'shadow')
     compile project(path: ':proc', configuration: 'shadow')
 }
 
