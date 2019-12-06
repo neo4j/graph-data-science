@@ -65,7 +65,7 @@ class VersionFuncTest extends ProcTestBase {
 
     private Optional<String> findVersion(File file) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
-        Pattern pattern = Pattern.compile(".*version = '(\\d\\.\\d\\.\\d+\\.\\d+)'.*");
+        Pattern pattern = Pattern.compile(".*version = '(\\d\\.\\d\\.\\d+)'.*");
 
         String version = null;
         while (reader.ready()) {
