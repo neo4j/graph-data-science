@@ -40,7 +40,11 @@ import org.neo4j.helpers.collection.Pair;
 import java.util.Map;
 import java.util.Optional;
 
-public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAlgoConfig> extends BaseProc {
+public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> extends BaseProc {
+
+    public String algoName() {
+        return this.getClass().getSimpleName();
+    }
 
     protected abstract CONFIG newConfig(
         Optional<String> graphName,
@@ -153,10 +157,63 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>, CONFIG extends BaseAl
 
     }
 
+    ComputationResult<A, RESULT, CONFIG> compute(Object graphNameOrConfig, Map<String, Object> configuration) {
+        ImmutableComputationResult.Builder<A, RESULT, CONFIG> builder = ImmutableComputationResult.builder();
+
+        Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
+        CONFIG config = input.first();
+
+        GraphCreateResult graphCreateResult = createGraph(input);
+        Graph graph = graphCreateResult.graph();
+        AllocationTracker tracker = AllocationTracker.create();
+
+        A algo = newAlgorithm(graph, config, tracker);
+
+        RESULT result = runWithExceptionLogging(
+            "Computation failed",
+            () -> {
+                try (ProgressTimer ignored = ProgressTimer.start(builder::computeMillis)) {
+                    return algo.compute();
+                }
+            }
+        );
+
+        log.info(algoName() + ": overall memory usage %s", tracker.getUsageString());
+
+        algo.release();
+        graph.releaseTopology();
+
+        return builder
+            .createMillis(graphCreateResult.createMillis())
+            .graph(graph)
+            .tracker(AllocationTracker.EMPTY)
+            .algorithm(algo)
+            .result(result)
+            .config(config)
+            .build();
+    }
+
     @ValueClass
     interface GraphCreateResult {
         long createMillis();
 
         Graph graph();
+    }
+
+    @ValueClass
+    interface ComputationResult<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> {
+        long createMillis();
+
+        long computeMillis();
+
+        A algorithm();
+
+        RESULT result();
+
+        Graph graph();
+
+        AllocationTracker tracker();
+
+        CONFIG config();
     }
 }

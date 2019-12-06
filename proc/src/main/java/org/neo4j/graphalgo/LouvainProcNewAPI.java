@@ -88,9 +88,8 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
             graphNameOrConfig,
             configuration
         );
-        GraphCreateResult graphCreateResult = createGraph(input);
-
-        return run(graphCreateResult, input.first(), true);
+        ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(graphNameOrConfig, configuration);
+        return write(computationResult, true);
     }
 
     @Procedure(value = "gds.algo.louvain.stats", mode = READ)
@@ -125,10 +124,8 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
     public Stream<WriteResult> stats(
             @Name(value = "graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
-        Pair<LouvainConfig, Optional<String>> input = processInput(graphNameOrConfig, configuration);
-        GraphCreateResult graphCreateResult = createGraph(input);
-
-        return run(graphCreateResult, input.first(), false);
+        ComputationResult<Louvain, Louvain, LouvainConfig> computationResult = compute(graphNameOrConfig, configuration);
+        return write(computationResult, false);
     }
 
     @Override
@@ -141,6 +138,96 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
         return LouvainConfig.of(getUsername(), graphName, maybeImplicitCreate, config);
     }
 
+    @Override
+    protected LouvainFactoryNew algorithmFactory(LouvainConfig config) {
+        Louvain.Config louvainConfig = new Louvain.Config(
+            config.maxLevels(),
+            config.maxIterations(),
+            config.tolerance(),
+            config.includeIntermediateCommunities(),
+            Optional.ofNullable(config.seedProperty())
+        );
+
+        return new LouvainFactoryNew(louvainConfig);
+    }
+
+    private Stream<WriteResult> write(ComputationResult<Louvain, Louvain, LouvainConfig> computeResult, boolean write) {
+        LouvainConfig config = computeResult.config();
+        Graph graph = computeResult.graph();
+        Louvain louvain = computeResult.algorithm();
+
+        WriteResultBuilder builder = new WriteResultBuilder(config, callContext, computeResult.tracker());
+
+        builder.setLoadMillis(computeResult.createMillis());
+        builder.setComputeMillis(computeResult.computeMillis());
+        builder.withNodeCount(graph.nodeCount());
+        builder
+            .withLevels(louvain.levels())
+            .withModularity(louvain.modularities()[louvain.levels() - 1])
+            .withModularities(louvain.modularities())
+            .withCommunityFunction(louvain::getCommunity);
+
+        if (write && !config.writeProperty().isEmpty()) {
+            write(
+                builder::timeWrite,
+                graph,
+                config,
+                louvain,
+                louvain.terminationFlag
+            );
+
+            graph.releaseProperties();
+        }
+
+        return Stream.of(builder.build());
+    }
+
+    private void write(
+        Supplier<ProgressTimer> timer,
+        Graph graph,
+        LouvainConfig config,
+        Louvain louvain,
+        TerminationFlag terminationFlag
+    ) {
+        try (ProgressTimer ignored = timer.get()) {
+            log.debug("Writing results");
+
+            NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, terminationFlag)
+                .withLog(log)
+                .parallel(Pools.DEFAULT, config.writeConcurrency())
+                .build();
+
+            Optional<NodeProperties> seed = louvain.config().maybeSeedPropertyKey.map(graph::nodeProperties);
+            PropertyTranslator<Louvain> translator;
+            if (!louvain.config().includeIntermediateCommunities) {
+                if (seed.isPresent() && config.seedProperty().equals(config.writeProperty())) {
+                    translator = new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
+                } else {
+                    translator = CommunityTranslator.INSTANCE;
+                }
+            } else {
+                translator = CommunitiesTranslator.INSTANCE;
+            }
+
+            exporter.write(
+                config.writeProperty(),
+                louvain,
+                translator
+            );
+        }
+    }
+
+    public static final class StreamResult {
+        public final long nodeId;
+        public final List<Long> communities;
+        public final long community;
+
+        StreamResult(final long nodeId, final long[] communities, final long community) {
+            this.nodeId = nodeId;
+            this.communities = communities == null ? null : Arrays.stream(communities).boxed().collect(Collectors.toList());
+            this.community = community;
+        }
+    }
 
     public static final class WriteResult {
 
@@ -197,125 +284,6 @@ public class LouvainProcNewAPI extends BaseAlgoProc<Louvain, Louvain, LouvainCon
             this.modularity = modularity;
             this.modularities = Arrays.stream(modularities).boxed().collect(Collectors.toList());
             this.communityDistribution = communityDistribution;
-        }
-    }
-
-    public Stream<WriteResult> run(GraphCreateResult graphCreateResult, LouvainConfig config, boolean write) {
-        Graph graph = graphCreateResult.graph();
-        AllocationTracker tracker = AllocationTracker.create();
-        WriteResultBuilder builder = new WriteResultBuilder(config, callContext, tracker);
-
-        builder.setLoadMillis(graphCreateResult.createMillis());
-        builder.withNodeCount(graph.nodeCount());
-
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.of(builder.build());
-        }
-
-        Louvain louvain = compute(graph, config, builder::setComputeMillis, tracker);
-
-        builder
-            .withLevels(louvain.levels())
-            .withModularity(louvain.modularities()[louvain.levels() -1])
-            .withModularities(louvain.modularities())
-            .withCommunityFunction(louvain::getCommunity);
-
-        if (write && !config.writeProperty().isEmpty()) {
-            write(
-                builder::timeWrite,
-                graph,
-                config,
-                louvain,
-                louvain.terminationFlag
-            );
-
-            graph.releaseProperties();
-        }
-
-        return Stream.of(builder.build());
-    }
-
-    @Override
-    protected LouvainFactoryNew algorithmFactory(LouvainConfig config) {
-        Louvain.Config louvainConfig = new Louvain.Config(
-            config.maxLevels(),
-            config.maxIterations(),
-            config.tolerance(),
-            config.includeIntermediateCommunities(),
-            Optional.ofNullable(config.seedProperty())
-        );
-
-        return new LouvainFactoryNew(louvainConfig);
-    }
-
-    private Louvain compute(
-        Graph graph,
-        LouvainConfig config,
-        LongConsumer timer,
-        AllocationTracker tracker
-    ) {
-        final Louvain louvain = newAlgorithm(graph, config, tracker);
-        runWithExceptionLogging(
-            Louvain.class.getSimpleName() + " failed",
-            () -> {
-                try (ProgressTimer ignored = ProgressTimer.start(timer)) {
-                    louvain.compute();
-                }
-            }
-        );
-
-        log.info(Louvain.class.getSimpleName() + ": overall memory usage %s", tracker.getUsageString());
-
-        louvain.release();
-        graph.releaseTopology();
-        return louvain;
-    }
-
-    private void write(
-        Supplier<ProgressTimer> timer,
-        Graph graph,
-        LouvainConfig config,
-        Louvain louvain,
-        TerminationFlag terminationFlag
-    ) {
-        try (ProgressTimer ignored = timer.get()) {
-            log.debug("Writing results");
-
-            NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, terminationFlag)
-                .withLog(log)
-                .parallel(Pools.DEFAULT, config.writeConcurrency())
-                .build();
-
-            Optional<NodeProperties> seed = louvain.config().maybeSeedPropertyKey.map(graph::nodeProperties);
-            PropertyTranslator<Louvain> translator;
-            if (!louvain.config().includeIntermediateCommunities) {
-                if (seed.isPresent() && config.seedProperty().equals(config.writeProperty())) {
-                    translator = new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
-                } else {
-                    translator = CommunityTranslator.INSTANCE;
-                }
-            } else {
-                translator = CommunitiesTranslator.INSTANCE;
-            }
-
-            exporter.write(
-                config.writeProperty(),
-                louvain,
-                translator
-            );
-        }
-    }
-
-    public static final class StreamResult {
-        public final long nodeId;
-        public final List<Long> communities;
-        public final long community;
-
-        StreamResult(final long nodeId, final long[] communities, final long community) {
-            this.nodeId = nodeId;
-            this.communities = communities == null ? null : Arrays.stream(communities).boxed().collect(Collectors.toList());
-            this.community = community;
         }
     }
 
