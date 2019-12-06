@@ -19,7 +19,7 @@
  */
 package positive;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ParametersOnlyConfig implements ParametersOnly {

@@ -381,12 +381,14 @@ final class GenerateConfiguration {
                 if (!(candidate.getParameters().size() == 1)) {
                     invalidCandidates.add(InvalidCandidate.of(candidate, "May only accept one parameter"));
                 }
-                if (!typeUtils.isAssignable(candidate.getReturnType(), targetType)) {
-                    invalidCandidates.add(InvalidCandidate.of(
-                        candidate,
-                        "Must return a type that is assignable to %s",
-                        targetType
-                    ));
+                if (candidate.getTypeParameters().isEmpty()) {
+                    if (!typeUtils.isAssignable(candidate.getReturnType(), targetType)) {
+                        invalidCandidates.add(InvalidCandidate.of(
+                            candidate,
+                            "Must return a type that is assignable to %s",
+                            targetType
+                        ));
+                    }
                 }
 
                 if (invalidCandidates.size() == sizeBeforeValidation) {

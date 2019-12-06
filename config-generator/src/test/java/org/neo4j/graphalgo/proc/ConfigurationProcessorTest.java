@@ -182,9 +182,7 @@ class ConfigurationProcessorTest {
     private JavaFileObject loadExpectedFile(String resourceName) {
         try {
             List<String> sourceLines = Resources.readLines(Resources.getResource(resourceName), UTF_8);
-            if (!isJavaxAnnotationProcessingGeneratedAvailable()) {
-                replaceGeneratedImport(sourceLines);
-            }
+            replaceGeneratedImport(sourceLines, isCompilingOnJdk8());
             String binaryName = resourceName
                 .replace('/', '.')
                 .replace(".java", "");
@@ -194,11 +192,11 @@ class ConfigurationProcessorTest {
         }
     }
 
-    private boolean isJavaxAnnotationProcessingGeneratedAvailable() {
-        return SourceVersion.latestSupported().compareTo(SourceVersion.RELEASE_8) > 0;
+    private boolean isCompilingOnJdk8() {
+        return SourceVersion.latestSupported().compareTo(SourceVersion.RELEASE_8) == 0;
     }
 
-    private static void replaceGeneratedImport(List<String> sourceLines) {
+    private static void replaceGeneratedImport(List<String> sourceLines, boolean compilesOnJdk8) {
         int i = 0;
         int firstImport = Integer.MAX_VALUE;
         int lastImport = -1;
@@ -211,10 +209,12 @@ class ConfigurationProcessorTest {
         }
         if (lastImport >= 0) {
             List<String> importLines = sourceLines.subList(firstImport, lastImport + 1);
-            importLines.replaceAll(line ->
-                line.startsWith("import javax.annotation.processing.Generated;")
-                    ? "import javax.annotation.Generated;"
-                    : line);
+            if (compilesOnJdk8) {
+                importLines.replaceAll(line ->
+                    line.startsWith("import javax.annotation.processing.Generated;")
+                        ? "import javax.annotation.Generated;"
+                        : line);
+            }
             importLines.sort(String.CASE_INSENSITIVE_ORDER);
         }
     }
