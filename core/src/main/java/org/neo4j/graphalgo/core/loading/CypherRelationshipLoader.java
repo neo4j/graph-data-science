@@ -24,8 +24,9 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.ResolvedPropertyMapping;
+import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -42,7 +43,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
+import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.NONE;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>>> {
 
@@ -84,7 +87,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         this.globalDeduplicationStrategy = setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
             ? NONE
             : setup.deduplicationStrategy();
-        this.globalDefaultPropertyValue = setup.relationshipDefaultPropertyValue().orElse(Double.NaN);
+        this.globalDefaultPropertyValue = setup.relationshipDefaultPropertyValue().orElse(DEFAULT_FALLBACK_VALUE);
 
         this.resultDimensions = initFromDimension(dimensions);
     }
@@ -95,20 +98,25 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         propertyKeyIdsByName = dimensions
             .relProperties()
             .stream()
-            .collect(toMap(PropertyMapping::neoPropertyKey, unused -> propertyKeyId.getAndIncrement()));
+            .collect(toMap(ResolvedPropertyMapping::neoPropertyKey, unused -> propertyKeyId.getAndIncrement()));
         propertyDefaultValueByName = dimensions
             .relProperties()
             .stream()
-            .collect(toMap(PropertyMapping::neoPropertyKey, PropertyMapping::defaultValue));
+            .collect(toMap(ResolvedPropertyMapping::neoPropertyKey, ResolvedPropertyMapping::defaultValue));
 
         // We can not rely on what the token store gives us.
         // We need to resolve the given property mappings
         // using our newly created property key identifiers.
         GraphDimensions newDimensions = new GraphDimensions.Builder(dimensions)
-            .setRelationshipProperties(PropertyMappings.of(dimensions.relProperties().stream()
-                .map(PropertyMapping::copyFrom)
-                .map(mapping -> mapping.resolveWith(propertyKeyIdsByName.get(mapping.neoPropertyKey)))
-                .toArray(PropertyMapping[]::new)))
+            .setRelationshipProperties(ResolvedPropertyMappings.of(dimensions.relProperties().stream()
+                .map(mapping -> PropertyMapping.of(
+                    mapping.propertyKey(),
+                    mapping.neoPropertyKey(),
+                    mapping.defaultValue(),
+                    mapping.deduplicationStrategy()
+                ))
+                .map(mapping -> mapping.resolveWith(propertyKeyIdsByName.get(mapping.neoPropertyKey())))
+                .collect(Collectors.toList())))
             .build();
 
         importWeights = newDimensions.relProperties().atLeastOneExists();
@@ -132,7 +140,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
             Predicate<String> contains = RelationshipRowVisitor.RESERVED_COLUMNS::contains;
             List<String> propertyColumns = allColumns.stream().filter(contains.negate()).collect(Collectors.toList());
 
-            PropertyMapping[] propertyMappings = propertyColumns
+            List<ResolvedPropertyMapping> propertyMappings = propertyColumns
                 .stream()
                 .map(propertyColumn -> PropertyMapping.of(
                     propertyColumn,
@@ -140,10 +148,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
                     globalDefaultPropertyValue,
                     globalDeduplicationStrategy
                 ))
-                .toArray(PropertyMapping[]::new);
+                .map(mapping -> mapping.resolveWith(NO_SUCH_PROPERTY_KEY))
+                .collect(Collectors.toList());
 
             GraphDimensions innerDimensions = new GraphDimensions.Builder(outerDimensions)
-                .setRelationshipProperties(PropertyMappings.of(propertyMappings))
+                .setRelationshipProperties(ResolvedPropertyMappings.of(propertyMappings))
                 .build();
 
             resultDimensions = initFromDimension(innerDimensions);

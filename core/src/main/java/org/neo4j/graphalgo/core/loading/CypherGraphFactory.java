@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
+import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -157,8 +157,8 @@ public class CypherGraphFactory extends GraphFactory {
                     return Collections.singletonMap("", graph);
                 } else {
                     return resultDimensions.relProperties().enumerate().map(propertyEntry -> {
-                        int propertyKeyId = propertyEntry.getKey();
-                        PropertyMapping propertyMapping = propertyEntry.getValue();
+                        int propertyKeyId = propertyEntry.getOne();
+                        ResolvedPropertyMapping propertyMapping = propertyEntry.getTwo();
                         HugeGraph graph = create(
                             setup.tracker(),
                             idsAndProperties.hugeIdMap,
@@ -186,7 +186,7 @@ public class CypherGraphFactory extends GraphFactory {
         AdjacencyList adjacencyList,
         AdjacencyOffsets adjacencyOffsets,
         int propertyKeyId,
-        PropertyMapping propertyMapping,
+        ResolvedPropertyMapping propertyMapping,
         long relationshipCount,
         boolean loadAsUndirected
     ) {
@@ -202,7 +202,7 @@ public class CypherGraphFactory extends GraphFactory {
             }
         }
 
-        Optional<Double> maybeDefaultValue = propertyMapping == PropertyMapping.EMPTY_PROPERTY
+        Optional<Double> maybeDefaultValue = propertyMapping.exists()
             ? Optional.empty()
             : Optional.of(propertyMapping.defaultValue());
 

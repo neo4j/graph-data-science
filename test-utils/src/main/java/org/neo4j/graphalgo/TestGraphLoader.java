@@ -151,10 +151,10 @@ public final class TestGraphLoader {
         MutableInt mutableInt = new MutableInt(0);
         return PropertyMappings.of(propertyMappings.stream()
             .map(mapping -> PropertyMapping.of(
-                mapping.propertyKey,
-                addSuffix(mapping.neoPropertyKey, mutableInt.getAndIncrement()),
-                mapping.defaultValue,
-                mapping.deduplicationStrategy
+                mapping.propertyKey(),
+                addSuffix(mapping.neoPropertyKey(), mutableInt.getAndIncrement()),
+                mapping.defaultValue(),
+                mapping.deduplicationStrategy()
             ))
             .toArray(PropertyMapping[]::new)
         );
@@ -167,8 +167,8 @@ public final class TestGraphLoader {
             .map(mapping -> String.format(
                 "%s.%s AS %s",
                 entityVar,
-                removeSuffix(mapping.neoPropertyKey),
-                mapping.neoPropertyKey
+                removeSuffix(mapping.neoPropertyKey()),
+                mapping.neoPropertyKey()
             ))
             .collect(Collectors.joining(", "))
             : "";

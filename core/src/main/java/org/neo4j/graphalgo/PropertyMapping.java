@@ -170,15 +170,6 @@ public abstract class PropertyMapping {
             .build();
     }
 
-    public static PropertyMapping copyFrom(PropertyMapping other) {
-        return PropertyMapping.of(
-            other.propertyKey,
-            other.neoPropertyKey,
-            other.defaultValue,
-            other.deduplicationStrategy
-        );
-    }
-
     /**
      * Creates a PropertyMapping. The given property key is also used for internal reference.
      */
