@@ -217,17 +217,57 @@ class GdsCypherTest {
             "  }" +
             "}";
 
+        //@formatter:off
         String expected =
-            "{relationshipProjection: {" +
-            "Rel: {type: \"TYPE\", projection: \"NATURAL\", aggregation: \"DEFAULT\", properties: {" +
-            "global: {property: \"RelProp\", defaultValue: 0.0 / 0.0, aggregation: \"DEFAULT\"}}}, " +
-            "BarRel: {type: \"Bar\", projection: \"UNDIRECTED\", aggregation: \"SINGLE\", properties: {" +
-            "global: {property: \"RelProp\", defaultValue: 0.0 / 0.0, aggregation: \"DEFAULT\"}, " +
-            "relProp: {property: \"RelationshipPropertyName\", defaultValue: 1337, aggregation: \"MAX\"}}}}, " +
-            "nodeProjection: {" +
-            "FooNode: {label: \"Foo\", properties: {" +
-            "GlobalNodeProp: {property: \"GlobalNodeProp\", defaultValue: 0.0 / 0.0}, " +
-            "nodeProp: {property: \"NodePropertyName\", defaultValue: 42.1337}}}}}";
+            "{" +
+                "relationshipProjection: {" +
+                    "Rel: {" +
+                        "type: \"TYPE\", " +
+                        "projection: \"NATURAL\", " +
+                        "aggregation: \"DEFAULT\", " +
+                        "properties: {" +
+                            "global: {" +
+                                "property: \"RelProp\", " +
+                                "defaultValue: 0.0 / 0.0, " +
+                                "aggregation: \"DEFAULT\"" +
+                            "}" +
+                        "}" +
+                    "}, " +
+                    "BarRel: {" +
+                        "type: \"Bar\", " +
+                        "projection: \"UNDIRECTED\", " +
+                        "aggregation: \"SINGLE\", " +
+                        "properties: {" +
+                            "global: {" +
+                                "property: \"RelProp\", " +
+                                "defaultValue: 0.0 / 0.0, " +
+                                "aggregation: \"DEFAULT\"" +
+                            "}, " +
+                            "relProp: {" +
+                                "property: \"RelationshipPropertyName\", " +
+                                "defaultValue: 1337, " +
+                                "aggregation: \"MAX\"" +
+                            "}" +
+                        "}" +
+                    "}" +
+                "}, " +
+                "nodeProjection: {" +
+                    "FooNode: {" +
+                        "label: \"Foo\", " +
+                        "properties: {" +
+                            "GlobalNodeProp: {" +
+                                "property: \"GlobalNodeProp\", " +
+                                "defaultValue: 0.0 / 0.0" +
+                            "}, " +
+                            "nodeProp: {" +
+                                "property: \"NodePropertyName\", " +
+                                "defaultValue: 42.1337" +
+                            "}" +
+                        "}" +
+                    "}" +
+                "}" +
+            "}";
+            //@formatter:on
 
         @SuppressWarnings("unchecked") Map<String, Object> map =
             (Map<String, Object>) new MapConverter().apply(input).value();
