@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * This test assumes that the implementing test method populates the database returned by `graphDb` and clears the
  * data after each test.
  */
-public interface BaseProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
+public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
     static Stream<String> emptyStringPropertyValues() {
         return Stream.of(null, "");

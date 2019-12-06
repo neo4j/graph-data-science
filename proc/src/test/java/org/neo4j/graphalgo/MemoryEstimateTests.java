@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public interface MemoryEstimateTests<CONFIG extends BaseAlgoConfig, RESULT> extends BaseProcTests<CONFIG, RESULT> {
+public interface MemoryEstimateTests<CONFIG extends BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
 
     @Test
     default void testEstimateExistsForEveryProcedure() {

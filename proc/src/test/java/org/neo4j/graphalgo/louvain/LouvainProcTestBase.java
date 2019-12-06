@@ -23,7 +23,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
-import org.neo4j.graphalgo.BaseProcTests;
+import org.neo4j.graphalgo.BaseAlgoProcTests;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.MemoryEstimateTests;
 import org.neo4j.graphalgo.ProcTestBase;
@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class LouvainProcTestBase<CONFIG extends LouvainConfigBase> extends ProcTestBase implements
-    BaseProcTests<CONFIG, Louvain>,
+    BaseAlgoProcTests<CONFIG, Louvain>,
     SeedConfigTests<CONFIG, Louvain>,
     IterationsConfigTest<CONFIG, Louvain>,
     WeightConfigTest<CONFIG, Louvain>,

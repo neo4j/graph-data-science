@@ -23,14 +23,14 @@ package org.neo4j.graphalgo.newapi;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.BaseProcTests;
+import org.neo4j.graphalgo.BaseAlgoProcTests;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig, RESULT> extends BaseProcTests<CONFIG, RESULT> {
+public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
     @Test
     default void testDefaultWeightPropertyIsNull() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.empty();
