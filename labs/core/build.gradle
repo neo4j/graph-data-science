@@ -1,9 +1,10 @@
 description = 'Neo4j Labs :: Graph Data Science :: Core'
 
 dependencies {
-    compile project(':core')
+    compileOnly project(':core')
 
     compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
 
     testCompile project(':test-utils')
+    testCompile project(':core')
 }
