@@ -29,7 +29,7 @@ import org.neo4j.helpers.collection.MapUtil;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public interface WriteConfigTests<CONFIG extends WriteConfig & BaseAlgoConfig, RESULT> extends BaseConfigTests<CONFIG, RESULT> {
+public interface WriteConfigTests<CONFIG extends WriteConfig & BaseAlgoConfig, RESULT> extends BaseProcTests<CONFIG, RESULT> {
 
     @Test
     default void testMissingWritePropertyFails() {

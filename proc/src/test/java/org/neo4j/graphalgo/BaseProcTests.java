@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public interface BaseConfigTests<CONFIG extends BaseAlgoConfig, RESULT> {
+public interface BaseProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
     static Stream<String> emptyStringPropertyValues() {
         return Stream.of(null, "");

@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.newapi.SeedConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public interface SeedConfigTests<CONFIG extends SeedConfig & BaseAlgoConfig, RESULT> extends BaseConfigTests<CONFIG, RESULT> {
+public interface SeedConfigTests<CONFIG extends SeedConfig & BaseAlgoConfig, RESULT> extends BaseProcTests<CONFIG, RESULT> {
 
     @Test
     default void testDefaultSeedPropertyIsNull() {
