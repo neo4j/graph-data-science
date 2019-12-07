@@ -470,7 +470,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (a)-[:REL_2 {p1: 42}]->(a)" +
             ", (a)-[:REL_3 {p1: 44}]->(a)");
 
-        GraphsByRelationshipType graphs = TestGraphLoader.from(db)
+        GraphsByRelationshipType graphs = TestGraphLoader.from(localDb)
             .withRelationshipType("REL_1 | REL_2 | REL_3")
             .withDeduplicationStrategy(MAX)
             .withRelationshipProperties(
