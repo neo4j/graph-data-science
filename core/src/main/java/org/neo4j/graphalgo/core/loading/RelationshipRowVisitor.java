@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.apache.commons.compress.utils.Sets;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
@@ -37,15 +39,15 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     static final Set<String> RESERVED_COLUMNS = Sets.newHashSet(SOURCE_COLUMN, TARGET_COLUMN, TYPE_COLUMN);
 
     private final IdMap idMap;
-    private final Map<String, Integer> propertyKeyIdsByName;
-    private final Map<String, Double> propertyDefaultValueByName;
+    private final ObjectIntHashMap<String> propertyKeyIdsByName;
+    private final ObjectDoubleHashMap<String> propertyDefaultValueByName;
     private final CypherRelationshipLoader.Context loaderContext;
     private final int bufferSize;
     private final int propertyCount;
 
     private final Map<String, SingleTypeRelationshipImporter> localImporters;
     private final Map<String, RelationshipPropertiesBatchBuffer> localPropertiesBuffers;
-    private final Map<String, Integer> localRelationshipIds;
+    private final ObjectIntHashMap<String> localRelationshipIds;
     private final boolean isAnyRelTypeQuery;
 
     private long lastNeoSourceId = -1, lastNeoTargetId = -1;
@@ -56,8 +58,8 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     RelationshipRowVisitor(
         IdMap idMap,
         CypherRelationshipLoader.Context loaderContext,
-        Map<String, Integer> propertyKeyIdsByName,
-        Map<String, Double> propertyDefaultValueByName,
+        ObjectIntHashMap<String> propertyKeyIdsByName,
+        ObjectDoubleHashMap<String> propertyDefaultValueByName,
         int bufferSize,
         boolean isAnyRelTypeQuery
     ) {
@@ -69,7 +71,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         this.bufferSize = bufferSize;
         this.localImporters = new HashMap<>();
         this.localPropertiesBuffers = new HashMap<>();
-        this.localRelationshipIds = new HashMap<>();
+        this.localRelationshipIds = new ObjectIntHashMap<>();
         this.isAnyRelTypeQuery = isAnyRelTypeQuery;
     }
 
@@ -165,7 +167,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     }
 
     private void readPropertyValues(Result.ResultRow row, int relationshipId, RelationshipPropertiesBatchBuffer propertiesBuffer) {
-        propertyKeyIdsByName.forEach((propertyKey, propertyKeyId) -> {
+        propertyKeyIdsByName.forEachKeyValue((propertyKey, propertyKeyId) -> {
             Object property = CypherLoadingUtils.getProperty(row, propertyKey);
             double propertyValue = property instanceof Number
                 ? ((Number) property).doubleValue()
@@ -187,10 +189,9 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     void flushAll() {
         relationshipCount += localImporters.values().stream()
-            .map(SingleTypeRelationshipImporter::importRels)
-            .map(RawValues::getHead)
-            .reduce(Integer::sum)
-            .orElse(0);
+            .mapToLong(SingleTypeRelationshipImporter::importRels)
+            .mapToInt(RawValues::getHead)
+            .sum();
     }
 
 }

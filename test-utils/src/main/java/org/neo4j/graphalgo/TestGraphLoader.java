@@ -110,11 +110,11 @@ public final class TestGraphLoader {
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
             String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s";
             String labelString = maybeLabel
-                .map(s -> "WHERE " + ProjectionParser
+                .map(s -> ProjectionParser
                     .parse(s)
                     .stream()
                     .map(l -> "n:" + l)
-                    .collect(Collectors.joining(" OR ")))
+                    .collect(Collectors.joining(" OR ", "WHERE ", "")))
                 .orElse("");
             // CypherNodeLoader not yet supports parsing node props from return items ...
             nodeProperties = getUniquePropertyMappings(nodeProperties);
@@ -162,7 +162,7 @@ public final class TestGraphLoader {
 
     private String getPropertiesString(PropertyMappings propertyMappings, String entityVar) {
         return propertyMappings.hasMappings()
-            ? ", " + propertyMappings
+            ? propertyMappings
             .stream()
             .map(mapping -> String.format(
                 "%s.%s AS %s",
@@ -170,7 +170,7 @@ public final class TestGraphLoader {
                 removeSuffix(mapping.neoPropertyKey()),
                 mapping.neoPropertyKey()
             ))
-            .collect(Collectors.joining(", "))
+            .collect(Collectors.joining(", ", ", ", ""))
             : "";
     }
 

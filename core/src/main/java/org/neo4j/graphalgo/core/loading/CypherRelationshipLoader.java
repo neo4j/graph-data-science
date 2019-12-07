@@ -22,7 +22,10 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
@@ -42,7 +45,6 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.NONE;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
@@ -60,8 +62,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
     // Property mappings are either defined upfront in
     // the procedure configuration or during load time
     // by looking at the columns returned by the query.
-    private Map<String, Integer> propertyKeyIdsByName;
-    private Map<String, Double> propertyDefaultValueByName;
+    private ObjectIntHashMap<String> propertyKeyIdsByName;
+    private ObjectDoubleHashMap<String> propertyDefaultValueByName;
     private boolean importWeights;
     private int[] propertyKeyIds;
     private double[] propertyDefaultValues;
@@ -95,14 +97,17 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
     private GraphDimensions initFromDimension(GraphDimensions dimensions) {
         MutableInt propertyKeyId = new MutableInt(0);
 
-        propertyKeyIdsByName = dimensions
+        int numberOfMappings = dimensions.relProperties().numberOfMappings();
+        propertyKeyIdsByName = new ObjectIntHashMap<>(numberOfMappings);
+        dimensions
             .relProperties()
             .stream()
-            .collect(toMap(ResolvedPropertyMapping::neoPropertyKey, unused -> propertyKeyId.getAndIncrement()));
-        propertyDefaultValueByName = dimensions
+            .forEach(mapping -> propertyKeyIdsByName.put(mapping.neoPropertyKey(), propertyKeyId.getAndIncrement()));
+        propertyDefaultValueByName = new ObjectDoubleHashMap<>(numberOfMappings);
+        dimensions
             .relProperties()
             .stream()
-            .collect(toMap(ResolvedPropertyMapping::neoPropertyKey, ResolvedPropertyMapping::defaultValue));
+            .forEach(mapping -> propertyDefaultValueByName.put(mapping.neoPropertyKey(), mapping.defaultValue()));
 
         // We can not rely on what the token store gives us.
         // We need to resolve the given property mappings
@@ -195,7 +200,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
 
         ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
         this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
-        return Pair.of(resultDimensions, relationshipCounters);
+        return Tuples.pair(resultDimensions, relationshipCounters);
     }
 
     Map<RelationshipTypeMapping, RelationshipsBuilder> allBuilders() {
@@ -238,14 +243,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         synchronized SingleTypeRelationshipImporter.Builder.WithImporter getOrCreateImporterBuilder(
             RelationshipTypeMapping relationshipTypeMapping
         ) {
-            SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder;
-            if (importerBuildersByType.containsKey(relationshipTypeMapping)) {
-                importerBuilder = importerBuildersByType.get(relationshipTypeMapping);
-            } else {
-                importerBuilder = createImporter(relationshipTypeMapping);
-                importerBuildersByType.put(relationshipTypeMapping, importerBuilder);
-            }
-            return importerBuilder;
+            return importerBuildersByType.computeIfAbsent(relationshipTypeMapping, this::createImporter);
         }
 
         private SingleTypeRelationshipImporter.Builder.WithImporter createImporter(RelationshipTypeMapping typeMapping) {

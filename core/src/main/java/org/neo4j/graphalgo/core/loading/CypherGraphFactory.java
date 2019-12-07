@@ -20,7 +20,8 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
@@ -118,8 +119,8 @@ public class CypherGraphFactory extends GraphFactory {
 
         Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>> result = relationshipLoader.load();
 
-        GraphDimensions resultDimensions = result.getLeft();
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = result.getRight();
+        GraphDimensions resultDimensions = result.getOne();
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = result.getTwo();
 
         return relationshipLoader.allBuilders().entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().typeName(),
@@ -154,7 +155,7 @@ public class CypherGraphFactory extends GraphFactory {
                         relationshipCount,
                         setup.loadAsUndirected()
                     );
-                    return Collections.singletonMap("", graph);
+                    return Collections.singletonMap(ANY_REL_TYPE, graph);
                 } else {
                     return resultDimensions.relProperties().enumerate().map(propertyEntry -> {
                         int propertyKeyId = propertyEntry.getOne();
@@ -171,8 +172,8 @@ public class CypherGraphFactory extends GraphFactory {
                             relationshipCount,
                             setup.loadAsUndirected()
                         );
-                        return Pair.of(propertyMapping.propertyKey(), graph);
-                    }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+                        return Tuples.pair(propertyMapping.propertyKey(), graph);
+                    }).collect(Collectors.toMap(Pair::getOne, Pair::getTwo));
                 }
             }
         ));

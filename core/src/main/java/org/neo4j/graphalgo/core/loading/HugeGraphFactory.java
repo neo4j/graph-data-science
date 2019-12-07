@@ -253,7 +253,7 @@ public final class HugeGraphFactory extends GraphFactory {
                                 relationshipCount,
                             setup.loadAsUndirected()
                         );
-                        return Collections.singletonMap("", graph);
+                        return Collections.singletonMap(ANY_REL_TYPE, graph);
                     } else {
                         return dimensions.relProperties().enumerate().map(propertyEntry -> {
                             int weightIndex = propertyEntry.getOne();

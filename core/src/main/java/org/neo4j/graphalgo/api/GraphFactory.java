@@ -38,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class GraphFactory implements Assessable {
 
     public static final String TASK_LOADING = "LOADING";
+    public static final String ANY_REL_TYPE = "";
 
     protected final ExecutorService threadPool;
     protected final GraphDatabaseAPI api;

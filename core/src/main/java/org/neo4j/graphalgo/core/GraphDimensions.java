@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongSet;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
