@@ -185,7 +185,7 @@ CREATE (links)-[:LINKS {weight: 0.05}]->(d)
 ----
 
 This graph represents seven pages, linking to another.
-The relationships that connect the nodes in each component have a property `weight` which determines the importance of the relationship.
+Each relationship has a property called `weight`, which describes the importance of the relationship.
 
 [[algorithms-pagerank-examples-unweighted]]
 === Unweighted
