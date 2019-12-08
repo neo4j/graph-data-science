@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,9 +76,9 @@ class CypherGraphFactoryTest {
         db = TestDatabaseCreator.createTestDatabase();
 
         String query = " CREATE (n1 {partition: 6})-[:REL {prop: 1}]->(n2 {foo: 4})-[:REL {prop: 2}]->(n3)" +
-                       " CREATE (n1)-[:REL {prop: 3}]->(n3)"+
+                       " CREATE (n1)-[:REL {prop: 3}]->(n3)" +
                        " RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3";
-        runQuery(db, query).accept( row -> {
+        runQuery(db, query).accept(row -> {
             id1 = row.getNumber("id1").intValue();
             id2 = row.getNumber("id2").intValue();
             id3 = row.getNumber("id3").intValue();
@@ -168,9 +169,9 @@ class CypherGraphFactoryTest {
     void testLoadRelationshipsParallelAccumulateWeightCypher(boolean parallel) {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String pagingQuery =
-                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
-                "UNION ALL "+
-                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
+            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
+            "UNION ALL " +
+            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
 
         loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.SUM, parallel);
@@ -202,9 +203,9 @@ class CypherGraphFactoryTest {
     void accumulateWeightCypher(boolean parallel) {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String pagingQuery =
-                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
-                "UNION ALL "+
-                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
+            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
+            "UNION ALL " +
+            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
 
         loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.SUM, parallel);
@@ -215,9 +216,9 @@ class CypherGraphFactoryTest {
     void countEachRelationshipOnce(boolean parallel) {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String pagingQuery =
-                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop AS weight " +
-                "UNION ALL "+
-                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop AS weight ";
+            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop AS weight " +
+            "UNION ALL " +
+            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop AS weight ";
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
 
         loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.SINGLE, parallel);
@@ -229,9 +230,9 @@ class CypherGraphFactoryTest {
         runQuery(
             db,
             "CREATE" +
-            "  (n1:Node1 {prop1: 1})" +
-            ", (n2:Node2 {prop2: 2})" +
-            ", (n3:Node3 {prop3: 3})"
+            "  ({prop1: 1})" +
+            ", ({prop2: 2})" +
+            ", ({prop3: 3})"
         );
         PropertyMapping prop1 = PropertyMapping.of("prop1", 0D);
         PropertyMapping prop2 = PropertyMapping.of("prop2", 0D);
@@ -254,14 +255,61 @@ class CypherGraphFactoryTest {
         assertGraphEquals(fromGdl(expectedGdl), graph);
     }
 
+    @Test
+    void testInitRelationshipPropertiesFromQuery() {
+        GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
+        runQuery(
+            db,
+            "CREATE" +
+            "  (n1)" +
+            ", (n2)" +
+            ", (n1)-[:REL {prop1: 1}]->(n2)" +
+            ", (n1)-[:REL {prop2: 2}]->(n2)" +
+            ", (n1)-[:REL {prop3: 3}]->(n2)"
+        );
+        PropertyMapping prop1 = PropertyMapping.of("prop1", 0D);
+        PropertyMapping prop2 = PropertyMapping.of("prop2", 0D);
+        PropertyMapping prop3 = PropertyMapping.of("prop3", 42D);
 
-    private void loadAndTestGraph(String nodeStatement, String relStatement, DeduplicationStrategy strategy, boolean parallel) {
+        GraphsByRelationshipType graphs = TestGraphLoader
+            .from(db)
+            .withRelationshipProperties(PropertyMappings.of(prop1, prop2, prop3), false)
+            .withDeduplicationStrategy(DeduplicationStrategy.DEFAULT)
+            .buildGraphs(CypherGraphFactory.class);
+
+        String expectedGraph =
+            "(a)-[{w: %f}]->(b)" +
+            "(a)-[{w: %f}]->(b)" +
+            "(a)-[{w: %f}]->(b)";
+
+        assertGraphEquals(
+            fromGdl(String.format(expectedGraph, 1.0, prop1.defaultValue(), prop1.defaultValue())),
+            graphs.getGraph("", Optional.of(addSuffix(prop1.propertyKey(), 0)))
+        );
+
+        assertGraphEquals(
+            fromGdl(String.format(expectedGraph, prop2.defaultValue(), 2.0, prop2.defaultValue())),
+            graphs.getGraph("", Optional.of(addSuffix(prop2.propertyKey(), 1)))
+        );
+
+        assertGraphEquals(
+            fromGdl(String.format(expectedGraph, prop3.defaultValue(), prop3.defaultValue(), 3.0)),
+            graphs.getGraph("", Optional.of(addSuffix(prop3.propertyKey(), 2)))
+        );
+    }
+
+    private void loadAndTestGraph(
+        String nodeStatement,
+        String relStatement,
+        DeduplicationStrategy strategy,
+        boolean parallel
+    ) {
         GraphLoader loader = new GraphLoader(db)
-                .withBatchSize(1000)
-                .withDeduplicationStrategy(strategy)
-                .withRelationshipProperties(PropertyMapping.of("weight", 0D))
-                .withLabel(nodeStatement)
-                .withRelationshipType(relStatement);
+            .withBatchSize(1000)
+            .withDeduplicationStrategy(strategy)
+            .withRelationshipProperties(PropertyMapping.of("weight", 0D))
+            .withLabel(nodeStatement)
+            .withRelationshipType(relStatement);
         if (parallel) {
             loader.withExecutorService(Pools.DEFAULT);
         }
