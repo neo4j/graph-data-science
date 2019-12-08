@@ -6,14 +6,12 @@
 This section describes the PageRank algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 PageRank is an algorithm that measures the *transitive* influence or connectivity of nodes.
 
 It can be computed by either iteratively distributing one node's rank (originally based on degree) over its neighbours or by randomly traversing the graph and counting the frequency of hitting each node during these walks.
 
 // TODO: Eigenvector is labs, so "a variant" might be misleading?
 PageRank is a variant of <<labs-algorithms-eigenvector, Eigenvector Centrality>>.
-// end::introduction[]
 
 This section includes:
 
@@ -32,7 +30,6 @@ This section includes:
 The PageRank algorithm measures the importance of each node within the graph, based on the number and quality of incoming relationships.
 The underlying assumption is that pages of importance are more likely to receive a higher volume of links from other pages.
 
-// tag::formula[]
 PageRank is defined in the original Google paper as follows:
 
 ----
@@ -45,7 +42,6 @@ where,
 * `d` is a damping factor which can be set between 0 and 1.
   It is usually set to 0.85.
 * `C(A)` is defined as the number of links going out of page `A`.
-// end::formula[]
 
 
 For more information on this algorithm, see:
