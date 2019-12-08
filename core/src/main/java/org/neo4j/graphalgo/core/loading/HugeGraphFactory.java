@@ -20,7 +20,8 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
@@ -226,8 +227,8 @@ public final class HugeGraphFactory extends GraphFactory {
                 entry -> entry.getKey().typeName(),
                 entry -> {
                     Pair<RelationshipsBuilder, RelationshipsBuilder> builders = entry.getValue();
-                    RelationshipsBuilder outgoingRelationshipsBuilder = builders.getLeft();
-                    RelationshipsBuilder incomingRelationshipsBuilder = builders.getRight();
+                    RelationshipsBuilder outgoingRelationshipsBuilder = builders.getOne();
+                    RelationshipsBuilder incomingRelationshipsBuilder = builders.getTwo();
 
                     AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder != null
                             ? outgoingRelationshipsBuilder.adjacency.build() : null;
@@ -273,8 +274,8 @@ public final class HugeGraphFactory extends GraphFactory {
                                     relationshipCount,
                                 setup.loadAsUndirected()
                             );
-                            return Pair.of(property.propertyKey(), graph);
-                        }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+                            return Tuples.pair(property.propertyKey(), graph);
+                        }).collect(Collectors.toMap(Pair::getOne, Pair::getTwo));
                     }
                 }));
     }
@@ -320,7 +321,7 @@ public final class HugeGraphFactory extends GraphFactory {
             }
         }
 
-        return Pair.of(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
+        return Tuples.pair(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
     }
 
     private HugeGraph create(

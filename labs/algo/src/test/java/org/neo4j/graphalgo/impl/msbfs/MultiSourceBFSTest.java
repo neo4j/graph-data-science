@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.impl.msbfs;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +39,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.helpers.collection.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -172,7 +173,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                                         i,
                                         d
                                 );
-                                assertTrue(seen.add(Pair.of(i, d)), message);
+                                assertTrue(seen.add(Tuples.pair(i, d)), message);
                             },
                             AllocationTracker.EMPTY
                     );

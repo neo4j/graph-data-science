@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
@@ -109,8 +109,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             int numberOfPages,
             Map.Entry<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> entry) {
         RelationshipTypeMapping mapping = entry.getKey();
-        RelationshipsBuilder outRelationshipsBuilder = entry.getValue().getLeft();
-        RelationshipsBuilder inRelationshipsBuilder = entry.getValue().getRight();
+        RelationshipsBuilder outRelationshipsBuilder = entry.getValue().getOne();
+        RelationshipsBuilder inRelationshipsBuilder = entry.getValue().getTwo();
 
         int[] weightProperties = dimensions.relProperties().allPropertyKeyIds();
         double[] defaultWeights = dimensions.relProperties().allDefaultWeights();

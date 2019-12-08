@@ -20,8 +20,9 @@
 package org.neo4j.graphalgo.core.utils.queue;
 
 import io.qala.datagen.RandomShortApi;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
-import org.neo4j.helpers.collection.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +99,7 @@ final class LongPriorityQueueTest {
                 min = i;
             }
             assertEquals(queue.add(i, weight), min);
-            elements.add(Pair.of(i, weight));
+            elements.add(Tuples.pair(i, weight));
         }
 
         // PQ isn't stable for duplicate elements, so we have to
@@ -106,8 +107,8 @@ final class LongPriorityQueueTest {
         Map<Double, Set<Long>> byWeight = elements
                 .stream()
                 .collect(Collectors.groupingBy(
-                        Pair::other,
-                        Collectors.mapping(Pair::first, Collectors.toSet())));
+                        Pair::getTwo,
+                        Collectors.mapping(Pair::getOne, Collectors.toSet())));
         List<Double> weightGroups = byWeight
                 .keySet()
                 .stream()

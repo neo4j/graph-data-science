@@ -19,13 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.yens;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.utils.StatementApi;
-import org.neo4j.helpers.collection.Pair;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Values;
@@ -117,10 +118,10 @@ public class WeightedPathExporter extends StatementApi {
         final Pointer.IntPointer counter = Pointer.wrap(0);
 
         Stream<Pair<WeightedPath, String>> pathsAndRelTypes = paths.stream().sorted(WeightedPath.comparator())
-                .map(path -> Pair.of(path, String.format("%s%d", relPrefix, counter.v++)));
+                .map(path -> Tuples.pair(path, String.format("%s%d", relPrefix, counter.v++)));
 
         final List<Runnable> tasks = pathsAndRelTypes
-                .map(pair -> (Runnable) () ->  export(pair.other(), propertyName, pair.first()))
+                .map(pair -> (Runnable) () ->  export(pair.getTwo(), propertyName, pair.getOne()))
                 .collect(Collectors.toList());
         ParallelUtil.run(tasks, executorService);
     }

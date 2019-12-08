@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -28,7 +30,6 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Iterables;
-import org.neo4j.helpers.collection.Pair;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -305,7 +306,7 @@ public final class CypherExporter {
         @Override
         public void forEachOutgoing(Graph graph, Long node, Consumer<Pair<Long, Long>> action) {
             graph.forEachRelationship(node, Direction.OUTGOING, (s, t) -> {
-                action.accept(Pair.of(s, t));
+                action.accept(Tuples.pair(s, t));
                 return true;
             });
         }
@@ -340,12 +341,12 @@ public final class CypherExporter {
 
         @Override
         public long startId(Pair<Long, Long> startAndEndNodeId) {
-            return startAndEndNodeId.first();
+            return startAndEndNodeId.getOne();
         }
 
         @Override
         public long endId(Pair<Long, Long> startAndEndNodeId) {
-            return startAndEndNodeId.other();
+            return startAndEndNodeId.getTwo();
         }
 
         @Override
@@ -360,7 +361,7 @@ public final class CypherExporter {
 
         @Override
         public Object property(String key, Pair<Long, Long> startAndEndNodeId, Graph graph) {
-            return graph.relationshipProperty(startAndEndNodeId.first(), startAndEndNodeId.other(), Double.NaN);
+            return graph.relationshipProperty(startAndEndNodeId.getOne(), startAndEndNodeId.getTwo(), Double.NaN);
         }
     }
 
