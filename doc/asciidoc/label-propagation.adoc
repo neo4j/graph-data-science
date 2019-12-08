@@ -18,7 +18,7 @@ This section includes:
 * <<algorithms-label-propagation-syntax, Syntax>>
 * <<algorithms-label-propagation-examples, Examples>>
 ** <<algorithms-label-propagation-examples-unweighted, Unweighted>>
-//** <<algorithms-label-propagation-examples-weighted, Weighted>>
+** <<algorithms-label-propagation-examples-weighted, Weighted>>
 ** <<algorithms-label-propagation-examples-seeded, Seeded>>
 ** <<algorithms-label-propagation-examples-projection, Named graphs and Cypher projections>>
 
@@ -245,19 +245,21 @@ CREATE (nDoug:User {name:'Doug', seed_label:21})
 CREATE (nMark:User {name:'Mark', seed_label:19})
 CREATE (nMichael:User {name:'Michael', seed_label:52})
 
-CREATE (nAlice)-[:FOLLOW]->(nBridget)
-CREATE (nAlice)-[:FOLLOW]->(nCharles)
-CREATE (nMark)-[:FOLLOW]->(nDoug)
-CREATE (nBridget)-[:FOLLOW]->(nMichael)
-CREATE (nDoug)-[:FOLLOW]->(nMark)
-CREATE (nMichael)-[:FOLLOW]->(nAlice)
-CREATE (nAlice)-[:FOLLOW]->(nMichael)
-CREATE (nBridget)-[:FOLLOW]->(nAlice)
-CREATE (nMichael)-[:FOLLOW]->(nBridget)
-CREATE (nCharles)-[:FOLLOW]->(nDoug);
+CREATE (nAlice)-[:FOLLOW {weight:1}]->(nBridget)
+CREATE (nAlice)-[:FOLLOW {weight:10}]->(nCharles)
+CREATE (nMark)-[:FOLLOW {weight:1}]->(nDoug)
+CREATE (nBridget)-[:FOLLOW {weight:1}]->(nMichael)
+CREATE (nDoug)-[:FOLLOW {weight:1}]->(nMark)
+CREATE (nMichael)-[:FOLLOW {weight:1}]->(nAlice)
+CREATE (nAlice)-[:FOLLOW {weight:1}]->(nMichael)
+CREATE (nBridget)-[:FOLLOW {weight:1}]->(nAlice)
+CREATE (nMichael)-[:FOLLOW {weight:1}]->(nBridget)
+CREATE (nCharles)-[:FOLLOW {weight:1}]->(nDoug);
 ----
 
-// TODO: graph explanation
+This graph represents 6 user and who follows who.
+Besides a `name` a name, each user also has a `seed_label`, which may be generated from previous label-propagation runs.
+In addition, each relationship has a weight property.
 
 [[algorithms-label-propagation-examples-unweighted]]
 === Unweighted
@@ -278,12 +280,12 @@ ORDER BY Community, Name
 [opts="header",cols="1,1"]
 |===
 | Name    | Community
-| "Alice"   | 1
-| "Bridget" | 1
-| "Charles" | 1
+| "Alice   | 1
+| Bridget" | 1
+| "Michael" | 1
+| "Charles" | 4
 | "Doug"    | 4
 | "Mark"    | 4
-| "Michael" | 4
 |===
 
 
@@ -311,9 +313,62 @@ Our algorithm found two communities, with 3 members each.
 It appears that Michael, Bridget, and Alice belong together, as do Doug and Mark.
 Only Charles doesn't strongly fit into either side, but ends up with Doug and Mark.
 
-// TODO: add weights to graph and create example
-//[[algorithms-label-propagation-examples-weighted]]
-//=== Weighted
+[[algorithms-label-propagation-examples-weighted]]
+=== Weighted
+
+The Label-Propagation algorithm can also run on weighted graphs, taking the given relationship weights into concern when forming the communities.
+
+
+.The following will run the algorithm on a weighted graph and stream results:
+[source, cypher]
+----
+CALL algo.labelPropagation.stream('User', 'FOLLOW', {
+  direction: 'OUTGOING',
+  iterations: 10,
+  weightProperty: 'weight'
+})
+YIELD nodeId, label AS Community
+RETURN algo.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| Name    | Community
+| Bridget" | 2
+| "Michael" | 2
+| "Alice   | 4
+| "Charles" | 4
+| "Doug"    | 4
+| "Mark"    | 4
+|===
+
+Using the weighted relationships, `Alice` and `Charles` are now in the same community as there is a strong link between them.
+
+
+.The following will load the graph, run the algorithm on a weighted graph and write back results:
+[source, cypher]
+----
+CALL algo.labelPropagation('User', 'FOLLOW', {
+  iterations: 10,
+  writeProperty: 'community',
+  write: true,
+  direction: 'OUTGOING',
+  weightProperty: 'weight'
+})
+YIELD nodes, iterations, communityCount, writeProperty;
+----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m"]
+|===
+| nodes | iterations | communityCount | writeProperty
+| 6     | 4          | 2               | "community"
+|===
+
+As we can see, the weighted example takes 4 iteration to converge, instead of 3 for the unweighted case.
+
 
 [[algorithms-label-propagation-examples-seeded]]
 === Seeded
@@ -403,12 +458,12 @@ ORDER BY Community, Name;
 [opts="header",cols="1,1"]
 |===
 | Name    | Community
-| "Alice"   | 1
-| "Bridget" | 1
-| "Charles" | 1
+| "Alice   | 1
+| Bridget" | 1
+| "Michael" | 1
+| "Charles" | 4
 | "Doug"    | 4
 | "Mark"    | 4
-| "Michael" | 4
 |===
 
 As we can see, the results are identical to the results in the <<algorithms-label-propagation-examples-unweighted>> example.
@@ -433,12 +488,12 @@ ORDER BY Community, Name;
 [opts="header",cols="1,1"]
 |===
 | Name    | Community
-| "Alice"   | 1
-| "Bridget" | 1
-| "Charles" | 1
+| "Alice   | 1
+| Bridget" | 1
+| "Michael" | 1
+| "Charles" | 4
 | "Doug"    | 4
 | "Mark"    | 4
-| "Michael" | 4
 |===
 
 Again, results are identical, as the Cypher projection we use mimics the behaviour of the default loading configuration.
