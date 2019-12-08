@@ -70,42 +70,83 @@ class LabelPropagationDocTest extends ProcTestBase {
                     "  direction: 'OUTGOING'," +
                     "  iterations: 10" +
                     "})" +
-                    "YIELD nodeId, label " +
-                    "RETURN algo.asNode(nodeId).name AS Name, label AS CommunityId " +
-                    "ORDER BY CommunityId, Name";
-        System.out.println(db.execute(q1).resultAsString());
-        
+                    "YIELD nodeId, label AS Community " +
+                    "RETURN algo.asNode(nodeId).name AS Name, Community " +
+                    "ORDER BY Community, Name";
+
+        String expectedString = "+-----------------------+\n" +
+                                "| Name      | Community |\n" +
+                                "+-----------------------+\n" +
+                                "| \"Alice\"   | 1         |\n" +
+                                "| \"Bridget\" | 1         |\n" +
+                                "| \"Michael\" | 1         |\n" +
+                                "| \"Charles\" | 4         |\n" +
+                                "| \"Doug\"    | 4         |\n" +
+                                "| \"Mark\"    | 4         |\n" +
+                                "+-----------------------+\n" +
+                                "6 rows\n";
+
+        assertEquals(expectedString, db.execute(q1).resultAsString());
+
+        expectedString = "+-----------------------------------------------------+\n" +
+                         "| nodes | iterations | communityCount | writeProperty |\n" +
+                         "+-----------------------------------------------------+\n" +
+                         "| 6     | 3          | 2              | \"community\"   |\n" +
+                         "+-----------------------------------------------------+\n" +
+                         "1 row\n";
+
         String q2 = "CALL algo.labelPropagation('User', 'FOLLOW', {" +
-                    "  direction: 'OUTGOING'," +
                     "  iterations: 10," +
                     "  writeProperty: 'community'," +
-                    "  write: true" +
-                    "})" +
+                    "  write: true," +
+                    "  direction: 'OUTGOING'})" +
                     "YIELD nodes, iterations, communityCount, writeProperty;";
-        System.out.println(db.execute(q2).resultAsString());
+
+        assertEquals(expectedString, db.execute(q2).resultAsString());
     }
 
     @Test
     void seeded(){
         String q1 = "CALL algo.labelPropagation.stream('User', 'FOLLOW', {" +
-                    "   iterations: 10," +
-                    "   seedProperty: 'seed_label'," +
-                    "   direction: 'OUTGOING'" +
+                    "  iterations: 10," +
+                    "  seedProperty: 'seed_label'," +
+                    "  direction: 'OUTGOING'" +
                     "})" +
-                    "YIELD nodeId, label " +
-                    "RETURN algo.asNode(nodeId).name AS Name, label AS CommunityId " +
-                    "ORDER BY CommunityId, Name";
-        System.out.println(db.execute(q1).resultAsString());
+                    "YIELD nodeId, label AS Community " +
+                    "RETURN algo.asNode(nodeId).name AS Name, Community " +
+                    "ORDER BY Community, Name";
+
+        String expectedString = "+-----------------------+\n" +
+                                "| Name      | Community |\n" +
+                                "+-----------------------+\n" +
+                                "| \"Charles\" | 19        |\n" +
+                                "| \"Doug\"    | 19        |\n" +
+                                "| \"Mark\"    | 19        |\n" +
+                                "| \"Alice\"   | 21        |\n" +
+                                "| \"Bridget\" | 21        |\n" +
+                                "| \"Michael\" | 21        |\n" +
+                                "+-----------------------+\n" +
+                                "6 rows\n";
+
+        assertEquals(expectedString, db.execute(q1).resultAsString());
 
         String q2 = "CALL algo.labelPropagation('User', 'FOLLOW', {" +
-                    "   iterations: 10," +
-                    "   seedProperty: 'seed_label'," +
-                    "   direction: 'OUTGOING'," +
-                    "   writeProperty: 'community'," +
-                    "   write: true" +
-                    "})" +
+                    "  direction: 'OUTGOING'," +
+                    "  iterations: 10," +
+                    "  seedProperty: 'seed_label'," +
+                    "  writeProperty: 'community'," +
+                    "  write: true" +
+                    "  })" +
                     "YIELD nodes, iterations, communityCount, writeProperty;";
-        System.out.println(db.execute(q2).resultAsString());
+
+        expectedString = "+-----------------------------------------------------+\n" +
+                         "| nodes | iterations | communityCount | writeProperty |\n" +
+                         "+-----------------------------------------------------+\n" +
+                         "| 6     | 3          | 2              | \"community\"   |\n" +
+                         "+-----------------------------------------------------+\n" +
+                         "1 row\n";
+
+        assertEquals(expectedString, db.execute(q2).resultAsString());
     }
 
     // Queries from the named graph and Cypher projection example in label-propagation.adoc
@@ -116,27 +157,40 @@ class LabelPropagationDocTest extends ProcTestBase {
         db.execute(loadGraph);
 
         String q1 = "CALL algo.labelPropagation.stream(null, null, {" +
-                    "   graph: 'myGraph'," +
-                    "   direction: 'OUTGOING'," +
-                    "   iterations: 10" +
+                    "  graph: 'myGraph'," +
+                    "  direction: 'OUTGOING'," +
+                    "  iterations: 10" +
                     "})" +
                     "YIELD nodeId, label " +
-                    "RETURN algo.asNode(nodeId).name AS Name, label AS ComponentId " +
-                    "ORDER BY ComponentId, Name";
-        String r1 = db.execute(q1).resultAsString();
-        System.out.println(r1);
+                    "RETURN algo.asNode(nodeId).name AS Name, label AS Community " +
+                    "ORDER BY Community, Name;";
+
+        String expectedString = "+-----------------------+\n" +
+                                "| Name      | Community |\n" +
+                                "+-----------------------+\n" +
+                                "| \"Alice\"   | 1         |\n" +
+                                "| \"Bridget\" | 1         |\n" +
+                                "| \"Michael\" | 1         |\n" +
+                                "| \"Charles\" | 4         |\n" +
+                                "| \"Doug\"    | 4         |\n" +
+                                "| \"Mark\"    | 4         |\n" +
+                                "+-----------------------+\n" +
+                                "6 rows\n";
+
+        assertEquals(expectedString, db.execute(q1).resultAsString());
 
         String q2 = "CALL algo.labelPropagation.stream(" +
                     "  'MATCH (p:User) RETURN id(p) AS id'," +
                     "  'MATCH (p1:User)-[f:FOLLOW]->(p2:User)" +
-                    "   RETURN id(p1) AS source, id(p2) AS target',{" +
-                    "   iterations: 10," +
-                    "   graph: 'cypher'})" +
+                    "   RETURN id(p1) AS source', {" +
+                    "  graph: 'cypher'," +
+                    "  direction: 'OUTGOING'," +
+                    "  iterations: 10" +
+                    "})" +
                     "YIELD nodeId, label " +
-                    "RETURN algo.asNode(nodeId).name AS Name, label AS ComponentId " +
-                    "ORDER BY ComponentId, Name;";
-        String r2 = db.execute(q2).resultAsString();
-        System.out.println(r2);
-        assertEquals(r1,r2);
+                    "RETURN algo.asNode(nodeId).name AS Name, label AS Community " +
+                    "ORDER BY Community, Name;";
+
+        assertEquals(expectedString, db.execute(q2).resultAsString());
     }
 }
