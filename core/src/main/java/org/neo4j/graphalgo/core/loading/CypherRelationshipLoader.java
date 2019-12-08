@@ -19,112 +19,285 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.ObjectLongHashMap;
+import com.carrotsearch.hppc.ObjectLongMap;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.ResolvedPropertyMapping;
+import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
-import org.neo4j.graphalgo.core.huge.AdjacencyList;
-import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.kernel.api.StatementConstants;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
+import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
+import static org.neo4j.graphalgo.core.DeduplicationStrategy.NONE;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-    private static final int SINGLE_RELATIONSHIP_WEIGHT = 1;
-    private static final int NO_RELATIONSHIP_WEIGHT = 0;
-    private static final int DEFAULT_WEIGHT_PROPERTY_ID = -2;
+class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>>> {
 
     private final IdMap idMap;
-    private final RelationshipsBuilder outgoingRelationshipsBuilder;
-    private final RelationshipImporter importer;
-    private final RelationshipImporter.Imports imports;
-    private final Optional<Double> maybeDefaultRelProperty;
+    private final Context loaderContext;
+    private final GraphDimensions outerDimensions;
+    private final boolean hasExplicitPropertyMappings;
+    private final DeduplicationStrategy globalDeduplicationStrategy;
+    private final double globalDefaultPropertyValue;
+    private final Map<RelationshipTypeMapping, LongAdder> relationshipCounters;
 
-    private long totalRecordsSeen;
-    private long totalRelationshipsImported;
+    // Property mappings are either defined upfront in
+    // the procedure configuration or during load time
+    // by looking at the columns returned by the query.
+    private ObjectIntHashMap<String> propertyKeyIdsByName;
+    private ObjectDoubleHashMap<String> propertyDefaultValueByName;
+    private boolean importWeights;
+    private int[] propertyKeyIds;
+    private double[] propertyDefaultValues;
+    private DeduplicationStrategy[] deduplicationStrategies;
+    private boolean initializedFromResult;
 
-    CypherRelationshipLoader(IdMap idMap, GraphDatabaseAPI api, GraphSetup setup) {
+    private GraphDimensions resultDimensions;
+
+    CypherRelationshipLoader(
+        IdMap idMap,
+        GraphDatabaseAPI api,
+        GraphSetup setup,
+        GraphDimensions dimensions
+    ) {
         super(setup.relationshipType(), idMap.nodeCount(), api, setup);
-
-        DeduplicationStrategy deduplicationStrategy =
-            setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
-                        ? DeduplicationStrategy.NONE
-                        : setup.deduplicationStrategy();
-        outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                new DeduplicationStrategy[]{deduplicationStrategy},
-            setup.tracker(),
-                setup.shouldLoadRelationshipProperties() ? SINGLE_RELATIONSHIP_WEIGHT : NO_RELATIONSHIP_WEIGHT);
-
-        ImportSizing importSizing = ImportSizing.of(setup.concurrency(), idMap.nodeCount());
-        int pageSize = importSizing.pageSize();
-        int numberOfPages = importSizing.numberOfPages();
-
-        this.maybeDefaultRelProperty = setup.relationshipDefaultPropertyValue();
-        Double defaultRelationshipProperty = maybeDefaultRelProperty.orElse(PropertyMapping.DEFAULT_FALLBACK_VALUE);
-
-        AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
-                outgoingRelationshipsBuilder,
-                numberOfPages,
-                pageSize,
-            setup.tracker(),
-                new LongAdder(),
-                new int[]{DEFAULT_WEIGHT_PROPERTY_ID},
-                new double[]{defaultRelationshipProperty}
-        );
-
         this.idMap = idMap;
-        importer = new RelationshipImporter(setup.tracker(), outBuilder, null);
-        imports = importer.imports(false, true, false, maybeDefaultRelProperty.isPresent());
-        totalRecordsSeen = 0;
-        totalRelationshipsImported = 0;
+        this.outerDimensions = dimensions;
+        this.loaderContext = new Context();
+        this.relationshipCounters = new HashMap<>();
+
+        this.hasExplicitPropertyMappings = dimensions.relProperties().hasMappings();
+
+        this.globalDeduplicationStrategy = setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
+            ? NONE
+            : setup.deduplicationStrategy();
+        this.globalDefaultPropertyValue = setup.relationshipDefaultPropertyValue().orElse(DEFAULT_FALLBACK_VALUE);
+
+        this.resultDimensions = initFromDimension(dimensions);
+    }
+
+    private GraphDimensions initFromDimension(GraphDimensions dimensions) {
+        MutableInt propertyKeyId = new MutableInt(0);
+
+        int numberOfMappings = dimensions.relProperties().numberOfMappings();
+        propertyKeyIdsByName = new ObjectIntHashMap<>(numberOfMappings);
+        dimensions
+            .relProperties()
+            .stream()
+            .forEach(mapping -> propertyKeyIdsByName.put(mapping.neoPropertyKey(), propertyKeyId.getAndIncrement()));
+        propertyDefaultValueByName = new ObjectDoubleHashMap<>(numberOfMappings);
+        dimensions
+            .relProperties()
+            .stream()
+            .forEach(mapping -> propertyDefaultValueByName.put(mapping.neoPropertyKey(), mapping.defaultValue()));
+
+        // We can not rely on what the token store gives us.
+        // We need to resolve the given property mappings
+        // using our newly created property key identifiers.
+        GraphDimensions newDimensions = new GraphDimensions.Builder(dimensions)
+            .setRelationshipProperties(ResolvedPropertyMappings.of(dimensions.relProperties().stream()
+                .map(mapping -> PropertyMapping.of(
+                    mapping.propertyKey(),
+                    mapping.neoPropertyKey(),
+                    mapping.defaultValue(),
+                    mapping.deduplicationStrategy()
+                ))
+                .map(mapping -> mapping.resolveWith(propertyKeyIdsByName.get(mapping.neoPropertyKey())))
+                .collect(Collectors.toList())))
+            .build();
+
+        importWeights = newDimensions.relProperties().atLeastOneExists();
+        propertyKeyIds = newDimensions.relProperties().allPropertyKeyIds();
+        propertyDefaultValues = newDimensions.relProperties().allDefaultWeights();
+        deduplicationStrategies = getDeduplicationStrategies(newDimensions);
+
+        return newDimensions;
     }
 
     @Override
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
-        RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
-                idMap,
-                StatementConstants.ANY_RELATIONSHIP_TYPE,
-                bufferSize);
+        Result queryResult = runLoadingQuery(offset, batchSize);
+
+        List<String> allColumns = queryResult.columns();
+
+        // If the user specifies property mappings, we use those.
+        // Otherwise, we create new property mappings from the result columns.
+        // We do that only once, as each batch has the same columns.
+        if (!hasExplicitPropertyMappings && !initializedFromResult) {
+            Predicate<String> contains = RelationshipRowVisitor.RESERVED_COLUMNS::contains;
+            List<String> propertyColumns = allColumns.stream().filter(contains.negate()).collect(Collectors.toList());
+
+            List<ResolvedPropertyMapping> propertyMappings = propertyColumns
+                .stream()
+                .map(propertyColumn -> PropertyMapping.of(
+                    propertyColumn,
+                    propertyColumn,
+                    globalDefaultPropertyValue,
+                    globalDeduplicationStrategy
+                ))
+                .map(mapping -> mapping.resolveWith(NO_SUCH_PROPERTY_KEY))
+                .collect(Collectors.toList());
+
+            GraphDimensions innerDimensions = new GraphDimensions.Builder(outerDimensions)
+                .setRelationshipProperties(ResolvedPropertyMappings.of(propertyMappings))
+                .build();
+
+            resultDimensions = initFromDimension(innerDimensions);
+
+            initializedFromResult = true;
+        }
+
+        boolean isAnyRelTypeQuery = !allColumns.contains(RelationshipRowVisitor.TYPE_COLUMN);
+
+        if (isAnyRelTypeQuery) {
+            loaderContext.getOrCreateImporterBuilder(RelationshipTypeMapping.all());
+        }
+
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
-                buffer,
-                idMap,
-                maybeDefaultRelProperty,
-                imports
+            idMap,
+            loaderContext,
+            propertyKeyIdsByName,
+            propertyDefaultValueByName,
+            bufferSize,
+            isAnyRelTypeQuery
         );
-        runLoadingQuery(offset, batchSize, visitor);
-        visitor.flush();
+
+        queryResult.accept(visitor);
+        visitor.flushAll();
         return new BatchLoadResult(offset, visitor.rows(), -1L, visitor.relationshipCount());
     }
 
     @Override
-    void updateCounts(BatchLoadResult result) {
-        totalRecordsSeen += result.rows();
-        totalRelationshipsImported += result.count();
-    }
+    void updateCounts(BatchLoadResult result) { }
 
     @Override
-    Relationships result() {
-        ParallelUtil.run(importer.flushTasks(), setup.executor());
+    Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>> result() {
+        List<Runnable> flushTasks = loaderContext.importerBuildersByType
+            .values()
+            .stream()
+            .flatMap(SingleTypeRelationshipImporter.Builder.WithImporter::flushTasks)
+            .collect(Collectors.toList());
 
-        AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder.adjacency.build();
-        AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder.globalAdjacencyOffsets;
-        AdjacencyList outWeightList = setup.shouldLoadRelationshipProperties() ? outgoingRelationshipsBuilder.weights[0].build() : null;
-        AdjacencyOffsets outWeightOffsets = setup.shouldLoadRelationshipProperties() ? outgoingRelationshipsBuilder.globalWeightOffsets[0] : null;
+        ParallelUtil.run(flushTasks, setup.executor());
 
-        return new Relationships(
-                totalRecordsSeen, totalRelationshipsImported,
-                null,
-                outAdjacencyList,
-                null,
-                outAdjacencyOffsets,
-            setup.relationshipDefaultPropertyValue(),
-                null,
-                outWeightList,
-                null,
-                outWeightOffsets
-        );
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
+        this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
+        return Tuples.pair(resultDimensions, relationshipCounters);
+    }
+
+    Map<RelationshipTypeMapping, RelationshipsBuilder> allBuilders() {
+        return loaderContext.allBuilders;
+    }
+
+    private DeduplicationStrategy[] getDeduplicationStrategies(GraphDimensions dimensions) {
+        DeduplicationStrategy[] deduplicationStrategies = dimensions
+            .relProperties()
+            .stream()
+            .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
+                ? NONE
+                : property.deduplicationStrategy()
+            )
+            .toArray(DeduplicationStrategy[]::new);
+        // TODO: backwards compat code
+        if (deduplicationStrategies.length == 0) {
+            deduplicationStrategies = new DeduplicationStrategy[]{globalDeduplicationStrategy};
+        }
+        return deduplicationStrategies;
+    }
+
+    class Context {
+
+        private final Map<RelationshipTypeMapping, SingleTypeRelationshipImporter.Builder.WithImporter> importerBuildersByType;
+        private final Map<RelationshipTypeMapping, RelationshipsBuilder> allBuilders;
+
+        private final int pageSize;
+        private final int numberOfPages;
+
+        Context() {
+            this.importerBuildersByType = new HashMap<>();
+            this.allBuilders = new HashMap<>();
+
+            ImportSizing importSizing = ImportSizing.of(setup.concurrency(), idMap.nodeCount());
+            this.pageSize = importSizing.pageSize();
+            this.numberOfPages = importSizing.numberOfPages();
+        }
+
+        synchronized SingleTypeRelationshipImporter.Builder.WithImporter getOrCreateImporterBuilder(
+            RelationshipTypeMapping relationshipTypeMapping
+        ) {
+            return importerBuildersByType.computeIfAbsent(relationshipTypeMapping, this::createImporter);
+        }
+
+        private SingleTypeRelationshipImporter.Builder.WithImporter createImporter(RelationshipTypeMapping typeMapping) {
+            RelationshipsBuilder builder = new RelationshipsBuilder(
+                deduplicationStrategies,
+                setup.tracker(),
+                propertyKeyIds.length
+            );
+
+            allBuilders.put(typeMapping, builder);
+
+            SingleTypeRelationshipImporter.Builder importerBuilder = createImporterBuilder(
+                pageSize,
+                numberOfPages,
+                typeMapping,
+                builder,
+                setup.tracker()
+            );
+
+            relationshipCounters.put(typeMapping, importerBuilder.relationshipCounter());
+
+            return importerBuilder.loadImporter(
+                false,
+                true,
+                false,
+                importWeights
+            );
+        }
+
+        private SingleTypeRelationshipImporter.Builder createImporterBuilder(
+            int pageSize,
+            int numberOfPages,
+            RelationshipTypeMapping mapping,
+            RelationshipsBuilder relationshipsBuilder,
+            AllocationTracker tracker
+        ) {
+            LongAdder relationshipCounter = new LongAdder();
+            AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
+                relationshipsBuilder,
+                numberOfPages,
+                pageSize,
+                tracker,
+                relationshipCounter,
+                propertyKeyIds,
+                propertyDefaultValues
+            );
+
+            RelationshipImporter relationshipImporter = new RelationshipImporter(
+                setup.tracker(),
+                adjacencyBuilder,
+                null
+            );
+
+            return new SingleTypeRelationshipImporter.Builder(mapping, relationshipImporter, relationshipCounter);
+        }
     }
 }

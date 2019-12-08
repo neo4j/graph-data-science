@@ -154,7 +154,7 @@ class GraphLoaderTest {
     @AllGraphTypesTest
     void testWithRelationshipProperty(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
-            .withRelationshipProperties(PropertyMapping.of("prop1", 1337.42))
+            .withRelationshipProperties(PropertyMapping.of("weight","prop1", 1337.42))
             .buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 1337.42D}]->(c), (b)-[{w: 1337.42D}]->(c)"));
     }

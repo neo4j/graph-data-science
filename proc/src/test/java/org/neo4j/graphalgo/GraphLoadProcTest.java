@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Stream;
@@ -67,14 +68,14 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.GraphHelper.assertOutProperties;
 import static org.neo4j.graphalgo.GraphHelper.assertOutPropertiesWithDelta;
 import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
-import static org.neo4j.graphalgo.TestSupport.allGraphNames;
 import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.TestSupport.toArguments;
 
 class GraphLoadProcTest extends ProcTestBase {
 
     private static final String ALL_NODES_QUERY = "'MATCH (n) RETURN id(n) AS id'";
-    private static final String ALL_RELATIONSIHPS_QUERY = "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'";
+    private static final String ALL_RELATIONSHIPS_QUERY = "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'";
     private static final String DB_CYPHER =
             "CREATE" +
             "  (a:A {id: 0, partition: 42})" +
@@ -91,6 +92,13 @@ class GraphLoadProcTest extends ProcTestBase {
             ", (b)-[:X { weight: 42.0 }]->(:B {id: 9,  weight: 1.0, partition: 1})" +
             ", (b)-[:Y { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
             ", (b)-[:Z { weight: 42.0 }]->(:B {id: 11, weight: 8.0, partition: 2})";
+
+    static Stream<Arguments> graphTypesFullGraph() {
+        return Stream.of(
+            Arguments.of("huge", null, null),
+            Arguments.of("cypher", "MATCH (n) RETURN id(n) AS id", "MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target")
+        );
+    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -111,43 +119,48 @@ class GraphLoadProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"huge", "cypher"})
-    void shouldLoadGraph(String graphImpl) {
-        String queryTemplate = "CALL algo.graph.load(" +
-                               "    'foo', %s, %s, {" +
-                               "        graph: $graph" +
+    @MethodSource("graphTypesFullGraph")
+    void shouldLoadGraph(String graphType, String nodeQuery, String relationshipQuery) {
+        String query = "CALL algo.graph.load(" +
+                               "    'foo', $nodeQuery, $relationshipQuery, {" +
+                               "        graph: $graphType" +
                                "    }" +
                                ")";
-        String query = graphImpl.equals("cypher")
-                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
-                : String.format(queryTemplate, "null", "null");
 
-        runQuery(query, singletonMap("graph", graphImpl),
+        runQuery(query, MapUtil.map("graphType", graphType, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
                 row -> {
                     assertEquals(12, row.getNumber("nodes").intValue());
                     assertEquals(10, row.getNumber("relationships").intValue());
-                    assertEquals(graphImpl, row.getString("graph"));
+                    assertEquals(graphType, row.getString("graph"));
                     assertFalse(row.getBoolean("alreadyLoaded"));
                 }
         );
     }
 
     static Stream<Arguments> relationshipWeightParameters() {
-        return allGraphNames()
-                .flatMap(graphName -> Stream.of("relationshipWeight", "weightProperty")
-                        .map(propertyParam -> arguments(graphName, propertyParam)));
+        return TestSupport.crossArguments(
+            () -> Stream.of(
+                Arguments.of("huge", null, null),
+                Arguments.of(
+                    "cypher",
+                    "MATCH (n) RETURN id(n) AS id",
+                    "MATCH (s)-[r]->(t) RETURN id(s) AS source, id(t) AS target, r.weight AS weight"
+                )
+            ),
+            toArguments(() -> Stream.of("relationshipWeight", "weightProperty"))
+        );
     }
 
-    @ParameterizedTest(name = "graphImpl = {0}, relationshipWeightParameter = {1}")
+    @ParameterizedTest(name = "graphType = {0}, relationshipWeightParameter = {3}")
     @MethodSource("relationshipWeightParameters")
-    void shouldLoadGraphWithRelationshipWeight(String graphImpl, String relationshipWeightParam) {
+    void shouldLoadGraphWithRelationshipWeight(String graphType, String nodeQuery, String relationshipQuery, String relationshipWeightParam) {
         String query = "CALL algo.graph.load(" +
-                       "    'foo', '', '', {" +
-                       "        graph: $graph, " + relationshipWeightParam + ": 'weight'" +
+                       "    'foo', $nodeQuery, $relationshipQuery, {" +
+                       "        graph: $graphType, " + relationshipWeightParam + ": 'weight'" +
                        "    }" +
                        ")";
 
-        runQuery(query, singletonMap("graph", graphImpl));
+        runQuery(query, MapUtil.map("graphType", graphType, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery));
 
         Graph fooGraph = GraphCatalog.getUnion(getUsername(), "foo").orElse(null);
         assertNotNull(fooGraph);
@@ -159,14 +172,11 @@ class GraphLoadProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"huge", "cypher"})
-    void shouldLoadGraphWithSaturatedThreadPool(String graphImpl) {
+    @MethodSource("graphTypesFullGraph")
+    void shouldLoadGraphWithSaturatedThreadPool(String graphType, String nodeQuery, String relationshipQuery) {
         // ensure that we don't drop task that can't be scheduled while importing a graph.
 
-        String queryTemplate = "CALL algo.graph.load('foo', %s, %s, {graph: $graph, batchSize: 2})";
-        String query = graphImpl.equals("cypher")
-                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
-                : String.format(queryTemplate, "null", "null");
+        String query = "CALL algo.graph.load('foo', $nodeQuery, $relationshipQuery, {graph: $graphType, batchSize: 2})";
 
         List<Future<?>> futures = new ArrayList<>();
         // block all available threads
@@ -177,11 +187,11 @@ class GraphLoadProcTest extends ProcTestBase {
         }
 
         try {
-            runQuery(query, singletonMap("graph", graphImpl),
+            runQuery(query, MapUtil.map("graphType", graphType, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
                     row -> {
                         assertEquals(12, row.getNumber("nodes").intValue());
                         assertEquals(10, row.getNumber("relationships").intValue());
-                        assertEquals(graphImpl, row.getString("graph"));
+                        assertEquals(graphType, row.getString("graph"));
                         assertFalse(row.getBoolean("alreadyLoaded"));
                     }
             );
@@ -253,22 +263,31 @@ class GraphLoadProcTest extends ProcTestBase {
         testLocalDb.shutdown();
     }
 
-    @Test
-    void shouldLoadGraphWithMultipleRelationships() {
+    static Stream<Arguments> graphTypesWithRelationshipFilter() {
+        return Stream.of(
+            Arguments.of("huge", "", "X | Y"),
+            Arguments.of("cypher", "MATCH (n) RETURN id(n) AS id", "MATCH (s)-[r:X|Y]->(t) RETURN type(r) AS type, id(s) AS source, id(t) AS target")
+        );
+    }
+
+    @ParameterizedTest(name = "graphType = {0}, relTypeQuery = {1}")
+    @MethodSource("graphTypesWithRelationshipFilter")
+    void shouldLoadGraphWithMultipleRelationships(String graphType, String nodeQuery, String relationshipQuery) {
         String query = "CALL algo.graph.load(" +
-                       "    'foo', null, 'X | Y', {" +
-                       "        graph: 'huge'" +
+                       "    'foo', $nodeQuery, $relationshipQuery, {" +
+                       "        graph: $graphType" +
                        "    }" +
                        ")";
 
         runQuery(
-                query,
-                row -> {
-                    assertEquals(12, row.getNumber("nodes").intValue());
-                    assertEquals(8, row.getNumber("relationships").intValue());
-                    assertEquals("huge", row.getString("graph"));
-                    assertFalse(row.getBoolean("alreadyLoaded"));
-                }
+            query,
+            MapUtil.map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery, "graphType", graphType),
+            row -> {
+                assertEquals(12, row.getNumber("nodes").intValue());
+                assertEquals(8, row.getNumber("relationships").intValue());
+                assertEquals(graphType, row.getString("graph"));
+                assertFalse(row.getBoolean("alreadyLoaded"));
+            }
         );
     }
 
@@ -430,7 +449,7 @@ class GraphLoadProcTest extends ProcTestBase {
                                "    }" +
                                ")";
         String loadQuery = graph.equals("cypher")
-                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
 
         runQuery(loadQuery, singletonMap("graph", graph));
@@ -453,7 +472,7 @@ class GraphLoadProcTest extends ProcTestBase {
                                "    }" +
                                ")";
         String loadQuery = graph.equals("cypher")
-                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
 
         runQuery(loadQuery, singletonMap("graph", graph));
@@ -511,7 +530,7 @@ class GraphLoadProcTest extends ProcTestBase {
                                "    }" +
                                ")";
         String loadQuery = graph.equals("cypher")
-                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
         runQuery(loadQuery, singletonMap("graph", graph));
 
@@ -541,7 +560,7 @@ class GraphLoadProcTest extends ProcTestBase {
                                ") YIELD alreadyLoaded AS loaded " +
                                "RETURN loaded";
         String query = graph.equals("cypher")
-                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
 
         Map<String, Object> params = singletonMap("graph", graph);
@@ -593,7 +612,7 @@ class GraphLoadProcTest extends ProcTestBase {
                                "    }" +
                                ")";
         String query = graph.equals("cypher")
-                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
         runQuery(query, singletonMap("graph", graph));
 
@@ -667,7 +686,7 @@ class GraphLoadProcTest extends ProcTestBase {
                                "    }" +
                                ")";
         String query = graph.equals("cypher")
-                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
         runQuery(query, singletonMap("graph", graph));
 
@@ -826,5 +845,37 @@ class GraphLoadProcTest extends ProcTestBase {
         Throwable root = ExceptionUtil.rootCause(ex);
         assertTrue(root instanceof IllegalArgumentException);
         assertThat(root.getMessage(), containsString("Query must be read only. Query: "));
+    }
+
+    @Test
+    void shouldPreferRelationshipPropertiesForCypherLoading() {
+        String nodeQuery = ALL_NODES_QUERY.replaceAll("'", "");
+        String relationshipQuery = "MATCH (s)-[r:Z]->(t) RETURN id(s) AS source, id(t) AS target " +
+                                   " , 23 AS foo, 42 AS bar, 1984 AS baz, r.weight AS weight";
+
+        String query = "CALL algo.graph.load(" +
+                       "    'testGraph', $nodeQuery, $relationshipQuery, {" +
+                       "        graph: 'cypher'," +
+                       "        relationshipProperties: {" +
+                       "            foobar : 'foo'," +
+                       "            foobaz : 'baz'," +
+                       "            raboof : 'weight'" +
+                       "        }" +
+                       "    }" +
+                       ")";
+
+        runQuery(query, MapUtil.map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery));
+
+        Graph foobarGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("foobar"));
+        Graph foobazGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("foobaz"));
+        Graph raboofGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("raboof"));
+
+        Graph expectedFoobarGraph = TestGraph.Builder.fromGdl("()-[{w: 23.0D}]->(),()-[{w: 23.0D}]->(),(),(),(),(),(),(),(),()");
+        Graph expectedFoobazGraph = TestGraph.Builder.fromGdl("()-[{w: 1984.0D}]->(),()-[{w: 1984.0D}]->(),(),(),(),(),(),(),(),()");
+        Graph expectedRaboofGraph = TestGraph.Builder.fromGdl("()-[{w: 1.0D}]->(),()-[{w: 42.0D}]->(),(),(),(),(),(),(),(),()");
+
+        TestSupport.assertGraphEquals(expectedFoobarGraph, foobarGraph);
+        TestSupport.assertGraphEquals(expectedFoobazGraph, foobazGraph);
+        TestSupport.assertGraphEquals(expectedRaboofGraph, raboofGraph);
     }
 }

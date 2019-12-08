@@ -33,7 +33,7 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
     @Override
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
         ResultCountingVisitor visitor = new ResultCountingVisitor();
-        runLoadingQuery(offset, batchSize, visitor);
+        runLoadingQuery(offset, batchSize).accept(visitor);
         return new BatchLoadResult(offset, visitor.rows(), -1L, -1L);
     }
 

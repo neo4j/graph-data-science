@@ -401,10 +401,14 @@ class LouvainTest extends AlgoTestBase {
         }
         if (graphImpl == CypherGraphFactory.class) {
             direction = Direction.OUTGOING;
+            String nodeStatement = "MATCH (u:Node) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2";
+            String relStatement = "MATCH (u1:Node)-[rel]-(u2:Node) RETURN id(u1) AS source, id(u2) AS target";
+            relStatement += loadRelWeight
+                ? ", rel.weight as weight"
+                : "";
             loader
-                .withNodeStatement("MATCH (u:Node) RETURN id(u) AS id, u.seed1 AS seed1, u.seed2 AS seed2")
-                .withRelationshipStatement("MATCH (u1:Node)-[rel]-(u2:Node) \n" +
-                                           "RETURN id(u1) AS source, id(u2) AS target, rel.weight AS weight")
+                .withNodeStatement(nodeStatement)
+                .withRelationshipStatement(relStatement)
                 .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .undirected();
         } else {

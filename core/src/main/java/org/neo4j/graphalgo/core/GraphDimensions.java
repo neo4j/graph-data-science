@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongSet;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
@@ -155,6 +153,16 @@ public final class GraphDimensions {
 
         public Builder() {
             this.highestNeoId = -1;
+        }
+
+        public Builder(GraphDimensions other) {
+            nodeCount = other.nodeCount;
+            highestNeoId = other.highestNeoId;
+            maxRelCount = other.maxRelCount;
+            nodeLabelIds = other.nodeLabelIds;
+            nodeProperties = other.nodeProperties;
+            relationshipTypeMappings = other.relTypeMappings;
+            relProperties = other.relProperties;
         }
 
         public Builder setNodeCount(long nodeCount) {

@@ -36,9 +36,9 @@ abstract class CypherRecordLoader<R> {
 
     static final long NO_COUNT = -1L;
 
-    private final String loadQuery;
+    protected final String loadQuery;
+    protected final GraphDatabaseAPI api;
     private final long recordCount;
-    private final GraphDatabaseAPI api;
     final GraphSetup setup;
 
     CypherRecordLoader(String loadQuery, long recordCount, GraphDatabaseAPI api, GraphSetup setup) {
@@ -122,14 +122,11 @@ abstract class CypherRecordLoader<R> {
         updateCounts(result);
     }
 
-    final void runLoadingQuery(
-            long offset,
-            int batchSize,
-            Result.ResultVisitor<RuntimeException> visitor) {
+    Result runLoadingQuery(long offset, int batchSize) {
         Map<String, Object> parameters =
                 batchSize == CypherLoadingUtils.NO_BATCHING
                         ? setup.params()
                         : CypherLoadingUtils.params(setup.params(), offset, batchSize);
-        api.execute(loadQuery, parameters).accept(visitor);
+        return api.execute(loadQuery, parameters);
     }
 }

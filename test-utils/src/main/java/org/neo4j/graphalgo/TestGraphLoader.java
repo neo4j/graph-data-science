@@ -20,10 +20,10 @@
 
 package org.neo4j.graphalgo;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
@@ -98,8 +98,7 @@ public final class TestGraphLoader {
         }
     }
 
-    // TODO: remove type constraints when we merge MultipleRelTypesSupport into GraphFactory
-    public <T extends GraphFactory & MultipleRelTypesSupport> GraphsByRelationshipType buildGraphs(Class<T> graphFactory) {
+    public <T extends GraphFactory> GraphsByRelationshipType buildGraphs(Class<T> graphFactory) {
         try (Transaction ignored = db.beginTx()) {
             return loader(graphFactory).build(graphFactory).importAllGraphs();
         }
@@ -108,36 +107,35 @@ public final class TestGraphLoader {
     private <T extends GraphFactory> GraphLoader loader(Class<T> graphFactory) {
         GraphLoader graphLoader = new GraphLoader(db).withDirection(direction);
 
-        String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s";
-        String relsQueryTemplate = "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s";
-
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+            String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s";
             String labelString = maybeLabel
-                .map(s -> "WHERE " + ProjectionParser.parse(s).stream().map(l -> "n:" + l).collect(Collectors.joining(" OR ")))
+                .map(s -> ProjectionParser
+                    .parse(s)
+                    .stream()
+                    .map(l -> "n:" + l)
+                    .collect(Collectors.joining(" OR ", "WHERE ", "")))
                 .orElse("");
             // CypherNodeLoader not yet supports parsing node props from return items ...
-            String nodePropertiesString = nodeProperties.hasMappings()
-                ? ", " + nodeProperties.stream()
-                .map(PropertyMapping::neoPropertyKey)
-                .map(k -> "n." + k + " AS " + k)
-                .collect(Collectors.joining(", "))
-                : "";
+            nodeProperties = getUniquePropertyMappings(nodeProperties);
+            String nodePropertiesString = getPropertiesString(nodeProperties, "n");
 
             String nodeQuery = String.format(nodeQueryTemplate, labelString, nodePropertiesString);
             graphLoader.withLabel(nodeQuery);
 
+            String relationshipQueryTemplate = maybeRelType.isPresent()
+                ? "MATCH (n)-[r%s]->(m) RETURN type(r) AS type, id(n) AS source, id(m) AS target%s"
+                : "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s";
+
             String relTypeString = maybeRelType.map(s -> ":" + s).orElse("");
+            relProperties = getUniquePropertyMappings(relProperties);
+            String relPropertiesString = getPropertiesString(relProperties, "r");
 
-            assert relProperties.numberOfMappings() <= 1;
-            String relPropertiesString = relProperties.hasMappings()
-                ? ", " + relProperties.stream()
-                .map(PropertyMapping::propertyKey)
-                .map(k -> "r." + k + " AS weight")
-                .collect(Collectors.joining(", "))
-                : "";
-
-            String relsQuery = String.format(relsQueryTemplate, relTypeString, relPropertiesString);
-            graphLoader.withRelationshipType(relsQuery);
+            graphLoader.withRelationshipType(String.format(
+                relationshipQueryTemplate,
+                relTypeString,
+                relPropertiesString
+            ));
         } else {
             maybeLabel.ifPresent(graphLoader::withLabel);
             maybeRelType.ifPresent(graphLoader::withRelationshipType);
@@ -147,5 +145,42 @@ public final class TestGraphLoader {
         graphLoader.withOptionalNodeProperties(nodeProperties);
 
         return graphLoader;
+    }
+
+    private PropertyMappings getUniquePropertyMappings(PropertyMappings propertyMappings) {
+        MutableInt mutableInt = new MutableInt(0);
+        return PropertyMappings.of(propertyMappings.stream()
+            .map(mapping -> PropertyMapping.of(
+                mapping.propertyKey(),
+                addSuffix(mapping.neoPropertyKey(), mutableInt.getAndIncrement()),
+                mapping.defaultValue(),
+                mapping.deduplicationStrategy()
+            ))
+            .toArray(PropertyMapping[]::new)
+        );
+    }
+
+    private String getPropertiesString(PropertyMappings propertyMappings, String entityVar) {
+        return propertyMappings.hasMappings()
+            ? propertyMappings
+            .stream()
+            .map(mapping -> String.format(
+                "%s.%s AS %s",
+                entityVar,
+                removeSuffix(mapping.neoPropertyKey()),
+                mapping.neoPropertyKey()
+            ))
+            .collect(Collectors.joining(", ", ", ", ""))
+            : "";
+    }
+
+    private static final String SUFFIX = "___";
+
+    private String addSuffix(String propertyKey, int id) {
+        return String.format("%s%s%d", propertyKey, SUFFIX, id);
+    }
+
+    private String removeSuffix(String propertyKey) {
+        return propertyKey.substring(0, propertyKey.indexOf(SUFFIX));
     }
 }

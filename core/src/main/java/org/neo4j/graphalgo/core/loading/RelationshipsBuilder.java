@@ -39,19 +39,20 @@ public class RelationshipsBuilder {
     AdjacencyOffsets[] globalWeightOffsets;
 
     public RelationshipsBuilder(
-            DeduplicationStrategy[] deduplicationStrategies,
-            AllocationTracker tracker,
-            int numberOfRelationshipWeights) {
+        DeduplicationStrategy[] deduplicationStrategies,
+        AllocationTracker tracker,
+        int numberOfRelationshipProperties
+    ) {
         if (Arrays.stream(deduplicationStrategies).anyMatch(d -> d == DeduplicationStrategy.DEFAULT)) {
             throw new IllegalArgumentException(String.format(
-                    "Needs an explicit deduplicateRelationshipsStrategy, but got %s",
-                    Arrays.toString(deduplicationStrategies)
+                "Needs an explicit deduplicateRelationshipsStrategy, but got %s",
+                Arrays.toString(deduplicationStrategies)
             ));
         }
         this.deduplicationStrategies = deduplicationStrategies;
         adjacency = AdjacencyListBuilder.newBuilder(tracker);
-        if (numberOfRelationshipWeights > 0) {
-            weights = new AdjacencyListBuilder[numberOfRelationshipWeights];
+        if (numberOfRelationshipProperties > 0) {
+            weights = new AdjacencyListBuilder[numberOfRelationshipProperties];
             // TODO: can we avoid to create an allocator/complete adjacency list
             //  if we know that the property does not exist?
             Arrays.setAll(weights, i -> AdjacencyListBuilder.newBuilder(tracker));

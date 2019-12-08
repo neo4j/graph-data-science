@@ -50,7 +50,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
         NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), bufferSize, true);
         NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer);
-        runLoadingQuery(offset, batchSize, visitor);
+        runLoadingQuery(offset, batchSize).accept(visitor);
         visitor.flush();
         return new BatchLoadResult(offset, visitor.rows(), visitor.maxId(), visitor.rows());
     }
