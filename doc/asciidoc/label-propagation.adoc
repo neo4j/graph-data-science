@@ -265,19 +265,19 @@ CREATE (nCharles)-[:FOLLOW]->(nDoug);
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.labelPropagation.stream("User", "FOLLOW", {
-  direction: "OUTGOING",
+CALL algo.labelPropagation.stream('User', 'FOLLOW', {
+  direction: 'OUTGOING',
   iterations: 10
 })
-YIELD nodeId AS Name, label AS name
-RETURN algo.asNode(nodeId).name AS Name, label AS CommunityId
-  ORDER BY CommunityId, Name
+YIELD nodeId, label AS Community
+RETURN algo.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name    | CommunityId
+| Name    | Community
 | "Alice"   | 1
 | "Bridget" | 1
 | "Charles" | 1
@@ -301,8 +301,8 @@ YIELD nodes, iterations, communityCount, writeProperty;
 .Results
 [opts="header",cols="1m,1m,1m,1m"]
 |===
-| nodes | iterations | communityCount | PropertyName
-| 6     | 3          | 2               | "componentId"
+| nodes | iterations | communityCount | writeProperty
+| 6     | 3          | 2               | "community"
 |===
 
 
@@ -337,15 +337,15 @@ CALL algo.labelPropagation.stream('User', 'FOLLOW', {
   seedProperty: 'seed_label',
   direction: 'OUTGOING'
 })
-YIELD nodeId AS Name, label AS name
-RETURN algo.asNode(nodeId).name AS Name, label AS CommunityId
-  ORDER BY CommunityId, Name
+YIELD nodeId, label AS Community
+RETURN algo.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name    | CommunityId
+| Name    | Community
 | "Alice"   | 19
 | "Bridget" | 19
 | "Charles" | 19
@@ -354,7 +354,7 @@ RETURN algo.asNode(nodeId).name AS Name, label AS CommunityId
 | "Michael" | 21
 |===
 
-As we can see, the communityIds are based on the `seed_label` property, concretely `19` is from the user `Mark` and `21` from `Doug`.
+As we can see, the communities are based on the `seed_label` property, concretely `19` is from the user `Mark` and `21` from `Doug`.
 
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
@@ -372,8 +372,8 @@ YIELD nodes, iterations, communityCount, writeProperty;
 .Results
 [opts="header",cols="1m,1m,1m,1m"]
 |===
-| nodes | iterations | communityCount | PropertyName
-| 6     | 3          | 2               | "componentId"
+| nodes | iterations | communityCount | writeProperty
+| 6     | 3          | 2               | "community"
 |===
 
 
@@ -385,26 +385,30 @@ However, like other algorithms WCC also accepts _named graphs_ and _Cypher proje
 See <<projected-graph-model, Projected Graph Model>> for more details.
 
 .Using a named graph:
-[source, cypher]
+[source,cypher]
 ----
 CALL algo.graph.load('myGraph', 'User', 'FOLLOW');
 
-CALL algo.labelPropagation.stream(null, null, {graph: 'myGraph'})
+CALL algo.labelPropagation.stream(null, null, {
+  graph: 'myGraph',
+  direction: 'OUTGOING',
+  iterations: 10
+})
 YIELD nodeId, label
-RETURN algo.asNode(nodeId).name AS Name, label AS ComponentId
-ORDER BY ComponentId, Name;
+RETURN algo.asNode(nodeId).name AS Name, label AS Community
+ORDER BY Community, Name;
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
 | Name    | Community
-| Alice   | 5
-| Charles | 4
-| Bridget | 5
-| Michael | 5
-| Doug    | 4
-| Mark    | 4
+| "Alice"   | 1
+| "Bridget" | 1
+| "Charles" | 1
+| "Doug"    | 4
+| "Mark"    | 4
+| "Michael" | 4
 |===
 
 As we can see, the results are identical to the results in the <<algorithms-label-propagation-examples-unweighted>> example.
@@ -417,24 +421,24 @@ CALL algo.labelPropagation.stream(
   'MATCH (p1:User)-[f:FOLLOW]->(p2:User)
    RETURN id(p1) AS source', {
   graph: 'cypher',
-  direction: "OUTGOING",
+  direction: 'OUTGOING',
   iterations: 10
 })
 YIELD nodeId, label
-RETURN algo.asNode(nodeId).name AS Name, label AS ComponentId
-ORDER BY ComponentId, Name;
+RETURN algo.asNode(nodeId).name AS Name, label AS Community
+ORDER BY Community, Name;
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
 | Name    | Community
-| Alice   | 5
-| Charles | 4
-| Bridget | 5
-| Michael | 5
-| Doug    | 4
-| Mark    | 4
+| "Alice"   | 1
+| "Bridget" | 1
+| "Charles" | 1
+| "Doug"    | 4
+| "Mark"    | 4
+| "Michael" | 4
 |===
 
 Again, results are identical, as the Cypher projection we use mimics the behaviour of the default loading configuration.
