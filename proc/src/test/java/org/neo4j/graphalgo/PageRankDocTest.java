@@ -78,15 +78,37 @@ class PageRankDocTest extends ProcTestBase {
                 "YIELD nodeId, score " +
                 "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
                 "ORDER BY score DESC ";
-        String r1 = db.execute(q1).resultAsString();
-        System.out.println(r1);
+
+        String expectedString = "+--------------------------------+\n" +
+                                "| Name      | PageRank           |\n" +
+                                "+--------------------------------+\n" +
+                                "| \"Home\"    | 3.2362017153762284 |\n" +
+                                "| \"About\"   | 1.0611098567023873 |\n" +
+                                "| \"Product\" | 1.0611098567023873 |\n" +
+                                "| \"Links\"   | 1.0611098567023873 |\n" +
+                                "| \"Site A\"  | 0.3292259009438567 |\n" +
+                                "| \"Site B\"  | 0.3292259009438567 |\n" +
+                                "| \"Site C\"  | 0.3292259009438567 |\n" +
+                                "| \"Site D\"  | 0.3292259009438567 |\n" +
+                                "+--------------------------------+\n" +
+                                "8 rows\n";
+
+        assertEquals(expectedString, db.execute(q1).resultAsString());
 
         String q2 =
             "CALL algo.pageRank('Page', 'LINKS'," +
             "  {iterations:20, dampingFactor:0.85, write: true,writeProperty:'pagerank'})" +
             "YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, writeProperty AS PropertyName";
         String r2 = db.execute(q2).resultAsString();
-        System.out.println(r2);
+
+        expectedString = "+---------------------------------------------------+\n" +
+                         "| Nodes | Iterations | DampingFactor | PropertyName |\n" +
+                         "+---------------------------------------------------+\n" +
+                         "| 8     | 20         | 0.85          | \"pagerank\"   |\n" +
+                         "+---------------------------------------------------+\n" +
+                         "1 row\n";
+
+        assertEquals(expectedString, r2);
     }
 
     // Queries and results match pagerank.adoc weighted example section
@@ -98,15 +120,37 @@ class PageRankDocTest extends ProcTestBase {
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
             "ORDER BY score DESC ";
-        String r1 = db.execute(q1).resultAsString();
-        System.out.println(r1);
+
+        String expectedString = "+---------------------------------+\n" +
+                                "| Name      | PageRank            |\n" +
+                                "+---------------------------------+\n" +
+                                "| \"Home\"    | 3.5528567278757683  |\n" +
+                                "| \"Product\" | 1.9541301048360766  |\n" +
+                                "| \"About\"   | 0.7513767024036497  |\n" +
+                                "| \"Links\"   | 0.7513767024036497  |\n" +
+                                "| \"Site A\"  | 0.18167360233856014 |\n" +
+                                "| \"Site B\"  | 0.18167360233856014 |\n" +
+                                "| \"Site C\"  | 0.18167360233856014 |\n" +
+                                "| \"Site D\"  | 0.18167360233856014 |\n" +
+                                "+---------------------------------+\n" +
+                                "8 rows\n";
+
+        assertEquals(expectedString, db.execute(q1).resultAsString());
+
 
         String q2 =
             "CALL algo.pageRank('Page', 'LINKS'," +
             "  {iterations:20, dampingFactor:0.85, write: true,writeProperty:'pagerank', weightProperty:'weight'})" +
             "YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, writeProperty AS PropertyName";
-        String r2 = db.execute(q2).resultAsString();
-        System.out.println(r2);
+
+        expectedString = "+---------------------------------------------------+\n" +
+                         "| Nodes | Iterations | DampingFactor | PropertyName |\n" +
+                         "+---------------------------------------------------+\n" +
+                         "| 8     | 20         | 0.85          | \"pagerank\"   |\n" +
+                         "+---------------------------------------------------+\n" +
+                         "1 row\n";
+
+        assertEquals(expectedString, db.execute(q2).resultAsString());
     }
 
     @Test
@@ -117,8 +161,22 @@ class PageRankDocTest extends ProcTestBase {
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
             "ORDER BY score DESC ";
-        String r1 = db.execute(q1).resultAsString();
-        System.out.println(r1);
+
+        String expectedString = "+---------------------------------+\n" +
+                                "| Name      | PageRank            |\n" +
+                                "+---------------------------------+\n" +
+                                "| \"Home\"    | 0.4015879109501838  |\n" +
+                                "| \"Site A\"  | 0.1690742586266424  |\n" +
+                                "| \"About\"   | 0.11305649263085797 |\n" +
+                                "| \"Product\" | 0.11305649263085797 |\n" +
+                                "| \"Links\"   | 0.11305649263085797 |\n" +
+                                "| \"Site B\"  | 0.01907425862664241 |\n" +
+                                "| \"Site C\"  | 0.01907425862664241 |\n" +
+                                "| \"Site D\"  | 0.01907425862664241 |\n" +
+                                "+---------------------------------+\n" +
+                                "8 rows\n";
+
+        assertEquals(expectedString, db.execute(q1).resultAsString());
 
         String q2 =
             "MATCH (siteA:Page {name: 'Site A'})" +
@@ -126,8 +184,15 @@ class PageRankDocTest extends ProcTestBase {
             "   {iterations:20, dampingFactor:0.85, write:true, writeProperty:'pagerank', sourceNodes: [siteA]})" +
             "YIELD nodes, iterations, dampingFactor, writeProperty " +
             "RETURN nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, writeProperty AS PropertyName";
-        String r2 = db.execute(q2).resultAsString();
-        System.out.println(r2);
+
+        expectedString = "+---------------------------------------------------+\n" +
+                         "| Nodes | Iterations | DampingFactor | PropertyName |\n" +
+                         "+---------------------------------------------------+\n" +
+                         "| 8     | 20         | 0.85          | \"pagerank\"   |\n" +
+                         "+---------------------------------------------------+\n" +
+                         "1 row\n";
+
+        assertEquals(expectedString, db.execute(q2).resultAsString());
     }
 
     // Queries from the named graph and Cypher projection example in pagerank.adoc
@@ -142,8 +207,24 @@ class PageRankDocTest extends ProcTestBase {
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
             "ORDER BY score DESC ";
-        String r1 = db.execute(q1).resultAsString();
-        System.out.println(r1);
+
+        String namedQueryResult = db.execute(q1).resultAsString();
+
+        String expectedString = "+--------------------------------+\n" +
+                                "| Name      | PageRank           |\n" +
+                                "+--------------------------------+\n" +
+                                "| \"Home\"    | 3.2362017153762284 |\n" +
+                                "| \"About\"   | 1.0611098567023873 |\n" +
+                                "| \"Product\" | 1.0611098567023873 |\n" +
+                                "| \"Links\"   | 1.0611098567023873 |\n" +
+                                "| \"Site A\"  | 0.3292259009438567 |\n" +
+                                "| \"Site B\"  | 0.3292259009438567 |\n" +
+                                "| \"Site C\"  | 0.3292259009438567 |\n" +
+                                "| \"Site D\"  | 0.3292259009438567 |\n" +
+                                "+--------------------------------+\n" +
+                                "8 rows\n";
+
+        assertEquals(expectedString, namedQueryResult);
 
         String q2 =
             "CALL algo.pageRank.stream(" +
@@ -159,10 +240,8 @@ class PageRankDocTest extends ProcTestBase {
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
             "ORDER BY score DESC";
-        String r2 = db.execute(q2).resultAsString();
-        System.out.println(r2);
 
-        assertEquals(r1, r2);
+        assertEquals(namedQueryResult, db.execute(q2).resultAsString());
     }
 
 }
