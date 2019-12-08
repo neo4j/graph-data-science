@@ -27,16 +27,20 @@ import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 abstract class CypherRecordLoader<R> {
 
     static final long NO_COUNT = -1L;
 
-    protected final String loadQuery;
+    private final String loadQuery;
     protected final GraphDatabaseAPI api;
     private final long recordCount;
     final GraphSetup setup;
@@ -70,6 +74,17 @@ abstract class CypherRecordLoader<R> {
     abstract void updateCounts(BatchLoadResult result);
 
     abstract R result();
+
+    abstract Set<String> getReservedColumns();
+
+    Collection<String> getPropertyColumns(Result queryResult) {
+        Predicate<String> contains = getReservedColumns()::contains;
+        return queryResult
+            .columns()
+            .stream()
+            .filter(contains.negate())
+            .collect(Collectors.toList());
+    }
 
     private boolean loadsInParallel() {
         return CypherLoadingUtils.canBatchLoad(setup.concurrency(), loadQuery);

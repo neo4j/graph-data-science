@@ -19,10 +19,15 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.apache.commons.compress.utils.Sets;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Set;
+
 class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
+
+    private static final Set<String> RESERVED_COLUMNS = Sets.newHashSet();
 
     private long total;
 
@@ -45,5 +50,10 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
     @Override
     BatchLoadResult result() {
         return new BatchLoadResult(0, total, -1L, -1L);
+    }
+
+    @Override
+    Set<String> getReservedColumns() {
+        return RESERVED_COLUMNS;
     }
 }

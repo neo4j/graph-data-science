@@ -30,9 +30,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
-import java.util.function.Predicate;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
@@ -71,12 +71,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
         if (!hasExplicitPropertyMappings && !initializedFromResult) {
             // init from columns
-            Predicate<String> contains = NodeRowVisitor.RESERVED_COLUMNS::contains;
-            List<String> propertyColumns = result
-                .columns()
-                .stream()
-                .filter(contains.negate())
-                .collect(Collectors.toList());
+            Collection<String> propertyColumns = getPropertyColumns(result);
 
             PropertyMappings propertyMappings = PropertyMappings.of(propertyColumns
                 .stream()
@@ -112,6 +107,11 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
         Map<String, NodeProperties> nodeProperties = nodePropertyBuilders.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().propertyKey(), e -> e.getValue().build()));
         return new IdsAndProperties(idMap, nodeProperties);
+    }
+
+    @Override
+    Set<String> getReservedColumns() {
+        return NodeRowVisitor.RESERVED_COLUMNS;
     }
 
     private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties(PropertyMappings propertyMappings) {

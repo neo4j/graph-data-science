@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestGraphLoader.addSuffix;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class CypherGraphFactoryTest {
@@ -232,29 +233,23 @@ class CypherGraphFactoryTest {
             ", (n2:Node2 {prop2: 2})" +
             ", (n3:Node3 {prop3: 3})"
         );
-        PropertyMapping prop1Mapping = PropertyMapping.of("prop1", 0D);
-        PropertyMapping prop2Mapping = PropertyMapping.of("prop2", 0D);
-        PropertyMapping prop3Mapping = PropertyMapping.of("prop3", 0D);
-        PropertyMappings nodePropertyMappings = PropertyMappings.of(prop1Mapping, prop2Mapping, prop3Mapping);
+        PropertyMapping prop1 = PropertyMapping.of("prop1", 0D);
+        PropertyMapping prop2 = PropertyMapping.of("prop2", 0D);
+        PropertyMapping prop3 = PropertyMapping.of("prop3", 0D);
 
         Graph graph = TestGraphLoader
             .from(db)
-            .withNodeProperties(nodePropertyMappings, false)
+            .withNodeProperties(PropertyMappings.of(prop1, prop2, prop3), false)
             .buildGraph(CypherGraphFactory.class);
-
-        String prop1Key = TestGraphLoader.addSuffix(prop1Mapping.propertyKey(), 0);
-        String prop2Key = TestGraphLoader.addSuffix(prop2Mapping.propertyKey(), 1);
-        String prop3Key = TestGraphLoader.addSuffix(prop3Mapping.propertyKey(), 2);
 
         String gdl = "(a {prop1: 1, prop2: 0, prop3: 0})" +
                      "(b {prop1: 0, prop2: 2, prop3: 0})" +
-                     "(c {prop1: 0, prop2: 0, prop3: 3})" +
-                     "(a)-->(b), (a)-->(c), (b)-->(c)";
+                     "(c {prop1: 0, prop2: 0, prop3: 3})";
 
         String expectedGdl = gdl
-            .replaceAll(prop1Mapping.propertyKey(), prop1Key)
-            .replaceAll(prop2Mapping.propertyKey(), prop2Key)
-            .replaceAll(prop3Mapping.propertyKey(), prop3Key);
+            .replaceAll(prop1.propertyKey(), addSuffix(prop1.propertyKey(), 0))
+            .replaceAll(prop2.propertyKey(), addSuffix(prop2.propertyKey(), 1))
+            .replaceAll(prop3.propertyKey(), addSuffix(prop3.propertyKey(), 2));
 
         assertGraphEquals(fromGdl(expectedGdl), graph);
     }

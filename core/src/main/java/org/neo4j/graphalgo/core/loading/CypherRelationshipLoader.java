@@ -38,11 +38,12 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
@@ -142,8 +143,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         // Otherwise, we create new property mappings from the result columns.
         // We do that only once, as each batch has the same columns.
         if (!hasExplicitPropertyMappings && !initializedFromResult) {
-            Predicate<String> contains = RelationshipRowVisitor.RESERVED_COLUMNS::contains;
-            List<String> propertyColumns = allColumns.stream().filter(contains.negate()).collect(Collectors.toList());
+
+            Collection<String> propertyColumns = getPropertyColumns(queryResult);
 
             List<ResolvedPropertyMapping> propertyMappings = propertyColumns
                 .stream()
@@ -201,6 +202,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
         ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
         this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
         return Tuples.pair(resultDimensions, relationshipCounters);
+    }
+
+    @Override
+    Set<String> getReservedColumns() {
+        return RelationshipRowVisitor.RESERVED_COLUMNS;
     }
 
     Map<RelationshipTypeMapping, RelationshipsBuilder> allBuilders() {
