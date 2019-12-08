@@ -25,7 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
@@ -40,6 +42,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class CypherGraphFactoryTest {
 
@@ -217,6 +221,44 @@ class CypherGraphFactoryTest {
 
         loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.SINGLE, parallel);
     }
+
+    @Test
+    void testInitNodePropertiesFromQuery() {
+        GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
+        runQuery(
+            db,
+            "CREATE" +
+            "  (n1:Node1 {prop1: 1})" +
+            ", (n2:Node2 {prop2: 2})" +
+            ", (n3:Node3 {prop3: 3})"
+        );
+        PropertyMapping prop1Mapping = PropertyMapping.of("prop1", 0D);
+        PropertyMapping prop2Mapping = PropertyMapping.of("prop2", 0D);
+        PropertyMapping prop3Mapping = PropertyMapping.of("prop3", 0D);
+        PropertyMappings nodePropertyMappings = PropertyMappings.of(prop1Mapping, prop2Mapping, prop3Mapping);
+
+        Graph graph = TestGraphLoader
+            .from(db)
+            .withNodeProperties(nodePropertyMappings, false)
+            .buildGraph(CypherGraphFactory.class);
+
+        String prop1Key = TestGraphLoader.addSuffix(prop1Mapping.propertyKey(), 0);
+        String prop2Key = TestGraphLoader.addSuffix(prop2Mapping.propertyKey(), 1);
+        String prop3Key = TestGraphLoader.addSuffix(prop3Mapping.propertyKey(), 2);
+
+        String gdl = "(a {prop1: 1, prop2: 0, prop3: 0})" +
+                     "(b {prop1: 0, prop2: 2, prop3: 0})" +
+                     "(c {prop1: 0, prop2: 0, prop3: 3})" +
+                     "(a)-->(b), (a)-->(c), (b)-->(c)";
+
+        String expectedGdl = gdl
+            .replaceAll(prop1Mapping.propertyKey(), prop1Key)
+            .replaceAll(prop2Mapping.propertyKey(), prop2Key)
+            .replaceAll(prop3Mapping.propertyKey(), prop3Key);
+
+        assertGraphEquals(fromGdl(expectedGdl), graph);
+    }
+
 
     private void loadAndTestGraph(String nodeStatement, String relStatement, DeduplicationStrategy strategy, boolean parallel) {
         GraphLoader loader = new GraphLoader(db)

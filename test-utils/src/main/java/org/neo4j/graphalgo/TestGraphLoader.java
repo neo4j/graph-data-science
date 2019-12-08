@@ -44,7 +44,9 @@ public final class TestGraphLoader {
     private Optional<String> maybeRelType = Optional.empty();
 
     private PropertyMappings nodeProperties = PropertyMappings.of();
+    private boolean addNodePropertiesToLoader;
     private PropertyMappings relProperties = PropertyMappings.of();
+    private boolean addRelationshipPropertiesToLoader;
 
     private Direction direction = Direction.OUTGOING;
     private Optional<DeduplicationStrategy> maybeDeduplicationStrategy = Optional.empty();
@@ -68,17 +70,26 @@ public final class TestGraphLoader {
     }
 
     public TestGraphLoader withNodeProperties(PropertyMappings nodeProperties) {
+        return withNodeProperties(nodeProperties, true);
+    }
+
+    public TestGraphLoader withNodeProperties(PropertyMappings nodeProperties, boolean addToLoader) {
         this.nodeProperties = nodeProperties;
+        this.addNodePropertiesToLoader = addToLoader;
         return this;
     }
 
     public TestGraphLoader withRelationshipProperties(PropertyMapping... relProperties) {
-        this.relProperties = PropertyMappings.of(relProperties);
-        return this;
+        return withRelationshipProperties(PropertyMappings.of(relProperties));
     }
 
     public TestGraphLoader withRelationshipProperties(PropertyMappings relProperties) {
+        return withRelationshipProperties(relProperties, true);
+    }
+
+    public TestGraphLoader withRelationshipProperties(PropertyMappings relProperties, boolean addToLoader) {
         this.relProperties = relProperties;
+        this.addRelationshipPropertiesToLoader = addToLoader;
         return this;
     }
 
@@ -116,7 +127,6 @@ public final class TestGraphLoader {
                     .map(l -> "n:" + l)
                     .collect(Collectors.joining(" OR ", "WHERE ", "")))
                 .orElse("");
-            // CypherNodeLoader not yet supports parsing node props from return items ...
             nodeProperties = getUniquePropertyMappings(nodeProperties);
             String nodePropertiesString = getPropertiesString(nodeProperties, "n");
 
@@ -141,8 +151,8 @@ public final class TestGraphLoader {
             maybeRelType.ifPresent(graphLoader::withRelationshipType);
         }
         graphLoader.withDeduplicationStrategy(maybeDeduplicationStrategy.orElse(DeduplicationStrategy.SINGLE));
-        graphLoader.withRelationshipProperties(relProperties);
-        graphLoader.withOptionalNodeProperties(nodeProperties);
+        if (addNodePropertiesToLoader) graphLoader.withOptionalNodeProperties(nodeProperties);
+        if (addRelationshipPropertiesToLoader) graphLoader.withRelationshipProperties(relProperties);
 
         return graphLoader;
     }
@@ -165,9 +175,10 @@ public final class TestGraphLoader {
             ? propertyMappings
             .stream()
             .map(mapping -> String.format(
-                "%s.%s AS %s",
+                "COALESCE(%s.%s, %f) AS %s",
                 entityVar,
                 removeSuffix(mapping.neoPropertyKey()),
+                mapping.defaultValue(),
                 mapping.neoPropertyKey()
             ))
             .collect(Collectors.joining(", ", ", ", ""))
@@ -176,7 +187,7 @@ public final class TestGraphLoader {
 
     private static final String SUFFIX = "___";
 
-    private String addSuffix(String propertyKey, int id) {
+    public static String addSuffix(String propertyKey, int id) {
         return String.format("%s%s%d", propertyKey, SUFFIX, id);
     }
 

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.apache.commons.compress.utils.Sets;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphdb.Result;
 import org.neo4j.values.storable.Values;
@@ -27,8 +28,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
+    private static final String ID_COLUMN = "id";
+    static final Set<String> RESERVED_COLUMNS = Sets.newHashSet(ID_COLUMN);
+
     private long rows;
     private long maxNeoId = 0;
     private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties;

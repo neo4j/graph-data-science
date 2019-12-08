@@ -21,36 +21,80 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
+import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
 
 class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
-    private final HugeLongArrayBuilder builder;
-    private final NodeImporter importer;
-    private final Map<PropertyMapping, NodePropertiesBuilder> nodePropertyBuilders;
+    private final long nodeCount;
+    private final boolean hasExplicitPropertyMappings;
+
+    private HugeLongArrayBuilder builder;
+    private NodeImporter importer;
+    private Map<PropertyMapping, NodePropertiesBuilder> nodePropertyBuilders;
     private long maxNodeId;
+    private boolean initializedFromResult;
 
     CypherNodeLoader(long nodeCount, GraphDatabaseAPI api, GraphSetup setup) {
         super(setup.nodeLabel(), nodeCount, api, setup);
-        maxNodeId = 0L;
-        nodePropertyBuilders = nodeProperties(nodeCount, setup);
+        this.nodeCount = nodeCount;
+        this.maxNodeId = 0L;
+        this.hasExplicitPropertyMappings = setup.nodePropertyMappings().hasMappings();
+
+        if (hasExplicitPropertyMappings) {
+            initImporter(setup.nodePropertyMappings());
+        }
+    }
+
+    private void initImporter(PropertyMappings nodeProperties) {
+        nodePropertyBuilders = nodeProperties(nodeProperties);
         builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker());
         importer = new NodeImporter(builder, nodePropertyBuilders.values());
     }
 
     @Override
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
+        Result result = runLoadingQuery(offset, batchSize);
+
+        if (!hasExplicitPropertyMappings && !initializedFromResult) {
+            // init from columns
+            Predicate<String> contains = NodeRowVisitor.RESERVED_COLUMNS::contains;
+            List<String> propertyColumns = result
+                .columns()
+                .stream()
+                .filter(contains.negate())
+                .collect(Collectors.toList());
+
+            PropertyMappings propertyMappings = PropertyMappings.of(propertyColumns
+                .stream()
+                .map(propertyColumn -> PropertyMapping.of(
+                    propertyColumn,
+                    propertyColumn,
+                    DEFAULT_FALLBACK_VALUE,
+                    DeduplicationStrategy.DEFAULT
+                ))
+                .toArray(PropertyMapping[]::new));
+
+            initImporter(propertyMappings);
+            initializedFromResult = true;
+        }
+
         NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), bufferSize, true);
         NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer);
-        runLoadingQuery(offset, batchSize).accept(visitor);
+        result.accept(visitor);
         visitor.flush();
         return new BatchLoadResult(offset, visitor.rows(), visitor.maxId(), visitor.rows());
     }
@@ -70,18 +114,16 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
         return new IdsAndProperties(idMap, nodeProperties);
     }
 
-    private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties(long capacity, GraphSetup setup) {
-        Map<PropertyMapping, NodePropertiesBuilder> nodeProperties = new HashMap<>();
-        for (PropertyMapping propertyMapping : setup.nodePropertyMappings()) {
-            nodeProperties.put(
-                    propertyMapping,
-                    NodePropertiesBuilder.of(
-                            capacity,
-                            AllocationTracker.EMPTY,
-                            propertyMapping.defaultValue(),
-                            -2,
-                            propertyMapping.propertyKey()));
-        }
-        return nodeProperties;
+    private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties(PropertyMappings propertyMappings) {
+        return propertyMappings.stream().collect(Collectors.toMap(
+            propertyMapping -> propertyMapping,
+            propertyMapping -> NodePropertiesBuilder.of(
+                nodeCount,
+                AllocationTracker.EMPTY,
+                propertyMapping.defaultValue(),
+                -2,
+                propertyMapping.propertyKey()
+            )
+        ));
     }
 }
