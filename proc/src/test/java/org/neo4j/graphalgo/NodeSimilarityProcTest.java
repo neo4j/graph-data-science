@@ -159,7 +159,7 @@ class NodeSimilarityProcTest extends ProcTestBase {
                        ") YIELD node1, node2, similarity";
 
         Collection<String> result = new HashSet<>();
-        runQuery(query, db, MapUtil.map("loader", loader, "nodes", nodes, "relationships", relationships),
+        runQuery(db, query, MapUtil.map("loader", loader, "nodes", nodes, "relationships", relationships),
             row -> {
                 long node1 = row.getNumber("node1").longValue();
                 long node2 = row.getNumber("node2").longValue();

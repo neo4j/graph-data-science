@@ -102,9 +102,10 @@ public class NodeSimilarityProc extends BaseAlgoProc<NodeSimilarity> {
         Direction direction = configuration.getDirection(COMPUTE_DIRECTION_DEFAULT);
         return runWithExceptionLogging(
             "NodeSimilarity compute failed",
-            () -> nodeSimilarity.computeToStream(direction).peek(similarityResult -> {
+            () -> nodeSimilarity.computeToStream(direction).map(similarityResult -> {
                 similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
                 similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
+                return similarityResult;
             })
         );
     }
