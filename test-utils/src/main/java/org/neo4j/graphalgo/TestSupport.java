@@ -94,6 +94,18 @@ public final class TestSupport {
         return crossArguments(toArguments(() -> Stream.of(true, false)), toArguments(TestSupport::allGraphNames));
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
+    @ParameterizedTest(name = "loader: {0}, nodes: {1}, relationships: {2}")
+    @MethodSource({"org.neo4j.graphalgo.TestSupport#allLoadersEntireGraphTest"})
+    public @interface AllLoadersEntireGraphTest {}
+
+    public static Stream<Arguments> allLoadersEntireGraphTest() {
+        return Stream.of(
+            Arguments.of("huge", null, null),
+            Arguments.of("cypher", "MATCH (n) RETURN id(n) AS id", "MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target")
+        );
+    }
+
     public static Stream<String> allDirectionsNames() {
         return Arrays.stream(Direction.values()).map(Direction::name);
     }

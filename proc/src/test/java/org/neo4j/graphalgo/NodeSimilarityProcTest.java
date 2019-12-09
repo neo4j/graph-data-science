@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo;
 
+import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.TestSupport.AllLoadersEntireGraphTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -36,6 +38,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -124,6 +127,48 @@ class NodeSimilarityProcTest extends ProcTestBase {
     @AfterEach
     void teardown() {
         db.shutdown();
+    }
+
+    @AllLoadersEntireGraphTest
+    void shouldDealWithAnyIdSpace(String loader, String nodes, String relationships) throws KernelException {
+        int idOffset = 100;
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(NodeSimilarityProc.class);
+        runQuery("MATCH (n) DETACH DELETE n");
+        runQuery(String.format("UNWIND range(1, %d) AS i CREATE (:IncrementIdSpace)", idOffset));
+        runQuery(DB_CYPHER);
+        runQuery("MATCH (n:IncrementIdSpace) DELETE n");
+
+        HashSet<String> expected = Sets.newHashSet(
+            resultString(idOffset + 0, idOffset + 1, 2 / 3.0),
+            resultString(idOffset + 0, idOffset + 2, 1 / 3.0),
+            resultString(idOffset + 1, idOffset + 2, 0.0),
+            resultString(idOffset + 1, idOffset + 0, 2 / 3.0),
+            resultString(idOffset + 2, idOffset + 0, 1 / 3.0),
+            resultString(idOffset + 2, idOffset + 1, 0.0)
+        );
+
+        String query = "CALL algo.nodeSimilarity.stream(" +
+                       "    $nodes, " +
+                       "    $relationships, " +
+                       "    {" +
+                       "        graph: $loader," +
+                       "        similarityCutoff: 0.0," +
+                       "        direction: 'outgoing'" +
+                       "    }" +
+                       ") YIELD node1, node2, similarity";
+
+        Collection<String> result = new HashSet<>();
+        runQuery(db, query, MapUtil.map("loader", loader, "nodes", nodes, "relationships", relationships),
+            row -> {
+                long node1 = row.getNumber("node1").longValue();
+                long node2 = row.getNumber("node2").longValue();
+                double similarity = row.getNumber("similarity").doubleValue();
+                result.add(resultString(node1, node2, similarity));
+            }
+        );
+
+        assertEquals(expected, result);
     }
 
     @ParameterizedTest(name = "{0} -- {1}")
