@@ -391,8 +391,8 @@ final class GenerateConfiguration {
                 //  only testing for assignability in the absence of generic types.
                 if (
                     candidate.getTypeParameters().isEmpty() &&
-                    !typeUtils.isAssignable(candidate.getReturnType(), targetType
-                )) {
+                    !typeUtils.isAssignable(candidate.getReturnType(), targetType)
+                ) {
                     invalidCandidates.add(InvalidCandidate.of(
                         candidate,
                         "Must return a type that is assignable to %s",
