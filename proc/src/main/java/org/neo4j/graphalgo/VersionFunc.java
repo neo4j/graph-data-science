@@ -25,7 +25,7 @@ import org.neo4j.procedure.UserFunction;
 public class VersionFunc {
 
     @UserFunction("gds.version")
-    @Description("RETURN algo.version() | return the current graph algorithms installed version")
+    @Description("RETURN gds.version() | return the current graph algorithms installed version")
     public String version() {
         return "0.9.0";
     }

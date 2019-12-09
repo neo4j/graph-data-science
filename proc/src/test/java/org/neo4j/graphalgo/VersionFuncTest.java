@@ -59,7 +59,7 @@ class VersionFuncTest extends ProcTestBase {
             fail("Could not find version in file: " + file.getAbsolutePath());
         }
         assertCypherResult(
-                "RETURN algo.version() AS v",
+                "RETURN gds.version() AS v",
                 singletonList(map("v", maybeVersion.get())));
     }
 
