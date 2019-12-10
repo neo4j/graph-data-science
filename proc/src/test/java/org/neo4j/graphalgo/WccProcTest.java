@@ -24,6 +24,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 
@@ -198,6 +200,17 @@ class WccProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCWithConsecutiveIds(String graphImpl) {
+
+        String query2 = GdsCypher.call("wcc")
+            .writeMode()
+            .implicitCreation(GraphCreateConfig.emptyWithName("", ""))
+            .addParameter("consecutiveIds", true)
+            .yields();
+
+
+
+
+
         String query = "CALL algo.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph, consecutiveIds: true" +

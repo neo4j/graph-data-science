@@ -42,7 +42,26 @@ import static org.neo4j.procedure.Mode.READ;
 public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
 
     @Procedure(value = "gds.algo.wcc.stream", mode = READ)
-    public Stream<StreamResult> stream(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
+    public Stream<StreamResult> stream(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
+        return stream(computationResult);
+    }
+
+    @Procedure(value = "gds.algo.wcc.stream.estimate", mode = READ)
+    public Stream<MemoryEstimateResult> streamEstimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeMemoryEstimate(graphNameOrConfig, configuration);
+    }
+
+    private Stream<StreamResult> stream(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
         if (computationResult.isEmpty()) {
             return Stream.empty();
         }
@@ -60,14 +79,6 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
             .mapToObj(mappedId -> new StreamResult(
                 graph.toOriginalNodeId(mappedId),
                 propertyTranslator.toLong(dss, mappedId)));
-    }
-
-    @Procedure(value = "gds.algo.wcc.estimate", mode = READ)
-    public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
