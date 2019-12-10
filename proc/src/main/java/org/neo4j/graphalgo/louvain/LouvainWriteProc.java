@@ -179,15 +179,15 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
         ComputationResult<Louvain, Louvain, LouvainWriteConfig> computeResult,
         boolean write
     ) {
-          return Stream.of(
-              new WriteResult(
-                  computeResult.config(),
-                  0, computeResult.createMillis(),
-                  0, 0, 0, 0, 0, 0, 0,
-                  new double[0], Collections.emptyMap()
-              )
-          );
         if (computeResult.isGraphEmpty()) {
+            return Stream.of(
+                new WriteResult(
+                    computeResult.config(),
+                    0, computeResult.createMillis(),
+                    0, 0, 0, 0, 0, 0, 0,
+                    new double[0], Collections.emptyMap()
+                )
+            );
         } else {
             LouvainWriteConfig config = computeResult.config();
             Graph graph = computeResult.graph();
