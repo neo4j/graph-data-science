@@ -227,7 +227,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
         if (graph.isEmpty()) {
             return builder
-                .isEmpty(true)
+                .isGraphEmpty(true)
                 .graph(graph)
                 .config(config)
                 .tracker(tracker)
@@ -336,7 +336,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         CONFIG config();
 
         @Value.Default
-        default Boolean isEmpty() {
+        default boolean isGraphEmpty() {
             return false;
         }
     }

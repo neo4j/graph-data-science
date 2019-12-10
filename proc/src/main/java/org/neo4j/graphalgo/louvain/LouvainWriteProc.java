@@ -179,7 +179,6 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
         ComputationResult<Louvain, Louvain, LouvainWriteConfig> computeResult,
         boolean write
     ) {
-        if (computeResult.isEmpty()) {
           return Stream.of(
               new WriteResult(
                   computeResult.config(),
@@ -188,6 +187,7 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
                   new double[0], Collections.emptyMap()
               )
           );
+        if (computeResult.isGraphEmpty()) {
         } else {
             LouvainWriteConfig config = computeResult.config();
             Graph graph = computeResult.graph();
