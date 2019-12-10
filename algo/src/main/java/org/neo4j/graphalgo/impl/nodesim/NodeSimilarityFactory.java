@@ -23,17 +23,18 @@ package org.neo4j.graphalgo.impl.nodesim;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class NodeSimilarityFactory extends AlgorithmFactory<NodeSimilarity, ProcedureConfiguration> {
+// TODO: Let CONFIG extend NodeSimilarityConfigBase
+public class NodeSimilarityFactory<CONFIG extends BaseAlgoConfig> extends AlgorithmFactory<NodeSimilarity, CONFIG> {
 
     private final NodeSimilarity.Config config;
     private final boolean computesSimilarityGraph;
@@ -43,7 +44,7 @@ public class NodeSimilarityFactory extends AlgorithmFactory<NodeSimilarity, Proc
     }
 
     @Override
-    public NodeSimilarity build(Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log) {
+    public NodeSimilarity build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
         return new NodeSimilarity(graph, config, Pools.DEFAULT, tracker);
     }
 

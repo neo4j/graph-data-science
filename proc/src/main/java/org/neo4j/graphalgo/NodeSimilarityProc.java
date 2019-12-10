@@ -223,7 +223,7 @@ public class NodeSimilarityProc extends LegacyBaseAlgoProc<NodeSimilarity, NodeS
     protected AlgorithmFactory<NodeSimilarity, ProcedureConfiguration> algorithmFactory(ProcedureConfiguration config) {
         // TODO: Should check if we are writing or streaming, but how to do that in memrec?
         boolean computesSimilarityGraph = true;
-        return new NodeSimilarityFactory(
+        return new NodeSimilarityFactory<>(
             config(config),
             computesSimilarityGraph
         );
