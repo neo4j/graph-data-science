@@ -244,6 +244,7 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
 
     public static final class WriteResult {
 
+        // TODO: add tolerance
         public String writeProperty;
         public String seedProperty;
         public String weightProperty;

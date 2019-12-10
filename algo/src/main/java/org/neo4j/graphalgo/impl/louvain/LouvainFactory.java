@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.impl.modularity.ModularityOptimizationFactory;
 import org.neo4j.graphalgo.louvain.LouvainConfigBase;
 import org.neo4j.logging.Log;
 
+// TODO remove type param
 public class LouvainFactory<CONFIG extends LouvainConfigBase> extends AlgorithmFactory<Louvain, CONFIG> {
 
     public LouvainConfigBase config;
