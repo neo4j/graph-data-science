@@ -18,17 +18,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.newapi;
+package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.BaseAlgoProcTests;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.WeightConfig;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
     @Test
@@ -51,5 +60,27 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig,
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("weightProperty", weightPropertyParameter));
         CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
         assertNull(config.weightProperty());
+    }
+
+    @Test
+    default void testValidateWeightToNodeProperties() {
+        List<String> nodeProperties = Arrays.asList("a", "b", "c");
+        Map<String, Object> config = MapUtil.map(
+            "weightProperty", "foo",
+            "writeProperty", "bar",
+            "nodeProjection", MapUtil.map(
+                "A", MapUtil.map(
+                    "properties", nodeProperties
+                )
+            )
+        );
+        applyOnProcedure(proc -> {
+            IllegalArgumentException e = assertThrows(
+                IllegalArgumentException.class,
+                () -> proc.compute(config, Collections.emptyMap())
+            );
+            assertThat(e.getMessage(), containsString("foo"));
+            assertThat(e.getMessage(), containsString("[a, b, c]"));
+        });
     }
 }

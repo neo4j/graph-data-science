@@ -41,12 +41,15 @@ import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.SeedConfig;
+import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.helpers.collection.Pair;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> extends BaseProc {
@@ -154,11 +157,20 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         Optional<String> graphName = configAndName.other();
 
         if (graphName.isPresent()) {
-            return GraphCatalog.getUnion(getUsername(), graphName.get()).orElseThrow(
-                () -> new NoSuchElementException(String.format("Cannot find graph with name %s", graphName.get()))
-            );
+            Map.Entry<GraphCreateConfig, Graph> catalogEntry = GraphCatalog
+                .getLoadedGraphs(getUsername())
+                .entrySet()
+                .stream()
+                .filter(e -> e.getKey().graphName().equals(graphName.get()))
+                .findFirst().orElseThrow(
+                    () -> new NoSuchElementException(String.format("Cannot find graph with name %s", graphName.get()))
+                );
+            validateConfig(catalogEntry.getKey(), config);
+            return catalogEntry.getValue();
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
+
+            validateConfig(createConfig, config);
 
             GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, getUsername())
@@ -169,6 +181,30 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             return loader.load(createConfig.getGraphImpl());
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
+        }
+    }
+
+    private void validateConfig(GraphCreateConfig graph, CONFIG config) {
+        Set<String> properties = graph.nodeProjection().allNodeProperties();
+        if (config instanceof SeedConfig) {
+            String seedProperty = ((SeedConfig) config).seedProperty();
+            if (seedProperty != null && !properties.contains(seedProperty)) {
+                throw new IllegalArgumentException(String.format(
+                    "Seed property `%s` not found in graph with properties: %s",
+                    seedProperty,
+                    properties
+                ));
+            }
+        }
+        if (config instanceof WeightConfig) {
+            String weightProperty = ((WeightConfig) config).weightProperty();
+            if (weightProperty != null && !properties.contains(weightProperty)) {
+                throw new IllegalArgumentException(String.format(
+                    "Weight property `%s` not found in graph with properties: %s",
+                    weightProperty,
+                    properties
+                ));
+            }
         }
     }
 

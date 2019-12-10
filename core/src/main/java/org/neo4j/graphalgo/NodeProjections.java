@@ -28,6 +28,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -164,5 +166,13 @@ public final class NodeProjections {
             value.put(identifier.name, projection.toObject());
         });
         return value;
+    }
+
+    public Set<String> allNodeProperties() {
+        return projections
+            .values()
+            .stream()
+            .flatMap(p -> p.properties().mappings().stream().map(PropertyMapping::propertyKey))
+            .collect(Collectors.toSet());
     }
 }

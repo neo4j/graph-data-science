@@ -28,8 +28,16 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public interface SeedConfigTests<CONFIG extends SeedConfig & BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
 
@@ -53,5 +61,28 @@ public interface SeedConfigTests<CONFIG extends SeedConfig & BaseAlgoConfig, RES
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", seedPropertyParameter));
         CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
         assertNull(config.seedProperty());
+    }
+
+    @Test
+    default void testValidateSeedToNodeProperties() {
+        List<String> nodeProperties = Arrays.asList("a", "b", "c");
+        Map<String, Object> config = MapUtil.map(
+            "seedProperty", "foo",
+            "writeProperty", "bar",
+            "nodeProjection", MapUtil.map(
+                "A", MapUtil.map(
+                    "properties", nodeProperties
+                )
+            )
+        );
+        applyOnProcedure(proc -> {
+            IllegalArgumentException e = assertThrows(
+                IllegalArgumentException.class,
+                () -> proc.compute(config, Collections.emptyMap())
+            );
+            assertThat(e.getMessage(), containsString("foo"));
+            assertThat(e.getMessage(), containsString("[a, b, c]"));
+        });
+
     }
 }

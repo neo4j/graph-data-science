@@ -42,7 +42,7 @@ import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfigTest;
-import org.neo4j.graphalgo.newapi.WeightConfigTest;
+import org.neo4j.graphalgo.WeightConfigTest;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
