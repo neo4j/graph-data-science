@@ -188,11 +188,13 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
     public PageRank compute() {
         initializeSteps();
         computeSteps.run(maxIterations);
+        computeSteps.mergeResults();
         return this;
     }
 
     public CentralityResult result() {
-        return computeSteps.getPageRank();
+//        return computeSteps.getPageRank();
+        return new CentralityResult(result);
     }
 
     @Override
@@ -445,11 +447,10 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
             }
         }
 
-        CentralityResult getPageRank() {
+        void mergeResults() {
             for (ComputeStep step : steps) {
                 step.getPageRankResult(result);
             }
-            return new CentralityResult(result);
         }
 
         private void run(int iterations) {

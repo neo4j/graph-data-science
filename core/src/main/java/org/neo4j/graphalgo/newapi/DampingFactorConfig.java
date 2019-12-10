@@ -20,29 +20,7 @@
 
 package org.neo4j.graphalgo.newapi;
 
-import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
+public interface DampingFactorConfig {
 
-import java.util.Optional;
-
-public interface BaseAlgoConfig extends BaseConfig {
-
-    @Value.Default
-    default int concurrency() {
-        return Pools.DEFAULT_CONCURRENCY;
-    }
-
-    @Value.Default
-    default int batchSize() {
-        return ParallelUtil.DEFAULT_BATCH_SIZE;
-    }
-
-    @Configuration.Parameter
-    Optional<String> graphName();
-
-    @Configuration.Parameter
-    Optional<GraphCreateConfig> implicitCreateConfig();
-
+    double dampingFactor();
 }

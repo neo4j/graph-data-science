@@ -18,31 +18,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.newapi;
+package org.neo4j.graphalgo.pagerank;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.WriteConfig;
 
 import java.util.Optional;
 
-public interface BaseAlgoConfig extends BaseConfig {
+@ValueClass
+@Configuration("PageRankWriteConfigImpl")
+public interface PageRankWriteConfig extends PageRankConfigBase, WriteConfig {
 
-    @Value.Default
-    default int concurrency() {
-        return Pools.DEFAULT_CONCURRENCY;
+    static PageRankWriteConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        return new PageRankWriteConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            config
+        );
     }
-
-    @Value.Default
-    default int batchSize() {
-        return ParallelUtil.DEFAULT_BATCH_SIZE;
-    }
-
-    @Configuration.Parameter
-    Optional<String> graphName();
-
-    @Configuration.Parameter
-    Optional<GraphCreateConfig> implicitCreateConfig();
-
 }

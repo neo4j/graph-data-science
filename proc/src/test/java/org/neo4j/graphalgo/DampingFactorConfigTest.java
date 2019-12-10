@@ -18,31 +18,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.newapi;
+package org.neo4j.graphalgo;
 
-import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.DampingFactorConfig;
 
-import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public interface BaseAlgoConfig extends BaseConfig {
+public interface DampingFactorConfigTest<CONFIG extends DampingFactorConfig & BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
 
-    @Value.Default
-    default int concurrency() {
-        return Pools.DEFAULT_CONCURRENCY;
+    @Test
+    default void testDampingFactorFromConfig() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("dampingFactor", 0.85));
+        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        assertEquals(0.85, config.dampingFactor());
     }
-
-    @Value.Default
-    default int batchSize() {
-        return ParallelUtil.DEFAULT_BATCH_SIZE;
-    }
-
-    @Configuration.Parameter
-    Optional<String> graphName();
-
-    @Configuration.Parameter
-    Optional<GraphCreateConfig> implicitCreateConfig();
-
 }

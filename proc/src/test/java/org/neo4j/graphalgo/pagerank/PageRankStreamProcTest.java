@@ -17,32 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.neo4j.graphalgo.pagerank;
 
-package org.neo4j.graphalgo.newapi;
-
-import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.impl.pagerank.PageRank;
 
 import java.util.Optional;
 
-public interface BaseAlgoConfig extends BaseConfig {
+class PageRankStreamProcTest extends PageRankProcTestBase<PageRankStreamConfig> {
 
-    @Value.Default
-    default int concurrency() {
-        return Pools.DEFAULT_CONCURRENCY;
+    @Override
+    public Class<? extends BaseAlgoProc<?, PageRank, PageRankStreamConfig>> getProcedureClazz() {
+        return PageRankStreamProc.class;
     }
 
-    @Value.Default
-    default int batchSize() {
-        return ParallelUtil.DEFAULT_BATCH_SIZE;
+    @Override
+    public PageRankStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return PageRankStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
-
-    @Configuration.Parameter
-    Optional<String> graphName();
-
-    @Configuration.Parameter
-    Optional<GraphCreateConfig> implicitCreateConfig();
-
 }

@@ -128,11 +128,11 @@ public interface GraphCreateConfig extends BaseConfig {
     ) {
         RelationshipProjections relP = RelationshipProjections.fromObject(CypherMapWrapper.failOnNull(
             "relationshipProjection",
-            config.get("relationshipProjection", RelationshipProjections.empty())
+            config.get("relationshipProjection", (Object) RelationshipProjections.empty())
         ));
         NodeProjections nodeP = NodeProjections.fromObject(CypherMapWrapper.failOnNull(
             "nodeProjection",
-            config.get("nodeProjection", NodeProjections.empty())
+            config.get("nodeProjection", (Object) NodeProjections.empty())
         ));
         GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
             IMPLICIT_GRAPH_NAME,
