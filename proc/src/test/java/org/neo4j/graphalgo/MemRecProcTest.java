@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
-import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -61,7 +60,6 @@ class MemRecProcTest extends ProcTestBase {
                 GraphLoadProc.class,
                 MemRecProc.class,
                 PageRankProc.class,
-                UnionFindProc.class,
                 LabelPropagationProc.class,
                 WccProc.class,
                 LouvainWriteProc.class,
@@ -71,7 +69,7 @@ class MemRecProcTest extends ProcTestBase {
         );
         availableAlgoProcedures = "the available and supported procedures are {" +
                                   "algo.beta.k1coloring, algo.beta.modularityOptimization, algo.beta.wcc, algo.graph.load," +
-                                  " algo.labelPropagation, algo.pageRank, algo.unionFind, algo.wcc," +
+                                  " algo.labelPropagation, algo.pageRank, algo.wcc," +
                                   " gds.algo.louvain.stats, gds.algo.louvain.stream, gds.algo.louvain.write" +
                                   "}.";
         runQuery(DB_CYPHER);
@@ -118,11 +116,6 @@ class MemRecProcTest extends ProcTestBase {
 //        test("algo.memrec(null, null, 'louvain', {direction: 'BOTH', graph: 'huge'})");
         test("gds.algo.louvain.write.estimate({writeProperty: 'foo'})");
         test("gds.algo.louvain.stream.estimate({})");
-
-        test("algo.memrec(null, null, 'unionFind')");
-        test("algo.memrec(null, null, 'unionFind', {direction: 'BOTH', graph: 'huge'})");
-        test("algo.unionFind.memrec(null, null)");
-        test("algo.unionFind.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
 
         test("algo.memrec(null, null, 'beta.k1coloring')");
         test("algo.memrec(null, null, 'beta.k1coloring', {direction: 'BOTH', graph: 'huge'})");

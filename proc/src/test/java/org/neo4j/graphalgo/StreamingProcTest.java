@@ -26,7 +26,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.stream.Stream;
@@ -45,8 +44,7 @@ public class StreamingProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             LabelPropagationProc.class,
-            PageRankProc.class,
-            UnionFindProc.class
+            PageRankProc.class
         );
     }
 
@@ -83,8 +81,7 @@ public class StreamingProcTest extends ProcTestBase {
         return Stream.of(
                 "algo.labelPropagation.stream",
 //                "algo.louvain.stream",
-                "algo.pageRank.stream",
-                "algo.unionFind.stream"
+                "algo.pageRank.stream"
         );
     }
 }

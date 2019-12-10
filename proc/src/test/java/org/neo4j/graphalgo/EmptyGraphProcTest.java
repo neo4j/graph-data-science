@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
-import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.Result;
 
@@ -41,7 +40,6 @@ class EmptyGraphProcTest extends ProcTestBase {
             LouvainWriteProc.class,
             LouvainStreamProc.class,
             PageRankProc.class,
-            UnionFindProc.class,
             WccProc.class
         );
     }
@@ -52,20 +50,6 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     public String graphImpl = "huge";
-
-    @Test
-    public void testUnionFindStream() {
-        Result result = runQuery("CALL algo.unionFind.stream('', '',{graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testUnionFind() throws Exception {
-        runQuery(
-            "CALL algo.unionFind('', '',{graph:'" + graphImpl + "'}) YIELD nodes",
-            row -> assertEquals(0L, row.getNumber("nodes"))
-        );
-    }
 
     @Test
     public void testWCCStream() {

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.unionfind.UnionFindProc;
+import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 class WccDocTest extends ProcTestBase {
@@ -45,7 +45,7 @@ class WccDocTest extends ProcTestBase {
                 builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );
         runQuery(createGraph);
-        registerProcedures(UnionFindProc.class, GraphLoadProc.class);
+        registerProcedures(WccProc.class, GraphLoadProc.class);
         registerFunctions(GetNodeFunc.class);
     }
 
@@ -60,7 +60,7 @@ class WccDocTest extends ProcTestBase {
     @Test
     void seeding() {
         String q1 =
-                "CALL algo.unionFind('User', 'LINK', { " +
+                "CALL algo.beta.wcc('User', 'LINK', { " +
                 "  write: true, " +
                 "  writeProperty: 'componentId', " +
                 "  weightProperty: 'weight', " +
@@ -75,7 +75,7 @@ class WccDocTest extends ProcTestBase {
         String r2 = runQuery(q2).resultAsString();
 //        System.out.println(r2);
 
-        String q3 = "CALL algo.unionFind.stream('User', 'LINK', { " +
+        String q3 = "CALL algo.beta.wcc.stream('User', 'LINK', { " +
                     "  seedProperty: 'componentId', " +
                     "  weightProperty: 'weight', " +
                     "  threshold: 1.0 " +
@@ -86,7 +86,7 @@ class WccDocTest extends ProcTestBase {
         String r3 = runQuery(q3).resultAsString();
 //        System.out.println(r3);
 
-        String q4 = "CALL algo.unionFind('User', 'LINK', { " +
+        String q4 = "CALL algo.beta.wcc('User', 'LINK', { " +
                     "  seedProperty: 'componentId', " +
                     "  weightProperty: 'weight', " +
                     "  threshold: 1.0, " +
@@ -108,13 +108,13 @@ class WccDocTest extends ProcTestBase {
         String q1 = "CALL algo.graph.load('myGraph', 'User', 'LINK');";
         runQuery(q1).resultAsString();
 
-        String q2 = "CALL algo.unionFind.stream(null, null, {graph: 'myGraph'}) " +
+        String q2 = "CALL algo.beta.wcc.stream(null, null, {graph: 'myGraph'}) " +
                     "YIELD nodeId, setId " +
                     "RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId " +
                     "ORDER BY ComponentId, Name;";
 //        System.out.println(runQuery(q2).resultAsString());
 
-        String q3 = "CALL algo.unionFind.stream( " +
+        String q3 = "CALL algo.beta.wcc.stream( " +
                     "  'MATCH (u:User) RETURN id(u) AS id',  " +
                     "  'MATCH (u1:User)-[:LINK]->(u2:User)  " +
                     "   RETURN id(u1) AS source, id(u2) AS target',  " +

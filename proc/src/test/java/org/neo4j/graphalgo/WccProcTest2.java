@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.unionfind.UnionFindProc;
+import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UnionFindProcTest extends ProcTestBase {
+public class WccProcTest2 extends ProcTestBase {
 
     @BeforeEach
     void setup() throws Exception {
@@ -75,7 +75,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(createGraph);
-        registerProcedures(UnionFindProc.class, GraphLoadProc.class);
+        registerProcedures(WccProc.class, GraphLoadProc.class);
     }
 
     @AfterEach
@@ -85,7 +85,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFind(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph" +
                        "    }" +
@@ -118,7 +118,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindWithLabel(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    'Label', 'TYPE', {" +
                        "        graph: $graph" +
                        "    }" +
@@ -133,7 +133,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindWithSeed(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'seed'" +
                        "    }" +
@@ -166,7 +166,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindThrowsExceptionWhenInitialSeedDoesNotExists(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'does_not_exist'" +
                        "    }" +
@@ -181,7 +181,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindReadAndWriteSeed(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'seed', writeProperty: 'seed'" +
                        "    }" +
@@ -214,7 +214,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindWithSeedAndConsecutive(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'seed', consecutiveIds: true" +
                        "    }" +
@@ -248,7 +248,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindWithConsecutiveIds(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph, consecutiveIds: true" +
                        "    }" +
@@ -269,7 +269,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindWriteBack(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', 'TYPE', {" +
                        "        write: true, graph: $graph" +
                        "    }" +
@@ -289,7 +289,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindWriteBackExplicitWriteProperty(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', 'TYPE', {" +
                        "        write: true, graph: $graph, writeProperty: 'unionFind'" +
                        "    }" +
@@ -309,7 +309,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindStream(String graphImpl) {
-        String query = "CALL algo.unionFind.stream(" +
+        String query = "CALL algo.beta.wcc.stream(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph" +
                        "    }" +
@@ -323,7 +323,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindStreamThreshold(String graphImpl) {
-        String query = "CALL algo.unionFind.stream(" +
+        String query = "CALL algo.beta.wcc.stream(" +
                        "    '', 'TYPE', {" +
                        "        weightProperty: 'cost', defaultValue: 10.0, threshold: 5.0, concurrency: 1, graph: $graph" +
                        "    }" +
@@ -338,7 +338,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testThresholdUnionFindLowThreshold(String graphImpl) {
-        String query = "CALL algo.unionFind.stream(" +
+        String query = "CALL algo.beta.wcc.stream(" +
                        "    '', 'TYPE', {" +
                        "        weightProperty: 'cost', defaultValue: 10.0, concurrency: 1, threshold: 3.14, graph: $graph" +
                        "    }" +
@@ -354,7 +354,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindThrowsExceptionWhenThresholdPropertyDoesNotExists(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph, weightProperty: 'does_not_exist', threshold: 3.14" +
                        "    }" +
@@ -425,7 +425,7 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     private void assertComponentSizes(String graphName, String relType, String weightProperty, int[] expectedSizes) {
-        String query = "CALL algo.unionFind.stream(" +
+        String query = "CALL algo.beta.wcc.stream(" +
                        "    '', '" + relType +"', {" +
                        "        weightProperty: '"+ weightProperty +"', threshold: 5.0, concurrency: 1, graph: '"+ graphName +"'" +
                        "    }" +

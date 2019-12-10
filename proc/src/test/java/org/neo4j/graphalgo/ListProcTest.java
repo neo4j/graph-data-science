@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
-import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.wcc.WccProc;
 
 import java.util.Arrays;
@@ -64,15 +63,6 @@ class ListProcTest extends ProcTestBase {
         "algo.pageRank",
         "algo.pageRank.memrec",
         "algo.pageRank.stream",
-        "algo.unionFind",
-        "algo.unionFind.forkJoin",
-        "algo.unionFind.forkJoin.stream",
-        "algo.unionFind.forkJoinMerge",
-        "algo.unionFind.forkJoinMerge.stream",
-        "algo.unionFind.memrec",
-        "algo.unionFind.queue",
-        "algo.unionFind.queue.stream",
-        "algo.unionFind.stream",
         "algo.wcc",
         "algo.wcc.memrec",
         "algo.wcc.stream",
@@ -113,7 +103,6 @@ class ListProcTest extends ProcTestBase {
             LouvainStreamProc.class,
             MemRecProc.class,
             PageRankProc.class,
-            UnionFindProc.class,
             WccProc.class
         );
         registerFunctions(

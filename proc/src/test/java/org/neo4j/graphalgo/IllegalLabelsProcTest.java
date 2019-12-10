@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.graphalgo.unionfind.UnionFindProc;
+import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -42,7 +42,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(UnionFindProc.class);
+        registerProcedures(WccProc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -55,7 +55,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
     void testUnionFindStreamWithInvalidNodeLabel(String graphName) {
         QueryExecutionException ex = assertThrows(
                 QueryExecutionException.class,
-                () -> runQuery(String.format("CALL algo.unionFind.stream('C', '',{graph:'%s'})", graphName)));
+                () -> runQuery(String.format("CALL algo.beta.wcc.stream('C', '',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Invalid node projection, one or more labels not found: 'C'"));
     }
@@ -63,7 +63,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testUnionFindStreamWithInvalidRelType(String graphName) {
         QueryExecutionException ex = assertThrows(QueryExecutionException.class, () ->
-                runQuery(String.format("CALL algo.unionFind.stream('', 'Y',{graph:'%s'})", graphName)));
+                runQuery(String.format("CALL algo.beta.wcc.stream('', 'Y',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Relationship type(s) not found: 'Y'"));
     }
@@ -71,7 +71,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testUnionFindStreamWithValidNodeLabelAndInvalidRelType(String graphName) {
         QueryExecutionException ex = assertThrows(QueryExecutionException.class, () ->
-                runQuery(String.format("CALL algo.unionFind.stream('A', 'Y',{graph:'%s'})", graphName)));
+                runQuery(String.format("CALL algo.beta.wcc.stream('A', 'Y',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Relationship type(s) not found: 'Y'"));
     }
@@ -79,7 +79,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testUnionFindStreamWithMultipleInvaludRelTypes(String graphName) {
         QueryExecutionException ex = assertThrows(QueryExecutionException.class, () ->
-                runQuery(String.format("CALL algo.unionFind.stream('A', 'Y | Z',{graph:'%s'})", graphName)));
+                runQuery(String.format("CALL algo.beta.wcc.stream('A', 'Y | Z',{graph:'%s'})", graphName)));
         assertEquals(IllegalArgumentException.class, rootCause(ex).getClass());
         assertThat(ex.getMessage(), containsString("Relationship type(s) not found: 'Y', 'Z'"));
     }
