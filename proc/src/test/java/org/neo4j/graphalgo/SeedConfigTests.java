@@ -48,7 +48,7 @@ public interface SeedConfigTests<CONFIG extends SeedConfig & BaseAlgoConfig, RES
     }
 
     @ParameterizedTest
-    @MethodSource("emptyStringPropertyValues")
+    @MethodSource("org.neo4j.graphalgo.BaseAlgoProcTests#emptyStringPropertyValues")
     default void testEmptySeedPropertyValues(String seedPropertyParameter) {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", seedPropertyParameter));
         CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
