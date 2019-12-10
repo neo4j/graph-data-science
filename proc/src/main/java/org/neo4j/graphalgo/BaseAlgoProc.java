@@ -55,10 +55,21 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         return this.getClass().getSimpleName();
     }
 
-    public abstract CONFIG newConfig(
+    protected abstract CONFIG newConfig(
+        String username,
         Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     );
+
+    public final CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
+        Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
+        if (!graphName.isPresent()) {
+            // we should do implicit loading
+            maybeImplicitCreate = Optional.of(GraphCreateConfig.implicitCreate(getUsername(), config));
+        }
+        return newConfig(getUsername(), graphName, maybeImplicitCreate, config);
+    }
 
     // TODO make AlgorithmFactory have a constructor that accepts CONFIG
     protected final A newAlgorithm(

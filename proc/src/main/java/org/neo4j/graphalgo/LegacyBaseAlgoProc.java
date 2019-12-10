@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
 import java.util.Map;
 import java.util.Optional;
@@ -104,7 +105,12 @@ public abstract class LegacyBaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT>
     }
 
     @Override
-    public ProcedureConfiguration newConfig(Optional<String> graphName, CypherMapWrapper config) {
+    public ProcedureConfiguration newConfig(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
         ProcedureConfiguration configuration = (config != null)
             ? ProcedureConfiguration.create(config, getUsername())
             : ProcedureConfiguration.create(getUsername());

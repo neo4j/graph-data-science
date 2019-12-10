@@ -101,7 +101,7 @@ public class LouvainStreamProc extends LouvainProcBase<LouvainStreamConfig> {
     }
 
     @Override
-    LouvainStreamConfig newConfig(
+    protected LouvainStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,

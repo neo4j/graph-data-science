@@ -233,7 +233,7 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
     }
 
     @Override
-    LouvainWriteConfig newConfig(
+    protected LouvainWriteConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,

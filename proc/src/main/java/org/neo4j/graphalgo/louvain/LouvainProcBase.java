@@ -20,31 +20,10 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.BaseAlgoProc;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-
-import java.util.Optional;
 
 abstract class LouvainProcBase<CONFIG extends LouvainConfigBase> extends BaseAlgoProc<Louvain, Louvain, CONFIG> {
-
-    abstract CONFIG newConfig(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    );
-
-    @Override
-    public final CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
-        if (!graphName.isPresent()) {
-            // we should do implicit loading
-            maybeImplicitCreate = Optional.of(GraphCreateConfig.implicitCreate(getUsername(), config));
-        }
-        return newConfig(getUsername(), graphName, maybeImplicitCreate, config);
-    }
 
     @Override
     protected final LouvainFactory<CONFIG> algorithmFactory(LouvainConfigBase config) {
