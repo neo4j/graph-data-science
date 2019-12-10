@@ -170,7 +170,6 @@ public class NodeSimilarityProc extends LegacyBaseAlgoProc<NodeSimilarity, NodeS
                             exporter.write(
                                 writeRelationshipType,
                                 writeProperty,
-                                WRITE_PROPERTY_VALUE_DEFAULT,
                                 (node1, node2, similarity) -> {
                                     histogram.recordValue(similarity);
                                     return true;
@@ -178,7 +177,7 @@ public class NodeSimilarityProc extends LegacyBaseAlgoProc<NodeSimilarity, NodeS
                             );
                             resultBuilder.withHistogram(histogram);
                         } else {
-                            exporter.write(writeRelationshipType, writeProperty, WRITE_PROPERTY_VALUE_DEFAULT);
+                            exporter.write(writeRelationshipType, writeProperty);
                         }
                     }
                 )

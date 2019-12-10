@@ -41,18 +41,22 @@ import static org.neo4j.graphalgo.core.utils.TerminationFlag.RUNNING_TRUE;
 class RelationshipExporterTest {
 
     private static final String NODE_QUERY_PART =
-        "CREATE"+
-        "  (a)"+
-        ", (b)"+
-        ", (c)";
+        "CREATE" +
+        "  (a)" +
+        ", (b)" +
+        ", (c)" +
+        ", (d)";
 
     private static final String RELS_QUERY_PART =
         ", (a)-[:BARFOO {weight: 4.2}]->(b)" +
         ", (a)-[:BARFOO {weight: 1.0}]->(a)" +
         ", (a)-[:BARFOO {weight: 2.3}]->(c)" +
-        ", (b)-[:BARFOO]->(c)";
+        ", (b)-[:BARFOO]->(c)" +
+        ", (c)-[:THISISNOTTHETYPEYOUARELOOKINGFOR]->(d)";
 
     private static final String DB_CYPHER = NODE_QUERY_PART;
+    private static final double PROPERTY_VALUE_IF_MISSING = 2.0;
+    private static final double PROPERTY_VALUE_IF_NOT_WRITTEN = 1337.0;
 
     private GraphDatabaseAPI db;
 
@@ -69,16 +73,23 @@ class RelationshipExporterTest {
 
     @Test
     void exportRelationships() {
-        RelationshipExporter build = setupExportTest();
-        build.write("FOOBAR", "weight", 0.0);
+        RelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
+        exporter.write("FOOBAR", "weight");
         validateWrittenGraph();
     }
 
     @Test
+    void exportRelationshipsWithoutProperties() {
+        RelationshipExporter exporter = setupExportTest(/* includeProperties */ false);
+        exporter.write("FOOBAR", "weight");
+        validateWrittenGraphWithoutProperties();
+    }
+
+    @Test
     void exportRelationshipsWithAfterWriteConsumer() {
-        RelationshipExporter build = setupExportTest();
+        RelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
         MutableInt count = new MutableInt();
-        build.write("FOOBAR", "weight", 0.0, (sourceNodeId, targetNodeId, property) -> {
+        exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
             count.increment();
             return true;
         });
@@ -86,15 +97,29 @@ class RelationshipExporterTest {
         validateWrittenGraph();
     }
 
-    private RelationshipExporter setupExportTest() {
+    @Test
+    void exportRelationshipsWithAfterWriteConsumerAndNoProperties() {
+        RelationshipExporter exporter = setupExportTest(/* includeProperties */ false);
+        MutableInt count = new MutableInt();
+        exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
+            count.increment();
+            return true;
+        });
+        Assertions.assertEquals(4, count.getValue());
+        validateWrittenGraphWithoutProperties();
+    }
+
+    private RelationshipExporter setupExportTest(boolean includeProperties) {
         // create graph to export
         GraphDatabaseAPI fromDb = TestDatabaseCreator.createTestDatabase();
         fromDb.execute(NODE_QUERY_PART + RELS_QUERY_PART);
-        Graph fromGraph = new GraphLoader(fromDb)
+        GraphLoader loader = new GraphLoader(fromDb)
             .withAnyLabel()
-            .withRelationshipType("BARFOO")
-            .withRelationshipProperties(PropertyMapping.of("weight", 2.0))
-            .load(HugeGraphFactory.class);
+            .withRelationshipType("BARFOO");
+        if (includeProperties) {
+            loader.withRelationshipProperties(PropertyMapping.of("weight", PROPERTY_VALUE_IF_MISSING));
+        }
+        Graph fromGraph = loader.load(HugeGraphFactory.class);
 
         // export into new database
         return RelationshipExporter
@@ -103,19 +128,36 @@ class RelationshipExporterTest {
     }
 
     private void validateWrittenGraph() {
-        Graph actual = new GraphLoader(db)
-            .withAnyLabel()
-            .withRelationshipType("FOOBAR")
-            .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-            .load(HugeGraphFactory.class);
-
+        Graph actual = loadWrittenGraph();
         assertGraphEquals(
             fromGdl(
                 "(a)-[{w: 4.2}]->(b)," +
                 "(a)-[{w: 1.0}]->(a)," +
                 "(a)-[{w: 2.3}]->(c)," +
-                "(b)-[{w: 2.0}]->(c)"),
+                "(b)-[{w: " + PROPERTY_VALUE_IF_MISSING + "}]->(c)," +
+                "(d)"),
             actual
         );
+    }
+
+    private void validateWrittenGraphWithoutProperties() {
+        Graph actual = loadWrittenGraph();
+        assertGraphEquals(
+            fromGdl(
+                "(a)-[{w: " + PROPERTY_VALUE_IF_NOT_WRITTEN + "}]->(b)," +
+                "(a)-[{w: " + PROPERTY_VALUE_IF_NOT_WRITTEN + "}]->(a)," +
+                "(a)-[{w: " + PROPERTY_VALUE_IF_NOT_WRITTEN + "}]->(c)," +
+                "(b)-[{w: " + PROPERTY_VALUE_IF_NOT_WRITTEN + "}]->(c)," +
+                "(d)"),
+            actual
+        );
+    }
+
+    private Graph loadWrittenGraph() {
+        return new GraphLoader(db)
+            .withAnyLabel()
+            .withRelationshipType("FOOBAR")
+            .withRelationshipProperties(PropertyMapping.of("weight", PROPERTY_VALUE_IF_NOT_WRITTEN))
+            .load(HugeGraphFactory.class);
     }
 }
