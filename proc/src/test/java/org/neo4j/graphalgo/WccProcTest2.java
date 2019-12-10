@@ -29,7 +29,8 @@ import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.wcc.WccProc;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -75,7 +76,7 @@ public class WccProcTest2 extends ProcTestBase {
 
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(createGraph);
-        registerProcedures(WccProc.class, GraphLoadProc.class);
+        registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphLoadProc.class);
     }
 
     @AfterEach

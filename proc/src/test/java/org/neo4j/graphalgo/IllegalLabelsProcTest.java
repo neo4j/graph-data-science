@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.graphalgo.wcc.WccProc;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -42,7 +42,7 @@ class IllegalLabelsProcTest extends ProcTestBase {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(WccProc.class);
+        registerProcedures(WccStreamProc.class);
         runQuery(DB_CYPHER);
     }
 

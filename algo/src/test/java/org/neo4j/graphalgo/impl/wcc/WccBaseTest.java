@@ -20,38 +20,35 @@
 package org.neo4j.graphalgo.impl.wcc;
 
 import com.carrotsearch.hppc.BitSet;
-import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
-import java.util.stream.Stream;
-
-abstract class WCCBaseTest extends AlgoTestBase {
+abstract class WccBaseTest extends AlgoTestBase {
 
     static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
 
-    static Stream<Arguments> parameters() {
-        return TestSupport.allTypesWithoutCypher().
-                flatMap(graphType -> Arrays.stream(WCCType.values())
-                        .map(ufType -> Arguments.of(graphType, ufType)));
-    }
-
     abstract int communitySize();
 
-    DisjointSetStruct run(WCCType uf, Graph graph, WCC.Config config) {
-        return WCCHelper.run(
-                uf,
-                graph,
-                communitySize() / Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT_CONCURRENCY,
-                config
-        );
+    DisjointSetStruct run(Graph graph) {
+        return run(graph, ImmutableWccStreamConfig.builder().build());
+    }
+
+    DisjointSetStruct run(Graph graph, WccBaseConfig config) {
+        return run(graph, config, communitySize() / Pools.DEFAULT_CONCURRENCY);
+    }
+
+    DisjointSetStruct run(Graph graph, WccBaseConfig config, int concurrency) {
+        return new Wcc(
+            graph,
+            Pools.DEFAULT,
+            communitySize() / Pools.DEFAULT_CONCURRENCY,
+            config,
+            AllocationTracker.EMPTY
+        ).compute();
     }
 
     /**

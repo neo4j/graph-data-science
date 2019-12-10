@@ -22,10 +22,7 @@ package org.neo4j.graphalgo.impl.wcc;
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport;
@@ -34,33 +31,27 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 
-class IncrementalWCCTest {
+// TODO should implement WccBaseTest
+class IncrementalWccTest {
 
     private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
     private static final String SEED_PROPERTY = "community";
 
     private static final int COMMUNITY_COUNT = 16;
     private static final int COMMUNITY_SIZE = 10;
-
-    static Stream<Arguments> parameters() {
-        return TestSupport.allTypesWithoutCypher().
-            flatMap(graphType -> Arrays.stream(WCCType.values())
-                .map(ufType -> Arguments.of(graphType, ufType)));
-    }
 
     private GraphDatabaseAPI db;
 
@@ -95,23 +86,23 @@ class IncrementalWCCTest {
         source.createRelationshipTo(target, RELATIONSHIP_TYPE);
     }
 
-    @ParameterizedTest(name = "{0} -- {1}")
-    @MethodSource("parameters")
-    void shouldComputeComponentsFromSeedProperty(Class<? extends GraphFactory> graphFactory, WCCType unionFindType) {
+    @TestSupport.AllGraphTypesWithoutCypherTest
+    void shouldComputeComponentsFromSeedProperty(Class<? extends GraphFactory> graphFactory) {
         Graph graph = new GraphLoader(db)
-                .withExecutorService(Pools.DEFAULT)
-                .withAnyLabel()
-                .withOptionalNodeProperties(PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L))
-                .withRelationshipType(RELATIONSHIP_TYPE)
-                .load(graphFactory);
+            .withExecutorService(Pools.DEFAULT)
+            .withAnyLabel()
+            .withOptionalNodeProperties(PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L))
+            .withRelationshipType(RELATIONSHIP_TYPE)
+            .load(graphFactory);
 
-        WCC.Config config = new WCC.Config(
-                graph.nodeProperties(SEED_PROPERTY),
-                Double.NaN
-        );
+        WccStreamConfig config = ImmutableWccStreamConfig.builder()
+            .concurrency(Pools.DEFAULT_CONCURRENCY)
+            .seedProperty(SEED_PROPERTY)
+            .threshold(0D)
+            .build();
 
         // We expect that UF connects pairs of communites
-        DisjointSetStruct result = run(unionFindType, graph, config);
+        DisjointSetStruct result = run(graph, config);
         assertEquals(COMMUNITY_COUNT / 2, getSetCount(result));
 
         graph.forEachNode((nodeId) -> {
@@ -121,17 +112,16 @@ class IncrementalWCCTest {
             long expectedCommunityId = nodeId / (2 * COMMUNITY_SIZE) * 2;
             long actualCommunityId = result.setIdOf(nodeId);
             assertEquals(
-                    expectedCommunityId,
-                    actualCommunityId,
-                    "Node " + nodeId + " in unexpected set: " + actualCommunityId
+                expectedCommunityId,
+                actualCommunityId,
+                "Node " + nodeId + " in unexpected set: " + actualCommunityId
             );
             return true;
         });
     }
 
-    @ParameterizedTest(name = "WCCType = {0}")
-    @EnumSource(WCCType.class)
-    void shouldAssignMinimumCommunityIdOnMerge(WCCType wccType) {
+    @Test
+    void shouldAssignMinimumCommunityIdOnMerge() {
         // Given
         // Simulates new node (a) created with lower ID and no seed
         Graph graph = fromGdl(
@@ -143,16 +133,11 @@ class IncrementalWCCTest {
         );
 
         // When
-        WCC.Config config = new WCC.Config(
-            graph.nodeProperties("seed"),
-            Double.NaN
-        );
+        WccStreamConfig config = ImmutableWccStreamConfig.builder()
+            .seedProperty("seed")
+            .build();
 
-        DisjointSetStruct result = run(
-            wccType,
-            graph,
-            config
-        );
+        DisjointSetStruct result = run(graph, config);
 
         // Then
         LongStream.range(IdMapping.START_NODE_ID, graph.nodeCount())
@@ -179,14 +164,14 @@ class IncrementalWCCTest {
         return temp.getId();
     }
 
-    private DisjointSetStruct run(WCCType uf, Graph graph, WCC.Config config) {
-        return WCCHelper.run(
-            uf,
+    private DisjointSetStruct run(Graph graph, WccBaseConfig config) {
+        return new Wcc(
             graph,
+            Pools.DEFAULT,
             COMMUNITY_SIZE / Pools.DEFAULT_CONCURRENCY,
-            Pools.DEFAULT_CONCURRENCY,
-            config
-        );
+            config,
+            AllocationTracker.EMPTY
+        ).compute();
     }
 
     /**

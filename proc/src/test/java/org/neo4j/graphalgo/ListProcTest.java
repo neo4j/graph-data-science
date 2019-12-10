@@ -25,7 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
-import org.neo4j.graphalgo.wcc.WccProc;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -103,7 +104,8 @@ class ListProcTest extends ProcTestBase {
             LouvainStreamProc.class,
             MemRecProc.class,
             PageRankProc.class,
-            WccProc.class
+            WccWriteProc.class,
+            WccStreamProc.class
         );
         registerFunctions(
             GetNodeFunc.class,

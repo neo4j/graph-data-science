@@ -24,7 +24,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.wcc.WccProc;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 
 import java.util.List;
 
@@ -63,7 +64,7 @@ class WccProcTest extends ProcTestBase {
 
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(createGraph);
-        registerProcedures(WccProc.class);
+        registerProcedures(WccStreamProc.class, WccWriteProc.class);
     }
 
     @AfterEach

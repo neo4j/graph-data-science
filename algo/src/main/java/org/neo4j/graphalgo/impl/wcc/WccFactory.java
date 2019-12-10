@@ -19,29 +19,35 @@
  */
 package org.neo4j.graphalgo.impl.wcc;
 
+import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.logging.Log;
 
-final class WCCHelper {
+public class WccFactory<CONFIG extends WccBaseConfig> extends AlgorithmFactory<Wcc, CONFIG> {
 
-    static DisjointSetStruct run(
-            WCCType algorithmType,
-            Graph graph,
-            int minBatchSize,
-            int concurrency,
-            final WCC.Config config) {
+    private final WccBaseConfig config;
 
-        WCC<? extends WCC> algo = algorithmType.create(
-                graph,
-                Pools.DEFAULT,
-                minBatchSize,
-                concurrency,
-                config,
-                AllocationTracker.EMPTY);
-        DisjointSetStruct communities = algo.compute();
-        algo.release();
-        return communities;
+    public WccFactory(WccBaseConfig config) {
+        this.config = config;
+    }
+
+    @Override
+    public Wcc build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
+        return new Wcc(
+            graph,
+            Pools.DEFAULT,
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            configuration,
+            tracker
+        );
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        return Wcc.memoryEstimation(config.isIncremental());
     }
 }

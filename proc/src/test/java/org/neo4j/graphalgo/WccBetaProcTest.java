@@ -25,7 +25,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.wcc.WccProc;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -39,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_WEIGHT_KEY;
-import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_THRESHOLD;
 
 class WccBetaProcTest extends ProcTestBase {
 
@@ -69,7 +69,7 @@ class WccBetaProcTest extends ProcTestBase {
 
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(createGraph);
-        registerProcedures(WccProc.class, GraphLoadProc.class);
+        registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphLoadProc.class);
     }
 
     @AfterEach
@@ -372,7 +372,7 @@ class WccBetaProcTest extends ProcTestBase {
             .getMessage()
             .contains(String.format(
                 "%s requires a `%s` or `%s`",
-                CONFIG_THRESHOLD,
+                0D,
                 RELATIONSHIP_WEIGHT_KEY,
                 DEPRECATED_RELATIONSHIP_PROPERTY_KEY
             )));

@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
-import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,8 +38,7 @@ class EmptyGraphProcTest extends ProcTestBase {
             LabelPropagationProc.class,
             LouvainWriteProc.class,
             LouvainStreamProc.class,
-            PageRankProc.class,
-            WccProc.class
+            PageRankProc.class
         );
     }
 

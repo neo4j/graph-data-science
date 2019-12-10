@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -106,7 +105,6 @@ class GraphLoadProcTest extends ProcTestBase {
         registerProcedures(
             GraphLoadProc.class,
             PageRankProc.class,
-            WccProc.class,
             LabelPropagationProc.class
         );
         runQuery(DB_CYPHER);

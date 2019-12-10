@@ -26,7 +26,8 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
-import org.neo4j.graphalgo.wcc.WccProc;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.Map;
@@ -61,7 +62,8 @@ class MemRecProcTest extends ProcTestBase {
                 MemRecProc.class,
                 PageRankProc.class,
                 LabelPropagationProc.class,
-                WccProc.class,
+                WccStreamProc.class,
+                WccWriteProc.class,
                 LouvainWriteProc.class,
                 LouvainStreamProc.class,
                 K1ColoringProc.class,
@@ -71,6 +73,7 @@ class MemRecProcTest extends ProcTestBase {
                                   "algo.beta.k1coloring, algo.beta.modularityOptimization, algo.beta.wcc, algo.graph.load," +
                                   " algo.labelPropagation, algo.pageRank, algo.wcc," +
                                   " gds.algo.louvain.stats, gds.algo.louvain.stream, gds.algo.louvain.write" +
+                                  " gds.algo.wcc.stats, gds.algo.wcc.stream, gds.algo.wcc.write" +
                                   "}.";
         runQuery(DB_CYPHER);
     }
@@ -112,10 +115,11 @@ class MemRecProcTest extends ProcTestBase {
         test("algo.wcc.memrec(null, null)");
         test("algo.wcc.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
 
-//        test("algo.memrec(null, null, 'louvain')");
-//        test("algo.memrec(null, null, 'louvain', {direction: 'BOTH', graph: 'huge'})");
         test("gds.algo.louvain.write.estimate({writeProperty: 'foo'})");
         test("gds.algo.louvain.stream.estimate({})");
+
+        test("gds.algo.wcc.write.estimate({writeProperty: 'foo'})");
+        test("gds.algo.wcc.stream.estimate({})");
 
         test("algo.memrec(null, null, 'beta.k1coloring')");
         test("algo.memrec(null, null, 'beta.k1coloring', {direction: 'BOTH', graph: 'huge'})");
