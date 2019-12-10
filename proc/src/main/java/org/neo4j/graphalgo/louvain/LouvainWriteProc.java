@@ -188,29 +188,29 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
                     new double[0], Collections.emptyMap()
                 )
             );
-        } else {
-            LouvainWriteConfig config = computeResult.config();
-            Graph graph = computeResult.graph();
-            Louvain louvain = computeResult.algorithm();
-
-            WriteResultBuilder builder = new WriteResultBuilder(config, callContext, computeResult.tracker());
-
-            builder.setLoadMillis(computeResult.createMillis());
-            builder.setComputeMillis(computeResult.computeMillis());
-            builder.withNodeCount(graph.nodeCount());
-            builder
-                .withLevels(louvain.levels())
-                .withModularity(louvain.modularities()[louvain.levels() - 1])
-                .withModularities(louvain.modularities())
-                .withCommunityFunction(louvain::getCommunity);
-
-            if (write && !config.writeProperty().isEmpty()) {
-                writeNodeProperties(builder, computeResult);
-                graph.releaseProperties();
-            }
-
-            return Stream.of(builder.build());
         }
+
+        LouvainWriteConfig config = computeResult.config();
+        Graph graph = computeResult.graph();
+        Louvain louvain = computeResult.algorithm();
+
+        WriteResultBuilder builder = new WriteResultBuilder(config, callContext, computeResult.tracker());
+
+        builder.setLoadMillis(computeResult.createMillis());
+        builder.setComputeMillis(computeResult.computeMillis());
+        builder.withNodeCount(graph.nodeCount());
+        builder
+            .withLevels(louvain.levels())
+            .withModularity(louvain.modularities()[louvain.levels() - 1])
+            .withModularities(louvain.modularities())
+            .withCommunityFunction(louvain::getCommunity);
+
+        if (write && !config.writeProperty().isEmpty()) {
+            writeNodeProperties(builder, computeResult);
+            graph.releaseProperties();
+        }
+
+        return Stream.of(builder.build());
     }
 
     @Override
