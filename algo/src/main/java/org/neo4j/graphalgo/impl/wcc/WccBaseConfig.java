@@ -51,5 +51,9 @@ public interface WccBaseConfig extends BaseAlgoConfig, SeedConfig, WeightConfig 
         if (threshold() > 0 && weightProperty() == null) {
             throw new IllegalArgumentException("Specifying a threshold requires `weightProperty` to be set.");
         }
+
+        if (isIncremental() && consecutiveIds()) {
+           throw new IllegalArgumentException("Seeding and the `consecutiveIds` option cannot be used at the same time.");
+        }
     }
 }

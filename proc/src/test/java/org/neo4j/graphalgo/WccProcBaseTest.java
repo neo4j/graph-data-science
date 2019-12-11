@@ -24,6 +24,8 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -127,6 +129,38 @@ abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBas
         applyOnProcedure(proc -> {
             CONFIG wccConfig = proc.newConfig(Optional.of("myGraph"), config);
             assertEquals(3.14, wccConfig.threshold());
+        });
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testSettingConsecutiveIds(boolean consecutiveIds) {
+        CypherMapWrapper config = CypherMapWrapper.create(MapUtil.map(
+            "consecutiveIds", consecutiveIds
+        ));
+
+        applyOnProcedure(proc -> {
+            CONFIG wccConfig = proc.newConfig(Optional.of("myGraph"), config);
+            assertEquals(consecutiveIds, wccConfig.consecutiveIds());
+        });
+    }
+
+    @Test
+    void testSettingConsecutiveIdsAndSeedingCannotBeUsedTogether() {
+        CypherMapWrapper config = CypherMapWrapper.create(MapUtil.map(
+            "consecutiveIds", true,
+            "seedProperty", "seed"
+        ));
+
+        applyOnProcedure(proc -> {
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> { proc.newConfig(Optional.empty(), config); }
+            );
+
+            assertTrue(exception
+                .getMessage()
+                .contains("Seeding and the `consecutiveIds` option cannot be used at the same time.")
+            );
         });
     }
 }
