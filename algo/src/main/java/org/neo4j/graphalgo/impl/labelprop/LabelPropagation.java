@@ -181,34 +181,4 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
     void withBatchSize(int batchSize) {
         this.batchSize = batchSize;
     }
-
-    public static class Config {
-
-        private final String seedProperty;
-        private final String weightProperty;
-        private final int batchSize;
-        private final int concurrency;
-        private Direction direction;
-        private final long maxIterations;
-
-        public Config(
-            String seedProperty,
-            String weightProperty,
-            int batchSize,
-            int concurrency,
-            Direction direction,
-            long maxIterations
-        ) {
-            this.seedProperty = seedProperty;
-            this.weightProperty = weightProperty;
-            this.batchSize = batchSize;
-            this.concurrency = concurrency;
-            this.direction = direction;
-            this.maxIterations = maxIterations;
-        }
-
-        void withDirection(Direction direction) {
-            this.direction = direction;
-        }
-    }
 }
