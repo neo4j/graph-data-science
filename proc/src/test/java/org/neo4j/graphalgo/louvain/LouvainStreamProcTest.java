@@ -19,10 +19,12 @@
  */
 package org.neo4j.graphalgo.louvain;
 
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 
@@ -42,11 +44,12 @@ class LouvainStreamProcTest extends LouvainProcTestBase<LouvainStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("graphVariations")
-    void testStream(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.algo.louvain.stream(" +
-                       graphSnippet.replaceAll(",$", "") +
-                       "}) YIELD nodeId, communityId, communityIds";
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTestBase#graphVariations")
+    void testStream(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
+        @Language("Cypher") String query = queryBuilder
+            .algo("louvain")
+            .streamMode()
+            .yields("nodeId", "communityId", "communityIds");
 
         List<Long> actualCommunities = new ArrayList<>();
         runQuery(query, row -> {
@@ -59,12 +62,13 @@ class LouvainStreamProcTest extends LouvainProcTestBase<LouvainStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("graphVariations")
-    void testStreamCommunities(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.algo.louvain.stream(" +
-                       graphSnippet +
-                       "    includeIntermediateCommunities: true" +
-                       "}) YIELD nodeId, communityId, communityIds";
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTestBase#graphVariations")
+    void testStreamCommunities(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
+        @Language("Cypher") String query = queryBuilder
+            .algo("louvain")
+            .streamMode()
+            .addParameter("includeIntermediateCommunities", true)
+            .yields("nodeId", "communityId", "communityIds");
 
         runQuery(query, row -> {
             Object maybeList = row.get("communityIds");
