@@ -64,17 +64,19 @@ public interface SeedConfigTests<CONFIG extends SeedConfig & BaseAlgoConfig, RES
     }
 
     @Test
-    default void testValidateSeedToNodeProperties() {
+    default void testSeedPropertyValidation() {
         List<String> nodeProperties = Arrays.asList("a", "b", "c");
-        Map<String, Object> config = MapUtil.map(
+        Map<String, Object> tempConfig = MapUtil.map(
             "seedProperty", "foo",
-            "writeProperty", "bar",
             "nodeProjection", MapUtil.map(
                 "A", MapUtil.map(
                     "properties", nodeProperties
                 )
             )
         );
+
+        Map<String, Object> config = createMinimallyValidConfig(CypherMapWrapper.create(tempConfig)).toMap();
+
         applyOnProcedure(proc -> {
             IllegalArgumentException e = assertThrows(
                 IllegalArgumentException.class,

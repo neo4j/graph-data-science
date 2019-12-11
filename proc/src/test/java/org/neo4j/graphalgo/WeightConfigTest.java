@@ -63,17 +63,19 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig,
     }
 
     @Test
-    default void testValidateWeightToNodeProperties() {
-        List<String> nodeProperties = Arrays.asList("a", "b", "c");
-        Map<String, Object> config = MapUtil.map(
+    default void testWeightPropertyValidation() {
+        List<String> relationshipProperties = Arrays.asList("a", "b", "c");
+        Map<String, Object> tempConfig = MapUtil.map(
             "weightProperty", "foo",
-            "writeProperty", "bar",
-            "nodeProjection", MapUtil.map(
+            "relationshipProjection", MapUtil.map(
                 "A", MapUtil.map(
-                    "properties", nodeProperties
+                    "properties", relationshipProperties
                 )
             )
         );
+
+        Map<String, Object> config = createMinimallyValidConfig(CypherMapWrapper.create(tempConfig)).toMap();
+
         applyOnProcedure(proc -> {
             IllegalArgumentException e = assertThrows(
                 IllegalArgumentException.class,
