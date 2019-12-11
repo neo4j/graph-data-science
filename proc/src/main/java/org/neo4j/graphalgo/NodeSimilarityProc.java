@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityFactory;
+import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityGraphResult;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
@@ -46,7 +47,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-public class NodeSimilarityProc extends LegacyBaseAlgoProc<NodeSimilarity> {
+public class NodeSimilarityProc extends LegacyBaseAlgoProc<NodeSimilarity, NodeSimilarityResult> {
 
     private static final String SIMILARITY_CUTOFF_KEY = "similarityCutoff";
     private static final double SIMILARITY_CUTOFF_DEFAULT = 1E-42;
