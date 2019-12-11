@@ -20,262 +20,267 @@
 
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.wcc.WccWriteConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
 
+    private static final String WRITE_PROPERTY = "componentId";
+    private static final String DEFAULT_GRAPH_NAME = "";
+    private static final String SEED_PROPERTY = "seedId";
+
     @Override
     public Class<? extends BaseAlgoProc<?, DisjointSetStruct, WccWriteConfig>> getProcedureClazz() {
-        return null;
+        return WccWriteProc.class;
     }
 
     @Override
     public WccWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return null;
+        return WccWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
     }
 
-    @AllGraphNamesTest
-    void testWCC(String graphImpl) {
-        String query = "CALL algo.beta.wcc(" +
-                       "    '', '', {" +
-                       "        graph: $graph" +
-                       "    }" +
-                       ") YIELD setCount, communityCount";
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> {
-                assertEquals(3L, row.getNumber("communityCount"));
-                assertEquals(3L, row.getNumber("setCount"));
-            }
-        );
+    @Override
+    public CypherMapWrapper createMinimallyValidConfig(CypherMapWrapper mapWrapper) {
+        if (!mapWrapper.containsKey("writeProperty")) {
+            return mapWrapper.withString("writeProperty", WRITE_PROPERTY);
+        }
+        return mapWrapper;
     }
 
-    @AllGraphNamesTest
-    void testWCCWithLabel(String graphImpl) {
-        String query = "CALL algo.beta.wcc(" +
-                       "    'Label', '', {" +
-                       "        graph: $graph" +
-                       "    }" +
-                       ") YIELD setCount, communityCount";
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> {
-                assertEquals(1L, row.getNumber("communityCount"));
-                assertEquals(1L, row.getNumber("setCount"));
-            }
-        );
-    }
+    @Test
+    void testWriteYields() {
+        String query = GdsCypher.call("wcc")
+            .writeMode()
+            .implicitCreation(GraphCreateConfig.emptyWithName(getUsername(), ""))
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .yields(
+                "writeProperty",
+                "seedProperty",
+                "weightProperty",
+                "nodePropertiesWritten",
+                "relationshipPropertiesWritten",
+                "createMillis",
+                "computeMillis",
+                "writeMillis",
+                "postProcessingMillis",
+                "componentCount",
+                "threshold",
+                "consecutiveIds",
+                "componentDistribution"
+            );
 
-    @AllGraphNamesTest
-    void testWCCWithSeed(String graphImpl) {
-        String query = "CALL algo.beta.wcc(" +
-                       "    '', '', {" +
-                       "        graph: $graph, seedProperty: 'seedId'" +
-                       "    }" +
-                       ") YIELD setCount, communityCount";
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> {
-                assertEquals(3L, row.getNumber("communityCount"));
-                assertEquals(3L, row.getNumber("setCount"));
-            }
-        );
-
-        runQuery(
-            "MATCH (n) RETURN n.partition AS partition",
-            row -> assertTrue(row.getNumber("partition").longValue() >= 42)
-        );
-
-        runQuery(
-            "MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
-            row -> {
-                final long nodeId = row.getNumber("nodeId").longValue();
-                final long partitionId = row.getNumber("partition").longValue();
-                if (nodeId >= 0 && nodeId <= 6) {
-                    assertEquals(42, partitionId);
-                } else {
-                    assertTrue(partitionId != 42);
-                }
-            }
-        );
-    }
-
-    @AllGraphNamesTest
-    void testWCCWithSeedOnPreloadedGraph(String graphImpl) {
-        String loadQuery = "CALL algo.graph.load('seedGraph', '', '', {" +
-                           "    graph: $graph," +
-                           "    nodeProperties: {" +
-                           "        seedId: 'seedId'" +
-                           "    }" +
-                           "})";
-        runQuery(loadQuery, MapUtil.map("graph", graphImpl));
-        String query = "CALL algo.beta.wcc(" +
-                       "    '', '', {" +
-                       "        graph: 'seedGraph', seedProperty: 'seedId'" +
-                       "    }" +
-                       ") YIELD setCount, communityCount";
         runQuery(
             query,
             row -> {
-                assertEquals(3L, row.getNumber("communityCount"));
-                assertEquals(3L, row.getNumber("setCount"));
-            }
-        );
+                assertEquals(WRITE_PROPERTY, row.getString("writeProperty"));
+                assertNull(row.getString("seedProperty"));
+                assertNull(row.getString("weightProperty"));
 
-        runQuery(
-            "MATCH (n) RETURN n.partition AS partition",
-            row -> assertTrue(row.getNumber("partition").longValue() >= 42)
-        );
+                assertEquals(10L, row.getNumber("nodePropertiesWritten"));
+                assertEquals(0L, row.getNumber("relationshipPropertiesWritten"));
 
-        runQuery(
-            "MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
-            row -> {
-                final long nodeId = row.getNumber("nodeId").longValue();
-                final long partitionId = row.getNumber("partition").longValue();
-                if (nodeId >= 0 && nodeId <= 6) {
-                    assertEquals(42, partitionId);
-                } else {
-                    assertTrue(partitionId != 42);
-                }
-            }
-        );
-    }
-
-    @AllGraphNamesTest
-    void testWCCReadAndWriteSeed(String graphImpl) {
-        String query = "CALL algo.beta.wcc(" +
-                       "    '', '', {" +
-                       "        graph: $graph, seedProperty: 'seedId', writeProperty: 'seedId'" +
-                       "    }" +
-                       ") YIELD setCount, communityCount";
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> {
-                assertEquals(3L, row.getNumber("communityCount"));
-                assertEquals(3L, row.getNumber("setCount"));
-            }
-        );
-
-        runQuery(
-            "MATCH (n) RETURN n.seedId AS partition",
-            row -> assertTrue(row.getNumber("partition").longValue() >= 42)
-        );
-
-        runQuery(
-            "MATCH (n) RETURN n.nodeId AS nodeId, n.seedId AS partition",
-            row -> {
-                final long nodeId = row.getNumber("nodeId").longValue();
-                final long partitionId = row.getNumber("partition").longValue();
-                if (nodeId >= 0 && nodeId <= 6) {
-                    assertEquals(42, partitionId);
-                } else {
-                    assertTrue(partitionId != 42);
-                }
-            }
-        );
-    }
-
-    @AllGraphNamesTest
-    void testWCCWithSeedAndConsecutive(String graphImpl) {
-        String query = "CALL algo.beta.wcc(" +
-                       "    '', '', {" +
-                       "        graph: $graph, seedProperty: 'seedId', consecutiveIds: true" +
-                       "    }" +
-                       ") YIELD setCount, communityCount";
-
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> {
-                assertEquals(3L, row.getNumber("communityCount"));
-                assertEquals(3L, row.getNumber("setCount"));
-            }
-        );
-
-        runQuery(
-            "MATCH (n) RETURN n.partition AS partition",
-            row -> assertThat(row.getNumber("partition").longValue(), greaterThanOrEqualTo(42L))
-        );
-
-        runQuery(
-            "MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
-            row -> {
-                final long nodeId = row.getNumber("nodeId").longValue();
-                final long partitionId = row.getNumber("partition").longValue();
-                if (nodeId >= 0 && nodeId <= 6) {
-                    assertEquals(42, partitionId);
-                } else {
-                    assertTrue(partitionId != 42);
-                }
-            }
-        );
-    }
-
-    @AllGraphNamesTest
-    void testWCCWithConsecutiveIds(String graphImpl) {
-        String query = "CALL algo.beta.wcc(" +
-                       "    '', '', {" +
-                       "        graph: $graph, consecutiveIds: true" +
-                       "    }" +
-                       ")";
-
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> {
-                assertEquals(3L, row.getNumber("communityCount"));
-                assertEquals(3L, row.getNumber("setCount"));
-            }
-        );
-
-        runQuery(
-            "MATCH (n) RETURN collect(distinct n.partition) AS partitions ",
-            row -> assertThat((List<Long>) row.get("partitions"), containsInAnyOrder(0L, 1L, 2L))
-        );
-    }
-
-    @AllGraphNamesTest
-    void testWCCWriteBack(String graphImpl) {
-        String query = "CALL algo.beta.wcc(" +
-                       "    '', 'TYPE', {" +
-                       "        write: true, graph: $graph" +
-                       "    }" +
-                       ") YIELD setCount, communityCount, writeMillis, nodes, partitionProperty, writeProperty";
-
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> {
+                assertNotEquals(-1L, row.getNumber("createMillis"));
+                assertNotEquals(-1L, row.getNumber("computeMillis"));
                 assertNotEquals(-1L, row.getNumber("writeMillis"));
-                assertNotEquals(-1L, row.getNumber("nodes"));
-                assertEquals(3L, row.getNumber("communityCount"));
-                assertEquals(3L, row.getNumber("setCount"));
-                assertEquals("partition", row.getString("partitionProperty"));
-                assertEquals("partition", row.getString("writeProperty"));
+                assertNotEquals(-1L, row.getNumber("postProcessingMillis"));
+
+                assertEquals(3L, row.getNumber("componentCount"));
+                assertEquals(0D, row.getNumber("threshold"));
+                assertEquals(false, row.getBoolean("consecutiveIds"));
+
+                assertEquals(MapUtil.map(
+                    "p99", 7L,
+                    "min", 1L,
+                    "max", 7L,
+                    "mean", 3.3333333333333335D,
+                    "p90", 7L,
+                    "p50", 2L,
+                    "p999", 7L,
+                    "p95", 7L,
+                    "p75", 2L
+                ), row.get("componentDistribution"));
             }
         );
     }
 
-    @AllGraphNamesTest
-    void testWCCWriteBackExplicitWriteProperty(String graphImpl) {
-        String query = "CALL algo.beta.wcc(" +
-                       "    '', 'TYPE', {" +
-                       "        write: true, graph: $graph, writeProperty: 'unionFind'" +
-                       "    }" +
-                       ") YIELD setCount, communityCount, writeMillis, nodes, partitionProperty, writeProperty";
+    @Test
+    void testWrite() {
+        String query = GdsCypher.call("wcc")
+            .writeMode()
+            .implicitCreation(GraphCreateConfig.emptyWithName("", ""))
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .yields("componentCount");
 
-        runQuery(query, MapUtil.map("graph", graphImpl),
+        runQuery(query, row -> {
+            assertEquals(3L, row.getNumber("componentCount"));
+        });
+    }
+
+    @Test
+    void testWriteWithLabel() {
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
+            .username(getUsername())
+            .graphName(DEFAULT_GRAPH_NAME)
+            .nodeProjection(NodeProjections.of("Label"))
+            .relationshipProjection(RelationshipProjections.empty())
+            .build();
+        String query = GdsCypher.call("wcc")
+            .writeMode()
+            .implicitCreation(graphCreateConfig)
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .yields("componentCount");
+
+        runQuery(query, row -> {
+            assertEquals(1L, row.getNumber("componentCount"));
+        });
+    }
+
+    @Test
+    void testWriteWithSeed() {
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
+            .username(getUsername())
+            .graphName(DEFAULT_GRAPH_NAME)
+            .nodeProjection(NodeProjections.empty()
+                .addPropertyMappings(PropertyMappings.of(PropertyMapping.of("seedId", 0D)))
+            )
+            .relationshipProjection(RelationshipProjections.empty())
+            .build();
+        String query = GdsCypher.call("wcc")
+            .writeMode()
+            .implicitCreation(graphCreateConfig)
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("seedProperty", SEED_PROPERTY)
+            .yields("componentCount");
+
+        assertForSeedTests(query, WRITE_PROPERTY);
+    }
+
+    @Test
+    void testWriteWithSeedAndSameWriteProperty() {
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
+            .username(getUsername())
+            .graphName(DEFAULT_GRAPH_NAME)
+            .nodeProjection(NodeProjections.of("")
+                .addPropertyMappings(PropertyMappings.of(PropertyMapping.of(SEED_PROPERTY, 0D)))
+            )
+            .relationshipProjection(RelationshipProjections.empty())
+            .build();
+        String query = GdsCypher.call("wcc")
+            .writeMode()
+            .implicitCreation(graphCreateConfig)
+            .addParameter("writeProperty", SEED_PROPERTY)
+            .addParameter("seedProperty", SEED_PROPERTY)
+            .yields("componentCount");
+
+        assertForSeedTests(query, SEED_PROPERTY);
+    }
+
+    @Test
+    void testWriteWithSeedAndConsecutiveIds() {
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
+            .username(getUsername())
+            .graphName(DEFAULT_GRAPH_NAME)
+            .nodeProjection(NodeProjections.of("")
+                .addPropertyMappings(PropertyMappings.of(PropertyMapping.of(SEED_PROPERTY, 0D)))
+            )
+            .relationshipProjection(RelationshipProjections.empty())
+            .build();
+        String query = GdsCypher.call("wcc")
+            .writeMode()
+            .implicitCreation(graphCreateConfig)
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("seedProperty", SEED_PROPERTY)
+            .addParameter("consecutiveIds", true)
+            .yields("componentCount");
+
+        assertForSeedTests(query, WRITE_PROPERTY);
+    }
+
+    @Test
+    void testWriteWithSeedOnExplicitGraph() {
+        String graphName = "seedGraph";
+        String loadQuery = "CALL algo.beta.graph.create(" +
+                           "   $graphName, " +
+                           "    {}, {}, {nodeProperties: ['seedId']}  " +
+                           ")";
+        runQuery(loadQuery, MapUtil.map("graphName", graphName));
+
+        String query = GdsCypher.call("wcc")
+            .writeMode()
+            .explicitCreation(graphName)
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("seedProperty", SEED_PROPERTY)
+            .yields("componentCount");
+
+        assertForSeedTests(query, WRITE_PROPERTY);
+    }
+
+    private void assertForSeedTests(String query, String writeProperty) {
+        runQuery(query, row -> {
+            assertEquals(3L, row.getNumber("componentCount"));
+        });
+
+        runQuery(
+            String.format("MATCH (n) RETURN n.%s AS %s", writeProperty, writeProperty),
             row -> {
-                assertNotEquals(-1L, row.getNumber("writeMillis"));
-                assertNotEquals(-1L, row.getNumber("nodes"));
-                assertEquals(3L, row.getNumber("communityCount"));
-                assertEquals(3L, row.getNumber("setCount"));
-                assertEquals("unionFind", row.getString("partitionProperty"));
-                assertEquals("unionFind", row.getString("writeProperty"));
+                assertTrue(row.getNumber(writeProperty).longValue() >= 42);
             }
+        );
+
+        runQuery(
+            String.format("MATCH (n) RETURN n.nodeId AS nodeId, n.%s AS %s", writeProperty, writeProperty),
+            row -> {
+                final long nodeId = row.getNumber("nodeId").longValue();
+                final long componentId = row.getNumber(writeProperty).longValue();
+                if (nodeId >= 0 && nodeId <= 6) {
+                    assertEquals(42, componentId);
+                } else {
+                    assertTrue(componentId != 42);
+                }
+            }
+        );
+    }
+
+    @Test
+    void testWriteWithConsecutiveIds() {
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
+            .username(getUsername())
+            .graphName(DEFAULT_GRAPH_NAME)
+            .nodeProjection(NodeProjections.of("")
+                .addPropertyMappings(PropertyMappings.of(PropertyMapping.of(SEED_PROPERTY, 0D)))
+            )
+            .relationshipProjection(RelationshipProjections.empty())
+            .build();
+        String query = GdsCypher.call("wcc")
+            .writeMode()
+            .implicitCreation(graphCreateConfig)
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("consecutiveIds", true)
+            .yields("componentCount");
+
+        runQuery(query, row -> {
+            assertEquals(3L, row.getNumber("componentCount"));
+        });
+
+        runQuery(
+            "MATCH (n) RETURN collect(distinct n." + WRITE_PROPERTY + ") AS components ",
+            row -> assertThat((List<Long>) row.get("components"), containsInAnyOrder(0L, 1L, 2L))
         );
     }
 }

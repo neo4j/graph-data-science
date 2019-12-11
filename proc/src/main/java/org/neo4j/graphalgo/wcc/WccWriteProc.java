@@ -77,7 +77,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
         return computeMemoryEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.algo.wcc.write.stats.estimate", mode = READ)
+    @Procedure(value = "gds.algo.wcc.stats.estimate", mode = READ)
     public Stream<MemoryEstimateResult> statsEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -101,14 +101,15 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
     ) {
         WccWriteConfig config = computationResult.config();
 
-        boolean withConsecutiveIds = config.consecutiveIds();
-        boolean writePropertyEqualsSeedProperty = config.writeProperty().equalsIgnoreCase(config.seedProperty());
+        boolean consecutiveIds = config.consecutiveIds();
+        boolean isIncremental = config.isIncremental();
+        boolean seedPropertyEqualsWriteProperty = config.writeProperty().equalsIgnoreCase(config.seedProperty());
 
         PropertyTranslator<DisjointSetStruct> propertyTranslator;
-        if (writePropertyEqualsSeedProperty && !withConsecutiveIds) {
+        if (seedPropertyEqualsWriteProperty && !consecutiveIds) {
             NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
             propertyTranslator = new PropertyTranslator.OfLongIfChanged<>(seedProperties, DisjointSetStruct::setIdOf);
-        } else if (withConsecutiveIds) {
+        } else if (consecutiveIds && !isIncremental) {
             propertyTranslator = new ConsecutivePropertyTranslator(computationResult.result(), computationResult.tracker());
         } else {
             propertyTranslator = (PropertyTranslator.OfLong<DisjointSetStruct>) DisjointSetStruct::setIdOf;
