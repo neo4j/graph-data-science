@@ -79,6 +79,37 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
         return write(result, true);
     }
 
+    @Procedure(name = "gds.algo.nodeSimilarity.stats", mode = Mode.WRITE)
+    @Description("CALL algo.nodeSimilarity(graphName: STRING, configuration: MAP {" +
+                 "    similarityCutoff: 0.0," +
+                 "    degreeCutoff: 0," +
+                 "    topK: 10," +
+                 "    bottomK: 10," +
+                 "    topN: 0," +
+                 "    bottomN: 0," +
+                 "    concurrency: 4," +
+                 "    readConcurrency: 4," +
+                 "    writeRelationshipType: ," +
+                 "    writeProperty: ," +
+                 "    writeConcurrency: 4" +
+                 "  }" +
+                 ") YIELD" +
+                 "  nodesCompared," +
+                 "  relationships," +
+                 "  writeRelationshipType," +
+                 "  writeProperty," +
+                 "  similarityDistribution")
+    public Stream<NodeSimilarityWriteResult> stats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> result = compute(
+            graphNameOrConfig,
+            configuration
+        );
+        return write(result, false);
+    }
+
     public Stream<NodeSimilarityWriteResult> write(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult, boolean write) {
         NodeSimilarityWriteConfig config = computationResult.config();
         if (computationResult.isEmpty()) {
