@@ -107,6 +107,11 @@ public interface NodeSimilarityConfigBase extends BaseAlgoConfig {
         return normalizedN() != 0;
     }
 
+    @Configuration.Ignore
+    default boolean computeToStream() {
+        return false;
+    }
+
     // TODO: Remove later
     @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
     @Value.Default

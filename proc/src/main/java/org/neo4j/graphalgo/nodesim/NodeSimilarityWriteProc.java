@@ -49,7 +49,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
     public static final double UNUSED_FALLBACK_RELATIONSHIP_PROPERTY_VALUE = Double.NaN;
 
     @Procedure(name = "gds.algo.nodeSimilarity.write", mode = Mode.WRITE)
-    @Description("CALL algo.nodeSimilarity(graphName: STRING, configuration: MAP {" +
+    @Description("CALL gds.algo.nodeSimilarity.write(graphName: STRING, configuration: MAP {" +
                  "    similarityCutoff: 0.0," +
                  "    degreeCutoff: 0," +
                  "    topK: 10," +

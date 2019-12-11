@@ -54,7 +54,7 @@ public abstract class NodeSimilarityProcBase <CONFIG extends NodeSimilarityConfi
                 config.concurrency(),
                 ParallelUtil.DEFAULT_BATCH_SIZE,
                 config.direction(),
-                false
+                config.computeToStream()
             ),
             computesSimilarityGraph
         );

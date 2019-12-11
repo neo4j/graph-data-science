@@ -270,6 +270,12 @@ public final class CypherMapWrapper {
         return new CypherMapWrapper(newMap);
     }
 
+    public CypherMapWrapper withBoolean(String key, Boolean value) {
+        HashMap<String, Object> newMap = new HashMap<>(config);
+        newMap.put(key, value);
+        return new CypherMapWrapper(newMap);
+    }
+
     public CypherMapWrapper withoutEntry(String key) {
         if (!containsKey(key)) {
             return this;

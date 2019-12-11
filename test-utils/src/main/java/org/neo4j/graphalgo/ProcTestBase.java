@@ -66,6 +66,10 @@ public class ProcTestBase {
     }
 
     protected void registerProcedures(Class<?>... procedureClasses) throws KernelException {
+        registerProcedures(db, procedureClasses);
+    }
+
+    protected void registerProcedures(GraphDatabaseAPI db, Class<?>... procedureClasses) throws KernelException {
         Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
         for (Class<?> clazz : procedureClasses) {
             procedures.registerProcedure(clazz);
