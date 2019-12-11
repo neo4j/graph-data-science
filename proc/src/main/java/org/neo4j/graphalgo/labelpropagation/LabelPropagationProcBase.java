@@ -21,31 +21,10 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.BaseAlgoProc;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagationFactory;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-
-import java.util.Optional;
 
 public abstract class LabelPropagationProcBase<CONFIG extends LabelPropagationConfigBase> extends BaseAlgoProc<LabelPropagation, LabelPropagation, CONFIG> {
-
-    abstract CONFIG newConfig(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    );
-
-    @Override
-    public final CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
-        if (!graphName.isPresent()) {
-            // we should do implicit loading
-            maybeImplicitCreate = Optional.of(GraphCreateConfig.implicitCreate(getUsername(), config));
-        }
-        return newConfig(getUsername(), graphName, maybeImplicitCreate, config);
-    }
 
     @Override
     protected LabelPropagationFactory<CONFIG> algorithmFactory(LabelPropagationConfigBase config) {

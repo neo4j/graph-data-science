@@ -99,7 +99,7 @@ public class LabelPropagationStreamProc extends LabelPropagationProcBase<LabelPr
     }
 
     @Override
-    LabelPropagationStreamConfig newConfig(
+    public LabelPropagationStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,

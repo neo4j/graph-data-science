@@ -222,7 +222,7 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
     }
 
     @Override
-    LabelPropagationWriteConfig newConfig(
+    public LabelPropagationWriteConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
