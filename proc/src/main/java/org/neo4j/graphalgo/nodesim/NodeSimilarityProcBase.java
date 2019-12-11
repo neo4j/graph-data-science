@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.org.neo4j.graphalgo.nodesim;
+package org.neo4j.graphalgo.nodesim;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseAlgoProc;

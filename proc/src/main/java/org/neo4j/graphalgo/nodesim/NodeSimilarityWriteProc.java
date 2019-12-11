@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.org.neo4j.graphalgo.nodesim;
+package org.neo4j.graphalgo.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.api.Graph;
@@ -58,8 +58,8 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
                  "    bottomN: 0," +
                  "    concurrency: 4," +
                  "    readConcurrency: 4," +
-                 "    writeRelationshipType: 'SIMILAR_TO'," +
-                 "    writeProperty: 'similarity'," +
+                 "    writeRelationshipType: ," +
+                 "    writeProperty: ," +
                  "    writeConcurrency: 4" +
                  "  }" +
                  ") YIELD" +
@@ -108,6 +108,8 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
             .withNodesCompared(similarityGraphResult.comparedNodes())
             .withWriteProperty(config.writeProperty())
             .withRelationshipCount(similarityGraphResult.similarityGraph().relationshipCount());
+        resultBuilder.setLoadMillis(computationResult.createMillis());
+        resultBuilder.setComputeMillis(computationResult.computeMillis());
 
         boolean shouldComputeHistogram = callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
         if (write && similarityGraph.relationshipCount() > 0) {
@@ -239,7 +241,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
         }
     }
 
-    private static class NodeSimilarityWriteResult {
+    public static class NodeSimilarityWriteResult {
         public final long loadMillis;
         public final long computeMillis;
         public final long writeMillis;
