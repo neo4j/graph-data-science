@@ -22,10 +22,13 @@ package org.neo4j.graphalgo;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.util.Collections.emptyMap;
 
@@ -73,4 +76,87 @@ abstract class ElementProjection {
     abstract void writeToObject(Map<String, Object> value);
 
     abstract boolean includeAggregation();
+
+    interface InlineProperties<Self extends InlineProperties<Self>> {
+
+        default Self addProperty(PropertyMapping mapping) {
+            inlineBuilder().propertiesBuilder().addMapping(mapping);
+            return (Self) this;
+        }
+
+        default Self addProperty(
+            @Nullable String propertyKey,
+            @Nullable String neoPropertyKey,
+            double defaultValue
+        ) {
+            return this.addProperty(propertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.DEFAULT);
+        }
+
+        default Self addProperty(
+            @Nullable String propertyKey,
+            @Nullable String neoPropertyKey,
+            double defaultValue,
+            DeduplicationStrategy deduplicationStrategy
+        ) {
+            inlineBuilder().propertiesBuilder().addMapping(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
+            return (Self) this;
+        }
+
+        default Self addProperties(PropertyMapping... properties) {
+            inlineBuilder().propertiesBuilder().addMappings(properties);
+            return (Self) this;
+        }
+
+        default Self addAllProperties(Iterable<? extends PropertyMapping> properties) {
+            inlineBuilder().propertiesBuilder().addAllMappings(properties);
+            return (Self) this;
+        }
+
+        default void buildProperties() {
+            inlineBuilder().build();
+        }
+
+        InlinePropertiesBuilder inlineBuilder();
+    }
+
+    static final class InlinePropertiesBuilder {
+        private final Supplier<PropertyMappings> getProperties;
+        private final Consumer<PropertyMappings> setProperties;
+        private AbstractPropertyMappings.Builder propertiesBuilder;
+
+        InlinePropertiesBuilder(
+            Supplier<PropertyMappings> getProperties,
+            Consumer<PropertyMappings> setProperties
+        ) {
+            this.getProperties = getProperties;
+            this.setProperties = setProperties;
+        }
+
+        private void build() {
+            if (propertiesBuilder != null) {
+                if (getProperties.get() != null) {
+                    throw new IllegalStateException(
+                        "Cannot have both, a complete mapping from `properties` " +
+                        "and other properties from `addProperty`. If you want to " +
+                        "combine those, make sure to call `properties` first and " +
+                        "then use `addProperty` and never set a new `properties`" +
+                        "again."
+                    );
+                }
+                setProperties.accept(propertiesBuilder.build());
+            }
+        }
+
+        private AbstractPropertyMappings.Builder propertiesBuilder() {
+            if (propertiesBuilder == null) {
+                propertiesBuilder = AbstractPropertyMappings.builder();
+                PropertyMappings properties = getProperties.get();
+                if (properties != null) {
+                    propertiesBuilder.from(properties);
+                    setProperties.accept(null);
+                }
+            }
+            return propertiesBuilder;
+        }
+    }
 }

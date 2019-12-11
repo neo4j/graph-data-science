@@ -36,7 +36,9 @@ import org.neo4j.cypher.internal.v3_5.expressions.SignedDecimalIntegerLiteral;
 import org.neo4j.cypher.internal.v3_5.expressions.StringLiteral;
 import org.neo4j.cypher.internal.v3_5.expressions.True;
 import org.neo4j.cypher.internal.v3_5.util.InputPosition;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import scala.Function1;
 import scala.Tuple2;
 import scala.collection.mutable.ListBuffer;
@@ -54,7 +56,7 @@ import java.util.StringJoiner;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE)
+@Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE, depluralize = true, deepImmutablesDetection = true)
 public abstract class GdsCypher {
 
     public static CreationBuildStage call() {
@@ -65,7 +67,143 @@ public abstract class GdsCypher {
         WRITE, STATS, STREAM
     }
 
-    public interface CreationBuildStage {
+    public interface ImplicitCreationInlineBuilder {
+
+        default ImplicitCreationBuildStage withNodeLabel(String label) {
+            return withNodeLabel(label, NodeProjection.builder().label(label).build());
+        }
+
+        default ImplicitCreationBuildStage withNodeLabel(String label, String neoLabel) {
+            return withRelationshipType(label, RelationshipProjection.builder().type(neoLabel).build());
+        }
+
+        ImplicitCreationBuildStage withNodeLabel(String labelKey, NodeProjection nodeProjection);
+
+        default ImplicitCreationBuildStage withRelationshipType(String type) {
+            return withRelationshipType(type, RelationshipProjection.builder().type(type).build());
+        }
+
+        default ImplicitCreationBuildStage withRelationshipType(String type, String neoType) {
+            return withRelationshipType(type, RelationshipProjection.builder().type(neoType).build());
+        }
+
+        ImplicitCreationBuildStage withRelationshipType(String type, RelationshipProjection relationshipProjection);
+
+        default ImplicitCreationBuildStage withNodeProperty(String relationshipProperty) {
+            return withNodeProperty(ImmutablePropertyMapping.builder().propertyKey(relationshipProperty).build());
+        }
+
+        default ImplicitCreationBuildStage withNodeProperty(String propertyKey, String neoPropertyKey) {
+            return withNodeProperty(ImmutablePropertyMapping
+                .builder()
+                .propertyKey(propertyKey)
+                .neoPropertyKey(neoPropertyKey)
+                .build());
+        }
+
+        default ImplicitCreationBuildStage withNodeProperty(String neoPropertyKey, double defaultValue) {
+            return withNodeProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
+        }
+
+        default ImplicitCreationBuildStage withNodeProperty(
+            String propertyKey,
+            String neoPropertyKey,
+            double defaultValue
+        ) {
+            return withNodeProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
+        }
+
+        default ImplicitCreationBuildStage withNodeProperty(
+            String propertyKey,
+            double defaultValue,
+            DeduplicationStrategy deduplicationStrategy
+        ) {
+            return withNodeProperty(PropertyMapping.of(propertyKey, defaultValue, deduplicationStrategy));
+        }
+
+        default ImplicitCreationBuildStage withNodeProperty(
+            String propertyKey,
+            DeduplicationStrategy deduplicationStrategy
+        ) {
+            return withNodeProperty(PropertyMapping.of(propertyKey, deduplicationStrategy));
+        }
+
+        default ImplicitCreationBuildStage withNodeProperty(
+            String propertyKey,
+            String neoPropertyKey,
+            double defaultValue,
+            DeduplicationStrategy deduplicationStrategy
+        ) {
+            return withNodeProperty(PropertyMapping.of(
+                propertyKey,
+                neoPropertyKey,
+                defaultValue,
+                deduplicationStrategy
+            ));
+        }
+
+        ImplicitCreationBuildStage withNodeProperty(PropertyMapping propertyMapping);
+
+        default ImplicitCreationBuildStage withRelationshipProperty(String relationshipProperty) {
+            return withRelationshipProperty(ImmutablePropertyMapping
+                .builder()
+                .propertyKey(relationshipProperty)
+                .build());
+        }
+
+        default ImplicitCreationBuildStage withRelationshipProperty(String propertyKey, String neoPropertyKey) {
+            return withRelationshipProperty(ImmutablePropertyMapping
+                .builder()
+                .propertyKey(propertyKey)
+                .neoPropertyKey(neoPropertyKey)
+                .build());
+        }
+
+        default ImplicitCreationBuildStage withRelationshipProperty(String neoPropertyKey, double defaultValue) {
+            return withRelationshipProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
+        }
+
+        default ImplicitCreationBuildStage withRelationshipProperty(
+            String propertyKey,
+            String neoPropertyKey,
+            double defaultValue
+        ) {
+            return withRelationshipProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
+        }
+
+        default ImplicitCreationBuildStage withRelationshipProperty(
+            String propertyKey,
+            double defaultValue,
+            DeduplicationStrategy deduplicationStrategy
+        ) {
+            return withRelationshipProperty(PropertyMapping.of(propertyKey, defaultValue, deduplicationStrategy));
+        }
+
+        default ImplicitCreationBuildStage withRelationshipProperty(
+            String propertyKey,
+            DeduplicationStrategy deduplicationStrategy
+        ) {
+            return withRelationshipProperty(PropertyMapping.of(propertyKey, deduplicationStrategy));
+        }
+
+        default ImplicitCreationBuildStage withRelationshipProperty(
+            String propertyKey,
+            String neoPropertyKey,
+            double defaultValue,
+            DeduplicationStrategy deduplicationStrategy
+        ) {
+            return withRelationshipProperty(PropertyMapping.of(
+                propertyKey,
+                neoPropertyKey,
+                defaultValue,
+                deduplicationStrategy
+            ));
+        }
+
+        ImplicitCreationBuildStage withRelationshipProperty(PropertyMapping propertyMapping);
+    }
+
+    public interface CreationBuildStage extends ImplicitCreationInlineBuilder {
         QueryBuilder implicitCreation(GraphCreateConfig config);
 
         QueryBuilder explicitCreation(String graphName);
@@ -96,6 +234,9 @@ public abstract class GdsCypher {
             String actualAlgoName = namespacedAlgoName[lastIndex];
             return algo(Arrays.asList(nameParts), actualAlgoName);
         }
+    }
+
+    public interface ImplicitCreationBuildStage extends ImplicitCreationInlineBuilder, QueryBuilder {
     }
 
     public interface ModeBuildStage {
@@ -137,9 +278,11 @@ public abstract class GdsCypher {
 
         ParametersBuildStage addAllParameters(Map<String, ?> entries);
 
-        @Language("Cypher") String yields(String... elements);
+        @Language("Cypher")
+        String yields(String... elements);
 
-        @Language("Cypher") String yields(Iterable<String> elements);
+        @Language("Cypher")
+        String yields(Iterable<String> elements);
     }
 
     @Language("Cypher")
@@ -276,12 +419,59 @@ public abstract class GdsCypher {
 
     private static final Pattern PERIOD = Pattern.compile(Pattern.quote("."));
 
-    private static final class StagedBuilder implements CreationBuildStage, QueryBuilder, ModeBuildStage, ParametersBuildStage {
+    private static final class StagedBuilder implements CreationBuildStage, ImplicitCreationBuildStage, QueryBuilder, ModeBuildStage, ParametersBuildStage {
 
         private final CallBuilder builder;
+        private InlineGraphCreateConfigBuilder graphCreateBuilder;
 
         private StagedBuilder() {
             builder = new CallBuilder();
+        }
+
+        @Override
+        public StagedBuilder explicitCreation(String graphName) {
+            builder
+                .explicitGraphName(graphName)
+                .implicitCreateConfig(Optional.empty());
+            return this;
+        }
+
+        @Override
+        public StagedBuilder implicitCreation(GraphCreateConfig config) {
+            builder
+                .implicitCreateConfig(config)
+                .explicitGraphName(Optional.empty());
+            return this;
+        }
+
+        @Override
+        public ImplicitCreationBuildStage withNodeLabel(
+            String labelKey,
+            NodeProjection nodeProjection
+        ) {
+            graphCreateBuilder().putNodeProjection(ElementIdentifier.of(labelKey), nodeProjection);
+            return this;
+        }
+
+        @Override
+        public ImplicitCreationBuildStage withRelationshipType(
+            String type,
+            RelationshipProjection relationshipProjection
+        ) {
+            graphCreateBuilder().putRelProjection(ElementIdentifier.of(type), relationshipProjection);
+            return this;
+        }
+
+        @Override
+        public ImplicitCreationBuildStage withNodeProperty(PropertyMapping propertyMapping) {
+            graphCreateBuilder().addNodeProperty(propertyMapping);
+            return this;
+        }
+
+        @Override
+        public ImplicitCreationBuildStage withRelationshipProperty(PropertyMapping propertyMapping) {
+            graphCreateBuilder().addRelProperty(propertyMapping);
+            return this;
         }
 
         @Override
@@ -305,30 +495,14 @@ public abstract class GdsCypher {
         }
 
         @Override
-        public StagedBuilder implicitCreation(GraphCreateConfig config) {
-            builder
-                .implicitCreateConfig(config)
-                .explicitGraphName(Optional.empty());
-            return this;
-        }
-
-        @Override
-        public StagedBuilder explicitCreation(String graphName) {
-            builder
-                .explicitGraphName(graphName)
-                .implicitCreateConfig(Optional.empty());
-            return this;
-        }
-
-        @Override
         public StagedBuilder addParameter(String key, Object value) {
-            builder.putParameters(key, value);
+            builder.putParameter(key, value);
             return this;
         }
 
         @Override
         public StagedBuilder addParameter(Map.Entry<String, ?> entry) {
-            builder.putParameters(entry);
+            builder.putParameter(entry);
             return this;
         }
 
@@ -341,13 +515,47 @@ public abstract class GdsCypher {
         @Language("Cypher")
         @Override
         public String yields(String... elements) {
-            return builder.yields(Arrays.asList(elements)).build();
+            builder.yields(Arrays.asList(elements));
+            return build();
         }
 
         @Language("Cypher")
         @Override
         public String yields(Iterable<String> elements) {
-            return builder.yields(elements).build();
+            builder.yields(elements);
+            return build();
         }
+
+        @Language("Cypher")
+        private String build() {
+            if (graphCreateBuilder != null) {
+                implicitCreation(graphCreateBuilder.build());
+            }
+            return builder.build();
+        }
+
+        private InlineGraphCreateConfigBuilder graphCreateBuilder() {
+            if (graphCreateBuilder == null) {
+                graphCreateBuilder = new InlineGraphCreateConfigBuilder();
+            }
+            return graphCreateBuilder;
+        }
+    }
+
+
+    @Builder.Factory
+    static GraphCreateConfig inlineGraphCreateConfig(
+        Map<ElementIdentifier, NodeProjection> nodeProjections,
+        Map<ElementIdentifier, RelationshipProjection> relProjections,
+        List<PropertyMapping> nodeProperties,
+        List<PropertyMapping> relProperties
+    ) {
+        return ImmutableGraphCreateConfig.builder()
+            .graphName("")
+            .nodeProjection(NodeProjections.create(nodeProjections))
+            .relationshipProjection(RelationshipProjections.builder().putAllProjections(relProjections).build())
+            .nodeProperties(PropertyMappings.of(nodeProperties))
+            .relationshipProperties(PropertyMappings.of(relProperties))
+            .build();
     }
 }

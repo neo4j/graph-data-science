@@ -64,7 +64,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
     }
 
     public static NodeProjection fromMap(Map<String, Object> map, ElementIdentifier identifier) {
-        String label = map.containsKey(LABEL_KEY) ? nonEmptyString(map, LABEL_KEY) : identifier.name;
+        String label = String.valueOf(map.getOrDefault(LABEL_KEY, identifier.name));
         return create(map, properties -> NodeProjection.of(label, properties));
     }
 
@@ -89,5 +89,37 @@ public abstract class AbstractNodeProjection extends ElementProjection {
             return (NodeProjection) this;
         }
         return ((NodeProjection) this).withProperties(newMappings);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @org.immutables.builder.Builder.AccessibleFields
+    public static final class Builder extends NodeProjection.Builder implements InlineProperties<Builder> {
+
+        private InlinePropertiesBuilder propertiesBuilder;
+
+        Builder() {
+        }
+
+        @Override
+        public NodeProjection build() {
+            buildProperties();
+            return super.build();
+        }
+
+        @Override
+        public InlinePropertiesBuilder inlineBuilder() {
+            if (propertiesBuilder == null) {
+                propertiesBuilder = new InlinePropertiesBuilder(
+                    () -> this.properties,
+                    newProperties -> {
+                        this.properties = newProperties;
+                    }
+                );
+            }
+            return propertiesBuilder;
+        }
     }
 }

@@ -94,7 +94,7 @@ public final class NodeProjections {
         ));
     }
 
-    private static NodeProjections create(Map<ElementIdentifier, NodeProjection> filters) {
+    public static NodeProjections create(Map<ElementIdentifier, NodeProjection> filters) {
         if (filters.values().stream().allMatch(NodeProjection::isMatchAll)) {
             return EMPTY;
         }

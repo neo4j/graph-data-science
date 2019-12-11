@@ -119,8 +119,39 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         return RelationshipProjection.copyOf(this).withProperties(newMappings);
     }
 
-
     public static RelationshipProjection empty() {
         return RelationshipProjection.of();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @org.immutables.builder.Builder.AccessibleFields
+    public static final class Builder extends RelationshipProjection.Builder implements InlineProperties<Builder> {
+
+        private InlinePropertiesBuilder propertiesBuilder;
+
+        Builder() {
+        }
+
+        @Override
+        public RelationshipProjection build() {
+            buildProperties();
+            return super.build();
+        }
+
+        @Override
+        public InlinePropertiesBuilder inlineBuilder() {
+            if (propertiesBuilder == null) {
+                propertiesBuilder = new InlinePropertiesBuilder(
+                    () -> this.properties,
+                    newProperties -> {
+                        this.properties = newProperties;
+                    }
+                );
+            }
+            return propertiesBuilder;
+        }
     }
 }

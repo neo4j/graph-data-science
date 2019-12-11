@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.kernel.impl.proc.MapConverter;
@@ -116,8 +117,63 @@ class GdsCypherTest {
             "  }" +
             "}";
 
+        @SuppressWarnings("unchecked") Map<String, Object> map =
+            (Map<String, Object>) new MapConverter().apply(input).value();
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig
+            .builder()
+            .username("")
+            .graphName("")
+            .nodeProjection(NodeProjections.fromObject(map.get("nodeProjection")))
+            .relationshipProjection(RelationshipProjections.fromObject(map.get("relationshipProjection")))
+            .nodeProperties(PropertyMappings.fromObject(map.get("nodeProperties")))
+            .relationshipProperties(PropertyMappings.fromObject(map.get("relationshipProperties")))
+            .build();
+
+        String query = GdsCypher
+            .call()
+            .implicitCreation(graphCreateConfig)
+            .algo("algoName")
+            .writeMode()
+            .yields();
+
+        assertEquals(
+            String.format("CALL gds.algo.algoName.write(%s)", expectedImplicitGraphCreateCall()),
+            query
+        );
+    }
+
+    @Test
+    void testImplicitGraphCreationWithInlineBuilder() {
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("FooNode", NodeProjection.builder()
+                .label("Foo")
+                .addProperty("nodeProp", "NodePropertyName", 42.1337)
+                .build()
+            )
+            .withNodeProperty("GlobalNodeProp")
+            .withRelationshipType("Rel", "TYPE")
+            .withRelationshipType("BarRel", RelationshipProjection.builder()
+                .type("Bar")
+                .projection(Projection.UNDIRECTED)
+                .aggregation(DeduplicationStrategy.SINGLE)
+                .addProperty("relProp", "RelationshipPropertyName", 1337, DeduplicationStrategy.MAX)
+                .build()
+            )
+            .withRelationshipProperty("global", "RelProp")
+            .algo("algoName")
+            .writeMode()
+            .yields();
+
+        assertEquals(
+            String.format("CALL gds.algo.algoName.write(%s)", expectedImplicitGraphCreateCall()),
+            query
+        );
+    }
+
+    private String expectedImplicitGraphCreateCall() {
         //@formatter:off
-        String expected =
+        return
             "{" +
                 "relationshipProjection: {" +
                     "Rel: {" +
@@ -167,30 +223,6 @@ class GdsCypherTest {
                 "}" +
             "}";
             //@formatter:on
-
-        @SuppressWarnings("unchecked") Map<String, Object> map =
-            (Map<String, Object>) new MapConverter().apply(input).value();
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig
-            .builder()
-            .username("")
-            .graphName("")
-            .nodeProjection(NodeProjections.fromObject(map.get("nodeProjection")))
-            .relationshipProjection(RelationshipProjections.fromObject(map.get("relationshipProjection")))
-            .nodeProperties(PropertyMappings.fromObject(map.get("nodeProperties")))
-            .relationshipProperties(PropertyMappings.fromObject(map.get("relationshipProperties")))
-            .build();
-
-        String query = GdsCypher
-            .call()
-            .implicitCreation(graphCreateConfig)
-            .algo("algoName")
-            .writeMode()
-            .yields();
-
-        assertEquals(
-            String.format("CALL gds.algo.algoName.write(%s)", expected),
-            query
-        );
     }
 
     @ParameterizedTest
