@@ -19,17 +19,25 @@
  */
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.IntIntScatterMap;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.wcc.WccStreamConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 
 import java.util.Optional;
 
 class WccStreamProcTest extends WccProcBaseTest<WccStreamConfig> {
+
+    private static final long[][] EXPECTED_COMMUNITIES = {new long[]{0L, 1L, 2L, 3L, 4, 5, 6}, new long[]{7, 8}, new long[]{9}};
 
     @Override
     public Class<? extends BaseAlgoProc<?, DisjointSetStruct, WccStreamConfig>> getProcedureClazz() {
@@ -39,6 +47,11 @@ class WccStreamProcTest extends WccProcBaseTest<WccStreamConfig> {
     @Override
     public WccStreamConfig createConfig(CypherMapWrapper mapWrapper) {
         return WccStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+    }
+
+    @AfterEach
+    void cleanCatalog() {
+        GraphCatalog.removeAllLoadedGraphs();
     }
 
     @Test
@@ -51,12 +64,42 @@ class WccStreamProcTest extends WccProcBaseTest<WccStreamConfig> {
                 .nodeProjection(NodeProjections.empty())
                 .relationshipProjection(RelationshipProjections.empty())
                 .build()
-            ).yields("setId");
+            ).yields("nodeId", "setId");
 
-        IntIntScatterMap map = new IntIntScatterMap(11);
-        runQuery(query,
-            row -> map.addTo(row.getNumber("setId").intValue(), 1)
-        );
-        assertMapContains(map, 1, 2, 7);
+        long [] communities = new long[10];
+        runQuery(query, row -> {
+            int nodeId = row.getNumber("nodeId").intValue();
+            long setId = row.getNumber("setId").longValue();
+            communities[nodeId] = setId;
+        });
+
+        CommunityHelper.assertCommunities(communities, EXPECTED_COMMUNITIES);
+    }
+
+    @Test
+    void testWCCStreamRunsOnLoadedGraph() {
+        GraphCreateConfig createGraphConfig = ImmutableGraphCreateConfig
+            .builder()
+            .graphName("testGraph")
+            .nodeProjection(NodeProjections.empty())
+            .relationshipProjection(RelationshipProjections.empty())
+            .build();
+
+        Graph graph = new GraphLoader(db).withGraphCreateConfig(createGraphConfig).load(HugeGraphFactory.class);
+        GraphCatalog.set(createGraphConfig, GraphsByRelationshipType.of(graph));
+
+        String query = GdsCypher.call("wcc")
+            .streamMode()
+            .explicitCreation("testGraph")
+            .yields("nodeId", "setId");
+
+        long [] communities = new long[10];
+        runQuery(query, row -> {
+            int nodeId = row.getNumber("nodeId").intValue();
+            long setId = row.getNumber("setId").longValue();
+            communities[nodeId] = setId;
+        });
+
+        CommunityHelper.assertCommunities(communities, EXPECTED_COMMUNITIES);
     }
 }
