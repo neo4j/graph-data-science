@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -108,8 +109,8 @@ class GraphLoadProcTest extends ProcTestBase {
         registerProcedures(
             GraphLoadProc.class,
             GraphCatalogProcs.class,
-            PageRankProc.class,
             LabelPropagationProc.class,
+            PageRankWriteProc.class,
             WccWriteProc.class
         );
         runQuery(DB_CYPHER);
@@ -457,13 +458,13 @@ class GraphLoadProcTest extends ProcTestBase {
 
         runQuery(loadQuery, singletonMap("graph", graph));
 
-        String algoQuery = "CALL algo.pageRank(" +
-                           "    null, null, {" +
-                           "        graph: $name, write: false" +
+        String algoQuery = "CALL gds.algo.pageRank.stats(" +
+                           "    'foo', {" +
+                           "        writeProperty: 'writingOnLoadedGraph'" +
                            "    }" +
-                           ")";
-        runQuery(algoQuery, singletonMap("name", "foo"),
-                row -> assertEquals(12, row.getNumber("nodes").intValue()));
+                           ") YIELD nodePropertiesWritten";
+        runQuery(algoQuery,
+                row -> assertEquals(12, row.getNumber("nodePropertiesWritten").intValue()));
     }
 
     @ParameterizedTest
@@ -480,15 +481,15 @@ class GraphLoadProcTest extends ProcTestBase {
 
         runQuery(loadQuery, singletonMap("graph", graph));
 
-        String algoQuery = "CALL algo.pageRank(" +
-                           "    null, null, {" +
-                           "        graph: $name, write: false" +
+        String algoQuery = "CALL gds.algo.pageRank.stats(" +
+                           "    'foo', {" +
+                           "        writeProperty: 'multiUseLoadedGraph'" +
                            "    }" +
-                           ")";
-        runQuery(algoQuery, singletonMap("name", "foo"),
-                row -> assertEquals(12, row.getNumber("nodes").intValue()));
-        runQuery(algoQuery, singletonMap("name", "foo"),
-                row -> assertEquals(12, row.getNumber("nodes").intValue()));
+                           ") YIELD nodePropertiesWritten";
+        runQuery(algoQuery,
+                row -> assertEquals(12, row.getNumber("nodePropertiesWritten").intValue()));
+        runQuery(algoQuery,
+                row -> assertEquals(12, row.getNumber("nodePropertiesWritten").intValue()));
     }
 
     @Disabled

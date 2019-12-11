@@ -36,15 +36,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
 
-// TODO port to new API, bring back Louvain
+// TODO port to new API, bring back Louvain and PageRankStreamProcedure
 public class StreamingProcTest extends ProcTestBase {
 
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
-            LabelPropagationProc.class,
-            PageRankProc.class
+            LabelPropagationProc.class
         );
     }
 
@@ -79,9 +78,7 @@ public class StreamingProcTest extends ProcTestBase {
 
     private static Stream<String> procsToTest() {
         return Stream.of(
-                "algo.labelPropagation.stream",
-//                "algo.louvain.stream",
-                "algo.pageRank.stream"
+                "algo.labelPropagation.stream"
         );
     }
 }

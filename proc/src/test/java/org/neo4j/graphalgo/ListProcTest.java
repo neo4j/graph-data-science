@@ -25,17 +25,17 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
+import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
+import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ListProcTest extends ProcTestBase {
@@ -56,9 +56,6 @@ class ListProcTest extends ProcTestBase {
         "algo.labelPropagation.memrec",
         "algo.labelPropagation.stream",
         "algo.memrec",
-        "algo.pageRank",
-        "algo.pageRank.memrec",
-        "algo.pageRank.stream",
 
         "gds.algo.louvain.stats",
         "gds.algo.louvain.stats.estimate",
@@ -66,6 +63,13 @@ class ListProcTest extends ProcTestBase {
         "gds.algo.louvain.stream.estimate",
         "gds.algo.louvain.write",
         "gds.algo.louvain.write.estimate",
+
+        "gds.algo.pageRank.stats",
+        "gds.algo.pageRank.stats.estimate",
+        "gds.algo.pageRank.stream",
+        "gds.algo.pageRank.stream.estimate",
+        "gds.algo.pageRank.write",
+        "gds.algo.pageRank.write.estimate",
 
         "gds.algo.wcc.stats",
         "gds.algo.wcc.stats.estimate",
@@ -75,7 +79,7 @@ class ListProcTest extends ProcTestBase {
         "gds.algo.wcc.write.estimate"
         );
 
-    private static final List<String> FUNCTIONS = Arrays.asList(
+    private static final List<String> FUNCTIONS = asList(
         "algo.asNode",
         "algo.asNodes",
         "algo.getNodeById",
@@ -83,10 +87,13 @@ class ListProcTest extends ProcTestBase {
         "algo.version"
     );
 
-    private static final List<String> PAGE_RANK = Arrays.asList(
-        "algo.pageRank",
-        "algo.pageRank.memrec",
-        "algo.pageRank.stream"
+    private static final List<String> PAGE_RANK = asList(
+        "gds.algo.pageRank.stats",
+        "gds.algo.pageRank.stats.estimate",
+        "gds.algo.pageRank.stream",
+        "gds.algo.pageRank.stream.estimate",
+        "gds.algo.pageRank.write",
+        "gds.algo.pageRank.write.estimate"
     );
 
     private static final List<String> ALL = Stream.concat(PROCEDURES.stream(), FUNCTIONS.stream()).collect(Collectors.toList());
@@ -103,7 +110,8 @@ class ListProcTest extends ProcTestBase {
             LouvainWriteProc.class,
             LouvainStreamProc.class,
             MemRecProc.class,
-            PageRankProc.class,
+            PageRankWriteProc.class,
+            PageRankStreamProc.class,
             WccWriteProc.class,
             WccStreamProc.class
         );
@@ -126,7 +134,7 @@ class ListProcTest extends ProcTestBase {
     @Test
     void listFilteredResult() {
         assertEquals(PAGE_RANK, listProcs("pageRank"));
-        assertEquals(singletonList("algo.pageRank.stream"), listProcs("pageRank.stream"));
+        assertEquals(asList("gds.algo.pageRank.stream", "gds.algo.pageRank.stream.estimate"), listProcs("pageRank.stream"));
         assertEquals(emptyList(), listProcs("foo"));
     }
 

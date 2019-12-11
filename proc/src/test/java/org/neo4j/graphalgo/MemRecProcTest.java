@@ -21,11 +21,14 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
+import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
+import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -37,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
+@Disabled("The MemRec functionality may be removed, fix this if it's not")
 class MemRecProcTest extends ProcTestBase {
 
     private final String availableAlgoProcedures = String.format(
@@ -51,6 +55,9 @@ class MemRecProcTest extends ProcTestBase {
             "gds.algo.louvain.stats",
             "gds.algo.louvain.stream",
             "gds.algo.louvain.write",
+            "gds.algo.pageRank.stats",
+            "gds.algo.pageRank.stream",
+            "gds.algo.pageRank.write",
             "gds.algo.wcc.stats",
             "gds.algo.wcc.stream",
             "gds.algo.wcc.write"
@@ -77,7 +84,8 @@ class MemRecProcTest extends ProcTestBase {
         registerProcedures(
                 GraphLoadProc.class,
                 MemRecProc.class,
-                PageRankProc.class,
+                PageRankWriteProc.class,
+                PageRankStreamProc.class,
                 LabelPropagationProc.class,
                 WccStreamProc.class,
                 WccWriteProc.class,
@@ -107,10 +115,10 @@ class MemRecProcTest extends ProcTestBase {
         test("algo.memrec(null, null, 'graph.load')");
         test("algo.graph.load.memrec(null, null)");
 
-        test("algo.memrec(null, null, 'pageRank')");
-        test("algo.memrec(null, null, 'pageRank', {direction: 'BOTH', graph: 'huge'})");
-        test("algo.pageRank.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
-        test("algo.pageRank.memrec(null, null, { graph: 'huge'})");
+//        test("algo.memrec(null, null, 'pageRank')");
+//        test("algo.memrec(null, null, 'pageRank', {direction: 'BOTH', graph: 'huge'})");
+        test("gds.algo.pageRank.write.estimate({writeProperty: 'foo'})");
+        test("gds.algo.pageRank.stream.estimate({})");
 
         test("algo.memrec(null, null, 'labelPropagation')");
         test("algo.memrec(null, null, 'labelPropagation', {direction: 'BOTH', graph: 'huge'})");
@@ -142,9 +150,9 @@ class MemRecProcTest extends ProcTestBase {
         test(s, Optional.empty());
     }
 
-    private void test(final String s, final Optional<String> expectedMessage) {
+    private void test(final String procedureToCall, final Optional<String> expectedMessage) {
         String queryTemplate = "CALL %s YIELD nodeCount, relationshipCount, requiredMemory, bytesMin, bytesMax RETURN nodeCount, relationshipCount, requiredMemory, bytesMin, bytesMax";
-        String query = String.format(queryTemplate, s);
+        String query = String.format(queryTemplate, procedureToCall);
 
         try {
             runQuery(query).resultAsString();
