@@ -22,12 +22,11 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.labelpropagation.ImmutableLabelPropagationStreamConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -89,53 +88,13 @@ public class LabelPropagationBenchmarkLdbc {
     public LabelPropagation lpa() {
         return new LabelPropagation(
             graph,
-            new ConfigBuilder()
-                .withSeedProperty(SEED_PROPERTY)
-                .withWeightProperty(WEIGHT_PROPERTY)
-                .withMaxIterations(iterations)
+            ImmutableLabelPropagationStreamConfig.builder()
+                .seedProperty(SEED_PROPERTY)
+                .weightProperty(WEIGHT_PROPERTY)
+                .maxIterations(iterations)
                 .build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         ).compute();
-    }
-
-    static class ConfigBuilder {
-
-        private String seedProperty = null;
-        private String weightProperty = null;
-        private int batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
-        private int concurrency = Pools.DEFAULT_CONCURRENCY;
-        private Direction direction = Direction.OUTGOING;
-        private int maxIterations = 10;
-
-        ConfigBuilder withSeedProperty(String seedProperty) {
-            this.seedProperty = seedProperty;
-            return this;
-        }
-
-        ConfigBuilder withWeightProperty(String weightProperty) {
-            this.weightProperty = weightProperty;
-            return this;
-        }
-        ConfigBuilder withDirection(Direction direction) {
-            this.direction = direction;
-            return this;
-        }
-
-        ConfigBuilder withMaxIterations(int maxIterations) {
-            this.maxIterations = maxIterations;
-            return this;
-        }
-
-        LabelPropagation.Config build() {
-            return new LabelPropagation.Config(
-                seedProperty,
-                weightProperty,
-                batchSize,
-                concurrency,
-                direction,
-                maxIterations
-            );
-        }
     }
 }
