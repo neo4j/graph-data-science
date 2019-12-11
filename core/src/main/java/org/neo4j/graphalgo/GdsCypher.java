@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
+import org.intellij.lang.annotations.Language;
 import org.neo4j.cypher.internal.v3_5.ast.prettifier.ExpressionStringifier;
 import org.neo4j.cypher.internal.v3_5.ast.prettifier.ExpressionStringifier$;
 import org.neo4j.cypher.internal.v3_5.expressions.DecimalDoubleLiteral;
@@ -42,58 +43,90 @@ import scala.collection.mutable.ListBuffer;
 import scala.runtime.AbstractFunction1;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE)
 public abstract class GdsCypher {
 
-    public static QueryBuilder call(String algorithm) {
-        return new StagedBuilder(algorithm);
+    public static CreationBuildStage call() {
+        return new StagedBuilder();
     }
 
     public enum ExecutionMode {
         WRITE, STATS, STREAM
     }
 
+    public interface CreationBuildStage {
+        QueryBuilder implicitCreation(GraphCreateConfig config);
+
+        QueryBuilder explicitCreation(String graphName);
+    }
+
     public interface QueryBuilder {
-        CreationBuildStage executionMode(ExecutionMode mode);
+        ModeBuildStage algo(Iterable<String> namespace, String algoName);
 
-        CreationBuildStage estimationMode(ExecutionMode mode);
-
-        default CreationBuildStage writeMode() {
-            return executionMode(ExecutionMode.WRITE);
+        default ModeBuildStage algo(String algoName) {
+            Objects.requireNonNull(algoName, "algoName");
+            List<String> nameParts = PERIOD.splitAsStream(algoName).collect(Collectors.toList());
+            if (nameParts.isEmpty()) {
+                // let builder implementation deal with the empty case
+                return algo(Collections.emptyList(), "");
+            }
+            String actualAlgoName = nameParts.remove(nameParts.size() - 1);
+            return algo(nameParts, actualAlgoName);
         }
 
-        default CreationBuildStage statsMode() {
-            return executionMode(ExecutionMode.STATS);
-        }
-
-        default CreationBuildStage streamMode() {
-            return executionMode(ExecutionMode.STREAM);
-        }
-
-        default CreationBuildStage writeEstimation() {
-            return estimationMode(ExecutionMode.WRITE);
-        }
-
-        default CreationBuildStage statsEstimation() {
-            return estimationMode(ExecutionMode.STATS);
-        }
-
-        default CreationBuildStage streamEstimation() {
-            return estimationMode(ExecutionMode.STREAM);
+        default ModeBuildStage algo(String... namespacedAlgoName) {
+            Objects.requireNonNull(namespacedAlgoName, "namespacedAlgoName");
+            if (namespacedAlgoName.length == 0) {
+                // let builder implementation deal with the empty case
+                return algo(Collections.emptyList(), "");
+            }
+            int lastIndex = namespacedAlgoName.length - 1;
+            String[] nameParts = Arrays.copyOf(namespacedAlgoName, lastIndex);
+            String actualAlgoName = namespacedAlgoName[lastIndex];
+            return algo(Arrays.asList(nameParts), actualAlgoName);
         }
     }
 
-    public interface CreationBuildStage {
-        ParametersBuildStage implicitCreation(GraphCreateConfig config);
+    public interface ModeBuildStage {
 
-        ParametersBuildStage explicitCreation(String graphName);
+        ParametersBuildStage executionMode(ExecutionMode mode);
+
+        ParametersBuildStage estimationMode(ExecutionMode mode);
+
+        default ParametersBuildStage writeMode() {
+            return executionMode(ExecutionMode.WRITE);
+        }
+
+        default ParametersBuildStage statsMode() {
+            return executionMode(ExecutionMode.STATS);
+        }
+
+        default ParametersBuildStage streamMode() {
+            return executionMode(ExecutionMode.STREAM);
+        }
+
+        default ParametersBuildStage writeEstimation() {
+            return estimationMode(ExecutionMode.WRITE);
+        }
+
+        default ParametersBuildStage statsEstimation() {
+            return estimationMode(ExecutionMode.STATS);
+        }
+
+        default ParametersBuildStage streamEstimation() {
+            return estimationMode(ExecutionMode.STREAM);
+        }
     }
 
     public interface ParametersBuildStage {
@@ -104,21 +137,37 @@ public abstract class GdsCypher {
 
         ParametersBuildStage addAllParameters(Map<String, ?> entries);
 
-        String yields(String... elements);
+        @Language("Cypher") String yields(String... elements);
 
-        String yields(Iterable<String> elements);
+        @Language("Cypher") String yields(Iterable<String> elements);
     }
 
+    @Language("Cypher")
+    @SuppressWarnings("TypeMayBeWeakened")
     @Builder.Factory
     static String call(
-        @Builder.Parameter String algoName,
+        List<String> algoNamespace,
+        String algoName,
         ExecutionMode executionMode,
         boolean runEstimation,
         Optional<GraphCreateConfig> implicitCreateConfig,
         Optional<String> explicitGraphName,
         Map<String, Object> parameters,
-        @SuppressWarnings("TypeMayBeWeakened") List<String> yields
+        List<String> yields
     ) {
+        StringJoiner procedureName = new StringJoiner(".");
+        if (algoNamespace.isEmpty()) {
+            procedureName.add("gds");
+            procedureName.add("algo");
+        } else {
+            algoNamespace.forEach(procedureName::add);
+        }
+        procedureName.add(algoName);
+        procedureName.add(executionMode.name().toLowerCase(Locale.ENGLISH));
+        if (runEstimation) {
+            procedureName.add("estimate");
+        }
+
         StringJoiner argumentsString = new StringJoiner(", ");
         explicitGraphName.ifPresent(name -> argumentsString.add(toCypherString(name)));
 
@@ -145,10 +194,8 @@ public abstract class GdsCypher {
         yields.forEach(yieldsString::add);
 
         return String.format(
-            "CALL gds.algo.%s.%s%s(%s)%s",
-            algoName,
-            executionMode.name().toLowerCase(Locale.ENGLISH),
-            runEstimation ? ".estimate" : "",
+            "CALL %s(%s)%s",
+            procedureName,
             argumentsString,
             yieldsString
         );
@@ -227,27 +274,38 @@ public abstract class GdsCypher {
         }
     }
 
-    private static final class StagedBuilder implements QueryBuilder, CreationBuildStage, ParametersBuildStage {
+    private static final Pattern PERIOD = Pattern.compile(Pattern.quote("."));
+
+    private static final class StagedBuilder implements CreationBuildStage, QueryBuilder, ModeBuildStage, ParametersBuildStage {
+
         private final CallBuilder builder;
 
-        private StagedBuilder(String algoName) {
-            builder = new CallBuilder(algoName);
+        private StagedBuilder() {
+            builder = new CallBuilder();
         }
 
         @Override
-        public CreationBuildStage executionMode(ExecutionMode mode) {
+        public ModeBuildStage algo(Iterable<String> namespace, String algoName) {
+            builder
+                .algoNamespace(namespace)
+                .algoName(algoName);
+            return this;
+        }
+
+        @Override
+        public StagedBuilder executionMode(ExecutionMode mode) {
             builder.executionMode(mode).runEstimation(false);
             return this;
         }
 
         @Override
-        public CreationBuildStage estimationMode(ExecutionMode mode) {
+        public StagedBuilder estimationMode(ExecutionMode mode) {
             builder.executionMode(mode).runEstimation(true);
             return this;
         }
 
         @Override
-        public ParametersBuildStage implicitCreation(GraphCreateConfig config) {
+        public StagedBuilder implicitCreation(GraphCreateConfig config) {
             builder
                 .implicitCreateConfig(config)
                 .explicitGraphName(Optional.empty());
@@ -255,7 +313,7 @@ public abstract class GdsCypher {
         }
 
         @Override
-        public ParametersBuildStage explicitCreation(String graphName) {
+        public StagedBuilder explicitCreation(String graphName) {
             builder
                 .explicitGraphName(graphName)
                 .implicitCreateConfig(Optional.empty());
@@ -263,28 +321,30 @@ public abstract class GdsCypher {
         }
 
         @Override
-        public ParametersBuildStage addParameter(String key, Object value) {
+        public StagedBuilder addParameter(String key, Object value) {
             builder.putParameters(key, value);
             return this;
         }
 
         @Override
-        public ParametersBuildStage addParameter(Map.Entry<String, ?> entry) {
+        public StagedBuilder addParameter(Map.Entry<String, ?> entry) {
             builder.putParameters(entry);
             return this;
         }
 
         @Override
-        public ParametersBuildStage addAllParameters(Map<String, ?> entries) {
+        public StagedBuilder addAllParameters(Map<String, ?> entries) {
             builder.putAllParameters(entries);
             return this;
         }
 
+        @Language("Cypher")
         @Override
         public String yields(String... elements) {
             return builder.yields(Arrays.asList(elements)).build();
         }
 
+        @Language("Cypher")
         @Override
         public String yields(Iterable<String> elements) {
             return builder.yields(elements).build();

@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,109 +47,6 @@ class GdsCypherTest {
 
     private static final GraphCreateConfig EMPTY_GRAPH_CREATE =
         GraphCreateConfig.emptyWithName("", "");
-
-    @ParameterizedTest
-    @ValueSource(strings = {"louvain", "pageRank", "foo.bar", "", " spa ces  ", "🙈"})
-    void algoNameIsInsertedVerbatim(String algoName) {
-        String query = GdsCypher
-            .call(algoName)
-            .writeMode()
-            .implicitCreation(EMPTY_GRAPH_CREATE)
-            .yields();
-
-        assertEquals(
-            String.format("CALL gds.algo.%s.write()", algoName),
-            query
-        );
-    }
-
-    @ParameterizedTest
-    @EnumSource(GdsCypher.ExecutionMode.class)
-    void testExecutionModesViaEnum(GdsCypher.ExecutionMode executionMode) {
-        String query = GdsCypher
-            .call("algoName")
-            .executionMode(executionMode)
-            .implicitCreation(EMPTY_GRAPH_CREATE)
-            .yields();
-
-        assertEquals(
-            String.format("CALL gds.algo.algoName.%s()", executionModeName(executionMode)),
-            query
-        );
-    }
-
-    @ParameterizedTest
-    @EnumSource(GdsCypher.ExecutionMode.class)
-    void testExecutionModesViaExplicitMethodCalls(GdsCypher.ExecutionMode executionMode) {
-        GdsCypher.QueryBuilder builder = GdsCypher.call("algoName");
-        GdsCypher.CreationBuildStage nextBuilder;
-
-        switch (executionMode) {
-            case WRITE:
-                nextBuilder = builder.writeMode();
-                break;
-            case STATS:
-                nextBuilder = builder.statsMode();
-                break;
-            case STREAM:
-                nextBuilder = builder.streamMode();
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
-        }
-        String query = nextBuilder
-            .implicitCreation(EMPTY_GRAPH_CREATE)
-            .yields();
-
-        assertEquals(
-            String.format("CALL gds.algo.algoName.%s()", executionModeName(executionMode)),
-            query
-        );
-    }
-
-    @ParameterizedTest
-    @EnumSource(GdsCypher.ExecutionMode.class)
-    void testEstimateModesViaEnum(GdsCypher.ExecutionMode executionMode) {
-        String query = GdsCypher
-            .call("algoName")
-            .estimationMode(executionMode)
-            .implicitCreation(EMPTY_GRAPH_CREATE)
-            .yields();
-
-        assertEquals(
-            String.format("CALL gds.algo.algoName.%s.estimate()", executionModeName(executionMode)),
-            query
-        );
-    }
-
-    @ParameterizedTest
-    @EnumSource(GdsCypher.ExecutionMode.class)
-    void testEstimatesModesViaExplicitMethodCalls(GdsCypher.ExecutionMode executionMode) {
-        GdsCypher.QueryBuilder builder = GdsCypher.call("algoName");
-        GdsCypher.CreationBuildStage nextBuilder;
-
-        switch (executionMode) {
-            case WRITE:
-                nextBuilder = builder.writeEstimation();
-                break;
-            case STATS:
-                nextBuilder = builder.statsEstimation();
-                break;
-            case STREAM:
-                nextBuilder = builder.streamEstimation();
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
-        }
-        String query = nextBuilder
-            .implicitCreation(EMPTY_GRAPH_CREATE)
-            .yields();
-
-        assertEquals(
-            String.format("CALL gds.algo.algoName.%s.estimate()", executionModeName(executionMode)),
-            query
-        );
-    }
 
     static Stream<Arguments> testExplicitCreationWithAnyName() {
         //@formatter:off
@@ -170,9 +68,10 @@ class GdsCypherTest {
     @MethodSource("testExplicitCreationWithAnyName")
     void testExplicitCreationWithAnyName(String graphName, String expectedStringLiteral) {
         String query = GdsCypher
-            .call("algoName")
-            .writeMode()
+            .call()
             .explicitCreation(graphName)
+            .algo("algoName")
+            .writeMode()
             .yields();
 
         assertEquals(
@@ -282,13 +181,158 @@ class GdsCypherTest {
             .build();
 
         String query = GdsCypher
-            .call("algoName")
-            .writeMode()
+            .call()
             .implicitCreation(graphCreateConfig)
+            .algo("algoName")
+            .writeMode()
             .yields();
 
         assertEquals(
             String.format("CALL gds.algo.algoName.write(%s)", expected),
+            query
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"louvain", "pageRank", "", " spa ces  ", "🙈"})
+    void algoNameIsInsertedVerbatim(String algoName) {
+        String query = GdsCypher
+            .call()
+            .implicitCreation(EMPTY_GRAPH_CREATE)
+            .algo(algoName)
+            .writeMode()
+            .yields();
+
+        assertEquals(
+            String.format("CALL gds.algo.%s.write()", algoName),
+            query
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.graph.create", "algo.louvain", "geedeeess.algo.louvain", "  foo .  bar  ", "🙈.🙉.🙊"})
+    void algoNameWithPeriodsOverridesDefaultNamespace(String algoName) {
+        String query = GdsCypher
+            .call()
+            .implicitCreation(EMPTY_GRAPH_CREATE)
+            .algo(algoName)
+            .writeMode()
+            .yields();
+
+        assertEquals(
+            String.format("CALL %s.write()", algoName),
+            query
+        );
+    }
+
+    static Stream<Arguments> separateNamePartsArguments() {
+        return Stream.of(
+            "gds.graph.create",
+            "algo.louvain",
+            "geedeeess.algo.louvain",
+            "  foo .  bar  ",
+            "🙈.🙉.🙊"
+        ).map(s -> arguments((Object) s.split(Pattern.quote("."))));
+    }
+
+    @ParameterizedTest
+    @MethodSource("separateNamePartsArguments")
+    void algoNamePartsCanBeSpecifiedAsSeparateArguments(String[] algoNameParts) {
+        String query = GdsCypher
+            .call()
+            .implicitCreation(EMPTY_GRAPH_CREATE)
+            .algo(algoNameParts)
+            .writeMode()
+            .yields();
+
+        assertEquals(
+            String.format("CALL %s.write()", String.join(".", algoNameParts)),
+            query
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(GdsCypher.ExecutionMode.class)
+    void testExecutionModesViaEnum(GdsCypher.ExecutionMode executionMode) {
+        String query = GdsCypher
+            .call()
+            .implicitCreation(EMPTY_GRAPH_CREATE)
+            .algo("algoName")
+            .executionMode(executionMode)
+            .yields();
+
+        assertEquals(
+            String.format("CALL gds.algo.algoName.%s()", executionModeName(executionMode)),
+            query
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(GdsCypher.ExecutionMode.class)
+    void testExecutionModesViaExplicitMethodCalls(GdsCypher.ExecutionMode executionMode) {
+        GdsCypher.ModeBuildStage builder = GdsCypher.call().implicitCreation(EMPTY_GRAPH_CREATE).algo("algoName");
+        GdsCypher.ParametersBuildStage nextBuilder;
+
+        switch (executionMode) {
+            case WRITE:
+                nextBuilder = builder.writeMode();
+                break;
+            case STATS:
+                nextBuilder = builder.statsMode();
+                break;
+            case STREAM:
+                nextBuilder = builder.streamMode();
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
+        }
+        String query = nextBuilder.yields();
+
+        assertEquals(
+            String.format("CALL gds.algo.algoName.%s()", executionModeName(executionMode)),
+            query
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(GdsCypher.ExecutionMode.class)
+    void testEstimateModesViaEnum(GdsCypher.ExecutionMode executionMode) {
+        String query = GdsCypher
+            .call()
+            .implicitCreation(EMPTY_GRAPH_CREATE)
+            .algo("algoName")
+            .estimationMode(executionMode)
+            .yields();
+
+        assertEquals(
+            String.format("CALL gds.algo.algoName.%s.estimate()", executionModeName(executionMode)),
+            query
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(GdsCypher.ExecutionMode.class)
+    void testEstimatesModesViaExplicitMethodCalls(GdsCypher.ExecutionMode executionMode) {
+        GdsCypher.ModeBuildStage builder = GdsCypher.call().implicitCreation(EMPTY_GRAPH_CREATE).algo("algoName");
+        GdsCypher.ParametersBuildStage nextBuilder;
+
+        switch (executionMode) {
+            case WRITE:
+                nextBuilder = builder.writeEstimation();
+                break;
+            case STATS:
+                nextBuilder = builder.statsEstimation();
+                break;
+            case STREAM:
+                nextBuilder = builder.streamEstimation();
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
+        }
+        String query = nextBuilder.yields();
+
+        assertEquals(
+            String.format("CALL gds.algo.algoName.%s.estimate()", executionModeName(executionMode)),
             query
         );
     }
@@ -315,9 +359,10 @@ class GdsCypherTest {
     @MethodSource("testAdditionalProperties")
     void testAdditionalProperties(Object value, String expected) {
         String query = GdsCypher
-            .call("algoName")
-            .writeMode()
+            .call()
             .explicitCreation("")
+            .algo("algoName")
+            .writeMode()
             .addParameter("foo", value)
             .addParameter(new AbstractMap.SimpleImmutableEntry<>("bar", value))
             .addAllParameters(Collections.singletonMap("baz", value))
@@ -341,9 +386,10 @@ class GdsCypherTest {
     @MethodSource("testEmptyProperties")
     void testEmptyProperties(Object value) {
         String query = GdsCypher
-            .call("algoName")
-            .writeMode()
+            .call()
             .explicitCreation("")
+            .algo("algoName")
+            .writeMode()
             .addParameter("foo", value)
             .addParameter(new AbstractMap.SimpleImmutableEntry<>("bar", value))
             .addAllParameters(Collections.singletonMap("baz", value))
@@ -358,9 +404,10 @@ class GdsCypherTest {
     @Test
     void testNoYield() {
         String query = GdsCypher
-            .call("algoName")
-            .writeMode()
+            .call()
             .explicitCreation("")
+            .algo("algoName")
+            .writeMode()
             .yields();
 
         assertEquals(
@@ -382,9 +429,10 @@ class GdsCypherTest {
     @MethodSource("testYields")
     void testYields(Iterable<String> yieldedFields) {
         String query = GdsCypher
-            .call("algoName")
-            .writeMode()
+            .call()
             .explicitCreation("")
+            .algo("algoName")
+            .writeMode()
             .yields(yieldedFields);
 
         assertEquals(
