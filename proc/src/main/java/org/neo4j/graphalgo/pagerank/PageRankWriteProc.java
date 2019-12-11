@@ -41,14 +41,13 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
     @Procedure(value = "gds.algo.pageRank.write", mode = WRITE)
     @Description("CALL gds.algo.pageRank.write(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
+                 "    iterations: INTEGER" +
                  "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
+                 "    dampingFactor: FLOAT" +
                  "    weightProperty: STRING" +
                  "  }" +
                  ") YIELD" +
+                 "  ranIterations: INTEGER," +
                  "  writeProperty: STRING," +
                  "  nodePropertiesWritten: INTEGER," +
                  "  relationshipPropertiesWritten: INTEGER," +
@@ -56,18 +55,9 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
                  "  computeMillis: INTEGER," +
                  "  writeMillis: INTEGER," +
                  "  maxIterations: INTEGER," +
-                 "  maxLevels: INTEGER," +
-                 "  includeIntermediateCommunities: BOOLEAN," +
-                 "  seedProperty: STRING," +
                  "  weightProperty: STRING," +
                  "  postProcessingMillis: INTEGER," +
-                 "  communityCount: INTEGER," +
-                 "  ranIterations: INTEGER," +
-                 "  ranLevels: INTEGER," +
-                 "  modularity: FLOAT," +
-                 "  modularities: LIST OF FLOAT," +
-                 "  didConverge: LIST OF BOOLEAN," +
-                 "  communityDistribution: MAP")
+                 "  didConverge: BOOLEAN")
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -81,14 +71,13 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
     @Procedure(value = "gds.algo.pageRank.stats", mode = READ)
     @Description("CALL gds.algo.pageRank.stats(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
+                 "    iterations: INTEGER" +
                  "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
+                 "    dampingFactor: FLOAT" +
                  "    weightProperty: STRING" +
                  "  }" +
                  ") YIELD" +
+                 "  ranIterations: INTEGER," +
                  "  writeProperty: STRING," +
                  "  nodePropertiesWritten: INTEGER," +
                  "  relationshipPropertiesWritten: INTEGER," +
@@ -96,18 +85,9 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
                  "  computeMillis: INTEGER," +
                  "  writeMillis: INTEGER," +
                  "  maxIterations: INTEGER," +
-                 "  maxLevels: INTEGER," +
-                 "  includeIntermediateCommunities: BOOLEAN," +
-                 "  seedProperty: STRING," +
                  "  weightProperty: STRING," +
                  "  postProcessingMillis: INTEGER," +
-                 "  communityCount: INTEGER," +
-                 "  ranIterations: INTEGER," +
-                 "  ranLevels: INTEGER," +
-                 "  modularity: FLOAT," +
-                 "  modularities: LIST OF FLOAT," +
-                 "  didConverge: LIST OF BOOLEAN," +
-                 "  communityDistribution: MAP")
+                 "  didConverge: BOOLEAN")
     public Stream<WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -121,11 +101,9 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
     @Procedure(value = "gds.algo.pageRank.write.estimate", mode = READ)
     @Description("CALL gds.algo.pageRank.write.estimate(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
+                 "    iterations: INTEGER" +
                  "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
+                 "    dampingFactor: FLOAT" +
                  "    weightProperty: STRING" +
                  "  }" +
                  ") YIELD" +
@@ -145,11 +123,9 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
     @Procedure(value = "gds.algo.pageRank.stats.estimate", mode = READ)
     @Description("CALL gds.algo.pageRank.stats.estimate(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
+                 "    iterations: INTEGER" +
                  "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
+                 "    dampingFactor: FLOAT" +
                  "    weightProperty: STRING" +
                  "  }" +
                  ") YIELD" +
@@ -179,7 +155,8 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
                   computeResult.createMillis(),
                   0,
                   0,
-                  0
+                  0,
+                  false
               )
           );
         } else {
@@ -193,6 +170,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
             builder.setComputeMillis(computeResult.computeMillis());
             builder.withNodeCount(graph.nodeCount());
             builder.withRanIterations(pageRank.iterations());
+            builder.withDidConverge(pageRank.didConverge());
 
             if (write && !config.writeProperty().isEmpty()) {
                 writeNodeProperties(builder, computeResult);
@@ -229,6 +207,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
         public long writeMillis;
         public long maxIterations;
         public long ranIterations;
+        public boolean didConverge;
 
         WriteResult(
             PageRankWriteConfig config,
@@ -236,7 +215,8 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
             long createMillis,
             long computeMillis,
             long writeMillis,
-            long ranIterations
+            long ranIterations,
+            boolean didConverge
         ) {
             this.relationshipPropertiesWritten = 0;
 
@@ -249,6 +229,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.ranIterations = ranIterations;
+            this.didConverge = didConverge;
         }
     }
 
@@ -257,6 +238,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
         private final PageRankWriteConfig config;
 
         private long ranIterations;
+        private boolean didConverge;
 
         WriteResultBuilder(PageRankWriteConfig config) {
             this.config = config;
@@ -264,6 +246,11 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
         WriteResultBuilder withRanIterations(long ranIterations) {
             this.ranIterations = ranIterations;
+            return this;
+        }
+
+        WriteResultBuilder withDidConverge(boolean didConverge) {
+            this.didConverge = didConverge;
             return this;
         }
 
@@ -275,7 +262,8 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
                 loadMillis,
                 computeMillis,
                 writeMillis,
-                ranIterations
+                ranIterations,
+                didConverge
             );
         }
     }

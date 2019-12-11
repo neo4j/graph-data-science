@@ -111,6 +111,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
     private final double dampingFactor;
     private final int maxIterations;
     private int ranIterations;
+    private boolean didConverge;
     private final double toleranceValue;
     private final Graph graph;
     private final LongStream sourceNodeIds;
@@ -167,6 +168,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         this.dampingFactor = algoConfig.dampingFactor;
         this.maxIterations = algoConfig.iterations;
         this.ranIterations = 0;
+        this.didConverge = false;
         this.toleranceValue = algoConfig.toleranceValue;
         this.sourceNodeIds = sourceNodeIds;
         this.pageRankVariant = pageRankVariant;
@@ -175,6 +177,10 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
 
     public int iterations() {
         return ranIterations;
+    }
+
+    public boolean didConverge() {
+        return didConverge;
     }
 
     public double dampingFactor() {
@@ -456,10 +462,10 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         private void run(int iterations) {
             final int operations = (iterations << 1) + 1;
             int op = 0;
-            boolean algorithmHasStabilized = false;
+            didConverge = false;
             ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
             getProgressLogger().logProgress(++op, operations, tracker);
-            for (int i = 0; i < iterations && !algorithmHasStabilized; i++) {
+            for (int i = 0; i < iterations && !didConverge; i++) {
                 // calculate scores
                 ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
                 getProgressLogger().logProgress(++op, operations, tracker);
@@ -467,7 +473,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
                 // sync scores
                 synchronizeScores();
                 ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
-                algorithmHasStabilized = checkTolerance();
+                didConverge = checkTolerance();
                 getProgressLogger().logProgress(++op, operations, tracker);
 
                 // normalize deltas

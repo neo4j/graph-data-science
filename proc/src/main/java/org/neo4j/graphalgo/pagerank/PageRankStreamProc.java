@@ -39,16 +39,14 @@ public class PageRankStreamProc extends PageRankProcBase<PageRankStreamConfig> {
 
     @Procedure(value = "gds.algo.pageRank.stream", mode = READ)
     @Description("CALL gds.algo.pageRank.stream(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
+                 "    iterations: INTEGER" +
                  "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
+                 "    dampingFactor: FLOAT" +
+                 "    weightProperty: STRING" +
                  "  }" +
                  ") YIELD" +
                  "  nodeId: INTEGER" +
-                 "  communityId: INTEGER" +
-                 "  communityIds: LIST OF INTEGER")
+                 "  score: FLOAT")
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -62,11 +60,9 @@ public class PageRankStreamProc extends PageRankProcBase<PageRankStreamConfig> {
 
     @Procedure(value = "gds.algo.pageRank.stream.estimate", mode = READ)
     @Description("CALL gds.algo.pageRank.stream.estimate(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
+                 "    iterations: INTEGER" +
                  "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
+                 "    dampingFactor: FLOAT" +
                  "    weightProperty: STRING" +
                  "  }" +
                  ") YIELD" +

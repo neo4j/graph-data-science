@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> implements
@@ -65,7 +66,8 @@ class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> im
                        "        writeProperty: 'pagerank', weightProperty: 'weight'" +
                        "    }" +
                        ") YIELD writeMillis, writeProperty";
-        runQuery(query,
+        runQuery(
+            query,
             row -> {
                 assertEquals("pagerank", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -82,7 +84,8 @@ class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> im
                        "        batchSize: 3, writeProperty: 'pagerank', graph: 'myGraph1'" +
                        "    }" +
                        ") YIELD writeMillis, writeProperty";
-        runQuery(query,
+        runQuery(
+            query,
             row -> assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set")
         );
         assertResult("pagerank", expected);
@@ -94,20 +97,22 @@ class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> im
         graphSnippet += " writeProperty: 'writeProp',";
         String graphName = "myGraph1";
         String query = "CALL gds.algo.pageRank.write(" +
-                        graphSnippet +
-                 "      tolerance: 0.0001, batchSize: 2, graph: $graph" +
-                 "  }" +
-                 ") YIELD ranIterations";
+                       graphSnippet +
+                       "      tolerance: 0.0001, batchSize: 2, graph: $graph" +
+                       "  }" +
+                       ") YIELD ranIterations";
         runQuery(query, MapUtil.map("graph", graphName),
-            row -> assertEquals(20L, (long) row.getNumber("ranIterations")));
+            row -> assertEquals(20L, (long) row.getNumber("ranIterations"))
+        );
 
         query = "CALL gds.algo.pageRank.write(" +
-                 graphSnippet +
+                graphSnippet +
                 "        tolerance: 100.0, batchSize: 2, graph: $graph" +
                 "  }" +
                 ") YIELD ranIterations";
         runQuery(query, MapUtil.map("graph", graphName),
-            row -> assertEquals(1L, (long) row.getNumber("ranIterations")));
+            row -> assertEquals(1L, (long) row.getNumber("ranIterations"))
+        );
 
         query = "CALL gds.algo.pageRank.write(" +
                 graphSnippet +
@@ -115,7 +120,8 @@ class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> im
                 "  }" +
                 ") YIELD ranIterations";
         runQuery(query, MapUtil.map("graph", graphName),
-            row -> assertEquals(4L, (long) row.getNumber("ranIterations")));
+            row -> assertEquals(4L, (long) row.getNumber("ranIterations"))
+        );
 
         query = "CALL gds.algo.pageRank.write(" +
                 graphSnippet +
@@ -123,7 +129,46 @@ class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> im
                 "  }" +
                 ") YIELD ranIterations";
         runQuery(query, MapUtil.map("graph", graphName),
-            row -> assertEquals(5L, (long) row.getNumber("ranIterations")));
+            row -> assertEquals(5L, (long) row.getNumber("ranIterations"))
+        );
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    void testWriteYieldRanAndMaxIterationsAndDidConverge(String graphSnippet, String testCaseName) {
+        String query = "CALL gds.algo.pageRank.write(" +
+                       graphSnippet +
+                       "     writeProperty: 'writeProp', tolerance: 0.0001, batchSize: 2" +
+                       "  }" +
+                       ") YIELD ranIterations, didConverge, maxIterations";
+        runQuery(
+            query,
+            row -> {
+                assertEquals(20, row.getNumber("ranIterations").longValue());
+                assertEquals(20, row.getNumber("maxIterations").longValue());
+                assertFalse(row.getBoolean("didConverge"));
+            }
+        );
+
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    void testStatsYieldRanAndMaxIterationsAndDidConverge(String graphSnippet, String testCaseName) {
+        String query = "CALL gds.algo.pageRank.stats(" +
+                       graphSnippet +
+                       "     writeProperty: 'writeProp', tolerance: 0.0001, batchSize: 2" +
+                       "  }" +
+                       ") YIELD ranIterations, didConverge, maxIterations";
+        runQuery(
+            query,
+            row -> {
+                assertEquals(20, row.getNumber("ranIterations").longValue());
+                assertEquals(20, row.getNumber("maxIterations").longValue());
+                assertFalse(row.getBoolean("didConverge"));
+            }
+        );
+
     }
 
     @Override

@@ -268,7 +268,7 @@ final class PageRankTest extends AlgoTestBase {
         long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
         final MemoryRange actual = pageRank.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
         final MemoryRange expected = MemoryRange.of(
-                88L /* PageRank.class */ +
+                96L /* PageRank.class */ +
                 32L /* ComputeSteps.class */ +
                 BitUtil.align(16 + concurrency * 4, 8) /* scores[] wrapper */ +
                 BitUtil.align(16 + concurrency * 8, 8) /* starts[] */ +
