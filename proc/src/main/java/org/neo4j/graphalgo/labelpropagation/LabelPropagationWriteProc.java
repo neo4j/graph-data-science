@@ -80,6 +80,42 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
         return write(result, true);
     }
 
+    @Procedure(value = "gds.algo.labelPropagation.stats", mode = READ)
+    @Description("CALL gds.algo.labelPropagation.stats(" +
+                 "  graphName: STRING," +
+                 "  configuration: MAP {" +
+                 "     maxIterations: INTEGER, " +
+                 "     weightProperty: STRING, " +
+                 "     seedProperty: STRING, " +
+                 "     concurrency: INTEGER"+
+                 "  }" +
+                 ")" +
+                 "YIELD" +
+                 "  writeProperty: STRING," +
+                 "  nodePropertiesWritten: INTEGER," +
+                 "  relationshipPropertiesWritten: INTEGER," +
+                 "  createMillis: INTEGER," +
+                 "  computeMillis: INTEGER," +
+                 "  writeMillis: INTEGER" +
+                 "  maxIterations: INTEGER," +
+                 "  seedProperty: STRING," +
+                 "  weightProperty: STRING," +
+                 "  postProcessingMillis: INTEGER," +
+                 "  communityCount: INTEGER," +
+                 "  ranIterations: INTEGER," +
+                 "  didConverge: BOOLEAN," +
+                 "  communityDistribution: MAP")
+    public Stream<LabelPropagationWriteProc.WriteResult> stats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
+        return write(computationResult, false);
+    }
+
     private Stream<WriteResult> write(
         ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult,
         boolean write
@@ -126,20 +162,13 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
                  "  }"+
                  ")" +
                  "YIELD" +
-                 "  writeProperty: STRING," +
-                 "  nodePropertiesWritten: INTEGER," +
-                 "  relationshipPropertiesWritten: INTEGER," +
-                 "  createMillis: INTEGER," +
-                 "  computeMillis: INTEGER," +
-                 "  writeMillis: INTEGER" +
-                 "  maxIterations: INTEGER," +
-                 "  seedProperty: STRING," +
-                 "  weightProperty: STRING," +
-                 "  postProcessingMillis: INTEGER," +
-                 "  communityCount: INTEGER," +
-                 "  ranIterations: INTEGER," +
-                 "  didConverge: BOOLEAN," +
-                 "  communityDistribution: MAP")
+                 "  nodes: INTEGER, "+
+                 "  relationships: INTEGER," +
+                 "  bytesMin: INTEGER," +
+                 "  bytesMax: INTEGER," +
+                 "  requiredMemory: STRING," +
+                 "  mapView: MAP," +
+                 "  treeView: STRING")
 
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -149,14 +178,14 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
     }
 
     @Procedure(value = "gds.algo.labelPropagation.stats.estimate", mode = READ)
-    @Description("CALL gds.algo.louvain.stats.estimate(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
-                 "    weightProperty: STRING" +
-                 "  }" +
+    @Description("CALL gds.algo.labelPropagation.stats.estimate(" +
+                 "  graphName: STRING," +
+                 "  configuration: MAP {" +
+                 "     maxIterations: INTEGER, " +
+                 "     weightProperty: STRING, " +
+                 "     seedProperty: STRING, " +
+                 "     concurrency: INTEGER" +
+                 "  }"+
                  ") YIELD" +
                  "  nodes: INTEGER, "+
                  "  relationships: INTEGER," +
