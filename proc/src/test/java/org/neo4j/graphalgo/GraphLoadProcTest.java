@@ -66,7 +66,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.GraphHelper.assertOutProperties;
 import static org.neo4j.graphalgo.GraphHelper.assertOutPropertiesWithDelta;
@@ -520,35 +519,6 @@ class GraphLoadProcTest extends ProcTestBase {
 
         runQuery(algoQuery, singletonMap("relType", Arrays.asList("Y")),
                 row -> assertEquals(10, row.getNumber("componentCount").intValue()));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"huge", "cypher"})
-    void shouldWorkWithLimitedTypes(String graph) {
-        String queryTemplate = "CALL algo.graph.load(" +
-                               "    'foo', %s, %s, {" +
-                               "        graph: $graph" +
-                               "    }" +
-                               ")";
-        String loadQuery = graph.equals("cypher")
-                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY)
-                : String.format(queryTemplate, "null", "null");
-        runQuery(loadQuery, singletonMap("graph", graph));
-
-        String algoQuery = "CALL algo.labelPropagation(" +
-                           "    null, null,{" +
-                           "        graph: $name, write: false" +
-                           "    }" +
-                           ")";
-        try {
-            runQuery(
-                    algoQuery,
-                    singletonMap("name", "foo"),
-                    row -> assertEquals(12, row.getNumber("nodes").intValue()));
-        } catch (QueryExecutionException qee) {
-            qee.printStackTrace();
-            fail("Error using wrong graph type:" + qee.getMessage());
-        }
     }
 
     @ParameterizedTest
