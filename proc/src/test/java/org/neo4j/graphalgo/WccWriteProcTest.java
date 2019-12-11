@@ -17,17 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.IntIntScatterMap;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.wcc.WccStreamProc;
-import org.neo4j.graphalgo.wcc.WccWriteProc;
-import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.impl.wcc.WccWriteConfig;
 
 import java.util.List;
 
@@ -36,45 +33,18 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_WEIGHT_KEY;
 
-class WccBetaProcTest extends ProcTestBase {
+class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
 
-    @BeforeEach
-    void setup() throws Exception {
-        String createGraph = "CREATE" +
-                             " (nA:Label {nodeId: 0, seedId: 42})" +
-                             ",(nB:Label {nodeId: 1, seedId: 42})" +
-                             ",(nC:Label {nodeId: 2, seedId: 42})" +
-                             ",(nD:Label {nodeId: 3, seedId: 42})" +
-                             ",(nE {nodeId: 4})" +
-                             ",(nF {nodeId: 5})" +
-                             ",(nG {nodeId: 6})" +
-                             ",(nH {nodeId: 7})" +
-                             ",(nI {nodeId: 8})" +
-                             ",(nJ {nodeId: 9})" +
-                             // {A, B, C, D}
-                             ",(nA)-[:TYPE]->(nB)" +
-                             ",(nB)-[:TYPE]->(nC)" +
-                             ",(nC)-[:TYPE]->(nD)" +
-                             ",(nD)-[:TYPE {cost:4.2}]->(nE)" + // threshold UF should split here
-                             // {E, F, G}
-                             ",(nE)-[:TYPE]->(nF)" +
-                             ",(nF)-[:TYPE]->(nG)" +
-                             // {H, I}
-                             ",(nH)-[:TYPE]->(nI)";
-
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(createGraph);
-        registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphLoadProc.class);
+    @Override
+    public Class<? extends BaseAlgoProc<?, DisjointSetStruct, WccWriteConfig>> getProcedureClazz() {
+        return null;
     }
 
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
+    @Override
+    public WccWriteConfig createConfig(CypherMapWrapper mapWrapper) {
+        return null;
     }
 
     @AllGraphNamesTest
@@ -305,91 +275,6 @@ class WccBetaProcTest extends ProcTestBase {
                 assertEquals(3L, row.getNumber("setCount"));
                 assertEquals("unionFind", row.getString("partitionProperty"));
                 assertEquals("unionFind", row.getString("writeProperty"));
-            }
-        );
-    }
-
-    @AllGraphNamesTest
-    void testWCCStream(String graphImpl) {
-        String query = "CALL algo.beta.wcc.stream(" +
-                       "    '', 'TYPE', {" +
-                       "        graph: $graph" +
-                       "    }" +
-                       ") YIELD setId";
-
-        IntIntScatterMap map = new IntIntScatterMap(11);
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> map.addTo(row.getNumber("setId").intValue(), 1)
-        );
-        assertMapContains(map, 1, 2, 7);
-    }
-
-    @AllGraphNamesTest
-    void testThresholdWCCStream(String graphImpl) {
-        String query = "CALL algo.beta.wcc.stream(" +
-                       "    '', 'TYPE', {" +
-                       "        weightProperty: 'cost', defaultValue: 10.0, threshold: 5.0, concurrency: 1, graph: $graph" +
-                       "    }" +
-                       ") YIELD setId";
-
-        IntIntScatterMap map = new IntIntScatterMap(11);
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> map.addTo(row.getNumber("setId").intValue(), 1)
-        );
-        assertMapContains(map, 4, 3, 2, 1);
-    }
-
-    @AllGraphNamesTest
-    void testThresholdWCCLowThreshold(String graphImpl) {
-        String query = "CALL algo.beta.wcc.stream(" +
-                       "    '', 'TYPE', {" +
-                       "        weightProperty: 'cost', defaultValue: 10.0, concurrency: 1, threshold: 3.14, graph: $graph" +
-                       "    }" +
-                       ") YIELD setId";
-        IntIntScatterMap map = new IntIntScatterMap(11);
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> {
-                map.addTo(row.getNumber("setId").intValue(), 1);
-            }
-        );
-        assertMapContains(map, 1, 2, 7);
-    }
-
-    @AllGraphNamesTest
-    void shouldFailWhenSpecifyingThresholdWithoutRelationshipWeight(String graphImpl) {
-        String query = "CALL algo.beta.wcc.stream(" +
-                       "    '', 'TYPE', {" +
-                       "        defaultValue: 10.0, concurrency: 1, threshold: 3.14, graph: $graph" +
-                       "    }" +
-                       ") YIELD setId";
-        QueryExecutionException exception = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(query, MapUtil.map("graph", graphImpl))
-        );
-        Throwable rootCause = ExceptionUtil.rootCause(exception);
-
-        assertTrue(rootCause
-            .getMessage()
-            .contains(String.format(
-                "%s requires a `%s` or `%s`",
-                0D,
-                RELATIONSHIP_WEIGHT_KEY,
-                DEPRECATED_RELATIONSHIP_PROPERTY_KEY
-            )));
-    }
-
-    @AllGraphNamesTest
-    void testUnionFindPregel(String graphImpl) {
-        String query = "CALL algo.beta.wcc.pregel(" +
-                       "    '', 'TYPE', {" +
-                       "        graph: $graph" +
-                       "    }" +
-                       ")";
-
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> {
-                assertEquals(3L, row.getNumber("communityCount"));
-                assertEquals(3L, row.getNumber("setCount"));
             }
         );
     }
