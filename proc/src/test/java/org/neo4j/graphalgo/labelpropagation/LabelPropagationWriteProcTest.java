@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.WriteConfigTests;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -44,9 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
-import static org.neo4j.graphalgo.core.ProcedureConstants.GRAPH_IMPL_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 
 class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPropagationWriteConfig> implements
     WriteConfigTests<LabelPropagationWriteConfig, LabelPropagation> {
@@ -88,18 +84,6 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
             return mapWrapper.withString("writeProperty", "writeProperty");
         }
         return mapWrapper;
-    }
-
-    @AllGraphNamesTest
-    void testOverwritingDefaults(String graphImpl) {
-        Map<String, Object> config = MapUtil.map(
-            GRAPH_IMPL_KEY, graphImpl,
-            "includeIntermediateCommunities", true,
-            "maxLevels", 42,
-            "maxIterations", 42,
-            TOLERANCE_KEY, 0.42,
-            SEED_PROPERTY_KEY, "foobar"
-        );
     }
 
     @ParameterizedTest(name = "{1}")
