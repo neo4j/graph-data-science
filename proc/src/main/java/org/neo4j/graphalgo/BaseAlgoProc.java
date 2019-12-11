@@ -185,24 +185,25 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     private void validateConfig(GraphCreateConfig graph, CONFIG config) {
-        Set<String> properties = graph.nodeProjection().allNodeProperties();
         if (config instanceof SeedConfig) {
+            Set<String> nodeProperties = graph.nodeProjection().allNodeProperties();
             String seedProperty = ((SeedConfig) config).seedProperty();
-            if (seedProperty != null && !properties.contains(seedProperty)) {
+            if (seedProperty != null && !nodeProperties.contains(seedProperty)) {
                 throw new IllegalArgumentException(String.format(
-                    "Seed property `%s` not found in graph with properties: %s",
+                    "Seed property `%s` not found in graph with node properties: %s",
                     seedProperty,
-                    properties
+                    nodeProperties
                 ));
             }
         }
         if (config instanceof WeightConfig) {
+            Set<String> relationshipProperties = graph.relationshipProjection().allRelationshipProperties();
             String weightProperty = ((WeightConfig) config).weightProperty();
-            if (weightProperty != null && !properties.contains(weightProperty)) {
+            if (weightProperty != null && !relationshipProperties.contains(weightProperty)) {
                 throw new IllegalArgumentException(String.format(
-                    "Weight property `%s` not found in graph with properties: %s",
+                    "Weight property `%s` not found in graph with relationship properties: %s",
                     weightProperty,
-                    properties
+                    relationshipProperties
                 ));
             }
         }

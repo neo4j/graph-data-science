@@ -30,6 +30,7 @@ import org.neo4j.stream.Streams;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -192,5 +193,13 @@ public abstract class AbstractRelationshipProjections {
             value.put(identifier.name, projection.toObject());
         });
         return value;
+    }
+
+    public Set<String> allRelationshipProperties() {
+        return projections()
+            .values()
+            .stream()
+            .flatMap(p -> p.properties().mappings().stream().map(PropertyMapping::propertyKey))
+            .collect(Collectors.toSet());
     }
 }
