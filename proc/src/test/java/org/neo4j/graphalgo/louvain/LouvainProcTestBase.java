@@ -24,15 +24,23 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.BaseAlgoProcTests;
+import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.MemoryEstimateTests;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.SeedConfigTests;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfigTest;
 import org.neo4j.graphalgo.newapi.WeightConfigTest;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -142,17 +150,28 @@ abstract class LouvainProcTestBase<CONFIG extends LouvainConfigBase> extends Pro
 
     static Stream<Arguments> graphVariations() {
         return Stream.of(
-            arguments("'myGraph', {", "explicit graph"),
             arguments(
-                "{" +
-                "  nodeProjection: ['Node']," +
-                "  relationshipProjection: {" +
-                "    TYPE: {" +
-                "      type: 'TYPE'," +
-                "      projection: 'UNDIRECTED'" +
-                "    }" +
-                "  }," +
-                "  nodeProperties: ['seed'],",
+                GdsCypher.call().explicitCreation("myGraph"),
+                "explicit graph"
+            ),
+            arguments(
+                GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
+                    .builder()
+                    .graphName("")
+                    .nodeProjection(NodeProjections.of("Node"))
+                    .nodeProperties(PropertyMappings.fromObject("seed"))
+                    .relationshipProjection(RelationshipProjections.builder()
+                        .putProjection(
+                            ElementIdentifier.of("TYPE"),
+                            RelationshipProjection.builder()
+                                .type("TYPE")
+                                .projection(Projection.UNDIRECTED)
+                                .build()
+                        )
+                        .build()
+                    )
+                    .build()
+                ),
                 "implicit graph"
             )
         );

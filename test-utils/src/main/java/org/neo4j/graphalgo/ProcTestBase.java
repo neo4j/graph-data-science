@@ -29,10 +29,6 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.internal.kernel.api.security.AuthenticationResult;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -52,7 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
-import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class ProcTestBase {
 
@@ -89,7 +84,7 @@ public class ProcTestBase {
         runQuery(query, emptyMap(), check);
     }
 
-    protected void runQuery(@Language("Cypher") GraphDatabaseAPI db, String query, Consumer<Result.ResultRow> check) {
+    protected void runQuery(GraphDatabaseAPI db, @Language("Cypher") String query, Consumer<Result.ResultRow> check) {
         runQuery(db, query, emptyMap(), check);
     }
 

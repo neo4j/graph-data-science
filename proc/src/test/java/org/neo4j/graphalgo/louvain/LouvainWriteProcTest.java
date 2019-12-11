@@ -19,11 +19,13 @@
  */
 package org.neo4j.graphalgo.louvain;
 
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.WriteConfigTests;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -57,53 +59,62 @@ class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> imple
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("graphVariations")
-    void testWrite(String graphSnippet, String testCaseName) {
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTestBase#graphVariations")
+    void testWrite(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyCommunity";
-        String query = "CALL gds.algo.louvain.write(" +
-                       graphSnippet +
-                       "    writeProperty: $writeProp" +
-                       "}) YIELD communityCount, modularity, modularities, ranLevels, includeIntermediateCommunities, createMillis, computeMillis, writeMillis, postProcessingMillis, communityDistribution";
+        @Language("Cypher") String query = queryBuilder
+            .algo("louvain")
+            .writeMode()
+            .addParameter("writeProperty", writeProperty)
+            .yields(
+                "communityCount",
+                "modularity",
+                "modularities",
+                "ranLevels",
+                "includeIntermediateCommunities",
+                "createMillis",
+                "computeMillis",
+                "writeMillis",
+                "postProcessingMillis",
+                "communityDistribution"
+            );
 
-        runQuery(query, MapUtil.map("writeProp", writeProperty),
-            row -> {
-                long communityCount = row.getNumber("communityCount").longValue();
-                double modularity = row.getNumber("modularity").doubleValue();
-                List<Double> modularities = (List<Double>) row.get("modularities");
-                long levels = row.getNumber("ranLevels").longValue();
-                boolean includeIntermediate = row.getBoolean("includeIntermediateCommunities");
-                long createMillis = row.getNumber("createMillis").longValue();
-                long computeMillis = row.getNumber("computeMillis").longValue();
-                long writeMillis = row.getNumber("writeMillis").longValue();
+        runQuery(query, row -> {
+            long communityCount = row.getNumber("communityCount").longValue();
+            double modularity = row.getNumber("modularity").doubleValue();
+            List<Double> modularities = (List<Double>) row.get("modularities");
+            long levels = row.getNumber("ranLevels").longValue();
+            boolean includeIntermediate = row.getBoolean("includeIntermediateCommunities");
+            long createMillis = row.getNumber("createMillis").longValue();
+            long computeMillis = row.getNumber("computeMillis").longValue();
+            long writeMillis = row.getNumber("writeMillis").longValue();
 
-                assertEquals(3, communityCount, "wrong community count");
-                assertEquals(2, modularities.size(), "invalud modularities");
-                assertEquals(2, levels, "invalid level count");
-                assertFalse(includeIntermediate, "invalid level count");
-                assertTrue(modularity > 0, "wrong modularity value");
-                assertTrue(createMillis >= 0, "invalid loadTime");
-                assertTrue(writeMillis >= 0, "invalid writeTime");
-                assertTrue(computeMillis >= 0, "invalid computeTime");
-            }
-        );
+            assertEquals(3, communityCount, "wrong community count");
+            assertEquals(2, modularities.size(), "invalud modularities");
+            assertEquals(2, levels, "invalid level count");
+            assertFalse(includeIntermediate, "invalid level count");
+            assertTrue(modularity > 0, "wrong modularity value");
+            assertTrue(createMillis >= 0, "invalid loadTime");
+            assertTrue(writeMillis >= 0, "invalid writeTime");
+            assertTrue(computeMillis >= 0, "invalid computeTime");
+        });
         assertWriteResult(RESULT, writeProperty);
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("graphVariations")
-    void testWriteIntermediateCommunities(String graphSnippet, String testCaseName) {
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTestBase#graphVariations")
+    void testWriteIntermediateCommunities(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyCommunity";
-        String query = "CALL gds.algo.louvain.write(" +
-                       graphSnippet +
-                       "    writeProperty: $writeProp," +
-                       "    includeIntermediateCommunities: true" +
-                       "}) YIELD includeIntermediateCommunities";
+        String query = queryBuilder
+            .algo("louvain")
+            .writeMode()
+            .addParameter("writeProperty", writeProperty)
+            .addParameter("includeIntermediateCommunities", true)
+            .yields("includeIntermediateCommunities");
 
-        runQuery(query, MapUtil.map("writeProp", writeProperty),
-            row -> {
-                assertTrue(row.getBoolean("includeIntermediateCommunities"));
-            }
-        );
+        runQuery(query, row -> {
+            assertTrue(row.getBoolean("includeIntermediateCommunities"));
+        });
 
         runQuery(String.format("MATCH (n) RETURN n.%s as %s", writeProperty, writeProperty), row -> {
             Object maybeList = row.get(writeProperty);
@@ -143,14 +154,15 @@ class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> imple
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("graphVariations")
-    void testWriteWithSeeding(String graphSnippet, String testCaseName) {
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTestBase#graphVariations")
+    void testWriteWithSeeding(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyWriteProperty";
-        String query = "CALL gds.algo.louvain.write(" +
-                       graphSnippet +
-                       "    writeProperty: '" + writeProperty + "'," +
-                       "    seedProperty: 'seed'" +
-                       "}) YIELD communityCount, ranLevels";
+        String query = queryBuilder
+            .algo("louvain")
+            .writeMode()
+            .addParameter("writeProperty", writeProperty)
+            .addParameter("seedProperty", "seed")
+            .yields("communityCount", "ranLevels");
 
         runQuery(
             query,
