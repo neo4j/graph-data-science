@@ -273,6 +273,19 @@ public class NodeSimilarityProcTest extends ProcTestBase {
         assertEquals(1, config.concurrency());
     }
 
+    @ParameterizedTest(name = "missing parameter: {0}")
+    @ValueSource(strings = {"writeProperty", "writeRelationshipType"})
+    void shouldFailIfConfigIsMissingWriteParameters(String parameter) {
+        CypherMapWrapper input = baseUserInput()
+            .withoutEntry(parameter);
+
+        IllegalArgumentException illegalArgumentException = assertThrows(
+            IllegalArgumentException.class,
+            () -> config(input)
+        );
+        assertThat(illegalArgumentException.getMessage(), is(String.format("No value specified for the mandatory configuration parameter `%s`", parameter)));
+    }
+
     private CypherMapWrapper baseUserInput() {
         return CypherMapWrapper.create(MapUtil.map("writeProperty", "foo", "writeRelationshipType", "bar"));
     }
