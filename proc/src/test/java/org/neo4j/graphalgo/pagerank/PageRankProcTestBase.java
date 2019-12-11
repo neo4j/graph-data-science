@@ -120,10 +120,37 @@ abstract class PageRankProcTestBase<CONFIG extends PageRankConfigBase> extends P
         runQuery(cypher);
 
         runQuery("CALL algo.beta.graph.create(" +
-                 "    'myGraph'," +
-                 "    'Label1 | Label2'," +
-                 "    ['TYPE1', 'TYPE2', 'TYPE3']" +
-//                 "      nodeProperties: ['weight', 'equalWeight']" +
+                 "'equalWeightGraph'," +
+                 "'Label1'," +
+                 "   {" +
+                 "      TYPE1: {" +
+                 "          type: 'TYPE1'," +
+                 "          properties: ['equalWeight']" +
+                 "      } " +
+                 "   }" +
+                 ")");
+
+        runQuery("CALL algo.beta.graph.create(" +
+                 "'graphLabel1'," +
+                 "'Label1'," +
+                 "   {" +
+                 "      TYPE1: {" +
+                 "          type: 'TYPE1'," +
+                 "          properties: ['weight']" +
+                 "      } " +
+                 "   }" +
+                 ")");
+
+        runQuery("CALL algo.beta.graph.create(" +
+                 "'graphLabel3'," +
+                 "'Label3'," +
+                 "   {" +
+                 "      TYPE3: {" +
+                 "          type: 'TYPE3'," +
+                 "          properties: ['equalWeight'], " +
+                 "          projection: 'UNDIRECTED'" +
+                 "      } " +
+                 "   }" +
                  ")");
 
         runInTransaction(db, () -> {
@@ -158,14 +185,69 @@ abstract class PageRankProcTestBase<CONFIG extends PageRankConfigBase> extends P
         GraphCatalog.removeAllLoadedGraphs();
     }
 
-    static Stream<Arguments> graphVariations() {
+    static Stream<Arguments> graphVariationsLabel1() {
         return Stream.of(
-            arguments("'myGraph', {", "explicit graph"),
+            arguments("'graphLabel1', {", "explicit graph"),
             arguments(
                 "{" +
-                "  nodeProjection: 'Label1 | Label2'," +
-                "  relationshipProjection: '',",
-//                "  nodeProperties: ['weight', 'equalWeight'],",
+                "  nodeProjection: 'Label1'," +
+                "  relationshipProjection: {" +
+                "      TYPE1: {" +
+                "          type: 'TYPE1'," +
+                "          properties: ['weight']" +
+                "      } " +
+                "  },",
+                "  implicit graph"
+            )
+        );
+    }
+
+    static Stream<Arguments> graphVariationsLabel1NoProps() {
+        return Stream.of(
+            arguments("'graphLabel1', {", "explicit graph"),
+            arguments(
+                "{" +
+                "  nodeProjection: 'Label1'," +
+                "  relationshipProjection: {" +
+                "      TYPE1: {" +
+                "          type: 'TYPE1'" +
+                "      } " +
+                "  }",
+                "  implicit graph"
+            )
+        );
+    }
+
+    static Stream<Arguments> graphVariationsLabel3() {
+        return Stream.of(
+            arguments("'graphLabel3', {", "explicit graph"),
+            arguments(
+                "{" +
+                "  nodeProjection: 'Label3'," +
+                "  relationshipProjection: {" +
+                "      TYPE3: {" +
+                "          type: 'TYPE3'," +
+                "          properties: ['equalWeight'], " +
+                "          projection: 'UNDIRECTED'" +
+                "      } " +
+                "  },",
+                "  implicit graph"
+            )
+        );
+    }
+
+    static Stream<Arguments> graphVariationsEqual() {
+        return Stream.of(
+            arguments("'equalWeightGraph', {", "explicit graph"),
+            arguments(
+                "{" +
+                "  nodeProjection: 'Label1'," +
+                "  relationshipProjection: {" +
+                "      TYPE1: {" +
+                "          type: 'TYPE1'," +
+                "          properties: ['equalWeight']" +
+                "      } " +
+                "  },",
                 "  implicit graph"
             )
         );

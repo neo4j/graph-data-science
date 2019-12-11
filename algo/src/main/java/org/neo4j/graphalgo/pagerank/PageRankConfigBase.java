@@ -44,13 +44,13 @@ public interface PageRankConfigBase extends
     @Value.Default
     @Override
     default double tolerance() {
-        return 0.0001;
+        return 1E-7;
     }
 
     @Value.Default
     @Override
     default int maxIterations() {
-        return 10;
+        return 20;
     }
 
     @Value.Default

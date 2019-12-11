@@ -55,7 +55,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig,
     }
 
     @ParameterizedTest
-    @MethodSource("emptyStringPropertyValues")
+    @MethodSource("org.neo4j.graphalgo.BaseAlgoProcTests#emptyStringPropertyValues")
     default void testEmptyWeightPropertyValues(String weightPropertyParameter) {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("weightProperty", weightPropertyParameter));
         CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));

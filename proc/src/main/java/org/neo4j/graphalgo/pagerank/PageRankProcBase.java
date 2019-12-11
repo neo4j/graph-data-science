@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.NewPageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
 import java.util.Optional;
@@ -48,6 +49,9 @@ abstract class PageRankProcBase<CONFIG extends PageRankConfigBase> extends BaseA
 
     @Override
     protected final NewPageRankFactory<CONFIG> algorithmFactory(PageRankConfigBase config) {
-        return new NewPageRankFactory<>(config);
+        if (config.weightProperty() == null) {
+            return new NewPageRankFactory<>(config);
+        }
+        return new NewPageRankFactory<>(PageRankAlgorithmType.WEIGHTED, config);
     }
 }
