@@ -120,62 +120,62 @@ class WccTest extends AlgoTestBase {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
         assertEquals(
-                MemoryRange.of(120),
+                MemoryRange.of(128),
                 Wcc.memoryEstimation(false).estimate(dimensions0, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(160),
+                MemoryRange.of(168),
                 Wcc.memoryEstimation(true).estimate(dimensions0, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(120),
+                MemoryRange.of(128),
                 Wcc.memoryEstimation(false).estimate(dimensions0, 8).memoryUsage());
         assertEquals(
-                MemoryRange.of(160),
+                MemoryRange.of(168),
                 Wcc.memoryEstimation(true).estimate(dimensions0, 8).memoryUsage());
         assertEquals(
-                MemoryRange.of(120),
+                MemoryRange.of(128),
                 Wcc.memoryEstimation(false).estimate(dimensions0, 64).memoryUsage());
         assertEquals(
-                MemoryRange.of(160),
+                MemoryRange.of(168),
                 Wcc.memoryEstimation(true).estimate(dimensions0, 64).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
         assertEquals(
-                MemoryRange.of(920),
+                MemoryRange.of(928),
                 Wcc.memoryEstimation(false).estimate(dimensions100, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(1760),
+                MemoryRange.of(1768),
                 Wcc.memoryEstimation(true).estimate(dimensions100, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(920),
+                MemoryRange.of(928),
                 Wcc.memoryEstimation(false).estimate(dimensions100, 8).memoryUsage());
         assertEquals(
-                MemoryRange.of(1760),
+                MemoryRange.of(1768),
                 Wcc.memoryEstimation(true).estimate(dimensions100, 8).memoryUsage());
         assertEquals(
-                MemoryRange.of(920),
+                MemoryRange.of(928),
                 Wcc.memoryEstimation(false).estimate(dimensions100, 64).memoryUsage());
         assertEquals(
-                MemoryRange.of(1760),
+                MemoryRange.of(1768),
                 Wcc.memoryEstimation(true).estimate(dimensions100, 64).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
         assertEquals(
-                MemoryRange.of(800_122_070_448L),
+                MemoryRange.of(800_122_070_456L),
                 Wcc.memoryEstimation(false).estimate(dimensions100B, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(1_600_244_140_816L),
+                MemoryRange.of(1_600_244_140_824L),
                 Wcc.memoryEstimation(true).estimate(dimensions100B, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(800_122_070_448L),
+                MemoryRange.of(800_122_070_456L),
                 Wcc.memoryEstimation(false).estimate(dimensions100B, 8).memoryUsage());
         assertEquals(
-                MemoryRange.of(1_600_244_140_816L),
+                MemoryRange.of(1_600_244_140_824L),
                 Wcc.memoryEstimation(true).estimate(dimensions100B, 8).memoryUsage());
         assertEquals(
-                MemoryRange.of(800_122_070_448L),
+                MemoryRange.of(800_122_070_456L),
                 Wcc.memoryEstimation(false).estimate(dimensions100B, 64).memoryUsage());
         assertEquals(
-                MemoryRange.of(1_600_244_140_816L),
+                MemoryRange.of(1_600_244_140_824L),
                 Wcc.memoryEstimation(true).estimate(dimensions100B, 64).memoryUsage());
     }
 
