@@ -52,8 +52,9 @@ class MemRecProcTest extends ProcTestBase {
             "algo.beta.k1coloring",
             "algo.beta.modularityOptimization",
             "algo.graph.load",
-            "algo.labelPropagation",
-            "algo.pageRank",
+            "gds.algo.labelPropagation.stats",
+            "gds.algo.labelPropagation.stream",
+            "gds.algo.labelPropagation.write",
             "gds.algo.louvain.stats",
             "gds.algo.louvain.stream",
             "gds.algo.louvain.write",
@@ -118,15 +119,11 @@ class MemRecProcTest extends ProcTestBase {
         test("algo.memrec(null, null, 'graph.load')");
         test("algo.graph.load.memrec(null, null)");
 
-//        test("algo.memrec(null, null, 'pageRank')");
-//        test("algo.memrec(null, null, 'pageRank', {direction: 'BOTH', graph: 'huge'})");
         test("gds.algo.pageRank.write.estimate({writeProperty: 'foo'})");
         test("gds.algo.pageRank.stream.estimate({})");
 
-        test("algo.memrec(null, null, 'labelPropagation')");
-        test("algo.memrec(null, null, 'labelPropagation', {direction: 'BOTH', graph: 'huge'})");
-        test("algo.labelPropagation.memrec(null, null)");
-        test("algo.labelPropagation.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+        test("gds.alg.labelPropagation.write.estimate({writeProperty: 'foo'})");
+        test("gds.alg.labelPropagation.stream.estimate({})");
 
         test("gds.algo.louvain.write.estimate({writeProperty: 'foo'})");
         test("gds.algo.louvain.stream.estimate({})");
