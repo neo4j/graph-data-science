@@ -241,6 +241,21 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
         });
     }
 
+    @Test
+    default void checkStatsModeExists() {
+        applyOnProcedure((proc) -> {
+            boolean inWriteClass = methodExits(proc, "write");
+            if (inWriteClass) {
+                assertTrue(methodExits(proc, "stats"));
+            }
+        });
+    }
+
+    default boolean methodExits(BaseAlgoProc<?, RESULT, CONFIG> proc, String methodSuffix) {
+        return getProcedureMethods(proc)
+            .anyMatch(method -> getProcedureMethodName(method).endsWith(methodSuffix));
+    }
+
     default Stream<Method> getProcedureMethods(BaseAlgoProc<?, RESULT, CONFIG> proc) {
         return Arrays.stream(proc.getClass().getDeclaredMethods())
             .filter(method -> method.getDeclaredAnnotation(Procedure.class) != null);
