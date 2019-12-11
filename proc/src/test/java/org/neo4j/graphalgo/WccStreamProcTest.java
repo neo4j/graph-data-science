@@ -56,15 +56,12 @@ class WccStreamProcTest extends WccProcBaseTest<WccStreamConfig> {
 
     @Test
     void testWCCStreamWithDefaults() {
-        String query = GdsCypher.call("wcc")
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("wcc")
             .streamMode()
-            .implicitCreation(ImmutableGraphCreateConfig
-                .builder()
-                .graphName("testGraph")
-                .nodeProjection(NodeProjections.empty())
-                .relationshipProjection(RelationshipProjections.empty())
-                .build()
-            ).yields("nodeId", "setId");
+            .yields("nodeId", "setId");
 
         long [] communities = new long[10];
         runQuery(query, row -> {
@@ -88,9 +85,10 @@ class WccStreamProcTest extends WccProcBaseTest<WccStreamConfig> {
         Graph graph = new GraphLoader(db).withGraphCreateConfig(createGraphConfig).load(HugeGraphFactory.class);
         GraphCatalog.set(createGraphConfig, GraphsByRelationshipType.of(graph));
 
-        String query = GdsCypher.call("wcc")
-            .streamMode()
+        String query = GdsCypher.call()
             .explicitCreation("testGraph")
+            .algo("wcc")
+            .streamMode()
             .yields("nodeId", "setId");
 
         long [] communities = new long[10];

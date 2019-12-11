@@ -102,29 +102,11 @@ abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBas
     }
 
     @Test
-    void testFailWhenSpecifyingThresholdWithoutRelationshipWeight() {
-        CypherMapWrapper config = CypherMapWrapper.create(MapUtil.map(
-            "threshold", 3.14
-        ));
-
-        applyOnProcedure(proc -> {
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> { proc.newConfig(Optional.empty(), config); }
-            );
-
-            assertTrue(exception
-                .getMessage()
-                .contains("Specifying a threshold requires `weightProperty` to be set")
-            );
-        });
-    }
-
-    @Test
-    void testSettingAThreshold() {
-        CypherMapWrapper config = CypherMapWrapper.create(MapUtil.map(
+    void testThreshold() {
+        CypherMapWrapper config = createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map(
             "threshold", 3.14,
             "weightProperty", "threshold"
-        ));
+        )));
 
         applyOnProcedure(proc -> {
             CONFIG wccConfig = proc.newConfig(Optional.of("myGraph"), config);
@@ -134,10 +116,10 @@ abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBas
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void testSettingConsecutiveIds(boolean consecutiveIds) {
-        CypherMapWrapper config = CypherMapWrapper.create(MapUtil.map(
+    void testConsecutiveIds(boolean consecutiveIds) {
+        CypherMapWrapper config = createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map(
             "consecutiveIds", consecutiveIds
-        ));
+        )));
 
         applyOnProcedure(proc -> {
             CONFIG wccConfig = proc.newConfig(Optional.of("myGraph"), config);
@@ -146,11 +128,11 @@ abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBas
     }
 
     @Test
-    void testSettingConsecutiveIdsAndSeedingCannotBeUsedTogether() {
-        CypherMapWrapper config = CypherMapWrapper.create(MapUtil.map(
+    void testFailSeedingAndConsecutiveIds() {
+        CypherMapWrapper config = createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map(
             "consecutiveIds", true,
             "seedProperty", "seed"
-        ));
+        )));
 
         applyOnProcedure(proc -> {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -160,6 +142,24 @@ abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBas
             assertTrue(exception
                 .getMessage()
                 .contains("Seeding and the `consecutiveIds` option cannot be used at the same time.")
+            );
+        });
+    }
+
+    @Test
+    void testFailThresholdWithoutRelationshipWeight() {
+        CypherMapWrapper config = createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map(
+            "threshold", 3.14
+        )));
+
+        applyOnProcedure(proc -> {
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> { proc.newConfig(Optional.empty(), config); }
+            );
+
+            assertTrue(exception
+                .getMessage()
+                .contains("Specifying a threshold requires `weightProperty` to be set")
             );
         });
     }

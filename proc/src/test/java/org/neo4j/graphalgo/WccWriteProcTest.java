@@ -25,8 +25,6 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.wcc.WccWriteConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 
 import java.util.List;
@@ -42,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
 
     private static final String WRITE_PROPERTY = "componentId";
-    private static final String DEFAULT_GRAPH_NAME = "";
     private static final String SEED_PROPERTY = "seedId";
 
     @Override
@@ -65,9 +62,12 @@ class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
 
     @Test
     void testWriteYields() {
-        String query = GdsCypher.call("wcc")
+        String query = GdsCypher
+            .call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("wcc")
             .writeMode()
-            .implicitCreation(GraphCreateConfig.emptyWithName(getUsername(), ""))
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields(
                 "writeProperty",
@@ -121,9 +121,12 @@ class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
 
     @Test
     void testWrite() {
-        String query = GdsCypher.call("wcc")
+        String query = GdsCypher
+            .call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("wcc")
             .writeMode()
-            .implicitCreation(GraphCreateConfig.emptyWithName("", ""))
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields("componentCount");
 
@@ -134,15 +137,12 @@ class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
 
     @Test
     void testWriteWithLabel() {
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
-            .username(getUsername())
-            .graphName(DEFAULT_GRAPH_NAME)
-            .nodeProjection(NodeProjections.of("Label"))
-            .relationshipProjection(RelationshipProjections.empty())
-            .build();
-        String query = GdsCypher.call("wcc")
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("Label")
+            .withAnyRelationshipType()
+            .algo("wcc")
             .writeMode()
-            .implicitCreation(graphCreateConfig)
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields("componentCount");
 
@@ -153,17 +153,11 @@ class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
 
     @Test
     void testWriteWithSeed() {
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
-            .username(getUsername())
-            .graphName(DEFAULT_GRAPH_NAME)
-            .nodeProjection(NodeProjections.empty()
-                .addPropertyMappings(PropertyMappings.of(PropertyMapping.of("seedId", 0D)))
-            )
-            .relationshipProjection(RelationshipProjections.empty())
-            .build();
-        String query = GdsCypher.call("wcc")
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withNodeProperty("seedId")
+            .algo("wcc")
             .writeMode()
-            .implicitCreation(graphCreateConfig)
             .addParameter("writeProperty", WRITE_PROPERTY)
             .addParameter("seedProperty", SEED_PROPERTY)
             .yields("componentCount");
@@ -173,43 +167,16 @@ class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
 
     @Test
     void testWriteWithSeedAndSameWriteProperty() {
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
-            .username(getUsername())
-            .graphName(DEFAULT_GRAPH_NAME)
-            .nodeProjection(NodeProjections.of("")
-                .addPropertyMappings(PropertyMappings.of(PropertyMapping.of(SEED_PROPERTY, 0D)))
-            )
-            .relationshipProjection(RelationshipProjections.empty())
-            .build();
-        String query = GdsCypher.call("wcc")
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withNodeProperty("seedId")
+            .algo("wcc")
             .writeMode()
-            .implicitCreation(graphCreateConfig)
             .addParameter("writeProperty", SEED_PROPERTY)
             .addParameter("seedProperty", SEED_PROPERTY)
             .yields("componentCount");
 
         assertForSeedTests(query, SEED_PROPERTY);
-    }
-
-    @Test
-    void testWriteWithSeedAndConsecutiveIds() {
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
-            .username(getUsername())
-            .graphName(DEFAULT_GRAPH_NAME)
-            .nodeProjection(NodeProjections.of("")
-                .addPropertyMappings(PropertyMappings.of(PropertyMapping.of(SEED_PROPERTY, 0D)))
-            )
-            .relationshipProjection(RelationshipProjections.empty())
-            .build();
-        String query = GdsCypher.call("wcc")
-            .writeMode()
-            .implicitCreation(graphCreateConfig)
-            .addParameter("writeProperty", WRITE_PROPERTY)
-            .addParameter("seedProperty", SEED_PROPERTY)
-            .addParameter("consecutiveIds", true)
-            .yields("componentCount");
-
-        assertForSeedTests(query, WRITE_PROPERTY);
     }
 
     @Test
@@ -221,9 +188,11 @@ class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
                            ")";
         runQuery(loadQuery, MapUtil.map("graphName", graphName));
 
-        String query = GdsCypher.call("wcc")
-            .writeMode()
+        String query = GdsCypher
+            .call()
             .explicitCreation(graphName)
+            .algo("wcc")
+            .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
             .addParameter("seedProperty", SEED_PROPERTY)
             .yields("componentCount");
@@ -259,17 +228,12 @@ class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
 
     @Test
     void testWriteWithConsecutiveIds() {
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
-            .username(getUsername())
-            .graphName(DEFAULT_GRAPH_NAME)
-            .nodeProjection(NodeProjections.of("")
-                .addPropertyMappings(PropertyMappings.of(PropertyMapping.of(SEED_PROPERTY, 0D)))
-            )
-            .relationshipProjection(RelationshipProjections.empty())
-            .build();
-        String query = GdsCypher.call("wcc")
+        String query = GdsCypher
+            .call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("wcc")
             .writeMode()
-            .implicitCreation(graphCreateConfig)
             .addParameter("writeProperty", WRITE_PROPERTY)
             .addParameter("consecutiveIds", true)
             .yields("componentCount");
