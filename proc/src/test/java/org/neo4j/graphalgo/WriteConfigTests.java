@@ -21,6 +21,8 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
@@ -45,6 +47,13 @@ public interface WriteConfigTests<CONFIG extends WriteConfig & BaseAlgoConfig, R
             "No value specified for the mandatory configuration parameter `writeProperty`",
             exception.getMessage()
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.BaseAlgoProcTests#emptyStringPropertyValues")
+    default void testEmptyWritePropertyValues(String writePropertyParameter) {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("writeProperty", writePropertyParameter));
+        assertThrows(IllegalArgumentException.class, () -> createConfig(mapWrapper));
     }
 
     @Test
