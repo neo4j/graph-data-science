@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
@@ -45,17 +47,19 @@ class ListProcTest extends ProcTestBase {
         "algo.beta.k1coloring",
         "algo.beta.k1coloring.memrec",
         "algo.beta.k1coloring.stream",
-        "algo.beta.labelPropagation",
-        "algo.beta.labelPropagation.stream",
         "algo.graph.info",
         "algo.graph.list",
         "algo.graph.load",
         "algo.graph.load.memrec",
         "algo.graph.remove",
-        "algo.labelPropagation",
-        "algo.labelPropagation.memrec",
-        "algo.labelPropagation.stream",
         "algo.memrec",
+
+        "gds.algo.labelPropagation.stats",
+        "gds.algo.labelPropagation.stats.estimate",
+        "gds.algo.labelPropagation.stream",
+        "gds.algo.labelPropagation.stream.estimate",
+        "gds.algo.labelPropagation.write",
+        "gds.algo.labelPropagation.write.estimate",
 
         "gds.algo.louvain.stats",
         "gds.algo.louvain.stats.estimate",
@@ -105,7 +109,8 @@ class ListProcTest extends ProcTestBase {
             GraphLoadProc.class,
             GraphGenerateProc.class,
             K1ColoringProc.class,
-            LabelPropagationProc.class,
+            LabelPropagationWriteProc.class,
+            LabelPropagationStreamProc.class,
             ListProc.class,
             LouvainWriteProc.class,
             LouvainStreamProc.class,

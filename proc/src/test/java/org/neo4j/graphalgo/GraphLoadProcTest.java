@@ -109,7 +109,7 @@ class GraphLoadProcTest extends ProcTestBase {
         registerProcedures(
             GraphLoadProc.class,
             GraphCatalogProcs.class,
-            LabelPropagationProc.class,
+            LabelPropagationWriteProc.class,
             PageRankWriteProc.class,
             WccWriteProc.class
         );

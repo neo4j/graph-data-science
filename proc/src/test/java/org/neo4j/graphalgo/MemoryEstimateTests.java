@@ -47,7 +47,6 @@ public interface MemoryEstimateTests<CONFIG extends BaseAlgoConfig, RESULT> exte
                     boolean estimateProcExists = getProcedureMethods(proc)
                         .map(this::getProcedureMethodName)
                         .anyMatch(otherProcName -> otherProcName.equals(procName + ".estimate"));
-
                     assertTrue(estimateProcExists, String.format("Could not find estimate method for %s", procName));
                 });
         });

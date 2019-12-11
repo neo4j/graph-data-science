@@ -43,7 +43,6 @@ public class StreamingProcTest extends ProcTestBase {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
-            LabelPropagationProc.class
         );
     }
 

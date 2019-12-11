@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
@@ -86,7 +88,8 @@ class MemRecProcTest extends ProcTestBase {
                 MemRecProc.class,
                 PageRankWriteProc.class,
                 PageRankStreamProc.class,
-                LabelPropagationProc.class,
+                LabelPropagationWriteProc.class,
+                LabelPropagationStreamProc.class,
                 WccStreamProc.class,
                 WccWriteProc.class,
                 LouvainWriteProc.class,
