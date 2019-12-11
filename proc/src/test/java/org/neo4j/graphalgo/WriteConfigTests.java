@@ -26,10 +26,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
+import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.MapUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public interface WriteConfigTests<CONFIG extends WriteConfig & BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
 
@@ -65,5 +67,11 @@ public interface WriteConfigTests<CONFIG extends WriteConfig & BaseAlgoConfig, R
         CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
         assertEquals("writeProperty", config.writeProperty());
         assertEquals(42, config.writeConcurrency());
+    }
+
+    default void checkMillisSet(Result.ResultRow row) {
+        assertTrue(row.getNumber("createMillis").intValue() >= 0, "load time not set");
+        assertTrue(row.getNumber("computeMillis").intValue() >= 0, "compute time not set");
+        assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
     }
 }
