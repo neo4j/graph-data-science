@@ -32,9 +32,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -42,7 +40,6 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
 class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPropagationWriteConfig> implements
     WriteConfigTests<LabelPropagationWriteConfig, LabelPropagation> {
@@ -89,18 +86,33 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTestBase#graphVariations")
     void respectsMaxIterations(String graphSnippet, String desc) {
-
-        @Language("Cypher")
         String query = "CALL gds.algo.labelPropagation.write(" +
                        graphSnippet +
                        "    maxIterations: 5, " +
                        "    writeProperty: 'label'" +
                        "  }" +
                        ")";
-
-        runQuery(query,
-            row -> assertTrue(5 >= row.getNumber("ranIterations").intValue())
+        runQuery(
+            query,
+            row -> {
+                assertTrue(5 >= row.getNumber("ranIterations").intValue());
+                assertEquals(
+                    MapUtil.map(
+                        "p999", 2L,
+                        "p99", 2L,
+                        "p95", 2L,
+                        "p90", 2L,
+                        "p75", 1L,
+                        "p50", 1L,
+                        "min", 1L,
+                        "max", 2L,
+                        "mean", 1.2D
+                    ),
+                    row.get("communityDistribution")
+                );
+            }
         );
+
     }
 
     static Stream<Arguments> concurrenciesExplicitAndImplicitCreate() {
@@ -122,9 +134,22 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
         runQuery(query, concurrencySeedWeightAndWriteParams(concurrency),
             row -> {
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
-                assertTrue(row.getNumber("createMillis").intValue() >= 0, "load time not set");
-                assertTrue(row.getNumber("computeMillis").intValue() >= 0, "compute time not set");
-                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+                checkMillisSet(row);
+                assertEquals(
+                    MapUtil.map(
+                        "p999", 8L,
+                        "p99", 8L,
+                        "p95", 8L,
+                        "p90", 8L,
+                        "p75", 8L,
+                        "p50", 4L,
+                        "min", 4L,
+                        "max", 8L,
+                        "mean", 6.0D
+                    ),
+                    row.get("communityDistribution")
+                );
+
             }
         );
         String check = "MATCH (n) " +
@@ -151,9 +176,22 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
         runQuery(query, MapUtil.map("graph", graphName, "writeProperty", writeProperty),
             row -> {
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
-                assertTrue(row.getNumber("createMillis").intValue() >= 0, "load time not set");
-                assertTrue(row.getNumber("computeMillis").intValue() >= 0, "compute time not set");
-                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+                checkMillisSet(row);
+                assertEquals(
+                    MapUtil.map(
+                        "p999", 6L,
+                        "p99", 6L,
+                        "p95", 6L,
+                        "p90", 6L,
+                        "p75", 6L,
+                        "p50", 6L,
+                        "min", 6L,
+                        "max", 6L,
+                        "mean", 6.0D
+                    ),
+                    row.get("communityDistribution")
+                );
+
             }
         );
         String check = String.format("MATCH (a {id: 0}), (b {id: 1}) " +
@@ -180,9 +218,22 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
         runQuery(query, MapUtil.map("graph", graphName, "writeProperty", writeProperty),
             row -> {
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
-                assertTrue(row.getNumber("createMillis").intValue() >= 0, "load time not set");
-                assertTrue(row.getNumber("computeMillis").intValue() >= 0, "compute time not set");
-                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+                checkMillisSet(row);
+                assertEquals(
+                    MapUtil.map(
+                        "p999", 6L,
+                        "p99", 6L,
+                        "p95", 6L,
+                        "p90", 6L,
+                        "p75", 6L,
+                        "p50", 6L,
+                        "min", 6L,
+                        "max", 6L,
+                        "mean", 6.0D
+                    ),
+                    row.get("communityDistribution")
+                );
+
             }
         );
         String validateQuery = String.format(
@@ -209,9 +260,22 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
                 assertEquals("seed", row.getString("seedProperty"));
                 assertEquals("seed", row.getString("writeProperty"));
-                assertTrue(row.getNumber("createMillis").intValue() >= 0, "load time not set");
-                assertTrue(row.getNumber("computeMillis").intValue() >= 0, "compute time not set");
-                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+                checkMillisSet(row);
+                assertEquals(
+                    MapUtil.map(
+                        "p999", 8L,
+                        "p99", 8L,
+                        "p95", 8L,
+                        "p90", 8L,
+                        "p75", 8L,
+                        "p50", 4L,
+                        "min", 4L,
+                        "max", 8L,
+                        "mean", 6.0D
+                    ),
+                    row.get("communityDistribution")
+                );
+
             }
         );
         String check = "MATCH (n) " +
@@ -233,9 +297,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
             row -> {
                 assertNull(row.getString("seedProperty"));
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
-                assertTrue(row.getNumber("createMillis").intValue() >= 0, "load time not set");
-                assertTrue(row.getNumber("computeMillis").intValue() >= 0, "compute time not set");
-                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+                checkMillisSet(row);
             }
         );
         runQuery(
@@ -246,18 +308,6 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
             "MATCH (n) WHERE n.id = 1 RETURN n.community AS community",
             row -> assertEquals(11, row.getNumber("community").intValue())
         );
-    }
-
-
-    private void assertWriteResult(List<List<Long>> expectedCommunities, String writeProperty) {
-        List<Long> actualCommunities = new ArrayList<>();
-        runQuery(String.format("MATCH (n) RETURN id(n) as id, n.%s as community", writeProperty), (row) -> {
-            long community = row.getNumber("community").longValue();
-            int id = row.getNumber("id").intValue();
-            actualCommunities.add(id, community);
-        });
-
-        assertCommunities(actualCommunities, expectedCommunities);
     }
 
     Map<String, Object> concurrencySeedWeightAndWriteParams(int concurrency) {
