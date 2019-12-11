@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
 import org.neo4j.graphalgo.wcc.WccWriteProc;

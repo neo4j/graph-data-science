@@ -135,7 +135,7 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
         builder.setComputeMillis(computationResult.computeMillis());
         builder.withNodeCount(graph.nodeCount());
 
-        if (!computationResult.isEmpty()) {
+        if (!computationResult.isGraphEmpty()) {
             builder
                 .didConverge(result.didConverge())
                 .ranIterations(result.ranIterations())
@@ -262,7 +262,7 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
         protected LabelPropagationWriteProc.WriteResult buildResult() {
             return new LabelPropagationWriteProc.WriteResult(
                 config,
-                nodeCount,  // should be nodePropertiesWritten
+                nodePropertiesWritten,
                 0L,
                 loadMillis,
                 computeMillis,

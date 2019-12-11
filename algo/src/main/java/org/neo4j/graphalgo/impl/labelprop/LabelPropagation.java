@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.labelprop;
 
+import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.Algorithm;
@@ -27,6 +28,10 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationConfigBase;
@@ -39,6 +44,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagation> {
 
@@ -176,6 +183,28 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         }
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, 1, MICROSECONDS, terminationFlag, executor);
         return tasks;
+    }
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(LabelPropagation.class)
+            .perNode("labels", HugeLongArray::memoryEstimation)
+            .perThread("votes", MemoryEstimations.builder()
+                .field("init step", InitStep.class)
+                .field("compute step", ComputeStep.class)
+                .field("step runner", StepRunner.class)
+                .field("compute step consumer", ComputeStepConsumer.class)
+                .field("votes container", LongDoubleScatterMap.class)
+                .rangePerNode("votes", nodeCount -> {
+                    long minBufferSize = MemoryUsage.sizeOfEmptyOpenHashContainer();
+                    long maxBufferSize = MemoryUsage.sizeOfOpenHashContainer(nodeCount);
+                    if (maxBufferSize < minBufferSize) {
+                        maxBufferSize = minBufferSize;
+                    }
+                    long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
+                    long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
+                    return MemoryRange.of(min, max);
+                }).build())
+            .build();
     }
 
     void withBatchSize(int batchSize) {

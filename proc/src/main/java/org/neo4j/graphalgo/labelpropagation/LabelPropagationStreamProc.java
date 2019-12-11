@@ -86,7 +86,7 @@ public class LabelPropagationStreamProc extends LabelPropagationProcBase<LabelPr
 
     private Stream<LabelPropagationStreamProc.StreamResult> stream(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult) {
         Graph graph = computationResult.graph();
-        if (computationResult.isEmpty()) {
+        if (computationResult.isGraphEmpty()) {
             return Stream.empty();
         }
         HugeLongArray labels = computationResult.result().labels();
