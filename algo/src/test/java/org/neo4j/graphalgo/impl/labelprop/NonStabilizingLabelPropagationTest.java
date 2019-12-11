@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphalgo.labelpropagation.ImmutableLabelPropagationStreamConfig;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -95,7 +95,7 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
         Graph graph = loadGraph(graphImpl);
         LabelPropagation labelPropagation = new LabelPropagation(
             graph,
-            LabelPropagationTest.ConfigBuilder.testDefault(),
+            ImmutableLabelPropagationStreamConfig.builder().build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

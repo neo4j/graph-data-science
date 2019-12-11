@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationConfigBase;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.StatementConstants;
 
@@ -47,7 +48,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
     private final AllocationTracker tracker;
     private final NodeProperties nodeProperties;
     private final NodeProperties nodeWeights;
-    private final Config config;
+    private final LabelPropagationConfigBase config;
     private final ExecutorService executor;
 
     private Graph graph;
@@ -55,10 +56,11 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
     private final long maxLabelId;
     private long ranIterations;
     private boolean didConverge;
+    private int batchSize;
 
     public LabelPropagation(
         Graph graph,
-        Config config,
+        LabelPropagationConfigBase config,
         ExecutorService executor,
         AllocationTracker tracker
     ) {
@@ -67,14 +69,15 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         this.config = config;
         this.executor = executor;
         this.tracker = tracker;
+        this.batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
 
-        NodeProperties seedProperty = graph.nodeProperties(config.seedProperty);
+        NodeProperties seedProperty = graph.nodeProperties(config.seedProperty());
         if (seedProperty == null) {
             seedProperty = new NullPropertyMap(0.0);
         }
         this.nodeProperties = seedProperty;
 
-        NodeProperties weightProperty = graph.nodeProperties(config.weightProperty);
+        NodeProperties weightProperty = graph.nodeProperties(config.weightProperty());
         if (weightProperty == null) {
             weightProperty = new NullPropertyMap(1.0);
         }
@@ -106,7 +109,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
 
     @Override
     public LabelPropagation compute() {
-        if (config.maxIterations <= 0L) {
+        if (config.maxIterations() <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
 
@@ -117,11 +120,11 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         ranIterations = 0L;
         didConverge = false;
 
-        List<StepRunner> stepRunners = stepRunners(config.direction);
+        List<StepRunner> stepRunners = stepRunners(config.direction());
 
         long currentIteration = 0L;
-        while (currentIteration < config.maxIterations) {
-            ParallelUtil.runWithConcurrency(config.concurrency, stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
+        while (currentIteration < config.maxIterations()) {
+            ParallelUtil.runWithConcurrency(config.concurrency(), stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
             ++currentIteration;
         }
 
@@ -147,7 +150,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
 
     private List<StepRunner> stepRunners(Direction direction) {
         long nodeCount = graph.nodeCount();
-        long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, config.batchSize);
+        long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, this.batchSize);
 
         Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
             nodeCount,
@@ -171,13 +174,12 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
             StepRunner task = new StepRunner(initStep);
             tasks.add(task);
         }
-        ParallelUtil.runWithConcurrency(config.concurrency, tasks, 1, MICROSECONDS, terminationFlag, executor);
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, 1, MICROSECONDS, terminationFlag, executor);
         return tasks;
     }
 
-    public LabelPropagation withDirection(Direction direction) {
-        config.withDirection(direction);
-        return this;
+    void withBatchSize(int batchSize) {
+        this.batchSize = batchSize;
     }
 
     public static class Config {

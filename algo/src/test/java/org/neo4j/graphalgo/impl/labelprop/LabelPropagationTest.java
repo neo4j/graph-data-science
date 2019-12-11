@@ -39,14 +39,13 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.impl.labelprop.LabelPropagation.Config;
+import org.neo4j.graphalgo.labelpropagation.ImmutableLabelPropagationStreamConfig;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
 
@@ -112,7 +111,7 @@ final class LabelPropagationTest extends AlgoTestBase {
         Graph graph = loadGraph(graphImpl);
         LabelPropagation lp = new LabelPropagation(
             graph,
-            new ConfigBuilder().withMaxIterations(1).build(),
+            ImmutableLabelPropagationStreamConfig.builder().maxIterations(1).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -134,9 +133,10 @@ final class LabelPropagationTest extends AlgoTestBase {
 
         LabelPropagation lp = new LabelPropagation(
             graph,
-            new ConfigBuilder()
-                .withSeedProperty("seedId")
-                .withMaxIterations(1)
+            ImmutableLabelPropagationStreamConfig
+                .builder()
+                .seedProperty("seedId")
+                .maxIterations(1)
                 .build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
@@ -168,12 +168,11 @@ final class LabelPropagationTest extends AlgoTestBase {
     private void testLPClustering(Graph graph, int batchSize) {
         LabelPropagation lp = new LabelPropagation(
                 graph,
-                new ConfigBuilder()
-                    .withBatchSize(batchSize)
-                    .build(),
+                defaultConfig(),
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY
         );
+        lp.withBatchSize(batchSize);
         lp.compute();
         HugeLongArray labels = lp.labels();
         assertNotNull(labels);
@@ -234,10 +233,10 @@ final class LabelPropagationTest extends AlgoTestBase {
     }
 
     @Test
-    void shouldBoundMemrecToMaxSupportedDegree() {
-        LabelPropagationFactory labelPropagation = new LabelPropagationFactory(ConfigBuilder.testDefault());
+    void shouldBoundMemEstimationToMaxSupportedDegree() {
+        LabelPropagationFactory labelPropagation = new LabelPropagationFactory(defaultConfig());
         GraphDimensions largeDimensions = new GraphDimensions.Builder()
-            .setNodeCount((long)Integer.MAX_VALUE + (long)Integer.MAX_VALUE)
+            .setNodeCount((long) Integer.MAX_VALUE + (long) Integer.MAX_VALUE)
             .build();
 
         // test for no failure and no overflow
@@ -247,7 +246,7 @@ final class LabelPropagationTest extends AlgoTestBase {
     private void assertMemoryEstimation(long nodeCount, int concurrency) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
 
-        LabelPropagationFactory labelPropagation = new LabelPropagationFactory(new ConfigBuilder().build());
+        LabelPropagationFactory labelPropagation = new LabelPropagationFactory(defaultConfig());
 
         MemoryRange actual = labelPropagation
             .memoryEstimation(ProcedureConfiguration.empty())
@@ -278,46 +277,7 @@ final class LabelPropagationTest extends AlgoTestBase {
         assertEquals(max, actual.max, "max");
     }
 
-    static class ConfigBuilder {
-
-        private String seedProperty = null;
-        private String weightProperty = null;
-        private int batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
-        private int concurrency = Pools.DEFAULT_CONCURRENCY;
-        private Direction direction = Direction.OUTGOING;
-        private int maxIterations = 10;
-
-        static Config testDefault() {
-            return new ConfigBuilder().build();
-        }
-
-        ConfigBuilder withSeedProperty(String seedProperty) {
-            this.seedProperty = seedProperty;
-            return this;
-        }
-
-        ConfigBuilder withBatchSize(int batchSize) {
-            this.batchSize = batchSize;
-            return this;
-        }
-
-        ConfigBuilder withConcurrency(int concurrency) {
-            this.concurrency = concurrency;
-            return this;
-        }
-
-        ConfigBuilder withDirection(Direction direction) {
-            this.direction = direction;
-            return this;
-        }
-
-        ConfigBuilder withMaxIterations(int maxIterations) {
-            this.maxIterations = maxIterations;
-            return this;
-        }
-
-        Config build() {
-            return new Config(seedProperty, weightProperty, batchSize, concurrency, direction, maxIterations);
-        }
+    LabelPropagationStreamConfig defaultConfig() {
+        return ImmutableLabelPropagationStreamConfig.builder().build();
     }
 }

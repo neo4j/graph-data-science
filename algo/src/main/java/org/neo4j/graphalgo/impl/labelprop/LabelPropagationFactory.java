@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.impl.labelprop;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -30,30 +29,32 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationConfigBase;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class LabelPropagationFactory extends AlgorithmFactory<LabelPropagation, ProcedureConfiguration> {
+public class LabelPropagationFactory<CONFIG extends LabelPropagationConfigBase> extends AlgorithmFactory<LabelPropagation, CONFIG> {
 
-    private final LabelPropagation.Config config;
+    private final LabelPropagationConfigBase config;
 
-    public LabelPropagationFactory(LabelPropagation.Config config) {
+    public LabelPropagationFactory(LabelPropagationConfigBase config) {
         this.config = config;
     }
 
     @Override
     public LabelPropagation build(
-            final Graph graph,
-            final ProcedureConfiguration configuration,
-            final AllocationTracker tracker,
-            final Log log) {
+        Graph graph,
+        CONFIG configuration,
+        AllocationTracker tracker,
+        Log log
+    ) {
         return new LabelPropagation(
-                graph,
-                config,
-                Pools.DEFAULT,
-                tracker
+            graph,
+            config,
+            Pools.DEFAULT,
+            tracker
         );
     }
 
