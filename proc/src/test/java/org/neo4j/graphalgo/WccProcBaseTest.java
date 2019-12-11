@@ -23,6 +23,9 @@ package org.neo4j.graphalgo;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.wcc.WccBaseConfig;
@@ -32,7 +35,11 @@ import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBase implements
     BaseAlgoProcTests<CONFIG, DisjointSetStruct>,
@@ -90,5 +97,36 @@ abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBas
         for (long i = 0; i < nodeCount; i++) {
             assertEquals(result1.setIdOf(i), result2.setIdOf(i), String.format("Node %d has different set ids", i));
         }
+    }
+
+    @Test
+    void testFailWhenSpecifyingThresholdWithoutRelationshipWeight() {
+        CypherMapWrapper config = CypherMapWrapper.create(MapUtil.map(
+            "threshold", 3.14
+        ));
+
+        applyOnProcedure(proc -> {
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> { proc.newConfig(Optional.empty(), config); }
+            );
+
+            assertTrue(exception
+                .getMessage()
+                .contains("Specifying a threshold requires `weightProperty` to be set")
+            );
+        });
+    }
+
+    @Test
+    void testSettingAThreshold() {
+        CypherMapWrapper config = CypherMapWrapper.create(MapUtil.map(
+            "threshold", 3.14,
+            "weightProperty", "threshold"
+        ));
+
+        applyOnProcedure(proc -> {
+            CONFIG wccConfig = proc.newConfig(Optional.of("myGraph"), config);
+            assertEquals(3.14, wccConfig.threshold());
+        });
     }
 }

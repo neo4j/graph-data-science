@@ -19,11 +19,12 @@
  */
 package org.neo4j.graphalgo.impl.wcc;
 
+import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -31,19 +32,35 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.RelationshipType;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-class WccTest extends WccBaseTest {
+class WccTest extends AlgoTestBase {
 
+    static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
     private static final int SETS_COUNT = 16;
     private static final int SET_SIZE = 10;
+
+    /**
+     * Compute number of sets present.
+     */
+    static long getSetCount(DisjointSetStruct struct) {
+        long capacity = struct.size();
+        BitSet sets = new BitSet(capacity);
+        for (long i = 0L; i < capacity; i++) {
+            long setId = struct.setIdOf(i);
+            sets.set(setId);
+        }
+        return sets.cardinality();
+    }
 
     @BeforeEach
     void setupGraphDb() {
@@ -58,7 +75,6 @@ class WccTest extends WccBaseTest {
         db.shutdown();
     }
 
-    @Override
     int communitySize() {
         return SET_SIZE;
     }
@@ -178,5 +194,23 @@ class WccTest extends WccBaseTest {
             temp.createRelationshipTo(t, RELATIONSHIP_TYPE);
             temp = t;
         }
+    }
+
+    DisjointSetStruct run(Graph graph) {
+        return run(graph, ImmutableWccStreamConfig.builder().build());
+    }
+
+    DisjointSetStruct run(Graph graph, WccBaseConfig config) {
+        return run(graph, config, communitySize() / Pools.DEFAULT_CONCURRENCY);
+    }
+
+    DisjointSetStruct run(Graph graph, WccBaseConfig config, int concurrency) {
+        return new Wcc(
+            graph,
+            Pools.DEFAULT,
+            communitySize() / Pools.DEFAULT_CONCURRENCY,
+            config,
+            AllocationTracker.EMPTY
+        ).compute();
     }
 }

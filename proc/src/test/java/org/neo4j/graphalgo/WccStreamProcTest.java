@@ -20,97 +20,43 @@
 package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntScatterMap;
-import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.graphalgo.compat.MapUtil;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.wcc.WccStreamConfig;
-import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_WEIGHT_KEY;
+import java.util.Optional;
 
 class WccStreamProcTest extends WccProcBaseTest<WccStreamConfig> {
 
     @Override
     public Class<? extends BaseAlgoProc<?, DisjointSetStruct, WccStreamConfig>> getProcedureClazz() {
-        return null;
+        return WccStreamProc.class;
     }
 
     @Override
     public WccStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return null;
+        return WccStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 
-    @AllGraphNamesTest
-    void testWCCStream(String graphImpl) {
-        String query = "CALL algo.beta.wcc.stream(" +
-                       "    '', 'TYPE', {" +
-                       "        graph: $graph" +
-                       "    }" +
-                       ") YIELD setId";
+    @Test
+    void testWCCStreamWithDefaults() {
+        String query = GdsCypher.call("wcc")
+            .streamMode()
+            .implicitCreation(ImmutableGraphCreateConfig
+                .builder()
+                .graphName("testGraph")
+                .nodeProjection(NodeProjections.empty())
+                .relationshipProjection(RelationshipProjections.empty())
+                .build()
+            ).yields("setId");
 
         IntIntScatterMap map = new IntIntScatterMap(11);
-        runQuery(query, MapUtil.map("graph", graphImpl),
+        runQuery(query,
             row -> map.addTo(row.getNumber("setId").intValue(), 1)
         );
         assertMapContains(map, 1, 2, 7);
-    }
-
-    @AllGraphNamesTest
-    void testThresholdWCCStream(String graphImpl) {
-        String query = "CALL algo.beta.wcc.stream(" +
-                       "    '', 'TYPE', {" +
-                       "        weightProperty: 'cost', defaultValue: 10.0, threshold: 5.0, concurrency: 1, graph: $graph" +
-                       "    }" +
-                       ") YIELD setId";
-
-        IntIntScatterMap map = new IntIntScatterMap(11);
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> map.addTo(row.getNumber("setId").intValue(), 1)
-        );
-        assertMapContains(map, 4, 3, 2, 1);
-    }
-
-    @AllGraphNamesTest
-    void testThresholdWCCLowThreshold(String graphImpl) {
-        String query = "CALL algo.beta.wcc.stream(" +
-                       "    '', 'TYPE', {" +
-                       "        weightProperty: 'cost', defaultValue: 10.0, concurrency: 1, threshold: 3.14, graph: $graph" +
-                       "    }" +
-                       ") YIELD setId";
-        IntIntScatterMap map = new IntIntScatterMap(11);
-        runQuery(query, MapUtil.map("graph", graphImpl),
-            row -> {
-                map.addTo(row.getNumber("setId").intValue(), 1);
-            }
-        );
-        assertMapContains(map, 1, 2, 7);
-    }
-
-    @AllGraphNamesTest
-    void shouldFailWhenSpecifyingThresholdWithoutRelationshipWeight(String graphImpl) {
-        String query = "CALL algo.beta.wcc.stream(" +
-                       "    '', 'TYPE', {" +
-                       "        defaultValue: 10.0, concurrency: 1, threshold: 3.14, graph: $graph" +
-                       "    }" +
-                       ") YIELD setId";
-        QueryExecutionException exception = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(query, MapUtil.map("graph", graphImpl))
-        );
-        Throwable rootCause = ExceptionUtil.rootCause(exception);
-
-        assertTrue(rootCause
-            .getMessage()
-            .contains(String.format(
-                "%s requires a `%s` or `%s`",
-                0D,
-                RELATIONSHIP_WEIGHT_KEY,
-                DEPRECATED_RELATIONSHIP_PROPERTY_KEY
-            )));
     }
 }

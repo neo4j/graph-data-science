@@ -36,11 +36,15 @@ public interface WccStreamConfig extends WccBaseConfig {
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new WccStreamConfigImpl(
+        WccStreamConfigImpl wccStreamConfig = new WccStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
             config
         );
+
+        wccStreamConfig.validate();
+
+        return wccStreamConfig;
     }
 }

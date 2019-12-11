@@ -45,4 +45,11 @@ public interface WccBaseConfig extends BaseAlgoConfig, SeedConfig, WeightConfig 
     default boolean isIncremental() {
         return seedProperty() != null;
     }
+
+    @Configuration.Ignore
+    default void validate() {
+        if (threshold() > 0 && weightProperty() == null) {
+            throw new IllegalArgumentException("Specifying a threshold requires `weightProperty` to be set.");
+        }
+    }
 }
