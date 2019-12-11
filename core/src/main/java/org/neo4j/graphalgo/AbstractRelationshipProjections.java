@@ -39,7 +39,7 @@ import static java.util.stream.Collectors.toMap;
 
 @DataClass
 @Value.Immutable(singleton = true)
-public abstract class AbstractRelationshipProjections {
+public abstract class AbstractRelationshipProjections extends AbstractProjections<RelationshipProjection> {
 
     public abstract Map<ElementIdentifier, RelationshipProjection> projections();
 
@@ -193,13 +193,5 @@ public abstract class AbstractRelationshipProjections {
             value.put(identifier.name, projection.toObject());
         });
         return value;
-    }
-
-    public Set<String> allRelationshipProperties() {
-        return projections()
-            .values()
-            .stream()
-            .flatMap(p -> p.properties().mappings().stream().map(PropertyMapping::propertyKey))
-            .collect(Collectors.toSet());
     }
 }

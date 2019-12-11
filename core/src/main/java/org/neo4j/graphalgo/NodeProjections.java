@@ -37,7 +37,7 @@ import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
-public final class NodeProjections {
+public final class NodeProjections extends AbstractProjections<NodeProjection> {
 
     private static final NodeProjections EMPTY = new NodeProjections(emptyMap());
 
@@ -112,6 +112,11 @@ public final class NodeProjections {
         this.projections = projections;
     }
 
+    @Override
+    public Map<ElementIdentifier, NodeProjection> projections() {
+        return projections;
+    }
+
     public NodeProjection getFilter(ElementIdentifier identifier) {
         NodeProjection filter = projections.get(identifier);
         if (filter == null) {
@@ -166,13 +171,5 @@ public final class NodeProjections {
             value.put(identifier.name, projection.toObject());
         });
         return value;
-    }
-
-    public Set<String> allNodeProperties() {
-        return projections
-            .values()
-            .stream()
-            .flatMap(p -> p.properties().mappings().stream().map(PropertyMapping::propertyKey))
-            .collect(Collectors.toSet());
     }
 }

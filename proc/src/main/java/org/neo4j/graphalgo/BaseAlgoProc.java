@@ -186,7 +186,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
     private void validateConfig(GraphCreateConfig graph, CONFIG config) {
         if (config instanceof SeedConfig) {
-            Set<String> nodeProperties = graph.nodeProjection().allNodeProperties();
+            Set<String> nodeProperties = graph.nodeProjection().allProperties();
             String seedProperty = ((SeedConfig) config).seedProperty();
             if (seedProperty != null && !nodeProperties.contains(seedProperty)) {
                 throw new IllegalArgumentException(String.format(
@@ -197,7 +197,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             }
         }
         if (config instanceof WeightConfig) {
-            Set<String> relationshipProperties = graph.relationshipProjection().allRelationshipProperties();
+            Set<String> relationshipProperties = graph.relationshipProjection().allProperties();
             String weightProperty = ((WeightConfig) config).weightProperty();
             if (weightProperty != null && !relationshipProperties.contains(weightProperty)) {
                 throw new IllegalArgumentException(String.format(
