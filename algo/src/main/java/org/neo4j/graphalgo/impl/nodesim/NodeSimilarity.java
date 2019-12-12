@@ -44,7 +44,7 @@ import java.util.stream.Stream;
 public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResult> {
 
     private final Graph graph;
-    private final Config config;
+    private final NodeSimilarityConfigBase config;
 
     private final ExecutorService executorService;
     private final AllocationTracker tracker;
@@ -58,7 +58,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
 
     public NodeSimilarity(
         Graph graph,
-        Config config,
+        NodeSimilarityConfigBase config,
         ExecutorService executorService,
         AllocationTracker tracker
     ) {
@@ -85,7 +85,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
 
     @Override
     public NodeSimilarityResult compute() {
-        if (config.computeToStream) {
+        if (config.computeToStream()) {
             return ImmutableNodeSimilarityResult.of(
                 Optional.of(computeToStream()),
                 Optional.empty()
@@ -135,7 +135,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private void prepare() {
-        if (config.direction == Direction.BOTH) {
+        if (config.direction() == Direction.BOTH) {
             throw new IllegalArgumentException(
                 "Direction BOTH is not supported by the NodeSimilarity algorithm.");
         }
@@ -145,15 +145,15 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         DegreeComputer degreeComputer = new DegreeComputer();
         VectorComputer vectorComputer = new VectorComputer();
         vectors.setAll(node -> {
-            graph.forEachRelationship(node, config.direction, degreeComputer);
+            graph.forEachRelationship(node, config.direction(), degreeComputer);
             int degree = degreeComputer.degree;
             degreeComputer.reset();
             vectorComputer.reset(degree);
-            if (degree >= config.degreeCutoff) {
+            if (degree >= config.degreeCutoff()) {
                 nodesToCompare++;
                 nodeFilter.set(node);
 
-                graph.forEachRelationship(node, config.direction, vectorComputer);
+                graph.forEachRelationship(node, config.direction(), vectorComputer);
                 return vectorComputer.targetIds.buffer;
             }
             return null;
@@ -207,8 +207,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private TopKMap computeTopkMap() {
-        Comparator<SimilarityResult> comparator = config.topK > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topK), comparator, tracker);
+        Comparator<SimilarityResult> comparator = config.topK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topK()), comparator, tracker);
         loggelableAndTerminatableNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
@@ -225,8 +225,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private TopKMap computeTopKMapParallel() {
-        Comparator<SimilarityResult> comparator = config.topK > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topK), comparator, tracker);
+        Comparator<SimilarityResult> comparator = config.topK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topK()), comparator, tracker);
         ParallelUtil.parallelStreamConsume(
             loggelableAndTerminatableNodeStream(),
             stream -> stream
@@ -252,7 +252,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private Stream<SimilarityResult> computeTopN() {
-        TopNList topNList = new TopNList(config.topN);
+        TopNList topNList = new TopNList(config.topN());
         loggelableAndTerminatableNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
@@ -268,7 +268,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private Stream<SimilarityResult> computeTopN(TopKMap topKMap) {
-        TopNList topNList = new TopNList(config.topN);
+        TopNList topNList = new TopNList(config.topN());
         topKMap.forEach(topNList::add);
         return topNList.stream();
     }
@@ -295,7 +295,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         long intersection = Intersections.intersection3(vector1, vector2);
         double union = vector1.length + vector2.length - intersection;
         double similarity = union == 0 ? 0 : intersection / union;
-        return similarity >= config.similarityCutoff ? similarity : Double.NaN;
+        return similarity >= config.similarityCutoff() ? similarity : Double.NaN;
     }
 
     private LongStream nodeStream() {

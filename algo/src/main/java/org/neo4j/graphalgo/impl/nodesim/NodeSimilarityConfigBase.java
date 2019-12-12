@@ -23,6 +23,7 @@ package org.neo4j.graphalgo.impl.nodesim;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 
 public interface NodeSimilarityConfigBase extends BaseAlgoConfig {
@@ -127,10 +128,18 @@ public interface NodeSimilarityConfigBase extends BaseAlgoConfig {
         }
 
         if (topK() != TOP_K_DEFAULT && bottomK() != BOTTOM_K_DEFAULT) {
-            throw new IllegalArgumentException(String.format("Invalid parameter combination: %s combined with %s", TOP_K_KEY, BOTTOM_K_KEY));
+            throw new IllegalArgumentException(String.format(
+                "Invalid parameter combination: %s combined with %s",
+                TOP_K_KEY,
+                BOTTOM_K_KEY
+            ));
         }
-        if (topN() != TOP_N_DEFAULT  && bottomN() != BOTTOM_N_DEFAULT) {
-            throw new IllegalArgumentException(String.format("Invalid parameter combination: %s combined with %s", TOP_N_KEY, BOTTOM_N_KEY));
+        if (topN() != TOP_N_DEFAULT && bottomN() != BOTTOM_N_DEFAULT) {
+            throw new IllegalArgumentException(String.format(
+                "Invalid parameter combination: %s combined with %s",
+                TOP_N_KEY,
+                BOTTOM_N_KEY
+            ));
         }
 
         String kMessage = "Invalid value for %s: must be a positive integer";
@@ -147,6 +156,33 @@ public interface NodeSimilarityConfigBase extends BaseAlgoConfig {
         if (topN() < 0) {
             throw new IllegalArgumentException(String.format(nMessage, TOP_N_KEY));
         }
+    }
+
+    interface Builder {
+
+        Builder username(String username);
+
+        Builder concurrency(int concurrency);
+
+        Builder graphName(String graphName);
+
+        Builder implicitCreateConfig(GraphCreateConfig implicitCreateConfig);
+
+        Builder similarityCutoff(double similarityCutoff);
+
+        Builder degreeCutoff(int degreeCutoff);
+
+        Builder topK(int topK);
+
+        Builder topN(int topN);
+
+        Builder bottomK(int bottomK);
+
+        Builder bottomN(int bottomN);
+
+        Builder direction(Direction direction);
+
+        NodeSimilarityConfigBase build();
     }
 
 }

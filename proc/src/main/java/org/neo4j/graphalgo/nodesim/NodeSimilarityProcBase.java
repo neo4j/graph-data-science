@@ -45,18 +45,6 @@ public abstract class NodeSimilarityProcBase <CONFIG extends NodeSimilarityConfi
     protected AlgorithmFactory<NodeSimilarity, CONFIG> algorithmFactory(CONFIG config) {
         // TODO: Should check if we are writing or streaming, but how to do that in memrec?
         boolean computesSimilarityGraph = !config.computeToStream();
-        return new NodeSimilarityFactory<>(
-            new NodeSimilarity.Config(
-                config.similarityCutoff(),
-                config.degreeCutoff(),
-                config.normalizedN(),
-                config.normalizedK(),
-                config.concurrency(),
-                ParallelUtil.DEFAULT_BATCH_SIZE,
-                config.direction(),
-                config.computeToStream()
-            ),
-            computesSimilarityGraph
-        );
+        return new NodeSimilarityFactory<CONFIG>(config, computesSimilarityGraph);
     }
 }

@@ -28,24 +28,23 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-// TODO: Let CONFIG extend NodeSimilarityConfigBase
-public class NodeSimilarityFactory<CONFIG extends BaseAlgoConfig> extends AlgorithmFactory<NodeSimilarity, CONFIG> {
+public class NodeSimilarityFactory<CONFIG extends NodeSimilarityConfigBase> extends AlgorithmFactory<NodeSimilarity, CONFIG> {
 
-    private final NodeSimilarity.Config config;
+    private final CONFIG config;
     private final boolean computesSimilarityGraph;
-    public NodeSimilarityFactory(NodeSimilarity.Config config, boolean computesSimilarityGraph) {
-        this.config = config;
+
+    public NodeSimilarityFactory(CONFIG config, boolean computesSimilarityGraph) {
         this.computesSimilarityGraph = computesSimilarityGraph;
+        this.config = config;
     }
 
     @Override
     public NodeSimilarity build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
-        return new NodeSimilarity(graph, config, Pools.DEFAULT, tracker);
+        return new NodeSimilarity(graph, configuration, Pools.DEFAULT, tracker);
     }
 
     @Override

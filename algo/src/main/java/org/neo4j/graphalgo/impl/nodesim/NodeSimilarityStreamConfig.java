@@ -52,4 +52,9 @@ public interface NodeSimilarityStreamConfig extends NodeSimilarityConfigBase {
     default boolean computeToStream() {
         return true;
     }
+
+    interface Builder extends NodeSimilarityConfigBase.Builder {
+        @Override
+        NodeSimilarityStreamConfig build();
+    }
 }

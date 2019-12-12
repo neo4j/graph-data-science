@@ -26,11 +26,12 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.nodesim.ImmutableNodeSimilarityStreamConfig;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
+import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityConfigBase;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -82,20 +83,19 @@ public class NodeSimilarityBenchmark {
     @Param(value = {"5"})
     int scaleFactor;
 
-    private NodeSimilarity.Config config;
+    private NodeSimilarityConfigBase config;
 
     @Setup
     public void setup() {
-        config = new NodeSimilarity.Config(
-            0,
-            0,
-            topN,
-            topK,
-            concurrency,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            Direction.OUTGOING,
-            true
-        );
+        config = ImmutableNodeSimilarityStreamConfig
+            .builder()
+            .similarityCutoff(0)
+            .degreeCutoff(0)
+            .topN(topN)
+            .topK(topK)
+            .concurrency(concurrency)
+            .direction(Direction.OUTGOING)
+            .build();
         db = TestDatabaseCreator.createTestDatabase();
 
         createGraph(db, scaleFactor);
@@ -130,7 +130,7 @@ public class NodeSimilarityBenchmark {
         runJaccardProcedure(blackhole, jaccardInput, procedureConfig);
     }
 
-    private NodeSimilarity initAlgo(NodeSimilarity.Config config) {
+    private NodeSimilarity initAlgo(NodeSimilarityConfigBase config) {
         return new NodeSimilarity(
             graph,
             config,
