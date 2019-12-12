@@ -23,6 +23,7 @@ package org.neo4j.graphalgo.newapi;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,8 +35,15 @@ import static org.neo4j.graphalgo.newapi.GraphCatalogProcs.HISTOGRAM_FIELD_NAME;
 
 public class GraphDropProc extends BaseProc {
 
-    // TODO: Add Description
     @Procedure(name = "algo.beta.graph.drop", mode = Mode.READ)
+    @Description("CALL gds.graph.drop(" +
+                 "  graphName: STRING" +
+                 ") YIELD" +
+                 "  graphName: STRING," +
+                 "  nodeProjection: STRING," +
+                 "  relationshipProjection: STRING," +
+                 "  nodes: INTEGER," +
+                 "  relationships: INTEGER")
     public Stream<GraphInfo> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
 
