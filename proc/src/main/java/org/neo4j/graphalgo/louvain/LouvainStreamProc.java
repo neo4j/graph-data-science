@@ -41,6 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LouvainStreamProc extends LouvainProcBase<LouvainStreamConfig> {
 
+    // TODO maps need to be comma-separated
     @Procedure(value = "gds.algo.louvain.stream", mode = READ)
     @Description("CALL gds.algo.louvain.stream(graphName: STRING, configuration: MAP {" +
                  "    maxIteration: INTEGER" +
@@ -88,8 +89,10 @@ public class LouvainStreamProc extends LouvainProcBase<LouvainStreamConfig> {
         return computeMemoryEstimate(graphNameOrConfig, configuration);
     }
 
+    // TODO: inline
     private Stream<StreamResult> stream(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
         Graph graph = computationResult.graph();
+        // TODO: check louvain != null
         Louvain louvain = computationResult.result();
         boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
         return LongStream.range(0, graph.nodeCount())

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -45,9 +46,13 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.graphalgo.core.utils.ExceptionUtil.rootCause;
 
 /**
  * Suite of Base test that should be used for every algorithm procedure.
@@ -161,9 +166,9 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
                     Map<String, Object> configMap = createMinimallyValidConfig(CypherMapWrapper.empty()).toMap();
 
                     try {
-                        Stream<?> result = (Stream)method.invoke(proc, configMap, Collections.emptyMap());
+                        Stream<?> result = (Stream) method.invoke(proc, configMap, Collections.emptyMap());
 
-                        if(getProcedureMethodName(method).endsWith("stream")) {
+                        if (getProcedureMethodName(method).endsWith("stream")) {
                             assertEquals(0, result.count());
                         } else {
                             assertEquals(1, result.count());
@@ -172,6 +177,66 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
+                });
+        });
+    }
+
+    @Test
+    default void testFailOnMissingNodeLabel() {
+        applyOnProcedure((proc) -> {
+            getWriteAndStreamProcedures(proc)
+                .forEach(method -> {
+                    String missingLabel = "___THIS_LABEL_SHOULD_NOT_EXIST___";
+                    Map<String, Object> tempConfig = MapUtil.map(
+                        "nodeProjection",
+                        Collections.singletonList(missingLabel)
+                    );
+
+                    Map<String, Object> configMap = createMinimallyValidConfig(CypherMapWrapper.create(tempConfig)).toMap();
+
+                    Exception ex = assertThrows(
+                        Exception.class,
+                        () -> method.invoke(proc, configMap, Collections.emptyMap())
+                    );
+                    Throwable rootCause = rootCause(ex);
+                    assertEquals(IllegalArgumentException.class, rootCause.getClass());
+                    assertThat(
+                        rootCause.getMessage(),
+                        containsString(String.format(
+                            "Invalid node projection, one or more labels not found: '%s'",
+                            missingLabel
+                        ))
+                    );
+                });
+        });
+    }
+
+    @Test
+    default void testFailOnMissingRelationshipType() {
+        applyOnProcedure((proc) -> {
+            getWriteAndStreamProcedures(proc)
+                .forEach(method -> {
+                    String missingRelType = "___THIS_REL_TYPE_SHOULD_NOT_EXIST___";
+                    Map<String, Object> tempConfig = MapUtil.map(
+                        "relationshipProjection",
+                        Collections.singletonList(missingRelType)
+                    );
+
+                    Map<String, Object> configMap = createMinimallyValidConfig(CypherMapWrapper.create(tempConfig)).toMap();
+
+                    Exception ex = assertThrows(
+                        Exception.class,
+                        () -> method.invoke(proc, configMap, Collections.emptyMap())
+                    );
+                    Throwable rootCause = rootCause(ex);
+                    assertEquals(IllegalArgumentException.class, rootCause.getClass());
+                    assertThat(
+                        rootCause.getMessage(),
+                        containsString(String.format(
+                            "Invalid relationship projection, one or more relationship types not found: '%s'",
+                            missingRelType
+                        ))
+                    );
                 });
         });
     }

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -35,7 +36,8 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.unionfind.UnionFindProc;
+import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -105,9 +107,10 @@ class GraphLoadProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphLoadProc.class,
+            GraphCatalogProcs.class,
             PageRankProc.class,
-            UnionFindProc.class,
-            LabelPropagationProc.class
+            LabelPropagationProc.class,
+            WccWriteProc.class
         );
         runQuery(DB_CYPHER);
     }
@@ -488,12 +491,10 @@ class GraphLoadProcTest extends ProcTestBase {
                 row -> assertEquals(12, row.getNumber("nodes").intValue()));
     }
 
-    @Test
+    @Disabled
     void multiUseLoadedGraphWithMultipleRelationships() {
-        String query = "CALL algo.graph.load(" +
-                       "    'foo', null, 'X | Y', {" +
-                       "        graph: 'huge'" +
-                       "    }" +
+        String query = "CALL algo.beta.graph.create(" +
+                       "    'foo', {}, 'X | Y'" +
                        ")";
 
         runQuery(
@@ -501,24 +502,23 @@ class GraphLoadProcTest extends ProcTestBase {
                 row -> {
                     assertEquals(12, row.getNumber("nodes").intValue());
                     assertEquals(8, row.getNumber("relationships").intValue());
-                    assertEquals("huge", row.getString("graph"));
-                    assertFalse(row.getBoolean("alreadyLoaded"));
+                    assertEquals("foo", row.getString("graphName"));
                 }
         );
 
-        String algoQuery = "CALL algo.unionFind(" +
-                           "    null, $relType, {" +
-                           "        graph: 'foo', write: false" +
+        String algoQuery = "CALL gds.algo.wcc.stats(" +
+                           "    'foo', {" +
+                           "        relationshipProjection: $relType, writeProperty: 'componentId'" +
                            "    }" +
                            ")";
-        runQuery(algoQuery, singletonMap("relType", "X | Y"),
-                row -> assertEquals(4, row.getNumber("communityCount").intValue()));
+        runQuery(algoQuery, singletonMap("relType", Arrays.asList("X", "Y")),
+                row -> assertEquals(4, row.getNumber("componentCount").intValue()));
 
-        runQuery(algoQuery, singletonMap("relType", "X"),
-                row -> assertEquals(6, row.getNumber("communityCount").intValue()));
+        runQuery(algoQuery, singletonMap("relType", Arrays.asList("X")),
+                row -> assertEquals(6, row.getNumber("componentCount").intValue()));
 
-        runQuery(algoQuery, singletonMap("relType", "Y"),
-                row -> assertEquals(10, row.getNumber("communityCount").intValue()));
+        runQuery(algoQuery, singletonMap("relType", Arrays.asList("Y")),
+                row -> assertEquals(10, row.getNumber("componentCount").intValue()));
     }
 
     @ParameterizedTest

@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
-import org.neo4j.graphalgo.unionfind.UnionFindProc;
-import org.neo4j.graphalgo.wcc.WccProc;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,11 +47,6 @@ class ListProcTest extends ProcTestBase {
         "algo.beta.k1coloring.stream",
         "algo.beta.labelPropagation",
         "algo.beta.labelPropagation.stream",
-        "algo.beta.wcc",
-        "algo.beta.wcc.memrec",
-        "algo.beta.wcc.pregel",
-        "algo.beta.wcc.pregel.stream",
-        "algo.beta.wcc.stream",
         "algo.graph.info",
         "algo.graph.list",
         "algo.graph.load",
@@ -64,24 +59,20 @@ class ListProcTest extends ProcTestBase {
         "algo.pageRank",
         "algo.pageRank.memrec",
         "algo.pageRank.stream",
-        "algo.unionFind",
-        "algo.unionFind.forkJoin",
-        "algo.unionFind.forkJoin.stream",
-        "algo.unionFind.forkJoinMerge",
-        "algo.unionFind.forkJoinMerge.stream",
-        "algo.unionFind.memrec",
-        "algo.unionFind.queue",
-        "algo.unionFind.queue.stream",
-        "algo.unionFind.stream",
-        "algo.wcc",
-        "algo.wcc.memrec",
-        "algo.wcc.stream",
+
         "gds.algo.louvain.stats",
         "gds.algo.louvain.stats.estimate",
         "gds.algo.louvain.stream",
         "gds.algo.louvain.stream.estimate",
         "gds.algo.louvain.write",
-        "gds.algo.louvain.write.estimate"
+        "gds.algo.louvain.write.estimate",
+
+        "gds.algo.wcc.stats",
+        "gds.algo.wcc.stats.estimate",
+        "gds.algo.wcc.stream",
+        "gds.algo.wcc.stream.estimate",
+        "gds.algo.wcc.write",
+        "gds.algo.wcc.write.estimate"
         );
 
     private static final List<String> FUNCTIONS = Arrays.asList(
@@ -113,8 +104,8 @@ class ListProcTest extends ProcTestBase {
             LouvainStreamProc.class,
             MemRecProc.class,
             PageRankProc.class,
-            UnionFindProc.class,
-            WccProc.class
+            WccWriteProc.class,
+            WccStreamProc.class
         );
         registerFunctions(
             GetNodeFunc.class,

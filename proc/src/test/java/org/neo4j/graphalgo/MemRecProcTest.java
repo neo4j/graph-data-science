@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
-import org.neo4j.graphalgo.unionfind.UnionFindProc;
-import org.neo4j.graphalgo.wcc.WccProc;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.Map;
@@ -39,7 +39,24 @@ import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class MemRecProcTest extends ProcTestBase {
 
-    private String availableAlgoProcedures;
+    private final String availableAlgoProcedures = String.format(
+        "the available and supported procedures are {%s}.",
+        String.join(
+            ", ",
+            "algo.beta.k1coloring",
+            "algo.beta.modularityOptimization",
+            "algo.graph.load",
+            "algo.labelPropagation",
+            "algo.pageRank",
+            "gds.algo.louvain.stats",
+            "gds.algo.louvain.stream",
+            "gds.algo.louvain.write",
+            "gds.algo.wcc.stats",
+            "gds.algo.wcc.stream",
+            "gds.algo.wcc.write"
+        )
+    );
+
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:A {class: 42.0})" +
@@ -61,19 +78,15 @@ class MemRecProcTest extends ProcTestBase {
                 GraphLoadProc.class,
                 MemRecProc.class,
                 PageRankProc.class,
-                UnionFindProc.class,
                 LabelPropagationProc.class,
-                WccProc.class,
+                WccStreamProc.class,
+                WccWriteProc.class,
                 LouvainWriteProc.class,
                 LouvainStreamProc.class,
                 K1ColoringProc.class,
                 ModularityOptimizationProc.class
         );
-        availableAlgoProcedures = "the available and supported procedures are {" +
-                                  "algo.beta.k1coloring, algo.beta.modularityOptimization, algo.beta.wcc, algo.graph.load," +
-                                  " algo.labelPropagation, algo.pageRank, algo.unionFind, algo.wcc," +
-                                  " gds.algo.louvain.stats, gds.algo.louvain.stream, gds.algo.louvain.write" +
-                                  "}.";
+
         runQuery(DB_CYPHER);
     }
 
@@ -104,25 +117,11 @@ class MemRecProcTest extends ProcTestBase {
         test("algo.labelPropagation.memrec(null, null)");
         test("algo.labelPropagation.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
 
-        test("algo.memrec(null, null, 'beta.wcc')");
-        test("algo.memrec(null, null, 'beta.wcc', {direction: 'BOTH', graph: 'huge'})");
-        test("algo.beta.wcc.memrec(null, null)");
-        test("algo.beta.wcc.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
-
-        test("algo.memrec(null, null, 'wcc')");
-        test("algo.memrec(null, null, 'wcc', {direction: 'BOTH', graph: 'huge'})");
-        test("algo.wcc.memrec(null, null)");
-        test("algo.wcc.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
-
-//        test("algo.memrec(null, null, 'louvain')");
-//        test("algo.memrec(null, null, 'louvain', {direction: 'BOTH', graph: 'huge'})");
         test("gds.algo.louvain.write.estimate({writeProperty: 'foo'})");
         test("gds.algo.louvain.stream.estimate({})");
 
-        test("algo.memrec(null, null, 'unionFind')");
-        test("algo.memrec(null, null, 'unionFind', {direction: 'BOTH', graph: 'huge'})");
-        test("algo.unionFind.memrec(null, null)");
-        test("algo.unionFind.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+        test("gds.algo.wcc.write.estimate({writeProperty: 'foo'})");
+        test("gds.algo.wcc.stream.estimate({})");
 
         test("algo.memrec(null, null, 'beta.k1coloring')");
         test("algo.memrec(null, null, 'beta.k1coloring', {direction: 'BOTH', graph: 'huge'})");
@@ -200,8 +199,6 @@ class MemRecProcTest extends ProcTestBase {
         testAgainstLoadedGraph("graph.load", map());
         testAgainstLoadedGraph("graph.load", map("relationshipProperties", "weight"));
         testAgainstLoadedGraph("graph.load", map("relationshipProperties", "weight", "nodeProperties", "class"));
-        testAgainstLoadedGraph("wcc", map());
-        testAgainstLoadedGraph("wcc", map("relationshipProperties", "weight", "nodeProperties", "class"));
         test("algo.memrec(null, null, 'pageRank', {graph: 'myGraph', nodeCount: 10})", "Unknown impl: myGraph");
         test("algo.memrec(null, null, 'pageRank', {graph: 'cypher', nodeCount: 10})");
         test("algo.memrec(null, null, 'pageRank', {graph: 'huge', nodeCount: 10})");
