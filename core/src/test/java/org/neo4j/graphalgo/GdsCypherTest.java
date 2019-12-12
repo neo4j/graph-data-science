@@ -105,7 +105,7 @@ class GdsCypherTest {
             "      properties: {" +
             "        relProp: {" +
             "          property: 'RelationshipPropertyName'," +
-            "          defaultValue: 1337," +
+            "          defaultValue: 1337.0," +
             "          aggregation: 'MAX'" +
             "        }" +
             "      }" +
@@ -200,7 +200,7 @@ class GdsCypherTest {
                             "}, " +
                             "relProp: {" +
                                 "property: \"RelationshipPropertyName\", " +
-                                "defaultValue: 1337, " +
+                                "defaultValue: 1337.0, " +
                                 "aggregation: \"MAX\"" +
                             "}" +
                         "}" +
@@ -236,7 +236,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.%s.write()", algoName),
+            String.format("CALL gds.algo.%s.write({})", algoName),
             query
         );
     }
@@ -252,7 +252,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL %s.write()", algoName),
+            String.format("CALL %s.write({})", algoName),
             query
         );
     }
@@ -278,7 +278,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL %s.write()", String.join(".", algoNameParts)),
+            String.format("CALL %s.write({})", String.join(".", algoNameParts)),
             query
         );
     }
@@ -294,7 +294,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.%s()", executionModeName(executionMode)),
+            String.format("CALL gds.algo.algoName.%s({})", executionModeName(executionMode)),
             query
         );
     }
@@ -321,7 +321,7 @@ class GdsCypherTest {
         String query = nextBuilder.yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.%s()", executionModeName(executionMode)),
+            String.format("CALL gds.algo.algoName.%s({})", executionModeName(executionMode)),
             query
         );
     }
@@ -337,7 +337,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.%s.estimate()", executionModeName(executionMode)),
+            String.format("CALL gds.algo.algoName.%s.estimate({})", executionModeName(executionMode)),
             query
         );
     }
@@ -364,7 +364,7 @@ class GdsCypherTest {
         String query = nextBuilder.yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.%s.estimate()", executionModeName(executionMode)),
+            String.format("CALL gds.algo.algoName.%s.estimate({})", executionModeName(executionMode)),
             query
         );
     }
@@ -374,7 +374,7 @@ class GdsCypherTest {
             arguments(true, "true"),
             arguments(false, "false"),
             arguments(42, "42"),
-            arguments(42.0, "42"),
+            arguments(42.0, "42.0"),
             arguments(1337.42, "1337.42"),
             arguments(Double.NaN, "0.0 / 0.0"),
             arguments("42", "\"42\""),
@@ -428,7 +428,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            "CALL gds.algo.algoName.write(\"\")",
+            "CALL gds.algo.algoName.write(\"\", {})",
             query
         );
     }
