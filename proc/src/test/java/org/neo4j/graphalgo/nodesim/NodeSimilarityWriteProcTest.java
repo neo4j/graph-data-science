@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.nodesim;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
@@ -35,10 +36,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.Projection.REVERSE;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -177,6 +180,22 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTestBase<Node
                     )
                 ),
             simGraph
+        );
+    }
+
+    @ParameterizedTest(name = "missing parameter: {0}")
+    @ValueSource(strings = {"writeProperty", "writeRelationshipType"})
+    void shouldFailIfConfigIsMissingWriteParameters(String parameter) {
+        CypherMapWrapper input = createMinimallyValidConfig(CypherMapWrapper.empty())
+            .withoutEntry(parameter);
+
+        IllegalArgumentException illegalArgumentException = assertThrows(
+            IllegalArgumentException.class,
+            () -> createConfig(input)
+        );
+        assertThat(
+            illegalArgumentException.getMessage(),
+            is(String.format("No value specified for the mandatory configuration parameter `%s`", parameter))
         );
     }
 }

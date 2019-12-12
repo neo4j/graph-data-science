@@ -27,17 +27,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
+import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityStreamConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,24 +53,17 @@ import static org.neo4j.graphalgo.TestSupport.toArguments;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-class NodeSimilarityStreamProcTest extends ProcTestBase {
+class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimilarityStreamConfig> {
 
-    private static final String DB_CYPHER =
-        "CREATE" +
-        "  (a:Person {id: 0,  name: 'Alice'})" +
-        ", (b:Person {id: 1,  name: 'Bob'})" +
-        ", (c:Person {id: 2,  name: 'Charlie'})" +
-        ", (d:Person {id: 3,  name: 'Dave'})" +
-        ", (i1:Item  {id: 10, name: 'p1'})" +
-        ", (i2:Item  {id: 11, name: 'p2'})" +
-        ", (i3:Item  {id: 12, name: 'p3'})" +
-        ", (i4:Item  {id: 13, name: 'p4'})" +
-        ", (a)-[:LIKES]->(i1)" +
-        ", (a)-[:LIKES]->(i2)" +
-        ", (a)-[:LIKES]->(i3)" +
-        ", (b)-[:LIKES]->(i1)" +
-        ", (b)-[:LIKES]->(i2)" +
-        ", (c)-[:LIKES]->(i3)";
+    @Override
+    public Class<? extends BaseAlgoProc<?, NodeSimilarityResult, NodeSimilarityStreamConfig>> getProcedureClazz() {
+        return NodeSimilarityStreamProc.class;
+    }
+
+    @Override
+    public NodeSimilarityStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return NodeSimilarityStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+    }
 
     private static final Collection<String> EXPECTED_OUTGOING = new HashSet<>();
     private static final Collection<String> EXPECTED_INCOMING = new HashSet<>();
@@ -107,18 +104,6 @@ class NodeSimilarityStreamProcTest extends ProcTestBase {
 
         EXPECTED_TOP_INCOMING.add(resultString(4, 5, 3.0 / 3.0));
         EXPECTED_TOP_INCOMING.add(resultString(5, 4, 3.0 / 3.0));
-    }
-
-    @BeforeEach
-    void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(DB_CYPHER);
-        registerProcedures(NodeSimilarityStreamProc.class);
-    }
-
-    @AfterEach
-    void teardown() {
-        db.shutdown();
     }
 
     @Test

@@ -65,7 +65,7 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
     MemoryEstimateTests<CONFIG, NodeSimilarityResult> {
 
 
-    private static final String DB_CYPHER =
+    static final String DB_CYPHER =
         "CREATE" +
         "  (a:Person {id: 0,  name: 'Alice'})" +
         ", (b:Person {id: 1,  name: 'Bob'})" +
@@ -90,7 +90,7 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-        registerProcedures(NodeSimilarityWriteProc.class, GraphLoadProc.class);
+        registerProcedures(NodeSimilarityWriteProc.class, NodeSimilarityStreamProc.class, GraphLoadProc.class);
     }
 
     @AfterEach
@@ -216,22 +216,6 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
         assertEquals(42, config.degreeCutoff());
         assertEquals(0.23, config.similarityCutoff());
         assertEquals(1, config.concurrency());
-    }
-
-    @ParameterizedTest(name = "missing parameter: {0}")
-    @ValueSource(strings = {"writeProperty", "writeRelationshipType"})
-    void shouldFailIfConfigIsMissingWriteParameters(String parameter) {
-        CypherMapWrapper input = baseUserInput()
-            .withoutEntry(parameter);
-
-        IllegalArgumentException illegalArgumentException = assertThrows(
-            IllegalArgumentException.class,
-            () -> config(input)
-        );
-        assertThat(
-            illegalArgumentException.getMessage(),
-            is(String.format("No value specified for the mandatory configuration parameter `%s`", parameter))
-        );
     }
 
     private CypherMapWrapper baseUserInput() {
