@@ -46,6 +46,7 @@ import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.helpers.collection.Pair;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -184,9 +185,9 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         }
     }
 
-    private void validateConfig(GraphCreateConfig graph, CONFIG config) {
+    private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
         if (config instanceof SeedConfig) {
-            Set<String> nodeProperties = graph.nodeProjection().allProperties();
+            Set<String> nodeProperties = graphCreateConfig.nodeProjection().allProperties();
             String seedProperty = ((SeedConfig) config).seedProperty();
             if (seedProperty != null && !nodeProperties.contains(seedProperty)) {
                 throw new IllegalArgumentException(String.format(
@@ -197,13 +198,16 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             }
         }
         if (config instanceof WeightConfig) {
-            Set<String> relationshipProperties = graph.relationshipProjection().allProperties();
+            Set<String> properties = new HashSet<>();
+            properties.addAll(graphCreateConfig.relationshipProjection().allProperties());
+            properties.addAll(graphCreateConfig.nodeProjection().allProperties());
+
             String weightProperty = ((WeightConfig) config).weightProperty();
-            if (weightProperty != null && !relationshipProperties.contains(weightProperty)) {
+            if (weightProperty != null && !properties.contains(weightProperty)) {
                 throw new IllegalArgumentException(String.format(
                     "Weight property `%s` not found in graph with relationship properties: %s",
                     weightProperty,
-                    relationshipProperties
+                    properties
                 ));
             }
         }
