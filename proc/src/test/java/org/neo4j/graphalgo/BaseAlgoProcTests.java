@@ -244,14 +244,17 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
     @Test
     default void checkStatsModeExists() {
         applyOnProcedure((proc) -> {
-            boolean inWriteClass = methodExits(proc, "write");
+            boolean inWriteClass = methodExists(proc, "write");
             if (inWriteClass) {
-                assertTrue(methodExits(proc, "stats"));
+                assertTrue(
+                    methodExists(proc, "stats"),
+                    String.format("Expected %s to have a `stats` method", proc.getClass().getSimpleName())
+                );
             }
         });
     }
 
-    default boolean methodExits(BaseAlgoProc<?, RESULT, CONFIG> proc, String methodSuffix) {
+    default boolean methodExists(BaseAlgoProc<?, RESULT, CONFIG> proc, String methodSuffix) {
         return getProcedureMethods(proc)
             .anyMatch(method -> getProcedureMethodName(method).endsWith(methodSuffix));
     }
