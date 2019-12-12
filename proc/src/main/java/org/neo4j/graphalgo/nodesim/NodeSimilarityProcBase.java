@@ -23,7 +23,6 @@ package org.neo4j.graphalgo.nodesim;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityConfigBase;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityFactory;
@@ -32,7 +31,7 @@ import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
 import java.util.Optional;
 
-public abstract class NodeSimilarityProcBase <CONFIG extends NodeSimilarityConfigBase> extends BaseAlgoProc<NodeSimilarity, NodeSimilarityResult, CONFIG> {
+public abstract class NodeSimilarityProcBase<CONFIG extends NodeSimilarityConfigBase> extends BaseAlgoProc<NodeSimilarity, NodeSimilarityResult, CONFIG> {
 
     protected abstract CONFIG newConfig(
         String username,
@@ -43,8 +42,6 @@ public abstract class NodeSimilarityProcBase <CONFIG extends NodeSimilarityConfi
 
     @Override
     protected AlgorithmFactory<NodeSimilarity, CONFIG> algorithmFactory(CONFIG config) {
-        // TODO: Should check if we are writing or streaming, but how to do that in memrec?
-        boolean computesSimilarityGraph = !config.computeToStream();
-        return new NodeSimilarityFactory<CONFIG>(config, computesSimilarityGraph);
+        return new NodeSimilarityFactory<>();
     }
 }

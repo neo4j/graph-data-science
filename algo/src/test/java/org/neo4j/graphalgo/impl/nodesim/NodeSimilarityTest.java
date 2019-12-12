@@ -686,9 +686,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .direction(OUTGOING)
             .build();
 
-        NodeSimilarityFactory<NodeSimilarityWriteConfig> factory = new NodeSimilarityFactory<>(config, true);
-
-        MemoryTree actual = factory.memoryEstimation(ProcedureConfiguration.empty()).estimate(dimensions, 1);
+        MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
 
         long thisInstance = 56;
 
@@ -737,12 +735,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .direction(OUTGOING)
             .build();
 
-        NodeSimilarityFactory<NodeSimilarityStreamConfig> factory = new NodeSimilarityFactory<>(
-            config,
-            true
-        );
-
-        MemoryTree actual = factory.memoryEstimation(ProcedureConfiguration.empty()).estimate(dimensions, 1);
+        MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
 
         long thisInstance = 56;
 

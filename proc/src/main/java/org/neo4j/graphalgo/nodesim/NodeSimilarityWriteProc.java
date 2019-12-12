@@ -48,8 +48,6 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilarityWriteConfig> {
 
-    private static final double UNUSED_FALLBACK_RELATIONSHIP_PROPERTY_VALUE = Double.NaN;
-
     @Procedure(name = "gds.algo.nodeSimilarity.write", mode = Mode.WRITE)
     @Description("CALL gds.algo.nodeSimilarity.write(graphName: STRING, configuration: MAP {" +
                  "    similarityCutoff: 0.0," +
@@ -217,7 +215,6 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
                             exporter.write(
                                 writeRelationshipType,
                                 writeProperty,
-                                UNUSED_FALLBACK_RELATIONSHIP_PROPERTY_VALUE,
                                 (node1, node2, similarity) -> {
                                     histogram.recordValue(similarity);
                                     return true;
@@ -225,9 +222,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
                             );
                             resultBuilder.withHistogram(histogram);
                         } else {
-                            exporter.write(writeRelationshipType, writeProperty,
-                                UNUSED_FALLBACK_RELATIONSHIP_PROPERTY_VALUE
-                            );
+                            exporter.write(writeRelationshipType, writeProperty);
                         }
                     }
                 )
@@ -243,13 +238,12 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
     private DoubleHistogram computeHistogram(Graph similarityGraph) {
         DoubleHistogram histogram = new DoubleHistogram(5);
         similarityGraph.forEachNode(nodeId -> {
-                similarityGraph.forEachRelationship(nodeId, OUTGOING, UNUSED_FALLBACK_RELATIONSHIP_PROPERTY_VALUE, (node1, node2, property) -> {
-                    histogram.recordValue(property);
-                    return true;
-                });
+            similarityGraph.forEachRelationship(nodeId, OUTGOING, Double.NaN, (node1, node2, property) -> {
+                histogram.recordValue(property);
                 return true;
-            }
-        );
+            });
+            return true;
+        });
         return histogram;
     }
 

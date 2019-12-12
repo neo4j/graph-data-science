@@ -34,21 +34,13 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public class NodeSimilarityFactory<CONFIG extends NodeSimilarityConfigBase> extends AlgorithmFactory<NodeSimilarity, CONFIG> {
 
-    private final CONFIG config;
-    private final boolean computesSimilarityGraph;
-
-    public NodeSimilarityFactory(CONFIG config, boolean computesSimilarityGraph) {
-        this.computesSimilarityGraph = computesSimilarityGraph;
-        this.config = config;
-    }
-
     @Override
     public NodeSimilarity build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
         return new NodeSimilarity(graph, configuration, Pools.DEFAULT, tracker);
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(ProcedureConfiguration configuration) {
+    public MemoryEstimation memoryEstimation(CONFIG config) {
         int topN = Math.abs(config.topN());
         int topK = Math.abs(config.topK());
 
@@ -65,7 +57,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityConfigBase> exte
                         .perNode("array", nodeCount -> nodeCount * averageVectorSize).build();
                 })
             );
-        if (computesSimilarityGraph && !config.hasTopK()) {
+        if (!config.computeToStream() && !config.hasTopK()) {
             builder.add(
                 "similarity graph",
                 SimilarityGraphBuilder.memoryEstimation(topK, topN)
