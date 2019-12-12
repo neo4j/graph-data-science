@@ -62,7 +62,7 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
     }
 
     private Stream<StreamResult> stream(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
-        if (computationResult.isEmpty()) {
+        if (computationResult.isGraphEmpty()) {
             return Stream.empty();
         }
         DisjointSetStruct dss = computationResult.result();

@@ -122,7 +122,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
         ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computeResult,
         boolean write
     ) {
-        if (computeResult.isEmpty()) {
+        if (computeResult.isGraphEmpty()) {
             return Stream.of(WriteResult.empty(computeResult.config(), computeResult.createMillis()));
         } else {
             WccWriteConfig config = computeResult.config();
