@@ -394,7 +394,18 @@ final class GenerateConfiguration {
                 if (!(candidate.getParameters().size() == 1)) {
                     invalidCandidates.add(InvalidCandidate.of(candidate, "May only accept one parameter"));
                 }
-                if (!typeUtils.isAssignable(candidate.getReturnType(), targetType)) {
+                // There is a difference in behavior between JDKs 8 and 11 for
+                //  javax.lang.model.util.Types#isAssignable
+                // Calling e.g. isAssignable(<A>, int) will return `true` in JDK 8,
+                //  that is, it allows primitive types to be auto-boxed and assigned
+                //  to an unbounded generic type.
+                // JDK 11, on the other hand, does return `false` for that method.
+                // We are aligning this difference to the behavior of JDK 8 by
+                //  only testing for assignability in the absence of generic types.
+                if (
+                    candidate.getTypeParameters().isEmpty() &&
+                    !typeUtils.isAssignable(candidate.getReturnType(), targetType)
+                ) {
                     invalidCandidates.add(InvalidCandidate.of(
                         candidate,
                         "Must return a type that is assignable to %s",
