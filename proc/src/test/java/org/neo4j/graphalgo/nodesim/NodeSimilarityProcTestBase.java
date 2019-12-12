@@ -106,7 +106,7 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
             arguments(
                 GdsCypher
                     .call()
-                    .withNodeLabel("")
+                    .withNodeLabel("Person | Item")
                     .withRelationshipType("LIKES", RelationshipProjection
                         .builder()
                         .type("LIKES")
@@ -134,7 +134,7 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
             String name = "myGraph" + projection.name();
             runQuery("CALL algo.beta.graph.create(" +
                      "    $graphName," +
-                     "    ''," +
+                     "    'Person | Item'," +
                      "    {" +
                      "        LIKES: {" +
                      "            type: 'LIKES'," +

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -134,32 +135,24 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
         assertEquals(expected, result);
     }
 
-    @ParameterizedTest(name = "{0} -- {1}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidProjections")
-    void shouldStreamResults(Projection projection) {
+    @ParameterizedTest(name = "{2}")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidGraphVariationsWithProjections")
+    void shouldStreamResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
         Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
-        String query = "CALL gds.algo.nodeSimilarity.stream(" +
-                       "    {" +
-                       "        nodeProjection: '' " +
-                       "        , relationshipProjection: {" +
-                       "            LIKES: {" +
-                       "                type: 'LIKES'" +
-                       "                , projection: $projection" +
-                       "            }" +
-                       "        }" +
-                       "        , direction: $direction" +
-                       "        , similarityCutoff: 0.0" +
-                       "    }" +
-                       ") YIELD node1, node2, similarity";
+        String query = queryBuilder
+            .algo("nodeSimilarity")
+            .streamMode()
+            .addParameter("direction", direction.name())
+            .addParameter("similarityCutoff", 0.0)
+            .yields("node1", "node2", "similarity");
 
         Collection<String> result = new HashSet<>();
-        runQuery(query, MapUtil.map("projection", projection.name(), "direction", direction.name()),
-            row -> {
-                long node1 = row.getNumber("node1").longValue();
-                long node2 = row.getNumber("node2").longValue();
-                double similarity = row.getNumber("similarity").doubleValue();
-                result.add(resultString(node1, node2, similarity));
-            });
+        runQuery(query, row -> {
+            long node1 = row.getNumber("node1").longValue();
+            long node2 = row.getNumber("node2").longValue();
+            double similarity = row.getNumber("similarity").doubleValue();
+            result.add(resultString(node1, node2, similarity));
+        });
 
         assertEquals(
             direction == INCOMING
@@ -169,33 +162,25 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
         );
     }
 
-    @ParameterizedTest(name = "{0} -- {1}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidProjections")
-    void shouldStreamTopResults(Projection projection) {
+    @ParameterizedTest(name = "{2}")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidGraphVariationsWithProjections")
+    void shouldStreamTopResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
         Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         int topN = 2;
-        String query = "CALL gds.algo.nodeSimilarity.stream(" +
-                       "    {" +
-                       "        nodeProjection: ''" +
-                       "        , relationshipProjection: {" +
-                       "            LIKES: {" +
-                       "                type: 'LIKES'" +
-                       "                , projection: $projection" +
-                       "            }" +
-                       "        }" +
-                       "        , direction: $direction" +
-                       "        , topN: $topN" +
-                       "    }" +
-                       ") YIELD node1, node2, similarity";
+        String query = queryBuilder
+            .algo("nodeSimilarity")
+            .streamMode()
+            .addParameter("direction", direction.name())
+            .addParameter("topN", topN)
+            .yields("node1", "node2", "similarity");
 
         Collection<String> result = new HashSet<>();
-        runQuery(query, MapUtil.map("projection", projection.name(), "direction", direction.name(), "topN", topN),
-            row -> {
-                long node1 = row.getNumber("node1").longValue();
-                long node2 = row.getNumber("node2").longValue();
-                double similarity = row.getNumber("similarity").doubleValue();
-                result.add(resultString(node1, node2, similarity));
-            });
+        runQuery(query, row -> {
+            long node1 = row.getNumber("node1").longValue();
+            long node2 = row.getNumber("node2").longValue();
+            double similarity = row.getNumber("similarity").doubleValue();
+            result.add(resultString(node1, node2, similarity));
+        });
 
         assertEquals(
             direction == INCOMING
@@ -205,9 +190,9 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
         );
     }
 
-    @ParameterizedTest(name = "{0} -- {1}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidProjections")
-    void shouldIgnoreParallelEdges(Projection projection) {
+    @ParameterizedTest(name = "{2}")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidGraphVariationsWithProjections")
+    void shouldIgnoreParallelEdges(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
         Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         // Add parallel edges
         runQuery("" +
@@ -223,28 +208,20 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
                  " CREATE (person)-[:LIKES]->(thing)"
         );
 
-        String query = "CALL gds.algo.nodeSimilarity.stream(" +
-                       "    {" +
-                       "        nodeProjection: ''" +
-                       "        , relationshipProjection: {" +
-                       "            LIKES: {" +
-                       "                type: 'LIKES'" +
-                       "                , projection: $projection" +
-                       "            }" +
-                       "        }" +
-                       "        , direction: $direction" +
-                       "        , similarityCutoff: 0.0" +
-                       "    }" +
-                       ") YIELD node1, node2, similarity";
+        String query = queryBuilder
+            .algo("nodeSimilarity")
+            .streamMode()
+            .addParameter("direction", direction.name())
+            .addParameter("similarityCutoff", 0.0)
+            .yields("node1", "node2", "similarity");
 
         Collection<String> result = new HashSet<>();
-        runQuery(query, MapUtil.map("projection", projection.name(), "direction", direction.name()),
-            row -> {
-                long node1 = row.getNumber("node1").longValue();
-                long node2 = row.getNumber("node2").longValue();
-                double similarity = row.getNumber("similarity").doubleValue();
-                result.add(resultString(node1, node2, similarity));
-            });
+        runQuery(query, row -> {
+            long node1 = row.getNumber("node1").longValue();
+            long node2 = row.getNumber("node2").longValue();
+            double similarity = row.getNumber("similarity").doubleValue();
+            result.add(resultString(node1, node2, similarity));
+        });
 
         assertEquals(
             direction == INCOMING

@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityWriteConfig;
+import org.neo4j.graphdb.Direction;
 
 import java.util.Map;
 import java.util.Optional;
@@ -64,11 +65,11 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTestBase<Node
     @ParameterizedTest(name = "{2}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidGraphVariationsWithProjections")
     void shouldWriteResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
-        String direction = projection == REVERSE ? INCOMING.name() : OUTGOING.name();
+        Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         String query = queryBuilder
             .algo("nodeSimilarity")
             .writeMode()
-            .addParameter("direction", direction)
+            .addParameter("direction", direction.name())
             .addParameter("similarityCutoff", 0.0)
             .addParameter("writeRelationshipType", "SIMILAR")
             .addParameter("writeProperty", "score")
