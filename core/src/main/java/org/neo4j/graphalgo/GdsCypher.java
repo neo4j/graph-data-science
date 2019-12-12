@@ -89,8 +89,8 @@ public abstract class GdsCypher {
 
         ImplicitCreationBuildStage withRelationshipType(String type, RelationshipProjection relationshipProjection);
 
-        default ImplicitCreationBuildStage withNodeProperty(String relationshipProperty) {
-            return withNodeProperty(ImmutablePropertyMapping.builder().propertyKey(relationshipProperty).build());
+        default ImplicitCreationBuildStage withNodeProperty(String nodeProperty) {
+            return withNodeProperty(ImmutablePropertyMapping.builder().propertyKey(nodeProperty).build());
         }
 
         default ImplicitCreationBuildStage withNodeProperty(String propertyKey, String neoPropertyKey) {
@@ -372,7 +372,7 @@ public abstract class GdsCypher {
                     InputPosition.NONE()
                 ));
             }
-            Expression expression = (long) v == v
+            Expression expression = (value instanceof Long || value instanceof Integer)
                 ? SignedDecimalIntegerLiteral.apply(Long.toString((long) v), InputPosition.NONE())
                 : DecimalDoubleLiteral.apply(value.toString(), InputPosition.NONE());
             return Optional.of(expression);
