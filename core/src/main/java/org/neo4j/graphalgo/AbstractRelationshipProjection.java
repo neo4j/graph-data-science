@@ -57,7 +57,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     public static RelationshipProjection fromMap(Map<String, Object> map, ElementIdentifier identifier) {
         RelationshipProjection.Builder builder = RelationshipProjection.builder();
-        String type = map.containsKey(TYPE_KEY) ? nonEmptyString(map, TYPE_KEY) : identifier.name;
+        String type = String.valueOf(map.getOrDefault(TYPE_KEY, identifier.name));
         builder.type(type);
         if (map.containsKey(PROJECTION_KEY)) {
             builder.projection(Projection.of(nonEmptyString(map, PROJECTION_KEY)));

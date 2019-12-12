@@ -69,6 +69,10 @@ public abstract class GdsCypher {
 
     public interface ImplicitCreationInlineBuilder {
 
+        default ImplicitCreationBuildStage withAnyLabel() {
+            return withNodeLabel("*", NodeProjection.empty());
+        }
+
         default ImplicitCreationBuildStage withNodeLabel(String label) {
             return withNodeLabel(label, NodeProjection.builder().label(label).build());
         }
@@ -78,6 +82,10 @@ public abstract class GdsCypher {
         }
 
         ImplicitCreationBuildStage withNodeLabel(String labelKey, NodeProjection nodeProjection);
+
+        default ImplicitCreationBuildStage withAnyRelationshipType() {
+            return withRelationshipType("*", RelationshipProjection.empty());
+        }
 
         default ImplicitCreationBuildStage withRelationshipType(String type) {
             return withRelationshipType(type, RelationshipProjection.builder().type(type).build());
@@ -89,8 +97,8 @@ public abstract class GdsCypher {
 
         ImplicitCreationBuildStage withRelationshipType(String type, RelationshipProjection relationshipProjection);
 
-        default ImplicitCreationBuildStage withNodeProperty(String relationshipProperty) {
-            return withNodeProperty(ImmutablePropertyMapping.builder().propertyKey(relationshipProperty).build());
+        default ImplicitCreationBuildStage withNodeProperty(String nodeProperty) {
+            return withNodeProperty(ImmutablePropertyMapping.builder().propertyKey(nodeProperty).build());
         }
 
         default ImplicitCreationBuildStage withNodeProperty(String propertyKey, String neoPropertyKey) {
@@ -329,6 +337,8 @@ public abstract class GdsCypher {
             String cypherString = toCypherString(parameters);
             if (!cypherString.isEmpty()) {
                 argumentsString.add(cypherString);
+            } else {
+                argumentsString.add("{}");
             }
         }
 
@@ -372,7 +382,7 @@ public abstract class GdsCypher {
                     InputPosition.NONE()
                 ));
             }
-            Expression expression = (long) v == v
+            Expression expression = (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long)
                 ? SignedDecimalIntegerLiteral.apply(Long.toString((long) v), InputPosition.NONE())
                 : DecimalDoubleLiteral.apply(value.toString(), InputPosition.NONE());
             return Optional.of(expression);
