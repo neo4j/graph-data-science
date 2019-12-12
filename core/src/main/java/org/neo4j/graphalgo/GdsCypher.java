@@ -416,6 +416,10 @@ public abstract class GdsCypher {
             } else {
                 return Optional.empty();
             }
+        } else if (value instanceof Enum) {
+            Enum<?> enumValue = (Enum<?>) value;
+            Expression expression = StringLiteral.apply(enumValue.name(), InputPosition.NONE());
+            return Optional.of(expression);
         } else if (value == null) {
             return Optional.empty();
         } else {

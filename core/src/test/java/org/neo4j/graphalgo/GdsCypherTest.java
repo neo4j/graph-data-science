@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.impl.proc.MapConverter;
 
 import java.util.AbstractMap;
@@ -382,6 +383,8 @@ class GdsCypherTest {
             arguments("string with '", "\"string with '\""),
             arguments("string with \"", "'string with \"'"),
             arguments("string with both ' and \"", "\"string with both ' and \\\"\""),
+            arguments(Direction.BOTH, "\"BOTH\""),
+            arguments(Projection.NATURAL, "\"NATURAL\""),
             arguments(Arrays.asList("foo", 42, true), "[\"foo\", 42, true]"),
             arguments(MapUtil.map(new LinkedHashMap<>(), "foo", 42, "bar", true), "{foo: 42, bar: true}")
         );
