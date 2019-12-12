@@ -27,9 +27,8 @@ import org.neo4j.stream.Streams;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -171,5 +170,25 @@ public final class NodeProjections extends AbstractProjections<NodeProjection> {
             value.put(identifier.name, projection.toObject());
         });
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NodeProjections that = (NodeProjections) o;
+        return projections.equals(that.projections);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(projections);
+    }
+
+    @Override
+    public String toString() {
+        return "NodeProjections{" +
+               "projections=" + projections +
+               '}';
     }
 }
