@@ -382,7 +382,7 @@ public abstract class GdsCypher {
                     InputPosition.NONE()
                 ));
             }
-            Expression expression = (value instanceof Long || value instanceof Integer)
+            Expression expression = (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long)
                 ? SignedDecimalIntegerLiteral.apply(Long.toString((long) v), InputPosition.NONE())
                 : DecimalDoubleLiteral.apply(value.toString(), InputPosition.NONE());
             return Optional.of(expression);
