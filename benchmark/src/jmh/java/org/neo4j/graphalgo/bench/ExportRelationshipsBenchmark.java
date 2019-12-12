@@ -89,6 +89,6 @@ public class ExportRelationshipsBenchmark extends BaseBenchmark {
 
     @Benchmark
     public void writeRelationshipAndProperty() {
-        exporter.write("FOOBAR", "weight", 0.0);
+        exporter.write("FOOBAR", "weight");
     }
 }

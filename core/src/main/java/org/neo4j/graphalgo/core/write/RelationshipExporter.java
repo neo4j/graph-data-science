@@ -114,14 +114,13 @@ public final class RelationshipExporter extends StatementApi {
         this.executorService = DEFAULT_SINGLE_THREAD_POOL;
     }
 
-    public void write(String relationshipType, String propertyKey, double fallbackValue) {
-        write(relationshipType, propertyKey, fallbackValue, null);
+    public void write(String relationshipType, String propertyKey) {
+        write(relationshipType, propertyKey, null);
     }
 
     public void write(
         String relationshipType,
         String propertyKey,
-        double fallbackValue,
         @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
     ) {
 
@@ -135,7 +134,6 @@ public final class RelationshipExporter extends StatementApi {
         PartitionUtils.degreePartition(graph, readDirection, MIN_BATCH_SIZE)
             .stream()
             .map(partition -> createBatchRunnable(
-                fallbackValue,
                 readDirection,
                 progress,
                 relationshipToken,
@@ -148,7 +146,6 @@ public final class RelationshipExporter extends StatementApi {
     }
 
     private Runnable createBatchRunnable(
-        double fallbackValue,
         Direction direction,
         AtomicLong progress,
         int relationshipToken,
@@ -167,7 +164,7 @@ public final class RelationshipExporter extends StatementApi {
             }
             RelationshipIterator relationshipIterator = graph.concurrentCopy();
             for (long currentNode = start; currentNode < end; currentNode++) {
-                relationshipIterator.forEachRelationship(currentNode, direction, fallbackValue, writeConsumer);
+                relationshipIterator.forEachRelationship(currentNode, direction, Double.NaN, writeConsumer);
 
                 // Only log after writing relationships for 10_000 nodes
                 if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
@@ -205,16 +202,18 @@ public final class RelationshipExporter extends StatementApi {
         @Override
         public boolean accept(long sourceNodeId, long targetNodeId, double property) {
             try {
-                final long relId = ops.relationshipCreate(
+                long relId = ops.relationshipCreate(
                     idMapping.toOriginalNodeId(sourceNodeId),
                     relTypeToken,
                     idMapping.toOriginalNodeId(targetNodeId)
                 );
-                ops.relationshipSetProperty(
-                    relId,
-                    propertyToken,
-                    Values.doubleValue(property)
-                );
+                if (!Double.isNaN(property)) {
+                    ops.relationshipSetProperty(
+                        relId,
+                        propertyToken,
+                        Values.doubleValue(property)
+                    );
+                }
             } catch (KernelException e) {
                 ExceptionUtil.throwKernelException(e);
             }

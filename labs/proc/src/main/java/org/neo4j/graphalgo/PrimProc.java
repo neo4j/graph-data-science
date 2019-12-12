@@ -148,7 +148,7 @@ public class PrimProc extends LabsProc {
                 )
                         .withLog(log)
                         .build()
-                        .write(configuration.get(CONFIG_WRITE_RELATIONSHIP, CONFIG_WRITE_RELATIONSHIP_DEFAULT), weightProperty, 0.0);
+                        .write(configuration.get(CONFIG_WRITE_RELATIONSHIP, CONFIG_WRITE_RELATIONSHIP_DEFAULT), weightProperty);
             });
         }
         return Stream.of(builder.build());
