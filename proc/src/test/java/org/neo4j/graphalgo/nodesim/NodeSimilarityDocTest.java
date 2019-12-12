@@ -18,13 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.nodesim;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
-import org.neo4j.graphalgo.nodesim.NodeSimilarityWriteProc;
+import org.neo4j.graphalgo.GetNodeFunc;
+import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
