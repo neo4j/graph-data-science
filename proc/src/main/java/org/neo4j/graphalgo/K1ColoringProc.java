@@ -337,7 +337,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
                 loadMillis,
                 computeMillis,
                 writeMillis,
-                nodeCount,
+                nodePropertiesWritten,
                 colorCount,
                 ranIterations,
                 write,

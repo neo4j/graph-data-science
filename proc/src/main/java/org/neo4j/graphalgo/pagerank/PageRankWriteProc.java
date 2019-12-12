@@ -41,7 +41,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
     @Procedure(value = "gds.algo.pageRank.write", mode = WRITE)
     @Description("CALL gds.algo.pageRank.write(graphName: STRING, configuration: MAP {" +
-                 "    iterations: INTEGER" +
+                 "    maxIterations: INTEGER" +
                  "    tolerance: FLOAT" +
                  "    dampingFactor: FLOAT" +
                  "    weightProperty: STRING" +
@@ -71,7 +71,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
     @Procedure(value = "gds.algo.pageRank.stats", mode = READ)
     @Description("CALL gds.algo.pageRank.stats(graphName: STRING, configuration: MAP {" +
-                 "    iterations: INTEGER" +
+                 "    maxIterations: INTEGER" +
                  "    tolerance: FLOAT" +
                  "    dampingFactor: FLOAT" +
                  "    weightProperty: STRING" +
@@ -101,7 +101,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
     @Procedure(value = "gds.algo.pageRank.write.estimate", mode = READ)
     @Description("CALL gds.algo.pageRank.write.estimate(graphName: STRING, configuration: MAP {" +
-                 "    iterations: INTEGER" +
+                 "    maxIterations: INTEGER" +
                  "    tolerance: FLOAT" +
                  "    dampingFactor: FLOAT" +
                  "    weightProperty: STRING" +
@@ -123,7 +123,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
     @Procedure(value = "gds.algo.pageRank.stats.estimate", mode = READ)
     @Description("CALL gds.algo.pageRank.stats.estimate(graphName: STRING, configuration: MAP {" +
-                 "    iterations: INTEGER" +
+                 "    maxIterations: INTEGER" +
                  "    tolerance: FLOAT" +
                  "    dampingFactor: FLOAT" +
                  "    weightProperty: STRING" +
@@ -183,7 +183,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
     @Override
     protected Optional<PropertyTranslator<PageRank>> nodePropertyTranslator(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computationResult) {
-        return Optional.of(CommunitiesTranslator.INSTANCE);
+        return Optional.of(ScoresTranslator.INSTANCE);
     }
 
     @Override
@@ -258,7 +258,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
         public WriteResult build() {
             return new WriteResult(
                 config,
-                nodeCount,  // should be nodePropertiesWritten
+                nodePropertiesWritten,
                 loadMillis,
                 computeMillis,
                 writeMillis,
@@ -268,8 +268,8 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
         }
     }
 
-    static final class CommunitiesTranslator implements PropertyTranslator.OfDouble<PageRank> {
-        public static final CommunitiesTranslator INSTANCE = new CommunitiesTranslator();
+    static final class ScoresTranslator implements PropertyTranslator.OfDouble<PageRank> {
+        public static final ScoresTranslator INSTANCE = new ScoresTranslator();
 
         @Override
         public double toDouble(PageRank pageRank, long nodeId) {

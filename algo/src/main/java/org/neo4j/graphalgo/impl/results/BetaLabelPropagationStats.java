@@ -161,7 +161,7 @@ public class BetaLabelPropagationStats {
                 computeMillis,
                 writeMillis,
                 postProcessingDuration,
-                nodeCount,
+                nodePropertiesWritten,
                 maybeCommunityCount.orElse(-1L),
                 maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
                 maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),

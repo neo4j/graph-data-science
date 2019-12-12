@@ -20,17 +20,17 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.BaseAlgoProc;
-import org.neo4j.graphalgo.impl.pagerank.NewPageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 
 abstract class PageRankProcBase<CONFIG extends PageRankConfigBase> extends BaseAlgoProc<PageRank, PageRank, CONFIG> {
 
     @Override
-    protected final NewPageRankFactory<CONFIG> algorithmFactory(PageRankConfigBase config) {
+    protected final PageRankFactory<CONFIG> algorithmFactory(PageRankConfigBase config) {
         if (config.weightProperty() == null) {
-            return new NewPageRankFactory<>(config);
+            return new PageRankFactory<>(config);
         }
-        return new NewPageRankFactory<>(PageRankAlgorithmType.WEIGHTED, config);
+        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED, config);
     }
 }

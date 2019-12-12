@@ -21,52 +21,48 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.pagerank.PageRankConfigBase;
 import org.neo4j.graphdb.Node;
 import org.neo4j.logging.Log;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
-public class PageRankFactory extends AlgorithmFactory<PageRank, ProcedureConfiguration> {
+public class PageRankFactory<CONFIG extends PageRankConfigBase> extends AlgorithmFactory<PageRank, CONFIG> {
 
     private final PageRankAlgorithmType algorithmType;
     private final PageRank.Config algoConfig;
 
-    public PageRankFactory(PageRank.Config algoConfig) {
-        this(PageRankAlgorithmType.NON_WEIGHTED, algoConfig);
+    public PageRankFactory(PageRankConfigBase config) {
+        this(PageRankAlgorithmType.NON_WEIGHTED, config);
     }
 
-    public PageRankFactory(PageRankAlgorithmType algorithmType, PageRank.Config algoConfig) {
+    public PageRankFactory(PageRankAlgorithmType algorithmType, PageRankConfigBase config) {
         this.algorithmType = algorithmType;
-        this.algoConfig = algoConfig;
+        this.algoConfig = config.toOldConfig();
     }
 
     @Override
     public PageRank build(
             final Graph graph,
-            final ProcedureConfiguration configuration,
+            final PageRankConfigBase configuration,
             final AllocationTracker tracker,
             final Log log) {
-        final int batchSize = configuration.getBatchSize();
-        final int concurrency = configuration.concurrency();
-        List<Node> sourceNodes = configuration.get("sourceNodes", Collections.emptyList());
-        LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
+        LongStream sourceNodeIds = configuration.sourceNodeIds().stream().mapToLong(Node::getId);
         return algorithmType.create(
                 graph,
                 Pools.DEFAULT,
-                batchSize,
-                concurrency,
+                DEFAULT_BATCH_SIZE,
+                configuration.concurrency(),
                 algoConfig,
                 sourceNodeIds,
                 tracker

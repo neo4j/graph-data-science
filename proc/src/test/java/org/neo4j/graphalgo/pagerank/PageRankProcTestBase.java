@@ -22,15 +22,17 @@ package org.neo4j.graphalgo.pagerank;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.BaseAlgoProcTests;
-import org.neo4j.graphalgo.DampingFactorConfigTest;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.MemoryEstimateTests;
 import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.WeightConfigTest;
+import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
@@ -45,6 +47,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
@@ -53,7 +56,6 @@ abstract class PageRankProcTestBase<CONFIG extends PageRankConfigBase> extends P
     IterationsConfigTest<CONFIG, PageRank>,
     WeightConfigTest<CONFIG, PageRank>,
     ToleranceConfigTest<CONFIG, PageRank>,
-    DampingFactorConfigTest<CONFIG, PageRank>,
     MemoryEstimateTests<CONFIG, PageRank>
 {
 
@@ -258,5 +260,12 @@ abstract class PageRankProcTestBase<CONFIG extends PageRankConfigBase> extends P
         HugeDoubleArray resultArray1 = result1.result().array();
         HugeDoubleArray resultArray2 = result2.result().array();
         assertArrayEquals(resultArray1.toArray(), resultArray2.toArray());
+    }
+
+    @Test
+    void testDampingFactorFromConfig() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("dampingFactor", 0.85));
+        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        assertEquals(0.85, config.dampingFactor());
     }
 }

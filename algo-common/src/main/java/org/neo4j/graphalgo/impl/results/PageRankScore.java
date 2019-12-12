@@ -81,7 +81,7 @@ public class PageRankScore {
 
             public Stats build() {
                 return new Stats(
-                    nodeCount,
+                    nodePropertiesWritten,
                     iterations,
                     loadMillis,
                     computeMillis,

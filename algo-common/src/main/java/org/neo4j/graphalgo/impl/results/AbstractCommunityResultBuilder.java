@@ -87,7 +87,7 @@ public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBu
         if (buildCommunityCount && communityFunction != null) {
             long expectedNumberOfCommunities = maybeExpectedCommunityCount.orElse(EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT);
             HugeLongLongMap communitySizeMap = new HugeLongLongMap(expectedNumberOfCommunities, tracker);
-            for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
+            for (long nodeId = 0L; nodeId < nodePropertiesWritten; nodeId++) {
                 final long communityId = communityFunction.applyAsLong(nodeId);
                 communitySizeMap.addTo(communityId, 1L);
             }

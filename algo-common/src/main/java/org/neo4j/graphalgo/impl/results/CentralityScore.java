@@ -55,7 +55,7 @@ public class CentralityScore {
 
             public CentralityScore.Stats build() {
                 return new CentralityScore.Stats(
-                    nodeCount,
+                    nodePropertiesWritten,
                     loadMillis,
                     computeMillis,
                     writeMillis,

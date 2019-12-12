@@ -216,7 +216,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
         protected WriteResult buildResult() {
             return new WriteResult(
                 config,
-                nodeCount,  // should be nodePropertiesWritten
+                nodePropertiesWritten,  // should be nodePropertiesWritten
                 loadMillis,
                 computeMillis,
                 writeMillis,

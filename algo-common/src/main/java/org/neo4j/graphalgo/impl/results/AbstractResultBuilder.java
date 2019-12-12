@@ -29,7 +29,7 @@ public abstract class AbstractResultBuilder<R> {
     protected long computeMillis = -1;
     protected long writeMillis = -1;
 
-    protected long nodeCount;
+    protected long nodePropertiesWritten;
     protected long relationshipCount;
 
     protected boolean write = false;
@@ -84,7 +84,7 @@ public abstract class AbstractResultBuilder<R> {
     }
 
     public AbstractResultBuilder<R> withNodeCount(long nodeCount) {
-        this.nodeCount = nodeCount;
+        this.nodePropertiesWritten = nodeCount;
         return this;
     }
 

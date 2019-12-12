@@ -199,7 +199,6 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
     }
 
     public CentralityResult result() {
-//        return computeSteps.getPageRank();
         return new CentralityResult(result);
     }
 

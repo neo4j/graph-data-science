@@ -39,7 +39,7 @@ public class PageRankStreamProc extends PageRankProcBase<PageRankStreamConfig> {
 
     @Procedure(value = "gds.algo.pageRank.stream", mode = READ)
     @Description("CALL gds.algo.pageRank.stream(graphName: STRING, configuration: MAP {" +
-                 "    iterations: INTEGER" +
+                 "    maxIterations: INTEGER" +
                  "    tolerance: FLOAT" +
                  "    dampingFactor: FLOAT" +
                  "    weightProperty: STRING" +
@@ -60,7 +60,7 @@ public class PageRankStreamProc extends PageRankProcBase<PageRankStreamConfig> {
 
     @Procedure(value = "gds.algo.pageRank.stream.estimate", mode = READ)
     @Description("CALL gds.algo.pageRank.stream.estimate(graphName: STRING, configuration: MAP {" +
-                 "    iterations: INTEGER" +
+                 "    maxIterations: INTEGER" +
                  "    tolerance: FLOAT" +
                  "    dampingFactor: FLOAT" +
                  "    weightProperty: STRING" +

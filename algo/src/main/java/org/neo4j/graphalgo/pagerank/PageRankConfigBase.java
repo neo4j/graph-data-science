@@ -24,7 +24,6 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
-import org.neo4j.graphalgo.newapi.DampingFactorConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfig;
 import org.neo4j.graphalgo.newapi.ToleranceConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
@@ -38,8 +37,7 @@ public interface PageRankConfigBase extends
     BaseAlgoConfig,
     WeightConfig,
     ToleranceConfig,
-    IterationsConfig,
-    DampingFactorConfig {
+    IterationsConfig {
 
     @Value.Default
     @Override
@@ -54,7 +52,6 @@ public interface PageRankConfigBase extends
     }
 
     @Value.Default
-    @Override
     default double dampingFactor() {
         return 0.85;
     }

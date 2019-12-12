@@ -34,11 +34,6 @@ public interface BaseAlgoConfig extends BaseConfig {
         return Pools.DEFAULT_CONCURRENCY;
     }
 
-    @Value.Default
-    default int batchSize() {
-        return ParallelUtil.DEFAULT_BATCH_SIZE;
-    }
-
     @Configuration.Parameter
     Optional<String> graphName();
 
