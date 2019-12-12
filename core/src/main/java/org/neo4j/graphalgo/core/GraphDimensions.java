@@ -110,7 +110,7 @@ public final class GraphDimensions {
                     .collect(joining("', '"));
             if (!missingTypes.isEmpty()) {
                 throw new IllegalArgumentException(String.format(
-                        "Relationship type(s) not found: '%s'",
+                        "Invalid relationship projection, one or more relationship types not found: '%s'",
                         missingTypes));
             }
         }
