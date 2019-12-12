@@ -69,6 +69,10 @@ public abstract class GdsCypher {
 
     public interface ImplicitCreationInlineBuilder {
 
+        default ImplicitCreationBuildStage withAnyLabel() {
+            return withNodeLabel("*", NodeProjection.empty());
+        }
+
         default ImplicitCreationBuildStage withNodeLabel(String label) {
             return withNodeLabel(label, NodeProjection.builder().label(label).build());
         }
@@ -78,6 +82,10 @@ public abstract class GdsCypher {
         }
 
         ImplicitCreationBuildStage withNodeLabel(String labelKey, NodeProjection nodeProjection);
+
+        default ImplicitCreationBuildStage withAnyRelationshipType() {
+            return withRelationshipType("*", RelationshipProjection.empty());
+        }
 
         default ImplicitCreationBuildStage withRelationshipType(String type) {
             return withRelationshipType(type, RelationshipProjection.builder().type(type).build());
