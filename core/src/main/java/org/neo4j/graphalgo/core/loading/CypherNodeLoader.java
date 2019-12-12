@@ -39,6 +39,8 @@ import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
 
 class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
+    private static final int CYPHER_RESULT_PROPERTY_KEY = -2;
+
     private final long nodeCount;
     private final boolean hasExplicitPropertyMappings;
 
@@ -121,7 +123,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
                 nodeCount,
                 AllocationTracker.EMPTY,
                 propertyMapping.defaultValue(),
-                -2,
+                CYPHER_RESULT_PROPERTY_KEY,
                 propertyMapping.propertyKey()
             )
         ));
