@@ -61,7 +61,7 @@ public class K1ColoringFactory extends AlgorithmFactory<K1Coloring, ProcedureCon
     }
 
     @Override
-    public MemoryEstimation memoryEstimation() {
+    public MemoryEstimation memoryEstimation(ProcedureConfiguration config) {
         return MemoryEstimations.builder(K1Coloring.class)
             .perNode("colors", HugeLongArray::memoryEstimation)
             .perNode("nodesToColor", MemoryUsage::sizeOfBitset)

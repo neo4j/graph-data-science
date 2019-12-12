@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -209,7 +210,7 @@ class K1ColoringTest extends AlgoTestBase {
     private void assertMemoryEstimation(long nodeCount, int concurrency, long expected) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
         final MemoryRange actual = new K1ColoringFactory()
-            .memoryEstimation()
+            .memoryEstimation(ProcedureConfiguration.create(""))
             .estimate(dimensions, concurrency)
             .memoryUsage();
 

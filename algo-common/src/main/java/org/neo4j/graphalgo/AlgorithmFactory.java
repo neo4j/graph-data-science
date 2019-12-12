@@ -20,16 +20,28 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.mem.Assessable;
+import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.logging.Log;
 
-public abstract class AlgorithmFactory<A extends Algorithm<A, ?>, C extends BaseAlgoConfig> implements Assessable {
+public abstract class AlgorithmFactory<A extends Algorithm<A, ?>, C extends BaseAlgoConfig> {
 
     public abstract A build(
             final Graph graph,
             final C configuration,
             final AllocationTracker tracker,
             final Log log);
+
+    /**
+     * Returns an estimation about the memory consumption of that algorithm. The memory estimation can be used to
+     * compute the actual consumption depending on {@link GraphDimensions} and concurrency.
+     *
+     * @return memory estimation
+     * @see MemoryEstimations
+     * @see MemoryEstimation#estimate(GraphDimensions, int)
+     */
+    public abstract MemoryEstimation memoryEstimation(C configuration);
 }

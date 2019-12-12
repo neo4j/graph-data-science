@@ -142,7 +142,7 @@ public abstract class LegacyBaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT>
 
         MemoryEstimation graphMemoryEstimation = config.estimate(loader.toSetup(), graphFactory);
         estimationsBuilder.add(graphMemoryEstimation)
-            .add(algorithmFactory.memoryEstimation());
+            .add(algorithmFactory.memoryEstimation(config));
 
         MemoryTree memoryTree = estimationsBuilder.build().estimate(dimensions, config.concurrency());
 

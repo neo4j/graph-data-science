@@ -71,7 +71,7 @@ public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOp
             .build();
 
     @Override
-    public MemoryEstimation memoryEstimation() {
+    public MemoryEstimation memoryEstimation(ProcedureConfiguration config) {
         return MEMORY_ESTIMATION;
     }
 

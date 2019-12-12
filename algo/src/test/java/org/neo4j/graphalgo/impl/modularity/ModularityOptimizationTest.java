@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
@@ -276,7 +277,9 @@ class ModularityOptimizationTest extends AlgoTestBase {
     void testMemoryEstimation(int concurrency, long min, long max) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000L).build();
 
-        MemoryTree memoryTree = new ModularityOptimizationFactory().memoryEstimation(dimensions, concurrency);
+        MemoryTree memoryTree = new ModularityOptimizationFactory()
+            .memoryEstimation(ProcedureConfiguration.create(""))
+            .estimate(dimensions, concurrency);
         assertEquals(min, memoryTree.memoryUsage().min);
         assertEquals(max, memoryTree.memoryUsage().max);
     }

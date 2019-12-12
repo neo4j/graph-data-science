@@ -32,14 +32,7 @@ import org.neo4j.graphalgo.impl.modularity.ModularityOptimizationFactory;
 import org.neo4j.graphalgo.louvain.LouvainConfigBase;
 import org.neo4j.logging.Log;
 
-// TODO remove type param
 public class LouvainFactory<CONFIG extends LouvainConfigBase> extends AlgorithmFactory<Louvain, CONFIG> {
-
-    public LouvainConfigBase config;
-
-    public LouvainFactory(LouvainConfigBase config) {
-        this.config = config;
-    }
 
     @Override
     public Louvain build(
@@ -58,7 +51,7 @@ public class LouvainFactory<CONFIG extends LouvainConfigBase> extends AlgorithmF
     }
 
     @Override
-    public MemoryEstimation memoryEstimation() {
+    public MemoryEstimation memoryEstimation(CONFIG config) {
         return MemoryEstimations.builder(Louvain.class)
             .add("modularityOptimization()", ModularityOptimizationFactory.MEMORY_ESTIMATION)
             .rangePerGraphDimension("subGraph", (graphDimensions, concurrency) -> {

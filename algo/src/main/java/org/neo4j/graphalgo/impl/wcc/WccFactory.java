@@ -29,12 +29,6 @@ import org.neo4j.logging.Log;
 
 public class WccFactory<CONFIG extends WccBaseConfig> extends AlgorithmFactory<Wcc, CONFIG> {
 
-    private final WccBaseConfig config;
-
-    public WccFactory(WccBaseConfig config) {
-        this.config = config;
-    }
-
     @Override
     public Wcc build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
         return new Wcc(
@@ -47,7 +41,7 @@ public class WccFactory<CONFIG extends WccBaseConfig> extends AlgorithmFactory<W
     }
 
     @Override
-    public MemoryEstimation memoryEstimation() {
+    public MemoryEstimation memoryEstimation(CONFIG config) {
         return Wcc.memoryEstimation(config.isIncremental());
     }
 }

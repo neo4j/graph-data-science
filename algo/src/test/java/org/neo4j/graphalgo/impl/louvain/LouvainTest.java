@@ -318,7 +318,7 @@ class LouvainTest extends AlgoTestBase {
             .concurrency(1)
             .build();
 
-        MemoryTree memoryTree = new LouvainFactory<>(config).memoryEstimation(dimensions, concurrency);
+        MemoryTree memoryTree = new LouvainFactory<>().memoryEstimation(config).estimate(dimensions, concurrency);
         assertEquals(min, memoryTree.memoryUsage().min);
         assertEquals(max, memoryTree.memoryUsage().max);
     }

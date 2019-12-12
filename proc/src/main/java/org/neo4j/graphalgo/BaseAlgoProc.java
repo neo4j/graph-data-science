@@ -115,7 +115,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             dimensions = graphFactory.dimensions();
         }
 
-        estimationBuilder.add("algorithm", algorithmFactory(config).memoryEstimation());
+        estimationBuilder.add("algorithm", algorithmFactory(config).memoryEstimation(config));
 
         MemoryTree memoryTree = estimationBuilder.build().estimate(dimensions, config.concurrency());
         return new MemoryTreeWithDimensions(memoryTree, dimensions);

@@ -58,7 +58,7 @@ public class LabelPropagationFactory extends AlgorithmFactory<LabelPropagation, 
     }
 
     @Override
-    public MemoryEstimation memoryEstimation() {
+    public MemoryEstimation memoryEstimation(ProcedureConfiguration config) {
         return MemoryEstimations.builder(LabelPropagation.class)
                 .perNode("labels", HugeLongArray::memoryEstimation)
                 .perThread("votes", MemoryEstimations.builder()

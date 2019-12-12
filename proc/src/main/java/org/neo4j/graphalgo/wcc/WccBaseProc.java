@@ -34,7 +34,7 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends BaseAlgo
 
     @Override
     protected final WccFactory<CONFIG> algorithmFactory(WccBaseConfig config) {
-        return new WccFactory<>(config);
+        return new WccFactory<>();
     }
 
     static class ConsecutivePropertyTranslator implements PropertyTranslator.OfLong<DisjointSetStruct> {

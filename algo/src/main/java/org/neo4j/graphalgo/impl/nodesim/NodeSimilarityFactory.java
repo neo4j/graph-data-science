@@ -48,7 +48,7 @@ public class NodeSimilarityFactory extends AlgorithmFactory<NodeSimilarity, Proc
     }
 
     @Override
-    public MemoryEstimation memoryEstimation() {
+    public MemoryEstimation memoryEstimation(ProcedureConfiguration configuration) {
         int topN = Math.abs(config.topN());
         int topK = Math.abs(config.topK());
 

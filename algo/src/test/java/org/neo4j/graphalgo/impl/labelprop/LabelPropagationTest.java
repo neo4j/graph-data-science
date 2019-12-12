@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -240,7 +241,7 @@ final class LabelPropagationTest extends AlgoTestBase {
             .build();
 
         // test for no failure and no overflow
-        assertTrue(0 < labelPropagation.memoryEstimation().estimate(largeDimensions, 1).memoryUsage().max);
+        assertTrue(0 < labelPropagation.memoryEstimation(ProcedureConfiguration.create("")).estimate(largeDimensions, 1).memoryUsage().max);
     }
 
     private void assertMemoryEstimation(long nodeCount, int concurrency) {
@@ -248,7 +249,10 @@ final class LabelPropagationTest extends AlgoTestBase {
 
         LabelPropagationFactory labelPropagation = new LabelPropagationFactory(new ConfigBuilder().build());
 
-        MemoryRange actual = labelPropagation.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
+        MemoryRange actual = labelPropagation
+            .memoryEstimation(ProcedureConfiguration.create(""))
+            .estimate(dimensions, concurrency)
+            .memoryUsage();
         long min = 80L /* LabelPropagation.class */ +
                          16L * concurrency /* StepRunner.class */ +
                          48L * concurrency /* InitStep.class */ +

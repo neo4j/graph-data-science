@@ -27,6 +27,6 @@ abstract class LouvainProcBase<CONFIG extends LouvainConfigBase> extends BaseAlg
 
     @Override
     protected final LouvainFactory<CONFIG> algorithmFactory(LouvainConfigBase config) {
-        return new LouvainFactory<>(config);
+        return new LouvainFactory<>();
     }
 }

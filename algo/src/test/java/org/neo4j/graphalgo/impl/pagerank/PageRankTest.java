@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -266,7 +267,10 @@ final class PageRankTest extends AlgoTestBase {
         final LabsPageRankFactory pageRank = new LabsPageRankFactory(DEFAULT_CONFIG);
 
         long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
-        final MemoryRange actual = pageRank.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
+        final MemoryRange actual = pageRank
+            .memoryEstimation(ProcedureConfiguration.create(""))
+            .estimate(dimensions, concurrency)
+            .memoryUsage();
         final MemoryRange expected = MemoryRange.of(
                 96L /* PageRank.class */ +
                 32L /* ComputeSteps.class */ +

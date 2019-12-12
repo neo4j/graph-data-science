@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -690,7 +691,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             true
         );
 
-        MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
+        MemoryTree actual = factory.memoryEstimation(ProcedureConfiguration.create("")).estimate(dimensions, 1);
 
         long thisInstance = 56;
 
@@ -746,7 +747,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             true
         );
 
-        MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
+        MemoryTree actual = factory.memoryEstimation(ProcedureConfiguration.create("")).estimate(dimensions, 1);
 
         long thisInstance = 56;
 
