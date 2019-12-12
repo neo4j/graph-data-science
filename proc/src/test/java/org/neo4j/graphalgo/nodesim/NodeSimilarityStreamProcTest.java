@@ -23,7 +23,6 @@ package org.neo4j.graphalgo.nodesim;
 import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.Projection;
@@ -39,11 +38,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.Projection.NATURAL;
 import static org.neo4j.graphalgo.Projection.REVERSE;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
@@ -67,10 +63,6 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
 
     private static String resultString(long node1, long node2, double similarity) {
         return String.format("%d,%d %f%n", node1, node2, similarity);
-    }
-
-    static Stream<Arguments> allValidProjections() {
-        return Stream.of(arguments(NATURAL), arguments(REVERSE));
     }
 
     static {
@@ -143,7 +135,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
     }
 
     @ParameterizedTest(name = "{0} -- {1}")
-    @MethodSource("allValidProjections")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidProjections")
     void shouldStreamResults(Projection projection) {
         Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         String query = "CALL gds.algo.nodeSimilarity.stream(" +
@@ -178,7 +170,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
     }
 
     @ParameterizedTest(name = "{0} -- {1}")
-    @MethodSource("allValidProjections")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidProjections")
     void shouldStreamTopResults(Projection projection) {
         Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         int topN = 2;
@@ -214,7 +206,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
     }
 
     @ParameterizedTest(name = "{0} -- {1}")
-    @MethodSource("allValidProjections")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidProjections")
     void shouldIgnoreParallelEdges(Projection projection) {
         Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         // Add parallel edges

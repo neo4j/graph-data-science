@@ -30,10 +30,14 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseAlgoProcTests;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.MemoryEstimateTests;
 import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -41,6 +45,7 @@ import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityConfigBase;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityGraphResult;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityResult;
+import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -82,15 +87,67 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
         ", (b)-[:LIKES]->(i2)" +
         ", (c)-[:LIKES]->(i3)";
 
-    static Stream<Arguments> allValidProjections() {
-        return Stream.of(arguments(NATURAL), arguments(REVERSE));
+    static Stream<Projection> allValidProjections() {
+        return Stream.of(NATURAL, REVERSE);
+    }
+
+    static Stream<Arguments> allValidGraphVariationsWithProjections() {
+        return allValidProjections().flatMap(NodeSimilarityProcTestBase::graphVariationForProjection);
+    }
+
+    private static Stream<Arguments> graphVariationForProjection(Projection projection) {
+        String name = "myGraph" + projection.name();
+        return Stream.of(
+            arguments(
+                GdsCypher.call().explicitCreation(name),
+                projection,
+                "explicit graph - " + projection
+            ),
+            arguments(
+                GdsCypher
+                    .call()
+                    .withNodeLabel("")
+                    .withRelationshipType("LIKES", RelationshipProjection
+                        .builder()
+                        .type("LIKES")
+                        .projection(projection)
+                        .build()
+                    ),
+                projection,
+                "implicit graph - " + projection
+            )
+        );
     }
 
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(
+            NodeSimilarityWriteProc.class,
+            NodeSimilarityStreamProc.class,
+            GraphLoadProc.class,
+            GraphCatalogProcs.class
+        );
         runQuery(DB_CYPHER);
-        registerProcedures(NodeSimilarityWriteProc.class, NodeSimilarityStreamProc.class, GraphLoadProc.class);
+
+        allValidProjections().forEach(projection -> {
+            String name = "myGraph" + projection.name();
+            runQuery("CALL algo.beta.graph.create(" +
+                     "    $graphName," +
+                     "    ''," +
+                     "    {" +
+                     "        LIKES: {" +
+                     "            type: 'LIKES'," +
+                     "            projection: $projection" +
+                     "        }" +
+                     "    }" +
+                     ")",
+                MapUtil.map(
+                    "graphName", name,
+                    "projection", projection.name()
+                )
+            );
+        });
     }
 
     @AfterEach

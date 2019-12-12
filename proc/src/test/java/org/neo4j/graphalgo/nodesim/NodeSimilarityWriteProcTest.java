@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -60,68 +61,60 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTestBase<Node
         return NodeSimilarityWriteConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 
-    @ParameterizedTest(name = "{0} -- {1}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidProjections")
-    void shouldWriteResults(Projection projection) {
-        String query = "CALL gds.algo.nodeSimilarity.write(" +
-                       "    {" +
-                       "        nodeProjection: '' " +
-                       "        , relationshipProjection: {" +
-                       "            LIKES: {" +
-                       "                type: 'LIKES'" +
-                       "                , projection: $projection" +
-                       "            }" +
-                       "        }" +
-                       "        , direction: $direction" +
-                       "        , similarityCutoff: 0.0" +
-                       "        , writeRelationshipType: 'SIMILAR'" +
-                       "        , writeProperty: 'score'" +
-                       "    }" +
-                       ") YIELD" +
-                       " computeMillis" +
-                       ", loadMillis" +
-                       ", nodesCompared " +
-                       ", relationships" +
-                       ", writeMillis" +
-                       ", writeProperty" +
-                       ", writeRelationshipType" +
-                       ", similarityDistribution" +
-                       ", postProcessingMillis";
+    @ParameterizedTest(name = "{2}")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidGraphVariationsWithProjections")
+    void shouldWriteResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
         String direction = projection == REVERSE ? INCOMING.name() : OUTGOING.name();
+        String query = queryBuilder
+            .algo("nodeSimilarity")
+            .writeMode()
+            .addParameter("direction", direction)
+            .addParameter("similarityCutoff", 0.0)
+            .addParameter("writeRelationshipType", "SIMILAR")
+            .addParameter("writeProperty", "score")
+            .yields(
+                "computeMillis",
+                "loadMillis",
+                "nodesCompared ",
+                "relationships",
+                "writeMillis",
+                "writeProperty",
+                "writeRelationshipType",
+                "similarityDistribution",
+                "postProcessingMillis"
+            );
 
-        runQuery(query, MapUtil.map("projection", projection.name(), "direction", direction),
-            row -> {
-                assertEquals(3, row.getNumber("nodesCompared").longValue());
-                assertEquals(6, row.getNumber("relationships").longValue());
-                assertEquals("SIMILAR", row.getString("writeRelationshipType"));
-                assertEquals("score", row.getString("writeProperty"));
-                assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
-                assertThat("Missing loadMillis", -1L, lessThan(row.getNumber("loadMillis").longValue()));
-                assertThat("Missing writeMillis", -1L, lessThan(row.getNumber("writeMillis").longValue()));
+        runQuery(query, row -> {
+            assertEquals(3, row.getNumber("nodesCompared").longValue());
+            assertEquals(6, row.getNumber("relationships").longValue());
+            assertEquals("SIMILAR", row.getString("writeRelationshipType"));
+            assertEquals("score", row.getString("writeProperty"));
+            assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
+            assertThat("Missing loadMillis", -1L, lessThan(row.getNumber("loadMillis").longValue()));
+            assertThat("Missing writeMillis", -1L, lessThan(row.getNumber("writeMillis").longValue()));
 
-                Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");
-                assertThat("Missing min", -1.0, lessThan(distribution.get("min")));
-                assertThat("Missing max", -1.0, lessThan(distribution.get("max")));
-                assertThat("Missing mean", -1.0, lessThan(distribution.get("mean")));
-                assertThat("Missing stdDev", -1.0, lessThan(distribution.get("stdDev")));
-                assertThat("Missing p1", -1.0, lessThan(distribution.get("p1")));
-                assertThat("Missing p5", -1.0, lessThan(distribution.get("p5")));
-                assertThat("Missing p10", -1.0, lessThan(distribution.get("p10")));
-                assertThat("Missing p25", -1.0, lessThan(distribution.get("p25")));
-                assertThat("Missing p50", -1.0, lessThan(distribution.get("p50")));
-                assertThat("Missing p75", -1.0, lessThan(distribution.get("p75")));
-                assertThat("Missing p90", -1.0, lessThan(distribution.get("p90")));
-                assertThat("Missing p95", -1.0, lessThan(distribution.get("p95")));
-                assertThat("Missing p99", -1.0, lessThan(distribution.get("p99")));
-                assertThat("Missing p100", -1.0, lessThan(distribution.get("p100")));
+            Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");
+            assertThat("Missing min", -1.0, lessThan(distribution.get("min")));
+            assertThat("Missing max", -1.0, lessThan(distribution.get("max")));
+            assertThat("Missing mean", -1.0, lessThan(distribution.get("mean")));
+            assertThat("Missing stdDev", -1.0, lessThan(distribution.get("stdDev")));
+            assertThat("Missing p1", -1.0, lessThan(distribution.get("p1")));
+            assertThat("Missing p5", -1.0, lessThan(distribution.get("p5")));
+            assertThat("Missing p10", -1.0, lessThan(distribution.get("p10")));
+            assertThat("Missing p25", -1.0, lessThan(distribution.get("p25")));
+            assertThat("Missing p50", -1.0, lessThan(distribution.get("p50")));
+            assertThat("Missing p75", -1.0, lessThan(distribution.get("p75")));
+            assertThat("Missing p90", -1.0, lessThan(distribution.get("p90")));
+            assertThat("Missing p95", -1.0, lessThan(distribution.get("p95")));
+            assertThat("Missing p99", -1.0, lessThan(distribution.get("p99")));
+            assertThat("Missing p100", -1.0, lessThan(distribution.get("p100")));
 
-                assertThat(
-                    "Missing postProcessingMillis",
-                    -1L,
-                    equalTo(row.getNumber("postProcessingMillis").longValue())
-                );
-            }
-        );
+            assertThat(
+                "Missing postProcessingMillis",
+                -1L,
+                equalTo(row.getNumber("postProcessingMillis").longValue())
+            );
+        });
 
         String resultGraphName = "simGraph_" + projection.name();
         String loadQuery = "CALL algo.graph.load($resultGraphName, $label, 'SIMILAR', {nodeProperties: 'id', relationshipProperties: 'score', projection: $projection})";
