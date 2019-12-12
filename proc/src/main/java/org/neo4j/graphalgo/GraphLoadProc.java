@@ -24,7 +24,6 @@ import org.HdrHistogram.Histogram;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -54,6 +53,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.core.ProcedureConstants.IS_EXPLICIT_CYPHER_GRAPH;
 
 public final class GraphLoadProc extends BaseProc {
     @Procedure(name = "algo.graph.load", mode = Mode.READ)
@@ -134,7 +135,7 @@ public final class GraphLoadProc extends BaseProc {
             stats.nodes = graph.nodeCount();
             stats.relationships = graph.relationshipCount();
             // TODO: remove this temporary hack; this is used for skipping validation in BaseAlgoProc for the cypher case
-            GraphCreateConfig graphCreateConfig = GraphCreateConfig.of(config.getUsername(), name, "__isCypher", "" , CypherMapWrapper
+            GraphCreateConfig graphCreateConfig = GraphCreateConfig.of(config.getUsername(), name, IS_EXPLICIT_CYPHER_GRAPH, "" , CypherMapWrapper
                 .empty());
             GraphCatalog.set(graphCreateConfig, graph);
         }

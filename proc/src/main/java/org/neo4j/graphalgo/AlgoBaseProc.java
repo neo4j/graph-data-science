@@ -53,6 +53,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.IS_EXPLICIT_CYPHER_GRAPH;
+
 public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends AlgoBaseConfig> extends BaseProc {
 
     protected static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
@@ -190,7 +192,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
-        if (graphCreateConfig.nodeProjection().labelFilter().orElse("not_cypher").equals("__isCypher")) {
+        if (graphCreateConfig.nodeProjection().labelFilter().orElse("not_cypher").equals(IS_EXPLICIT_CYPHER_GRAPH)) {
             return;
         }
         if (config instanceof SeedConfig) {
