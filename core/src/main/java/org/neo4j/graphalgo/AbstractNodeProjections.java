@@ -71,6 +71,9 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
         if (StringUtils.isEmpty(label)) {
             return empty();
         }
+        if (label.equals(PROJECT_ALL.name)) {
+            return create(singletonMap(PROJECT_ALL, NodeProjection.of()));
+        }
         ElementIdentifier identifier = new ElementIdentifier(label);
         NodeProjection projection = NodeProjection.fromString(label);
         return create(singletonMap(identifier, projection));
@@ -134,7 +137,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
         ));
         if (newProjections.isEmpty()) {
             // TODO: special identifier for 'SELECT ALL'
-            newProjections.put(new ElementIdentifier("*"), NodeProjection.empty().withAdditionalPropertyMappings(mappings));
+            newProjections.put(PROJECT_ALL, NodeProjection.empty().withAdditionalPropertyMappings(mappings));
         }
         return create(newProjections);
     }

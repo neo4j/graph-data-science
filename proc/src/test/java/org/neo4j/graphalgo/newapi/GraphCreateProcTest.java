@@ -48,7 +48,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
-import static org.neo4j.helpers.collection.MapUtil.map;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class GraphCreateProcTest extends BaseProcTest {
 
@@ -86,6 +86,16 @@ class GraphCreateProcTest extends BaseProcTest {
                 "createMillis", instanceOf(Long.class)
             ))
         );
+    }
+
+    @Test
+    void shouldProjectAllNodesWithSpecialStar() {
+        String query = "CALL algo.beta.graph.create('g', '*', {}) YIELD nodes";
+
+        runQuery("CREATE (), (:B), (:C:D:E)");
+        assertCypherResult(query, singletonList(
+            map("nodes", nodeCount + 3)
+        ));
     }
 
     /*
