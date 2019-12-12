@@ -92,7 +92,7 @@ public class PageRankStreamProc extends PageRankProcBase<PageRankStreamConfig> {
     }
 
     @Override
-    PageRankStreamConfig newConfig(
+    protected PageRankStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,

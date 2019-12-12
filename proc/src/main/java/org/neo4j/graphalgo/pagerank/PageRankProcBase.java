@@ -20,32 +20,11 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.BaseAlgoProc;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.NewPageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-
-import java.util.Optional;
 
 abstract class PageRankProcBase<CONFIG extends PageRankConfigBase> extends BaseAlgoProc<PageRank, PageRank, CONFIG> {
-
-    abstract CONFIG newConfig(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    );
-
-    @Override
-    public final CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
-        if (!graphName.isPresent()) {
-            // we should do implicit loading
-            maybeImplicitCreate = Optional.of(GraphCreateConfig.implicitCreate(getUsername(), config));
-        }
-        return newConfig(getUsername(), graphName, maybeImplicitCreate, config);
-    }
 
     @Override
     protected final NewPageRankFactory<CONFIG> algorithmFactory(PageRankConfigBase config) {

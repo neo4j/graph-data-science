@@ -187,7 +187,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
     }
 
     @Override
-    PageRankWriteConfig newConfig(
+    protected PageRankWriteConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
