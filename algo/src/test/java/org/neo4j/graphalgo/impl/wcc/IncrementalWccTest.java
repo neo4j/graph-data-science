@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport;
@@ -36,7 +37,6 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.stream.LongStream;
 
@@ -44,16 +44,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 
-// TODO should implement WccBaseTest
-class IncrementalWccTest {
+class IncrementalWccTest extends AlgoTestBase {
 
     private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
     private static final String SEED_PROPERTY = "community";
 
     private static final int COMMUNITY_COUNT = 16;
     private static final int COMMUNITY_SIZE = 10;
-
-    private GraphDatabaseAPI db;
 
     /**
      * Create multiple communities and connect them pairwise.
@@ -73,10 +70,6 @@ class IncrementalWccTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
-    }
-
-    private static long getCommunityId(long nodeId, int communitySize) {
-        return nodeId / communitySize;
     }
 
     private static void createConnection(GraphDatabaseService db, long sourceId, long targetId) {

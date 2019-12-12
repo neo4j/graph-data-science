@@ -112,7 +112,6 @@ public class WccThresholdTest extends AlgoTestBase {
             .implicitCreateConfig(createConfig)
             .build();
 
-
         Graph graph = new GraphLoader(db).withGraphCreateConfig(createConfig).load(HugeGraphFactory.class);
 
         DisjointSetStruct dss = new Wcc(
