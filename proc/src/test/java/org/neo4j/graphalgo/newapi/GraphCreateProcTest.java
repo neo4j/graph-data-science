@@ -34,6 +34,7 @@ import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -181,18 +182,18 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
-    @Test
-    void failsOnMultipleLabelProjections() {
-        String name = "g";
+    // This test will be removed once we have rich multi-label support
+    @ParameterizedTest(name = "argument: {0}")
+    @MethodSource("multipleNodeProjections")
+    void failsOnMultipleLabelProjections(Object argument) {
         Map<String, Object> nodeProjection = map("A", map("label", "A"), "B", map("label", "A"));
 
         assertError(
-            "CALL algo.beta.graph.create($name, $nodeProjection, {})",
-            map("name", name, "nodeProjection", nodeProjection),
-            "Only one node projection is supported."
+            "CALL algo.beta.graph.create('g', $nodeProjection, {})",
+            map("nodeProjection", nodeProjection),
+            "Multiple node projections are not supported; please use a single projection with a `|` operator to project nodes with different labels into the in-memory graph."
         );
     }
-
 
     @ParameterizedTest(name = "{0}, nodeProjection = {1}")
     @MethodSource("nodeProjectionVariants")
@@ -365,6 +366,15 @@ class GraphCreateProcTest extends BaseProcTest {
             "CALL algo.beta.graph.create($name, {}, $relProjection)",
             map("name", name, "relProjection", relProjection),
             "Invalid relationship projection, one or more relationship types not found: 'INVALID'"
+        );
+    }
+
+    // Arguments for parameterised tests
+
+    static Stream<Arguments> multipleNodeProjections() {
+        return Stream.of(
+            Arguments.of(Arrays.asList("A", "B")),
+            Arguments.of(map("A", map("label", "B"), "B", map("label", "X")))
         );
     }
 

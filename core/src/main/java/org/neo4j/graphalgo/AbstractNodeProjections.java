@@ -106,7 +106,8 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
             return empty();
         }
         if (projections.size() != 1) {
-            throw new IllegalArgumentException("Only one node projection is supported.");
+            throw new IllegalArgumentException(
+                "Multiple node projections are not supported; please use a single projection with a `|` operator to project nodes with different labels into the in-memory graph.");
         }
         return NodeProjections.of(unmodifiableMap(projections));
     }
