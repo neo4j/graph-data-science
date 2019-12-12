@@ -49,21 +49,6 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
         return LabelPropagationWriteProc.class;
     }
 
-    @Test
-    void testCreateConfigWithNonDefaults() {
-        LabelPropagationWriteConfig labelPropagationConfig = LabelPropagationWriteConfig.of(
-            "",
-            Optional.empty(),
-            Optional.empty(),
-            createMinimallyValidConfig(CypherMapWrapper.empty())
-        );
-        assertEquals(10, labelPropagationConfig.maxIterations());
-        assertNull(labelPropagationConfig.seedProperty());
-        assertNull(labelPropagationConfig.weightProperty());
-    }
-
-
-
     @Override
     public LabelPropagationWriteConfig createConfig(CypherMapWrapper mapWrapper) {
         return LabelPropagationWriteConfig.of(
