@@ -186,6 +186,9 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
+        if (graphCreateConfig.nodeProjection().labelFilter().orElse("not_cypher").equals("__isCypher")) {
+            return;
+        }
         if (config instanceof SeedConfig) {
             Set<String> nodeProperties = graphCreateConfig.nodeProjection().allProperties();
             String seedProperty = ((SeedConfig) config).seedProperty();

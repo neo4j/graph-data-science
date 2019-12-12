@@ -24,6 +24,8 @@ import org.HdrHistogram.Histogram;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -113,7 +115,8 @@ public final class GraphLoadProc extends BaseProc {
 
         try (ProgressTimer ignored = ProgressTimer.start(time -> stats.loadMillis = time)) {
             Class<? extends GraphFactory> graphImpl = config.getGraphImpl();
-            Set<String> relationshipTypes = graphImpl == CypherGraphFactory.class
+            boolean isCypher = graphImpl == CypherGraphFactory.class;
+            Set<String> relationshipTypes = isCypher
                     ? Collections.emptySet()
                     : ProjectionParser.parse(config.getRelationshipOrQuery());
 
@@ -130,8 +133,10 @@ public final class GraphLoadProc extends BaseProc {
 
             stats.nodes = graph.nodeCount();
             stats.relationships = graph.relationshipCount();
-
-            GraphCatalog.set(GraphCreateConfig.emptyWithName(getUsername(), name), graph);
+            // TODO: remove this temporary hack; this is used for skipping validation in BaseAlgoProc for the cypher case
+            GraphCreateConfig graphCreateConfig = GraphCreateConfig.of(config.getUsername(), name, "__isCypher", "" , CypherMapWrapper
+                .empty());
+            GraphCatalog.set(graphCreateConfig, graph);
         }
 
         return stats;
