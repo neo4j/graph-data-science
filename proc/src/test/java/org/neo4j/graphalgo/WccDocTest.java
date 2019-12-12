@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
@@ -43,10 +44,10 @@ class WccDocTest extends ProcTestBase {
                              "CREATE (nMark)-[:LINK {weight: 2}]->(nMichael); ";
 
         db = TestDatabaseCreator.createTestDatabase(builder ->
-                builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );
         runQuery(createGraph);
-        registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphLoadProc.class);
+        registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphCatalogProcs.class);
         registerFunctions(GetNodeFunc.class);
     }
 
@@ -60,14 +61,17 @@ class WccDocTest extends ProcTestBase {
     // This is left for a future task
     @Test
     void seeding() {
-        String q1 =
-                "CALL algo.beta.wcc('User', 'LINK', { " +
-                "  write: true, " +
-                "  writeProperty: 'componentId', " +
-                "  weightProperty: 'weight', " +
-                "  threshold: 1.0 " +
-                "}) " +
-                "YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName";
+        String q1 = GdsCypher.call()
+            .withNodeLabel("User")
+            .withRelationshipType("LINK")
+            .withRelationshipProperty("weight")
+            .algo("wcc")
+            .writeMode()
+            .addParameter("writeProperty", "componentId")
+            .addParameter("weightProperty", "weight")
+            .addParameter("threshold", 1.0D)
+            .yields("nodePropertiesWritten", "componentCount", "writeProperty");
+
         String r1 = runQuery(q1).resultAsString();
 //        System.out.println(r1);
 
@@ -76,25 +80,37 @@ class WccDocTest extends ProcTestBase {
         String r2 = runQuery(q2).resultAsString();
 //        System.out.println(r2);
 
-        String q3 = "CALL algo.beta.wcc.stream('User', 'LINK', { " +
-                    "  seedProperty: 'componentId', " +
-                    "  weightProperty: 'weight', " +
-                    "  threshold: 1.0 " +
-                    "}) " +
-                    "YIELD nodeId, setId " +
-                    "RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId " +
-                    "ORDER BY ComponentId, Name";
+        String q3 = GdsCypher.call()
+            .withNodeLabel("User")
+            .withNodeProperty("componentId")
+            .withRelationshipType("LINK")
+            .withRelationshipProperty("weight")
+            .algo("wcc")
+            .streamMode()
+            .addParameter("seedProperty", "componentId")
+            .addParameter("weightProperty", "weight")
+            .addParameter("threshold", 1.0D)
+            .yields("nodeId", "componentId");
+
+        q3 += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+              " ORDER BY componentId, name";
+
         String r3 = runQuery(q3).resultAsString();
 //        System.out.println(r3);
 
-        String q4 = "CALL algo.beta.wcc('User', 'LINK', { " +
-                    "  seedProperty: 'componentId', " +
-                    "  weightProperty: 'weight', " +
-                    "  threshold: 1.0, " +
-                    "  write: true, " +
-                    "  writeProperty: 'componentId' " +
-                    "}) " +
-                    "YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName";
+        String q4 = GdsCypher.call()
+            .withNodeLabel("User")
+            .withNodeProperty("componentId")
+            .withRelationshipType("LINK")
+            .withRelationshipProperty("weight")
+            .algo("wcc")
+            .writeMode()
+            .addParameter("seedProperty", "componentId")
+            .addParameter("weightProperty", "weight")
+            .addParameter("writeProperty", "componentId")
+            .addParameter("threshold", 1.0D)
+            .yields("nodePropertiesWritten", "componentCount", "writeProperty");
+
         String r4 = runQuery(q4).resultAsString();
 //        System.out.println(r4);
 
@@ -106,24 +122,31 @@ class WccDocTest extends ProcTestBase {
     // used to test that the results are correct in the docs
     @Test
     void namedGraphAndCypherProjection() {
-        String q1 = "CALL algo.graph.load('myGraph', 'User', 'LINK');";
-        runQuery(q1).resultAsString();
+        String q1 = "CALL algo.beta.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;";
+        String r1 = runQuery(q1).resultAsString();
+//        System.out.println(r1);
 
-        String q2 = "CALL algo.beta.wcc.stream(null, null, {graph: 'myGraph'}) " +
-                    "YIELD nodeId, setId " +
-                    "RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId " +
-                    "ORDER BY ComponentId, Name;";
-//        System.out.println(runQuery(q2).resultAsString());
+        String q2 = GdsCypher.call()
+            .explicitCreation("myGraph")
+            .algo("wcc")
+            .streamMode()
+            .yields("nodeId", "componentId");
 
-        String q3 = "CALL algo.beta.wcc.stream( " +
-                    "  'MATCH (u:User) RETURN id(u) AS id',  " +
-                    "  'MATCH (u1:User)-[:LINK]->(u2:User)  " +
-                    "   RETURN id(u1) AS source, id(u2) AS target',  " +
-                    "   {graph:'cypher'} " +
-                    ") " +
-                    "YIELD nodeId, setId " +
-                    "RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId " +
-                    "ORDER BY ComponentId, Name";
-//        System.out.println(runQuery(q3).resultAsString());
+        q2 += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+              " ORDER BY componentId, name;";
+
+        String r2 = runQuery(q2).resultAsString();
+//        System.out.println(r2);
+
+        String q3 = "CALL gds.algo.wcc.stream({" +
+                    "   nodeQuery: 'MATCH (u:User) RETURN id(u) AS id', " +
+                    "   relationshipQuery: 'MATCH (u1:User)-[:LINK]->(u2:User) RETURN id(u1) AS source, id(u2) AS target'" +
+                    "}) " +
+                    "YIELD nodeId, componentId " +
+                    "RETURN algo.asNode(nodeId).name AS name, componentId " +
+                    "ORDER BY componentId, name";
+
+        String r3 = runQuery(q3).resultAsString();
+//        System.out.println(r3);
     }
 }
