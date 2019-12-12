@@ -40,6 +40,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -181,7 +182,13 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
     }
 
     default String getProcedureMethodName(Method method) {
-        return method.getDeclaredAnnotation(Procedure.class).value();
+        Procedure procedureAnnotation = method.getDeclaredAnnotation(Procedure.class);
+        Objects.requireNonNull(procedureAnnotation, method + " is not annotation with " + Procedure.class);
+        String name = procedureAnnotation.name();
+        if (name.isEmpty()) {
+            name = procedureAnnotation.value();
+        }
+        return name;
     }
 
     default Stream<Method> getWriteAndStreamProcedures(BaseAlgoProc<?, RESULT, CONFIG> proc) {

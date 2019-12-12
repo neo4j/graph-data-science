@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
-import org.neo4j.procedure.Procedure;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
@@ -43,8 +42,8 @@ public interface MemoryEstimateTests<CONFIG extends BaseAlgoConfig, RESULT> exte
         applyOnProcedure(proc -> {
             getProcedureMethods(proc)
                 .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
-                .forEach(noneEstimateMethods -> {
-                    String procName = noneEstimateMethods.getDeclaredAnnotation(Procedure.class).value();
+                .forEach(noneEstimateMethod -> {
+                    String procName = getProcedureMethodName(noneEstimateMethod);
                     boolean estimateProcExists = getProcedureMethods(proc)
                         .map(this::getProcedureMethodName)
                         .anyMatch(otherProcName -> otherProcName.equals(procName + ".estimate"));
