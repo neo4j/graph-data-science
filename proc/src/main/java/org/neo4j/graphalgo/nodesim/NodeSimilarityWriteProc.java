@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityWriteConfig;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityGraphResult;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -43,10 +44,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphdb.Direction.OUTGOING;
+import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilarityWriteConfig> {
 
-    public static final double UNUSED_FALLBACK_RELATIONSHIP_PROPERTY_VALUE = Double.NaN;
+    private static final double UNUSED_FALLBACK_RELATIONSHIP_PROPERTY_VALUE = Double.NaN;
 
     @Procedure(name = "gds.algo.nodeSimilarity.write", mode = Mode.WRITE)
     @Description("CALL gds.algo.nodeSimilarity.write(graphName: STRING, configuration: MAP {" +
@@ -79,6 +81,35 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
         return write(result, true);
     }
 
+    @Procedure(value = "gds.algo.nodeSimilarity.write.estimate", mode = READ)
+    @Description("CALL gds.algo.nodeSimilarity.write.estimate(graphName: STRING, configuration: MAP {" +
+                 "    similarityCutoff: 0.0," +
+                 "    degreeCutoff: 0," +
+                 "    topK: 10," +
+                 "    bottomK: 10," +
+                 "    topN: 0," +
+                 "    bottomN: 0," +
+                 "    concurrency: 4," +
+                 "    readConcurrency: 4," +
+                 "    writeRelationshipType: ," +
+                 "    writeProperty: ," +
+                 "    writeConcurrency: 4" +
+                 "  }" +
+                 ") YIELD" +
+                 "  nodes: INTEGER, "+
+                 "  relationships: INTEGER," +
+                 "  bytesMin: INTEGER," +
+                 "  bytesMax: INTEGER," +
+                 "  requiredMemory: STRING," +
+                 "  mapView: MAP," +
+                 "  treeView: STRING")
+    public Stream<MemoryEstimateResult> estimateWrite(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeMemoryEstimate(graphNameOrConfig, configuration);
+    }
+
     @Procedure(name = "gds.algo.nodeSimilarity.stats", mode = Mode.WRITE)
     @Description("CALL algo.nodeSimilarity(graphName: STRING, configuration: MAP {" +
                  "    similarityCutoff: 0.0," +
@@ -108,6 +139,35 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
             configuration
         );
         return write(result, false);
+    }
+
+    @Procedure(value = "gds.algo.nodeSimilarity.stats.estimate", mode = READ)
+    @Description("CALL gds.algo.nodeSimilarity.stats.estimate(graphName: STRING, configuration: MAP {" +
+                 "    similarityCutoff: 0.0," +
+                 "    degreeCutoff: 0," +
+                 "    topK: 10," +
+                 "    bottomK: 10," +
+                 "    topN: 0," +
+                 "    bottomN: 0," +
+                 "    concurrency: 4," +
+                 "    readConcurrency: 4," +
+                 "    writeRelationshipType: ," +
+                 "    writeProperty: ," +
+                 "    writeConcurrency: 4" +
+                 "  }" +
+                 ") YIELD" +
+                 "  nodes: INTEGER, "+
+                 "  relationships: INTEGER," +
+                 "  bytesMin: INTEGER," +
+                 "  bytesMax: INTEGER," +
+                 "  requiredMemory: STRING," +
+                 "  mapView: MAP," +
+                 "  treeView: STRING")
+    public Stream<MemoryEstimateResult> estimateStats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeMemoryEstimate(graphNameOrConfig, configuration);
     }
 
     public Stream<NodeSimilarityWriteResult> write(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult, boolean write) {
