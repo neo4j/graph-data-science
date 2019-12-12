@@ -53,6 +53,7 @@ abstract class LabelPropagationProcTestBase<CONFIG extends LabelPropagationConfi
 {
 
     static final List<Long> RESULT = Arrays.asList(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);
+    public static final String TEST_GRAPH_NAME = "myGraph";
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -84,7 +85,7 @@ abstract class LabelPropagationProcTestBase<CONFIG extends LabelPropagationConfi
         registerProcedures(LabelPropagationStreamProc.class, LabelPropagationWriteProc.class, GraphLoadProc.class, GraphCatalogProcs.class);
         runQuery(cypher);
 
-        runQuery(createGraphQuery(Projection.NATURAL, "myGraph"));
+        runQuery(createGraphQuery(Projection.NATURAL, TEST_GRAPH_NAME));
         // TODO: is this flaky?
         runQuery("CALL algo.graph.load('myCypherGraph', '" +
                  nodeQuery +

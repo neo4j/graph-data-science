@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.WriteConfigTests;
@@ -293,6 +294,24 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
             "MATCH (n) WHERE n.id = 1 RETURN n.community AS community",
             row -> assertEquals(11, row.getNumber("community").intValue())
         );
+    }
+
+    @Test
+    void testWriteEstimate() {
+        String query = GdsCypher
+            .call()
+            .explicitCreation(TEST_GRAPH_NAME)
+            .algo("labelPropagation")
+            .writeEstimation()
+            .addAllParameters(createMinimallyValidConfig(CypherMapWrapper.empty()).toMap())
+            .yields(Arrays.asList("bytesMin", "bytesMax", "nodeCount", "relationshipCount"));
+
+        assertCypherResult(query, Arrays.asList(MapUtil.map(
+            "nodeCount", 12L,
+            "relationshipCount", 10L,
+            "bytesMin", 1720L,
+            "bytesMax", 2232L
+        )));
     }
 
     Map<String, Object> concurrencySeedWeightAndWriteParams(int concurrency) {

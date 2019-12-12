@@ -19,13 +19,17 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +57,24 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTestBase<LabelP
         });
 
         assertEquals(actualCommunities, RESULT);
+    }
+
+    @Test
+    void testEstimate() {
+        String query = GdsCypher
+            .call()
+            .explicitCreation(TEST_GRAPH_NAME)
+            .algo("labelPropagation")
+            .streamEstimation()
+            .addAllParameters(createMinimallyValidConfig(CypherMapWrapper.empty()).toMap())
+            .yields(Arrays.asList("bytesMin", "bytesMax", "nodeCount", "relationshipCount"));
+
+        assertCypherResult(query, Arrays.asList(MapUtil.map(
+            "nodeCount", 12L,
+            "relationshipCount", 10L,
+            "bytesMin", 1720L,
+            "bytesMax", 2232L
+        )));
     }
 
     @Override
