@@ -337,6 +337,8 @@ public abstract class GdsCypher {
             String cypherString = toCypherString(parameters);
             if (!cypherString.isEmpty()) {
                 argumentsString.add(cypherString);
+            } else {
+                argumentsString.add("{}");
             }
         }
 
