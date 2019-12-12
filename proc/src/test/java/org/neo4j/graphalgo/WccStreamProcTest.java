@@ -61,12 +61,12 @@ class WccStreamProcTest extends WccProcBaseTest<WccStreamConfig> {
             .withAnyRelationshipType()
             .algo("wcc")
             .streamMode()
-            .yields("nodeId", "setId");
+            .yields("nodeId", "componentId");
 
         long [] communities = new long[10];
         runQuery(query, row -> {
             int nodeId = row.getNumber("nodeId").intValue();
-            long setId = row.getNumber("setId").longValue();
+            long setId = row.getNumber("componentId").longValue();
             communities[nodeId] = setId;
         });
 
@@ -89,12 +89,12 @@ class WccStreamProcTest extends WccProcBaseTest<WccStreamConfig> {
             .explicitCreation("testGraph")
             .algo("wcc")
             .streamMode()
-            .yields("nodeId", "setId");
+            .yields("nodeId", "componentId");
 
         long [] communities = new long[10];
         runQuery(query, row -> {
             int nodeId = row.getNumber("nodeId").intValue();
-            long setId = row.getNumber("setId").longValue();
+            long setId = row.getNumber("componentId").longValue();
             communities[nodeId] = setId;
         });
 

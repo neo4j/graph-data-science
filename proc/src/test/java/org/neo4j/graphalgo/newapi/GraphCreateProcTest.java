@@ -471,7 +471,7 @@ class GraphCreateProcTest extends ProcTestBase {
         assertError(
             "CALL algo.beta.graph.create($name, {}, $relFilter)",
             map("name", name, "relFilter", relFilter),
-            "Relationship type(s) not found: 'INVALID'"
+            "Invalid relationship projection, one or more relationship types not found: 'INVALID'"
         );
     }
 }

@@ -95,11 +95,11 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
 
         public final long nodeId;
 
-        public final long setId;
+        public final long componentId;
 
-        public StreamResult(long nodeId, long setId) {
+        public StreamResult(long nodeId, long componentId) {
             this.nodeId = nodeId;
-            this.setId = setId;
+            this.componentId = componentId;
         }
     }
 }
