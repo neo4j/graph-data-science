@@ -43,10 +43,10 @@ class NodeProjectionsTest {
     void syntacticSugars(Object argument) {
         NodeProjections actual = NodeProjections.fromObject(argument);
 
-        NodeProjections expected = NodeProjections.create(singletonMap(
+        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
             ElementIdentifier.of("A"),
             NodeProjection.builder().label("A").properties(PropertyMappings.of()).build()
-        ));
+        )).build();
 
         assertThat(
             actual,
@@ -66,7 +66,7 @@ class NodeProjectionsTest {
             )
         ));
 
-        NodeProjections expected = NodeProjections.create(singletonMap(
+        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
             ElementIdentifier.of("MY_LABEL"),
             NodeProjection
                 .builder()
@@ -78,7 +78,7 @@ class NodeProjectionsTest {
                     .build()
                 )
                 .build()
-        ));
+        )).build();
 
         assertThat(
             actual,

@@ -539,7 +539,7 @@ public class GraphLoader {
                     );
             }
 
-            NodeProjections nodeProjections = NodeProjections.of(label);
+            NodeProjections nodeProjections = NodeProjections.fromString(label);
             createConfig = ImmutableGraphCreateConfig
                 .builder()
                 .graphName(StringUtils.trimToEmpty(graphName))

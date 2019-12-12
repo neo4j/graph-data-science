@@ -21,13 +21,14 @@
 package org.neo4j.graphalgo;
 
 import org.apache.commons.lang3.StringUtils;
+import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.stream.Streams;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
@@ -36,20 +37,46 @@ import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
-public final class NodeProjections extends AbstractProjections<NodeProjection> {
+@DataClass
+@Value.Immutable(singleton = true)
+public abstract class AbstractNodeProjections extends AbstractProjections<NodeProjection> {
 
-    private static final NodeProjections EMPTY = new NodeProjections(emptyMap());
+    public abstract Map<ElementIdentifier, NodeProjection> projections();
 
-    public static NodeProjections of(@Nullable String label) {
+    public static NodeProjections fromObject(Object object) {
+        if (object == null) {
+            return fromMap(emptyMap());
+        }
+        if (object instanceof NodeProjections) {
+            return (NodeProjections) object;
+        }
+        if (object instanceof String) {
+            return fromString((String) object);
+        }
+        if (object instanceof Map) {
+            @SuppressWarnings("unchecked") Map<String, ?> map = (Map) object;
+            return fromMap(map);
+        }
+        if (object instanceof Iterable) {
+            Iterable<?> list = (Iterable) object;
+            return fromList(list);
+        }
+        throw new IllegalArgumentException(String.format(
+            "Cannot construct a node projection out of a %s",
+            object.getClass().getName()
+        ));
+    }
+
+    public static NodeProjections fromString(@Nullable String label) {
         if (StringUtils.isEmpty(label)) {
-            return EMPTY;
+            return empty();
         }
         ElementIdentifier identifier = new ElementIdentifier(label);
         NodeProjection projection = NodeProjection.fromString(label);
         return create(singletonMap(identifier, projection));
     }
 
-    public static NodeProjections of(Map<String, ?> map) {
+    private static NodeProjections fromMap(Map<String, ?> map) {
         Map<ElementIdentifier, NodeProjection> projections = new LinkedHashMap<>();
         map.forEach((name, spec) -> {
             ElementIdentifier identifier = new ElementIdentifier(name);
@@ -62,62 +89,31 @@ public final class NodeProjections extends AbstractProjections<NodeProjection> {
         return create(projections);
     }
 
-    public static NodeProjections of(Iterable<?> items) {
+    private static NodeProjections fromList(Iterable<?> items) {
         Map<ElementIdentifier, NodeProjection> projections = new LinkedHashMap<>();
         for (Object item : items) {
             NodeProjections nodeProjections = fromObject(item);
-            projections.putAll(nodeProjections.projections);
+            projections.putAll(nodeProjections.projections());
         }
         return create(projections);
     }
 
-    public static NodeProjections fromObject(Object object) {
-        if (object == null) {
-            return of(emptyMap());
-        }
-        if (object instanceof NodeProjections) {
-            return (NodeProjections) object;
-        }
-        if (object instanceof String) {
-            return of((String) object);
-        }
-        if (object instanceof Map) {
-            @SuppressWarnings("unchecked") Map<String, ?> map = (Map) object;
-            return of(map);
-        }
-        if (object instanceof Iterable) {
-            Iterable<?> list = (Iterable) object;
-            return of(list);
-        }
-        throw new IllegalArgumentException(String.format(
-            "Cannot construct a node projection out of a %s",
-            object.getClass().getName()
-        ));
-    }
-
     public static NodeProjections create(Map<ElementIdentifier, NodeProjection> projections) {
         if (projections.values().stream().allMatch(NodeProjection::isMatchAll)) {
-            return EMPTY;
+            return empty();
         }
         if (projections.size() != 1) {
             throw new IllegalArgumentException("Only one node projection is supported.");
         }
-        return new NodeProjections(unmodifiableMap(projections));
+        return NodeProjections.of(unmodifiableMap(projections));
     }
 
-    private final Map<ElementIdentifier, NodeProjection> projections;
-
-    private NodeProjections(Map<ElementIdentifier, NodeProjection> projections) {
-        this.projections = projections;
-    }
-
-    @Override
-    public Map<ElementIdentifier, NodeProjection> projections() {
-        return projections;
-    }
+    public static NodeProjections empty() {
+        return NodeProjections.of();
+    };
 
     public NodeProjection getProjection(ElementIdentifier identifier) {
-        NodeProjection projection = projections.get(identifier);
+        NodeProjection projection = projections().get(identifier);
         if (projection == null) {
             throw new IllegalArgumentException("Node label identifier does not exist: " + identifier);
         }
@@ -125,14 +121,14 @@ public final class NodeProjections extends AbstractProjections<NodeProjection> {
     }
 
     public Collection<NodeProjection> allProjections() {
-        return projections.values();
+        return projections().values();
     }
 
     public NodeProjections addPropertyMappings(PropertyMappings mappings) {
         if (!mappings.hasMappings()) {
-            return this;
+            return NodeProjections.copyOf(this);
         }
-        Map<ElementIdentifier, NodeProjection> newProjections = projections.entrySet().stream().collect(toMap(
+        Map<ElementIdentifier, NodeProjection> newProjections = projections().entrySet().stream().collect(toMap(
             Map.Entry::getKey,
             e -> e.getValue().withAdditionalPropertyMappings(mappings)
         ));
@@ -147,7 +143,7 @@ public final class NodeProjections extends AbstractProjections<NodeProjection> {
         if (isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(projections
+        return Optional.of(projections()
             .values()
             .stream()
             .map(NodeProjection::label)
@@ -157,38 +153,14 @@ public final class NodeProjections extends AbstractProjections<NodeProjection> {
     }
 
     public boolean isEmpty() {
-        return this == EMPTY;
-    }
-
-    public static NodeProjections empty() {
-        return EMPTY;
+        return this == NodeProjections.of();
     }
 
     public Map<String, Object> toObject() {
         Map<String, Object> value = new LinkedHashMap<>();
-        projections.forEach((identifier, projection) -> {
+        projections().forEach((identifier, projection) -> {
             value.put(identifier.name, projection.toObject());
         });
         return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        NodeProjections that = (NodeProjections) o;
-        return projections.equals(that.projections);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(projections);
-    }
-
-    @Override
-    public String toString() {
-        return "NodeProjections{" +
-               "projections=" + projections +
-               '}';
     }
 }

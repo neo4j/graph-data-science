@@ -158,7 +158,7 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Bas
                 GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
                     .builder()
                     .graphName("")
-                    .nodeProjection(NodeProjections.of("Node"))
+                    .nodeProjection(NodeProjections.fromString("Node"))
                     .nodeProperties(PropertyMappings.fromObject("seed"))
                     .relationshipProjection(RelationshipProjections.builder()
                         .putProjection(
