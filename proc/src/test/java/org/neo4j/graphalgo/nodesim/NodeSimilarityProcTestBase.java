@@ -91,6 +91,10 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
         return Stream.of(NATURAL, REVERSE);
     }
 
+    static Stream<Arguments> allGraphVariations() {
+        return graphVariationForProjection(NATURAL).map(args -> arguments(args.get()[0], args.get()[2]));
+    }
+
     static Stream<Arguments> allValidGraphVariationsWithProjections() {
         return allValidProjections().flatMap(NodeSimilarityProcTestBase::graphVariationForProjection);
     }

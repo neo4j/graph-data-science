@@ -21,18 +21,18 @@
 package org.neo4j.graphalgo.nodesim;
 
 import org.apache.commons.compress.utils.Sets;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityStreamConfig;
+import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -90,14 +90,24 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
         EXPECTED_TOP_INCOMING.add(resultString(5, 4, 3.0 / 3.0));
     }
 
-    @Test
-    void shouldDealWithAnyIdSpace() throws Exception {
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allGraphVariations")
+    void shouldDealWithAnyIdSpace(GdsCypher.QueryBuilder queryBuilder, String testName) throws Exception {
+        String graphCreate =
+            "CALL algo.beta.graph.create(" +
+            "    'myGraphNATURAL'," +
+            "    'Person | Item'," +
+            "    'LIKES'" +
+            ")";
+
         int idOffset = 100;
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, NodeSimilarityStreamProc.class);
+        registerProcedures(localDb, NodeSimilarityStreamProc.class, GraphCatalogProcs.class, GraphLoadProc.class);
         QueryRunner.runQuery(localDb, "MATCH (n) DETACH DELETE n");
         QueryRunner.runQuery(localDb, String.format("UNWIND range(1, %d) AS i CREATE (:IncrementIdSpace)", idOffset));
         QueryRunner.runQuery(localDb, DB_CYPHER);
+        QueryRunner.runQuery(localDb, "CALL algo.graph.remove('myGraphNATURAL')");
+        QueryRunner.runQuery(localDb, graphCreate);
         QueryRunner.runQuery(localDb, "MATCH (n:IncrementIdSpace) DELETE n");
 
         HashSet<String> expected = Sets.newHashSet(
@@ -109,19 +119,12 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
             resultString(idOffset + 2, idOffset + 1, 0.0)
         );
 
-        String query = "CALL gds.algo.nodeSimilarity.stream(" +
-                       "    {" +
-                       "        nodeProjection: '' " +
-                       "        , relationshipProjection: {" +
-                       "            LIKES: {" +
-                       "                type: 'LIKES'" +
-                       "                , projection: 'natural'" +
-                       "            }" +
-                       "        }" +
-                       "        , similarityCutoff: 0.0" +
-                       "        , direction: 'OUTGOING'" +
-                       "    }" +
-                       ") YIELD node1, node2, similarity";
+        String query = queryBuilder
+            .algo("nodeSimilarity")
+            .streamMode()
+            .addParameter("similarityCutoff", 0.0)
+            .addParameter("direction", OUTGOING.name())
+            .yields("node1", "node2", "similarity");
 
         Collection<String> result = new HashSet<>();
         runQuery(localDb, query, row -> {
