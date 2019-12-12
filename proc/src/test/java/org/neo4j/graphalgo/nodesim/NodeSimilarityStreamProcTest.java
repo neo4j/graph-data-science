@@ -21,8 +21,6 @@
 package org.neo4j.graphalgo.nodesim;
 
 import org.apache.commons.compress.utils.Sets;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -31,7 +29,6 @@ import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
@@ -48,8 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.Projection.NATURAL;
 import static org.neo4j.graphalgo.Projection.REVERSE;
-import static org.neo4j.graphalgo.TestSupport.crossArguments;
-import static org.neo4j.graphalgo.TestSupport.toArguments;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
@@ -72,10 +67,6 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
 
     private static String resultString(long node1, long node2, double similarity) {
         return String.format("%d,%d %f%n", node1, node2, similarity);
-    }
-
-    static Stream<Arguments> allGraphNamesWithIncomingOutgoing() {
-        return crossArguments(toArguments(TestSupport::allGraphNames), toArguments(() -> Stream.of(INCOMING, OUTGOING)));
     }
 
     static Stream<Arguments> allValidProjections() {

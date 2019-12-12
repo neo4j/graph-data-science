@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityStreamConfig;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityResult;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -38,10 +39,10 @@ import java.util.stream.Stream;
 
 public class NodeSimilarityStreamProc extends NodeSimilarityProcBase<NodeSimilarityStreamConfig> {
 
-    @Procedure(name = "gds.algo.nodeSimilarity.stream", mode = Mode.READ)
+    @Procedure(value = "gds.algo.nodeSimilarity.stream", mode = Mode.READ)
     @Description("CALL gds.algo.nodeSimilarity.stream(graphName: STRING, configuration: MAP {" +
                  "    similarityCutoff: 0.0," +
-                 "    degreeCutoff: 0," +
+                 "    degreeCutoff: 1," +
                  "    topK: 10," +
                  "    bottomK: 10," +
                  "    topN: 0," +
@@ -74,6 +75,28 @@ public class NodeSimilarityStreamProc extends NodeSimilarityProcBase<NodeSimilar
                 similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
                 return similarityResult;
             });
+    }
+
+    @Procedure(value = "gds.algo.nodeSimilarity.stream.estimate", mode = Mode.READ)
+    @Description("CALL gds.algo.nodeSimilarity.stream.estimate(graphName: STRING, configuration: MAP {" +
+                 "    similarityCutoff: 0.0," +
+                 "    degreeCutoff: 1," +
+                 "    topK: 10," +
+                 "    bottomK: 10," +
+                 "    topN: 0," +
+                 "    bottomN: 0," +
+                 "    concurrency: 4," +
+                 "    readConcurrency: 4" +
+                 "  }" +
+                 ") YIELD" +
+                 "  node1," +
+                 "  node2," +
+                 "  similarity")
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeMemoryEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

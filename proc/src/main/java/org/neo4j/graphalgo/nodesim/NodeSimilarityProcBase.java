@@ -44,7 +44,7 @@ public abstract class NodeSimilarityProcBase <CONFIG extends NodeSimilarityConfi
     @Override
     protected AlgorithmFactory<NodeSimilarity, CONFIG> algorithmFactory(CONFIG config) {
         // TODO: Should check if we are writing or streaming, but how to do that in memrec?
-        boolean computesSimilarityGraph = true;
+        boolean computesSimilarityGraph = !config.computeToStream();
         return new NodeSimilarityFactory<>(
             new NodeSimilarity.Config(
                 config.similarityCutoff(),
