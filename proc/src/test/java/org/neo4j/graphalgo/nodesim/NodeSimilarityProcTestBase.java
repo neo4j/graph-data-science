@@ -253,8 +253,8 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
         CypherMapWrapper input = baseUserInput();
         NodeSimilarityConfigBase config = config(input);
 
-        assertEquals(10, config.topK());
-        assertEquals(0, config.topN());
+        assertEquals(10, config.normalizedK());
+        assertEquals(0, config.normalizedN());
         assertEquals(1, config.degreeCutoff());
         assertEquals(1E-42, config.similarityCutoff());
         assertEquals(Pools.DEFAULT_CONCURRENCY, config.concurrency());

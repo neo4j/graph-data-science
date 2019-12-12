@@ -207,8 +207,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private TopKMap computeTopkMap() {
-        Comparator<SimilarityResult> comparator = config.topK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topK()), comparator, tracker);
+        Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator, tracker);
         loggelableAndTerminatableNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
@@ -225,8 +225,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private TopKMap computeTopKMapParallel() {
-        Comparator<SimilarityResult> comparator = config.topK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topK()), comparator, tracker);
+        Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator, tracker);
         ParallelUtil.parallelStreamConsume(
             loggelableAndTerminatableNodeStream(),
             stream -> stream
@@ -252,7 +252,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private Stream<SimilarityResult> computeTopN() {
-        TopNList topNList = new TopNList(config.topN());
+        TopNList topNList = new TopNList(config.normalizedN());
         loggelableAndTerminatableNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
@@ -268,7 +268,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private Stream<SimilarityResult> computeTopN(TopKMap topKMap) {
-        TopNList topNList = new TopNList(config.topN());
+        TopNList topNList = new TopNList(config.normalizedN());
         topKMap.forEach(topNList::add);
         return topNList.stream();
     }
@@ -308,78 +308,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
 
     private LongStream nodeStream(long offset) {
         return new SetBitsIterable(nodeFilter, offset).stream();
-    }
-
-    public static final class Config {
-
-        private final double similarityCutoff;
-        private final int degreeCutoff;
-
-        private final int topN;
-        private final int topK;
-
-        private final int concurrency;
-        private final int minBatchSize;
-
-        final Direction direction;
-        final boolean computeToStream;
-
-        public Config(
-            double similarityCutoff,
-            int degreeCutoff,
-            int topN,
-            int topK,
-            int concurrency,
-            int minBatchSize,
-            Direction direction,
-            boolean computeToStream
-        ) {
-            this.similarityCutoff = similarityCutoff;
-            // TODO: make this constraint more prominent
-            this.degreeCutoff = Math.max(1, degreeCutoff);
-            this.topN = topN;
-            this.topK = topK;
-            this.concurrency = concurrency;
-            this.minBatchSize = minBatchSize;
-            this.direction = direction;
-            this.computeToStream = computeToStream;
-        }
-
-        public int topK() {
-            return topK;
-        }
-
-        public int topN() {
-            return topN;
-        }
-
-        public double similarityCutoff() {
-            return similarityCutoff;
-        }
-
-        public int degreeCutoff() {
-            return degreeCutoff;
-        }
-
-        public int concurrency() {
-            return concurrency;
-        }
-
-        public int minBatchSize() {
-            return minBatchSize;
-        }
-
-        public boolean isParallel() {
-            return concurrency > 1;
-        }
-
-        public boolean hasTopK() {
-            return topK != 0;
-        }
-
-        public boolean hasTopN() {
-            return topN != 0;
-        }
     }
 
     private static final class VectorComputer implements RelationshipConsumer {

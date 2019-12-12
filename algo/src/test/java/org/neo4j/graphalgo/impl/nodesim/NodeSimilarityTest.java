@@ -37,9 +37,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -68,6 +66,7 @@ import static org.neo4j.graphalgo.TestSupport.assertAlgorithmTermination;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
+import static org.neo4j.graphalgo.impl.nodesim.NodeSimilarityConfigBase.TOP_K_DEFAULT;
 import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
@@ -119,14 +118,11 @@ final class NodeSimilarityTest extends AlgoTestBase {
     private static NodeSimilarityConfigBase.Builder configBuilder(boolean streamMode) {
         NodeSimilarityConfigBase.Builder builder = streamMode
             ? ImmutableNodeSimilarityStreamConfig.builder()
-            : ImmutableNodeSimilarityWriteConfig.builder();
+            : ImmutableNodeSimilarityWriteConfig.builder()
+                .writeProperty("writeProperty")
+                .writeRelationshipType("writeRelationshipType");
 
-        return builder
-            .similarityCutoff(0.0)
-            .degreeCutoff(1)
-            .topN(1)
-            .topK(1)
-            .direction(OUTGOING);
+        return builder.similarityCutoff(0.0);
     }
 
     static {
@@ -196,7 +192,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
     }
 
     static Stream<Arguments> topKAndConcurrencies() {
-        Stream<Integer> topKStream = Stream.of(0, 100);
+        Stream<Integer> topKStream = Stream.of(TOP_K_DEFAULT, 100);
         return TestSupport.crossArguments(
             toArguments(() -> topKStream),
             toArguments(NodeSimilarityTest::concurrencies)
@@ -279,7 +275,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).topN(-1).direction(algoDirection).build(),
+            configBuilder().concurrency(concurrency).bottomN(1).direction(algoDirection).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -338,7 +334,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
             graph,
             configBuilder(false)
                 .concurrency(concurrency)
-                .topK(-1)
+                .topK(10)
+                .bottomK(1)
                 .direction(algoDirection)
                 .build(),
             Pools.DEFAULT,
@@ -670,7 +667,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
     }
 
     @ParameterizedTest(name = "topK = {0}")
-    @ValueSource(ints = {0, 100})
+    @ValueSource(ints = {TOP_K_DEFAULT, 100})
     void shouldComputeMemrec(int topK) {
         GraphDimensions dimensions = new GraphDimensions.Builder()
             .setNodeCount(1_000_000)
@@ -680,10 +677,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
         NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig
             .builder()
             .similarityCutoff(0.0)
-            .degreeCutoff(0)
-            .topN(0)
             .topK(topK)
-            .direction(OUTGOING)
+            .writeProperty("writeProperty")
+            .writeRelationshipType("writeRelationshipType")
             .build();
 
         MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
@@ -703,7 +699,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange);
 
-        if (topK == 0) {
+        if (topK == TOP_K_DEFAULT) {
             long graphRangeMin = 500_050_564_640L;
             long graphRangeMax = 500_050_564_640L;
             builder.fixed("similarity graph", MemoryRange.of(graphRangeMin, graphRangeMax));
@@ -719,20 +715,20 @@ final class NodeSimilarityTest extends AlgoTestBase {
     }
 
     @ParameterizedTest(name = "topK = {0}")
-    @ValueSource(ints = {0, 100})
+    @ValueSource(ints = {TOP_K_DEFAULT, 100})
     void shouldComputeMemrecWithTop(int topK) {
         GraphDimensions dimensions = new GraphDimensions.Builder()
             .setNodeCount(1_000_000)
             .setMaxRelCount(5_000_000)
             .build();
 
-        NodeSimilarityStreamConfig config = ImmutableNodeSimilarityStreamConfig
+        NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig
             .builder()
             .similarityCutoff(0.0)
-            .degreeCutoff(0)
             .topN(100)
             .topK(topK)
-            .direction(OUTGOING)
+            .writeProperty("writeProperty")
+            .writeRelationshipType("writeRelationshipType")
             .build();
 
         MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
@@ -757,7 +753,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .fixed("vectors", vectorsRange)
             .fixed("topNList", topNListRange);
 
-        if (topK == 0) {
+        if (topK == TOP_K_DEFAULT) {
             long graphRangeMin = 270_520L;
             long graphRangeMax = 270_520L;
             builder.fixed("similarity graph", MemoryRange.of(graphRangeMin, graphRangeMax));
@@ -771,5 +767,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         assertEquals(expected.memoryUsage(), actual.memoryUsage());
     }
+
 }
 
