@@ -40,8 +40,8 @@ public class GraphDropProc extends BaseProc {
                  "  graphName: STRING" +
                  ") YIELD" +
                  "  graphName: STRING," +
-                 "  nodeProjection: STRING," +
-                 "  relationshipProjection: STRING," +
+                 "  nodeProjection: MAP," +
+                 "  relationshipProjection: MAP," +
                  "  nodes: INTEGER," +
                  "  relationships: INTEGER")
     public Stream<GraphInfo> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
