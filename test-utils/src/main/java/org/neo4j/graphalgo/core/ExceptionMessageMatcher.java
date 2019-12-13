@@ -26,6 +26,7 @@ import org.hamcrest.TypeSafeMatcher;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
 
 public final class ExceptionMessageMatcher<EX extends Throwable>
         extends TypeSafeMatcher<EX> {
@@ -42,6 +43,10 @@ public final class ExceptionMessageMatcher<EX extends Throwable>
 
     public static <EX extends Throwable> Matcher<EX> containsMessage(final String message) {
         return new ExceptionMessageMatcher<>(containsString(message));
+    }
+
+    public static <EX extends Throwable> Matcher<EX> containsMessageRegex(final String message) {
+        return new ExceptionMessageMatcher<>(matchesPattern(message));
     }
 
     @Override

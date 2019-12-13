@@ -36,9 +36,8 @@ public abstract class PropertyMapping {
 
     public static final double DEFAULT_FALLBACK_VALUE = Double.NaN;
 
-    private static final String ELEMENT_PROPERTIES_PROPERTY_KEY = "property";
-    private static final String ELEMENT_PROPERTIES_AGGREGATION_KEY = "aggregation";
-    private static final String ELEMENT_PROPERTIES_DEFAULT_VALUE_KEY = "defaultValue";
+    public static final String PROPERTY_KEY = "property";
+    public static final String DEFAULT_VALUE_KEY = "defaultValue";
 
     /**
      * property key in the result map Graph.nodeProperties(`propertyKey`)
@@ -69,29 +68,29 @@ public abstract class PropertyMapping {
             return fromObject(
                 propertyKey,
                 Collections.singletonMap(
-                    ELEMENT_PROPERTIES_PROPERTY_KEY,
+                    PROPERTY_KEY,
                     neoPropertyKey
                 )
             );
         } else if (stringOrMap instanceof Map) {
             Map relPropertyMap = (Map) stringOrMap;
 
-            final Object propertyNameValue = relPropertyMap.get(ELEMENT_PROPERTIES_PROPERTY_KEY);
+            final Object propertyNameValue = relPropertyMap.get(PROPERTY_KEY);
             if (propertyNameValue == null) {
                 throw new IllegalArgumentException(String.format(
                     "Expected a '%s', but no such entry found for '%s'.",
-                    ELEMENT_PROPERTIES_PROPERTY_KEY, ELEMENT_PROPERTIES_PROPERTY_KEY
+                    PROPERTY_KEY, PROPERTY_KEY
                 ));
             }
             if (!(propertyNameValue instanceof String)) {
                 throw new IllegalArgumentException(String.format(
                     "Expected the value of '%s' to be of type String, but was '%s'.",
-                    ELEMENT_PROPERTIES_PROPERTY_KEY, propertyNameValue.getClass().getSimpleName()
+                    PROPERTY_KEY, propertyNameValue.getClass().getSimpleName()
                 ));
             }
             String neoPropertyKey = (String) propertyNameValue;
 
-            final Object aggregationValue = relPropertyMap.get(ELEMENT_PROPERTIES_AGGREGATION_KEY);
+            final Object aggregationValue = relPropertyMap.get(RelationshipProjection.AGGREGATION_KEY);
             DeduplicationStrategy deduplicationStrategy;
             if (aggregationValue == null) {
                 deduplicationStrategy = DeduplicationStrategy.DEFAULT;
@@ -100,11 +99,11 @@ public abstract class PropertyMapping {
             } else {
                 throw new IllegalStateException(String.format(
                     "Expected the value of '%s' to be of type String, but was '%s'",
-                    ELEMENT_PROPERTIES_AGGREGATION_KEY, aggregationValue.getClass().getSimpleName()
+                    RelationshipProjection.AGGREGATION_KEY, aggregationValue.getClass().getSimpleName()
                 ));
             }
 
-            final Object defaultPropertyValue = relPropertyMap.get(ELEMENT_PROPERTIES_DEFAULT_VALUE_KEY);
+            final Object defaultPropertyValue = relPropertyMap.get(DEFAULT_VALUE_KEY);
             double defaultProperty;
             if (defaultPropertyValue == null) {
                 defaultProperty = HugeGraph.NO_PROPERTY_VALUE;
@@ -113,7 +112,7 @@ public abstract class PropertyMapping {
             } else {
                 throw new IllegalStateException(String.format(
                     "Expected the value of '%s' to be of type double, but was '%s'",
-                    ELEMENT_PROPERTIES_DEFAULT_VALUE_KEY, defaultPropertyValue.getClass().getSimpleName()
+                    DEFAULT_VALUE_KEY, defaultPropertyValue.getClass().getSimpleName()
                 ));
             }
 
@@ -142,10 +141,10 @@ public abstract class PropertyMapping {
 
     public Map.Entry<String, Object> toObject(boolean includeAggregation) {
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put(ELEMENT_PROPERTIES_PROPERTY_KEY, neoPropertyKey());
-        value.put(ELEMENT_PROPERTIES_DEFAULT_VALUE_KEY, defaultValue());
+        value.put(PROPERTY_KEY, neoPropertyKey());
+        value.put(DEFAULT_VALUE_KEY, defaultValue());
         if (includeAggregation) {
-            value.put(ELEMENT_PROPERTIES_AGGREGATION_KEY, deduplicationStrategy().name());
+            value.put(RelationshipProjection.AGGREGATION_KEY, deduplicationStrategy().name());
         }
         return new AbstractMap.SimpleImmutableEntry<>(propertyKey(), value);
     }

@@ -39,7 +39,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
         return super.properties();
     }
 
-    private static final String LABEL_KEY = "label";
+    public static final String LABEL_KEY = "label";
 
     public static NodeProjection empty() {
         return NodeProjection.of();
@@ -66,10 +66,6 @@ public abstract class AbstractNodeProjection extends ElementProjection {
     public static NodeProjection fromMap(Map<String, Object> map, ElementIdentifier identifier) {
         String label = String.valueOf(map.getOrDefault(LABEL_KEY, identifier.name));
         return create(map, properties -> NodeProjection.of(label, properties));
-    }
-
-    public boolean isMatchAll() {
-        return this == NodeProjection.of();
     }
 
     @Override

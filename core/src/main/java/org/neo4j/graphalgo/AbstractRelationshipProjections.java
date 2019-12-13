@@ -122,8 +122,9 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
     }
 
     private static RelationshipProjections create(Map<ElementIdentifier, RelationshipProjection> projections) {
-        if (projections.values().stream().allMatch(RelationshipProjection::isMatchAll)) {
-            return empty();
+        if (projections.isEmpty()) {
+            throw new IllegalArgumentException(
+                "An empty relationship projection was given; at least one relationship type must be projected.");
         }
         return RelationshipProjections.of(projections);
     }
