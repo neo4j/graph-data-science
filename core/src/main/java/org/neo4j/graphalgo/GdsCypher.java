@@ -23,6 +23,7 @@ package org.neo4j.graphalgo;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.cypher.internal.v3_5.ast.prettifier.ExpressionStringifier;
 import org.neo4j.cypher.internal.v3_5.ast.prettifier.ExpressionStringifier$;
 import org.neo4j.cypher.internal.v3_5.expressions.DecimalDoubleLiteral;
@@ -46,7 +47,7 @@ import scala.runtime.AbstractFunction1;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -63,10 +64,14 @@ public abstract class GdsCypher {
         return new StagedBuilder();
     }
 
-    public enum ExecutionMode {
+    public interface ExecutionMode {
+    }
+
+    public enum ExecutionModes implements ExecutionMode {
         WRITE, STATS, STREAM
     }
 
+    @SuppressWarnings("unused")
     public interface ImplicitCreationInlineBuilder {
 
         default ImplicitCreationBuildStage withAnyLabel() {
@@ -218,6 +223,10 @@ public abstract class GdsCypher {
     }
 
     public interface QueryBuilder {
+        ParametersBuildStage graphCreate(String graphName);
+
+        ParametersBuildStage betaGraphCreate(String graphName);
+
         ModeBuildStage algo(Iterable<String> namespace, String algoName);
 
         default ModeBuildStage algo(String algoName) {
@@ -254,27 +263,27 @@ public abstract class GdsCypher {
         ParametersBuildStage estimationMode(ExecutionMode mode);
 
         default ParametersBuildStage writeMode() {
-            return executionMode(ExecutionMode.WRITE);
+            return executionMode(ExecutionModes.WRITE);
         }
 
         default ParametersBuildStage statsMode() {
-            return executionMode(ExecutionMode.STATS);
+            return executionMode(ExecutionModes.STATS);
         }
 
         default ParametersBuildStage streamMode() {
-            return executionMode(ExecutionMode.STREAM);
+            return executionMode(ExecutionModes.STREAM);
         }
 
         default ParametersBuildStage writeEstimation() {
-            return estimationMode(ExecutionMode.WRITE);
+            return estimationMode(ExecutionModes.WRITE);
         }
 
         default ParametersBuildStage statsEstimation() {
-            return estimationMode(ExecutionMode.STATS);
+            return estimationMode(ExecutionModes.STATS);
         }
 
         default ParametersBuildStage streamEstimation() {
-            return estimationMode(ExecutionMode.STREAM);
+            return estimationMode(ExecutionModes.STREAM);
         }
     }
 
@@ -291,6 +300,10 @@ public abstract class GdsCypher {
 
         @Language("Cypher")
         String yields(Iterable<String> elements);
+    }
+
+    private enum InternalExecutionMode implements ExecutionMode {
+        GRAPH_CREATE
     }
 
     @Language("Cypher")
@@ -314,7 +327,9 @@ public abstract class GdsCypher {
             algoNamespace.forEach(procedureName::add);
         }
         procedureName.add(algoName);
-        procedureName.add(executionMode.name().toLowerCase(Locale.ENGLISH));
+        if (executionMode instanceof ExecutionModes) {
+            procedureName.add(((ExecutionModes) executionMode).name().toLowerCase(Locale.ENGLISH));
+        }
         if (runEstimation) {
             procedureName.add("estimate");
         }
@@ -324,9 +339,16 @@ public abstract class GdsCypher {
 
         if (implicitCreateConfig.isPresent()) {
             GraphCreateConfig config = implicitCreateConfig.get();
-            Map<String, Object> newParameters = new HashMap<>(parameters.size() + 4);
-            newParameters.put("nodeProjection", config.nodeProjection().toObject());
-            newParameters.put("relationshipProjection", config.relationshipProjection().toObject());
+            Map<String, Object> newParameters = new LinkedHashMap<>(parameters.size() + 4);
+
+            if (executionMode == InternalExecutionMode.GRAPH_CREATE) {
+                argumentsString.add(toCypherString(config.nodeProjection().toObject()));
+                argumentsString.add(toCypherString(config.relationshipProjection().toObject()));
+            } else {
+                newParameters.put("nodeProjection", config.nodeProjection().toObject());
+                newParameters.put("relationshipProjection", config.relationshipProjection().toObject());
+            }
+
             newParameters.put("nodeProperties", config.nodeProperties().toObject(false));
             newParameters.put("relationshipProperties", config.relationshipProperties().toObject(true));
             newParameters.putAll(parameters);
@@ -436,7 +458,7 @@ public abstract class GdsCypher {
     private static final class StagedBuilder implements CreationBuildStage, ImplicitCreationBuildStage, QueryBuilder, ModeBuildStage, ParametersBuildStage {
 
         private final CallBuilder builder;
-        private InlineGraphCreateConfigBuilder graphCreateBuilder;
+        private @Nullable InlineGraphCreateConfigBuilder graphCreateBuilder;
 
         private StagedBuilder() {
             builder = new CallBuilder();
@@ -444,6 +466,7 @@ public abstract class GdsCypher {
 
         @Override
         public StagedBuilder explicitCreation(String graphName) {
+            graphCreateBuilder = null;
             builder
                 .explicitGraphName(graphName)
                 .implicitCreateConfig(Optional.empty());
@@ -452,14 +475,18 @@ public abstract class GdsCypher {
 
         @Override
         public StagedBuilder implicitCreation(GraphCreateConfig config) {
-            builder
-                .implicitCreateConfig(config)
-                .explicitGraphName(Optional.empty());
+            graphCreateBuilder()
+                .graphName("")
+                .nodeProjections(config.nodeProjection().projections())
+                .relProjections(config.relationshipProjection().projections())
+                .nodeProperties(config.nodeProperties())
+                .relProperties(config.relationshipProperties());
+            builder.explicitGraphName(Optional.empty());
             return this;
         }
 
         @Override
-        public ImplicitCreationBuildStage withNodeLabel(
+        public StagedBuilder withNodeLabel(
             String labelKey,
             NodeProjection nodeProjection
         ) {
@@ -468,7 +495,7 @@ public abstract class GdsCypher {
         }
 
         @Override
-        public ImplicitCreationBuildStage withRelationshipType(
+        public StagedBuilder withRelationshipType(
             String type,
             RelationshipProjection relationshipProjection
         ) {
@@ -477,19 +504,40 @@ public abstract class GdsCypher {
         }
 
         @Override
-        public ImplicitCreationBuildStage withNodeProperty(PropertyMapping propertyMapping) {
+        public StagedBuilder withNodeProperty(PropertyMapping propertyMapping) {
             graphCreateBuilder().addNodeProperty(propertyMapping);
             return this;
         }
 
         @Override
-        public ImplicitCreationBuildStage withRelationshipProperty(PropertyMapping propertyMapping) {
+        public StagedBuilder withRelationshipProperty(PropertyMapping propertyMapping) {
             graphCreateBuilder().addRelProperty(propertyMapping);
             return this;
         }
 
         @Override
-        public ModeBuildStage algo(Iterable<String> namespace, String algoName) {
+        public StagedBuilder graphCreate(String graphName) {
+            return createGraph(graphName, "gds", "graph");
+        }
+
+        @Override
+        public StagedBuilder betaGraphCreate(String graphName) {
+            return createGraph(graphName, "algo", "beta", "graph");
+        }
+
+        private StagedBuilder createGraph(String graphName, String... namespace) {
+            graphCreateBuilder().graphName(graphName);
+            builder
+                .explicitGraphName(Optional.empty())
+                .algoNamespace(Arrays.asList(namespace))
+                .algoName("create")
+                .executionMode(InternalExecutionMode.GRAPH_CREATE)
+                .runEstimation(false);
+            return this;
+        }
+
+        @Override
+        public StagedBuilder algo(Iterable<String> namespace, String algoName) {
             builder
                 .algoNamespace(namespace)
                 .algoName(algoName);
@@ -543,7 +591,13 @@ public abstract class GdsCypher {
         @Language("Cypher")
         private String build() {
             if (graphCreateBuilder != null) {
-                implicitCreation(graphCreateBuilder.build());
+                GraphCreateConfig config = graphCreateBuilder.build();
+                if (config.graphName().isEmpty()) {
+                    builder.explicitGraphName(Optional.empty());
+                } else {
+                    builder.explicitGraphName(config.graphName());
+                }
+                builder.implicitCreateConfig(config);
             }
             return builder.build();
         }
@@ -559,13 +613,14 @@ public abstract class GdsCypher {
 
     @Builder.Factory
     static GraphCreateConfig inlineGraphCreateConfig(
+        Optional<String> graphName,
         Map<ElementIdentifier, NodeProjection> nodeProjections,
         Map<ElementIdentifier, RelationshipProjection> relProjections,
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relProperties
     ) {
         return ImmutableGraphCreateConfig.builder()
-            .graphName("")
+            .graphName(graphName.orElse(""))
             .nodeProjection(NodeProjections.create(nodeProjections))
             .relationshipProjection(RelationshipProjections.builder().putAllProjections(relProjections).build())
             .nodeProperties(PropertyMappings.of(nodeProperties))

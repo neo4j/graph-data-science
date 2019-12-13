@@ -82,9 +82,8 @@ class GdsCypherTest {
         );
     }
 
-    @Test
-    void testImplicitGraphCreationWithConfig() {
-        String input =
+    static Stream<Arguments> implicitBuilders() {
+        String configString =
             "{" +
             "  nodeProjection: {" +
             "    FooNode: {" +
@@ -119,8 +118,8 @@ class GdsCypherTest {
             "}";
 
         @SuppressWarnings("unchecked") Map<String, Object> map =
-            (Map<String, Object>) new MapConverter().apply(input).value();
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig
+            (Map<String, Object>) new MapConverter().apply(configString).value();
+        GraphCreateConfig parsedConfig = ImmutableGraphCreateConfig
             .builder()
             .username("")
             .graphName("")
@@ -130,9 +129,78 @@ class GdsCypherTest {
             .relationshipProperties(PropertyMappings.fromObject(map.get("relationshipProperties")))
             .build();
 
-        String query = GdsCypher
-            .call()
-            .implicitCreation(graphCreateConfig)
+        NodeProjection fooNode = NodeProjection.builder()
+            .label("Foo")
+            .addProperty("nodeProp", "NodePropertyName", 42.1337)
+            .build();
+
+        RelationshipProjection barRel = RelationshipProjection.builder()
+            .type("Bar")
+            .projection(Projection.UNDIRECTED)
+            .aggregation(DeduplicationStrategy.SINGLE)
+            .addProperty("relProp", "RelationshipPropertyName", 1337, DeduplicationStrategy.MAX)
+            .build();
+
+        GraphCreateConfig configFromBuilder = ImmutableGraphCreateConfig
+            .builder()
+            .username("")
+            .graphName("")
+            .nodeProjection(NodeProjections.create(Collections.singletonMap(
+                new ElementIdentifier("FooNode"), fooNode
+            )))
+            .nodeProperties(PropertyMappings.of(ImmutablePropertyMapping
+                .builder()
+                .propertyKey("GlobalNodeProp")
+                .build()
+            ))
+            .relationshipProjection(RelationshipProjections
+                .builder()
+                .putProjection(
+                    new ElementIdentifier("Rel"),
+                    RelationshipProjection.builder().type("TYPE").build()
+                )
+                .putProjection(
+                    new ElementIdentifier("BarRel"),
+                    barRel
+                )
+                .build()
+            )
+            .relationshipProperties(PropertyMappings.of(ImmutablePropertyMapping
+                .builder()
+                .propertyKey("global")
+                .neoPropertyKey("RelProp")
+                .build()
+            ))
+            .build();
+
+
+        return Stream.of(
+            arguments(
+                GdsCypher.call().implicitCreation(parsedConfig),
+                "implicit config parsed cypher string"
+            ),
+            arguments(
+                GdsCypher.call().implicitCreation(configFromBuilder),
+                "implicit config created from builder"
+            ),
+            arguments(
+                GdsCypher
+                    .call()
+                    .withNodeLabel("FooNode", fooNode)
+                    .withNodeProperty("GlobalNodeProp")
+                    .withRelationshipType("Rel", "TYPE")
+                    .withRelationshipType("BarRel", barRel)
+                    .withRelationshipProperty("global", "RelProp"),
+                "implicit config from inlined builder in GdsCypher"
+            )
+        );
+    }
+
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("implicitBuilders")
+    void testImplicitGraphCreationWithConfig(GdsCypher.QueryBuilder queryBuilder, String testName) {
+        String query = queryBuilder
             .algo("algoName")
             .writeMode()
             .yields();
@@ -143,31 +211,38 @@ class GdsCypherTest {
         );
     }
 
-    @Test
-    void testImplicitGraphCreationWithInlineBuilder() {
-        String query = GdsCypher
-            .call()
-            .withNodeLabel("FooNode", NodeProjection.builder()
-                .label("Foo")
-                .addProperty("nodeProp", "NodePropertyName", 42.1337)
-                .build()
-            )
-            .withNodeProperty("GlobalNodeProp")
-            .withRelationshipType("Rel", "TYPE")
-            .withRelationshipType("BarRel", RelationshipProjection.builder()
-                .type("Bar")
-                .projection(Projection.UNDIRECTED)
-                .aggregation(DeduplicationStrategy.SINGLE)
-                .addProperty("relProp", "RelationshipPropertyName", 1337, DeduplicationStrategy.MAX)
-                .build()
-            )
-            .withRelationshipProperty("global", "RelProp")
-            .algo("algoName")
-            .writeMode()
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("implicitBuilders")
+    void generatesGraphCreateFromImplicitConfig(GdsCypher.QueryBuilder queryBuilder, String testName) {
+        String query = queryBuilder
+            .graphCreate("foo42")
+            .addParameter("nodeProjection", "SOMETHING | ELSE")
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.write(%s)", expectedImplicitGraphCreateCall()),
+            String.format(
+                "CALL gds.graph.create(\"foo42\", %s, %s, {nodeProjection: \"SOMETHING | ELSE\"})",
+                expectedNodeProjection(),
+                expectedRelationshipProjection()
+            ),
+            query
+        );
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("implicitBuilders")
+    void generatesBetaGraphCreateFromImplicitConfig(GdsCypher.QueryBuilder queryBuilder, String testName) {
+        String query = queryBuilder
+            .betaGraphCreate("foo42")
+            .addParameter("nodeProjection", "SOMETHING | ELSE")
+            .yields();
+
+        assertEquals(
+            String.format(
+                "CALL algo.beta.graph.create(\"foo42\", %s, %s, {nodeProjection: \"SOMETHING | ELSE\"})",
+                expectedNodeProjection(),
+                expectedRelationshipProjection()
+            ),
             query
         );
     }
@@ -176,49 +251,66 @@ class GdsCypherTest {
         //@formatter:off
         return
             "{" +
-                "relationshipProjection: {" +
-                    "Rel: {" +
-                        "type: \"TYPE\", " +
-                        "projection: \"NATURAL\", " +
-                        "aggregation: \"DEFAULT\", " +
-                        "properties: {" +
-                            "global: {" +
-                                "property: \"RelProp\", " +
-                                "defaultValue: 0.0 / 0.0, " +
-                                "aggregation: \"DEFAULT\"" +
-                            "}" +
+                "nodeProjection: " +
+                    expectedNodeProjection() +
+                ", " +
+                "relationshipProjection: " +
+                    expectedRelationshipProjection() +
+            "}";
+            //@formatter:on
+    }
+
+    private String expectedNodeProjection() {
+        //@formatter:off
+        return
+            "{" +
+                "FooNode: {" +
+                    "label: \"Foo\", " +
+                    "properties: {" +
+                        "GlobalNodeProp: {" +
+                            "property: \"GlobalNodeProp\", " +
+                            "defaultValue: 0.0 / 0.0" +
+                        "}, " +
+                        "nodeProp: {" +
+                            "property: \"NodePropertyName\", " +
+                            "defaultValue: 42.1337" +
                         "}" +
-                    "}, " +
-                    "BarRel: {" +
-                        "type: \"Bar\", " +
-                        "projection: \"UNDIRECTED\", " +
-                        "aggregation: \"SINGLE\", " +
-                        "properties: {" +
-                            "global: {" +
-                                "property: \"RelProp\", " +
-                                "defaultValue: 0.0 / 0.0, " +
-                                "aggregation: \"DEFAULT\"" +
-                            "}, " +
-                            "relProp: {" +
-                                "property: \"RelationshipPropertyName\", " +
-                                "defaultValue: 1337.0, " +
-                                "aggregation: \"MAX\"" +
-                            "}" +
+                    "}" +
+                "}" +
+            "}";
+            //@formatter:on
+    }
+
+    private String expectedRelationshipProjection() {
+        //@formatter:off
+        return
+            "{" +
+                "Rel: {" +
+                    "type: \"TYPE\", " +
+                    "projection: \"NATURAL\", " +
+                    "aggregation: \"DEFAULT\", " +
+                    "properties: {" +
+                        "global: {" +
+                            "property: \"RelProp\", " +
+                            "defaultValue: 0.0 / 0.0, " +
+                            "aggregation: \"DEFAULT\"" +
                         "}" +
                     "}" +
                 "}, " +
-                "nodeProjection: {" +
-                    "FooNode: {" +
-                        "label: \"Foo\", " +
-                        "properties: {" +
-                            "GlobalNodeProp: {" +
-                                "property: \"GlobalNodeProp\", " +
-                                "defaultValue: 0.0 / 0.0" +
-                            "}, " +
-                            "nodeProp: {" +
-                                "property: \"NodePropertyName\", " +
-                                "defaultValue: 42.1337" +
-                            "}" +
+                "BarRel: {" +
+                    "type: \"Bar\", " +
+                    "projection: \"UNDIRECTED\", " +
+                    "aggregation: \"SINGLE\", " +
+                    "properties: {" +
+                        "global: {" +
+                            "property: \"RelProp\", " +
+                            "defaultValue: 0.0 / 0.0, " +
+                            "aggregation: \"DEFAULT\"" +
+                        "}, " +
+                        "relProp: {" +
+                            "property: \"RelationshipPropertyName\", " +
+                            "defaultValue: 1337.0, " +
+                            "aggregation: \"MAX\"" +
                         "}" +
                     "}" +
                 "}" +
@@ -285,8 +377,8 @@ class GdsCypherTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GdsCypher.ExecutionMode.class)
-    void testExecutionModesViaEnum(GdsCypher.ExecutionMode executionMode) {
+    @EnumSource(GdsCypher.ExecutionModes.class)
+    void testExecutionModesViaEnum(GdsCypher.ExecutionModes executionMode) {
         String query = GdsCypher
             .call()
             .implicitCreation(EMPTY_GRAPH_CREATE)
@@ -301,8 +393,8 @@ class GdsCypherTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GdsCypher.ExecutionMode.class)
-    void testExecutionModesViaExplicitMethodCalls(GdsCypher.ExecutionMode executionMode) {
+    @EnumSource(GdsCypher.ExecutionModes.class)
+    void testExecutionModesViaExplicitMethodCalls(GdsCypher.ExecutionModes executionMode) {
         GdsCypher.ModeBuildStage builder = GdsCypher.call().implicitCreation(EMPTY_GRAPH_CREATE).algo("algoName");
         GdsCypher.ParametersBuildStage nextBuilder;
 
@@ -328,8 +420,8 @@ class GdsCypherTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GdsCypher.ExecutionMode.class)
-    void testEstimateModesViaEnum(GdsCypher.ExecutionMode executionMode) {
+    @EnumSource(GdsCypher.ExecutionModes.class)
+    void testEstimateModesViaEnum(GdsCypher.ExecutionModes executionMode) {
         String query = GdsCypher
             .call()
             .implicitCreation(EMPTY_GRAPH_CREATE)
@@ -344,8 +436,8 @@ class GdsCypherTest {
     }
 
     @ParameterizedTest
-    @EnumSource(GdsCypher.ExecutionMode.class)
-    void testEstimatesModesViaExplicitMethodCalls(GdsCypher.ExecutionMode executionMode) {
+    @EnumSource(GdsCypher.ExecutionModes.class)
+    void testEstimatesModesViaExplicitMethodCalls(GdsCypher.ExecutionModes executionMode) {
         GdsCypher.ModeBuildStage builder = GdsCypher.call().implicitCreation(EMPTY_GRAPH_CREATE).algo("algoName");
         GdsCypher.ParametersBuildStage nextBuilder;
 
@@ -479,7 +571,7 @@ class GdsCypherTest {
         );
     }
 
-    private static String executionModeName(GdsCypher.ExecutionMode executionMode) {
+    private static String executionModeName(GdsCypher.ExecutionModes executionMode) {
         switch (executionMode) {
             case WRITE:
                 return "write";
