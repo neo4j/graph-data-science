@@ -195,16 +195,18 @@ In the following examples we will demonstrate using the Weakly Connected Compone
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL algo.unionFind.stream('User', 'LINK')
-YIELD nodeId, setId
-RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
-ORDER BY ComponentId, Name
+CALL gds.algo.wcc.stream({
+  nodeProjection: ["User"],
+  relationshipProjection: ["LINK"]
+})
+YIELD nodeId, componentId
+RETURN algo.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
 ----
 
 .Results
 [opts="header",cols="1m,1m"]
 |===
-| Name      | ComponentId
+| name      | componentId
 | "Alice"   | 0
 | "Bridget" | 0
 | "Charles" | 0
@@ -218,18 +220,19 @@ To instead write the component ID to a node property in the Neo4j graph, use thi
 .The following will load the graph with weights, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL algo.unionFind('User', 'LINK', {
-  write: true,
-  writeProperty: 'componentId'
+CALL gds.algo.wcc.write({
+  nodeProjection: ["User"],
+  relationshipProjection: ["LINK"],
+  writeProperty: "componentId"
 })
-YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName;
+YIELD nodePropertiesWritten, componentCount, writeProperty;
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m"]
 |===
-| Nodes | NbrOfComponents | PropertyName
-| 6     | 2               | "componentId"
+| nodePropertiesWritten | componentCount    | writeProperty
+| 6                     | 2                 | "componentId"
 |===
 
 As we can see from the results, the nodes connected to one another are calculated by the algorithm as belonging to the same connected component.
@@ -249,14 +252,15 @@ The default is zero, and can be configured to another value using the `defaultVa
 .The following will load the graph with weights, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL algo.unionFind.stream('User', 'LINK', {
-  weightProperty: 'weight',
+CALL gds.algo.wcc.stream({
+  nodeProjection: ["User"],
+  relationshipProjection: ["LINK"],
+  relationshipProperties: ["weight"],
+  weightProperty: "weight",
   threshold: 1.0
 })
-YIELD nodeId, setId
-
-RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
-ORDER BY ComponentId, Name
+YIELD nodeId, componentId
+RETURN algo.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
 ----
 
 .Results
@@ -275,20 +279,21 @@ ORDER BY ComponentId, Name
 .The following will load the graph with weights, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL algo.unionFind('User', 'LINK', {
-  write: true,
+CALL gds.algo.wcc.write({
+  nodeProjection: ["User"],
+  relationshipProjection: ["LINK"],
   writeProperty: "componentId",
-  weightProperty: 'weight',
+  weightProperty: "weight",
   threshold: 1.0
 })
-YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName;
+YIELD nodePropertiesWritten, componentCount, writeProperty;
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m"]
 |===
-| Nodes | NbrOfComponents | PropertyName
-| 6     | 3               | "componentId"
+| nodePropertiesWritten | componentCount    | writeProperty
+| 6                     | 3                 | "componentId"
 |===
 
 As we can see from the results, the node named 'Bridget' is now in its own component, due to its relationship weight being less than the configured threshold and thus ignored.
@@ -321,20 +326,21 @@ We will use the weighted variant of WCC.
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL algo.unionFind('User', 'LINK', {
-  write: true,
-  writeProperty: 'componentId',
-  weightProperty: 'weight',
+CALL gds.algo.wcc.write({
+  nodeProjection: ["User"],
+  relationshipProjection: ["LINK"],
+  writeProperty: "componentId",
+  weightProperty: "weight",
   threshold: 1.0
 })
-YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName;
+YIELD nodePropertiesWritten, componentCount, writeProperty;
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m"]
 |===
-| Nodes | NbrOfComponents | PropertyName
-| 6     | 3               | "componentId"
+| nodePropertiesWritten | componentCount    | writeProperty
+| 6                     | 3                 | "componentId"
 |===
 
 .The following will create a new node in the Neo4j graph, with no component ID:
@@ -353,21 +359,23 @@ CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL algo.unionFind.stream('User', 'LINK', {
-  seedProperty: 'componentId',
-  weightProperty: 'weight',
+CALL gds.algo.wcc.stream({
+  nodeProjection: ["User"],
+  nodeProperties: ["componentId"],
+  relationshipProjection: ["LINK"],
+  relationshipProperties: ["weight"],
+  seedProperty: "componentId",
+  weightProperty: "weight",
   threshold: 1.0
 })
-YIELD nodeId, setId
-
-RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
-ORDER BY ComponentId, Name
+YIELD nodeId, componentId
+RETURN algo.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
 ----
 
 .Results
 [opts="header",cols="1m,1m"]
 |===
-| Name      | ComponentId
+| name      | componentId
 | "Alice"   | 0
 | "Charles" | 0
 | "Bridget" | 1
@@ -380,21 +388,22 @@ ORDER BY ComponentId, Name
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL algo.unionFind('User', 'LINK', {
-  seedProperty: 'componentId',
-  weightProperty: 'weight',
-  threshold: 1.0,
-  write: true,
-  writeProperty: 'componentId'
+CALL gds.algo.wcc.write({
+  nodeProjection: ["User"],
+  relationshipProjection: ["LINK"],
+  seedProperty: "componentId",
+  writeProperty: "componentId",
+  weightProperty: "weight",
+  threshold: 1.0
 })
-YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName;
+YIELD nodePropertiesWritten, componentCount, writeProperty;
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m"]
 |===
-| Nodes | NbrOfComponents | PropertyName
-| 7     | 3               | "componentId"
+| nodePropertiesWritten | componentCount    | writeProperty
+| 7                     | 3                 | "componentId"
 |===
 
 [NOTE]
@@ -414,18 +423,18 @@ See <<projected-graph-model, Projected Graph Model>> for more details.
 .Using a named graph:
 [source, cypher]
 ----
-CALL algo.graph.load('myGraph', 'User', 'LINK');
+CALL algo.beta.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;
 
-CALL algo.unionFind.stream(null, null, {graph: 'myGraph'})
-YIELD nodeId, setId
-RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
-ORDER BY ComponentId, Name;
+CALL gds.algo.wcc.stream('myGraph')
+YIELD nodeId, componentId
+RETURN algo.asNode(nodeId).name AS name, componentId
+ORDER BY componentId, Name;
 ----
 
 .Results
 [opts="header",cols="1m,1m"]
 |===
-| Name      | ComponentId
+| name      | componentId
 | "Alice"   | 0
 | "Bridget" | 0
 | "Charles" | 0
@@ -439,15 +448,13 @@ As we can see, the results are identical to the results in the <<algorithms-wcc-
 .Using a Cypher projection:
 [source, cypher]
 ----
-CALL algo.unionFind.stream(
-  'MATCH (u:User) RETURN id(u) AS id',
-  'MATCH (u1:User)-[:LINK]->(u2:User)
-   RETURN id(u1) AS source, id(u2) AS target',
-   {graph:'cypher'}
-)
-YIELD nodeId, setId
-RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
-ORDER BY ComponentId, Name
+CALL gds.algo.wcc.stream({
+    nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
+    relationshipQuery: 'MATCH (u1:User)-[:LINK]->(u2:User) RETURN id(u1) AS source, id(u2) AS target'
+})
+YIELD nodeId, componentId
+RETURN algo.asNode(nodeId).name AS name, componentId
+ORDER BY componentId, name
 ----
 
 .Results

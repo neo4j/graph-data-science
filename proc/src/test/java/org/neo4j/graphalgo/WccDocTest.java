@@ -60,8 +60,55 @@ class WccDocTest extends ProcTestBase {
     // Doesn't have any assertions; those should be to verify results with contents in wcc.adoc
     // This is left for a future task
     @Test
-    void seeding() {
+    void implicitGraph() {
+        // stream
+        String q0 = GdsCypher.call()
+            .withNodeLabel("User")
+            .withRelationshipType("LINK")
+            .algo("wcc")
+            .streamMode()
+            .yields("nodeId", "componentId");
+
+        q0 += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+              " ORDER BY componentId, name";
+
+//        System.out.println("q0 = " + q0);
+        String r0 = runQuery(q0).resultAsString();
+//        System.out.println(r0);
+
+        // write
         String q1 = GdsCypher.call()
+            .withNodeLabel("User")
+            .withRelationshipType("LINK")
+            .algo("wcc")
+            .writeMode()
+            .addParameter("writeProperty", "componentId")
+            .yields("nodePropertiesWritten", "componentCount", "writeProperty");
+
+//        System.out.println("q1 = " + q1);
+        String r1 = runQuery(q1).resultAsString();
+//        System.out.println(r1);
+
+        // stream weighted
+        String q2 = GdsCypher.call()
+            .withNodeLabel("User")
+            .withRelationshipType("LINK")
+            .withRelationshipProperty("weight")
+            .algo("wcc")
+            .streamMode()
+            .addParameter("weightProperty", "weight")
+            .addParameter("threshold", 1.0D)
+            .yields("nodeId", "componentId");
+
+        q2 += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+              " ORDER BY componentId, name";
+
+//        System.out.println("q2 = " + q2);
+        String r2 = runQuery(q2).resultAsString();
+//        System.out.println(r2);
+
+        // write weighted
+        String q3 = GdsCypher.call()
             .withNodeLabel("User")
             .withRelationshipType("LINK")
             .withRelationshipProperty("weight")
@@ -72,15 +119,19 @@ class WccDocTest extends ProcTestBase {
             .addParameter("threshold", 1.0D)
             .yields("nodePropertiesWritten", "componentCount", "writeProperty");
 
-        String r1 = runQuery(q1).resultAsString();
-//        System.out.println(r1);
+//        System.out.println("q3 = " + q3);
+        String r3 = runQuery(q3).resultAsString();
+//        System.out.println(r3);
 
-        String q2 = "MATCH (b:User {name: 'Bridget'}) " +
+        // create new node and relationship
+        String q4 = "MATCH (b:User {name: 'Bridget'}) " +
                     "CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})";
-        String r2 = runQuery(q2).resultAsString();
-//        System.out.println(r2);
+        System.out.println("q4 = " + q4);
+        String r4 = runQuery(q4).resultAsString();
+        System.out.println(r4);
 
-        String q3 = GdsCypher.call()
+        // stream with seeding
+        String q5 = GdsCypher.call()
             .withNodeLabel("User")
             .withNodeProperty("componentId")
             .withRelationshipType("LINK")
@@ -92,13 +143,15 @@ class WccDocTest extends ProcTestBase {
             .addParameter("threshold", 1.0D)
             .yields("nodeId", "componentId");
 
-        q3 += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+        q5 += " RETURN algo.asNode(nodeId).name AS name, componentId" +
               " ORDER BY componentId, name";
 
-        String r3 = runQuery(q3).resultAsString();
-//        System.out.println(r3);
+//        System.out.println("q5 = " + q5);
+        String r5 = runQuery(q5).resultAsString();
+//        System.out.println(r5);
 
-        String q4 = GdsCypher.call()
+        // write with seeding
+        String q6 = GdsCypher.call()
             .withNodeLabel("User")
             .withNodeProperty("componentId")
             .withRelationshipType("LINK")
@@ -106,22 +159,20 @@ class WccDocTest extends ProcTestBase {
             .algo("wcc")
             .writeMode()
             .addParameter("seedProperty", "componentId")
-            .addParameter("weightProperty", "weight")
             .addParameter("writeProperty", "componentId")
+            .addParameter("weightProperty", "weight")
             .addParameter("threshold", 1.0D)
             .yields("nodePropertiesWritten", "componentCount", "writeProperty");
 
-        String r4 = runQuery(q4).resultAsString();
-//        System.out.println(r4);
-
-        // graph end-state
-        System.out.println(runQuery("MATCH (n) RETURN n").resultAsString());
+//        System.out.println("q6 = " + q6);
+        String r6 = runQuery(q6).resultAsString();
+//        System.out.println(r6);
     }
 
     // Queries from the named graph and Cypher projection example in wcc.adoc
     // used to test that the results are correct in the docs
     @Test
-    void namedGraphAndCypherProjection() {
+    void namedGraph() {
         String q1 = "CALL algo.beta.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;";
         String r1 = runQuery(q1).resultAsString();
 //        System.out.println(r1);
@@ -135,10 +186,14 @@ class WccDocTest extends ProcTestBase {
         q2 += " RETURN algo.asNode(nodeId).name AS name, componentId" +
               " ORDER BY componentId, name;";
 
+//        System.out.println("q2 = " + q2);
         String r2 = runQuery(q2).resultAsString();
 //        System.out.println(r2);
+    }
 
-        String q3 = "CALL gds.algo.wcc.stream({" +
+    @Test
+    void cypherProjection() {
+        String q0 = "CALL gds.algo.wcc.stream({" +
                     "   nodeQuery: 'MATCH (u:User) RETURN id(u) AS id', " +
                     "   relationshipQuery: 'MATCH (u1:User)-[:LINK]->(u2:User) RETURN id(u1) AS source, id(u2) AS target'" +
                     "}) " +
@@ -146,7 +201,8 @@ class WccDocTest extends ProcTestBase {
                     "RETURN algo.asNode(nodeId).name AS name, componentId " +
                     "ORDER BY componentId, name";
 
-        String r3 = runQuery(q3).resultAsString();
-//        System.out.println(r3);
+//        System.out.println("q0 = " + q0);
+        String r0 = runQuery(q0).resultAsString();
+//        System.out.println(r0);
     }
 }
