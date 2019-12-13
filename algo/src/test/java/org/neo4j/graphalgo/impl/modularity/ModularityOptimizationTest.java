@@ -278,7 +278,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000L).build();
 
         MemoryTree memoryTree = new ModularityOptimizationFactory()
-            .memoryEstimation(ProcedureConfiguration.create(""))
+            .memoryEstimation(ProcedureConfiguration.empty())
             .estimate(dimensions, concurrency);
         assertEquals(min, memoryTree.memoryUsage().min);
         assertEquals(max, memoryTree.memoryUsage().max);

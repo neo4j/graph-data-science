@@ -691,7 +691,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             true
         );
 
-        MemoryTree actual = factory.memoryEstimation(ProcedureConfiguration.create("")).estimate(dimensions, 1);
+        MemoryTree actual = factory.memoryEstimation(ProcedureConfiguration.empty()).estimate(dimensions, 1);
 
         long thisInstance = 56;
 
@@ -747,7 +747,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             true
         );
 
-        MemoryTree actual = factory.memoryEstimation(ProcedureConfiguration.create("")).estimate(dimensions, 1);
+        MemoryTree actual = factory.memoryEstimation(ProcedureConfiguration.empty()).estimate(dimensions, 1);
 
         long thisInstance = 56;
 

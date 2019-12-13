@@ -241,7 +241,7 @@ final class LabelPropagationTest extends AlgoTestBase {
             .build();
 
         // test for no failure and no overflow
-        assertTrue(0 < labelPropagation.memoryEstimation(ProcedureConfiguration.create("")).estimate(largeDimensions, 1).memoryUsage().max);
+        assertTrue(0 < labelPropagation.memoryEstimation(ProcedureConfiguration.empty()).estimate(largeDimensions, 1).memoryUsage().max);
     }
 
     private void assertMemoryEstimation(long nodeCount, int concurrency) {
@@ -250,7 +250,7 @@ final class LabelPropagationTest extends AlgoTestBase {
         LabelPropagationFactory labelPropagation = new LabelPropagationFactory(new ConfigBuilder().build());
 
         MemoryRange actual = labelPropagation
-            .memoryEstimation(ProcedureConfiguration.create(""))
+            .memoryEstimation(ProcedureConfiguration.empty())
             .estimate(dimensions, concurrency)
             .memoryUsage();
         long min = 80L /* LabelPropagation.class */ +

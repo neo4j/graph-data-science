@@ -268,7 +268,7 @@ final class PageRankTest extends AlgoTestBase {
 
         long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
         final MemoryRange actual = pageRank
-            .memoryEstimation(ProcedureConfiguration.create(""))
+            .memoryEstimation(ProcedureConfiguration.empty())
             .estimate(dimensions, concurrency)
             .memoryUsage();
         final MemoryRange expected = MemoryRange.of(

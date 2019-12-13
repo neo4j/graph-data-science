@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -522,6 +523,10 @@ public class ProcedureConfiguration implements BaseAlgoConfig {
 
     public static ProcedureConfiguration create(String username) {
         return create(CypherMapWrapper.empty(), username);
+    }
+
+    public static ProcedureConfiguration empty() {
+        return create(CypherMapWrapper.empty(), AuthSubject.ANONYMOUS.username());
     }
 
     public Map<String, Object> getParams() {

@@ -210,7 +210,7 @@ class K1ColoringTest extends AlgoTestBase {
     private void assertMemoryEstimation(long nodeCount, int concurrency, long expected) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
         final MemoryRange actual = new K1ColoringFactory()
-            .memoryEstimation(ProcedureConfiguration.create(""))
+            .memoryEstimation(ProcedureConfiguration.empty())
             .estimate(dimensions, concurrency)
             .memoryUsage();
 
