@@ -55,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.core.utils.ExceptionUtil.rootCause;
+import static scala.Predef.assume;
 
 /**
  * Suite of Base test that should be used for every algorithm procedure.
@@ -115,9 +116,7 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
     @Test
     default void shouldFailWithInvalidWeightProperty() {
-        if (!(createConfig(createMinimallyValidConfig(CypherMapWrapper.empty())) instanceof WeightConfig)) {
-            return;
-        }
+        assume(createConfig(createMinimallyValidConfig(CypherMapWrapper.empty())) instanceof WeightConfig);
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
         Graph graph = new GraphLoader(graphDb())
@@ -144,9 +143,7 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
     @Test
     default void shouldFailWithInvalidSeedProperty() {
-        if (!(createConfig(createMinimallyValidConfig(CypherMapWrapper.empty())) instanceof SeedConfig)) {
-            return;
-        }
+        assume(createConfig(createMinimallyValidConfig(CypherMapWrapper.empty())) instanceof SeedConfig);
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
         Graph graph = new GraphLoader(graphDb())

@@ -50,6 +50,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class LabelPropagationProcTestBase<CONFIG extends LabelPropagationConfigBase> extends ProcTestBase implements
@@ -198,9 +200,8 @@ abstract class LabelPropagationProcTestBase<CONFIG extends LabelPropagationConfi
 
     @Override
     public void compareResults(LabelPropagation result1, LabelPropagation result2) {
-        /*assertEquals(result1.levels(), result2.levels());
-        assertEquals(result1.modularities()[result1.levels() - 1], result2.modularities()[result2.levels() - 1]);
-        assertArrayEquals(result1.finalDendrogram().toArray(), result2.finalDendrogram().toArray());*/
+        assertArrayEquals(result1.labels().toArray(), result2.labels().toArray());
+        assertEquals(result1.didConverge(), result2.didConverge());
+        assertEquals(result1.ranIterations(), result2.ranIterations());
     }
-
 }

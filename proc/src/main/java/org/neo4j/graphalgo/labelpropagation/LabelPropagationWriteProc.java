@@ -50,7 +50,7 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
                  "     maxIterations: INTEGER, " +
                  "     weightProperty: STRING, " +
                  "     seedProperty: STRING, " +
-                 "     concurrency: INTEGER"+
+                 "     concurrency: INTEGER" +
                  "  }" +
                  ")" +
                  "YIELD" +
@@ -86,7 +86,7 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
                  "     maxIterations: INTEGER, " +
                  "     weightProperty: STRING, " +
                  "     seedProperty: STRING, " +
-                 "     concurrency: INTEGER"+
+                 "     concurrency: INTEGER" +
                  "  }" +
                  ")" +
                  "YIELD" +
@@ -155,10 +155,10 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
                  "     weightProperty: STRING, " +
                  "     seedProperty: STRING, " +
                  "     concurrency: INTEGER" +
-                 "  }"+
+                 "  }" +
                  ")" +
                  "YIELD" +
-                 "  nodes: INTEGER, "+
+                 "  nodes: INTEGER, " +
                  "  relationships: INTEGER," +
                  "  bytesMin: INTEGER," +
                  "  bytesMax: INTEGER," +
@@ -181,9 +181,9 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
                  "     weightProperty: STRING, " +
                  "     seedProperty: STRING, " +
                  "     concurrency: INTEGER" +
-                 "  }"+
+                 "  }" +
                  ") YIELD" +
-                 "  nodes: INTEGER, "+
+                 "  nodes: INTEGER, " +
                  "  relationships: INTEGER," +
                  "  bytesMin: INTEGER," +
                  "  bytesMax: INTEGER," +
@@ -214,7 +214,8 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
 
         return Optional.of((PropertyTranslator.OfLong<LabelPropagation>) (data, nodeId) -> data
             .labels()
-            .get(nodeId));
+            .get(nodeId)
+        );
     }
 
     @Override
@@ -234,7 +235,11 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
         private long ranIterations;
         private boolean didConverge;
 
-        WriteResultBuilder(LabelPropagationWriteConfig config, ProcedureCallContext context, AllocationTracker tracker) {
+        WriteResultBuilder(
+            LabelPropagationWriteConfig config,
+            ProcedureCallContext context,
+            AllocationTracker tracker
+        ) {
             super(
                 // TODO: factor these out to OutputFieldParser
                 context.outputFields().anyMatch(s -> s.equalsIgnoreCase("communityDistribution")),
