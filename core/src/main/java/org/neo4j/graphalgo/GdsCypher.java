@@ -24,31 +24,13 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.cypher.internal.v3_5.ast.prettifier.ExpressionStringifier;
-import org.neo4j.cypher.internal.v3_5.ast.prettifier.ExpressionStringifier$;
-import org.neo4j.cypher.internal.v3_5.expressions.DecimalDoubleLiteral;
-import org.neo4j.cypher.internal.v3_5.expressions.Divide;
-import org.neo4j.cypher.internal.v3_5.expressions.Expression;
-import org.neo4j.cypher.internal.v3_5.expressions.False;
-import org.neo4j.cypher.internal.v3_5.expressions.ListLiteral;
-import org.neo4j.cypher.internal.v3_5.expressions.MapExpression;
-import org.neo4j.cypher.internal.v3_5.expressions.Parameter;
-import org.neo4j.cypher.internal.v3_5.expressions.PropertyKeyName;
-import org.neo4j.cypher.internal.v3_5.expressions.SignedDecimalIntegerLiteral;
-import org.neo4j.cypher.internal.v3_5.expressions.StringLiteral;
-import org.neo4j.cypher.internal.v3_5.expressions.True;
-import org.neo4j.cypher.internal.v3_5.util.InputPosition;
-import org.neo4j.cypher.internal.v3_5.util.symbols.AnyType;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.cypher.v3_5.CypherPrinter;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
-import scala.Function1;
-import scala.Tuple2;
-import scala.collection.mutable.ListBuffer;
-import scala.runtime.AbstractFunction1;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -64,12 +46,14 @@ import java.util.stream.Collectors;
 public abstract class GdsCypher {
 
     private static final int ADDITIONAL_PARAMETERS_FOR_IMPLICIT_GRAPH_CREATION = 4;
+    private static final Pattern PERIOD = Pattern.compile(Pattern.quote("."));
+    private static final CypherPrinter PRINTER = new CypherPrinter();
 
     public static CreationBuildStage call() {
         return new StagedBuilder();
     }
 
-    public interface ExecutionMode {
+    interface ExecutionMode {
     }
 
     public enum ExecutionModes implements ExecutionMode {
@@ -309,9 +293,8 @@ public abstract class GdsCypher {
         String yields(Iterable<String> elements);
     }
 
-    @ValueClass
-    interface Placeholder {
-        String name();
+    enum SpecialExecution {
+        NORMAL, ESTIMATE
     }
 
     private enum InternalExecutionMode implements ExecutionMode {
@@ -325,11 +308,23 @@ public abstract class GdsCypher {
         List<String> algoNamespace,
         String algoName,
         ExecutionMode executionMode,
-        boolean runEstimation,
-        Optional<GraphCreateConfig> implicitCreateConfig,
+        @Builder.Switch(defaultName = "NORMAL") SpecialExecution specialExecution,
         Optional<String> explicitGraphName,
+        Optional<GraphCreateConfig> implicitCreateConfig,
         Map<String, Object> parameters,
         List<String> yields
+    ) {
+        String procedureName = procedureName(algoNamespace, algoName, executionMode, specialExecution);
+        String queryArguments = queryArguments(explicitGraphName, implicitCreateConfig, executionMode, parameters);
+        String yieldsFields = yieldsFields(yields);
+        return String.format("CALL %s(%s)%s", procedureName, queryArguments, yieldsFields);
+    }
+
+    private static String procedureName(
+        Collection<String> algoNamespace,
+        CharSequence algoName,
+        ExecutionMode executionMode,
+        SpecialExecution specialExecution
     ) {
         StringJoiner procedureName = new StringJoiner(".");
         if (algoNamespace.isEmpty()) {
@@ -342,12 +337,21 @@ public abstract class GdsCypher {
         if (executionMode instanceof ExecutionModes) {
             procedureName.add(((ExecutionModes) executionMode).name().toLowerCase(Locale.ENGLISH));
         }
-        if (runEstimation) {
+        if (specialExecution == SpecialExecution.ESTIMATE) {
             procedureName.add("estimate");
         }
 
-        StringJoiner argumentsString = new StringJoiner(", ");
-        explicitGraphName.ifPresent(name -> argumentsString.add(toCypherString(name)));
+        return procedureName.toString();
+    }
+
+    private static String queryArguments(
+        Optional<String> explicitGraphName,
+        Optional<GraphCreateConfig> implicitCreateConfig,
+        ExecutionMode executionMode,
+        Map<String, Object> parameters
+    ) {
+        StringJoiner queryArguments = new StringJoiner(", ");
+        explicitGraphName.ifPresent(name -> queryArguments.add(PRINTER.toCypherString(name)));
 
         if (implicitCreateConfig.isPresent()) {
             GraphCreateConfig config = implicitCreateConfig.get();
@@ -356,8 +360,8 @@ public abstract class GdsCypher {
             );
 
             if (executionMode == InternalExecutionMode.GRAPH_CREATE) {
-                argumentsString.add(toCypherString(config.nodeProjection().toObject()));
-                argumentsString.add(toCypherString(config.relationshipProjection().toObject()));
+                queryArguments.add(PRINTER.toCypherString(config.nodeProjection().toObject()));
+                queryArguments.add(PRINTER.toCypherString(config.relationshipProjection().toObject()));
             } else {
                 newParameters.put("nodeProjection", config.nodeProjection().toObject());
                 newParameters.put("relationshipProjection", config.relationshipProjection().toObject());
@@ -370,112 +374,19 @@ public abstract class GdsCypher {
         }
 
         if (!parameters.isEmpty()) {
-            String cypherString = toCypherString(parameters);
-            if (!cypherString.isEmpty()) {
-                argumentsString.add(cypherString);
-            } else {
-                argumentsString.add("{}");
-            }
+            queryArguments.add(PRINTER.toCypherStringOr(parameters, "{}"));
         }
 
-        StringJoiner yieldsString = new StringJoiner(", ", " YIELD ", "");
-        yieldsString.setEmptyValue("");
-        yields.forEach(yieldsString::add);
-
-        return String.format(
-            "CALL %s(%s)%s",
-            procedureName,
-            argumentsString,
-            yieldsString
-        );
+        return queryArguments.toString();
     }
 
-    private static final Function1<Expression, String> AS_CANONICAL_STRING_FALLBACK =
-        new AbstractFunction1<Expression, String>() {
-            @Override
-            public String apply(Expression v1) {
-                return v1.asCanonicalStringVal();
-            }
-        };
+    private static String yieldsFields(Iterable<String> yields) {
+        StringJoiner yieldsFields = new StringJoiner(", ", " YIELD ", "");
+        yieldsFields.setEmptyValue("");
+        yields.forEach(yieldsFields::add);
 
-    private static final ExpressionStringifier STRINGIFIER =
-        ExpressionStringifier$.MODULE$.apply(AS_CANONICAL_STRING_FALLBACK);
-
-    private static String toCypherString(Object value) {
-        return toCypher(value).map(STRINGIFIER::apply).orElse("");
+        return yieldsFields.toString();
     }
-
-    private static Optional<Expression> toCypher(Object value) {
-        if (value instanceof CharSequence) {
-            Expression expression = StringLiteral.apply(String.valueOf(value), InputPosition.NONE());
-            return Optional.of(expression);
-        } else if (value instanceof Number) {
-            double v = ((Number) value).doubleValue();
-            if (Double.isNaN(v)) {
-                return Optional.of(Divide.apply(
-                    DecimalDoubleLiteral.apply("0.0", InputPosition.NONE()),
-                    DecimalDoubleLiteral.apply("0.0", InputPosition.NONE()),
-                    InputPosition.NONE()
-                ));
-            }
-            Expression expression = (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long)
-                ? SignedDecimalIntegerLiteral.apply(Long.toString((long) v), InputPosition.NONE())
-                : DecimalDoubleLiteral.apply(value.toString(), InputPosition.NONE());
-            return Optional.of(expression);
-        } else if (value instanceof Boolean) {
-            Expression expression = Boolean.TRUE.equals(value)
-                ? True.apply(InputPosition.NONE())
-                : False.apply(InputPosition.NONE());
-            return Optional.of(expression);
-        } else if (value instanceof Iterable) {
-            ListBuffer<Expression> list = new ListBuffer<>();
-            ((Iterable<?>) value).forEach(val -> {
-                Optional<Expression> expression = toCypher(val);
-                expression.ifPresent(list::$plus$eq);
-            });
-            if (list.nonEmpty()) {
-                return Optional.of(ListLiteral.apply(list.toList(), InputPosition.NONE()));
-            } else {
-                return Optional.empty();
-            }
-        } else if (value instanceof Map) {
-            ListBuffer<Tuple2<PropertyKeyName, Expression>> list = new ListBuffer<>();
-            ((Map<?, ?>) value).forEach((key, val) -> {
-                Optional<Expression> expression = toCypher(val);
-                expression.ifPresent(e -> {
-                    PropertyKeyName keyName = PropertyKeyName.apply(String.valueOf(key), InputPosition.NONE());
-                    list.$plus$eq(Tuple2.apply(keyName, e));
-                });
-            });
-            if (list.nonEmpty()) {
-                return Optional.of(MapExpression.apply(list.toList(), InputPosition.NONE()));
-            } else {
-                return Optional.empty();
-            }
-        } else if (value instanceof Enum) {
-            Enum<?> enumValue = (Enum<?>) value;
-            Expression expression = StringLiteral.apply(enumValue.name(), InputPosition.NONE());
-            return Optional.of(expression);
-        } else if (value instanceof Placeholder) {
-            Expression expression = Parameter.apply(
-                ((Placeholder) value).name(),
-                AnyType.instance(),
-                InputPosition.NONE()
-            );
-
-            return Optional.of(expression);
-        } else if (value == null) {
-            return Optional.empty();
-        } else {
-            throw new IllegalArgumentException(String.format(
-                "Unsupported type [%s] of value [%s]",
-                value.getClass().getSimpleName(),
-                value
-            ));
-        }
-    }
-
-    private static final Pattern PERIOD = Pattern.compile(Pattern.quote("."));
 
     private static final class StagedBuilder implements CreationBuildStage, ImplicitCreationBuildStage, QueryBuilder, ModeBuildStage, ParametersBuildStage {
 
@@ -553,8 +464,7 @@ public abstract class GdsCypher {
                 .explicitGraphName(Optional.empty())
                 .algoNamespace(Arrays.asList(namespace))
                 .algoName("create")
-                .executionMode(InternalExecutionMode.GRAPH_CREATE)
-                .runEstimation(false);
+                .executionMode(InternalExecutionMode.GRAPH_CREATE);
             return this;
         }
 
@@ -568,13 +478,15 @@ public abstract class GdsCypher {
 
         @Override
         public StagedBuilder executionMode(ExecutionMode mode) {
-            builder.executionMode(mode).runEstimation(false);
+            builder.executionMode(mode);
             return this;
         }
 
         @Override
         public StagedBuilder estimationMode(ExecutionMode mode) {
-            builder.executionMode(mode).runEstimation(true);
+            builder
+                .executionMode(mode)
+                .estimateSpecialExecution();
             return this;
         }
 
@@ -586,7 +498,7 @@ public abstract class GdsCypher {
 
         @Override
         public StagedBuilder addPlaceholder(String key, String placeholder) {
-            builder.putParameter(key, ImmutablePlaceholder.of(placeholder));
+            builder.putParameter(key, PRINTER.parameter(placeholder));
             return this;
         }
 
