@@ -25,7 +25,6 @@ The WCC algorithm finds sets of connected nodes in an undirected graph, where al
 WCC is often used early in an analysis to understand the structure of a graph.
 
 WCC has previously been known as Union Find or Connected Components in this User Guide.
-Currently, the WCC algorithm still uses the syntax of `algo.unionFind`.
 
 // TODO: something about use cases
 
@@ -47,103 +46,121 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL algo.unionFind(label: STRING, relationship: STRING, {
-  write: BOOLEAN,
-  writeProperty: STRING
-  // additional configuration
-})
-YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
+CALL gds.algo.wcc.write(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  // general write return columns
+  weightProperty: string,
+  defaultValue: float,
+  seedProperty: string,
+  threshold: float,
+  consecutiveIds: boolean,
+  componentCount: integer,
+  componentDistribution: map
 ----
 
 .Parameters
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name         | Type    | Default | Optional | Description
-| node label   | string  | null    | yes      | The node label to load from the graph. If `null`, load all nodes.
-| relationship | string  | null    | yes      | The relationship type to load from the graph. If `null`, load all relationships.
-| config       | map     | {}      | yes      | Additional configuration, see below.
+| Name          | Type      | Default | Optional | Description
+| graphName     | string    | null    | yes      | Name of an explicitly created graph to run the algorithm on.
+| configuration | map       | {}      | yes      | Configuration for implicit graph creation, algorithm-specifics and/or graph filtering.
 |===
 
 .Configuration
 [opts="header",cols="1m,1,1,1,4"]
 |===
-| Name              | Type    | Default                   | Optional | Description
-| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency   | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency  | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for writing the result.
-| weightProperty    | string  | `null`                    | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
-| seedProperty      | string  | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| write             | boolean | `true`                    | yes      | Specifies if the result should be written back as a node property.
-| writeProperty     | string  | `'partition'`             | yes      | The property name written back the ID of the partition particular node belongs to.
-| threshold         | float   | `null`                    | yes      | The value of the weight above which the relationship is not thrown away.
-| defaultValue      | float   | `null`                    | yes      | The default value of the weight in case it is missing or invalid.
-| consecutiveIds    | boolean | `false`                   | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with node label and relationship type parameters. Use `'cypher'` for describing the subset using Cypher queries for nodes and relationships.
+| Name                      | Type          | Default                   | Optional  | Description
+// general configuration
+| nodeProjection            | map or list   | null                      | yes       | The node projection used for implicit graph loading or filtering nodes of an explicitly loaded graph.
+| relationshipProjection    | map or list   | null                      | yes       | The relationship projection used for implicit graph loading or filtering relationship of an explicitly loaded graph.
+| nodeQuery                 | string        | null                      | yes       | The Cypher query used to select the nodes for implicit graph loading via a Cypher projection.
+| relationshipQuery         | string        | null                      | yes       | The Cypher query used to select the relationships for implicit graph loading via a Cypher projection.
+| nodeProperties            | map or list   | null                      | yes       | The node properties to load during implicit graph loading.
+| relationshipProperties    | map or list   | null                      | yes       | The relationship properties to load during implicit graph loading.
+| concurrency               | int           | available CPUs            | yes       | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency           | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for implicit graph loading.
+| writeConcurrency          | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for writing the result to Neo4j.
+// algorithm specific
+| writeProperty             | string        | n/a                       | no        | The property name written back the ID of the partition particular node belongs to.
+| weightProperty            | string        | `null`                    | yes       | The property name that contains relationship weight. If `null`, treats the graph as unweighted. Must be numeric.
+| defaultValue              | float         | `null`                    | yes       | The default value of the relationship weight in case it is missing or invalid.
+| seedProperty              | string        | n/a                       | yes       | Used to set the initial community for a node. The property value needs to be a number.
+| threshold                 | float         | `null`                    | yes       | The value of the weight above which the relationship is considered in the computation.
+| consecutiveIds            | boolean       | `false`                   | yes       | Community identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
 [opts="header",cols="1m,1,6"]
 |===
-| Name                 | Type    | Description
-| loadMillis           | int     | Milliseconds for loading data.
-| computeMillis        | int     | Milliseconds for running the algorithm.
-| writeMillis          | int     | Milliseconds for writing result data back.
-| postProcessingMillis | int     | Milliseconds for computing percentiles and community count.
-| nodes                | int     | The number of nodes considered.
-| communityCount       | int     | The number of communities found.
-| p1                   | double  | The 1 percentile of community size.
-| p5                   | double  | The 5 percentile of community size.
-| p10                  | double  | The 10 percentile of community size.
-| p25                  | double  | The 25 percentile of community size.
-| p50                  | double  | The 50 percentile of community size.
-| p75                  | double  | The 75 percentile of community size.
-| p90                  | double  | The 90 percentile of community size.
-| p95                  | double  | The 95 percentile of community size.
-| p99                  | double  | The 99 percentile of community size.
-| p100                 | double  | The 100 percentile of community size.
-| write                | boolean | Specifies if the result was written back as a node property.
-| writeProperty        | string  | The property name written back to.
+| Name                          | Type    | Description
+| createMillis                  | int     | Milliseconds for loading data.
+| computeMillis                 | int     | Milliseconds for running the algorithm.
+| writeMillis                   | int     | Milliseconds for writing result data back.
+| postProcessingMillis          | int     | Milliseconds for computing component count and distribution statistics.
+| nodePropertiesWritten         | int     | The number of node properties written.
+| relationshipPropertiesWritten | int     | The number of relationship properties written.
+| writeProperty                 | string  | The value of `writeProperty` used to run the algorithm.
+| weightProperty                | string  | The value of `weightProperty` used to run the algorithm.
+| seedProperty                  | string  | The value of `seedProperty` used to run the algorithm.
+| threshold                     | float   | The value of `threshold` used to run the algorithm.
+| consecutiveIds                | boolean | The value of `consecutiveIds` used to run the algorithm.
+| componentCount                | int     | The number of computed components.
+| componentDistribution         | map     | Statistical information about the component sizes.
 |===
 
 [[algorithms-wcc-syntax-stream]]
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.unionFind.stream(label: STRING, relationship: STRING, {
-  // configuration
-})
-YIELD nodeId, setId
+CALL gds.algo.wcc.stream(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  // general stream return columns
+  nodeId: int,
+  communityId: int
 ----
 
 .Parameters
-[opts="header",cols="1,1,1,1,4"]
+[opts="header",cols="1,1,1m,1,4"]
 |===
-| Name              | Type    | Default        | Optional | Description
-| node label        | string  | `null`         | yes      | The node label to load from the graph. If null, load all nodes.
-| relationship type | string  | `null`         | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config            | map     | `{}`           | yes      | Additional configuration, see below.
+| Name          | Type      | Default | Optional | Description
+| graphName     | string    | null    | yes      | Name of an explicitly loaded graph to run the algorithm on.
+| configuration | map       | {}      | yes      | Configuration for implicit graph creation, algorithm-specifics and/or graph filtering.
 |===
 
 .Configuration
 [opts="header",cols="1m,1,1,1,4"]
 |===
-| Name              | Type    | Default                   | Optional | Description
-| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency   | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
-| weightProperty    | string  | `null`                    | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| seedProperty      | string  | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| threshold         | float   | `null`                    | yes      | The value of the weight above which the relationship is not thrown away.
-| defaultValue      | float   | `null`                    | yes      | The default value of the weight in case it is missing or invalid.
-| consecutiveIds    | boolean | `false`                   | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with node label and relationship type parameters. Use `'cypher'` for describing the subset using Cypher queries for nodes and relationships.
+| Name                      | Type          | Default                   | Optional  | Description
+// general configuration
+| nodeProjection            | map or list   | null                      | yes       | The node projection used for implicit graph loading or filtering nodes of an explicitly loaded graph.
+| relationshipProjection    | map or list   | null                      | yes       | The relationship projection used for implicit graph loading or filtering relationship of an explicitly loaded graph.
+| nodeQuery                 | string        | null                      | yes       | The Cypher query used to select the nodes for implicit graph loading via a Cypher projection.
+| relationshipQuery         | string        | null                      | yes       | The Cypher query used to select the relationships for implicit graph loading via a Cypher projection.
+| nodeProperties            | map or list   | null                      | yes       | The node properties to load during implicit graph loading.
+| relationshipProperties    | map or list   | null                      | yes       | The relationship properties to load during implicit graph loading.
+| concurrency               | int           | available CPUs            | yes       | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency           | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for implicit graph loading.
+| writeConcurrency          | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for writing the result to Neo4j.
+// algorithm specific
+| weightProperty            | string        | `null`                    | yes       | The property name that contains relationship weight. If `null`, treats the graph as unweighted. Must be numeric.
+| defaultValue              | float         | `null`                    | yes       | The default value of the relationship weight in case it is missing or invalid.
+| seedProperty              | string        | n/a                       | yes       | Used to set the initial community for a node. The property value needs to be a number.
+| threshold                 | float         | `null`                    | yes       | The value of the weight above which the relationship is considered in the computation.
+| consecutiveIds            | boolean       | `false`                   | yes       | Community identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
 [opts="header",cols="1m,1,6"]
 |===
-| Name   | Type | Description
-| nodeId | int  | Node ID
-| setId  | int  | Partition ID
+| Name          | Type | Description
+| nodeId        | int  | The Neo4j node ID.
+| componentId   | int  | The component ID.
 |===
 
 

@@ -28,9 +28,6 @@ import org.neo4j.graphalgo.newapi.WeightConfig;
 
 public interface WccBaseConfig extends BaseAlgoConfig, SeedConfig, WeightConfig {
 
-    String CONSECUTIVE_IDS_KEY = "consecutiveIds";
-    String THRESHOLD_KEY = "threshold";
-
     @Value.Default
     default boolean consecutiveIds() {
         return false;
