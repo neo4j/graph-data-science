@@ -20,63 +20,47 @@
 
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphdb.QueryExecutionException;
-
-import java.util.stream.Stream;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.TestSupport.toArguments;
-
 // TODO port to new API, bring back Louvain and PageRankStreamProcedure
 public class StreamingProcTest extends ProcTestBase {
-
-    @BeforeEach
-    void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(
-        );
-    }
-
-    @AfterEach
-    void teardown() {
-        db.shutdown();
-    }
-
-    @ParameterizedTest
-    @MethodSource("parameters")
-    void shouldFailToWriteInCypherLoaderQueries(String proc, String nodeQuery, String relQuery) {
-        String query = String.format(
-                "CALL %s(" +
-                "  '%s'," +
-                "  '%s'," +
-                "  {" +
-                "    graph: 'cypher'" +
-                "  })",
-                proc, nodeQuery, relQuery);
-        QueryExecutionException ex = assertThrows(QueryExecutionException.class, () -> runQuery(query).hasNext());
-        Throwable root = ExceptionUtil.rootCause(ex);
-        assertTrue(root instanceof IllegalArgumentException);
-        assertThat(root.getMessage(), containsString("Query must be read only. Query: "));
-    }
-
-    private static Stream<Arguments> parameters() {
-        return TestSupport.crossArguments(toArguments(StreamingProcTest::procsToTest), () -> Stream.of(
-                Arguments.of("CREATE (n) RETURN id(n) AS id", "RETURN 0 AS source, 1 AS target"),
-                Arguments.of("RETURN 0 AS id", "CREATE (n)-[:REL]->(m) RETURN id(n) AS source, id(m) AS target")
-        ));
-    }
-
-    private static Stream<String> procsToTest() {
-        return Stream.of(
-        );
-    }
+//
+//    @BeforeEach
+//    void setup() throws Exception {
+//        db = TestDatabaseCreator.createTestDatabase();
+//        registerProcedures(
+//        );
+//    }
+//
+//    @AfterEach
+//    void teardown() {
+//        db.shutdown();
+//    }
+//
+//    @ParameterizedTest
+//    @MethodSource("parameters")
+//    void shouldFailToWriteInCypherLoaderQueries(String proc, String nodeQuery, String relQuery) {
+//        String query = String.format(
+//                "CALL %s(" +
+//                "  '%s'," +
+//                "  '%s'," +
+//                "  {" +
+//                "    graph: 'cypher'" +
+//                "  })",
+//                proc, nodeQuery, relQuery);
+//        QueryExecutionException ex = assertThrows(QueryExecutionException.class, () -> runQuery(query).hasNext());
+//        Throwable root = ExceptionUtil.rootCause(ex);
+//        assertTrue(root instanceof IllegalArgumentException);
+//        assertThat(root.getMessage(), containsString("Query must be read only. Query: "));
+//    }
+//
+//    private static Stream<Arguments> parameters() {
+//        return TestSupport.crossArguments(toArguments(StreamingProcTest::procsToTest), () -> Stream.of(
+//                Arguments.of("CREATE (n) RETURN id(n) AS id", "RETURN 0 AS source, 1 AS target"),
+//                Arguments.of("RETURN 0 AS id", "CREATE (n)-[:REL]->(m) RETURN id(n) AS source, id(m) AS target")
+//        ));
+//    }
+//
+//    private static Stream<String> procsToTest() {
+//        return Stream.of(
+//        );
+//    }
 }
