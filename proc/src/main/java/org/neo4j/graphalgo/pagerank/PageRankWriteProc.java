@@ -147,7 +147,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
         ComputationResult<PageRank, PageRank, PageRankWriteConfig> computeResult,
         boolean write
     ) {
-        if (computeResult.isEmpty()) {
+        if (computeResult.isGraphEmpty()) {
           return Stream.of(
               new WriteResult(
                   computeResult.config(),
