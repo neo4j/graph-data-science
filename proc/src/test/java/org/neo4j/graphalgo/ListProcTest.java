@@ -52,7 +52,6 @@ class ListProcTest extends ProcTestBase {
         "algo.graph.load",
         "algo.graph.load.memrec",
         "algo.graph.remove",
-        "algo.memrec",
 
         "gds.algo.labelPropagation.stats",
         "gds.algo.labelPropagation.stats.estimate",
@@ -114,7 +113,6 @@ class ListProcTest extends ProcTestBase {
             ListProc.class,
             LouvainWriteProc.class,
             LouvainStreamProc.class,
-            MemRecProc.class,
             PageRankWriteProc.class,
             PageRankStreamProc.class,
             WccWriteProc.class,
