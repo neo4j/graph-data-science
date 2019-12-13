@@ -224,12 +224,10 @@ public class TriangleProc extends LabsProc {
             }
         }
 
-
-        builder.withAverageClusteringCoefficient(triangleCount.getAverageCoefficient())
-                .withTriangleCount(triangleCount.getTriangleCount());
-
         final PagedAtomicIntegerArray triangles = triangleCount.getTriangles();
 
+        builder.withAverageClusteringCoefficient(triangleCount.getAverageCoefficient());
+        builder.withTriangleCount(triangleCount.getTriangleCount());
         builder.withNodeCount(graph.nodeCount());
         builder.withCommunityFunction(triangles::get);
 

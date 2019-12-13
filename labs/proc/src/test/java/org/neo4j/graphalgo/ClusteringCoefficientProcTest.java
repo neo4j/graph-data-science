@@ -100,7 +100,7 @@ class ClusteringCoefficientProcTest extends ProcTestBase {
             assertEquals(3, triangles);
             assertEquals(0.851, coefficient, 0.1);
             assertEquals(9, nodeCount);
-            assertEquals(1, p100);
+            assertEquals(9, p100);
         });
 
         final String request = "MATCH (n) WHERE exists(n.clusteringCoefficient) RETURN n.clusteringCoefficient as c";

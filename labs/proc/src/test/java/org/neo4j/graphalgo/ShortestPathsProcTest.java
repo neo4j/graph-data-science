@@ -128,15 +128,15 @@ final class ShortestPathsProcTest extends ProcTestBase {
 
         final String matchCypher = "MATCH(n:Node {name:'s'}) " +
                                    "WITH n CALL algo.shortestPaths(n, 'cost', {write:true, writeProperty:'sp',graph:'" + graphName + "'}) " +
-                                   "YIELD nodeCount, loadDuration, evalDuration, writeDuration RETURN nodeCount, loadDuration, evalDuration, writeDuration";
+                                   "YIELD nodeCount, loadMillis, evalMillis, writeMillis RETURN nodeCount, loadMillis, evalMillis, writeMillis";
 
         runQuery(matchCypher, row -> {
-            System.out.println("loadDuration = " + row.getNumber("loadDuration").longValue());
-            System.out.println("evalDuration = " + row.getNumber("evalDuration").longValue());
-            long writeDuration = row.getNumber("writeDuration").longValue();
-            System.out.println("writeDuration = " + writeDuration);
+            System.out.println("loadMillis = " + row.getNumber("loadMillis").longValue());
+            System.out.println("evalMillis = " + row.getNumber("evalMillis").longValue());
+            long writeMillis = row.getNumber("writeMillis").longValue();
+            System.out.println("writeMillis = " + writeMillis);
             System.out.println("nodeCount = " + row.getNumber("nodeCount").longValue());
-            assertNotEquals(-1L, writeDuration);
+            assertNotEquals(-1L, writeMillis);
         });
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
