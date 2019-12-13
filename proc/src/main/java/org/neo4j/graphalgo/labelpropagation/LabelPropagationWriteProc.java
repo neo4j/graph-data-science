@@ -76,7 +76,6 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
             graphNameOrConfig,
             configuration
         );
-
         return write(result, true);
     }
 
