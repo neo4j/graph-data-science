@@ -163,7 +163,7 @@ See <<projected-graph-model, Projected Graph Model>> for more details.
 ----
 CALL algo.graph.load('myGraph', 'User', 'LINK');
 
-CALL algo.k1coloring.stream(null, null, {graph: 'myGraph'})
+CALL algo.beta.k1coloring.stream(null, null, {graph: 'myGraph'})
 YIELD nodeId, color
 RETURN algo.asNode(nodeId).name AS Name, color AS Color
 ORDER BY Name;
@@ -182,7 +182,7 @@ ORDER BY Name;
 .Using a Cypher projection:
 [source, cypher]
 ----
-CALL algo.k1coloring.stream(
+CALL algo.beta.k1coloring.stream(
   'MATCH (u:User) RETURN id(u) AS id',
   'MATCH (u1:User)-[:LINK]->(u2:User)
    RETURN id(u1) AS source, id(u2) AS target',
