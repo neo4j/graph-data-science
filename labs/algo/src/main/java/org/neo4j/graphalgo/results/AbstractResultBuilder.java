@@ -21,34 +21,42 @@ package org.neo4j.graphalgo.results;
 
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 
+import java.util.function.Supplier;
+
 public abstract class AbstractResultBuilder<R> {
 
-    protected long loadDuration = -1;
-    protected long evalDuration = -1;
-    protected long writeDuration = -1;
+    protected long loadMillis = -1;
+    protected long computeMillis = -1;
+    protected long writeMillis = -1;
 
-    public void setLoadDuration(long loadDuration) {
-        this.loadDuration = loadDuration;
+    protected long nodeCount;
+    protected long relationshipCount;
+
+    protected boolean write = false;
+    protected String writeProperty;
+
+    public void setLoadMillis(long loadMillis) {
+        this.loadMillis = loadMillis;
     }
 
-    public void setEvalDuration(long evalDuration) {
-        this.evalDuration = evalDuration;
+    public void setEvalMillis(long computeMillis) {
+        this.computeMillis = computeMillis;
     }
 
-    public void setWriteDuration(long writeDuration) {
-        this.writeDuration = writeDuration;
+    public void setWriteMillis(long writeMillis) {
+        this.writeMillis = writeMillis;
     }
 
     public ProgressTimer timeLoad() {
-        return ProgressTimer.start(this::setLoadDuration);
+        return ProgressTimer.start(this::setLoadMillis);
     }
 
     public ProgressTimer timeEval() {
-        return ProgressTimer.start(this::setEvalDuration);
+        return ProgressTimer.start(this::setEvalMillis);
     }
 
     public ProgressTimer timeWrite() {
-        return ProgressTimer.start(this::setWriteDuration);
+        return ProgressTimer.start(this::setWriteMillis);
     }
 
     public void timeLoad(Runnable runnable) {
@@ -63,10 +71,36 @@ public abstract class AbstractResultBuilder<R> {
         }
     }
 
+    public <U> U timeEval(Supplier<U> supplier) {
+        try (ProgressTimer ignored = timeEval()) {
+            return supplier.get();
+        }
+    }
+
     public void timeWrite(Runnable runnable) {
         try (ProgressTimer ignored = timeWrite()) {
             runnable.run();
         }
+    }
+
+    public AbstractResultBuilder<R> withNodeCount(long nodeCount) {
+        this.nodeCount = nodeCount;
+        return this;
+    }
+
+    public AbstractResultBuilder<R> withRelationshipCount(long relationshipCount) {
+        this.relationshipCount = relationshipCount;
+        return this;
+    }
+
+    public AbstractResultBuilder<R> withWrite(boolean write) {
+        this.write = write;
+        return this;
+    }
+
+    public AbstractResultBuilder<R> withWriteProperty(String writeProperty) {
+        this.writeProperty = writeProperty;
+        return this;
     }
 
     public abstract R build();

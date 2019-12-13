@@ -161,10 +161,11 @@ public class Prim extends LegacyAlgorithm<Prim> {
         }
 
         public Result build() {
-            return new Result(loadDuration,
-                    evalDuration,
-                    writeDuration,
-                    effectiveNodeCount);
+            return new Result(
+                loadMillis,
+                computeMillis,
+                writeMillis,
+                effectiveNodeCount);
         }
     }
 }

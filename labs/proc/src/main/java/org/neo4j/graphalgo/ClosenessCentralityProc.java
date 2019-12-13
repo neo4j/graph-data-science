@@ -37,6 +37,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -122,7 +123,7 @@ public class ClosenessCentralityProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "ClosenessCentrality(MultiSource)"))
                 .withTerminationFlag(terminationFlag);
 
-        builder.timeEval(algo::compute);
+        builder.timeEval((Supplier<Boolean>) algo::compute);
 
         if (configuration.isWriteFlag()) {
             graph.release();

@@ -55,7 +55,7 @@ public class ClusteringCoefficientResult {
 
         @Override
         public ClusteringCoefficientResult build() {
-            return new ClusteringCoefficientResult(loadDuration, evalDuration, writeDuration, nodeCount, averageClusteringCoefficient);
+            return new ClusteringCoefficientResult(loadMillis, computeMillis, writeMillis, nodeCount, averageClusteringCoefficient);
         }
 
     }

@@ -19,13 +19,14 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.HdrHistogram.Histogram;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 public class SCCResult {
 
     public static SCCResult EMPTY = new SCCResult(
-            0, 0, 0, 0,0, 0, -1,-1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0,
-            false, null, null);
+        0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0,
+        false, null, null
+    );
 
     public final long loadMillis;
     public final long computeMillis;
@@ -50,9 +51,29 @@ public class SCCResult {
     public final String partitionProperty;
     public final String writeProperty;
 
-    public SCCResult(long loadMillis, long computeMillis, long postProcessingMillis, long writeMillis, long nodes, long communityCount,
-                     long p100, long p99, long p95, long p90, long p75, long p50, long p25, long p10, long p5, long p1,
-                     long minSetSize, long maxSetSize, boolean write, String partitionProperty, String writeProperty) {
+    public SCCResult(
+        long loadMillis,
+        long computeMillis,
+        long postProcessingMillis,
+        long writeMillis,
+        long nodes,
+        long communityCount,
+        long p100,
+        long p99,
+        long p95,
+        long p90,
+        long p75,
+        long p50,
+        long p25,
+        long p10,
+        long p5,
+        long p1,
+        long minSetSize,
+        long maxSetSize,
+        boolean write,
+        String partitionProperty,
+        String writeProperty
+    ) {
         this.loadMillis = loadMillis;
         this.computeMillis = computeMillis;
         this.postProcessingMillis = postProcessingMillis;
@@ -76,45 +97,41 @@ public class SCCResult {
         this.writeProperty = writeProperty;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public static final class Builder extends AbstractCommunityResultBuilder<SCCResult> {
         private String partitionProperty;
         private String writeProperty;
 
+        public Builder(
+            boolean buildHistogram,
+            boolean buildCommunityCount,
+            AllocationTracker tracker
+        ) {
+            super(buildHistogram, buildCommunityCount, tracker);
+        }
+
         @Override
-        protected SCCResult build(
-                long loadMillis,
-                long computeMillis,
-                long writeMillis,
-                long postProcessingMillis,
-                long nodeCount,
-                long communityCount,
-                Histogram communityHistogram,
-                boolean write) {
+        public SCCResult buildResult() {
             return new SCCResult(
-                    loadMillis,
-                    computeMillis,
-                    writeMillis,
-                    postProcessingMillis,
-                    nodeCount,
-                    communityCount,
-                    communityHistogram.getValueAtPercentile(100),
-                    communityHistogram.getValueAtPercentile(99),
-                    communityHistogram.getValueAtPercentile(95),
-                    communityHistogram.getValueAtPercentile(90),
-                    communityHistogram.getValueAtPercentile(75),
-                    communityHistogram.getValueAtPercentile(50),
-                    communityHistogram.getValueAtPercentile(25),
-                    communityHistogram.getValueAtPercentile(10),
-                    communityHistogram.getValueAtPercentile(5),
-                    communityHistogram.getValueAtPercentile(1),
-                    communityHistogram.getMinNonZeroValue(),
-                    communityHistogram.getMaxValue(),
-                    write,
-                    partitionProperty, writeProperty
+                loadMillis,
+                computeMillis,
+                writeMillis,
+                postProcessingDuration,
+                nodeCount,
+                maybeCommunityCount.orElse(0),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(100)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(99)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(95)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(90)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(75)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(50)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(25)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(10)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(5)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getMinNonZeroValue()).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getMaxValue()).orElse(0L),
+                write,
+                partitionProperty, writeProperty
             );
         }
 

@@ -19,12 +19,14 @@
  */
 package org.neo4j.graphalgo.results;
 
-public class CentralityScore {
+import org.neo4j.graphalgo.impl.pagerank.PageRank;
+
+public class PageRankScore {
 
     public final long nodeId;
     public final Double score;
 
-    public CentralityScore(long nodeId, final Double score) {
+    public PageRankScore(long nodeId, final Double score) {
         this.nodeId = nodeId;
         this.score = score;
     }
@@ -32,33 +34,59 @@ public class CentralityScore {
     // TODO: return number of relationships as well
     //  the Graph API doesn't expose this value yet
     public static final class Stats {
-        public final long nodes, loadMillis, computeMillis, writeMillis;
+        public final long nodes, iterations, loadMillis, computeMillis, writeMillis;
+        public final double dampingFactor;
         public final boolean write;
         public final String writeProperty;
 
         Stats(
                 long nodes,
+                long iterations,
                 long loadMillis,
                 long computeMillis,
                 long writeMillis,
+                double dampingFactor,
                 boolean write,
                 String writeProperty) {
             this.nodes = nodes;
+            this.iterations = iterations;
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
+            this.dampingFactor = dampingFactor;
             this.write = write;
             this.writeProperty = writeProperty;
         }
 
         public static final class Builder extends AbstractResultBuilder<Stats> {
 
-            public CentralityScore.Stats build() {
-                return new CentralityScore.Stats(
+            private long iterations;
+            private double dampingFactor;
+
+            public Builder withConfig(PageRank.Config config) {
+                this.dampingFactor = config.dampingFactor;
+                this.iterations = config.iterations;
+                return this;
+            }
+
+            public Builder withIterations(long iterations) {
+                this.iterations = iterations;
+                return this;
+            }
+
+            public Builder withDampingFactor(double dampingFactor) {
+                this.dampingFactor = dampingFactor;
+                return this;
+            }
+
+            public Stats build() {
+                return new Stats(
                     nodeCount,
+                    iterations,
                     loadMillis,
                     computeMillis,
                     writeMillis,
+                    dampingFactor,
                     write,
                     writeProperty
                 );

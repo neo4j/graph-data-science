@@ -47,15 +47,15 @@ public class DeltaSteppingProcResult {
         protected long nodeCount = 0;
 
         public ProgressTimer load() {
-            return ProgressTimer.start(res -> loadDuration = res);
+            return ProgressTimer.start(res -> loadMillis = res);
         }
 
         public ProgressTimer eval() {
-            return ProgressTimer.start(res -> evalDuration = res);
+            return ProgressTimer.start(res -> computeMillis = res);
         }
 
         public ProgressTimer write() {
-            return ProgressTimer.start(res -> writeDuration = res);
+            return ProgressTimer.start(res -> writeMillis = res);
         }
 
         public Builder withNodeCount(long nodeCount) {
@@ -64,7 +64,7 @@ public class DeltaSteppingProcResult {
         }
 
         public DeltaSteppingProcResult build() {
-            return new DeltaSteppingProcResult(loadDuration, evalDuration, writeDuration, nodeCount);
+            return new DeltaSteppingProcResult(loadMillis, computeMillis, writeMillis, nodeCount);
         }
     }
 }

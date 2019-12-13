@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -177,7 +176,9 @@ public class TriangleProc extends LabsProc {
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
-        final TriangleCountResultBuilder builder = new TriangleCountResultBuilder();
+
+        final AllocationTracker tracker = AllocationTracker.create();
+        final TriangleCountResultBuilder builder = new TriangleCountResultBuilder(true, true, tracker);
 
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = new GraphLoader(api, Pools.DEFAULT)
@@ -196,7 +197,8 @@ public class TriangleProc extends LabsProc {
                     graph,
                     Pools.DEFAULT,
                     configuration.concurrency(),
-                    AllocationTracker.create())
+                tracker
+            )
                     .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction));
             triangleCount.compute();
@@ -227,7 +229,11 @@ public class TriangleProc extends LabsProc {
                 .withTriangleCount(triangleCount.getTriangleCount());
 
         final PagedAtomicIntegerArray triangles = triangleCount.getTriangles();
-        return Stream.of(builder.buildfromKnownLongSizes(graph.nodeCount(), triangles::get));
+
+        builder.withNodeCount(graph.nodeCount());
+        builder.withCommunityFunction(triangles::get);
+
+        return Stream.of(builder.build());
     }
 
     /**
@@ -292,7 +298,7 @@ public class TriangleProc extends LabsProc {
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
-        final TriangleCountResultBuilder builder = new TriangleCountResultBuilder();
+        final TriangleCountResultBuilder builder = new TriangleCountResultBuilder(true, true, AllocationTracker.EMPTY);
 
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = new GraphLoader(api, Pools.DEFAULT)
@@ -346,7 +352,11 @@ public class TriangleProc extends LabsProc {
                 .withTriangleCount(triangleCount.getTriangleCount());
 
         final AtomicIntegerArray triangles = triangleCount.getTriangles();
-        return Stream.of(builder.buildfromKnownSizes(Math.toIntExact(graph.nodeCount()), triangles::get));
+
+        builder.withNodeCount(graph.nodeCount());
+        builder.withCommunityFunction(l -> triangles.get((int) l));
+
+        return Stream.of(builder.build());
     }
 
 
@@ -447,6 +457,14 @@ public class TriangleProc extends LabsProc {
         private String writeProperty;
         private String clusteringCoefficientProperty;
 
+        protected TriangleCountResultBuilder(
+            boolean buildHistogram,
+            boolean buildCommunityCount,
+            AllocationTracker tracker
+        ) {
+            super(buildHistogram, buildCommunityCount, tracker);
+        }
+
         public TriangleCountResultBuilder withAverageClusteringCoefficient(double averageClusteringCoefficient) {
             this.averageClusteringCoefficient = averageClusteringCoefficient;
             return this;
@@ -457,40 +475,6 @@ public class TriangleProc extends LabsProc {
             return this;
         }
 
-
-        // communityCount is not used here
-        @Override
-        protected Result build(
-                long loadMillis,
-                long computeMillis,
-                long writeMillis,
-                long postProcessingMillis,
-                long nodeCount,
-                long communityCount,
-                Histogram communityHistogram,
-                boolean write) {
-            return new Result(
-                    loadMillis,
-                    computeMillis,
-                    writeMillis,
-                    postProcessingMillis,
-                    nodeCount,
-                    triangleCount,
-                    communityHistogram.getValueAtPercentile(100),
-                    communityHistogram.getValueAtPercentile(99),
-                    communityHistogram.getValueAtPercentile(95),
-                    communityHistogram.getValueAtPercentile(90),
-                    communityHistogram.getValueAtPercentile(75),
-                    communityHistogram.getValueAtPercentile(50),
-                    communityHistogram.getValueAtPercentile(25),
-                    communityHistogram.getValueAtPercentile(10),
-                    communityHistogram.getValueAtPercentile(5),
-                    communityHistogram.getValueAtPercentile(1),
-                    averageClusteringCoefficient,
-                    write, writeProperty, clusteringCoefficientProperty
-            );
-        }
-
         public TriangleCountResultBuilder withWriteProperty(String writeProperty) {
             this.writeProperty = writeProperty;
             return this;
@@ -499,6 +483,30 @@ public class TriangleProc extends LabsProc {
         public TriangleCountResultBuilder withClusteringCoefficientProperty(Optional<String> clusteringCoefficientProperty) {
             this.clusteringCoefficientProperty = clusteringCoefficientProperty.orElse(null);
             return this;
+        }
+
+        @Override
+        protected Result buildResult() {
+            return new Result(
+                loadMillis,
+                computeMillis,
+                writeMillis,
+                postProcessingDuration,
+                nodeCount,
+                triangleCount,
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(100)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(99)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(95)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(90)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(75)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(50)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(25)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(10)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(5)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
+                averageClusteringCoefficient,
+                write, writeProperty, clusteringCoefficientProperty
+            );
         }
     }
 

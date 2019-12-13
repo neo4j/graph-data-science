@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.MSColoring;
-import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -257,7 +257,7 @@ public class MSColoringProc extends LabsProc {
                 computeMillis,
                 postProcessingDuration,
                 writeMillis,
-                nodePropertiesWritten,
+                nodeCount,
                 maybeCommunityCount.orElse(-1L),
                 maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
                 maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),

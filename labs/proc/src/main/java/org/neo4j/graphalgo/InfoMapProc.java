@@ -374,7 +374,7 @@ public class InfoMapProc extends LabsProc {
         }
 
         public InfoMapResult build() {
-            return new InfoMapResult(loadDuration, evalDuration, writeDuration, nodeCount, iterations, communityCount);
+            return new InfoMapResult(loadMillis, computeMillis, writeMillis, nodeCount, iterations, communityCount);
         }
     }
 

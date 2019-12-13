@@ -252,9 +252,9 @@ public class KShortestPathsProc extends LabsProc {
             @Override
             public KspResult build() {
                 return new KspResult(
-                        this.loadDuration,
-                        this.evalDuration,
-                        this.writeDuration,
+                        loadMillis,
+                        computeMillis,
+                        writeMillis,
                         resultCount);
             }
         }

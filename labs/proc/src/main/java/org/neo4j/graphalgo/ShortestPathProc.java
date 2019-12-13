@@ -296,7 +296,7 @@ public class ShortestPathProc extends LabsProc {
             }
 
             public DijkstraResult build() {
-                return new DijkstraResult(loadDuration, evalDuration, writeDuration, nodeCount, totalCosts);
+                return new DijkstraResult(loadMillis, computeMillis, writeMillis, nodeCount, totalCosts);
             }
         }
     }

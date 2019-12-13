@@ -19,205 +19,96 @@
  */
 package org.neo4j.graphalgo.results;
 
+import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
+import org.neo4j.helpers.collection.MapUtil;
 
-import java.util.function.IntUnaryOperator;
-import java.util.function.LongToIntFunction;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.function.LongUnaryOperator;
 
-/**
- * @author mknblch
- */
-public abstract class AbstractCommunityResultBuilder<T> {
+public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBuilder<R> {
 
-    protected long loadDuration = -1;
-    protected long evalDuration = -1;
-    protected long writeDuration = -1;
-    protected boolean write = false;
+    private static final long EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT = 4L;
 
-    public AbstractCommunityResultBuilder<T> withLoadDuration(long loadDuration) {
-        this.loadDuration = loadDuration;
+    private final boolean buildHistogram;
+    private final boolean buildCommunityCount;
+
+    protected long postProcessingDuration = -1L;
+
+    private LongUnaryOperator communityFunction = null;
+    private OptionalLong maybeExpectedCommunityCount = OptionalLong.empty();
+
+    protected OptionalLong maybeCommunityCount = OptionalLong.empty();
+    protected Optional<Histogram> maybeCommunityHistogram = Optional.empty();
+
+    protected Map<String, Object> communityHistogramOrNull() {
+        return maybeCommunityHistogram.map(histogram -> MapUtil.map(
+            "min", histogram.getMinValue(),
+            "mean", histogram.getMean(),
+            "max", histogram.getMaxValue(),
+            "p50", histogram.getValueAtPercentile(50),
+            "p75", histogram.getValueAtPercentile(75),
+            "p90", histogram.getValueAtPercentile(90),
+            "p95", histogram.getValueAtPercentile(95),
+            "p99", histogram.getValueAtPercentile(99),
+            "p999", histogram.getValueAtPercentile(99.9)
+        )).orElse(null);
+    }
+
+    private final AllocationTracker tracker;
+
+    protected AbstractCommunityResultBuilder(boolean buildHistogram, boolean buildCommunityCount, AllocationTracker tracker) {
+        this.buildHistogram = buildHistogram;
+        this.buildCommunityCount = buildCommunityCount;
+        this.tracker = tracker;
+    }
+
+    protected abstract R buildResult();
+
+    public AbstractCommunityResultBuilder<R> withExpectedNumberOfCommunities(long expectedNumberOfCommunities) {
+        this.maybeExpectedCommunityCount = OptionalLong.of(expectedNumberOfCommunities);
         return this;
     }
 
-
-    public AbstractCommunityResultBuilder<T> withEvalDuration(long evalDuration) {
-        this.evalDuration = evalDuration;
+    public AbstractCommunityResultBuilder<R> withCommunityFunction(LongUnaryOperator communityFunction) {
+        this.communityFunction = communityFunction;
         return this;
     }
 
-
-    public AbstractCommunityResultBuilder<T> withWriteDuration(long writeDuration) {
-        this.writeDuration = writeDuration;
-        return this;
-    }
-
-    public AbstractCommunityResultBuilder<T> withWrite(boolean write) {
-        this.write = write;
-        return this;
-    }
-
-    /**
-     * returns an AutoClosable which measures the time
-     * until it gets closed. Saves the duration as loadMillis
-     *
-     * @return
-     */
-    public ProgressTimer timeLoad() {
-        return ProgressTimer.start(this::withLoadDuration);
-    }
-
-    /**
-     * returns an AutoClosable which measures the time
-     * until it gets closed. Saves the duration as evalMillis
-     *
-     * @return
-     */
-    public ProgressTimer timeEval() {
-        return ProgressTimer.start(this::withEvalDuration);
-    }
-
-    /**
-     * returns an AutoClosable which measures the time
-     * until it gets closed. Saves the duration as writeMillis
-     *
-     * @return
-     */
-    public ProgressTimer timeWrite() {
-        return ProgressTimer.start(this::withWriteDuration);
-    }
-
-    /**
-     * evaluates loadMillis
-     *
-     * @param runnable
-     */
-    public void timeLoad(Runnable runnable) {
-        try (ProgressTimer timer = timeLoad()) {
-            runnable.run();
-        }
-    }
-
-    /**
-     * evaluates comuteMillis
-     *
-     * @param runnable
-     */
-    public void timeEval(Runnable runnable) {
-        try (ProgressTimer timer = timeEval()) {
-            runnable.run();
-        }
-    }
-
-    /**
-     * evaluates writeMillis
-     *
-     * @param runnable
-     */
-    public void timeWrite(Runnable runnable) {
-        try (ProgressTimer timer = timeWrite()) {
-            runnable.run();
-        }
-    }
-
-    public T buildfromKnownSizes(int nodeCount, IntUnaryOperator sizeForNode) {
+    @Override
+    public R build() {
         final ProgressTimer timer = ProgressTimer.start();
-        final Histogram histogram = new Histogram(5);
-        for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            final int communitySize = sizeForNode.applyAsInt(nodeId);
-            histogram.recordValue(communitySize);
+
+        if (buildCommunityCount && communityFunction != null) {
+            long expectedNumberOfCommunities = maybeExpectedCommunityCount.orElse(EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT);
+            HugeLongLongMap communitySizeMap = new HugeLongLongMap(expectedNumberOfCommunities, tracker);
+            for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
+                final long communityId = communityFunction.applyAsLong(nodeId);
+                communitySizeMap.addTo(communityId, 1L);
+            }
+
+            if (buildHistogram) {
+                final Histogram histogram = new Histogram(5);
+                for (LongLongCursor cursor : communitySizeMap) {
+                    histogram.recordValue(cursor.value);
+                }
+                maybeCommunityHistogram = Optional.of(histogram);
+            }
+
+            maybeCommunityCount = OptionalLong.of(communitySizeMap.size());
+            communitySizeMap.release();
         }
 
         timer.stop();
 
-        return build(loadDuration,
-                evalDuration,
-                writeDuration,
-                timer.getDuration(),
-                nodeCount,
-                nodeCount,
-                histogram,
-                write
-        );
+        this.postProcessingDuration = timer.getDuration();
+
+        return buildResult();
     }
-
-    public T buildfromKnownLongSizes(long nodeCount, LongToIntFunction sizeForNode) {
-        final ProgressTimer timer = ProgressTimer.start();
-        final Histogram histogram = new Histogram(5);
-        for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
-            final int communitySize = sizeForNode.applyAsInt(nodeId);
-            histogram.recordValue(communitySize);
-        }
-
-        timer.stop();
-
-        return build(loadDuration,
-                evalDuration,
-                writeDuration,
-                timer.getDuration(),
-                nodeCount,
-                nodeCount,
-                histogram,
-                write
-        );
-    }
-
-    /**
-     * build result
-     */
-    public T build(
-            AllocationTracker tracker,
-            long nodeCount,
-            LongUnaryOperator fun) {
-        return build(4L, tracker, nodeCount, fun);
-    }
-
-    /**
-     * build result. If you know (or can reasonably estimate) the number of final communities,
-     * prefer this overload over {@link #build(AllocationTracker, long, LongUnaryOperator)} as this
-     * one will presize the counting bag and avoid excessive allocations and resizing operations.
-     */
-    public T build(
-            long expectedNumberOfCommunities,
-            AllocationTracker tracker,
-            long nodeCount,
-            LongUnaryOperator fun) {
-        final HugeLongLongMap communitySizeMap = new HugeLongLongMap(expectedNumberOfCommunities, tracker);
-        final ProgressTimer timer = ProgressTimer.start();
-        for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
-            final long communityId = fun.applyAsLong(nodeId);
-            communitySizeMap.addTo(communityId, 1L);
-        }
-
-        Histogram histogram = CommunityHistogram.buildFrom(communitySizeMap);
-
-        timer.stop();
-
-        long communityCount = communitySizeMap.size();
-        communitySizeMap.release();
-
-        return build(loadDuration,
-                evalDuration,
-                writeDuration,
-                timer.getDuration(),
-                nodeCount,
-                communityCount,
-                histogram,
-                write
-        );
-    }
-
-    protected abstract T build(
-            long loadMillis,
-            long computeMillis,
-            long writeMillis,
-            long postProcessingMillis,
-            long nodeCount,
-            long communityCount,
-            Histogram communityHistogram,
-            boolean write);
 
 }

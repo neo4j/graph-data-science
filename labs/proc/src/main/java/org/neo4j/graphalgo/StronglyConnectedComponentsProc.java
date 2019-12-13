@@ -89,10 +89,10 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
-        SCCResult.Builder builder = SCCResult.builder();
+        AllocationTracker tracker = AllocationTracker.create();
+        SCCResult.Builder builder = new SCCResult.Builder(true, true, tracker);
 
         ProgressTimer loadTimer = builder.timeLoad();
-        AllocationTracker tracker = AllocationTracker.create();
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
@@ -135,7 +135,10 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             });
         }
 
-        return Stream.of(builder.build(tracker, graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
+        builder.withNodeCount(graph.nodeCount());
+        builder.withCommunityFunction( l -> (long) connectedComponents[((int) l)]);
+
+        return Stream.of(builder.build());
     }
 
     // algo.scc.tunedTarjan
@@ -149,10 +152,10 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
-        SCCResult.Builder builder = SCCResult.builder();
+        AllocationTracker tracker = AllocationTracker.create();
+        SCCResult.Builder builder = new SCCResult.Builder(true, true, tracker);
 
         ProgressTimer loadTimer = builder.timeLoad();
-        AllocationTracker tracker = AllocationTracker.create();
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
@@ -190,7 +193,11 @@ public class StronglyConnectedComponentsProc extends LabsProc {
         }
 
         final int[] connectedComponents = tarjan.getConnectedComponents();
-        return Stream.of(builder.build(tracker, graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
+
+        builder.withNodeCount(graph.nodeCount());
+        builder.withCommunityFunction( l -> (long) connectedComponents[((int) l)]);
+
+        return Stream.of(builder.build());
     }
 
     // algo.scc.tunedTarjan.stream
@@ -232,7 +239,8 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
-        final SCCResult.Builder builder = SCCResult.builder();
+        final AllocationTracker tracker = AllocationTracker.create();
+        SCCResult.Builder builder = new SCCResult.Builder(true, true, tracker);
 
         final ProgressTimer loadTimer = builder.timeLoad();
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
@@ -245,7 +253,6 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             return Stream.of(SCCResult.EMPTY);
         }
 
-        final AllocationTracker tracker = AllocationTracker.create();
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         final SCCAlgorithm tarjan = SCCAlgorithm.iterativeTarjan(graph, tracker)
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(IterativeTarjan)"))
@@ -274,7 +281,11 @@ public class StronglyConnectedComponentsProc extends LabsProc {
         final HugeLongArray connectedComponents = tarjan.getConnectedComponents();
         tarjan.release();
         graph.release();
-        return Stream.of(builder.build(tracker, graph.nodeCount(), connectedComponents::get));
+
+        builder.withNodeCount(graph.nodeCount());
+        builder.withCommunityFunction( connectedComponents::get);
+
+        return Stream.of(builder.build());
     }
 
     // algo.scc.iterative.stream
@@ -321,10 +332,10 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
-        SCCResult.Builder builder = SCCResult.builder();
+        AllocationTracker tracker = AllocationTracker.create();
+        SCCResult.Builder builder = new SCCResult.Builder(true, true, tracker);
 
         ProgressTimer loadTimer = builder.timeLoad();
-        AllocationTracker tracker = AllocationTracker.create();
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
@@ -370,7 +381,10 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             });
         }
 
-        return Stream.of(builder.build(tracker, graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
+        builder.withNodeCount(graph.nodeCount());
+        builder.withCommunityFunction( l -> (long) connectedComponents[((int) l)]);
+
+        return Stream.of(builder.build());
     }
 
     // algo.scc.multistep.stream

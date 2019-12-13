@@ -457,9 +457,9 @@ public class BetweennessCentralityProc extends LabsProc {
 
             public BetweennessCentralityProcResult build() {
                 return new BetweennessCentralityProcResult(
-                    loadDuration,
-                    evalDuration,
-                    writeDuration,
+                    loadMillis,
+                    computeMillis,
+                    writeMillis,
                     nodes,
                     centralityMin,
                     centralityMax,

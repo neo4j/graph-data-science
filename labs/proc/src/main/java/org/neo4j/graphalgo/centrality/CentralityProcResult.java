@@ -56,9 +56,10 @@ public final class CentralityProcResult {
         }
 
         public CentralityProcResult build() {
-            return new CentralityProcResult(loadDuration,
-                evalDuration,
-                writeDuration,
+            return new CentralityProcResult(
+                loadMillis,
+                computeMillis,
+                writeMillis,
                 nodes);
         }
     }

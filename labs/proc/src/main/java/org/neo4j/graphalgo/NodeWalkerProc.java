@@ -229,9 +229,9 @@ public class NodeWalkerProc extends LabsProc {
                     return new PageRankScore.Stats(
                         nodes,
                         iterations,
-                        loadDuration,
-                        evalDuration,
-                        writeDuration,
+                        loadMillis,
+                        computeMillis,
+                        writeMillis,
                         dampingFactor,
                         write,
                         writeProperty);

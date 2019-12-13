@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -107,8 +106,9 @@ public class BalancedTriadsProc extends LabsProc {
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
+        final AllocationTracker tracker = AllocationTracker.create();
 
-        final BalancedTriadsResultBuilder builder = new BalancedTriadsResultBuilder();
+        final BalancedTriadsResultBuilder builder = new BalancedTriadsResultBuilder(true, true, tracker);
 
         // load
         try (ProgressTimer timer = builder.timeLoad()) {
@@ -125,7 +125,9 @@ public class BalancedTriadsProc extends LabsProc {
         // compute
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         try (ProgressTimer timer = builder.timeEval()) {
-            balancedTriads = new BalancedTriads(graph, Pools.DEFAULT, configuration.concurrency(), AllocationTracker.create())
+            balancedTriads = new BalancedTriads(graph, Pools.DEFAULT, configuration.concurrency(),
+                tracker
+            )
                     .withProgressLogger(ProgressLogger.wrap(log, "balancedTriads"))
                     .withTerminationFlag(terminationFlag);
             balancedTriads.compute();
@@ -158,8 +160,8 @@ public class BalancedTriadsProc extends LabsProc {
 
         // result
         builder.withBalancedTriadCount(balancedTriads.getBalancedTriangleCount())
-                .withUnbalancedTriadCount(balancedTriads.getUnbalancedTriangleCount());
-        return Stream.of(builder.buildfromKnownLongSizes(graph.nodeCount(), balancedTriads.getBalancedTriangles()::get));
+               .withUnbalancedTriadCount(balancedTriads.getUnbalancedTriangleCount());
+        return Stream.of(builder.withCommunityFunction(balancedTriads.getBalancedTriangles()::get).build());
     }
 
     /**
@@ -190,7 +192,6 @@ public class BalancedTriadsProc extends LabsProc {
         public final boolean write;
         public final String balancedProperty;
         public final String unbalancedProperty;
-
 
         public Result(
                 long loadMillis,
@@ -230,6 +231,14 @@ public class BalancedTriadsProc extends LabsProc {
         private String balancedProperty;
         private String unbalancedProperty;
 
+        protected BalancedTriadsResultBuilder(
+            boolean buildHistogram,
+            boolean buildCommunityCount,
+            AllocationTracker tracker
+        ) {
+            super(buildHistogram, buildCommunityCount, tracker);
+        }
+
 
         public BalancedTriadsResultBuilder withBalancedTriadCount(long balancedTriadCount) {
             this.balancedTriadCount = balancedTriadCount;
@@ -252,30 +261,22 @@ public class BalancedTriadsProc extends LabsProc {
         }
 
         @Override
-        protected Result build(
-                long loadMillis,
-                long computeMillis,
-                long writeMillis,
-                long postProcessingMillis,
-                long nodeCount,
-                long communityCount,
-                Histogram communityHistogram,
-                boolean write) {
+        protected Result buildResult() {
             return new Result(
-                    loadMillis, computeMillis, writeMillis, postProcessingMillis,  nodeCount, balancedTriadCount, unbalancedTriadCount,
-                    communityHistogram.getValueAtPercentile(100),
-                    communityHistogram.getValueAtPercentile(99),
-                    communityHistogram.getValueAtPercentile(95),
-                    communityHistogram.getValueAtPercentile(90),
-                    communityHistogram.getValueAtPercentile(75),
-                    communityHistogram.getValueAtPercentile(50),
-                    communityHistogram.getValueAtPercentile(25),
-                    communityHistogram.getValueAtPercentile(10),
-                    communityHistogram.getValueAtPercentile(5),
-                    communityHistogram.getValueAtPercentile(1),
-                    write,
-                    balancedProperty,
-                    unbalancedProperty
+                loadMillis, computeMillis, writeMillis, postProcessingDuration, nodeCount, balancedTriadCount, unbalancedTriadCount,
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(100)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(99)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(95)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(90)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(75)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(50)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(25)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(10)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(5)).orElse(0L),
+                maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
+                write,
+                balancedProperty,
+                unbalancedProperty
             );
         }
     }
