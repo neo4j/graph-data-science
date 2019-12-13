@@ -19,13 +19,14 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -150,7 +151,9 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
         if (computeResult.isGraphEmpty()) {
           return Stream.of(
               new WriteResult(
-                  computeResult.config(),
+                  computeResult.config().writeProperty(),
+                  computeResult.config().weightProperty(),
+                  computeResult.config().maxIterations(),
                   0,
                   computeResult.createMillis(),
                   0,
@@ -166,9 +169,8 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
             WriteResultBuilder builder = new WriteResultBuilder(config);
 
-            builder.setLoadMillis(computeResult.createMillis());
+            builder.setCreateMillis(computeResult.createMillis());
             builder.setComputeMillis(computeResult.computeMillis());
-            builder.withNodeCount(graph.nodeCount());
             builder.withRanIterations(pageRank.iterations());
             builder.withDidConverge(pageRank.didConverge());
 
@@ -199,7 +201,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
     public static final class WriteResult {
 
         public String writeProperty;
-        public String weightProperty;
+        public @Nullable String weightProperty;
         public long nodePropertiesWritten;
         public long relationshipPropertiesWritten;
         public long createMillis;
@@ -210,7 +212,9 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
         public boolean didConverge;
 
         WriteResult(
-            PageRankWriteConfig config,
+            String writeProperty,
+            @Nullable String weightProperty,
+            long maxIterations,
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
@@ -219,11 +223,9 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
             boolean didConverge
         ) {
             this.relationshipPropertiesWritten = 0;
-
-            this.writeProperty = config.writeProperty();
-            this.weightProperty = config.weightProperty();
-            this.maxIterations = config.maxIterations();
-
+            this.writeProperty = writeProperty;
+            this.weightProperty = weightProperty;
+            this.maxIterations = maxIterations;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
@@ -233,15 +235,13 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
         }
     }
 
-    public static class WriteResultBuilder extends AbstractResultBuilder<WriteResult> {
-
-        private final PageRankWriteConfig config;
+    public static class WriteResultBuilder extends AbstractResultBuilder<PageRankWriteConfig, WriteResult> {
 
         private long ranIterations;
         private boolean didConverge;
 
         WriteResultBuilder(PageRankWriteConfig config) {
-            this.config = config;
+            super(config);
         }
 
         WriteResultBuilder withRanIterations(long ranIterations) {
@@ -257,7 +257,9 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
         @Override
         public WriteResult build() {
             return new WriteResult(
-                config,
+                writeProperty,
+                config.weightProperty(),
+                config.maxIterations(),
                 nodePropertiesWritten,
                 loadMillis,
                 computeMillis,

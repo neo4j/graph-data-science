@@ -26,11 +26,11 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.impl.wcc.Wcc;
 import org.neo4j.graphalgo.impl.wcc.WccWriteConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -131,9 +131,8 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
             WriteResultBuilder builder = new WriteResultBuilder(config, callContext, computeResult.tracker());
             DisjointSetStruct dss = computeResult.result();
 
-            builder.setLoadMillis(computeResult.createMillis());
+            builder.setCreateMillis(computeResult.createMillis());
             builder.setComputeMillis(computeResult.computeMillis());
-            builder.withNodeCount(graph.nodeCount());
             builder.withCommunityFunction(dss::setIdOf);
 
             if (write && !config.writeProperty().isEmpty()) {
@@ -198,15 +197,14 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
         }
     }
 
-    static class WriteResultBuilder extends AbstractCommunityResultBuilder<WccWriteProc.WriteResult> {
+    static class WriteResultBuilder extends AbstractCommunityResultBuilder<WccWriteConfig, WriteResult> {
 
         private final WccWriteConfig config;
 
         WriteResultBuilder(WccWriteConfig config, ProcedureCallContext context, AllocationTracker tracker) {
             super(
-                // TODO: factor these out to OutputFieldParser
-                context.outputFields().anyMatch(s -> s.equalsIgnoreCase("componentDistribution")),
-                context.outputFields().anyMatch(s -> s.equalsIgnoreCase("componentCount")),
+                config,
+                context,
                 tracker
             );
             this.config = config;

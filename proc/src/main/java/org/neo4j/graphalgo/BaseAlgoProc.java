@@ -37,13 +37,13 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.helpers.collection.Pair;
 
 import java.util.HashSet;
@@ -276,7 +276,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     protected void writeNodeProperties(
-        AbstractResultBuilder<?> writeBuilder,
+        AbstractResultBuilder<?, ?> writeBuilder,
         ComputationResult<A, RESULT, CONFIG> computationResult
     ) {
         Optional<PropertyTranslator<RESULT>> resultPropertyTranslator = nodePropertyTranslator(computationResult);
@@ -293,7 +293,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         }
 
         WriteConfig writeConfig = (WriteConfig) config;
-        try (ProgressTimer ignored = writeBuilder.timeWrite()) {
+        try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::setWriteMillis)) {
             log.debug("Writing results");
 
             Graph graph = computationResult.graph();

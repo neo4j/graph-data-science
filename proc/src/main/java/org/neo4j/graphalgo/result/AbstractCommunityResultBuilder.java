@@ -17,21 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.results;
+package org.neo4j.graphalgo.result;
 
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.HdrHistogram.Histogram;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
+import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.LongUnaryOperator;
 
-public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBuilder<R> {
+public abstract class AbstractCommunityResultBuilder<CONFIG extends WriteConfig, WRITE_RESULT> extends AbstractResultBuilder<CONFIG, WRITE_RESULT> {
 
     private static final long EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT = 4L;
 
@@ -46,7 +49,7 @@ public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBu
     protected OptionalLong maybeCommunityCount = OptionalLong.empty();
     protected Optional<Histogram> maybeCommunityHistogram = Optional.empty();
 
-    protected Map<String, Object> communityHistogramOrNull() {
+    protected @Nullable Map<String, Object> communityHistogramOrNull() {
         return maybeCommunityHistogram.map(histogram -> MapUtil.map(
             "min", histogram.getMinValue(),
             "mean", histogram.getMean(),
@@ -62,26 +65,31 @@ public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBu
 
     private final AllocationTracker tracker;
 
-    protected AbstractCommunityResultBuilder(boolean buildHistogram, boolean buildCommunityCount, AllocationTracker tracker) {
-        this.buildHistogram = buildHistogram;
-        this.buildCommunityCount = buildCommunityCount;
+    protected AbstractCommunityResultBuilder(
+        CONFIG config,
+        ProcedureCallContext callContext,
+        AllocationTracker tracker
+    ) {
+        super(config);
+        this.buildHistogram = callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("communityDistribution"));
+        this.buildCommunityCount = callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("communityCount"));
         this.tracker = tracker;
     }
 
-    protected abstract R buildResult();
+    protected abstract WRITE_RESULT buildResult();
 
-    public AbstractCommunityResultBuilder<R> withExpectedNumberOfCommunities(long expectedNumberOfCommunities) {
+    public AbstractCommunityResultBuilder<CONFIG, WRITE_RESULT> withExpectedNumberOfCommunities(long expectedNumberOfCommunities) {
         this.maybeExpectedCommunityCount = OptionalLong.of(expectedNumberOfCommunities);
         return this;
     }
 
-    public AbstractCommunityResultBuilder<R> withCommunityFunction(LongUnaryOperator communityFunction) {
+    public AbstractCommunityResultBuilder<CONFIG, WRITE_RESULT> withCommunityFunction(LongUnaryOperator communityFunction) {
         this.communityFunction = communityFunction;
         return this;
     }
 
     @Override
-    public R build() {
+    public WRITE_RESULT build() {
         final ProgressTimer timer = ProgressTimer.start();
 
         if (buildCommunityCount && communityFunction != null) {

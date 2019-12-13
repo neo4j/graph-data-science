@@ -32,8 +32,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.coloring.K1Coloring;
 import org.neo4j.graphalgo.impl.coloring.K1ColoringFactory;
-import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -42,7 +42,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -102,8 +101,6 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
 
         K1Coloring coloring = compute(setup);
 
-        setup.builder.withCommunityFunction(coloring.colors()::get);
-
         if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
             setup.builder.withColorCount(coloring.usedColors().cardinality());
         }
@@ -115,11 +112,9 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
             .withDidConverge(coloring.didConverge());
 
         if (setup.procedureConfig.isWriteFlag() && writeProperty.isPresent() && !writeProperty.get().equals("")) {
-            setup.builder.withWrite(true);
             setup.builder.withWriteProperty(writeProperty.get());
-
             write(
-                setup.builder::timeWrite,
+                setup.builder,
                 setup.graph,
                 coloring.colors(),
                 setup.procedureConfig,
@@ -172,7 +167,11 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
         final K1Coloring k1Coloring = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
         K1Coloring algoResult = runWithExceptionLogging(
             K1Coloring.class.getSimpleName() + " failed",
-            () -> setup.builder.timeEval(k1Coloring::compute)
+            () -> {
+                try (ProgressTimer ignore = ProgressTimer.start(setup.builder::setComputeMillis)) {
+                    return k1Coloring.compute();
+                }
+            }
         );
 
         log.info(K1Coloring.class.getSimpleName() + ": overall memory usage %s", setup.tracker.getUsageString());
@@ -190,7 +189,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
     ) {
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
-        WriteResultBuilder builder = new WriteResultBuilder(configuration, tracker);
+        WriteResultBuilder builder = new WriteResultBuilder(configuration);
 
         Graph graph = loadGraph(configuration, tracker, builder);
 
@@ -198,7 +197,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
     }
 
     private void write(
-        Supplier<ProgressTimer> timer,
+        WriteResultBuilder resultBuilder,
         Graph graph,
         HugeLongArray coloring,
         ProcedureConfiguration configuration,
@@ -206,7 +205,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
         TerminationFlag terminationFlag,
         AllocationTracker tracker
     ) {
-        try (ProgressTimer ignored = timer.get()) {
+        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::setWriteMillis)) {
             write(graph, coloring, configuration, writeProperty, terminationFlag, tracker);
         }
     }
@@ -300,15 +299,15 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
         }
     }
 
-    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
+    public static class WriteResultBuilder extends AbstractResultBuilder<ProcedureConfiguration, WriteResult> {
 
         private long colorCount = -1L;
         private long ranIterations;
         private boolean didConverge;
         private String writeProperty;
 
-        WriteResultBuilder(ProcedureConfiguration config, AllocationTracker tracker) {
-            super(config.computeHistogram(), config.computeCommunityCount(), tracker);
+        WriteResultBuilder(ProcedureConfiguration config) {
+            super(config);
         }
 
         public WriteResultBuilder withColorCount(long colorCount) {
@@ -332,7 +331,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
         }
 
         @Override
-        protected WriteResult buildResult() {
+        public WriteResult build() {
             return new WriteResult(
                 loadMillis,
                 computeMillis,
@@ -340,7 +339,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
                 nodePropertiesWritten,
                 colorCount,
                 ranIterations,
-                write,
+                config.isWriteFlag(true),
                 didConverge,
                 writeProperty
             );

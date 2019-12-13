@@ -32,9 +32,10 @@ import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimizationFactory;
-import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -42,7 +43,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -74,7 +74,7 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
         @Name(value = "relationship", defaultValue = "") String relationshipType,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
-        return stream(label, relationshipType, config);
+        return stream(label, relationshipType, config, callContext);
     }
 
     @Procedure(value = "algo.beta.modularityOptimization.memrec")
@@ -83,7 +83,8 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
     public Stream<MemoryEstimateResult> modularityOptimizationMemrec(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
@@ -91,11 +92,17 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
     }
 
     public Stream<WriteResult> run(String label, String relationshipType, Map<String, Object> config) {
-        ProcedureSetup setup = setup(label, relationshipType, config);
+        ProcedureSetup setup = setup(label, relationshipType, config, callContext);
 
         if (setup.graph.isEmpty()) {
             setup.graph.release();
-            return Stream.of(WriteResult.EMPTY);
+            return Stream.of(new WriteResult(
+                0, 0, 0, 0, 0,
+                setup.procedureConfig.isWriteFlag(true),
+                setup.procedureConfig.writeProperty(),
+                setup.procedureConfig.writeProperty(),
+                false, 0, 0, 0, null
+            ));
         }
 
         ModularityOptimization modularity = compute(setup);
@@ -107,15 +114,12 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
         setup.builder
             .withModularity(modularity.getModularity())
             .withRanIterations(modularity.getIterations())
-            .withDidConverge(modularity.didConverge())
-            .withWriteProperty(writeProperty.orElse(null));
+            .withDidConverge(modularity.didConverge());
 
         if (setup.procedureConfig.isWriteFlag() && writeProperty.isPresent() && !writeProperty.get().equals("")) {
-            setup.builder.withWrite(true);
-            setup.builder.withCommunityProperty(writeProperty.get()).withWriteProperty(writeProperty.get());
-
+            setup.builder.withCommunityProperty(writeProperty.get());
             write(
-                setup.builder::timeWrite,
+                setup.builder,
                 setup.graph,
                 modularity,
                 setup.procedureConfig,
@@ -131,10 +135,11 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
     public Stream<StreamResult> stream(
         String label,
         String relationship,
-        Map<String, Object> config
+        Map<String, Object> config,
+        ProcedureCallContext context
     ) {
 
-        ProcedureSetup setup = setup(label, relationship, config);
+        ProcedureSetup setup = setup(label, relationship, config, context);
 
         if (setup.graph.isEmpty()) {
             setup.graph.release();
@@ -175,7 +180,11 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
         );
         ModularityOptimization algoResult = runWithExceptionLogging(
             ModularityOptimization.class.getSimpleName() + "failed",
-            () -> setup.builder.timeEval(modularityOptimization::compute)
+            () -> {
+                try (ProgressTimer ignore = ProgressTimer.start(setup.builder::setComputeMillis)) {
+                    return modularityOptimization.compute();
+                }
+            }
         );
 
         log.info(
@@ -190,13 +199,13 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
     }
 
     private void write(
-        Supplier<ProgressTimer> timer,
+        WriteResultBuilder resultBuilder,
         Graph graph,
         ModularityOptimization modularityOptimization,
         ProcedureConfiguration configuration,
         String writeProperty
     ) {
-        try (ProgressTimer ignored = timer.get()) {
+        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::setWriteMillis)) {
             write(graph, modularityOptimization, configuration, writeProperty);
         }
     }
@@ -227,11 +236,12 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
     private ProcedureSetup setup(
         String label,
         String relationship,
-        Map<String, Object> config
+        Map<String, Object> config,
+        ProcedureCallContext context
     ) {
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
-        WriteResultBuilder builder = new WriteResultBuilder(configuration, tracker);
+        WriteResultBuilder builder = new WriteResultBuilder(configuration, context, tracker);
 
         Graph graph = loadGraph(configuration, tracker, builder);
 
@@ -268,54 +278,20 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
 
     public static class WriteResult {
 
-        public static final WriteResult EMPTY = new WriteResult(
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            false,
-            null,
-            null,
-            false,
-            0,
-            0.0D
-        );
-
         public final long loadMillis;
         public final long computeMillis;
         public final long writeMillis;
         public final long postProcessingMillis;
         public final long nodes;
-        public final long communityCount;
-        public final long setCount;
-        public final long p1;
-        public final long p5;
-        public final long p10;
-        public final long p25;
-        public final long p50;
-        public final long p75;
-        public final long p90;
-        public final long p95;
-        public final long p99;
-        public final long p100;
         public final boolean write;
         public final String communityProperty;
         public final String writeProperty;
         public boolean didConverge;
         public long ranIterations;
         public double modularity;
+        public final long communityCount;
+        public final Map<String, Object> communityDistribution;
+
 
         WriteResult(
             long loadMillis,
@@ -323,57 +299,39 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
             long postProcessingMillis,
             long writeMillis,
             long nodes,
-            long communityCount,
-            long p100,
-            long p99,
-            long p95,
-            long p90,
-            long p75,
-            long p50,
-            long p25,
-            long p10,
-            long p5,
-            long p1,
             boolean write,
             String communityProperty,
             String writeProperty,
             boolean didConverge,
             long ranIterations,
-            double modularity
+            double modularity,
+            long communityCount,
+            Map<String, Object> communityDistribution
         ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.nodes = nodes;
-            this.communityCount = this.setCount = communityCount;
-            this.p100 = p100;
-            this.p99 = p99;
-            this.p95 = p95;
-            this.p90 = p90;
-            this.p75 = p75;
-            this.p50 = p50;
-            this.p25 = p25;
-            this.p10 = p10;
-            this.p5 = p5;
-            this.p1 = p1;
             this.write = write;
             this.communityProperty = communityProperty;
             this.writeProperty = writeProperty;
             this.didConverge = didConverge;
             this.ranIterations = ranIterations;
             this.modularity = modularity;
+            this.communityCount = communityCount;
+            this.communityDistribution = communityDistribution;
         }
     }
 
-    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
+    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<ProcedureConfiguration, WriteResult> {
         private String communityProperty;
         private long ranIterations;
         private boolean didConverge;
         private double modularity;
 
-        WriteResultBuilder(ProcedureConfiguration config, AllocationTracker tracker) {
-            super(config.computeHistogram(), config.computeCommunityCount(), tracker);
+        WriteResultBuilder(ProcedureConfiguration config, ProcedureCallContext context, AllocationTracker tracker) {
+            super(config, context, tracker);
         }
 
         public WriteResultBuilder withRanIterations(long ranIterations) {
@@ -404,23 +362,14 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
                 postProcessingDuration,
                 writeMillis,
                 nodePropertiesWritten,
-                maybeCommunityCount.orElse(-1L),
-                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
-                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
-                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
-                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
-                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
-                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
-                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
-                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
-                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
-                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
-                write,
+                config.isWriteFlag(true),
                 communityProperty,
                 writeProperty,
                 didConverge,
                 ranIterations,
-                modularity
+                modularity,
+                maybeCommunityCount.orElse(0),
+                communityHistogramOrNull()
             );
         }
     }

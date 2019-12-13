@@ -25,9 +25,9 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
-import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -184,7 +184,7 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
                 new WriteResult(
                     computeResult.config(),
                     0, computeResult.createMillis(),
-                    0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
                     new double[0], Collections.emptyMap()
                 )
             );
@@ -196,9 +196,8 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
 
         WriteResultBuilder builder = new WriteResultBuilder(config, callContext, computeResult.tracker());
 
-        builder.setLoadMillis(computeResult.createMillis());
-        builder.setComputeMillis(computeResult.computeMillis());
-        builder.withNodeCount(graph.nodeCount());
+        builder.setCreateMillis(computeResult.createMillis());
+            builder.setComputeMillis(computeResult.computeMillis());
         builder
             .withLevels(louvain.levels())
             .withModularity(louvain.modularities()[louvain.levels() - 1])
@@ -256,7 +255,6 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
         public long postProcessingMillis;
         public long maxIterations;
         public long maxLevels;
-        public long ranIterations;
         public long ranLevels;
         public long communityCount;
         public boolean includeIntermediateCommunities;
@@ -271,7 +269,6 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
             long computeMillis,
             long writeMillis,
             long postProcessingMillis,
-            long ranIterations,
             long ranLevels,
             long communityCount,
             double modularity,
@@ -292,7 +289,6 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.postProcessingMillis = postProcessingMillis;
-            this.ranIterations = ranIterations;
             this.ranLevels = ranLevels;
             this.communityCount = communityCount;
             this.modularity = modularity;
@@ -301,28 +297,18 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
         }
     }
 
-    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
-
-        private final LouvainWriteConfig config;
+    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<LouvainWriteConfig, WriteResult> {
 
         private long levels = -1;
-        private long ranIterations;
         private double[] modularities = new double[]{};
         private double modularity = -1;
 
         WriteResultBuilder(LouvainWriteConfig config, ProcedureCallContext context, AllocationTracker tracker) {
             super(
-                // TODO: factor these out to OutputFieldParser
-                context.outputFields().anyMatch(s -> s.equalsIgnoreCase("communityDistribution")),
-                context.outputFields().anyMatch(s -> s.equalsIgnoreCase("communityCount")),
+                config,
+                context,
                 tracker
             );
-            this.config = config;
-        }
-
-        LouvainWriteProc.WriteResultBuilder ranIterations(long iterations) {
-            this.ranIterations = iterations;
-            return this;
         }
 
         LouvainWriteProc.WriteResultBuilder withLevels(long levels) {
@@ -349,7 +335,6 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
                 computeMillis,
                 writeMillis,
                 postProcessingDuration,
-                ranIterations,
                 levels,
                 maybeCommunityCount.orElse(-1L),
                 modularity,

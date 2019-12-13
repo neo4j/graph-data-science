@@ -34,8 +34,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 import java.util.Map;
 import java.util.Optional;
@@ -93,14 +93,10 @@ public abstract class LegacyBaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT>
     protected final <R> Graph loadGraph(
         ProcedureConfiguration config,
         AllocationTracker tracker,
-        AbstractResultBuilder<R> resultBuilder
+        AbstractResultBuilder<?, R> resultBuilder
     ) {
-        try (ProgressTimer ignored = resultBuilder.timeLoad()) {
-            Graph graph = loadGraph(config, tracker);
-            resultBuilder
-                .withNodeCount(graph.nodeCount())
-                .withRelationshipCount(graph.relationshipCount());
-            return graph;
+        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::setCreateMillis)) {
+            return loadGraph(config, tracker);
         }
     }
 

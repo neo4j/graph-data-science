@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -55,7 +56,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.RELCOUNT_KEY;
 /**
  * Wrapper around configuration options map
  */
-public class ProcedureConfiguration implements BaseAlgoConfig {
+public class ProcedureConfiguration implements BaseAlgoConfig, WriteConfig {
 
     public static final String HEAVY_GRAPH_TYPE = "heavy";
     public static final String LIGHT_GRAPH_TYPE = "light";
@@ -536,5 +537,15 @@ public class ProcedureConfiguration implements BaseAlgoConfig {
     public DeduplicationStrategy getDeduplicationStrategy() {
         String strategy = configurationMap.get("duplicateRelationships", null);
         return strategy != null ? DeduplicationStrategy.lookup(strategy.toUpperCase()) : DeduplicationStrategy.DEFAULT;
+    }
+
+    @Override
+    public String writeProperty() {
+        return getWriteProperty();
+    }
+
+    @Override
+    public int writeConcurrency() {
+        return getWriteConcurrency(Pools.DEFAULT_CONCURRENCY);
     }
 }

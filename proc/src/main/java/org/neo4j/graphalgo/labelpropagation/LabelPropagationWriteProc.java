@@ -26,9 +26,9 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
-import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -130,9 +130,8 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
             callContext,
             computationResult.tracker()
         );
-        builder.setLoadMillis(computationResult.createMillis());
+        builder.setCreateMillis(computationResult.createMillis());
         builder.setComputeMillis(computationResult.computeMillis());
-        builder.withNodeCount(graph.nodeCount());
 
         if (!computationResult.isGraphEmpty()) {
             builder
@@ -228,7 +227,7 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
         return LabelPropagationWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
-    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<LabelPropagationWriteProc.WriteResult> {
+    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<LabelPropagationWriteConfig, WriteResult> {
 
         private final LabelPropagationWriteConfig config;
 
@@ -241,9 +240,8 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
             AllocationTracker tracker
         ) {
             super(
-                // TODO: factor these out to OutputFieldParser
-                context.outputFields().anyMatch(s -> s.equalsIgnoreCase("communityDistribution")),
-                context.outputFields().anyMatch(s -> s.equalsIgnoreCase("communityCount")),
+                config,
+                context,
                 tracker
             );
             this.config = config;
