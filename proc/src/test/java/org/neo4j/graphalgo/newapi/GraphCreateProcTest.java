@@ -99,6 +99,16 @@ class GraphCreateProcTest extends BaseProcTest {
         ));
     }
 
+    @Test
+    void shouldProjectAllRelsWithSpecialStar() {
+        String query = "CALL algo.beta.graph.create('g', {}, '*') YIELD relationships";
+
+        runQuery("CREATE ()-[:R]->(), (:B)-[:T]->(:B), (cde:C:D:E)-[:SELF]->(cde)");
+        assertCypherResult(query, singletonList(
+            map("relationships", relCount + 3)
+        ));
+    }
+
     /*
      TODO:
       - node label as LIST OF ANY

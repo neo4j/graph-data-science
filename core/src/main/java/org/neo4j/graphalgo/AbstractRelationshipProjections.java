@@ -71,6 +71,9 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         if (StringUtils.isEmpty(type)) {
             return empty();
         }
+        if (type.equals(PROJECT_ALL.name)) {
+            return create(singletonMap(PROJECT_ALL, RelationshipProjection.of()));
+        }
         ElementIdentifier identifier = new ElementIdentifier(type);
         RelationshipProjection filter = RelationshipProjection.fromString(type);
         return create(singletonMap(identifier, filter));
@@ -159,7 +162,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         if (newProjections.isEmpty()) {
             // TODO: special identifier for 'SELECT ALL'
             newProjections.put(
-                new ElementIdentifier("*"),
+                PROJECT_ALL,
                 operator.apply(RelationshipProjection.empty())
             );
         }
