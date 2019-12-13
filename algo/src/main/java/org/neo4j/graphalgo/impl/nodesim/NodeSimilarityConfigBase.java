@@ -99,13 +99,13 @@ public interface NodeSimilarityConfigBase extends BaseAlgoConfig {
     @Configuration.Ignore
     @Value.Derived
     default boolean hasTopK() {
-        return topK() != TOP_K_DEFAULT || bottomK() != BOTTOM_K_DEFAULT;
+        return normalizedK() != 0;
     }
 
     @Configuration.Ignore
     @Value.Derived
     default boolean hasTopN() {
-        return topN() != TOP_N_DEFAULT || bottomN() != BOTTOM_N_DEFAULT;
+        return normalizedN() != 0;
     }
 
     @Configuration.Ignore

@@ -132,6 +132,13 @@ final class NodeSimilarityTest extends AlgoTestBase {
         EXPECTED_OUTGOING.add(resultString(1, 2, 0.0));
         EXPECTED_OUTGOING.add(resultString(1, 3, 2 / 3.0));
         EXPECTED_OUTGOING.add(resultString(2, 3, 1 / 3.0));
+        // Add results in reverse direction because topK
+        EXPECTED_OUTGOING.add(resultString(1, 0, 2 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(2, 0, 1 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(3, 0, 1.0));
+        EXPECTED_OUTGOING.add(resultString(2, 1, 0.0));
+        EXPECTED_OUTGOING.add(resultString(3, 1, 2 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(3, 2, 1 / 3.0));
 
         EXPECTED_OUTGOING_TOP_N_1.add(resultString(0, 3, 1.0));
 
@@ -145,14 +152,28 @@ final class NodeSimilarityTest extends AlgoTestBase {
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(0, 3, 1.0));
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(1, 3, 2 / 3.0));
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(2, 3, 1 / 3.0));
+        // Add results in reverse direction because topK
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(1, 0, 2 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(2, 0, 1 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(3, 0, 1.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(3, 1, 2 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(3, 2, 1 / 3.0));
 
         EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(0, 1, 2 / 3.0));
         EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(0, 3, 1.0));
         EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(1, 3, 2 / 3.0));
+        // Add results in reverse direction because topK
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(1, 0, 2 / 3.0));
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(3, 0, 1.0));
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(3, 1, 2 / 3.0));
 
         EXPECTED_INCOMING.add(resultString(4, 5, 1.0));
         EXPECTED_INCOMING.add(resultString(4, 6, 1 / 2.0));
         EXPECTED_INCOMING.add(resultString(5, 6, 1 / 2.0));
+        // Add results in reverse direction because topK
+        EXPECTED_INCOMING.add(resultString(5, 4, 1.0));
+        EXPECTED_INCOMING.add(resultString(6, 4, 1 / 2.0));
+        EXPECTED_INCOMING.add(resultString(6, 5, 1 / 2.0));
 
         EXPECTED_INCOMING_TOP_N_1.add(resultString(4, 5, 3.0 / 3.0));
 
@@ -163,10 +184,18 @@ final class NodeSimilarityTest extends AlgoTestBase {
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(4, 5, 1.0));
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(4, 6, 1 / 2.0));
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(5, 6, 1 / 2.0));
+        // Add results in reverse direction because topK
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(5, 4, 1.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(6, 4, 1 / 2.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(6, 5, 1 / 2.0));
 
         EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(4, 5, 3.0 / 3.0));
         EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(4, 6, 1 / 2.0));
         EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(5, 6, 1 / 2.0));
+        // Add results in reverse direction because topK
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(5, 4, 3.0 / 3.0));
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(6, 4, 1 / 2.0));
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(6, 5, 1 / 2.0));
     }
 
     private static String resultString(long node1, long node2, double similarity) {
@@ -467,13 +496,28 @@ final class NodeSimilarityTest extends AlgoTestBase {
         assertGraphEquals(
             algoDirection == INCOMING
                 ? fromGdl(
-                "(a), (b), (c), (d), (e), (f)-[{property: 1.000000D}]->(g), (f)-[{property: 0.500000D}]->(h), (g)-[{property: 0.500000D}]->(h)")
-                : fromGdl("(a)-[{property: 0.666667D}]->(b)" +
+                "(a), (b), (c), (d), (e)" +
+                ", (f)-[{property: 1.000000D}]->(g)" +
+                ", (f)-[{property: 0.500000D}]->(h)" +
+                ", (g)-[{property: 0.500000D}]->(h)" +
+                // Add results in reverse direction because topK
+                ", (g)-[{property: 1.000000D}]->(f)" +
+                ", (h)-[{property: 0.500000D}]->(f)" +
+                ", (h)-[{property: 0.500000D}]->(g)"
+            )
+                : fromGdl("  (a)-[{property: 0.666667D}]->(b)" +
                           ", (a)-[{property: 0.333333D}]->(c)" +
                           ", (a)-[{property: 1.000000D}]->(d)" +
                           ", (b)-[{property: 0.000000D}]->(c)" +
                           ", (b)-[{property: 0.666667D}]->(d)" +
                           ", (c)-[{property: 0.333333D}]->(d)" +
+                          // Add results in reverse direction because topK
+                          "  (b)-[{property: 0.666667D}]->(a)" +
+                          ", (c)-[{property: 0.333333D}]->(a)" +
+                          ", (d)-[{property: 1.000000D}]->(a)" +
+                          ", (c)-[{property: 0.000000D}]->(b)" +
+                          ", (d)-[{property: 0.666667D}]->(b)" +
+                          ", (d)-[{property: 0.333333D}]->(c)" +
                           ", (e), (f), (g), (h)"),
             resultGraph
         );
@@ -699,15 +743,16 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange);
 
+        long topKMapRangeMin;
+        long topKMapRangeMax;
         if (topK == TOP_K_DEFAULT) {
-            long graphRangeMin = 500_050_564_640L;
-            long graphRangeMax = 500_050_564_640L;
-            builder.fixed("similarity graph", MemoryRange.of(graphRangeMin, graphRangeMax));
+            topKMapRangeMin = 248_000_024L;
+            topKMapRangeMax = 248_000_024L;
         } else {
-            long topKMapRangeMin = 1_688_000_024L;
-            long topKMapRangeMax = 1_688_000_024L;
-            builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
+            topKMapRangeMin = 1_688_000_024L;
+            topKMapRangeMax = 1_688_000_024L;
         }
+        builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
 
         MemoryTree expected = builder.build().estimate(dimensions, 1);
 
@@ -753,15 +798,16 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .fixed("vectors", vectorsRange)
             .fixed("topNList", topNListRange);
 
+        long topKMapRangeMin;
+        long topKMapRangeMax;
         if (topK == TOP_K_DEFAULT) {
-            long graphRangeMin = 270_520L;
-            long graphRangeMax = 270_520L;
-            builder.fixed("similarity graph", MemoryRange.of(graphRangeMin, graphRangeMax));
+            topKMapRangeMin = 248_000_024L;
+            topKMapRangeMax = 248_000_024L;
         } else {
-            long topKMapRangeMin = 1_688_000_024L;
-            long topKMapRangeMax = 1_688_000_024L;
-            builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
+            topKMapRangeMin = 1_688_000_024L;
+            topKMapRangeMax = 1_688_000_024L;
         }
+        builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
 
         MemoryTree expected = builder.build().estimate(dimensions, 1);
 
