@@ -144,7 +144,6 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
                 graph.releaseProperties();
             }
         }
-
         return Stream.of(builder.build());
     }
 

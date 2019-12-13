@@ -24,15 +24,23 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.BaseAlgoProcTests;
+import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.MemoryEstimateTests;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.SeedConfigTests;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfigTest;
 import org.neo4j.graphalgo.WeightConfigTest;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -124,6 +132,35 @@ abstract class LabelPropagationProcTestBase<CONFIG extends LabelPropagationConfi
     void clearCommunities() {
         db.shutdown();
         GraphCatalog.removeAllLoadedGraphs();
+    }
+
+    static Stream<Arguments> gdsGraphVariations() {
+        return Stream.of(
+            arguments(
+                GdsCypher.call().explicitCreation("myGraph"),
+                "explicit graph"
+            ),
+            arguments(
+                GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
+                    .builder()
+                    .graphName("")
+                    .nodeProjection(NodeProjections.of(MapUtil.map("A", "A | B")))
+                    .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed", "weight", "score")))
+                    .relationshipProjection(RelationshipProjections.builder()
+                        .putProjection(
+                            ElementIdentifier.of("TYPE"),
+                            RelationshipProjection.builder()
+                                .type("X")
+                                .projection(Projection.NATURAL)
+                                .build()
+                        )
+                        .build()
+                    )
+                    .build()
+                ),
+                "implicit graph"
+            )
+        );
     }
 
     static Stream<Arguments> graphVariations() {

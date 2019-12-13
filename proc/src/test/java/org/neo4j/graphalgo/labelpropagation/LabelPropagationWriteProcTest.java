@@ -39,6 +39,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -67,6 +68,43 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
             return mapWrapper.withString("writeProperty", "writeProperty");
         }
         return mapWrapper;
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTestBase#gdsGraphVariations")
+    void testWrite(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
+        String writeProperty = "myFancyCommunity";
+        @Language("Cypher") String query = queryBuilder
+            .algo("labelPropagation")
+            .writeMode()
+            .addParameter("writeProperty", writeProperty)
+            .yields(
+                "communityCount",
+                "createMillis",
+                "computeMillis",
+                "writeMillis",
+                "postProcessingMillis",
+                "communityDistribution",
+                "didConverge"
+            );
+
+        runQuery(query, row -> {
+            long communityCount = row.getNumber("communityCount").longValue();
+            long createMillis = row.getNumber("createMillis").longValue();
+            long computeMillis = row.getNumber("computeMillis").longValue();
+            long  writeMillis = row.getNumber("writeMillis").longValue();
+            boolean didConverge = row.getBoolean("didConverge");
+            Map<String, Object> communityDistribution = (Map<String, Object>) row.get("communityDistribution");
+            assertEquals(10, communityCount, "wrong community count");
+            assertTrue(createMillis >= 0, "invalid loadTime");
+            assertTrue(writeMillis >= 0, "invalid writeTime");
+            assertTrue(computeMillis >= 0, "invalid computeTime");
+            assertTrue(didConverge, "did not converge");
+            assertNotNull(communityDistribution);
+            for (String key: Arrays.asList("min", "max", "mean", "p50", "p75", "p90", "p99", "p999", "p95")) {
+                assertTrue(communityDistribution.containsKey(key));
+            }
+        });
     }
 
     @ParameterizedTest(name = "{1}")

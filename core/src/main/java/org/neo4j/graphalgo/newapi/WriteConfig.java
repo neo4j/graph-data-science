@@ -32,5 +32,4 @@ public interface WriteConfig extends BaseAlgoConfig {
     default int writeConcurrency() {
         return concurrency();
     }
-
 }
