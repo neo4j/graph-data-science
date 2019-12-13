@@ -44,6 +44,10 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private final CypherRelationshipLoader.Context loaderContext;
     private final int bufferSize;
     private final int propertyCount;
+    private final boolean noProperties;
+    private final boolean singleProperty;
+    private final boolean multipleProperties;
+    private final String singlePropertyKey;
 
     private final Map<String, SingleTypeRelationshipImporter> localImporters;
     private final Map<String, RelationshipPropertiesBatchBuffer> localPropertiesBuffers;
@@ -67,6 +71,10 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         this.propertyKeyIdsByName = propertyKeyIdsByName;
         this.propertyDefaultValueByName = propertyDefaultValueByName;
         this.propertyCount = propertyKeyIdsByName.size();
+        this.noProperties = propertyCount == 0;
+        this.singleProperty = propertyCount == 1;
+        this.multipleProperties = propertyCount > 1;
+        this.singlePropertyKey = propertyKeyIdsByName.keySet().stream().findFirst().orElse("");
         this.loaderContext = loaderContext;
         this.bufferSize = bufferSize;
         this.localImporters = new HashMap<>();
@@ -97,16 +105,25 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             // Lazily init relationship importer builder
             SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder = loaderContext
                 .getOrCreateImporterBuilder(relationshipType);
-            // Create thread-local buffer for relationship properties
-            RelationshipPropertiesBatchBuffer propertiesBuffer = new RelationshipPropertiesBatchBuffer(
-                bufferSize,
-                propertyCount
-            );
+
+            RelationshipImporter.PropertyReader propertyReader;
+
+            if (multipleProperties) {
+                // Create thread-local buffer for relationship properties
+                RelationshipPropertiesBatchBuffer propertiesBuffer = new RelationshipPropertiesBatchBuffer(
+                    bufferSize,
+                    propertyCount
+                );
+                propertyReader = propertiesBuffer;
+                localPropertiesBuffers.put(relationshipTypeName, propertiesBuffer);
+            } else {
+                // Single properties can be in-lined in the relationship batch
+                propertyReader = RelationshipImporter.preLoadedPropertyReader();
+            }
             // Create thread-local relationship importer
-            SingleTypeRelationshipImporter importer = importerBuilder.withBuffer(idMap, bufferSize, propertiesBuffer);
+            SingleTypeRelationshipImporter importer = importerBuilder.withBuffer(idMap, bufferSize, propertyReader);
 
             localImporters.put(relationshipTypeName, importer);
-            localPropertiesBuffers.put(relationshipTypeName, propertiesBuffer);
             localRelationshipIds.put(relationshipTypeName, 0);
         }
 
@@ -125,22 +142,34 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         }
 
         SingleTypeRelationshipImporter importer = localImporters.get(relationshipType);
-        RelationshipPropertiesBatchBuffer propertiesBuffer = localPropertiesBuffers.get(relationshipType);
-        int nextRelationshipId = localRelationshipIds.get(relationshipType);
 
-        // We write source and target into
-        // the buffer and add a reference
-        // to the property batch buffer.
-        importer.buffer().add(
-            sourceId,
-            targetId,
-            NO_RELATIONSHIP_REFERENCE,
-            nextRelationshipId
-        );
-
-        readPropertyValues(row, nextRelationshipId, propertiesBuffer);
-
-        localRelationshipIds.put(relationshipType, nextRelationshipId + 1);
+        if (noProperties) {
+            importer.buffer().add(
+                sourceId,
+                targetId,
+                NO_RELATIONSHIP_REFERENCE
+            );
+        } else if (singleProperty) {
+            importer.buffer().add(
+                sourceId,
+                targetId,
+                NO_RELATIONSHIP_REFERENCE,
+                Double.doubleToLongBits(readPropertyValue(row, singlePropertyKey))
+            );
+        } else {
+            // Instead of inlining the property
+            // value, we write a reference into
+            // the properties batch buffer.
+            int nextRelationshipId = localRelationshipIds.get(relationshipType);
+            importer.buffer().add(
+                sourceId,
+                targetId,
+                NO_RELATIONSHIP_REFERENCE,
+                nextRelationshipId
+            );
+            readPropertyValues(row, nextRelationshipId, localPropertiesBuffers.get(relationshipType));
+            localRelationshipIds.put(relationshipType, nextRelationshipId + 1);
+        }
 
         if (importer.buffer().isFull()) {
             flush(importer);
@@ -168,13 +197,15 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     private void readPropertyValues(Result.ResultRow row, int relationshipId, RelationshipPropertiesBatchBuffer propertiesBuffer) {
         propertyKeyIdsByName.forEachKeyValue((propertyKey, propertyKeyId) -> {
-            Object property = CypherLoadingUtils.getProperty(row, propertyKey);
-            double propertyValue = property instanceof Number
-                ? ((Number) property).doubleValue()
-                : propertyDefaultValueByName.get(propertyKey);
-
-            propertiesBuffer.add(relationshipId, propertyKeyId, propertyValue);
+            propertiesBuffer.add(relationshipId, propertyKeyId, readPropertyValue(row, propertyKey));
         });
+    }
+
+    private double readPropertyValue(Result.ResultRow row, String propertyKey) {
+        Object property = CypherLoadingUtils.getProperty(row, propertyKey);
+        return property instanceof Number
+            ? ((Number) property).doubleValue()
+            : propertyDefaultValueByName.get(propertyKey);
     }
 
     private void flush(SingleTypeRelationshipImporter importer) {
