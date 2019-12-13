@@ -48,6 +48,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
 
     private final WccBaseConfig config;
     private final NodeProperties initialComponents;
+    private final Direction computeDirection;
     private final ExecutorService executor;
     private final AllocationTracker tracker;
     private final long nodeCount;
@@ -75,6 +76,9 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         this.initialComponents = config.isIncremental()
             ? graph.nodeProperties(config.seedProperty())
             : null;
+        this.computeDirection = graph.getLoadDirection() == Direction.BOTH
+            ? Direction.OUTGOING
+            : graph.getLoadDirection();
 
         this.executor = executor;
         this.tracker = tracker;
@@ -169,7 +173,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         }
 
         void compute(final long node) {
-            rels.forEachRelationship(node, Direction.OUTGOING, this);
+            rels.forEachRelationship(node, computeDirection, this);
         }
 
         @Override
@@ -190,7 +194,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
 
         @Override
         void compute(final long node) {
-            rels.forEachRelationship(node, Direction.OUTGOING, Wcc.defaultWeight(threshold), this);
+            rels.forEachRelationship(node, computeDirection, Wcc.defaultWeight(threshold), this);
         }
 
         @Override
