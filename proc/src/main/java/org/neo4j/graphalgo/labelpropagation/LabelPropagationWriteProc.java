@@ -145,7 +145,6 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
             }
         }
 
-
         return Stream.of(builder.build());
     }
 
