@@ -29,8 +29,8 @@ abstract class PageRankProcBase<CONFIG extends PageRankConfigBase> extends BaseA
     @Override
     protected final PageRankFactory<CONFIG> algorithmFactory(PageRankConfigBase config) {
         if (config.weightProperty() == null) {
-            return new PageRankFactory<>(config);
+            return new PageRankFactory<>();
         }
-        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED, config);
+        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
     }
 }

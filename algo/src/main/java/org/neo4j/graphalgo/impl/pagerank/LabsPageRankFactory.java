@@ -74,7 +74,7 @@ public class LabsPageRankFactory extends AlgorithmFactory<PageRank, ProcedureCon
     }
 
     @Override
-    public MemoryEstimation memoryEstimation() {
+    public MemoryEstimation memoryEstimation(ProcedureConfiguration config) {
         return MemoryEstimations.builder(PageRank.class)
                 .add(MemoryEstimations.setup("computeSteps", (dimensions, concurrency) -> {
                     // adjust concurrency, if necessary

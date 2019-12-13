@@ -39,15 +39,13 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 public class PageRankFactory<CONFIG extends PageRankConfigBase> extends AlgorithmFactory<PageRank, CONFIG> {
 
     private final PageRankAlgorithmType algorithmType;
-    private final PageRank.Config algoConfig;
 
-    public PageRankFactory(PageRankConfigBase config) {
-        this(PageRankAlgorithmType.NON_WEIGHTED, config);
+    public PageRankFactory() {
+        this(PageRankAlgorithmType.NON_WEIGHTED);
     }
 
-    public PageRankFactory(PageRankAlgorithmType algorithmType, PageRankConfigBase config) {
+    public PageRankFactory(PageRankAlgorithmType algorithmType) {
         this.algorithmType = algorithmType;
-        this.algoConfig = config.toOldConfig();
     }
 
     @Override
@@ -63,14 +61,14 @@ public class PageRankFactory<CONFIG extends PageRankConfigBase> extends Algorith
                 Pools.DEFAULT,
                 DEFAULT_BATCH_SIZE,
                 configuration.concurrency(),
-                algoConfig,
+                configuration.toOldConfig(),
                 sourceNodeIds,
                 tracker
         );
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(ProcedureConfiguration config) {
+    public MemoryEstimation memoryEstimation(CONFIG config) {
         return MemoryEstimations.builder(PageRank.class)
                 .add(MemoryEstimations.setup("computeSteps", (dimensions, concurrency) -> {
                     // adjust concurrency, if necessary
