@@ -27,11 +27,11 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
 import org.neo4j.logging.Log;
 
-public abstract class AlgorithmFactory<A extends Algorithm<A, ?>, C extends BaseAlgoConfig> {
+public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends BaseAlgoConfig> {
 
-    public abstract A build(
+    public abstract ALGO build(
             final Graph graph,
-            final C configuration,
+            final CONFIG configuration,
             final AllocationTracker tracker,
             final Log log);
 
@@ -43,5 +43,5 @@ public abstract class AlgorithmFactory<A extends Algorithm<A, ?>, C extends Base
      * @see MemoryEstimations
      * @see MemoryEstimation#estimate(GraphDimensions, int)
      */
-    public abstract MemoryEstimation memoryEstimation(C configuration);
+    public abstract MemoryEstimation memoryEstimation(CONFIG configuration);
 }
