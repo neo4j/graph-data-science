@@ -36,17 +36,17 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-class GraphExistProcTest extends ProcTestBase {
+class GraphExistsProcTest extends ProcTestBase {
     private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
 
     @BeforeEach
     void setup() throws KernelException {
-        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
-        registerProcedures(
-            GraphCreateProc.class,
-            GraphExistsProc.class
-        );
-        registerFunctions(GraphExistsProc.class);
+        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(
+            GraphDatabaseSettings.procedure_unrestricted,
+            "algo.*"
+        ));
+        registerProcedures(GraphCreateProc.class, GraphExistsProc.class);
+        registerFunctions(GraphExistsFunc.class);
 
         db.execute(DB_CYPHER);
     }
