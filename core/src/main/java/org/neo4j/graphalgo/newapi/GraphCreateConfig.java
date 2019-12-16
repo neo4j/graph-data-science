@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
@@ -33,6 +34,10 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.utils.Pools;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @ValueClass
 @Configuration("GraphCreateConfigImpl")
@@ -77,6 +82,21 @@ public interface GraphCreateConfig extends BaseConfig {
     default GraphCreateConfig withNormalizedPropertyMappings() {
         PropertyMappings nodeProperties = nodeProperties();
         PropertyMappings relationshipProperties = relationshipProperties();
+
+        verifyProjectionAndProperties(
+            nodeProperties.stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet()),
+            nodeProjection().allProperties(),
+            "node"
+        );
+
+
+        verifyProjectionAndProperties(
+            relationshipProperties.stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet()),
+            relationshipProjection().allProperties(),
+            "relationship"
+        );
+
+
         if (nodeProperties.hasMappings() || relationshipProperties.hasMappings()) {
             return ImmutableGraphCreateConfig
                 .builder()
@@ -88,6 +108,23 @@ public interface GraphCreateConfig extends BaseConfig {
                 .build();
         }
         return this;
+    }
+
+    @Configuration.Ignore
+    default void verifyProjectionAndProperties(
+        Set<String> propertiesFromMapping,
+        Set<String> propertiesFromProjection,
+        String type
+    ) {
+        Set<String> propertyIntersection = new HashSet<>(propertiesFromMapping);
+        propertyIntersection.retainAll(propertiesFromProjection);
+
+        if (!propertyIntersection.isEmpty()) {
+            throw new IllegalArgumentException(String.format(
+                "Incompatible %s projection and %s property specification. Both specify properties named %s",
+                type, type, propertyIntersection
+            ));
+        }
     }
 
     static GraphCreateConfig legacyFactory(String graphName) {
