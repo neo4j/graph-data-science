@@ -65,32 +65,6 @@ public final class FieldTypesConfig implements FieldTypes {
         this.aList = CypherMapWrapper.failOnNull("aList", config.requireChecked("aList", List.class));
     }
 
-    public FieldTypesConfig(
-        boolean aBoolean,
-        byte aByte,
-        short aShort,
-        int anInt,
-        long aLong,
-        float aFloat,
-        double aDouble,
-        @NotNull Number aNumber,
-        @NotNull String aString,
-        @NotNull Map<String, Object> aMap,
-        @NotNull List<Object> aList
-    ) {
-        this.aBoolean = aBoolean;
-        this.aByte = aByte;
-        this.aShort = aShort;
-        this.anInt = anInt;
-        this.aLong = aLong;
-        this.aFloat = aFloat;
-        this.aDouble = aDouble;
-        this.aNumber = CypherMapWrapper.failOnNull("aNumber", aNumber);
-        this.aString = CypherMapWrapper.failOnNull("aString", aString);
-        this.aMap = CypherMapWrapper.failOnNull("aMap", aMap);
-        this.aList = CypherMapWrapper.failOnNull("aList", aList);
-    }
-
     @Override
     public boolean aBoolean() {
         return this.aBoolean;

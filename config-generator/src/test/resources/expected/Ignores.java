@@ -33,10 +33,6 @@ public final class MyConfig implements Ignores.MyConfig {
         this.notIgnored = config.requireLong("notIgnored");
     }
 
-    public MyConfig(long notIgnored) {
-        this.notIgnored = notIgnored;
-    }
-
     @Override
     public long notIgnored() {
         return this.notIgnored;

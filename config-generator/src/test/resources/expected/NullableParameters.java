@@ -54,27 +54,6 @@ public final class NullableParametersConfig implements NullableParameters {
         this.extraValue = config.requireInt("extraValue");
     }
 
-    public NullableParametersConfig(
-        @NotNull String referenceTypesDefaultToNotNull,
-        @NotNull String referenceTypesCanBeMarkedAsNotNull,
-        @NotNull String referenceTypesCanBeMarkedAsNullable,
-        int extraValue
-    ) {
-        this.referenceTypesDefaultToNotNull = CypherMapWrapper.failOnNull(
-            "referenceTypesDefaultToNotNull",
-            referenceTypesDefaultToNotNull
-        );
-        this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.failOnNull(
-            "referenceTypesCanBeMarkedAsNotNull",
-            referenceTypesCanBeMarkedAsNotNull
-        );
-        this.referenceTypesCanBeMarkedAsNullable = CypherMapWrapper.failOnNull(
-            "referenceTypesCanBeMarkedAsNullable",
-            referenceTypesCanBeMarkedAsNullable
-        );
-        this.extraValue = extraValue;
-    }
-
     @Override
     public String referenceTypesDefaultToNotNull() {
         return this.referenceTypesDefaultToNotNull;

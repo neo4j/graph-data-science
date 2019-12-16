@@ -39,12 +39,6 @@ public final class NamingConflictConfig implements NamingConflict {
         this.config_ = config_;
     }
 
-    public NamingConflictConfig(int config, int anotherConfig, int config_) {
-        this.config = config;
-        this.anotherConfig = anotherConfig;
-        this.config_ = config_;
-    }
-
     @Override
     public int config() {
         return this.config;

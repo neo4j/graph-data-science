@@ -36,10 +36,6 @@ public final class ConvertingParametersConfig implements ConvertingParameters {
         ));
     }
 
-    public ConversionsConfig(int parametersAreSubjectToConversion) {
-        this.parametersAreSubjectToConversion = parametersAreSubjectToConversion;
-    }
-
     @Override
     public int parametersAreSubjectToConversion() {
         return this.parametersAreSubjectToConversion;

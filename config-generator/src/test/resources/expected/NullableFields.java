@@ -36,18 +36,14 @@ public final class NullableFieldsConfig implements NullableFields {
 
     public NullableFieldsConfig(@NotNull CypherMapWrapper config) {
         this.nullableRequiredField = config.requireString("nullableRequiredField");
-        this.nullableDefaultField = config.getString("nullableDefaultField", NullableFields.super.nullableDefaultField());
-        this.conversionCanReturnNull = NullableFields.emptyToNull(config.getString("conversionCanReturnNull", NullableFields.super.conversionCanReturnNull()));
-    }
-
-    public NullableParametersConfig(
-        @NotNull String nullableRequiredField,
-        @NotNull String nullableDefaultField,
-        @NotNull String conversionCanReturnNull
-    ) {
-        this.nullableRequiredField = CypherMapWrapper.failOnNull("nullableRequiredField", nullableRequiredField);
-        this.nullableDefaultField = CypherMapWrapper.failOnNull("nullableDefaultField", nullableDefaultField);
-        this.conversionCanReturnNull = CypherMapWrapper.failOnNull("conversionCanReturnNull", conversionCanReturnNull);
+        this.nullableDefaultField = config.getString(
+            "nullableDefaultField",
+            NullableFields.super.nullableDefaultField()
+        );
+        this.conversionCanReturnNull = NullableFields.emptyToNull(config.getString(
+            "conversionCanReturnNull",
+            NullableFields.super.conversionCanReturnNull()
+        ));
     }
 
     @Override

@@ -39,14 +39,10 @@ public final class ConversionsConfig implements Conversions.MyConversion {
         this.directMethod = Conversions.MyConversion.toInt(config.requireString("directMethod"));
         this.inheritedMethod = Conversions.BaseConversion.toIntBase(config.requireString("inheritedMethod");
         this.qualifiedMethod = Conversions.OtherConversion.toIntQual(config.requireString("qualifiedMethod");
-        this.referenceTypeAsResult = CypherMapWrapper.failOnNull("referenceTypeAsResult", Conversions.MyConversion.add42(config.requireString("referenceTypeAsResult")));
-    }
-
-    public ConversionsConfig(int directMethod, int inheritedMethod, int qualifiedMethod, @NotNull String referenceTypeAsResult) {
-        this.directMethod = directMethod;
-        this.inheritedMethod = inheritedMethod;
-        this.qualifiedMethod = qualifiedMethod;
-        this.referenceTypeAsResult = CypherMapWrapper.failOnNull("referenceTypeAsResult", referenceTypeAsResult);
+        this.referenceTypeAsResult = CypherMapWrapper.failOnNull(
+            "referenceTypeAsResult",
+            Conversions.MyConversion.add42(config.requireString("referenceTypeAsResult"))
+        );
     }
 
     @Override

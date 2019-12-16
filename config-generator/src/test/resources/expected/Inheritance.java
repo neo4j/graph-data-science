@@ -47,20 +47,6 @@ public final class MyConfig implements Inheritance.MyConfig {
             .shortValue();
     }
 
-    public MyConfig(
-        @NotNull String baseValue,
-        int overriddenValue,
-        long overwrittenValue,
-        double inheritedValue,
-        short inheritedDefaultValue
-    ) {
-        this.baseValue = CypherMapWrapper.failOnNull("baseValue", baseValue);
-        this.overriddenValue = overriddenValue;
-        this.overwrittenValue = overwrittenValue;
-        this.inheritedValue = inheritedValue;
-        this.inheritedDefaultValue = inheritedDefaultValue;
-    }
-
     @Override
     public String baseValue() {
         return this.baseValue;

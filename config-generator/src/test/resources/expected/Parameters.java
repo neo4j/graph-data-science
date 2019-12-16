@@ -39,12 +39,6 @@ public final class ParametersConfig implements Parameters {
         this.parametersAreAddedFirst = parametersAreAddedFirst;
     }
 
-    public ParametersConfig(int keyFromParameter, long keyFromMap, int parametersAreAddedFirst) {
-        this.keyFromParameter = keyFromParameter;
-        this.keyFromMap = keyFromMap;
-        this.parametersAreAddedFirst = parametersAreAddedFirst;
-    }
-
     @Override
     public int keyFromParameter() {
         return this.keyFromParameter;

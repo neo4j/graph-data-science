@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.proc;
 
 import com.google.auto.common.GeneratedAnnotationSpecs;
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -100,7 +99,7 @@ final class GenerateConfiguration {
         FieldDefinitions fieldDefinitions = defineFields(config);
         return classBuilder(config, packageName, generatedClassName)
             .addFields(fieldDefinitions.fields())
-            .addMethods(defineConstructors(config, fieldDefinitions.names()))
+            .addMethod(defineConstructor(config, fieldDefinitions.names()))
             .addMethods(defineGetters(config, fieldDefinitions.names()))
             .build();
     }
@@ -140,12 +139,8 @@ final class GenerateConfiguration {
         return builder.build();
     }
 
-    private Iterable<MethodSpec> defineConstructors(ConfigParser.Spec config, NameAllocator names) {
+    private MethodSpec defineConstructor(ConfigParser.Spec config, NameAllocator names) {
         MethodSpec.Builder configMapConstructor = MethodSpec
-            .constructorBuilder()
-            .addModifiers(Modifier.PUBLIC);
-
-        MethodSpec.Builder allParametersConstructor = MethodSpec
             .constructorBuilder()
             .addModifiers(Modifier.PUBLIC);
 
@@ -166,17 +161,12 @@ final class GenerateConfiguration {
                         definition
                     );
                 } else {
-                    addParameterToPrimaryConstructor(
+                    addParameterToConstructor(
                         configMapConstructor,
                         definition,
                         parameter
                     );
                 }
-
-                addParameterToSecondaryConstructor(
-                    allParametersConstructor,
-                    definition
-                );
             }
         }
 
@@ -187,24 +177,7 @@ final class GenerateConfiguration {
             );
         }
 
-        MethodSpec primaryConstructor = configMapConstructor.build();
-        MethodSpec secondaryConstructor = allParametersConstructor.build();
-
-        List<TypeName> primaryParameters = primaryConstructor.parameters
-            .stream()
-            .map(p -> p.type.withoutAnnotations())
-            .collect(Collectors.toList());
-        List<TypeName> secondaryParameters = secondaryConstructor.parameters
-            .stream()
-            .map(p -> p.type.withoutAnnotations())
-            .collect(Collectors.toList());
-        boolean identicalSignature = primaryParameters.equals(secondaryParameters);
-
-        if (identicalSignature) {
-            return ImmutableList.of(primaryConstructor);
-        } else {
-            return ImmutableList.of(primaryConstructor, secondaryConstructor);
-        }
+        return configMapConstructor.build();
     }
 
     private void addConfigGetterToConstructor(
@@ -241,7 +214,7 @@ final class GenerateConfiguration {
         constructor.addStatement("this.$N = $L", definition.fieldName(), codeBlock);
     }
 
-    private void addParameterToPrimaryConstructor(
+    private void addParameterToConstructor(
         MethodSpec.Builder constructor,
         MemberDefinition definition,
         Parameter parameter
@@ -272,30 +245,6 @@ final class GenerateConfiguration {
         constructor
             .addParameter(paramType, definition.fieldName())
             .addStatement("this.$N = $L", definition.fieldName(), valueProducer);
-    }
-
-    private void addParameterToSecondaryConstructor(
-        MethodSpec.Builder constructor,
-        MemberDefinition definition
-    ) {
-        TypeName paramType = TypeName.get(definition.fieldType());
-
-        CodeBlock valueProducer;
-        if (definition.fieldType().getKind() == TypeKind.DECLARED) {
-            paramType = paramType.annotated(NOT_NULL);
-            valueProducer = CodeBlock.of(
-                "this.$3N = $1T.failOnNull($2S, $3N)",
-                CypherMapWrapper.class,
-                definition.configKey(),
-                definition.fieldName()
-            );
-        } else {
-            valueProducer = CodeBlock.of("this.$1N = $1N", definition.fieldName());
-        }
-
-        constructor
-            .addParameter(paramType, definition.fieldName())
-            .addStatement(valueProducer);
     }
 
     private Optional<MemberDefinition> memberDefinition(NameAllocator names, ConfigParser.Member member) {
