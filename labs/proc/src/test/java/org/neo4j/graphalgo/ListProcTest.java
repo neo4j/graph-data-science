@@ -64,8 +64,6 @@ class ListProcTest extends ProcTestBase {
         "algo.randomWalk.stream",
         "algo.scc",
         "algo.scc.forwardBackward.stream",
-        "algo.scc.recursive.tunedTarjan",
-        "algo.scc.recursive.tunedTarjan.stream",
         "algo.scc.stream",
         "algo.shortestPath",
         "algo.shortestPath.astar.stream",

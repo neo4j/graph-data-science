@@ -29,10 +29,8 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.scc.ForwardBackwardScc;
 import org.neo4j.graphalgo.impl.scc.SCCAlgorithm;
-import org.neo4j.graphalgo.impl.scc.SCCTunedTarjan;
 import org.neo4j.graphalgo.results.SCCResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
@@ -75,97 +73,6 @@ public class StronglyConnectedComponentsProc extends LabsProc {
     ) {
 
         return sccIterativeTarjanStream(label, relationship, config);
-    }
-
-    // algo.scc.tunedTarjan
-    @Procedure(value = "algo.scc.recursive.tunedTarjan", mode = Mode.WRITE)
-    @Description("CALL algo.scc.recursive.tunedTarjan(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-                 "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
-    public Stream<SCCResult> sccTunedTarjan(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationship,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
-    ) {
-
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-
-        AllocationTracker tracker = AllocationTracker.create();
-        SCCResult.Builder builder = new SCCResult.Builder(true, true, tracker);
-
-        ProgressTimer loadTimer = builder.timeLoad();
-        Graph graph = new GraphLoader(api, Pools.DEFAULT)
-            .init(log, label, relationship, configuration)
-            .withAllocationTracker(tracker)
-            .withDirection(Direction.OUTGOING)
-            .load(configuration.getGraphImpl());
-        loadTimer.stop();
-
-        if (graph.isEmpty()) {
-            return Stream.of(SCCResult.EMPTY);
-        }
-
-        SCCTunedTarjan tarjan = new SCCTunedTarjan(graph)
-            .withProgressLogger(ProgressLogger.wrap(log, "SCC(TunedTarjan)"))
-            .withTerminationFlag(TerminationFlag.wrap(transaction));
-
-        builder.timeCompute(tarjan::compute);
-
-        if (configuration.isWriteFlag()) {
-            builder.withWrite(true);
-            String partitionProperty = configuration.get(
-                CONFIG_WRITE_PROPERTY,
-                CONFIG_OLD_WRITE_PROPERTY,
-                CONFIG_CLUSTER
-            );
-            builder.withPartitionProperty(partitionProperty);
-
-            builder.timeWrite(() -> NodePropertyExporter
-                .of(api, graph, tarjan.terminationFlag)
-                .withLog(log)
-                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                .build()
-                .write(
-                    partitionProperty,
-                    tarjan.getConnectedComponents(),
-                    Translators.OPTIONAL_INT_ARRAY_TRANSLATOR
-                ));
-        }
-
-        final int[] connectedComponents = tarjan.getConnectedComponents();
-
-        builder.withNodeCount(graph.nodeCount());
-        builder.withCommunityFunction( l -> (long) connectedComponents[((int) l)]);
-
-        return Stream.of(builder.build());
-    }
-
-    // algo.scc.tunedTarjan.stream
-    @Procedure(name = "algo.scc.recursive.tunedTarjan.stream", mode = READ)
-    @Description("CALL algo.scc.recursive.tunedTarjan.stream(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-                 "nodeId, partition")
-    public Stream<SCCAlgorithm.StreamResult> sccTunedTarjanStream(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationship,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
-    ) {
-
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-
-        Graph graph = new GraphLoader(api, Pools.DEFAULT)
-            .init(log, label, relationship, configuration)
-            .withDirection(Direction.OUTGOING)
-            .load(configuration.getGraphImpl());
-
-        if (graph.isEmpty()) {
-            return Stream.empty();
-        }
-
-        SCCTunedTarjan sccTunedTarjan = new SCCTunedTarjan(graph)
-            .withProgressLogger(ProgressLogger.wrap(log, "SCC(TunedTarjan)"))
-            .withTerminationFlag(TerminationFlag.wrap(transaction));
-
-        sccTunedTarjan.compute();
-        return sccTunedTarjan.resultStream();
     }
 
     private Stream<SCCResult> sccIterativeTarjan(String label, String relationship, Map<String, Object> config) {

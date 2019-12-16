@@ -79,17 +79,6 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testStronglyConnectedComponentsTunedTarjan() {
-        runQuery("CALL algo.scc.recursive.tunedTarjan('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("setCount")));
-    }
-
-    @Test
-    void testStronglyConnectedComponentsTunedTarjanStream() {
-        Result result = runQuery("CALL algo.scc.recursive.tunedTarjan.stream('', '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
-    }
-
-    @Test
     void testForwardBackwardStronglyConnectedComponentsStream() {
         Result result = runQuery("CALL algo.scc.forwardBackward.stream(0, '', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());

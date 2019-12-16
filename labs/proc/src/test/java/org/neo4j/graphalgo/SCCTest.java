@@ -25,11 +25,7 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.scc.SCCIterativeTarjan;
-import org.neo4j.graphalgo.impl.scc.SCCTunedTarjan;
-
-import java.util.Arrays;
 
 /**        _______
  *        /       \
@@ -85,16 +81,6 @@ class SCCTest extends ConnectedComponentsTest {
         SCCIterativeTarjan algo = new SCCIterativeTarjan(graph, AllocationTracker.EMPTY);
         algo.compute();
         assertCC(algo.getConnectedComponents());
-    }
-
-    @AllGraphTypesWithoutCypherTest
-    void testTunedTarjan(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
-        SCCTunedTarjan algo = new SCCTunedTarjan(graph);
-        algo.compute();
-        int[] connectedComponents = algo.getConnectedComponents();
-        HugeLongArray longs = HugeLongArray.of(Arrays.stream(connectedComponents).mapToLong(i -> (long) i).toArray());
-        assertCC(longs);
     }
 
     private void setup(Class<? extends GraphFactory> graphImpl) {
