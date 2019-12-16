@@ -19,13 +19,21 @@
  */
 package org.neo4j.graphalgo.impl.labelprop;
 
+import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationConfigBase;
 import org.neo4j.logging.Log;
+
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public class LabelPropagationFactory<CONFIG extends LabelPropagationConfigBase> extends AlgorithmFactory<LabelPropagation, CONFIG> {
 
