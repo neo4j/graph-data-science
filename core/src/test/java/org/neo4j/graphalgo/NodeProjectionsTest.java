@@ -34,7 +34,7 @@ import static org.neo4j.helpers.collection.MapUtil.map;
 class NodeProjectionsTest {
 
     @Test
-    void shouldParseNoProperties() {
+    void shouldParseWithoutProperties() {
         Map<String, Object> noProperties = map(
             "MY_LABEL", map(
                 "label", "A"
