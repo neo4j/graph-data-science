@@ -88,37 +88,35 @@ class StronglyConnectedComponentsProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testScc(String graphName) {
-        db
-                .execute("CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "'}) " +
-                         "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty")
-                .accept(row -> {
-                    assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
-                    assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
-                    assertEquals(2, row.getNumber("setCount").longValue());
-                    assertEquals(2, row.getNumber("minSetSize").longValue());
-                    assertEquals(3, row.getNumber("maxSetSize").longValue());
-                    assertEquals("partition", row.getString("partitionProperty"));
-                    assertEquals("partition", row.getString("writeProperty"));
-
-                    return true;
-                });
+        runQuery(
+            "CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "'}) " +
+            "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty",
+            row -> {
+                assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
+                assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
+                assertEquals(2, row.getNumber("setCount").longValue());
+                assertEquals(2, row.getNumber("minSetSize").longValue());
+                assertEquals(3, row.getNumber("maxSetSize").longValue());
+                assertEquals("partition", row.getString("partitionProperty"));
+                assertEquals("partition", row.getString("writeProperty"));
+            }
+        );
     }
 
     @AllGraphNamesTest
     void explicitWriteProperty(String graphName) {
-        db
-                .execute("CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "', writeProperty: 'scc'}) " +
-                         "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty")
-                .accept(row -> {
-                    assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
-                    assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
-                    assertEquals(2, row.getNumber("setCount").longValue());
-                    assertEquals(2, row.getNumber("minSetSize").longValue());
-                    assertEquals(3, row.getNumber("maxSetSize").longValue());
-                    assertEquals("scc", row.getString("partitionProperty"));
-                    assertEquals("scc", row.getString("writeProperty"));
-
-                    return true;
-                });
+        runQuery(
+            "CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "', writeProperty: 'scc'}) " +
+            "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty",
+            row -> {
+                assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
+                assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
+                assertEquals(2, row.getNumber("setCount").longValue());
+                assertEquals(2, row.getNumber("minSetSize").longValue());
+                assertEquals(3, row.getNumber("maxSetSize").longValue());
+                assertEquals("scc", row.getString("partitionProperty"));
+                assertEquals("scc", row.getString("writeProperty"));
+            }
+        );
     }
 }

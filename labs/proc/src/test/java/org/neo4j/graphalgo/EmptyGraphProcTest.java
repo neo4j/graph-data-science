@@ -68,23 +68,6 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     @Test
-    void testStronglyConnectedComponentsMultiStepStream() {
-        Result result = runQuery("CALL algo.scc.stream('', '',{graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    void testStronglyConnectedComponentsMultiStep() {
-        runQuery("CALL algo.scc('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("setCount")));
-    }
-
-    @Test
-    void testForwardBackwardStronglyConnectedComponentsStream() {
-        Result result = runQuery("CALL algo.scc.forwardBackward.stream(0, '', '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
-    }
-
-    @Test
     void testAllShortestPathsStream() {
         Result result = runQuery("CALL algo.allShortestPaths.stream('',{graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());

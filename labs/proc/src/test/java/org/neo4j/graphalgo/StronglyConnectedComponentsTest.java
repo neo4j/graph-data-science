@@ -24,10 +24,16 @@ import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.scc.SCCIterativeTarjan;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.impl.scc.SCCAlgorithm;
+import org.neo4j.graphdb.Node;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -40,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  *             / \
  *           (7)-(8)
  */
-class IterativeTarjanSCCTest extends ConnectedComponentsTest {
+class StronglyConnectedComponentsTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -68,6 +74,8 @@ class IterativeTarjanSCCTest extends ConnectedComponentsTest {
             ", (h)-[:TYPE {cost: 3}]->(i)" +
             ", (i)-[:TYPE {cost: 3}]->(g)";
 
+    private Graph graph;
+
     @BeforeEach
     void setupGraphDb() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
@@ -81,15 +89,23 @@ class IterativeTarjanSCCTest extends ConnectedComponentsTest {
     }
 
     @AllGraphTypesWithoutCypherTest
-    void testDirect() {
+    void testDirect(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        SCCAlgorithm scc = new SCCAlgorithm(graph, AllocationTracker.EMPTY);
+        scc.compute();
 
-        final SCCIterativeTarjan tarjan = new SCCIterativeTarjan(graph, AllocationTracker.EMPTY);
-        tarjan.compute();
+        assertCC(scc.getConnectedComponents());
+        assertEquals(3, scc.getMaxSetSize());
+        assertEquals(3, scc.getMinSetSize());
+        assertEquals(3, scc.getSetCount());
+    }
 
-        assertCC(tarjan.getConnectedComponents());
-        assertEquals(3, tarjan.getMaxSetSize());
-        assertEquals(3, tarjan.getMinSetSize());
-        assertEquals(3, tarjan.getSetCount());
+    @AllGraphTypesWithoutCypherTest
+    void testHugeIterativeScc(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        SCCAlgorithm algo = new SCCAlgorithm(graph, AllocationTracker.EMPTY);
+        algo.compute();
+        assertCC(algo.getConnectedComponents());
     }
 
     @AllGraphTypesWithoutCypherTest
@@ -139,5 +155,45 @@ class IterativeTarjanSCCTest extends ConnectedComponentsTest {
                 .withRelationshipType("TYPE")
                 .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .load(graphFactory);
+    }
+
+    private void assertBelongSameSet(HugeLongArray data, Long... expected) {
+        // check if all belong to same set
+        final long needle = data.get(expected[0]);
+        for (long l : expected) {
+            assertEquals(needle, data.get(l));
+        }
+
+        final List<Long> exp = Arrays.asList(expected);
+        // check no other element belongs to this set
+        for (long i = 0; i < data.size(); i++) {
+            if (exp.contains(i)) {
+                continue;
+            }
+            assertNotEquals(needle, data.get(i));
+        }
+    }
+
+    private long getMappedNodeId(String name) {
+        final Node[] node = new Node[1];
+        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> {
+            node[0] = row.getNode("n");
+        });
+        return graph.toMappedNodeId(node[0].getId());
+    }
+
+    private void assertCC(HugeLongArray connectedComponents) {
+        assertBelongSameSet(connectedComponents,
+            getMappedNodeId("a"),
+            getMappedNodeId("b"),
+            getMappedNodeId("c"));
+        assertBelongSameSet(connectedComponents,
+            getMappedNodeId("d"),
+            getMappedNodeId("e"),
+            getMappedNodeId("f"));
+        assertBelongSameSet(connectedComponents,
+            getMappedNodeId("g"),
+            getMappedNodeId("h"),
+            getMappedNodeId("i"));
     }
 }

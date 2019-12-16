@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.impl.scc.ForwardBackwardScc;
 import org.neo4j.graphalgo.impl.scc.SCCAlgorithm;
 import org.neo4j.graphalgo.results.SCCResult;
 import org.neo4j.graphdb.Direction;
@@ -156,35 +155,6 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         graph.release();
 
-        return algo.resultStream();
-    }
-
-    // algo.scc.forwardBackward.stream
-    @Procedure(name = "algo.scc.forwardBackward.stream", mode = READ)
-    @Description("CALL algo.scc.forwardBackward.stream(long startNodeId, label:String, relationship:String, {write:true, concurrency:4}) YIELD " +
-                 "nodeId, partition")
-    public Stream<ForwardBackwardScc.Result> fwbwStream(
-        @Name(value = "startNodeId", defaultValue = "0") long startNodeId,
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationship,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
-    ) {
-
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-        Graph graph = new GraphLoader(api, Pools.DEFAULT)
-            .init(log, label, relationship, configuration)
-            .load(configuration.getGraphImpl());
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-        final ForwardBackwardScc algo = new ForwardBackwardScc(graph, Pools.DEFAULT,
-            configuration.concurrency()
-        )
-            .withProgressLogger(ProgressLogger.wrap(log, "SCC(ForwardBackward)"))
-            .withTerminationFlag(TerminationFlag.wrap(transaction))
-            .compute(graph.toMappedNodeId(startNodeId));
-        graph.release();
         return algo.resultStream();
     }
 }

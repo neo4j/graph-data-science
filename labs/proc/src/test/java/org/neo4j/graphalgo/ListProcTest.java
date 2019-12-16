@@ -63,7 +63,6 @@ class ListProcTest extends ProcTestBase {
         "algo.mst",
         "algo.randomWalk.stream",
         "algo.scc",
-        "algo.scc.forwardBackward.stream",
         "algo.scc.stream",
         "algo.shortestPath",
         "algo.shortestPath.astar.stream",
