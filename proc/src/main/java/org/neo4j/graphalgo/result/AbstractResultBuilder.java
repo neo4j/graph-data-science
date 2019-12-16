@@ -37,23 +37,23 @@ public abstract class AbstractResultBuilder<CONFIG extends WriteConfig, WRITE_RE
         this.writeProperty = config.writeProperty();
     }
 
-    public void setCreateMillis(long loadMillis) {
+    public void withCreateMillis(long loadMillis) {
         this.loadMillis = loadMillis;
     }
 
-    public void setComputeMillis(long computeMillis) {
+    public void withComputeMillis(long computeMillis) {
         this.computeMillis = computeMillis;
     }
 
-    public void setWriteMillis(long writeMillis) {
+    public void withWriteMillis(long writeMillis) {
         this.writeMillis = writeMillis;
     }
 
-    public void setNodePropertiesWritten(long nodePropertiesWritten) {
+    public void withNodePropertiesWritten(long nodePropertiesWritten) {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public void setRelationshipPropertiesWritten(long relationshipPropertiesWritten) {
+    public void withRelationshipPropertiesWritten(long relationshipPropertiesWritten) {
         this.relationshipPropertiesWritten = relationshipPropertiesWritten;
     }
 

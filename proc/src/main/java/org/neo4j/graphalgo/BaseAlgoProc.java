@@ -269,20 +269,17 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             .build();
     }
 
-    protected Optional<PropertyTranslator<RESULT>> nodePropertyTranslator(
+    protected PropertyTranslator<RESULT> nodePropertyTranslator(
         ComputationResult<A, RESULT, CONFIG> computationResult
     ) {
-        return Optional.empty();
+        throw new UnsupportedOperationException("Write procedures needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyTranslator");
     }
 
     protected void writeNodeProperties(
         AbstractResultBuilder<?, ?> writeBuilder,
         ComputationResult<A, RESULT, CONFIG> computationResult
     ) {
-        Optional<PropertyTranslator<RESULT>> resultPropertyTranslator = nodePropertyTranslator(computationResult);
-        if (!resultPropertyTranslator.isPresent()) {
-            return;
-        }
+        PropertyTranslator<RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
 
         CONFIG config = computationResult.config();
         if (!(config instanceof WriteConfig)) {
@@ -293,7 +290,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         }
 
         WriteConfig writeConfig = (WriteConfig) config;
-        try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::setWriteMillis)) {
+        try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
             log.debug("Writing results");
 
             Graph graph = computationResult.graph();
@@ -306,8 +303,9 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             exporter.write(
                 writeConfig.writeProperty(),
                 computationResult.result(),
-                resultPropertyTranslator.get()
+                resultPropertyTranslator
             );
+            writeBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
         }
     }
 

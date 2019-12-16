@@ -168,7 +168,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
         K1Coloring algoResult = runWithExceptionLogging(
             K1Coloring.class.getSimpleName() + " failed",
             () -> {
-                try (ProgressTimer ignore = ProgressTimer.start(setup.builder::setComputeMillis)) {
+                try (ProgressTimer ignore = ProgressTimer.start(setup.builder::withComputeMillis)) {
                     return k1Coloring.compute();
                 }
             }
@@ -205,7 +205,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
         TerminationFlag terminationFlag,
         AllocationTracker tracker
     ) {
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::setWriteMillis)) {
+        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
             write(graph, coloring, configuration, writeProperty, terminationFlag, tracker);
         }
     }

@@ -196,8 +196,8 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
 
         WriteResultBuilder builder = new WriteResultBuilder(config, callContext, computeResult.tracker());
 
-        builder.setCreateMillis(computeResult.createMillis());
-            builder.setComputeMillis(computeResult.computeMillis());
+        builder.withCreateMillis(computeResult.createMillis());
+        builder.withComputeMillis(computeResult.computeMillis());
         builder
             .withLevels(louvain.levels())
             .withModularity(louvain.modularities()[louvain.levels() - 1])
@@ -213,7 +213,7 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
     }
 
     @Override
-    protected Optional<PropertyTranslator<Louvain>> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
+    protected PropertyTranslator<Louvain> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
         Graph graph = computationResult.graph();
         Louvain louvain = computationResult.result();
         LouvainWriteConfig config = computationResult.config();
@@ -228,7 +228,7 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
         } else {
             translator = CommunitiesTranslator.INSTANCE;
         }
-        return Optional.of(translator);
+        return translator;
     }
 
     @Override

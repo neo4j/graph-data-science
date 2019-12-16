@@ -47,6 +47,7 @@ public final class NodePropertyExporter extends StatementApi {
     private final int concurrency;
     private final long nodeCount;
     private final LongUnaryOperator toOriginalId;
+    private final AtomicLong propertiesWritten;
 
     public static Builder of(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
         return new Builder(db, idMapping, terminationFlag);
@@ -93,6 +94,7 @@ public final class NodePropertyExporter extends StatementApi {
         this.progressLogger = log;
         this.concurrency = concurrency;
         this.executorService = executorService;
+        propertiesWritten = new AtomicLong(0);
     }
 
     public <T> void write(
@@ -130,6 +132,10 @@ public final class NodePropertyExporter extends StatementApi {
         } else {
             writeSequential(propertyId1, data1, translator1, propertyId2, data2, translator2);
         }
+    }
+
+    public long propertiesWritten() {
+        return propertiesWritten.get();
     }
 
     private <T> void writeSequential(
@@ -259,6 +265,7 @@ public final class NodePropertyExporter extends StatementApi {
                     propertyId,
                     prop
             );
+            propertiesWritten.incrementAndGet();
         }
     }
 
@@ -275,10 +282,12 @@ public final class NodePropertyExporter extends StatementApi {
         Value prop1 = translator1.toProperty(propertyId1, data1, nodeId);
         if (prop1 != null) {
             ops.nodeSetProperty(originalNodeId, propertyId1, prop1);
+            propertiesWritten.incrementAndGet();
         }
         Value prop2 = translator2.toProperty(propertyId2, data2, nodeId);
         if (prop2 != null) {
             ops.nodeSetProperty(originalNodeId, propertyId2, prop2);
+            propertiesWritten.incrementAndGet();
         }
     }
 }

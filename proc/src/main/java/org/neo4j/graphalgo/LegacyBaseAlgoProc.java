@@ -95,7 +95,7 @@ public abstract class LegacyBaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT>
         AllocationTracker tracker,
         AbstractResultBuilder<?, R> resultBuilder
     ) {
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::setCreateMillis)) {
+        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withCreateMillis)) {
             return loadGraph(config, tracker);
         }
     }

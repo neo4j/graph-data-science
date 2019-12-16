@@ -181,7 +181,7 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
         ModularityOptimization algoResult = runWithExceptionLogging(
             ModularityOptimization.class.getSimpleName() + "failed",
             () -> {
-                try (ProgressTimer ignore = ProgressTimer.start(setup.builder::setComputeMillis)) {
+                try (ProgressTimer ignore = ProgressTimer.start(setup.builder::withComputeMillis)) {
                     return modularityOptimization.compute();
                 }
             }
@@ -205,7 +205,7 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
         ProcedureConfiguration configuration,
         String writeProperty
     ) {
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::setWriteMillis)) {
+        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
             write(graph, modularityOptimization, configuration, writeProperty);
         }
     }

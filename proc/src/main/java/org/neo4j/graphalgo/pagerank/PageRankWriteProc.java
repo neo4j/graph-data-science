@@ -169,8 +169,8 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
 
             WriteResultBuilder builder = new WriteResultBuilder(config);
 
-            builder.setCreateMillis(computeResult.createMillis());
-            builder.setComputeMillis(computeResult.computeMillis());
+            builder.withCreateMillis(computeResult.createMillis());
+            builder.withComputeMillis(computeResult.computeMillis());
             builder.withRanIterations(pageRank.iterations());
             builder.withDidConverge(pageRank.didConverge());
 
@@ -184,8 +184,8 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
     }
 
     @Override
-    protected Optional<PropertyTranslator<PageRank>> nodePropertyTranslator(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computationResult) {
-        return Optional.of(ScoresTranslator.INSTANCE);
+    protected PropertyTranslator<PageRank> nodePropertyTranslator(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computationResult) {
+        return ScoresTranslator.INSTANCE;
     }
 
     @Override

@@ -130,8 +130,8 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
             callContext,
             computationResult.tracker()
         );
-        builder.setCreateMillis(computationResult.createMillis());
-        builder.setComputeMillis(computationResult.computeMillis());
+        builder.withCreateMillis(computationResult.createMillis());
+        builder.withComputeMillis(computationResult.computeMillis());
 
         if (!computationResult.isGraphEmpty()) {
             builder
@@ -197,7 +197,7 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
     }
 
     @Override
-    protected Optional<PropertyTranslator<LabelPropagation>> nodePropertyTranslator(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult) {
+    protected PropertyTranslator<LabelPropagation> nodePropertyTranslator(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult) {
 
         LabelPropagationWriteConfig config = computationResult.config();
 
@@ -205,16 +205,15 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
         NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
 
         if (writePropertyEqualsSeedProperty) {
-            return Optional.of(new PropertyTranslator.OfLongIfChanged<>(
+            return new PropertyTranslator.OfLongIfChanged<>(
                 seedProperties,
                 (data, nodeId) -> data.labels().get(nodeId)
-            ));
+            );
         }
 
-        return Optional.of((PropertyTranslator.OfLong<LabelPropagation>) (data, nodeId) -> data
+        return (PropertyTranslator.OfLong<LabelPropagation>) (data, nodeId) -> data
             .labels()
-            .get(nodeId)
-        );
+            .get(nodeId);
     }
 
     @Override

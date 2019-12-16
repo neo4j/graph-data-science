@@ -96,7 +96,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
     }
 
     @Override
-    protected Optional<PropertyTranslator<DisjointSetStruct>> nodePropertyTranslator(
+    protected PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
         ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult
     ) {
         WccWriteConfig config = computationResult.config();
@@ -115,7 +115,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
             propertyTranslator = (PropertyTranslator.OfLong<DisjointSetStruct>) DisjointSetStruct::setIdOf;
         }
 
-        return Optional.of(propertyTranslator);
+        return propertyTranslator;
     }
 
     private Stream<WccWriteProc.WriteResult> write(
@@ -131,8 +131,8 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
             WriteResultBuilder builder = new WriteResultBuilder(config, callContext, computeResult.tracker());
             DisjointSetStruct dss = computeResult.result();
 
-            builder.setCreateMillis(computeResult.createMillis());
-            builder.setComputeMillis(computeResult.computeMillis());
+            builder.withCreateMillis(computeResult.createMillis());
+            builder.withComputeMillis(computeResult.computeMillis());
             builder.withCommunityFunction(dss::setIdOf);
 
             if (write && !config.writeProperty().isEmpty()) {
