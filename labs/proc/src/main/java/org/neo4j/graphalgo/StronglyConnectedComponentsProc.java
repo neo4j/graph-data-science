@@ -57,11 +57,12 @@ public class StronglyConnectedComponentsProc extends LabsProc {
     // default algo.scc -> iterative tarjan
     @Procedure(value = "algo.scc", mode = Mode.WRITE)
     @Description("CALL algo.scc(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-            "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
+                 "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
     public Stream<SCCResult> sccDefaultMethod(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         return sccIterativeTarjan(label, relationship, config);
     }
@@ -69,11 +70,12 @@ public class StronglyConnectedComponentsProc extends LabsProc {
     // default algo.scc -> iter tarjan
     @Procedure(value = "algo.scc.stream", mode = READ)
     @Description("CALL algo.scc.stream(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-            "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
+                 "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
     public Stream<SCCAlgorithm.StreamResult> sccDefaultMethodStream(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         return sccIterativeTarjanStream(label, relationship, config);
     }
@@ -81,11 +83,12 @@ public class StronglyConnectedComponentsProc extends LabsProc {
     // algo.scc.tarjan
     @Procedure(value = "algo.scc.recursive.tarjan", mode = Mode.WRITE)
     @Description("CALL algo.scc.tarjan(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-            "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
+                 "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
     public Stream<SCCResult> sccTarjan(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
@@ -94,12 +97,12 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         ProgressTimer loadTimer = builder.timeLoad();
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .withAllocationTracker(tracker)
-                .withOptionalLabel(label)
-                .withOptionalRelationshipType(relationship)
-                .withDirection(Direction.OUTGOING)
-                .load(configuration.getGraphImpl());
+            .init(log, label, relationship, configuration)
+            .withAllocationTracker(tracker)
+            .withOptionalLabel(label)
+            .withOptionalRelationshipType(relationship)
+            .withDirection(Direction.OUTGOING)
+            .load(configuration.getGraphImpl());
         loadTimer.stop();
 
         if (graph.isEmpty()) {
@@ -107,31 +110,33 @@ public class StronglyConnectedComponentsProc extends LabsProc {
         }
 
         SCCTarjan tarjan = new SCCTarjan(graph)
-                .withProgressLogger(ProgressLogger.wrap(log, "SCC(Tarjan)"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
+            .withProgressLogger(ProgressLogger.wrap(log, "SCC(Tarjan)"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
 
         builder.timeCompute(tarjan::compute);
 
         final int[] connectedComponents = tarjan.getConnectedComponents();
         if (configuration.isWriteFlag()) {
             builder.withWrite(true);
-            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
-                    CONFIG_OLD_WRITE_PROPERTY,
-                    CONFIG_CLUSTER);
+            String partitionProperty = configuration.get(
+                CONFIG_WRITE_PROPERTY,
+                CONFIG_OLD_WRITE_PROPERTY,
+                CONFIG_CLUSTER
+            );
             builder.withPartitionProperty(partitionProperty);
 
             builder.timeWrite(() -> {
                 graph.release();
                 tarjan.release();
                 NodePropertyExporter.of(api, graph, tarjan.terminationFlag)
-                        .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                        .build()
-                        .write(
-                                partitionProperty,
-                                connectedComponents,
-                                Translators.OPTIONAL_INT_ARRAY_TRANSLATOR
-                        );
+                    .withLog(log)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
+                    .build()
+                    .write(
+                        partitionProperty,
+                        connectedComponents,
+                        Translators.OPTIONAL_INT_ARRAY_TRANSLATOR
+                    );
             });
         }
 
@@ -144,11 +149,12 @@ public class StronglyConnectedComponentsProc extends LabsProc {
     // algo.scc.tunedTarjan
     @Procedure(value = "algo.scc.recursive.tunedTarjan", mode = Mode.WRITE)
     @Description("CALL algo.scc.recursive.tunedTarjan(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-            "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
+                 "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
     public Stream<SCCResult> sccTunedTarjan(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
@@ -157,10 +163,10 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         ProgressTimer loadTimer = builder.timeLoad();
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .withAllocationTracker(tracker)
-                .withDirection(Direction.OUTGOING)
-                .load(configuration.getGraphImpl());
+            .init(log, label, relationship, configuration)
+            .withAllocationTracker(tracker)
+            .withDirection(Direction.OUTGOING)
+            .load(configuration.getGraphImpl());
         loadTimer.stop();
 
         if (graph.isEmpty()) {
@@ -168,28 +174,30 @@ public class StronglyConnectedComponentsProc extends LabsProc {
         }
 
         SCCTunedTarjan tarjan = new SCCTunedTarjan(graph)
-                .withProgressLogger(ProgressLogger.wrap(log, "SCC(TunedTarjan)"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
+            .withProgressLogger(ProgressLogger.wrap(log, "SCC(TunedTarjan)"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
 
         builder.timeCompute(tarjan::compute);
 
         if (configuration.isWriteFlag()) {
             builder.withWrite(true);
-            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
-                    CONFIG_OLD_WRITE_PROPERTY,
-                    CONFIG_CLUSTER);
+            String partitionProperty = configuration.get(
+                CONFIG_WRITE_PROPERTY,
+                CONFIG_OLD_WRITE_PROPERTY,
+                CONFIG_CLUSTER
+            );
             builder.withPartitionProperty(partitionProperty);
 
             builder.timeWrite(() -> NodePropertyExporter
-                    .of(api, graph, tarjan.terminationFlag)
-                    .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                    .build()
-                    .write(
-                            partitionProperty,
-                            tarjan.getConnectedComponents(),
-                            Translators.OPTIONAL_INT_ARRAY_TRANSLATOR
-                    ));
+                .of(api, graph, tarjan.terminationFlag)
+                .withLog(log)
+                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
+                .build()
+                .write(
+                    partitionProperty,
+                    tarjan.getConnectedComponents(),
+                    Translators.OPTIONAL_INT_ARRAY_TRANSLATOR
+                ));
         }
 
         final int[] connectedComponents = tarjan.getConnectedComponents();
@@ -203,18 +211,19 @@ public class StronglyConnectedComponentsProc extends LabsProc {
     // algo.scc.tunedTarjan.stream
     @Procedure(name = "algo.scc.recursive.tunedTarjan.stream", mode = READ)
     @Description("CALL algo.scc.recursive.tunedTarjan.stream(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-            "nodeId, partition")
+                 "nodeId, partition")
     public Stream<SCCAlgorithm.StreamResult> sccTunedTarjanStream(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .withDirection(Direction.OUTGOING)
-                .load(configuration.getGraphImpl());
+            .init(log, label, relationship, configuration)
+            .withDirection(Direction.OUTGOING)
+            .load(configuration.getGraphImpl());
 
         if (graph.isEmpty()) {
             return Stream.empty();
@@ -228,14 +237,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
         return sccTunedTarjan.resultStream();
     }
 
-    // algo.scc.iterative
-    @Procedure(value = "algo.scc.iterative", mode = Mode.WRITE)
-    @Description("CALL algo.scc.iterative(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-            "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
-    public Stream<SCCResult> sccIterativeTarjan(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+    private Stream<SCCResult> sccIterativeTarjan(String label, String relationship, Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
@@ -244,9 +246,9 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         final ProgressTimer loadTimer = builder.timeLoad();
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .withDirection(Direction.OUTGOING)
-                .load(configuration.getGraphImpl());
+            .init(log, label, relationship, configuration)
+            .withDirection(Direction.OUTGOING)
+            .load(configuration.getGraphImpl());
         loadTimer.stop();
 
         if (graph.isEmpty()) {
@@ -255,27 +257,29 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         final SCCAlgorithm tarjan = SCCAlgorithm.iterativeTarjan(graph, tracker)
-                .withProgressLogger(ProgressLogger.wrap(log, "SCC(IterativeTarjan)"))
-                .withTerminationFlag(terminationFlag);
+            .withProgressLogger(ProgressLogger.wrap(log, "SCC(IterativeTarjan)"))
+            .withTerminationFlag(terminationFlag);
 
         builder.timeCompute(tarjan::compute);
 
         if (configuration.isWriteFlag()) {
             builder.withWrite(true);
-            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
-                    CONFIG_OLD_WRITE_PROPERTY,
-                    CONFIG_CLUSTER);
+            String partitionProperty = configuration.get(
+                CONFIG_WRITE_PROPERTY,
+                CONFIG_OLD_WRITE_PROPERTY,
+                CONFIG_CLUSTER
+            );
             builder.withPartitionProperty(partitionProperty).withWriteProperty(partitionProperty);
 
             builder.timeWrite(() -> NodePropertyExporter.of(api, graph, terminationFlag)
-                    .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                    .build()
-                    .write(
-                            partitionProperty,
-                            tarjan.getConnectedComponents(),
-                            HugeLongArray.Translator.INSTANCE
-                    ));
+                .withLog(log)
+                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
+                .build()
+                .write(
+                    partitionProperty,
+                    tarjan.getConnectedComponents(),
+                    HugeLongArray.Translator.INSTANCE
+                ));
         }
 
         final HugeLongArray connectedComponents = tarjan.getConnectedComponents();
@@ -288,21 +292,18 @@ public class StronglyConnectedComponentsProc extends LabsProc {
         return Stream.of(builder.build());
     }
 
-    // algo.scc.iterative.stream
-    @Procedure(name = "algo.scc.iterative.stream", mode = READ)
-    @Description("CALL algo.scc.iterative.stream(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-            "nodeId, partition")
-    public Stream<SCCAlgorithm.StreamResult> sccIterativeTarjanStream(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+    private Stream<SCCAlgorithm.StreamResult> sccIterativeTarjanStream(
+        String label,
+        String relationship,
+        Map<String, Object> config
+    ) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .withDirection(Direction.OUTGOING)
-                .load(configuration.getGraphImpl());
+            .init(log, label, relationship, configuration)
+            .withDirection(Direction.OUTGOING)
+            .load(configuration.getGraphImpl());
 
         if (graph.isEmpty()) {
             graph.release();
@@ -311,8 +312,8 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         final AllocationTracker tracker = AllocationTracker.create();
         final SCCAlgorithm algo = SCCAlgorithm.iterativeTarjan(graph, tracker)
-                .withProgressLogger(ProgressLogger.wrap(log, "SCC(IterativeTarjan)"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
+            .withProgressLogger(ProgressLogger.wrap(log, "SCC(IterativeTarjan)"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
         algo.compute();
 
         graph.release();
@@ -324,11 +325,12 @@ public class StronglyConnectedComponentsProc extends LabsProc {
     // algo.scc.multistep
     @Procedure(value = "algo.scc.multistep", mode = Mode.WRITE)
     @Description("CALL algo.scc.multistep(label:String, relationship:String, {write:true, concurrency:4, cutoff:100000}) YIELD " +
-            "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
+                 "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
     public Stream<SCCResult> multistep(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
@@ -337,9 +339,9 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         ProgressTimer loadTimer = builder.timeLoad();
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .withAllocationTracker(tracker)
-                .load(configuration.getGraphImpl());
+            .init(log, label, relationship, configuration)
+            .withAllocationTracker(tracker)
+            .load(configuration.getGraphImpl());
         loadTimer.stop();
 
         if (graph.isEmpty()) {
@@ -349,10 +351,11 @@ public class StronglyConnectedComponentsProc extends LabsProc {
 
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT,
-                configuration.concurrency(),
-                configuration.getNumber("cutoff", 100_000).intValue())
-                .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))
-                .withTerminationFlag(terminationFlag);
+            configuration.concurrency(),
+            configuration.getNumber("cutoff", 100_000).intValue()
+        )
+            .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))
+            .withTerminationFlag(terminationFlag);
 
         builder.timeCompute(multistep::compute);
 
@@ -363,21 +366,23 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             multistep.release();
             builder.timeWrite(() -> {
                 builder.withWrite(true);
-                String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
-                        CONFIG_OLD_WRITE_PROPERTY,
-                        CONFIG_CLUSTER);
+                String partitionProperty = configuration.get(
+                    CONFIG_WRITE_PROPERTY,
+                    CONFIG_OLD_WRITE_PROPERTY,
+                    CONFIG_CLUSTER
+                );
                 builder.withPartitionProperty(partitionProperty);
 
                 NodePropertyExporter
-                        .of(api, graph, multistep.terminationFlag)
-                        .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                        .build()
-                        .write(
-                                partitionProperty,
-                                connectedComponents,
-                                Translators.OPTIONAL_INT_ARRAY_TRANSLATOR
-                        );
+                    .of(api, graph, multistep.terminationFlag)
+                    .withLog(log)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
+                    .build()
+                    .write(
+                        partitionProperty,
+                        connectedComponents,
+                        Translators.OPTIONAL_INT_ARRAY_TRANSLATOR
+                    );
             });
         }
 
@@ -390,25 +395,27 @@ public class StronglyConnectedComponentsProc extends LabsProc {
     // algo.scc.multistep.stream
     @Procedure(name = "algo.scc.multistep.stream", mode = READ)
     @Description("CALL algo.scc.multistep.stream(label:String, relationship:String, {write:true, concurrency:4, cutoff:100000}) YIELD " +
-            "nodeId, partition")
+                 "nodeId, partition")
     public Stream<SCCStreamResult> multistepStream(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .load(configuration.getGraphImpl());
+            .init(log, label, relationship, configuration)
+            .load(configuration.getGraphImpl());
         if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
         final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT,
-                configuration.concurrency(),
-                configuration.getNumber("cutoff", 100_000).intValue())
-                .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
+            configuration.concurrency(),
+            configuration.getNumber("cutoff", 100_000).intValue()
+        )
+            .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
         multistep.compute();
 
         int nodeCount = Math.toIntExact(graph.nodeCount());
@@ -426,26 +433,28 @@ public class StronglyConnectedComponentsProc extends LabsProc {
     // algo.scc.forwardBackward.stream
     @Procedure(name = "algo.scc.forwardBackward.stream", mode = READ)
     @Description("CALL algo.scc.forwardBackward.stream(long startNodeId, label:String, relationship:String, {write:true, concurrency:4}) YIELD " +
-            "nodeId, partition")
+                 "nodeId, partition")
     public Stream<ForwardBackwardScc.Result> fwbwStream(
-            @Name(value = "startNodeId", defaultValue = "0") long startNodeId,
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "startNodeId", defaultValue = "0") long startNodeId,
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .load(configuration.getGraphImpl());
+            .init(log, label, relationship, configuration)
+            .load(configuration.getGraphImpl());
         if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
         final ForwardBackwardScc algo = new ForwardBackwardScc(graph, Pools.DEFAULT,
-                configuration.concurrency())
-                .withProgressLogger(ProgressLogger.wrap(log, "SCC(ForwardBackward)"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .compute(graph.toMappedNodeId(startNodeId));
+            configuration.concurrency()
+        )
+            .withProgressLogger(ProgressLogger.wrap(log, "SCC(ForwardBackward)"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction))
+            .compute(graph.toMappedNodeId(startNodeId));
         graph.release();
         return algo.resultStream();
     }

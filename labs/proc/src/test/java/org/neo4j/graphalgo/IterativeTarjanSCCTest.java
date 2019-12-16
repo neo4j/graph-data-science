@@ -95,7 +95,7 @@ class IterativeTarjanSCCTest extends ConnectedComponentsTest {
     @AllGraphTypesWithoutCypherTest
     void testCypher(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        String cypher = "CALL algo.scc.iterative('', '', {write:true}) YIELD loadMillis, computeMillis, writeMillis";
+        String cypher = "CALL algo.scc('', '', {write:true}) YIELD loadMillis, computeMillis, writeMillis";
 
         runQuery(cypher, row -> {
             long loadMillis = row.getNumber("loadMillis").longValue();
@@ -122,7 +122,7 @@ class IterativeTarjanSCCTest extends ConnectedComponentsTest {
         setup(graphFactory);
         final IntIntScatterMap testMap = new IntIntScatterMap();
 
-        String cypher = "CALL algo.scc.iterative.stream() YIELD nodeId, partition";
+        String cypher = "CALL algo.scc.stream() YIELD nodeId, partition";
 
         runQuery(cypher, row -> testMap.addTo(row.getNumber("partition").intValue(), 1));
 
