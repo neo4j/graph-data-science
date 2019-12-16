@@ -49,7 +49,7 @@ class GraphListProcTest extends BaseProcTest {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
-            GraphCatalogProcs.class,
+            GraphCreateProc.class,
             GraphListProc.class
         );
         runQuery(DB_CYPHER);

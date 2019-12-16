@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.wcc.WccBaseConfig;
-import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -82,7 +82,7 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTes
             // {H, I}
             ",(nH)-[:TYPE]->(nI)";
 
-        registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphLoadProc.class, GraphCatalogProcs.class);
+        registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphLoadProc.class, GraphCreateProc.class);
         runQuery(cypher);
     }
 

@@ -31,7 +31,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.newapi.GraphCatalogProcs.HISTOGRAM_FIELD_NAME;
+import static org.neo4j.graphalgo.newapi.GraphCreateProc.HISTOGRAM_FIELD_NAME;
 
 public class GraphDropProc extends BaseProc {
 

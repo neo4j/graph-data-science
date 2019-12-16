@@ -37,7 +37,7 @@ import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
-import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -108,7 +108,7 @@ class GraphLoadProcTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphLoadProc.class,
-            GraphCatalogProcs.class,
+            GraphCreateProc.class,
             LabelPropagationWriteProc.class,
             PageRankWriteProc.class,
             WccWriteProc.class

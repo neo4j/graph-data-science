@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.neo4j.graphalgo.newapi.GraphCatalogProcs.HISTOGRAM_FIELD_NAME;
+import static org.neo4j.graphalgo.newapi.GraphCreateProc.HISTOGRAM_FIELD_NAME;
 
 public class GraphListProc extends BaseProc {
 

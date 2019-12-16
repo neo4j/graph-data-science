@@ -59,7 +59,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(GraphCatalogProcs.class);
+        registerProcedures(GraphCreateProc.class);
         runQuery(DB_CYPHER);
     }
 

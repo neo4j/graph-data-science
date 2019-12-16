@@ -36,7 +36,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.IterationsConfigTest;
 import org.neo4j.graphdb.Label;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -118,7 +118,7 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
             ", (u)-[:TYPE3 {weight: 1.0}]->(w)" +
             ", (v)-[:TYPE3 {weight: 1.0}]->(w)";
 
-        registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphLoadProc.class, GraphCatalogProcs.class);
+        registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphLoadProc.class, GraphCreateProc.class);
         runQuery(cypher);
 
         runQuery("CALL algo.beta.graph.create(" +

@@ -39,7 +39,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
-import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfigTest;
 import org.neo4j.graphalgo.WeightConfigTest;
@@ -123,7 +123,7 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Bas
             ", (l)-[:TYPE {weight: 1.0}]->(n)" +
             ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
-        registerProcedures(LouvainStreamProc.class, LouvainWriteProc.class, GraphLoadProc.class, GraphCatalogProcs.class);
+        registerProcedures(LouvainStreamProc.class, LouvainWriteProc.class, GraphLoadProc.class, GraphCreateProc.class);
         runQuery(cypher);
         runQuery("CALL algo.beta.graph.create(" +
                  "    'myGraph'," +

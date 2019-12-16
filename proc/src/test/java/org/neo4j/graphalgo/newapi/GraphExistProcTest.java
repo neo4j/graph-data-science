@@ -43,7 +43,7 @@ class GraphExistProcTest extends ProcTestBase {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
         registerProcedures(
-            GraphCatalogProcs.class,
+            GraphCreateProc.class,
             GraphExistsProc.class
         );
         registerFunctions(GraphExistsProc.class);

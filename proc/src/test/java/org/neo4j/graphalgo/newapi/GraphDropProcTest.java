@@ -43,7 +43,7 @@ class GraphDropProcTest extends ProcTestBase {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
-            GraphCatalogProcs.class,
+            GraphCreateProc.class,
             GraphExistsProc.class,
             GraphDropProc.class
         );

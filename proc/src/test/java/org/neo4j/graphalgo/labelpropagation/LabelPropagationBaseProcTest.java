@@ -39,7 +39,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
-import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfigTest;
 import org.neo4j.graphalgo.WeightConfigTest;
@@ -92,7 +92,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
             ", (b)-[:X]->(:B {id: 10, weight: 1.0, score: 1.0, seed: 1}) " +
             ", (b)-[:X]->(:B {id: 11, weight: 8.0, score: 8.0, seed: 2})";
 
-        registerProcedures(LabelPropagationStreamProc.class, LabelPropagationWriteProc.class, GraphLoadProc.class, GraphCatalogProcs.class);
+        registerProcedures(LabelPropagationStreamProc.class, LabelPropagationWriteProc.class, GraphLoadProc.class, GraphCreateProc.class);
         runQuery(cypher);
 
         runQuery(createGraphQuery(Projection.NATURAL, TEST_GRAPH_NAME));

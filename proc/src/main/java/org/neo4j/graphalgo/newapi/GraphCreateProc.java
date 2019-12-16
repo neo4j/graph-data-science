@@ -40,7 +40,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class GraphCatalogProcs extends BaseProc {
+public class GraphCreateProc extends BaseProc {
 
     static final String HISTOGRAM_FIELD_NAME = "histogram";
 
