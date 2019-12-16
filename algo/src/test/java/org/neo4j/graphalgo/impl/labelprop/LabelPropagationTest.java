@@ -44,6 +44,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.labelpropagation.ImmutableLabelPropagationStreamConfig;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationConfigBase;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.graphdb.Direction;
 
@@ -234,22 +235,26 @@ final class LabelPropagationTest extends AlgoTestBase {
 
     @Test
     void shouldBoundMemEstimationToMaxSupportedDegree() {
-        LabelPropagationFactory labelPropagation = new LabelPropagationFactory(defaultConfig());
+        LabelPropagationFactory<LabelPropagationStreamConfig> labelPropagation = new LabelPropagationFactory<>(
+            defaultConfig());
         GraphDimensions largeDimensions = new GraphDimensions.Builder()
             .setNodeCount((long) Integer.MAX_VALUE + (long) Integer.MAX_VALUE)
             .build();
 
         // test for no failure and no overflow
-        assertTrue(0 < labelPropagation.memoryEstimation(ProcedureConfiguration.empty()).estimate(largeDimensions, 1).memoryUsage().max);
+        assertTrue(0 < labelPropagation
+            .memoryEstimation(ImmutableLabelPropagationStreamConfig.builder().build())
+            .estimate(largeDimensions, 1)
+            .memoryUsage().max);
     }
 
     private void assertMemoryEstimation(long nodeCount, int concurrency) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
 
-        LabelPropagationFactory labelPropagation = new LabelPropagationFactory(defaultConfig());
+        LabelPropagationFactory<LabelPropagationConfigBase> labelPropagation = new LabelPropagationFactory<>(defaultConfig());
 
         MemoryRange actual = labelPropagation
-            .memoryEstimation(ProcedureConfiguration.empty())
+            .memoryEstimation(ImmutableLabelPropagationStreamConfig.builder().build())
             .estimate(dimensions, concurrency)
             .memoryUsage();
         long min = 80L /* LabelPropagation.class */ +
