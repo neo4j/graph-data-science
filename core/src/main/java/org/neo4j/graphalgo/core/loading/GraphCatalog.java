@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
@@ -28,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -152,6 +154,15 @@ public final class GraphCatalog extends GraphFactory {
         ));
     }
 
+    public static Map<GraphCreateConfig, Graph> filterLoadedGraphs(
+        String username,
+        String graphName,
+        String relType,
+        Optional<String> propertyName
+    ) {
+        return getUserCatalog(username).filterLoadedGraphs(graphName, relType, propertyName);
+    }
+
     private static class UserCatalog {
 
         private static final UserCatalog EMPTY = new UserCatalog();
@@ -236,6 +247,24 @@ public final class GraphCatalog extends GraphFactory {
             return graphsByName.values().stream().collect(Collectors.toMap(
                 GraphWithConfig::config, GraphWithConfig::getGraph
             ));
+        }
+
+        Map<GraphCreateConfig, Graph> filterLoadedGraphs(
+            String graphName,
+            String relType,
+            Optional<String> propertyName
+        ) {
+            Map<GraphCreateConfig, Graph> filteredGraphs = new HashMap<>();
+            if (StringUtils.isBlank(graphName)) {
+                graphsByName.values().forEach(gwc ->
+                    filteredGraphs.put(gwc.config(), gwc.graph().getGraph(relType, propertyName)
+                    ));
+            } else {
+                GraphWithConfig graphWithConfig = graphsByName.get(graphName);
+                filteredGraphs.put(graphWithConfig.config(), graphWithConfig.graph().getGraph(relType, propertyName));
+            }
+
+            return filteredGraphs;
         }
     }
 

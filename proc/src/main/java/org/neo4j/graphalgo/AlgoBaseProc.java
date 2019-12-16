@@ -61,6 +61,8 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
 
 
+    public static final String ALL_REL_TYPES = "";
+
     public String algoName() {
         return this.getClass().getSimpleName();
     }
@@ -161,16 +163,23 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
     protected Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
         CONFIG config = configAndName.first();
-        Optional<String> graphName = configAndName.other();
+        Optional<String> maybeGraphName = configAndName.other();
 
-        if (graphName.isPresent()) {
-            Map.Entry<GraphCreateConfig, Graph> catalogEntry = GraphCatalog
-                .getLoadedGraphs(getUsername())
+        Map.Entry<GraphCreateConfig, Graph> catalogEntry;
+
+        Optional<String> weightProperty = Optional.empty();
+        if (config instanceof WeightConfig) {
+            weightProperty = Optional.ofNullable(((WeightConfig) config).weightProperty());
+        }
+
+        if (maybeGraphName.isPresent()) {
+            catalogEntry = GraphCatalog
+                .filterLoadedGraphs(getUsername(), maybeGraphName.get(), ALL_REL_TYPES, weightProperty)
                 .entrySet()
                 .stream()
-                .filter(e -> e.getKey().graphName().equals(graphName.get()))
+                .filter(e -> e.getKey().graphName().equals(maybeGraphName.get()))
                 .findFirst().orElseThrow(
-                    () -> new NoSuchElementException(String.format("Cannot find graph with name %s", graphName.get()))
+                    () -> new NoSuchElementException(String.format("Cannot find graph with name %s", maybeGraphName.get()))
                 );
             validateConfig(catalogEntry.getKey(), config);
             return catalogEntry.getValue();
