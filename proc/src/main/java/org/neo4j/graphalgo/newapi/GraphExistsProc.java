@@ -30,7 +30,7 @@ import org.neo4j.procedure.UserFunction;
 
 import java.util.stream.Stream;
 
-public class GraphExistsProc extends BaseProc {
+public class GraphExistsProc extends CatalogProc {
 
     @Procedure(name = "algo.beta.graph.exists", mode = Mode.READ)
     @Description("CALL graph.exists(" +

@@ -40,9 +40,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class GraphCreateProc extends BaseProc {
-
-    static final String HISTOGRAM_FIELD_NAME = "histogram";
+public class GraphCreateProc extends CatalogProc {
 
     @Procedure(name = "algo.beta.graph.create", mode = Mode.READ)
     @Description("CALL graph.create(" +

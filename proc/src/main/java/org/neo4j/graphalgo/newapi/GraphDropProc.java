@@ -20,7 +20,6 @@
 
 package org.neo4j.graphalgo.newapi;
 
-import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.procedure.Description;
@@ -31,9 +30,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.newapi.GraphCreateProc.HISTOGRAM_FIELD_NAME;
-
-public class GraphDropProc extends BaseProc {
+public class GraphDropProc extends CatalogProc {
 
     @Procedure(name = "algo.beta.graph.drop", mode = Mode.READ)
     @Description("CALL gds.graph.drop(" +
@@ -47,11 +44,9 @@ public class GraphDropProc extends BaseProc {
     public Stream<GraphInfo> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
 
-        boolean computeHistogram = callContext.outputFields().anyMatch(HISTOGRAM_FIELD_NAME::equals);
-
         AtomicReference<GraphInfo> result = new AtomicReference<>();
         GraphCatalog.remove(getUsername(), graphName, (removedGraph) -> {
-            result.set(new GraphInfo(removedGraph.config(), removedGraph.getGraph(), computeHistogram));
+            result.set(new GraphInfo(removedGraph.config(), removedGraph.getGraph(), computeHistogram()));
         });
 
         return Stream.of(result.get());

@@ -20,7 +20,6 @@
 
 package org.neo4j.graphalgo.newapi;
 
-import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.procedure.Mode;
@@ -32,9 +31,8 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.neo4j.graphalgo.newapi.GraphCreateProc.HISTOGRAM_FIELD_NAME;
 
-public class GraphListProc extends BaseProc {
+public class GraphListProc extends CatalogProc {
 
     @Procedure(name = "algo.beta.graph.list", mode = Mode.READ)
     public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = "null") Object graphName) {
@@ -42,7 +40,6 @@ public class GraphListProc extends BaseProc {
             throw new IllegalArgumentException("`graphName` parameter must be a STRING");
         }
 
-        boolean computeHistogram = callContext.outputFields().anyMatch(HISTOGRAM_FIELD_NAME::equals);
         Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries;
 
         graphEntries = GraphCatalog.getLoadedGraphs(getUsername()).entrySet().stream();
@@ -51,7 +48,7 @@ public class GraphListProc extends BaseProc {
             graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
         }
 
-        return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram));
+        return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram()));
     }
 
 }
