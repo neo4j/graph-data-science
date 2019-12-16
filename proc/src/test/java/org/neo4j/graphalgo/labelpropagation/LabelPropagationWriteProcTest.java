@@ -341,7 +341,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
             .explicitCreation(TEST_GRAPH_NAME)
             .algo("labelPropagation")
             .writeEstimation()
-            .addAllParameters(createMinimallyValidConfig(CypherMapWrapper.empty()).toMap())
+            .addAllParameters(createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 4))).toMap())
             .yields(Arrays.asList("bytesMin", "bytesMax", "nodeCount", "relationshipCount"));
 
         assertCypherResult(query, Arrays.asList(MapUtil.map(

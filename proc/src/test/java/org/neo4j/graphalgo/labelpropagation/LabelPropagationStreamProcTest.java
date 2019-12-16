@@ -66,7 +66,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTestBase<LabelP
             .explicitCreation(TEST_GRAPH_NAME)
             .algo("labelPropagation")
             .streamEstimation()
-            .addAllParameters(createMinimallyValidConfig(CypherMapWrapper.empty()).toMap())
+            .addAllParameters(createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 4))).toMap())
             .yields(Arrays.asList("bytesMin", "bytesMax", "nodeCount", "relationshipCount"));
 
         assertCypherResult(query, Arrays.asList(MapUtil.map(
