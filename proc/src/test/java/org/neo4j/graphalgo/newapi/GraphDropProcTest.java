@@ -38,6 +38,7 @@ import static org.neo4j.helpers.collection.MapUtil.map;
 
 class GraphDropProcTest extends ProcTestBase {
     private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
+    private static final String GRAPH_NAME = "graphNameToDrop";
 
     @BeforeEach
     void setup() throws KernelException {
@@ -58,24 +59,23 @@ class GraphDropProcTest extends ProcTestBase {
     }
 
     @Test
-    void drop() {
-        String graphName = "graphNameToDrop";
-        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", graphName));
+    void shouldDropGraphFromCatalog() {
+        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
 
         assertCypherResult(
             "CALL algo.beta.graph.exists($graphName)",
-            map("graphName", graphName),
+            map("graphName", GRAPH_NAME),
             singletonList(
-                map("graphName", graphName, "exists", true)
+                map("graphName", GRAPH_NAME, "exists", true)
             )
         );
 
         assertCypherResult(
             "CALL algo.beta.graph.drop($graphName)",
-            map("graphName", graphName),
+            map("graphName", GRAPH_NAME),
             singletonList(
                 map(
-                    "graphName", graphName,
+                    "graphName", GRAPH_NAME,
                     "nodeProjection", map(
                         "A", map(
                             "label", "A",
@@ -109,9 +109,9 @@ class GraphDropProcTest extends ProcTestBase {
 
         assertCypherResult(
             "CALL algo.beta.graph.exists($graphName)",
-            map("graphName", graphName),
+            map("graphName", GRAPH_NAME),
             singletonList(
-                map("graphName", graphName, "exists", false)
+                map("graphName", GRAPH_NAME, "exists", false)
             )
         );
     }
@@ -119,23 +119,23 @@ class GraphDropProcTest extends ProcTestBase {
 
     @Test
     void dropWithHistogramComputationOptOut() {
-        String graphName = "graphNameToDrop";
-        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", graphName));
+        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
 
         assertCypherResult(
             "CALL algo.beta.graph.exists($graphName)",
-            map("graphName", graphName),
+            map("graphName", GRAPH_NAME),
             singletonList(
-                map("graphName", graphName, "exists", true)
+                map("graphName", GRAPH_NAME, "exists", true)
             )
         );
 
         assertCypherResult(
-            "CALL algo.beta.graph.drop($graphName) YIELD graphName, nodeProjection, relationshipProjection, nodes, relationships",
-            map("graphName", graphName),
+            "CALL algo.beta.graph.drop($graphName) " +
+            "YIELD graphName, nodeProjection, relationshipProjection, nodes, relationships",
+            map("graphName", GRAPH_NAME),
             singletonList(
                 map(
-                    "graphName", graphName,
+                    "graphName", GRAPH_NAME,
                     "nodeProjection", map(
                         "A", map(
                             "label", "A",
@@ -157,37 +157,34 @@ class GraphDropProcTest extends ProcTestBase {
 
         assertCypherResult(
             "CALL algo.beta.graph.exists($graphName)",
-            map("graphName", graphName),
+            map("graphName", GRAPH_NAME),
             singletonList(
-                map("graphName", graphName, "exists", false)
+                map("graphName", GRAPH_NAME, "exists", false)
             )
         );
     }
 
-
     @Test
     void failOnNonExistingGraph() {
-        String graphName = "nonExistingGraph";
-
         assertCypherResult(
             "CALL algo.beta.graph.exists($graphName)",
-            map("graphName", graphName),
+            map("graphName", GRAPH_NAME),
             singletonList(
-                map("graphName", graphName, "exists", false)
+                map("graphName", GRAPH_NAME, "exists", false)
             )
         );
 
         assertError(
             "CALL algo.beta.graph.drop($graphName)",
-            map("graphName", graphName),
-            String.format("Graph with name `%s` does not exist and can't be removed.", graphName)
+            map("graphName", GRAPH_NAME),
+            String.format("Graph with name `%s` does not exist and can't be removed.", GRAPH_NAME)
         );
 
         assertCypherResult(
             "CALL algo.beta.graph.exists($graphName)",
-            map("graphName", graphName),
+            map("graphName", GRAPH_NAME),
             singletonList(
-                map("graphName", graphName, "exists", false)
+                map("graphName", GRAPH_NAME, "exists", false)
             )
         );
     }
