@@ -21,7 +21,11 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
+import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -59,7 +63,7 @@ class PageRankDocTest extends ProcTestBase {
                 builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );
         db.execute(createGraph);
-        registerProcedures(PageRankProc.class, GraphLoadProc.class);
+        registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCatalogProcs.class);
         registerFunctions(GetNodeFunc.class);
     }
 
@@ -74,13 +78,13 @@ class PageRankDocTest extends ProcTestBase {
     @Test
     void unweighted() {
         String q1 =
-                "CALL algo.pageRank.stream('Page', 'LINKS', {iterations:20, dampingFactor:0.85}) " +
+                "CALL gds.algo.pageRank.stream({ nodeProjection: 'Page', relationshipProjection: 'LINKS', iterations: 20, dampingFactor: 0.85}) " +
                 "YIELD nodeId, score " +
-                "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
+                "RETURN algo.asNode(nodeId).name AS name, score " +
                 "ORDER BY score DESC ";
 
         String expectedString = "+--------------------------------+\n" +
-                                "| Name      | PageRank           |\n" +
+                                "| name      | score              |\n" +
                                 "+--------------------------------+\n" +
                                 "| \"Home\"    | 3.2362017153762284 |\n" +
                                 "| \"About\"   | 1.0611098567023873 |\n" +
@@ -96,16 +100,17 @@ class PageRankDocTest extends ProcTestBase {
         assertEquals(expectedString, db.execute(q1).resultAsString());
 
         String q2 =
-            "CALL algo.pageRank('Page', 'LINKS'," +
-            "  {iterations:20, dampingFactor:0.85, write: true,writeProperty:'pagerank'})" +
-            "YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, writeProperty AS PropertyName";
+            "CALL gds.algo.pageRank.write({" +
+            "  nodeProjection: 'Page', relationshipProjection: 'LINKS'," +
+            "  iterations: 20, dampingFactor: 0.85, writeProperty: 'pagerank'})" +
+            "YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
         String r2 = db.execute(q2).resultAsString();
 
-        expectedString = "+---------------------------------------------------+\n" +
-                         "| Nodes | Iterations | DampingFactor | PropertyName |\n" +
-                         "+---------------------------------------------------+\n" +
-                         "| 8     | 20         | 0.85          | \"pagerank\"   |\n" +
-                         "+---------------------------------------------------+\n" +
+        expectedString = "+-------------------------------------------------------------------+\n" +
+                         "| writtenProperties | ranIterations | dampingFactor | writeProperty |\n" +
+                         "+-------------------------------------------------------------------+\n" +
+                         "| 8                 | 20            | 0.85          | \"pagerank\"    |\n" +
+                         "+-------------------------------------------------------------------+\n" +
                          "1 row\n";
 
         assertEquals(expectedString, r2);
@@ -116,13 +121,20 @@ class PageRankDocTest extends ProcTestBase {
     @Test
     void weighted() {
         String q1 =
-            "CALL algo.pageRank.stream('Page', 'LINKS', {iterations:20, dampingFactor:0.85, weightProperty:'weight'}) " +
+            "CALL gds.algo.pageRank.stream({ " +
+            "  nodeProjection: 'Page', " +
+            "  relationshipProjection: {" +
+            "    LINKS: {" +
+            "      properties: ['weight']" +
+            "    }" +
+            "  }," +
+            "  iterations: 20, dampingFactor: 0.85, weightProperty: 'weight'}) " +
             "YIELD nodeId, score " +
-            "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
+            "RETURN algo.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC ";
 
         String expectedString = "+---------------------------------+\n" +
-                                "| Name      | PageRank            |\n" +
+                                "| name      | score               |\n" +
                                 "+---------------------------------+\n" +
                                 "| \"Home\"    | 3.5528567278757683  |\n" +
                                 "| \"Product\" | 1.9541301048360766  |\n" +
@@ -139,31 +151,39 @@ class PageRankDocTest extends ProcTestBase {
 
 
         String q2 =
-            "CALL algo.pageRank('Page', 'LINKS'," +
-            "  {iterations:20, dampingFactor:0.85, write: true,writeProperty:'pagerank', weightProperty:'weight'})" +
-            "YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, writeProperty AS PropertyName";
+            "CALL gds.algo.pageRank.write({ " +
+            "  nodeProjection: 'Page', " +
+            "  relationshipProjection: {" +
+            "    LINKS: {" +
+            "      properties: ['weight']" +
+            "    }" +
+            "  }," +
+            "  iterations: 20, dampingFactor: 0.85, writeProperty: 'pagerank', weightProperty: 'weight'})" +
+            "YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
 
-        expectedString = "+---------------------------------------------------+\n" +
-                         "| Nodes | Iterations | DampingFactor | PropertyName |\n" +
-                         "+---------------------------------------------------+\n" +
-                         "| 8     | 20         | 0.85          | \"pagerank\"   |\n" +
-                         "+---------------------------------------------------+\n" +
+        expectedString = "+-------------------------------------------------------------------+\n" +
+                         "| writtenProperties | ranIterations | dampingFactor | writeProperty |\n" +
+                         "+-------------------------------------------------------------------+\n" +
+                         "| 8                 | 20            | 0.85          | \"pagerank\"    |\n" +
+                         "+-------------------------------------------------------------------+\n" +
                          "1 row\n";
 
         assertEquals(expectedString, db.execute(q2).resultAsString());
     }
 
     @Test
+    @Disabled(value = "Disabled as the personalized page rank algorithm is currently not triggered")
     void personalized() {
         String q1 =
             "MATCH (siteA:Page {name: 'Site A'})" +
-            "CALL algo.pageRank.stream('Page', 'LINKS', {iterations:20, dampingFactor:0.85,  sourceNodes: [siteA]}) " +
+            "CALL gds.algo.pageRank.stream({ nodeProjection: 'Page', relationshipProjection: 'LINKS', " +
+            "  iterations: 20, dampingFactor: 0.85,  sourceNodes: [siteA]}) " +
             "YIELD nodeId, score " +
-            "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
+            "RETURN algo.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC ";
 
         String expectedString = "+---------------------------------+\n" +
-                                "| Name      | PageRank            |\n" +
+                                "| name      | score               |\n" +
                                 "+---------------------------------+\n" +
                                 "| \"Home\"    | 0.4015879109501838  |\n" +
                                 "| \"Site A\"  | 0.1690742586266424  |\n" +
@@ -180,16 +200,16 @@ class PageRankDocTest extends ProcTestBase {
 
         String q2 =
             "MATCH (siteA:Page {name: 'Site A'})" +
-            "CALL algo.pageRank('Page', 'LINKS', " +
-            "   {iterations:20, dampingFactor:0.85, write:true, writeProperty:'pagerank', sourceNodes: [siteA]})" +
-            "YIELD nodes, iterations, dampingFactor, writeProperty " +
-            "RETURN nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, writeProperty AS PropertyName";
+            "CALL gds.algo.pageRank.write({ nodeProjection: 'Page', relationshipProjection: 'LINKS', " +
+            "   iterations: 20, dampingFactor: 0.85, writeProperty: 'pagerank', sourceNodes: [siteA]})" +
+            "YIELD nodePropertiesWritten, ranIterations, dampingFactor, writeProperty " +
+            "RETURN nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
 
-        expectedString = "+---------------------------------------------------+\n" +
-                         "| Nodes | Iterations | DampingFactor | PropertyName |\n" +
-                         "+---------------------------------------------------+\n" +
-                         "| 8     | 20         | 0.85          | \"pagerank\"   |\n" +
-                         "+---------------------------------------------------+\n" +
+        expectedString = "+-------------------------------------------------------------------+\n" +
+                         "| writtenProperties | ranIterations | dampingFactor | writeProperty |\n" +
+                         "+-------------------------------------------------------------------+\n" +
+                         "| 8                 | 20            | 0.85          | \"pagerank\"    |\n" +
+                         "+-------------------------------------------------------------------+\n" +
                          "1 row\n";
 
         assertEquals(expectedString, db.execute(q2).resultAsString());
@@ -199,19 +219,19 @@ class PageRankDocTest extends ProcTestBase {
     // used to test that the results are correct in the docs
     @Test
     void namedGraphAndCypherProjection() {
-        String loadGraph = "CALL algo.graph.load('myGraph', 'Page', 'LINKS')";
+        String loadGraph = "CALL algo.beta.graph.create('myGraph', ['Page'], ['LINKS'])";
         db.execute(loadGraph);
 
         String q1 =
-            "CALL algo.pageRank.stream(null, null, {graph: 'myGraph'})" +
+            "CALL gds.algo.pageRank.stream('myGraph')" +
             "YIELD nodeId, score " +
-            "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
+            "RETURN algo.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC ";
 
         String namedQueryResult = db.execute(q1).resultAsString();
 
         String expectedString = "+--------------------------------+\n" +
-                                "| Name      | PageRank           |\n" +
+                                "| name      | score              |\n" +
                                 "+--------------------------------+\n" +
                                 "| \"Home\"    | 3.2362017153762284 |\n" +
                                 "| \"About\"   | 1.0611098567023873 |\n" +
@@ -227,18 +247,16 @@ class PageRankDocTest extends ProcTestBase {
         assertEquals(expectedString, namedQueryResult);
 
         String q2 =
-            "CALL algo.pageRank.stream(" +
-            "  'MATCH (p:Page) RETURN id(p) AS id'," +
-            "  'MATCH (p1:Page)-[:LINKS]->(p2:Page)" +
-            "   RETURN id(p1) AS source, id(p2) AS target'," +
-            "   {" +
+            "CALL gds.algo.pageRank.stream({" +
+            "  nodeQuery: 'MATCH (p:Page) RETURN id(p) AS id'," +
+            "  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page)" +
+            "                      RETURN id(p1) AS source, id(p2) AS target'," +
             "    iterations:20," +
             "    dampingFactor:0.85," +
             "    graph:'cypher'" +
-            "  }" +
-            ")" +
+            "})" +
             "YIELD nodeId, score " +
-            "RETURN algo.asNode(nodeId).name AS Name, score AS PageRank " +
+            "RETURN algo.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC";
 
         assertEquals(namedQueryResult, db.execute(q2).resultAsString());

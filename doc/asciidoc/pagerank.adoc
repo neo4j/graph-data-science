@@ -189,19 +189,21 @@ Each relationship has a property called `weight`, which describes the importance
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.pageRank.stream('Page', 'LINKS', {
-  iterations:20,
-  dampingFactor:0.85
+CALL gds.algo.pageRank.stream({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  iterations: 20,
+  dampingFactor: 0.85
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS Name, score AS PageRank
+RETURN algo.asNode(nodeId).name AS name, score
 ORDER BY score DESC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name    | PageRank
+| name    | score
 | Home    | 3.236
 | Product | 1.061
 | Links   | 1.061
@@ -217,20 +219,21 @@ To instead write the page-rank score to a node property in the Neo4j graph, use 
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.pageRank('Page', 'LINKS', {
-  iterations:20,
-  dampingFactor:0.85,
-  write: true,
-  writeProperty:"pagerank"
+CALL gds.algo.pageRank.write({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  iterations: 20,
+  dampingFactor: 0.85,
+  writeProperty: 'pagerank'
 })
-YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, writeProperty AS PropertyName
+YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m,1m"]
 |===
-| Nodes | Iterations | DampingFactor | PropertyName
-| 8     | 20         | 0.85          | "pagerank"
+| writtenProperties | ranIterations | dampingFactor | writeProperty
+| 8                 | 20            | 0.85          | "pagerank"
 |===
 
 [[algorithms-pagerank-examples-weighted]]
@@ -239,20 +242,26 @@ YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, 
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.pageRank.stream('Page', 'LINKS', {
-  iterations:20,
-  dampingFactor:0.85,
-  weightProperty:'weight'
+CALL gds.algo.pageRank.stream({
+  nodeProjection: 'Page',
+  relationshipProjection: {
+    LINKS: {
+      properties: ['weight']
+    }
+  },
+  iterations: 20,
+  dampingFactor: 0.85,
+  weightProperty: 'weight'
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS Name, score AS PageRank
+RETURN algo.asNode(nodeId).name AS name, score
 ORDER BY score DESC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name    | PageRank
+| name    | score
 | Home    | 3.550
 | Product | 1.954
 | Links   | 0.751
@@ -268,21 +277,26 @@ To instead write the page-rank score to a node property in the Neo4j graph, use 
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.pageRank('Page', 'LINKS', {
-  iterations:20,
-  dampingFactor:0.85,
-  weightProperty:'weight',
-  write: true,
-  writeProperty:'pagerank'
+"CALL gds.algo.pageRank.write({
+  nodeProjection: 'Page',
+  relationshipProjection: {
+    LINKS: {
+      properties: ['weight']
+    }
+  },
+  iterations: 20,
+  dampingFactor: 0.85,
+  writeProperty: 'pagerank',
+  weightProperty: 'weight'
 })
-YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, writeProperty AS PropertyName
+YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m,1m"]
 |===
-| Nodes | Iterations | DampingFactor | PropertyName
-| 8     | 20         | 0.85          | "pagerank"
+| writtenProperties | ranIterations | dampingFactor | writeProperty
+| 8                 | 20            | 0.85          | "pagerank"
 |===
 
 
@@ -298,21 +312,23 @@ The following examples show how to run PageRank centered around 'Site A'.
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-MATCH (siteA:Page {name: "Site A"})
-CALL algo.pageRank.stream('Page', 'LINKS', {
-  iterations:20,
-  dampingFactor:0.85,
+MATCH (siteA:Page {name: 'Site A'})
+CALL gds.algo.pageRank.stream({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  iterations: 20,
+  dampingFactor: 0.85,
   sourceNodes: [siteA]
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS Name, score AS PageRank
+RETURN algo.asNode(nodeId).name AS name, score
 ORDER BY score DESC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name    | PageRank
+| name    | score
 | Home    | 0.402
 | Site A  | 0.169
 | About   | 0.113
@@ -327,20 +343,24 @@ ORDER BY score DESC
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.pageRank('Page', 'LINKS', {
-  iterations:20,
-  dampingFactor:0.85,
-  write: true,
-  writeProperty:"pagerank"
+MATCH (siteA:Page {name: 'Site A'})
+CALL gds.algo.pageRank.write(
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+   iterations: 20,
+  dampingFactor: 0.85,
+  writeProperty: 'pagerank',
+  sourceNodes: [siteA]
 })
-YIELD nodes AS Nodes, iterations AS Iterations, dampingFactor AS DampingFactor, writeProperty AS PropertyName
+YIELD nodePropertiesWritten, ranIterations, dampingFactor, writeProperty
+RETURN nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m,1m"]
 |===
-| Nodes | Iterations | DampingFactor | PropertyName
-| 8     | 20         | 0.85          | "pagerank"
+| writtenProperties | ranIterations | dampingFactor | writeProperty
+| 8                 | 20            | 0.85          | "pagerank"
 |===
 
 [[algorithms-pagerank-examples-projection]]
@@ -353,18 +373,18 @@ See <<projected-graph-model, Projected Graph Model>> for more details.
 .Using a named graph:
 [source, cypher]
 ----
-CALL algo.graph.load('myGraph', 'Page', 'LINKS');
+CALL algo.beta.graph.create('myGraph', ['Page'], ['LINKS']);
 
-CALL algo.pageRank.stream(null, null, {graph: 'myGraph'})
+CALL gds.algo.pageRank.stream('myGraph')
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS Name, score AS PageRank
+RETURN algo.asNode(nodeId).name AS name, score
 ORDER BY score DESC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name    | PageRank
+| name    | score
 | Home    | 3.236
 | Product | 1.061
 | Links   | 1.061
@@ -380,25 +400,23 @@ As we can see, the results are identical to the results in the <<algorithms-page
 .Using a Cypher projection:
 [source, cypher]
 ----
-CALL algo.pageRank.stream(
-  'MATCH (p:Page) RETURN id(p) AS id',
-  'MATCH (p1:Page)-[:LINKS]->(p2:Page)
-   RETURN id(p1) AS source, id(p2) AS target',
-   {
-    iterations:20,
-    dampingFactor:0.85,
-    graph:'cypher'
-  }
-)
-YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS Name, score AS PageRank
+CALL gds.algo.pageRank.stream({"
+  graph:'cypher'",
+  nodeQuery: 'MATCH (p:Page) RETURN id(p) AS id',"
+  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page)"
+                      RETURN id(p1) AS source, id(p2) AS target',"
+  iterations:20,"
+  dampingFactor:0.85,"
+})"
+YIELD nodeId, score "
+RETURN algo.asNode(nodeId).name AS name, score "
 ORDER BY score DESC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name    | PageRank
+| name    | score
 | Home    | 3.236
 | Product | 1.061
 | Links   | 1.061
