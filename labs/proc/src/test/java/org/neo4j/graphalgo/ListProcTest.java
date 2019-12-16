@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
-import org.neo4j.graphalgo.unionfind.MSColoringProc;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -97,9 +96,7 @@ class ListProcTest extends ProcTestBase {
         "algo.spanningTree.minimum",
         "algo.triangle.stream",
         "algo.triangleCount",
-        "algo.triangleCount.stream",
-        "algo.unionFind.mscoloring",
-        "algo.unionFind.mscoloring.stream"
+        "algo.triangleCount.stream"
     ));
 
     private static final Set<String> FUNCTIONS = new HashSet<>(asList(
@@ -126,7 +123,6 @@ class ListProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             ListProc.class,
-            MSColoringProc.class,
             AllShortestPathsProc.class,
             ApproxNearestNeighborsProc.class,
             ArticleRankProc.class,

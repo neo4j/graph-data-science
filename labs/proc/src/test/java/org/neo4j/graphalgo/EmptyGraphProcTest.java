@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.unionfind.MSColoringProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +40,6 @@ class EmptyGraphProcTest extends ProcTestBase {
             ClosenessCentralityProc.class,
             KShortestPathsProc.class,
             KSpanningTreeProc.class,
-            MSColoringProc.class,
             PrimProc.class,
             ShortestPathDeltaSteppingProc.class,
             ShortestPathProc.class,
@@ -57,17 +55,6 @@ class EmptyGraphProcTest extends ProcTestBase {
     }
 
     private String graphImpl = "huge";
-
-    @Test
-    void testUnionFindMSColoringStream() {
-        Result result = runQuery("CALL algo.unionFind.mscoloring.stream('', '',{graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    void testUnionFindMSColoring() {
-        runQuery("CALL algo.unionFind.mscoloring('', '',{graph:'" + graphImpl + "'}) YIELD nodes", row -> assertEquals(0L, row.getNumber("nodes")));
-    }
 
     @Test
     void testStronglyConnectedComponentsStream() {
