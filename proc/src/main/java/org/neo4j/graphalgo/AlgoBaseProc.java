@@ -192,7 +192,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
-        if (graphCreateConfig.nodeProjection().labelFilter().orElse("not_cypher").equals(IS_EXPLICIT_CYPHER_GRAPH)) {
+        if (graphCreateConfig.nodeProjection().labelProjection().orElse("not_cypher").equals(IS_EXPLICIT_CYPHER_GRAPH)) {
             return;
         }
         if (config instanceof SeedConfig) {
