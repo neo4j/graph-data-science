@@ -84,12 +84,12 @@ YIELD
 | readConcurrency           | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for implicit graph loading.
 | writeConcurrency          | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for writing the result to Neo4j.
 // algorithm specific
-| writeProperty             | string        | n/a                       | no        | The property name written back the ID of the partition particular node belongs to.
-| weightProperty            | string        | `null`                    | yes       | The property name that contains relationship weight. If `null`, treats the graph as unweighted. Must be numeric.
+| writeProperty             | string        | n/a                       | no        | The node property to which the component ID is written to.
+| weightProperty            | string        | `null`                    | yes       | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
 | defaultValue              | float         | `null`                    | yes       | The default value of the relationship weight in case it is missing or invalid.
 | seedProperty              | string        | n/a                       | yes       | Used to set the initial community for a node. The property value needs to be a number.
 | threshold                 | float         | `null`                    | yes       | The value of the weight above which the relationship is considered in the computation.
-| consecutiveIds            | boolean       | `false`                   | yes       | Community identifiers are mapped into a consecutive id space (requires additional memory).
+| consecutiveIds            | boolean       | `false`                   | yes       | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
@@ -148,11 +148,11 @@ YIELD
 | readConcurrency           | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for implicit graph loading.
 | writeConcurrency          | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for writing the result to Neo4j.
 // algorithm specific
-| weightProperty            | string        | `null`                    | yes       | The property name that contains relationship weight. If `null`, treats the graph as unweighted. Must be numeric.
+| weightProperty            | string        | `null`                    | yes       | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
 | defaultValue              | float         | `null`                    | yes       | The default value of the relationship weight in case it is missing or invalid.
 | seedProperty              | string        | n/a                       | yes       | Used to set the initial community for a node. The property value needs to be a number.
 | threshold                 | float         | `null`                    | yes       | The value of the weight above which the relationship is considered in the computation.
-| consecutiveIds            | boolean       | `false`                   | yes       | Community identifiers are mapped into a consecutive id space (requires additional memory).
+| consecutiveIds            | boolean       | `false`                   | yes       | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
