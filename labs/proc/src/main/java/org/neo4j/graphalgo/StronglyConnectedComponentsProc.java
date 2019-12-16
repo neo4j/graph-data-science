@@ -187,23 +187,4 @@ public class StronglyConnectedComponentsProc extends LabsProc {
         graph.release();
         return algo.resultStream();
     }
-
-    public static class SCCStreamResult {
-
-        /**
-         * the node id
-         */
-        public final long nodeId;
-
-        /**
-         * the set id of the stronly connected component or
-         * -1 of not part of a SCC
-         */
-        public final long partition;
-
-        public SCCStreamResult(long nodeId, long clusterId) {
-            this.nodeId = nodeId;
-            this.partition = clusterId;
-        }
-    }
 }

@@ -58,10 +58,6 @@ public abstract class ConnectedComponentsTest extends ProcTestBase{
         return graph.toMappedNodeId(node[0].getId());
     }
 
-    protected void assertCC(int[] connectedComponents) {
-        assertCC(HugeLongArray.of(Arrays.stream(connectedComponents).mapToLong(i -> (long) i).toArray()));
-    }
-
     protected void assertCC(HugeLongArray connectedComponents) {
         assertBelongSameSet(connectedComponents,
                 getMappedNodeId("a"),
