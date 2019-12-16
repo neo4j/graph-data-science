@@ -212,10 +212,6 @@ YIELD nodeId, partition
 
 * *Iterative* adaptation of tarjan algorithm.
 
-`algo.scc.recursive.tarjan`
-
-* Original *recursive* tarjan implementation.
-
 `algo.scc.recursive.tunedTarjan`
 
 * Also a *recursive* tarjan implementation.
@@ -259,14 +255,6 @@ Strongly Connected Components (SCC) is a class algorithms for finding groups of 
 
 
 == Details
-
-
-=== algo.scc.tarjan
-
-- original *recursive* tarjan implementation
-- result is a cluster-id at all nodes
-- each cluster is a scc
-- Builds sets of node-Ids which represent a strongly connected component within the graph. Also calculates minimum and maximum setSize as well as the count of distinct sets.
 
 
 === algo.scc.tunedTarjan

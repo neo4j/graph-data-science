@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.scc.ForwardBackwardScc;
 import org.neo4j.graphalgo.impl.scc.SCCAlgorithm;
-import org.neo4j.graphalgo.impl.scc.SCCTarjan;
 import org.neo4j.graphalgo.impl.scc.SCCTunedTarjan;
 import org.neo4j.graphalgo.results.SCCResult;
 import org.neo4j.graphdb.Direction;
@@ -76,72 +75,6 @@ public class StronglyConnectedComponentsProc extends LabsProc {
     ) {
 
         return sccIterativeTarjanStream(label, relationship, config);
-    }
-
-    // algo.scc.tarjan
-    @Procedure(value = "algo.scc.recursive.tarjan", mode = Mode.WRITE)
-    @Description("CALL algo.scc.tarjan(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-                 "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
-    public Stream<SCCResult> sccTarjan(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationship,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
-    ) {
-
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-
-        AllocationTracker tracker = AllocationTracker.create();
-        SCCResult.Builder builder = new SCCResult.Builder(true, true, tracker);
-
-        ProgressTimer loadTimer = builder.timeLoad();
-        Graph graph = new GraphLoader(api, Pools.DEFAULT)
-            .init(log, label, relationship, configuration)
-            .withAllocationTracker(tracker)
-            .withOptionalLabel(label)
-            .withOptionalRelationshipType(relationship)
-            .withDirection(Direction.OUTGOING)
-            .load(configuration.getGraphImpl());
-        loadTimer.stop();
-
-        if (graph.isEmpty()) {
-            return Stream.of(SCCResult.EMPTY);
-        }
-
-        SCCTarjan tarjan = new SCCTarjan(graph)
-            .withProgressLogger(ProgressLogger.wrap(log, "SCC(Tarjan)"))
-            .withTerminationFlag(TerminationFlag.wrap(transaction));
-
-        builder.timeCompute(tarjan::compute);
-
-        final int[] connectedComponents = tarjan.getConnectedComponents();
-        if (configuration.isWriteFlag()) {
-            builder.withWrite(true);
-            String partitionProperty = configuration.get(
-                CONFIG_WRITE_PROPERTY,
-                CONFIG_OLD_WRITE_PROPERTY,
-                CONFIG_CLUSTER
-            );
-            builder.withPartitionProperty(partitionProperty);
-
-            builder.timeWrite(() -> {
-                graph.release();
-                tarjan.release();
-                NodePropertyExporter.of(api, graph, tarjan.terminationFlag)
-                    .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                    .build()
-                    .write(
-                        partitionProperty,
-                        connectedComponents,
-                        Translators.OPTIONAL_INT_ARRAY_TRANSLATOR
-                    );
-            });
-        }
-
-        builder.withNodeCount(graph.nodeCount());
-        builder.withCommunityFunction( l -> (long) connectedComponents[((int) l)]);
-
-        return Stream.of(builder.build());
     }
 
     // algo.scc.tunedTarjan
