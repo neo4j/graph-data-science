@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -31,10 +30,8 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphalgo.impl.triangle.TriangleCountBase;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountForkJoin;
 import org.neo4j.graphalgo.impl.triangle.TriangleStream;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
 import org.neo4j.procedure.Description;
@@ -44,8 +41,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -127,42 +122,6 @@ public class TriangleProc extends LabsProc {
         algo.compute();
         return algo.resultStream();
     }
-
-
-    @Procedure(name = "algo.triangleCount.forkJoin.stream", mode = READ)
-    @Description("CALL algo.triangleCount.forkJoin.stream(label, relationship, {concurrency:8}) " +
-                 "YIELD nodeId, triangles - yield nodeId, number of triangles")
-    public Stream<TriangleCountBase.Result> triangleCountForkJoinStream(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationship,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
-    ) {
-
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
-            .setNodeLabelOrQuery(label)
-            .setRelationshipTypeOrQuery(relationship);
-
-        final Graph graph = new GraphLoader(api, Pools.DEFAULT)
-            .init(log, label, relationship, configuration)
-            .withOptionalLabel(configuration.getNodeLabelOrQuery())
-            .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
-            .withDirection(TriangleCountBase.D)
-            .sorted()
-            .undirected()
-            .load(configuration.getGraphImpl());
-
-        TriangleCountForkJoin algo = new TriangleCountForkJoin(
-            graph,
-            ForkJoinPool.commonPool(),
-            configuration.getNumber("threshold", 10_000).intValue()
-        )
-            .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
-            .withTerminationFlag(TerminationFlag.wrap(transaction));
-
-        algo.compute();
-        return algo.resultStream();
-    }
-
 
     @Procedure(value = "algo.triangleCount", mode = Mode.WRITE)
     @Description("CALL algo.triangleCount(label, relationship, " +
@@ -286,86 +245,6 @@ public class TriangleProc extends LabsProc {
         }
 
     }
-
-    @Procedure(value = "algo.triangleCount.forkJoin", mode = Mode.WRITE)
-    @Description("CALL algo.triangleCount.forkJoin(label, relationship, " +
-                 "{concurrency:4, write:true, writeProperty:'triangles', clusteringCoefficientProperty:'coefficient'}) " +
-                 "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient")
-    public Stream<Result> triangleCountExp3(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationship,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
-    ) {
-
-        final Graph graph;
-        final TriangleCountForkJoin triangleCount;
-        final AtomicDoubleArray clusteringCoefficients;
-
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
-            .setNodeLabelOrQuery(label)
-            .setRelationshipTypeOrQuery(relationship);
-        final TriangleCountResultBuilder builder = new TriangleCountResultBuilder(true, true, AllocationTracker.EMPTY);
-
-        try (ProgressTimer timer = builder.timeLoad()) {
-            graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .withOptionalLabel(configuration.getNodeLabelOrQuery())
-                .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
-                .withDirection(TriangleCountBase.D)
-                .sorted()
-                .undirected()
-                .load(configuration.getGraphImpl());
-        }
-
-        try (ProgressTimer timer = builder.timeCompute()) {
-            triangleCount = new TriangleCountForkJoin(
-                graph,
-                ForkJoinPool.commonPool(),
-                configuration.getNumber("threshold", 10_000).intValue()
-            )
-                .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
-            triangleCount.compute();
-            clusteringCoefficients = triangleCount.getClusteringCoefficients();
-        }
-
-        if (configuration.isWriteFlag()) {
-            try (ProgressTimer timer = builder.timeWrite()) {
-                final Optional<String> coefficientProperty = configuration.getString(COEFFICIENT_WRITE_PROPERTY_VALUE);
-                final NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, triangleCount.terminationFlag)
-                    .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                    .build();
-                if (coefficientProperty.isPresent()) {
-                    exporter.write(
-                        configuration.getWriteProperty(DEFAULT_WRITE_PROPERTY_VALUE),
-                        triangleCount.getTriangles(),
-                        Translators.ATOMIC_INTEGER_ARRAY_TRANSLATOR,
-                        coefficientProperty.get(),
-                        clusteringCoefficients,
-                        Translators.ATOMIC_DOUBLE_ARRAY_TRANSLATOR
-                    );
-                } else {
-                    exporter.write(
-                        configuration.getWriteProperty(DEFAULT_WRITE_PROPERTY_VALUE),
-                        triangleCount.getTriangles(),
-                        Translators.ATOMIC_INTEGER_ARRAY_TRANSLATOR
-                    );
-                }
-            }
-        }
-
-        builder.withAverageClusteringCoefficient(triangleCount.getAverageClusteringCoefficient())
-            .withTriangleCount(triangleCount.getTriangleCount());
-
-        final AtomicIntegerArray triangles = triangleCount.getTriangles();
-
-        builder.withNodeCount(graph.nodeCount());
-        builder.withCommunityFunction(l -> triangles.get((int) l));
-
-        return Stream.of(builder.build());
-    }
-
 
     /**
      * result dto

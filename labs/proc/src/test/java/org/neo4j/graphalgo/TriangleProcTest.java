@@ -130,47 +130,10 @@ class TriangleProcTest extends ProcTestBase {
         });
     }
 
-
-    @Test
-    void testTriangleCountExp1WriteCypher() {
-        final String cypher = "CALL algo.triangleCount.forkJoin('Node', '', {concurrency:4, write:true}) " +
-                "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount";
-        runQuery(cypher, row -> {
-            final long loadMillis = row.getNumber("loadMillis").longValue();
-            final long computeMillis = row.getNumber("computeMillis").longValue();
-            final long writeMillis = row.getNumber("writeMillis").longValue();
-            final long nodeCount = row.getNumber("nodeCount").longValue();
-            final long triangleCount = row.getNumber("triangleCount").longValue();
-            assertNotEquals(-1, loadMillis);
-            assertNotEquals(-1, computeMillis);
-            assertNotEquals(-1, writeMillis);
-            assertEquals(3, triangleCount);
-            assertEquals(9, nodeCount);
-        });
-
-        final String request = "MATCH (n) WHERE exists(n.triangles) RETURN n.triangles as t";
-        runQuery(request, row -> {
-            final int triangles = row.getNumber("t").intValue();
-            assertEquals(1, triangles);
-        });
-    }
-
     @Test
     void testTriangleCountStream() {
         final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
         final String cypher = "CALL algo.triangleCount.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles";
-        runQuery(cypher, row -> {
-            final long nodeId = row.getNumber("nodeId").longValue();
-            final long triangles = row.getNumber("triangles").longValue();
-            mock.consume(nodeId, triangles);
-        });
-        verify(mock, times(9)).consume(anyLong(), eq(1L));
-    }
-
-    @Test
-    void testTriangleCountExp1Stream() {
-        final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
-        final String cypher = "CALL algo.triangleCount.forkJoin.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles";
         runQuery(cypher, row -> {
             final long nodeId = row.getNumber("nodeId").longValue();
             final long triangles = row.getNumber("triangles").longValue();

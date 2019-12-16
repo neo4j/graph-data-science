@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountForkJoin;
 import org.neo4j.graphalgo.impl.triangle.TriangleStream;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
@@ -109,14 +108,7 @@ public class TriangleCountBenchmark {
     }
 
     @Benchmark
-    public Object _02_forkJoin() {
-        TriangleCountForkJoin algo = new TriangleCountForkJoin(g, Pools.FJ_POOL, seqThreshold);
-        algo.compute();
-        return algo.getTriangleCount();
-    }
-
-    @Benchmark
-    public Object _03_stream() {
+    public Object _02_stream() {
         return new TriangleStream(g, Pools.DEFAULT, concurrency).resultStream().count();
     }
 }

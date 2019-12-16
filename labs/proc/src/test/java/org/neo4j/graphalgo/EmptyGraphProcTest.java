@@ -39,8 +39,6 @@ class EmptyGraphProcTest extends ProcTestBase {
             AllShortestPathsProc.class,
             BetweennessCentralityProc.class,
             ClosenessCentralityProc.class,
-            DangalchevCentralityProc.class,
-            HarmonicCentralityProc.class,
             KShortestPathsProc.class,
             KSpanningTreeProc.class,
             MSColoringProc.class,
@@ -164,28 +162,6 @@ class EmptyGraphProcTest extends ProcTestBase {
     void testTriangleStream() {
         Result result = runQuery("CALL algo.triangle.stream('', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
-    }
-
-    @Test
-    void testDangelchevCentralityStream() {
-        Result result = runQuery("CALL algo.closeness.dangalchev.stream('', '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    void testDangelchevCentrality() {
-        runQuery("CALL algo.closeness.dangalchev('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodes")));
-    }
-
-    @Test
-    void testHarmonicCentralityStream() {
-        Result result = runQuery("CALL algo.closeness.harmonic.stream('', '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    void testHarmonicCentrality() {
-        runQuery("CALL algo.closeness.harmonic('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodes")));
     }
 
     @Test

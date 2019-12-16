@@ -58,8 +58,6 @@
                 </d:tocentry>
                 <d:tocentry linkend="labs-algorithms-eigenvector"><?dbhtml filename="labs-algorithms/eigenvector-centrality/index.html"?>
                 </d:tocentry>
-                <d:tocentry linkend="labs-algorithms-harmonic-centrality"><?dbhtml filename="labs-algorithms/harmonic-centrality/index.html"?>
-                </d:tocentry>
             </d:tocentry>
             <d:tocentry linkend="labs-algorithms-community"><?dbhtml filename="labs-algorithms/community/index.html"?>
                 <d:tocentry linkend="labs-algorithms-strongly-connected-components"><?dbhtml filename="labs-algorithms/strongly-connected-components/index.html"?>

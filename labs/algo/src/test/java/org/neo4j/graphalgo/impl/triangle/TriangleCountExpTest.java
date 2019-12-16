@@ -39,7 +39,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -111,32 +110,6 @@ class TriangleCountExpTest {
         assertTriangles(algo.getTriangles());
         assertCoefficients(algo.getCoefficients());
         assertEquals(EXPECTED_COEFFICIENT, algo.getAverageCoefficient(), 0.001);
-    }
-
-    @AllGraphTypesWithoutCypherTest
-    void testForkJoin(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
-        final TriangleCountForkJoin algo = new TriangleCountForkJoin(graph, ForkJoinPool.commonPool(), 100_000);
-        try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
-            algo.compute();
-        }
-        assertEquals(TRIANGLE_COUNT, algo.getTriangleCount());
-        assertTriangles(algo.getTriangles());
-        assertClusteringCoefficient(algo.getClusteringCoefficients());
-        assertEquals(EXPECTED_COEFFICIENT, algo.getAverageClusteringCoefficient(), 0.001);
-    }
-
-    @AllGraphTypesWithoutCypherTest
-    void testForkJoinParallel(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
-        final TriangleCountForkJoin algo = new TriangleCountForkJoin(graph, ForkJoinPool.commonPool(), 100);
-        try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
-            algo.compute();
-        }
-        assertEquals(TRIANGLE_COUNT, algo.getTriangleCount());
-        assertTriangles(algo.getTriangles());
-        assertClusteringCoefficient(algo.getClusteringCoefficients());
-        assertEquals(EXPECTED_COEFFICIENT, algo.getAverageClusteringCoefficient(), 0.001);
     }
 
     private void assertTriangles(Object triangles) {

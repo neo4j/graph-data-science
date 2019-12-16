@@ -48,7 +48,7 @@ For more information, see http://i11www.iti.kit.edu/extra/publications/sw-fclt-0
 
 
 [[algorithms-triangle-count-clustering-coefficient-usecase]]
-== Use-cases - when to use the Triangle Counting / Clustering Coefficient algorithm
+== Use-cases - when to use the Triangle Counting / Clustering Coefficient algorithm 
 
 // tag::use-case[]
 * Triangle count and clustering coefficient have been shown to be useful as features for classifying a given website as spam, or non-spam, content.

@@ -39,7 +39,6 @@ These algorithms determine the importance of distinct nodes in a network:
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/article-rank/[ArticleRank^] (`algo.articleRank`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/betweenness-centrality/[Betweenness Centrality^] (`algo.betweenness`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/closeness-centrality/[Closeness Centrality^] (`algo.closeness`)
-* https://neo4j.com/docs/graph-algorithms/current/algorithms/harmonic-centrality/[Harmonic Centrality^] (`algo.closeness.harmonic`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/eigenvector-centrality/[Eigenvector Centrality^] (`algo.eigenvector`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/degree-centrality/[Degree Centrality^] (`algo.degree`)
 
