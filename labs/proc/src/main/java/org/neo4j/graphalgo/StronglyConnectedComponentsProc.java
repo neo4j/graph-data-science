@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
-import org.neo4j.graphalgo.impl.multistepscc.MultistepSCC;
 import org.neo4j.graphalgo.impl.scc.ForwardBackwardScc;
 import org.neo4j.graphalgo.impl.scc.SCCAlgorithm;
 import org.neo4j.graphalgo.impl.scc.SCCTarjan;
@@ -43,7 +42,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -319,115 +317,6 @@ public class StronglyConnectedComponentsProc extends LabsProc {
         graph.release();
 
         return algo.resultStream();
-    }
-
-
-    // algo.scc.multistep
-    @Procedure(value = "algo.scc.multistep", mode = Mode.WRITE)
-    @Description("CALL algo.scc.multistep(label:String, relationship:String, {write:true, concurrency:4, cutoff:100000}) YIELD " +
-                 "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
-    public Stream<SCCResult> multistep(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationship,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
-    ) {
-
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-
-        AllocationTracker tracker = AllocationTracker.create();
-        SCCResult.Builder builder = new SCCResult.Builder(true, true, tracker);
-
-        ProgressTimer loadTimer = builder.timeLoad();
-        Graph graph = new GraphLoader(api, Pools.DEFAULT)
-            .init(log, label, relationship, configuration)
-            .withAllocationTracker(tracker)
-            .load(configuration.getGraphImpl());
-        loadTimer.stop();
-
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.of(SCCResult.EMPTY);
-        }
-
-        final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT,
-            configuration.concurrency(),
-            configuration.getNumber("cutoff", 100_000).intValue()
-        )
-            .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))
-            .withTerminationFlag(terminationFlag);
-
-        builder.timeCompute(multistep::compute);
-
-        final int[] connectedComponents = multistep.getConnectedComponents();
-
-        if (configuration.isWriteFlag()) {
-            graph.release();
-            multistep.release();
-            builder.timeWrite(() -> {
-                builder.withWrite(true);
-                String partitionProperty = configuration.get(
-                    CONFIG_WRITE_PROPERTY,
-                    CONFIG_OLD_WRITE_PROPERTY,
-                    CONFIG_CLUSTER
-                );
-                builder.withPartitionProperty(partitionProperty);
-
-                NodePropertyExporter
-                    .of(api, graph, multistep.terminationFlag)
-                    .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                    .build()
-                    .write(
-                        partitionProperty,
-                        connectedComponents,
-                        Translators.OPTIONAL_INT_ARRAY_TRANSLATOR
-                    );
-            });
-        }
-
-        builder.withNodeCount(graph.nodeCount());
-        builder.withCommunityFunction( l -> (long) connectedComponents[((int) l)]);
-
-        return Stream.of(builder.build());
-    }
-
-    // algo.scc.multistep.stream
-    @Procedure(name = "algo.scc.multistep.stream", mode = READ)
-    @Description("CALL algo.scc.multistep.stream(label:String, relationship:String, {write:true, concurrency:4, cutoff:100000}) YIELD " +
-                 "nodeId, partition")
-    public Stream<SCCStreamResult> multistepStream(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationship,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
-    ) {
-
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-        Graph graph = new GraphLoader(api, Pools.DEFAULT)
-            .init(log, label, relationship, configuration)
-            .load(configuration.getGraphImpl());
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-        final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT,
-            configuration.concurrency(),
-            configuration.getNumber("cutoff", 100_000).intValue()
-        )
-            .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))
-            .withTerminationFlag(TerminationFlag.wrap(transaction));
-        multistep.compute();
-
-        int nodeCount = Math.toIntExact(graph.nodeCount());
-
-        graph.release();
-
-        int[] connectedComponents = multistep.result();
-
-        return IntStream.range(0, nodeCount)
-            .filter(node -> connectedComponents[node] != -1)
-            .mapToObj(node ->
-                new SCCStreamResult(graph.toOriginalNodeId(node), connectedComponents[node]));
     }
 
     // algo.scc.forwardBackward.stream

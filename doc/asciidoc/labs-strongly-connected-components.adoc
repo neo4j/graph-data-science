@@ -220,10 +220,6 @@ YIELD nodeId, partition
 
 * Also a *recursive* tarjan implementation.
 
-`algo.scc.multistep`
-
-* Parallel SCC algorithm.
-
 
 ifndef::env-docs[]
 == References
@@ -285,15 +281,6 @@ Strongly Connected Components (SCC) is a class algorithms for finding groups of 
 - *iterative* adaption of tarjan algorithm
 - result is a cluster-id at all nodes
 - http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
-
-
-=== algo.scc.multistep
-
-- parallel scc algorithm
-- composition of several scc algorithms (FWBW, coloring, tarjan)
-- uses FWBW + coloring to find big scc's
-- starts simple tarjan once the cutoff threshold is reached
-- http://www.sandia.gov/~srajama/publications/BFS_and_Coloring.pdf
 
 
 // end::implementation[]
