@@ -23,9 +23,12 @@ import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -34,14 +37,18 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.TestSupport.crossArguments;
+import static org.neo4j.graphalgo.TestSupport.toArguments;
 
 class WccTest extends AlgoTestBase {
 
@@ -79,13 +86,22 @@ class WccTest extends AlgoTestBase {
         return SET_SIZE;
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void shouldComputeComponents(Class<? extends GraphFactory> graphFactory) {
+    static Stream<Arguments> allTypesWithoutCypherAndDirections() {
+        return crossArguments(
+            toArguments(TestSupport::allTypesWithoutCypher),
+            toArguments(() -> Arrays.stream(Direction.values()))
+        );
+    }
+
+    @ParameterizedTest(name = "factory = {0}, direction = {1}")
+    @MethodSource("allTypesWithoutCypherAndDirections")
+    void shouldComputeComponents(Class<? extends GraphFactory> graphFactory, Direction direction) {
         Graph graph = new GraphLoader(db)
-                .withExecutorService(Pools.DEFAULT)
-                .withAnyLabel()
-                .withRelationshipType(RELATIONSHIP_TYPE)
-                .load(graphFactory);
+            .withExecutorService(Pools.DEFAULT)
+            .withAnyLabel()
+            .withRelationshipType(RELATIONSHIP_TYPE)
+            .withDirection(direction)
+            .load(graphFactory);
 
         DisjointSetStruct result = run(graph);
 
@@ -98,18 +114,20 @@ class WccTest extends AlgoTestBase {
             final long setId = result.setIdOf(nodeId);
             int setRegion = (int) (setId / SET_SIZE);
             assertEquals(
-                    expectedSetRegion,
-                    setRegion,
-                    "Node " + nodeId + " in unexpected set: " + setId);
+                expectedSetRegion,
+                setRegion,
+                "Node " + nodeId + " in unexpected set: " + setId
+            );
 
             long regionSetId = setRegions[setRegion];
             if (regionSetId == -1) {
                 setRegions[setRegion] = setId;
             } else {
                 assertEquals(
-                        regionSetId,
-                        setId,
-                        "Inconsistent set for node " + nodeId + ", is " + setId + " but should be " + regionSetId);
+                    regionSetId,
+                    setId,
+                    "Inconsistent set for node " + nodeId + ", is " + setId + " but should be " + regionSetId
+                );
             }
             return true;
         });
@@ -120,63 +138,81 @@ class WccTest extends AlgoTestBase {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
         assertEquals(
-                MemoryRange.of(128),
-                Wcc.memoryEstimation(false).estimate(dimensions0, 1).memoryUsage());
+            MemoryRange.of(128),
+            Wcc.memoryEstimation(false).estimate(dimensions0, 1).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(168),
-                Wcc.memoryEstimation(true).estimate(dimensions0, 1).memoryUsage());
+            MemoryRange.of(168),
+            Wcc.memoryEstimation(true).estimate(dimensions0, 1).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(128),
-                Wcc.memoryEstimation(false).estimate(dimensions0, 8).memoryUsage());
+            MemoryRange.of(128),
+            Wcc.memoryEstimation(false).estimate(dimensions0, 8).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(168),
-                Wcc.memoryEstimation(true).estimate(dimensions0, 8).memoryUsage());
+            MemoryRange.of(168),
+            Wcc.memoryEstimation(true).estimate(dimensions0, 8).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(128),
-                Wcc.memoryEstimation(false).estimate(dimensions0, 64).memoryUsage());
+            MemoryRange.of(128),
+            Wcc.memoryEstimation(false).estimate(dimensions0, 64).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(168),
-                Wcc.memoryEstimation(true).estimate(dimensions0, 64).memoryUsage());
+            MemoryRange.of(168),
+            Wcc.memoryEstimation(true).estimate(dimensions0, 64).memoryUsage()
+        );
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
         assertEquals(
-                MemoryRange.of(928),
-                Wcc.memoryEstimation(false).estimate(dimensions100, 1).memoryUsage());
+            MemoryRange.of(928),
+            Wcc.memoryEstimation(false).estimate(dimensions100, 1).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(1768),
-                Wcc.memoryEstimation(true).estimate(dimensions100, 1).memoryUsage());
+            MemoryRange.of(1768),
+            Wcc.memoryEstimation(true).estimate(dimensions100, 1).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(928),
-                Wcc.memoryEstimation(false).estimate(dimensions100, 8).memoryUsage());
+            MemoryRange.of(928),
+            Wcc.memoryEstimation(false).estimate(dimensions100, 8).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(1768),
-                Wcc.memoryEstimation(true).estimate(dimensions100, 8).memoryUsage());
+            MemoryRange.of(1768),
+            Wcc.memoryEstimation(true).estimate(dimensions100, 8).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(928),
-                Wcc.memoryEstimation(false).estimate(dimensions100, 64).memoryUsage());
+            MemoryRange.of(928),
+            Wcc.memoryEstimation(false).estimate(dimensions100, 64).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(1768),
-                Wcc.memoryEstimation(true).estimate(dimensions100, 64).memoryUsage());
+            MemoryRange.of(1768),
+            Wcc.memoryEstimation(true).estimate(dimensions100, 64).memoryUsage()
+        );
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
         assertEquals(
-                MemoryRange.of(800_122_070_456L),
-                Wcc.memoryEstimation(false).estimate(dimensions100B, 1).memoryUsage());
+            MemoryRange.of(800_122_070_456L),
+            Wcc.memoryEstimation(false).estimate(dimensions100B, 1).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(1_600_244_140_824L),
-                Wcc.memoryEstimation(true).estimate(dimensions100B, 1).memoryUsage());
+            MemoryRange.of(1_600_244_140_824L),
+            Wcc.memoryEstimation(true).estimate(dimensions100B, 1).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(800_122_070_456L),
-                Wcc.memoryEstimation(false).estimate(dimensions100B, 8).memoryUsage());
+            MemoryRange.of(800_122_070_456L),
+            Wcc.memoryEstimation(false).estimate(dimensions100B, 8).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(1_600_244_140_824L),
-                Wcc.memoryEstimation(true).estimate(dimensions100B, 8).memoryUsage());
+            MemoryRange.of(1_600_244_140_824L),
+            Wcc.memoryEstimation(true).estimate(dimensions100B, 8).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(800_122_070_456L),
-                Wcc.memoryEstimation(false).estimate(dimensions100B, 64).memoryUsage());
+            MemoryRange.of(800_122_070_456L),
+            Wcc.memoryEstimation(false).estimate(dimensions100B, 64).memoryUsage()
+        );
         assertEquals(
-                MemoryRange.of(1_600_244_140_824L),
-                Wcc.memoryEstimation(true).estimate(dimensions100B, 64).memoryUsage());
+            MemoryRange.of(1_600_244_140_824L),
+            Wcc.memoryEstimation(true).estimate(dimensions100B, 64).memoryUsage()
+        );
     }
 
     private void createTestGraph(int... setSizes) {

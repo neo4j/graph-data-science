@@ -55,7 +55,7 @@ class WccStreamProcTest extends WccProcBaseTest<WccStreamConfig> {
     }
 
     @Test
-    void testWCCStreamWithDefaults() {
+    void testStreamWithDefaults() {
         String query = GdsCypher.call()
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -74,7 +74,7 @@ class WccStreamProcTest extends WccProcBaseTest<WccStreamConfig> {
     }
 
     @Test
-    void testWCCStreamRunsOnLoadedGraph() {
+    void testStreamRunsOnLoadedGraph() {
         GraphCreateConfig createGraphConfig = ImmutableGraphCreateConfig
             .builder()
             .graphName("testGraph")
