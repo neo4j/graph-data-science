@@ -34,6 +34,7 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 class GraphExistsProcTest extends ProcTestBase {
@@ -48,7 +49,7 @@ class GraphExistsProcTest extends ProcTestBase {
         registerProcedures(GraphCreateProc.class, GraphExistsProc.class);
         registerFunctions(GraphExistsFunc.class);
 
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -59,8 +60,8 @@ class GraphExistsProcTest extends ProcTestBase {
 
     @ParameterizedTest(name = "Existing Graphs: {0}, Lookup: {1}, Exists: {2}")
     @MethodSource("graphNameExistsCombinations")
-    void existsTest(String graphNameToCreate, String graphNameToCheck, boolean exists) {
-        db.execute("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", graphNameToCreate));
+    void shouldReportOnGraphExistenceProc(String graphNameToCreate, String graphNameToCheck, boolean exists) {
+        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", graphNameToCreate));
 
         assertCypherResult(
             "CALL algo.beta.graph.exists($graphName)",
@@ -73,8 +74,8 @@ class GraphExistsProcTest extends ProcTestBase {
 
     @ParameterizedTest(name = "Existing Graphs: {0}, Lookup: {1}, Exists: {2}")
     @MethodSource("graphNameExistsCombinations")
-    void existsFunctionTest(String graphNameToCreate, String graphNameToCheck, boolean exists) {
-        db.execute("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", graphNameToCreate));
+    void shouldReportOnGraphExistenceFunc(String graphNameToCreate, String graphNameToCheck, boolean exists) {
+        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", graphNameToCreate));
 
         assertCypherResult(
             "RETURN algo.beta.graph.exists($graphName) AS exists",
@@ -87,14 +88,14 @@ class GraphExistsProcTest extends ProcTestBase {
 
     static Stream<Arguments> graphNameExistsCombinations() {
         return Stream.of(
-            Arguments.of("g", "g", true),
-            Arguments.of("graph", "graph", true),
-            Arguments.of("graph", "graph1", false),
-            Arguments.of("g", "a", false),
-            Arguments.of("g", "", false),
-            Arguments.of("g", null, false),
-            Arguments.of("g", "\n", false),
-            Arguments.of("g", "    ", false)
+            arguments("g", "g", true),
+            arguments("graph", "graph", true),
+            arguments("graph", "graph1", false),
+            arguments("g", "a", false),
+            arguments("g", "", false),
+            arguments("g", null, false),
+            arguments("g", "\n", false),
+            arguments("g", "    ", false)
         );
     }
 }

@@ -214,7 +214,7 @@ class GraphListProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "Invalid Graph Name: {0}")
     @ValueSource(strings = {"{ a: 'b' }", "[]", "1", "true", "false", "[1, 2, 3]", "1.4"})
-    void failForInvalidGraphNameParameter(String graphName) {
+    void failForInvalidGraphNameTypeDueToObjectSignature(String graphName) {
         assertError(String.format("CALL algo.beta.graph.list(%s)", graphName), "`graphName` parameter must be a STRING");
     }
 

@@ -41,7 +41,7 @@ public class GraphDropProc extends CatalogProc {
                  "  relationshipProjection: MAP," +
                  "  nodes: INTEGER," +
                  "  relationships: INTEGER")
-    public Stream<GraphInfo> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
+    public Stream<GraphInfo> drop(@Name(value = "graphName") String graphName) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
 
         AtomicReference<GraphInfo> result = new AtomicReference<>();
