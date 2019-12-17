@@ -152,6 +152,14 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
     }
 
     public RelationshipProjections filterPropertyMappings(String... propertyNames) {
+        Boolean noMatch = Arrays
+            .stream(propertyNames)
+            .map(propertyName -> allProperties().stream().noneMatch(p -> p.equals(propertyName)))
+            .reduce(Boolean::logicalAnd)
+            .get();
+        if (noMatch) {
+            return modifyProjections(p -> p);
+        }
         return modifyProjections(p ->
             p.withProperties(PropertyMappings.of(
                 p.properties().stream()
