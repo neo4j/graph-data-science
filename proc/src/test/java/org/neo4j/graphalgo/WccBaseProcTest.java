@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends ProcTestBase implements
+abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, DisjointSetStruct>,
     SeedConfigTest<CONFIG, DisjointSetStruct>,
     WeightConfigTest<CONFIG, DisjointSetStruct>,

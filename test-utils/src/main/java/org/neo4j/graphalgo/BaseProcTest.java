@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
-public class ProcTestBase {
+public class BaseProcTest {
 
     protected GraphDatabaseAPI db;
 

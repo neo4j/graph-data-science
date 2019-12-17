@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ParallelBetweennessCentralityProcTest extends ProcTestBase {
+public class ParallelBetweennessCentralityProcTest extends BaseProcTest {
 
     public static final String TYPE = "TYPE";
 

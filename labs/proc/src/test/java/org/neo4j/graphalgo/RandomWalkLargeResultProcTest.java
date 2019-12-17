@@ -29,7 +29,7 @@ import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class RandomWalkLargeResultProcTest extends ProcTestBase {
+class RandomWalkLargeResultProcTest extends BaseProcTest {
 
     private static final int NODE_COUNT = 20000;
 

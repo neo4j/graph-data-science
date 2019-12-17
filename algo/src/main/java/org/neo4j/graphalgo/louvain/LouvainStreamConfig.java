@@ -35,13 +35,13 @@ public interface LouvainStreamConfig extends LouvainBaseConfig {
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
+        CypherMapWrapper userInput
     ) {
         return new LouvainStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
-            config
+            userInput
         );
     }
 }

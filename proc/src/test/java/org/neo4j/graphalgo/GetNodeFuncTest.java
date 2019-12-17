@@ -34,7 +34,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-class GetNodeFuncTest extends ProcTestBase {
+class GetNodeFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {

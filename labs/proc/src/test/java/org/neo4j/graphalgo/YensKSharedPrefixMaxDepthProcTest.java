@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *        \- (e) - (f) - /
  * </pre>
  */
-class YensKSharedPrefixMaxDepthProcTest extends ProcTestBase {
+class YensKSharedPrefixMaxDepthProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {

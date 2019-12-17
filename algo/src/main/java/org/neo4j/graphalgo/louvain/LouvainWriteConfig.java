@@ -36,13 +36,13 @@ public interface LouvainWriteConfig extends LouvainBaseConfig, WriteConfig {
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
+        CypherMapWrapper userInput
     ) {
         return new LouvainWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
-            config
+            userInput
         );
     }
 }

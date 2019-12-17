@@ -36,13 +36,13 @@ public interface LabelPropagationWriteConfig extends LabelPropagationBaseConfig,
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
+        CypherMapWrapper userInput
     ) {
         return new LabelPropagationWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
-            config
+            userInput
         );
     }
 }

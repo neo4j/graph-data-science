@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 
-class DegreeCentralityProcTest extends ProcTestBase {
+class DegreeCentralityProcTest extends BaseProcTest {
 
     private static final Map<Long, Double> incomingExpected = new HashMap<>();
     private static final Map<Long, Double> bothExpected = new HashMap<>();

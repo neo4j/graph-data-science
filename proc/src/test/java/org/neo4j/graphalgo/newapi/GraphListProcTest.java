@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -42,7 +42,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-class GraphListProcTest extends ProcTestBase {
+class GraphListProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
 

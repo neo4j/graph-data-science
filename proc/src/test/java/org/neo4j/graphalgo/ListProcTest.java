@@ -40,7 +40,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ListProcTest extends ProcTestBase {
+class ListProcTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
         "algo.beta.graph.generate",

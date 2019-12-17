@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  *             / \
  *           (7)-(8)
  */
-class TerminationTest extends ProcTestBase {
+class TerminationTest extends BaseProcTest {
 
     public static final String QUERY = "CALL test.testProc()";
 

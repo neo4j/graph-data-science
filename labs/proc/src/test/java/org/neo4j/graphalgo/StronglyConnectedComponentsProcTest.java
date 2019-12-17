@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class StronglyConnectedComponentsProcTest extends ProcTestBase {
+class StronglyConnectedComponentsProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +

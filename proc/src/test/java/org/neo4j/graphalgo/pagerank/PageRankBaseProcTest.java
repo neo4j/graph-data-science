@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.MemoryEstimateTest;
-import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.WeightConfigTest;
@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends ProcTestBase implements
+abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, PageRank>,
     IterationsConfigTest<CONFIG, PageRank>,
     WeightConfigTest<CONFIG, PageRank>,

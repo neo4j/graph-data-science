@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class K1ColoringProcTest extends ProcTestBase {
+class K1ColoringProcTest extends BaseProcTest {
 
     final String DB_CYPHER =
         "CREATE" +

@@ -35,7 +35,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ListProcTest extends ProcTestBase {
+class ListProcTest extends BaseProcTest {
 
     private static final Set<String> PROCEDURES = new HashSet<>(asList(
         "algo.allShortestPaths.stream",

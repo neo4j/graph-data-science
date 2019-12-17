@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 
-class EigenvectorCentralityProcTest extends ProcTestBase {
+class EigenvectorCentralityProcTest extends BaseProcTest {
 
     private static final Map<Long, Double> expected = new HashMap<>();
 

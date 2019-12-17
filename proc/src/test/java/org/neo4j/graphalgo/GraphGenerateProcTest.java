@@ -56,7 +56,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_VALUE_KEY;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-class GraphGenerateProcTest extends ProcTestBase {
+class GraphGenerateProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {

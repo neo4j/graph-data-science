@@ -28,7 +28,7 @@ import java.util.Map;
 
 import static org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 
-class DegreeProcIssue848Test extends ProcTestBase {
+class DegreeProcIssue848Test extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "UNWIND range(1, 10001) AS s " +

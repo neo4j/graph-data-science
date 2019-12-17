@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.MemoryEstimateTest;
-import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -65,7 +65,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.Projection.NATURAL;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityConfigBase> extends ProcTestBase implements
+abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityConfigBase> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, NodeSimilarityResult>,
     MemoryEstimateTest<CONFIG, NodeSimilarityResult> {
 

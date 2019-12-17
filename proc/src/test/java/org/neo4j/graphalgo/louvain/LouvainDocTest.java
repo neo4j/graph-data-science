@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
@@ -32,7 +32,7 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class LouvainDocTest extends ProcTestBase {
+class LouvainDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws KernelException {

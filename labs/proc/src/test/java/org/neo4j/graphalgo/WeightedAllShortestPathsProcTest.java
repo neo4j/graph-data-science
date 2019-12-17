@@ -42,7 +42,7 @@ import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
  *
  * S->X: {S,G,H,I,X}:8, {S,D,E,F,X}:12, {S,A,B,C,X}:20
  */
-final class WeightedAllShortestPathsProcTest extends ProcTestBase {
+final class WeightedAllShortestPathsProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +

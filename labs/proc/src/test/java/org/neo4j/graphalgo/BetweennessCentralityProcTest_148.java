@@ -33,7 +33,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class BetweennessCentralityProcTest_148 extends ProcTestBase {
+class BetweennessCentralityProcTest_148 extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {

@@ -29,7 +29,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class WccDocTest extends ProcTestBase {
+class WccDocTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE (nAlice:User {name: 'Alice'}) " +

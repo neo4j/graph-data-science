@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class KSpanningTreeProcTest extends ProcTestBase {
+class KSpanningTreeProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {

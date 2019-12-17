@@ -32,7 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class ShortestPathIntegrationTest extends ProcTestBase {
+class ShortestPathIntegrationTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +

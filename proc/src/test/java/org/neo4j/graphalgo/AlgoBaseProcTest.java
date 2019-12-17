@@ -71,7 +71,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     }
 
     @AfterEach
-    default void clearLoadedGraphs() {
+    default void removeAllLoadedGraphs() {
         GraphCatalog.removeAllLoadedGraphs();
     }
 

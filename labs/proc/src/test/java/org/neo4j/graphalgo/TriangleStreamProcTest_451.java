@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class TriangleStreamProcTest_451 extends ProcTestBase {
+public class TriangleStreamProcTest_451 extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {

@@ -75,7 +75,7 @@ import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
 
-class GraphLoadProcTest extends ProcTestBase {
+class GraphLoadProcTest extends BaseProcTest {
 
     private static final String ALL_NODES_QUERY = "'MATCH (n) RETURN id(n) AS id'";
     private static final String ALL_RELATIONSHIPS_QUERY = "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'";

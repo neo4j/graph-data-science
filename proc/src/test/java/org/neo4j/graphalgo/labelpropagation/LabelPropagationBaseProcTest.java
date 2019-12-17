@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseConfig> extends ProcTestBase implements
+abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, LabelPropagation>,
     SeedConfigTest<CONFIG, LabelPropagation>,
     IterationsConfigTest<CONFIG, LabelPropagation>,

@@ -38,7 +38,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-class ShortestPathProcTest_152 extends ProcTestBase {
+class ShortestPathProcTest_152 extends BaseProcTest {
 
     private static long startNodeId;
     private static long endNodeId;

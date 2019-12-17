@@ -36,7 +36,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class VersionFuncTest extends ProcTestBase {
+class VersionFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {

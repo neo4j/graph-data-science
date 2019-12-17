@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class OverlapProcTest extends ProcTestBase {
+class OverlapProcTest extends BaseProcTest {
 
     private static final String STATEMENT_STREAM =
             "MATCH (p:Person)-[:LIKES]->(i:Item) \n" +

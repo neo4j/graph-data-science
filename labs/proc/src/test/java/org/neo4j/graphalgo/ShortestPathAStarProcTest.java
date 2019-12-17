@@ -30,7 +30,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-class ShortestPathAStarProcTest extends ProcTestBase {
+class ShortestPathAStarProcTest extends BaseProcTest {
 	
     @BeforeEach
     void setup() throws Exception {

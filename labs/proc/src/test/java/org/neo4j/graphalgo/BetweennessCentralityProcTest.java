@@ -40,7 +40,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class BetweennessCentralityProcTest extends ProcTestBase {
+class BetweennessCentralityProcTest extends BaseProcTest {
 
     private static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 

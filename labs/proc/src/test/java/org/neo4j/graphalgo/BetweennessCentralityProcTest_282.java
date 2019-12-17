@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
  *    (D)--´   (G)
  */
 @ExtendWith(MockitoExtension.class)
-class BetweennessCentralityProcTest_282 extends ProcTestBase {
+class BetweennessCentralityProcTest_282 extends BaseProcTest {
 
     private static final double[] EXPECTED = {
             0.0,

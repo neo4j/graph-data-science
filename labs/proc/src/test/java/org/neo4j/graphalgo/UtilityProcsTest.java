@@ -44,7 +44,7 @@ import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
  *         \  /  \ /
  *         (3)---(2)
  */
-class UtilityProcsTest extends ProcTestBase {
+class UtilityProcsTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {

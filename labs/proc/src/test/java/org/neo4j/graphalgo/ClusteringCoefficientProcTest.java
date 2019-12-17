@@ -40,7 +40,7 @@ import static org.mockito.Mockito.verify;
  *             / \
  *           (7)-(8)
  */
-class ClusteringCoefficientProcTest extends ProcTestBase {
+class ClusteringCoefficientProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {

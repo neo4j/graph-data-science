@@ -35,13 +35,13 @@ public interface PageRankStreamConfig extends PageRankBaseConfig {
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
+        CypherMapWrapper userInput
     ) {
         return new PageRankStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
-            config
+            userInput
         );
     }
 }

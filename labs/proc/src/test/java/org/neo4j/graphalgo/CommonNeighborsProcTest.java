@@ -30,7 +30,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CommonNeighborsProcTest extends ProcTestBase {
+class CommonNeighborsProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE (mark:Person {name: 'Mark'})\n" +

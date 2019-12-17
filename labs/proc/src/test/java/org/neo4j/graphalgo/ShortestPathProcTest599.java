@@ -32,7 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ShortestPathProcTest599 extends ProcTestBase {
+class ShortestPathProcTest599 extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +

@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  *     |       |        |      |
  *     d --6-- e        d      e
  */
-public class PrimProcTest extends ProcTestBase {
+public class PrimProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {

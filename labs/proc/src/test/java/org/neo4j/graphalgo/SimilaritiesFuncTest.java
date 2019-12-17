@@ -26,7 +26,7 @@ import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SimilaritiesFuncTest extends ProcTestBase {
+public class SimilaritiesFuncTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE (java:Skill{name:'Java'})\n" +

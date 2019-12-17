@@ -34,7 +34,7 @@ import java.util.UUID;
 
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-class EigenvectorCentralityNormalizationProcTest extends ProcTestBase {
+class EigenvectorCentralityNormalizationProcTest extends BaseProcTest {
 
     private final Map<Long, Double> expected = new HashMap<>();
     private final Map<Long, Double> maxNormExpected = new HashMap<>();

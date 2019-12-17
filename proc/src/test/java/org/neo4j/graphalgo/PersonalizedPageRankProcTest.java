@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 @Disabled(value = "This should be fixed to use `Start Node(s)` when calling the procedure, also should be changed to use the new procedure API")
-class PersonalizedPageRankProcTest extends ProcTestBase {
+class PersonalizedPageRankProcTest extends BaseProcTest {
 
     private static final Map<Long, Double> EXPECTED = new HashMap<>();
 

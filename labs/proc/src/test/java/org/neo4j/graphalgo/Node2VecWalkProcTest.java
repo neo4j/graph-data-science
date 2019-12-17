@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-class Node2VecWalkProcTest extends ProcTestBase {
+class Node2VecWalkProcTest extends BaseProcTest {
 
     private static final int NODE_COUNT = 54;
 

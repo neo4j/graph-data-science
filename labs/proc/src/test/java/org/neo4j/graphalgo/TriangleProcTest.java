@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verify;
  *          \  /T3\
  *          (h)--(i)
  */
-class TriangleProcTest extends ProcTestBase {
+class TriangleProcTest extends BaseProcTest {
 
     private static String[] idToName;
 

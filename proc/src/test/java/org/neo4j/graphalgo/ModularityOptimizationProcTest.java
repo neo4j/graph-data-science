@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
-class ModularityOptimizationProcTest extends ProcTestBase {
+class ModularityOptimizationProcTest extends BaseProcTest {
 
     static final String DB_CYPHER =
         "CREATE" +

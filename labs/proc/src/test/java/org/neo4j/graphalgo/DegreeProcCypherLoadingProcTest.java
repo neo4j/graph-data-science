@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-class DegreeProcCypherLoadingProcTest extends ProcTestBase {
+class DegreeProcCypherLoadingProcTest extends BaseProcTest {
 
     private static final Map<Long, Double> incomingExpected = new HashMap<>();
     private static final Map<Long, Double> bothExpected = new HashMap<>();

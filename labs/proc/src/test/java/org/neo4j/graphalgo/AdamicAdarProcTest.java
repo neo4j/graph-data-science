@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.util.Map;
@@ -32,7 +31,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-class AdamicAdarProcTest extends ProcTestBase {
+class AdamicAdarProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE (mark:Person {name: 'Mark'})\n" +

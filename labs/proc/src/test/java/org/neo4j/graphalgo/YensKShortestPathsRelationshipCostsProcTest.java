@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * \  /  \ /
  * (3)---(2)
  */
-class YensKShortestPathsRelationshipCostsProcTest extends ProcTestBase {
+class YensKShortestPathsRelationshipCostsProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {

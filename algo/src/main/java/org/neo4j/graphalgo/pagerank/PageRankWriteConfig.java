@@ -36,13 +36,13 @@ public interface PageRankWriteConfig extends PageRankBaseConfig, WriteConfig {
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
+        CypherMapWrapper userInput
     ) {
         return new PageRankWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
-            config
+            userInput
         );
     }
 }

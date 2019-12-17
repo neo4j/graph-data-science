@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * @author mknblch
  */
-class BFSDFSIntegrationTest extends ProcTestBase {
+class BFSDFSIntegrationTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {

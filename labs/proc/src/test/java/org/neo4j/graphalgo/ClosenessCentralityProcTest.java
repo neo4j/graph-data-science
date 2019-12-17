@@ -39,7 +39,7 @@ import static org.mockito.Mockito.verify;
 
 
 @ExtendWith(MockitoExtension.class)
-class ClosenessCentralityProcTest extends ProcTestBase {
+class ClosenessCentralityProcTest extends BaseProcTest {
 
     public static final String TYPE = "TYPE";
 

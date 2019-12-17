@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class CosineProcTest extends ProcTestBase {
+class CosineProcTest extends BaseProcTest {
 
     private static final String STATEMENT_STREAM =
             "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +

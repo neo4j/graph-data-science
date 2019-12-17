@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
@@ -50,7 +50,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-class GraphCreateProcTest extends ProcTestBase {
+class GraphCreateProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER = "CREATE (:A {age: 2})-[:REL {weight: 55}]->(:A)";
     private static final long nodeCount = 2L;

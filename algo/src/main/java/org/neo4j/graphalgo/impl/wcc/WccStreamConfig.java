@@ -34,13 +34,13 @@ public interface WccStreamConfig extends WccBaseConfig {
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
+        CypherMapWrapper userInput
     ) {
         WccStreamConfigImpl wccStreamConfig = new WccStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
-            config
+            userInput
         );
 
         wccStreamConfig.validate();

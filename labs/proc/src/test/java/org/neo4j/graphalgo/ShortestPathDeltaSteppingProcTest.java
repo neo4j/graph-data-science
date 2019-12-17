@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verify;
  *
  * S->X: {S,G,H,I,X}:8, {S,D,E,F,X}:12, {S,A,B,C,X}:20
  */
-final class ShortestPathDeltaSteppingProcTest extends ProcTestBase {
+final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +

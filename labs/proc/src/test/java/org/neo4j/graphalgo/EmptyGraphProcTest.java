@@ -27,7 +27,7 @@ import org.neo4j.graphdb.Result;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class EmptyGraphProcTest extends ProcTestBase {
+class EmptyGraphProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,7 +46,7 @@ import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
  *         \  /  \ /
  *         (3)---(2)
  */
-class YensKShortestPathsStreamingProcTest extends ProcTestBase {
+class YensKShortestPathsStreamingProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {

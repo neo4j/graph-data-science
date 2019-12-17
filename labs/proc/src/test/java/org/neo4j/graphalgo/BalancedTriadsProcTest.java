@@ -30,7 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
-class BalancedTriadsProcTest extends ProcTestBase {
+class BalancedTriadsProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
