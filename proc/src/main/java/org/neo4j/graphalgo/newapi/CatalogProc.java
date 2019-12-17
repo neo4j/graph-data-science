@@ -21,11 +21,16 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 abstract class CatalogProc extends BaseProc {
     private static final String HISTOGRAM_FIELD_NAME = "histogram";
 
     boolean computeHistogram() {
         return callContext.outputFields().anyMatch(HISTOGRAM_FIELD_NAME::equals);
+    }
+
+    void validateGraphName(String graphName) {
+        CypherMapWrapper.failOnBlank("graphName", graphName);
     }
 }

@@ -265,11 +265,18 @@ public class BaseProcTest {
         String messageSubstring
     ) {
         try {
-            runQuery(query, queryParameters);
+            consume(runQuery(query, queryParameters));
             fail(format("Expected an exception to be thrown by query:\n%s", query));
         } catch (Exception e) {
             assertThat(e, containsMessage(messageSubstring));
         }
+    }
+
+    private void consume(Result result) {
+        while (result.hasNext()) {
+            result.next();
+        }
+        result.close();
     }
 
 }

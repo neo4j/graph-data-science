@@ -86,6 +86,21 @@ class GraphExistsProcTest extends ProcTestBase {
         );
     }
 
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.newapi.GraphCreateProcTest#invalidGraphNames")
+    void failsOnInvalidGraphName(String invalidName) {
+        assertError(
+            "CALL algo.beta.graph.exists($graphName)",
+            map("graphName", invalidName),
+            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+        );
+        assertError(
+            "RETURN algo.beta.graph.exists($graphName)",
+            map("graphName", invalidName),
+            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+        );
+    }
+
     static Stream<Arguments> graphNameExistsCombinations() {
         return Stream.of(
             arguments("g", "g", true),

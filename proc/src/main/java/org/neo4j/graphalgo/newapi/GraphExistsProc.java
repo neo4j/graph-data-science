@@ -20,13 +20,11 @@
 
 package org.neo4j.graphalgo.newapi;
 
-import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.procedure.UserFunction;
 
 import java.util.stream.Stream;
 
@@ -39,6 +37,7 @@ public class GraphExistsProc extends CatalogProc {
                  "  graphName: STRING," +
                  "  exists: BOOLEAN")
     public Stream<GraphExistsResult> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
+        validateGraphName(graphName);
         return Stream.of(new GraphExistsResult(graphName, GraphCatalog.exists(getUsername(), graphName)));
     }
 

@@ -30,6 +30,7 @@ public class GraphExistsFunc extends CatalogProc {
     @UserFunction(name = "algo.beta.graph.exists")
     @Description("RETURN graph.exists(graphName: STRING) :: BOOLEAN")
     public boolean existsFunction(@Name(value = "graphName") String graphName) {
+        validateGraphName(graphName);
         return GraphCatalog.exists(getUsername(), graphName);
     }
 

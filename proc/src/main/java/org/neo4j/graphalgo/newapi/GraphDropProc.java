@@ -42,7 +42,7 @@ public class GraphDropProc extends CatalogProc {
                  "  nodes: INTEGER," +
                  "  relationships: INTEGER")
     public Stream<GraphInfo> drop(@Name(value = "graphName") String graphName) {
-        CypherMapWrapper.failOnBlank("graphName", graphName);
+        validateGraphName(graphName);
 
         AtomicReference<GraphInfo> result = new AtomicReference<>();
         GraphCatalog.remove(getUsername(), graphName, (removedGraph) -> {

@@ -124,12 +124,12 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
-    @MethodSource("blankStrings")
-    void failsOnEmptyGraphName(String graphName) {
+    @MethodSource("org.neo4j.graphalgo.newapi.GraphCreateProcTest#invalidGraphNames")
+    void failsOnInvalidGraphName(String invalidName) {
         assertError(
             "CALL algo.beta.graph.create($graphName, {}, {})",
-            map("graphName", graphName),
-            String.format("`graphName` can not be null or blank, but it was `%s`", graphName)
+            map("graphName", invalidName),
+            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
     }
 
@@ -485,7 +485,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
-    static Stream<String> blankStrings() {
+    static Stream<String> invalidGraphNames() {
         return Stream.of("", "   ", "           ", "\r\n\t", null);
     }
 }

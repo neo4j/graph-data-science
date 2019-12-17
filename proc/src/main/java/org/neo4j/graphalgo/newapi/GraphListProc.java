@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-
 public class GraphListProc extends CatalogProc {
 
     @Procedure(name = "algo.beta.graph.list", mode = Mode.READ)
@@ -39,13 +37,18 @@ public class GraphListProc extends CatalogProc {
         if (Objects.nonNull(graphName) && !(graphName instanceof String)) {
             throw new IllegalArgumentException("`graphName` parameter must be a STRING");
         }
+        String graphNameS = (String) graphName;
 
-        Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries;
+        Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries = GraphCatalog
+            .getLoadedGraphs(getUsername())
+            .entrySet()
+            .stream();
 
-        graphEntries = GraphCatalog.getLoadedGraphs(getUsername()).entrySet().stream();
-        if (!isEmpty((String)graphName)) {
+        if (graphNameS != null) {
+            validateGraphName(graphNameS);
+
             // we should only list the provided graph
-            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
+            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphNameS));
         }
 
         return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram()));

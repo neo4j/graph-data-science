@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -247,7 +248,7 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "name argument: ''{0}''")
-    @ValueSource(strings = {"foobar", " "})
+    @ValueSource(strings = {"foobar", "aa"})
     void returnEmptyStreamWhenNoGraphMatchesTheFilterArgument(String argument) {
         String[] names = {"a", "b", "c"};
         for (String name : names) {
@@ -260,5 +261,17 @@ class GraphListProcTest extends BaseProcTest {
             .count();
 
         assertThat(numberOfRows, is(0L));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.newapi.GraphCreateProcTest#invalidGraphNames")
+    void failsOnInvalidGraphName(String invalidName) {
+        if (invalidName != null) { // null is not a valid name, but we use it to mean 'list all'
+            assertError(
+                "CALL algo.beta.graph.list($graphName)",
+                map("graphName", invalidName),
+                String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+            );
+        }
     }
 }
