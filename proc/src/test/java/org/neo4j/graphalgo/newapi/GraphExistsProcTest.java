@@ -106,11 +106,7 @@ class GraphExistsProcTest extends ProcTestBase {
             arguments("g", "g", true),
             arguments("graph", "graph", true),
             arguments("graph", "graph1", false),
-            arguments("g", "a", false),
-            arguments("g", "", false),
-            arguments("g", null, false),
-            arguments("g", "\n", false),
-            arguments("g", "    ", false)
+            arguments("g", "a", false)
         );
     }
 }
