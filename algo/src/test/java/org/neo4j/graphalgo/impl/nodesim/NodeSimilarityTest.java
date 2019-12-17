@@ -66,7 +66,7 @@ import static org.neo4j.graphalgo.TestSupport.assertAlgorithmTermination;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
-import static org.neo4j.graphalgo.impl.nodesim.NodeSimilarityConfigBase.TOP_K_DEFAULT;
+import static org.neo4j.graphalgo.impl.nodesim.NodeSimilarityBaseConfig.TOP_K_DEFAULT;
 import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;

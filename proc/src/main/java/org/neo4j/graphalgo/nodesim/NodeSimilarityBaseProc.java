@@ -24,14 +24,14 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityConfigBase;
+import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityFactory;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
 import java.util.Optional;
 
-public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityConfigBase> extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, CONFIG> {
+public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseConfig> extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, CONFIG> {
 
     static final String NODE_SIMILARITY_DESCRIPTION =
         "The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to. " +

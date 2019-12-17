@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphdb.Direction;
 
-public interface NodeSimilarityConfigBase extends AlgoBaseConfig {
+public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
 
     String TOP_K_KEY = "topK";
     int TOP_K_DEFAULT = 10;

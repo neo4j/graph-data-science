@@ -44,7 +44,7 @@ import java.util.stream.Stream;
 public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResult> {
 
     private final Graph graph;
-    private final NodeSimilarityConfigBase config;
+    private final NodeSimilarityBaseConfig config;
 
     private final ExecutorService executorService;
     private final AllocationTracker tracker;
@@ -58,7 +58,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
 
     public NodeSimilarity(
         Graph graph,
-        NodeSimilarityConfigBase config,
+        NodeSimilarityBaseConfig config,
         ExecutorService executorService,
         AllocationTracker tracker
     ) {

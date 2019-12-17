@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.nodesim.ImmutableNodeSimilarityStreamConfig;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityConfigBase;
+import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -83,7 +83,7 @@ public class NodeSimilarityBenchmark {
     @Param(value = {"5"})
     int scaleFactor;
 
-    private NodeSimilarityConfigBase config;
+    private NodeSimilarityBaseConfig config;
 
     @Setup
     public void setup() {
@@ -130,7 +130,7 @@ public class NodeSimilarityBenchmark {
         runJaccardProcedure(blackhole, jaccardInput, procedureConfig);
     }
 
-    private NodeSimilarity initAlgo(NodeSimilarityConfigBase config) {
+    private NodeSimilarity initAlgo(NodeSimilarityBaseConfig config) {
         return new NodeSimilarity(
             graph,
             config,

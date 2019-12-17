@@ -32,7 +32,7 @@ import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class NodeSimilarityFactory<CONFIG extends NodeSimilarityConfigBase> extends AlgorithmFactory<NodeSimilarity, CONFIG> {
+public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> extends AlgorithmFactory<NodeSimilarity, CONFIG> {
 
     @Override
     public NodeSimilarity build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {

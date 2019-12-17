@@ -42,7 +42,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityConfigBase;
+import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityGraphResult;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityResult;
@@ -65,7 +65,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.Projection.NATURAL;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityConfigBase> extends BaseProcTest implements
+abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, NodeSimilarityResult>,
     MemoryEstimateTest<CONFIG, NodeSimilarityResult> {
 
@@ -246,7 +246,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityConfigBas
     @Test
     void shouldCreateValidDefaultAlgoConfig() {
         CypherMapWrapper input = baseUserInput();
-        NodeSimilarityConfigBase config = config(input);
+        NodeSimilarityBaseConfig config = config(input);
 
         assertEquals(10, config.normalizedK());
         assertEquals(0, config.normalizedN());
@@ -265,7 +265,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityConfigBas
             .withNumber("similarityCutoff", 0.23)
             .withNumber("concurrency", 1);
 
-        NodeSimilarityConfigBase config = config(input);
+        NodeSimilarityBaseConfig config = config(input);
 
         assertEquals(parameter.equals("top") ? 100 : -100, config.normalizedK());
         assertEquals(parameter.equals("top") ? 1000 : -1000, config.normalizedN());

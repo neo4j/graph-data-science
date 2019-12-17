@@ -29,7 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("NodeSimilarityStreamConfigImpl")
-public interface NodeSimilarityStreamConfig extends NodeSimilarityConfigBase {
+public interface NodeSimilarityStreamConfig extends NodeSimilarityBaseConfig {
 
     static NodeSimilarityStreamConfig of(
         String username,

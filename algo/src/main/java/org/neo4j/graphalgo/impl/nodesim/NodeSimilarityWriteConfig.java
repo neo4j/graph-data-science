@@ -30,7 +30,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("NodeSimilarityWriteConfigImpl")
-public interface NodeSimilarityWriteConfig extends NodeSimilarityConfigBase, WriteConfig {
+public interface NodeSimilarityWriteConfig extends NodeSimilarityBaseConfig, WriteConfig {
 
     static NodeSimilarityWriteConfig of(
         String username,
