@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -62,13 +63,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.Projection.NATURAL;
-import static org.neo4j.graphalgo.Projection.REVERSE;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBase> extends ProcTestBase implements
     BaseAlgoProcTests<CONFIG, NodeSimilarityResult>,
     MemoryEstimateTests<CONFIG, NodeSimilarityResult> {
-
 
     static final String DB_CYPHER =
         "CREATE" +
@@ -87,16 +86,12 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
         ", (b)-[:LIKES]->(i2)" +
         ", (c)-[:LIKES]->(i3)";
 
-    static Stream<Projection> allValidProjections() {
-        return Stream.of(NATURAL, REVERSE);
-    }
-
     static Stream<Arguments> allGraphVariations() {
         return graphVariationForProjection(NATURAL).map(args -> arguments(args.get()[0], args.get()[2]));
     }
 
     static Stream<Arguments> allValidGraphVariationsWithProjections() {
-        return allValidProjections().flatMap(NodeSimilarityProcTestBase::graphVariationForProjection);
+        return TestSupport.allDirectedProjections().flatMap(NodeSimilarityProcTestBase::graphVariationForProjection);
     }
 
     private static Stream<Arguments> graphVariationForProjection(Projection projection) {
@@ -134,7 +129,7 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
         );
         runQuery(DB_CYPHER);
 
-        allValidProjections().forEach(projection -> {
+        TestSupport.allDirectedProjections().forEach(projection -> {
             String name = "myGraph" + projection.name();
             runQuery("CALL algo.beta.graph.create(" +
                      "    $graphName," +
