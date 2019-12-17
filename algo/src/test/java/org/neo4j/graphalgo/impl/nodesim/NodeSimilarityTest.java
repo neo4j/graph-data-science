@@ -37,9 +37,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -68,6 +66,7 @@ import static org.neo4j.graphalgo.TestSupport.assertAlgorithmTermination;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
+import static org.neo4j.graphalgo.impl.nodesim.NodeSimilarityConfigBase.TOP_K_DEFAULT;
 import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
@@ -112,17 +111,12 @@ final class NodeSimilarityTest extends AlgoTestBase {
     private static final int COMPARED_ITEMS = 3;
     private static final int COMPARED_PERSONS = 4;
 
-    private static ConfigBuilder configBuilder() {
-        return new ConfigBuilder(new NodeSimilarity.Config(
-            0.0,
-            1,
-            0,
-            0,
-            Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            OUTGOING,
-            true
-        ));
+    private static ImmutableNodeSimilarityWriteConfig.Builder configBuilder() {
+        return ImmutableNodeSimilarityWriteConfig
+            .builder()
+            .writeProperty("writeProperty")
+            .writeRelationshipType("writeRelationshipType")
+            .similarityCutoff(0.0);
     }
 
     static {
@@ -132,6 +126,13 @@ final class NodeSimilarityTest extends AlgoTestBase {
         EXPECTED_OUTGOING.add(resultString(1, 2, 0.0));
         EXPECTED_OUTGOING.add(resultString(1, 3, 2 / 3.0));
         EXPECTED_OUTGOING.add(resultString(2, 3, 1 / 3.0));
+        // Add results in reverse direction because topK
+        EXPECTED_OUTGOING.add(resultString(1, 0, 2 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(2, 0, 1 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(3, 0, 1.0));
+        EXPECTED_OUTGOING.add(resultString(2, 1, 0.0));
+        EXPECTED_OUTGOING.add(resultString(3, 1, 2 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(3, 2, 1 / 3.0));
 
         EXPECTED_OUTGOING_TOP_N_1.add(resultString(0, 3, 1.0));
 
@@ -145,14 +146,28 @@ final class NodeSimilarityTest extends AlgoTestBase {
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(0, 3, 1.0));
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(1, 3, 2 / 3.0));
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(2, 3, 1 / 3.0));
+        // Add results in reverse direction because topK
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(1, 0, 2 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(2, 0, 1 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(3, 0, 1.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(3, 1, 2 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(3, 2, 1 / 3.0));
 
         EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(0, 1, 2 / 3.0));
         EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(0, 3, 1.0));
         EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(1, 3, 2 / 3.0));
+        // Add results in reverse direction because topK
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(1, 0, 2 / 3.0));
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(3, 0, 1.0));
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(3, 1, 2 / 3.0));
 
         EXPECTED_INCOMING.add(resultString(4, 5, 1.0));
         EXPECTED_INCOMING.add(resultString(4, 6, 1 / 2.0));
         EXPECTED_INCOMING.add(resultString(5, 6, 1 / 2.0));
+        // Add results in reverse direction because topK
+        EXPECTED_INCOMING.add(resultString(5, 4, 1.0));
+        EXPECTED_INCOMING.add(resultString(6, 4, 1 / 2.0));
+        EXPECTED_INCOMING.add(resultString(6, 5, 1 / 2.0));
 
         EXPECTED_INCOMING_TOP_N_1.add(resultString(4, 5, 3.0 / 3.0));
 
@@ -163,10 +178,18 @@ final class NodeSimilarityTest extends AlgoTestBase {
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(4, 5, 1.0));
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(4, 6, 1 / 2.0));
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(5, 6, 1 / 2.0));
+        // Add results in reverse direction because topK
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(5, 4, 1.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(6, 4, 1 / 2.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(6, 5, 1 / 2.0));
 
         EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(4, 5, 3.0 / 3.0));
         EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(4, 6, 1 / 2.0));
         EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(5, 6, 1 / 2.0));
+        // Add results in reverse direction because topK
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(5, 4, 3.0 / 3.0));
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(6, 4, 1 / 2.0));
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(6, 5, 1 / 2.0));
     }
 
     private static String resultString(long node1, long node2, double similarity) {
@@ -192,7 +215,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
     }
 
     static Stream<Arguments> topKAndConcurrencies() {
-        Stream<Integer> topKStream = Stream.of(0, 100);
+        Stream<Integer> topKStream = Stream.of(TOP_K_DEFAULT, 100);
         return TestSupport.crossArguments(
             toArguments(() -> topKStream),
             toArguments(NodeSimilarityTest::concurrencies)
@@ -221,7 +244,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withDirection(algoDirection).toConfig(),
+            configBuilder().concurrency(concurrency).direction(algoDirection).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -246,7 +269,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withTopN(1).withDirection(algoDirection).toConfig(),
+            configBuilder().concurrency(concurrency).topN(1).direction(algoDirection).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -275,7 +298,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withTopN(-1).withDirection(algoDirection).toConfig(),
+            configBuilder().concurrency(concurrency).bottomN(1).direction(algoDirection).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -303,7 +326,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withTopK(1).withConcurrency(concurrency).withDirection(algoDirection).toConfig(),
+            configBuilder().topK(1).concurrency(concurrency).direction(algoDirection).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -333,11 +356,11 @@ final class NodeSimilarityTest extends AlgoTestBase {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder()
-                .withConcurrency(concurrency)
-                .withTopK(-1)
-                .withDirection(algoDirection)
-                .withComputeToStream(false)
-                .toConfig(),
+                .concurrency(concurrency)
+                .topK(10)
+                .bottomK(1)
+                .direction(algoDirection)
+                .build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -369,7 +392,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withSimilarityCutoff(0.1).withDirection(algoDirection).toConfig(),
+            configBuilder().concurrency(concurrency).similarityCutoff(0.1).direction(algoDirection).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -401,7 +424,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withDegreeCutoff(2).withConcurrency(concurrency).withDirection(algoDirection).toConfig(),
+            configBuilder().degreeCutoff(2).concurrency(concurrency).direction(algoDirection).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -429,7 +452,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).toConfig(),
+            configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -453,7 +476,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withDirection(algoDirection).withComputeToStream(false).toConfig(),
+            configBuilder().concurrency(concurrency).direction(algoDirection).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -467,13 +490,28 @@ final class NodeSimilarityTest extends AlgoTestBase {
         assertGraphEquals(
             algoDirection == INCOMING
                 ? fromGdl(
-                "(a), (b), (c), (d), (e), (f)-[{property: 1.000000D}]->(g), (f)-[{property: 0.500000D}]->(h), (g)-[{property: 0.500000D}]->(h)")
-                : fromGdl("(a)-[{property: 0.666667D}]->(b)" +
+                "(a), (b), (c), (d), (e)" +
+                ", (f)-[{property: 1.000000D}]->(g)" +
+                ", (f)-[{property: 0.500000D}]->(h)" +
+                ", (g)-[{property: 0.500000D}]->(h)" +
+                // Add results in reverse direction because topK
+                ", (g)-[{property: 1.000000D}]->(f)" +
+                ", (h)-[{property: 0.500000D}]->(f)" +
+                ", (h)-[{property: 0.500000D}]->(g)"
+            )
+                : fromGdl("  (a)-[{property: 0.666667D}]->(b)" +
                           ", (a)-[{property: 0.333333D}]->(c)" +
                           ", (a)-[{property: 1.000000D}]->(d)" +
                           ", (b)-[{property: 0.000000D}]->(c)" +
                           ", (b)-[{property: 0.666667D}]->(d)" +
                           ", (c)-[{property: 0.333333D}]->(d)" +
+                          // Add results in reverse direction because topK
+                          "  (b)-[{property: 0.666667D}]->(a)" +
+                          ", (c)-[{property: 0.333333D}]->(a)" +
+                          ", (d)-[{property: 1.000000D}]->(a)" +
+                          ", (c)-[{property: 0.000000D}]->(b)" +
+                          ", (d)-[{property: 0.666667D}]->(b)" +
+                          ", (d)-[{property: 0.333333D}]->(c)" +
                           ", (e), (f), (g), (h)"),
             resultGraph
         );
@@ -501,12 +539,11 @@ final class NodeSimilarityTest extends AlgoTestBase {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder()
-                .withConcurrency(concurrency)
-                .withTopK(100)
-                .withTopN(1)
-                .withDirection(algoDirection)
-                .withComputeToStream(false)
-                .toConfig(),
+                .concurrency(concurrency)
+                .topK(100)
+                .topN(1)
+                .direction(algoDirection)
+                .build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -550,7 +587,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withTopN(1).withDirection(algoDirection).toConfig(),
+            configBuilder().concurrency(concurrency).topN(1).direction(algoDirection).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -590,7 +627,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withDirection(algoDirection).toConfig(),
+            configBuilder().concurrency(concurrency).direction(algoDirection).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -617,7 +654,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             IllegalArgumentException.class,
             () -> new NodeSimilarity(
                 graph,
-                configBuilder().withConcurrency(concurrency).withDirection(BOTH).toConfig(),
+                configBuilder().concurrency(concurrency).direction(BOTH).build(),
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY
             ).computeToStream()
@@ -638,7 +675,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().withTopN(100).withTopK(topK).withConcurrency(concurrency).withComputeToStream(false).toConfig(),
+            configBuilder().topN(100).topK(topK).concurrency(concurrency).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         ).withProgressLogger(log);
@@ -654,7 +691,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldTerminate() {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             RandomGraphGenerator.generate(10, 2),
-            configBuilder().withConcurrency(1).toConfig(),
+            configBuilder().concurrency(1).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -668,30 +705,22 @@ final class NodeSimilarityTest extends AlgoTestBase {
     }
 
     @ParameterizedTest(name = "topK = {0}")
-    @ValueSource(ints = {0, 100})
+    @ValueSource(ints = {TOP_K_DEFAULT, 100})
     void shouldComputeMemrec(int topK) {
         GraphDimensions dimensions = new GraphDimensions.Builder()
             .setNodeCount(1_000_000)
             .setMaxRelCount(5_000_000)
             .build();
 
-        NodeSimilarity.Config config = new NodeSimilarity.Config(
-            0.0,
-            0,
-            0,
-            topK,
-            Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            OUTGOING,
-            false
-        );
+        NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig
+            .builder()
+            .similarityCutoff(0.0)
+            .topK(topK)
+            .writeProperty("writeProperty")
+            .writeRelationshipType("writeRelationshipType")
+            .build();
 
-        NodeSimilarityFactory factory = new NodeSimilarityFactory(
-            config,
-            true
-        );
-
-        MemoryTree actual = factory.memoryEstimation(ProcedureConfiguration.empty()).estimate(dimensions, 1);
+        MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
 
         long thisInstance = 56;
 
@@ -708,15 +737,16 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange);
 
-        if (topK == 0) {
-            long graphRangeMin = 500_050_564_640L;
-            long graphRangeMax = 500_050_564_640L;
-            builder.fixed("similarity graph", MemoryRange.of(graphRangeMin, graphRangeMax));
+        long topKMapRangeMin;
+        long topKMapRangeMax;
+        if (topK == TOP_K_DEFAULT) {
+            topKMapRangeMin = 248_000_024L;
+            topKMapRangeMax = 248_000_024L;
         } else {
-            long topKMapRangeMin = 1_688_000_024L;
-            long topKMapRangeMax = 1_688_000_024L;
-            builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
+            topKMapRangeMin = 1_688_000_024L;
+            topKMapRangeMax = 1_688_000_024L;
         }
+        builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
 
         MemoryTree expected = builder.build().estimate(dimensions, 1);
 
@@ -724,30 +754,23 @@ final class NodeSimilarityTest extends AlgoTestBase {
     }
 
     @ParameterizedTest(name = "topK = {0}")
-    @ValueSource(ints = {0, 100})
+    @ValueSource(ints = {TOP_K_DEFAULT, 100})
     void shouldComputeMemrecWithTop(int topK) {
         GraphDimensions dimensions = new GraphDimensions.Builder()
             .setNodeCount(1_000_000)
             .setMaxRelCount(5_000_000)
             .build();
 
-        NodeSimilarity.Config config = new NodeSimilarity.Config(
-            0.0,
-            0,
-            100,
-            topK,
-            Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            OUTGOING,
-            false
-        );
+        NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig
+            .builder()
+            .similarityCutoff(0.0)
+            .topN(100)
+            .topK(topK)
+            .writeProperty("writeProperty")
+            .writeRelationshipType("writeRelationshipType")
+            .build();
 
-        NodeSimilarityFactory factory = new NodeSimilarityFactory(
-            config,
-            true
-        );
-
-        MemoryTree actual = factory.memoryEstimation(ProcedureConfiguration.empty()).estimate(dimensions, 1);
+        MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
 
         long thisInstance = 56;
 
@@ -769,90 +792,21 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .fixed("vectors", vectorsRange)
             .fixed("topNList", topNListRange);
 
-        if (topK == 0) {
-            long graphRangeMin = 270_520L;
-            long graphRangeMax = 270_520L;
-            builder.fixed("similarity graph", MemoryRange.of(graphRangeMin, graphRangeMax));
+        long topKMapRangeMin;
+        long topKMapRangeMax;
+        if (topK == TOP_K_DEFAULT) {
+            topKMapRangeMin = 248_000_024L;
+            topKMapRangeMax = 248_000_024L;
         } else {
-            long topKMapRangeMin = 1_688_000_024L;
-            long topKMapRangeMax = 1_688_000_024L;
-            builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
+            topKMapRangeMin = 1_688_000_024L;
+            topKMapRangeMax = 1_688_000_024L;
         }
+        builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
 
         MemoryTree expected = builder.build().estimate(dimensions, 1);
 
         assertEquals(expected.memoryUsage(), actual.memoryUsage());
     }
 
-    private static class ConfigBuilder {
-
-        private final NodeSimilarity.Config config;
-        private int concurrency;
-        private int topK;
-        private int topN;
-        private int degreeCutoff;
-        private double similarityCutoff;
-        private Direction direction;
-        private boolean computeToStream;
-
-        ConfigBuilder(NodeSimilarity.Config config) {
-            this.config = config;
-            this.concurrency = config.concurrency();
-            this.topN = config.topN();
-            this.topK = config.topK();
-            this.degreeCutoff = config.degreeCutoff();
-            this.similarityCutoff = config.similarityCutoff();
-            this.direction = config.direction;
-            this.computeToStream = config.computeToStream;
-        }
-
-        ConfigBuilder withConcurrency(int concurrency) {
-            this.concurrency = concurrency;
-            return this;
-        }
-
-        ConfigBuilder withTopN(int topN) {
-            this.topN = topN;
-            return this;
-        }
-
-        ConfigBuilder withTopK(int topK) {
-            this.topK = topK;
-            return this;
-        }
-
-        ConfigBuilder withDegreeCutoff(int degreeCutoff) {
-            this.degreeCutoff = degreeCutoff;
-            return this;
-        }
-
-        ConfigBuilder withSimilarityCutoff(double similarityCutoff) {
-            this.similarityCutoff = similarityCutoff;
-            return this;
-        }
-
-        ConfigBuilder withDirection(Direction direction) {
-            this.direction = direction;
-            return this;
-        }
-
-        ConfigBuilder withComputeToStream(boolean computeToStream) {
-            this.computeToStream = computeToStream;
-            return this;
-        }
-
-        NodeSimilarity.Config toConfig() {
-            return new NodeSimilarity.Config(
-                similarityCutoff,
-                degreeCutoff,
-                topN,
-                topK,
-                concurrency,
-                config.minBatchSize(),
-                direction,
-                computeToStream
-            );
-        }
-    }
 }
 

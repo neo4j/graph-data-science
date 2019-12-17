@@ -64,7 +64,7 @@ public abstract class BaseProc {
             .withGraphCreateConfig(config);
     }
 
-    void runWithExceptionLogging(String message, Runnable runnable) {
+    protected void runWithExceptionLogging(String message, Runnable runnable) {
         try {
             runnable.run();
         } catch (Exception e) {

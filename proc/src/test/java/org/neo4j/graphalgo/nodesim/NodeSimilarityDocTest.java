@@ -18,11 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.nodesim;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.GetNodeFunc;
+import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,7 +59,7 @@ class NodeSimilarityDocTest extends ProcTestBase {
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );
         runQuery(DB_CYPHER);
-        registerProcedures(NodeSimilarityProc.class);
+        registerProcedures(NodeSimilarityStreamProc.class, NodeSimilarityWriteProc.class);
         registerFunctions(GetNodeFunc.class);
     }
 
@@ -67,13 +70,14 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceStreamOutput() {
-        String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    'Person | Instrument', 'LIKES', {" +
-                       "        direction: 'OUTGOING'" +
-                       "    }" +
-                       ") YIELD node1, node2, similarity " +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity " +
-                       "ORDER BY similarity DESCENDING, Person1, Person2";
+        String query = "CALL gds.algo.nodeSimilarity.stream({\n" +
+                       "  nodeProjection: 'Person | Instrument',\n" +
+                       "  relationshipProjection: 'LIKES',\n" +
+                       "  direction: 'OUTGOING'\n" +
+                       "})\n" +
+                       "YIELD node1, node2, similarity\n" +
+                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "ORDER BY similarity DESCENDING, Person1, Person2\n";
 
         String expectedString = "+----------------------------------------+\n" +
                                 "| Person1 | Person2 | similarity         |\n" +
@@ -96,34 +100,37 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceWriteOutput() {
-        String query = "CALL algo.nodeSimilarity('Person | Instrument', 'LIKES', {" +
-                       "  direction: 'OUTGOING'," +
-                       "  write: true" +
-                       "})" +
-                       "YIELD nodesCompared, relationships, write, writeProperty, writeRelationshipType;";
+        String query = "CALL gds.algo.nodeSimilarity.write({\n" +
+                       "  nodeProjection: 'Person | Instrument',\n" +
+                       "  relationshipProjection: 'LIKES',\n" +
+                       "  direction: 'OUTGOING',\n" +
+                       "  writeRelationshipType: 'SIMILAR',\n" +
+                       "  writeProperty: 'score'\n" +
+                       "})\n" +
+                       "YIELD nodesCompared, relationships, writeProperty, writeRelationshipType;\n";
 
-        String expectedString = "+-------------------------------------------------------------------------------+\n" +
-                                "| nodesCompared | relationships | write | writeProperty | writeRelationshipType |\n" +
-                                "+-------------------------------------------------------------------------------+\n" +
-                                "| 4             | 10            | true  | \"score\"       | \"SIMILAR\"             |\n" +
-                                "+-------------------------------------------------------------------------------+\n" +
+        String expectedString = "+-----------------------------------------------------------------------+\n" +
+                                "| nodesCompared | relationships | writeProperty | writeRelationshipType |\n" +
+                                "+-----------------------------------------------------------------------+\n" +
+                                "| 4             | 10            | \"score\"       | \"SIMILAR\"             |\n" +
+                                "+-----------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
         assertEquals(expectedString, runQuery(query).resultAsString());
-
     }
 
     @Test
     void shouldProduceTopStreamOutput() {
-        String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    'Person | Instrument', 'LIKES', {" +
-                       "        direction: 'OUTGOING'," +
-                       "        topK: 1," +
-                       "        topN: 3" +
-                       "    }" +
-                       ") YIELD node1, node2, similarity " +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity " +
-                       "ORDER BY similarity DESC, Person1, Person2";
+        String query = "CALL gds.algo.nodeSimilarity.stream({\n" +
+                       "  nodeProjection: 'Person | Instrument',\n" +
+                       "  relationshipProjection: 'LIKES',\n" +
+                       "  direction: 'OUTGOING',\n" +
+                       "  topK: 1,\n" +
+                       "  topN: 3\n" +
+                       "})\n" +
+                       "YIELD node1, node2, similarity\n" +
+                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "ORDER BY similarity DESC, Person1, Person2\n";
 
         String expectedString = "+----------------------------------------+\n" +
                                 "| Person1 | Person2 | similarity         |\n" +
@@ -139,14 +146,15 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceTopKStreamOutput() {
-        String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    'Person | Instrument', 'LIKES', {" +
-                       "        direction: 'OUTGOING'," +
-                       "        topK: 1" +
-                       "    }" +
-                       ") YIELD node1, node2, similarity " +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity " +
-                       "ORDER BY Person1";
+        String query = "CALL gds.algo.nodeSimilarity.stream({\n" +
+                       "  nodeProjection: 'Person | Instrument',\n" +
+                       "  relationshipProjection: 'LIKES',\n" +
+                       "  direction: 'OUTGOING',\n" +
+                       "  topK: 1\n" +
+                       "})\n" +
+                       "YIELD node1, node2, similarity\n" +
+                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "ORDER BY Person1\n";
 
         String expectedString = "+----------------------------------------+\n" +
                                 "| Person1 | Person2 | similarity         |\n" +
@@ -163,14 +171,15 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceBottomKStreamOutput() {
-        String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    'Person | Instrument', 'LIKES', {" +
-                       "        direction: 'OUTGOING'," +
-                       "        bottomK: 1" +
-                       "    }" +
-                       ") YIELD node1, node2, similarity " +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity " +
-                       "ORDER BY Person1";
+        String query = "CALL gds.algo.nodeSimilarity.stream({\n" +
+                       "  nodeProjection: 'Person | Instrument',\n" +
+                       "  relationshipProjection: 'LIKES',\n" +
+                       "  direction: 'OUTGOING',\n" +
+                       "  bottomK: 1\n" +
+                       "})\n" +
+                       "YIELD node1, node2, similarity\n" +
+                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "ORDER BY Person1\n";
 
         String expectedString = "+----------------------------------------+\n" +
                                 "| Person1 | Person2 | similarity         |\n" +
@@ -188,14 +197,15 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceDegreeCutoffStreamOutput() {
-        String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    'Person | Instrument', 'LIKES', {" +
-                       "        direction: 'OUTGOING'," +
-                       "        degreeCutoff: 3" +
-                       "    }" +
-                       ") YIELD node1, node2, similarity " +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity " +
-                       "ORDER BY Person1";
+        String query = "CALL gds.algo.nodeSimilarity.stream({\n" +
+                       "  nodeProjection: 'Person | Instrument',\n" +
+                       "  relationshipProjection: 'LIKES',\n" +
+                       "  direction: 'OUTGOING',\n" +
+                       "  degreeCutoff: 3\n" +
+                       "})\n" +
+                       "YIELD node1, node2, similarity\n" +
+                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "ORDER BY Person1\n";
 
         String expectedString = "+--------------------------------+\n" +
                                 "| Person1 | Person2 | similarity |\n" +
@@ -210,14 +220,15 @@ class NodeSimilarityDocTest extends ProcTestBase {
 
     @Test
     void shouldProduceSimilarityCutoffStreamOutput() {
-        String query = "CALL algo.nodeSimilarity.stream(" +
-                       "    'Person | Instrument', 'LIKES', {" +
-                       "        direction: 'OUTGOING'," +
-                       "        similarityCutoff: 0.5" +
-                       "    }" +
-                       ") YIELD node1, node2, similarity " +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity " +
-                       "ORDER BY Person1, similarity DESCENDING";
+        String query = "CALL gds.algo.nodeSimilarity.stream({\n" +
+                       "  nodeProjection: 'Person | Instrument',\n" +
+                       "  relationshipProjection: 'LIKES',\n" +
+                       "  direction: 'OUTGOING',\n" +
+                       "  similarityCutoff: 0.5\n" +
+                       "})\n" +
+                       "YIELD node1, node2, similarity\n" +
+                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "ORDER BY Person1\n";
 
         String expectedString = "+----------------------------------------+\n" +
                                 "| Person1 | Person2 | similarity         |\n" +

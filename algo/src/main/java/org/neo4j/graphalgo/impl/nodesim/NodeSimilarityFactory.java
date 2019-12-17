@@ -23,7 +23,6 @@ package org.neo4j.graphalgo.impl.nodesim;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -33,24 +32,17 @@ import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class NodeSimilarityFactory extends AlgorithmFactory<NodeSimilarity, ProcedureConfiguration> {
+public class NodeSimilarityFactory<CONFIG extends NodeSimilarityConfigBase> extends AlgorithmFactory<NodeSimilarity, CONFIG> {
 
-    private final NodeSimilarity.Config config;
-    private final boolean computesSimilarityGraph;
-    public NodeSimilarityFactory(NodeSimilarity.Config config, boolean computesSimilarityGraph) {
-        this.config = config;
-        this.computesSimilarityGraph = computesSimilarityGraph;
+    @Override
+    public NodeSimilarity build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
+        return new NodeSimilarity(graph, configuration, Pools.DEFAULT, tracker);
     }
 
     @Override
-    public NodeSimilarity build(Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log) {
-        return new NodeSimilarity(graph, config, Pools.DEFAULT, tracker);
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation(ProcedureConfiguration configuration) {
-        int topN = Math.abs(config.topN());
-        int topK = Math.abs(config.topK());
+    public MemoryEstimation memoryEstimation(CONFIG config) {
+        int topN = Math.abs(config.normalizedN());
+        int topK = Math.abs(config.normalizedK());
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder(NodeSimilarity.class)
             .perNode("node filter", nodeCount -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
@@ -65,7 +57,7 @@ public class NodeSimilarityFactory extends AlgorithmFactory<NodeSimilarity, Proc
                         .perNode("array", nodeCount -> nodeCount * averageVectorSize).build();
                 })
             );
-        if (computesSimilarityGraph && !config.hasTopK()) {
+        if (config.computeToGraph() && !config.hasTopK()) {
             builder.add(
                 "similarity graph",
                 SimilarityGraphBuilder.memoryEstimation(topK, topN)

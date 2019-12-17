@@ -59,76 +59,61 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity(nodeFilter: STRING, relationshipFilter: STRING, {
-  write: BOOLEAN,
+CALL gds.algo.nodeSimilarity.write(graphName: STRING, {
+  writeRelationshipType: STRING,
   writeProperty: STRING
   // additional configuration
 })
-YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
+YIELD nodesCompared, relationships, writeRelationshipType, writeProperty
 ----
 
 .Parameters
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name               | Type    | Default | Optional | Description
-| nodeFilter         | string  | null    | yes      | The node label to load from the graph. If null, load all nodes.
-| relationshipFilter | string  | null    | yes      | The relationship types to load from the graph. If null, load all relationships.
-| config             | map     | {}      | yes      | Additional configuration, see below.
+| Name      | Type    | Default | Optional | Description
+| graphName | string  | null    | yes      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the config map must contain configuration for creating a graph.
+| config    | map     | {}      | yes      | Additional configuration, see below.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                  | Type    | Default                | Optional | Description
-| graph                 | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with node label and relationship type parameters. Use 'cypher' for describing the subset using Cypher queries for nodes and relationships.
-| concurrency           | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency      | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| write                 | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
-| writeRelationshipType | string  | SIMILAR                | yes      | The relationship type used to represent a similarity score.
-| writeProperty         | string  | 'score'                | yes      | The relationship property that stores the similarity score.
-| similarityCutoff      | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
-| degreeCutoff          | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| topK                  | int     | 10                     | yes      | Limit on the number of scores per node. The K largest results are returned.
-| bottomK               | int     | 10                     | yes      | Limit on the number of scores per node. The K smallest results are returned.
-| topN                  | int     | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned.
-| bottomN               | int     | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
+| Name                   | Type    | Default                | Optional | Description
+| nodeProjection         | string  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
+| relationshipProjection | string  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
+| concurrency            | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency        | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| similarityCutoff       | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
+| degreeCutoff           | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
+| topK                   | int     | 10                     | yes      | Limit on the number of scores per node. The K largest results are returned.
+| bottomK                | int     | 10                     | yes      | Limit on the number of scores per node. The K smallest results are returned.
+| topN                   | int     | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned.
+| bottomN                | int     | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
+| writeRelationshipType  | string  | SIMILAR                | yes      | The relationship type used to represent a similarity score.
+| writeProperty          | string  | 'score'                | yes      | The relationship property that stores the similarity score.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                  | Type    | Description
-| nodesCompared         | int     | The number of nodes compared.
-| relationships         | int     | The number of relationships created.
-| write                 | boolean | Specifies if the result was written back as a new relationship.
-| writeRelationshipType | string  | The relationship type used to represent a similarity score.
-| writeProperty         | string  | The relationship property that stores the similarity score.
-| loadMillis            | int     | Milliseconds for loading data.
-| computeMillis         | int     | Milliseconds for running the algorithm.
-| writeMillis           | int     | Milliseconds for writing result data back to Neo4j.
-| postProcessingMillis  | int     | Milliseconds for computing percentiles.
-| min                   | double  | The minimum similarity score computed.
-| max                   | double  | The maximum similarity score computed.
-| mean                  | double  | The mean of similarities scores computed.
-| stdDev                | double  | The standard deviation of similarities scores computed.
-| p1                    | double  | The 1 percentile of similarity scores computed.
-| p5                    | double  | The 5 percentile of similarity scores computed.
-| p10                   | double  | The 10 percentile of similarity scores computed.
-| p25                   | double  | The 25 percentile of similarity scores computed.
-| p50                   | double  | The 50 percentile of similarity scores computed.
-| p75                   | double  | The 75 percentile of similarity scores computed.
-| p90                   | double  | The 90 percentile of similarity scores computed.
-| p95                   | double  | The 95 percentile of similarity scores computed.
-| p99                   | double  | The 99 percentile of similarity scores computed.
-| p100                  | double  | The 100 percentile of similarity scores computed.
+| Name                   | Type   | Description
+| nodesCompared          | int    | The number of nodes compared.
+| relationships          | int    | The number of relationships created.
+| writeRelationshipType  | string | The relationship type used to represent a similarity score.
+| writeProperty          | string | The relationship property that stores the similarity score.
+| loadMillis             | int    | Milliseconds for loading data.
+| computeMillis          | int    | Milliseconds for running the algorithm.
+| writeMillis            | int    | Milliseconds for writing result data back to Neo4j.
+| postProcessingMillis   | int    | Milliseconds for computing percentiles.
+| similarityDistribution | map    | Min, max, mean, stdDev and percentile distribution of the computed similarity results.
 |===
 
 [[algorithms-node-similarity-syntax-stream]]
 .The following describes the API for running the algorithm and streaming results:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream(nodeFilter: STRING, relationshipFilter: STRING, {
+CALL gds.algo.nodeSimilarity.stream(graphName: STRING, {
   // configuration
 })
 YIELD node1, node2, similarity
@@ -137,17 +122,15 @@ YIELD node1, node2, similarity
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name               | Type    | Default      | Optional | Description
-| nodeFilter         | string  | null         | yes      | The node label to load from the graph. If null, load all nodes.
-| relationshipFilter | string  | null         | yes      | The relationship types to load from the graph. If null, load all relationships.
-| config             | map     | {}           | yes      | Additional configuration, see below.
+| Name      | Type    | Default | Optional | Description
+| graphName | string  | null    | yes      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the config map must contain configuration for creating a graph.
+| config    | map     | {}      | yes      | Additional configuration, see below.
 |===
 
 .Configuration
 [opts="header",cols="1m,1,1,1,4"]
 |===
 | Name              | Type    | Default                | Optional | Description
-| graph             | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with node label and relationship type parameters. Use 'cypher' for describing the subset using Cypher queries for nodes and relationships.
 | concurrency       | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | similarityCutoff  | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
@@ -212,7 +195,9 @@ In the example graph, the Eve node will not be compared to other Person nodes.
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
+CALL gds.algo.nodeSimilarity.stream({
+  nodeProjection: 'Person | Instrument',
+  relationshipProjection: 'LIKES',
   direction: 'OUTGOING'
 })
 YIELD node1, node2, similarity
@@ -252,18 +237,21 @@ The similarity score is written as a property on the relationship.
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity('Person | Instrument', 'LIKES', {
+CALL gds.algo.nodeSimilarity.write({
+  nodeProjection: 'Person | Instrument',
+  relationshipProjection: 'LIKES',
   direction: 'OUTGOING',
-  write: true
+  writeRelationshipType: 'SIMILAR',
+  writeProperty: 'score'
 })
-YIELD nodesCompared, relationships, write, writeProperty, writeRelationshipType;
+YIELD nodesCompared, relationships, writeProperty, writeRelationshipType;
 ----
 
 .Results
 [opts="header"]
 |===
-| nodesCompared | relationships | write | writeProperty | writeRelationshipType
-| 4             | 10            | true  | "score"       | "SIMILAR"
+| nodesCompared | relationships | writeProperty | writeRelationshipType
+| 4             | 10            | "score"       | "SIMILAR"
 |===
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
@@ -305,7 +293,9 @@ If neither is specified, topK is used.
 .The following will load the graph, run the algorithm, and stream the top 1 result per node:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
+CALL gds.algo.nodeSimilarity.stream({
+  nodeProjection: 'Person | Instrument',
+  relationshipProjection: 'LIKES',
   direction: 'OUTGOING',
   topK: 1
 })
@@ -328,7 +318,9 @@ ORDER BY Person1
 .The following will load the graph, run the algorithm, and stream the bottom 1 result per node:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
+CALL gds.algo.nodeSimilarity.stream({
+  nodeProjection: 'Person | Instrument',
+  relationshipProjection: 'LIKES',
   direction: 'OUTGOING',
   bottomK: 1
 })
@@ -361,7 +353,9 @@ A value of 0 means no global limit is imposed and all results from topK or botto
 .The following will load the graph, run the algorithm, and stream the 3 highest out of the top 1 results per node:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
+CALL gds.algo.nodeSimilarity.stream({
+  nodeProjection: 'Person | Instrument',
+  relationshipProjection: 'LIKES',
   direction: 'OUTGOING',
   topK: 1,
   topN: 3
@@ -391,9 +385,11 @@ This value can not be lower than 1.
 .The following will ignore nodes with less than 3 LIKES relationships:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
+CALL gds.algo.nodeSimilarity.stream({
+  nodeProjection: 'Person | Instrument',
+  relationshipProjection: 'LIKES',
   direction: 'OUTGOING',
-  degreeCutOff: 3
+  degreeCutoff: 3
 })
 YIELD node1, node2, similarity
 RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity
@@ -420,7 +416,9 @@ Setting similarity cutoff to 0 may yield a very large result set, increased runt
 .The following will ignore node pairs with a similarty score less than 0.5:
 [source, cypher]
 ----
-CALL algo.nodeSimilarity.stream('Person | Instrument', 'LIKES', {
+CALL gds.algo.nodeSimilarity.stream({
+  nodeProjection: 'Person | Instrument',
+  relationshipProjection: 'LIKES',
   direction: 'OUTGOING',
   similarityCutoff: 0.5
 })
