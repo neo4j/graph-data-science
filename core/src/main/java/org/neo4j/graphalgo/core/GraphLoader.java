@@ -19,21 +19,16 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AbstractPropertyMappings;
-import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.GraphSetupImpl;
+import org.neo4j.graphalgo.api.GraphSetupLegacyImpl;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -41,7 +36,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
@@ -486,70 +480,26 @@ public class GraphLoader {
     public GraphSetup toSetup() {
         this.relPropertyMappings.setGlobalDeduplicationStrategy(deduplicationStrategy);
         if (createConfig == null) {
-            PropertyMappings relProperties = this.relPropertyMappings.build();
-            RelationshipProjections.Builder projectionsBuilder = RelationshipProjections.builder();
-            if (!undirected && direction == Direction.BOTH) {
-                String outIdentifier;
-                String inIdentifier;
-                if (StringUtils.isEmpty(relationshipType)) {
-                    // TODO: fake select all
-                    outIdentifier = "*->";
-                    inIdentifier = "->*";
-                } else {
-                    outIdentifier = relationshipType + "_OUT";
-                    inIdentifier = relationshipType + "_IN";
-                }
-
-                projectionsBuilder
-                    .putProjection(
-                        ElementIdentifier.of(outIdentifier),
-                        RelationshipProjection
-                            .builder()
-                            .type(relationshipType)
-                            .aggregation(deduplicationStrategy)
-                            .properties(relProperties)
-                            .projection(Projection.NATURAL)
-                            .build()
-                    )
-                    .putProjection(
-                        ElementIdentifier.of(inIdentifier),
-                        RelationshipProjection
-                            .builder()
-                            .type(relationshipType)
-                            .aggregation(deduplicationStrategy)
-                            .properties(relProperties)
-                            .projection(Projection.REVERSE)
-                            .build()
-                    );
-            } else {
-                Projection projection = undirected
-                    ? Projection.UNDIRECTED
-                    : direction == Direction.INCOMING ? Projection.REVERSE : Projection.NATURAL;
-
-                projectionsBuilder
-                    .putProjection(
-                        // TODO: fake select all
-                        ElementIdentifier.of(StringUtils.isEmpty(relationshipType) ? "*" : relationshipType),
-                        RelationshipProjection
-                            .builder()
-                            .type(relationshipType)
-                            .aggregation(deduplicationStrategy)
-                            .properties(relProperties)
-                            .projection(projection)
-                            .build()
-                    );
-            }
-
-            NodeProjections nodeProjections = NodeProjections.fromString(label);
-            createConfig = ImmutableGraphCreateConfig
-                .builder()
-                .graphName(StringUtils.trimToEmpty(graphName))
-                .concurrency(concurrency)
-                .username(username)
-                .nodeProperties(nodePropertyMappings.build())
-                .nodeProjection(nodeProjections)
-                .relationshipProjection(projectionsBuilder.build())
-                .build();
+            // uh-oh Labs are calling us
+            return new GraphSetupLegacyImpl(
+                username,
+                label,
+                relationshipType,
+                direction,
+                params,
+                executorService,
+                concurrency,
+                batchSize,
+                deduplicationStrategy,
+                log,
+                logMillis,
+                undirected,
+                tracker,
+                terminationFlag,
+                graphName,
+                nodePropertyMappings.build(),
+                relPropertyMappings.build()
+            );
         }
 
         return new GraphSetupImpl(
