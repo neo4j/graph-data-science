@@ -60,6 +60,8 @@ import java.util.stream.Collectors;
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE, depluralize = true, deepImmutablesDetection = true)
 public abstract class GdsCypher {
 
+    private static final int ADDITIONAL_PARAMETERS_FOR_IMPLICIT_GRAPH_CREATION = 4;
+
     public static CreationBuildStage call() {
         return new StagedBuilder();
     }
@@ -339,7 +341,9 @@ public abstract class GdsCypher {
 
         if (implicitCreateConfig.isPresent()) {
             GraphCreateConfig config = implicitCreateConfig.get();
-            Map<String, Object> newParameters = new LinkedHashMap<>(parameters.size() + 4);
+            Map<String, Object> newParameters = new LinkedHashMap<>(
+                parameters.size() + ADDITIONAL_PARAMETERS_FOR_IMPLICIT_GRAPH_CREATION
+            );
 
             if (executionMode == InternalExecutionMode.GRAPH_CREATE) {
                 argumentsString.add(toCypherString(config.nodeProjection().toObject()));
