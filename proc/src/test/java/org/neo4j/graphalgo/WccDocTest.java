@@ -27,26 +27,29 @@ import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class WccDocTest extends ProcTestBase {
+
+    private static final String DB_CYPHER =
+        "CREATE (nAlice:User {name: 'Alice'}) " +
+        "CREATE (nBridget:User {name: 'Bridget'}) " +
+        "CREATE (nCharles:User {name: 'Charles'}) " +
+        "CREATE (nDoug:User {name: 'Doug'}) " +
+        "CREATE (nMark:User {name: 'Mark'}) " +
+        "CREATE (nMichael:User {name: 'Michael'}) " +
+
+        "CREATE (nAlice)-[:LINK {weight: 0.5}]->(nBridget) " +
+        "CREATE (nAlice)-[:LINK {weight: 4}]->(nCharles) " +
+        "CREATE (nMark)-[:LINK {weight: 1.1}]->(nDoug) " +
+        "CREATE (nMark)-[:LINK {weight: 2}]->(nMichael); ";
 
     @BeforeEach
     void setup() throws Exception {
-        String createGraph = "CREATE (nAlice:User {name: 'Alice'}) " +
-                             "CREATE (nBridget:User {name: 'Bridget'}) " +
-                             "CREATE (nCharles:User {name: 'Charles'}) " +
-                             "CREATE (nDoug:User {name: 'Doug'}) " +
-                             "CREATE (nMark:User {name: 'Mark'}) " +
-                             "CREATE (nMichael:User {name: 'Michael'}) " +
-
-                             "CREATE (nAlice)-[:LINK {weight: 0.5}]->(nBridget) " +
-                             "CREATE (nAlice)-[:LINK {weight: 4}]->(nCharles) " +
-                             "CREATE (nMark)-[:LINK {weight: 1.1}]->(nDoug) " +
-                             "CREATE (nMark)-[:LINK {weight: 2}]->(nMichael); ";
-
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );
-        runQuery(createGraph);
+        runQuery(DB_CYPHER);
         registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphCatalogProcs.class);
         registerFunctions(GetNodeFunc.class);
     }
@@ -56,12 +59,86 @@ class WccDocTest extends ProcTestBase {
         db.shutdown();
     }
 
-    // Queries and results match wcc.adoc Seeding section; should read from there in a future
-    // Doesn't have any assertions; those should be to verify results with contents in wcc.adoc
-    // This is left for a future task
     @Test
-    void seeding() {
-        String q1 = GdsCypher.call()
+    void shouldProduceStreamOutput() {
+        String query = GdsCypher.call()
+            .withNodeLabel("User")
+            .withRelationshipType("LINK")
+            .algo("wcc")
+            .streamMode()
+            .yields("nodeId", "componentId");
+
+        query += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+                 " ORDER BY componentId, name";
+
+        String expected = "+-------------------------+\n" +
+                          "| name      | componentId |\n" +
+                          "+-------------------------+\n" +
+                          "| \"Alice\"   | 0           |\n" +
+                          "| \"Bridget\" | 0           |\n" +
+                          "| \"Charles\" | 0           |\n" +
+                          "| \"Doug\"    | 3           |\n" +
+                          "| \"Mark\"    | 3           |\n" +
+                          "| \"Michael\" | 3           |\n" +
+                          "+-------------------------+\n" +
+                          "6 rows\n";
+
+        assertEquals(expected, runQuery(query).resultAsString());
+    }
+
+    @Test
+    void shouldProduceWriteOutput() {
+        String query = GdsCypher.call()
+            .withNodeLabel("User")
+            .withRelationshipType("LINK")
+            .algo("wcc")
+            .writeMode()
+            .addParameter("writeProperty", "componentId")
+            .yields("nodePropertiesWritten", "componentCount", "writeProperty");
+
+        String expected = "+--------------------------------------------------------+\n" +
+                          "| nodePropertiesWritten | componentCount | writeProperty |\n" +
+                          "+--------------------------------------------------------+\n" +
+                          "| 6                     | 2              | \"componentId\" |\n" +
+                          "+--------------------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(query).resultAsString());
+    }
+
+    @Test
+    void shouldProduceWeightedStreamOutput() {
+        String query = GdsCypher.call()
+            .withNodeLabel("User")
+            .withRelationshipType("LINK")
+            .withRelationshipProperty("weight")
+            .algo("wcc")
+            .streamMode()
+            .addParameter("weightProperty", "weight")
+            .addParameter("threshold", 1.0D)
+            .yields("nodeId", "componentId");
+
+        query += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+                 " ORDER BY componentId, name";
+
+        String expected = "+-------------------------+\n" +
+                          "| name      | componentId |\n" +
+                          "+-------------------------+\n" +
+                          "| \"Alice\"   | 0           |\n" +
+                          "| \"Charles\" | 0           |\n" +
+                          "| \"Bridget\" | 1           |\n" +
+                          "| \"Doug\"    | 3           |\n" +
+                          "| \"Mark\"    | 3           |\n" +
+                          "| \"Michael\" | 3           |\n" +
+                          "+-------------------------+\n" +
+                          "6 rows\n";
+
+        assertEquals(expected, runQuery(query).resultAsString());
+    }
+
+    @Test
+    void shouldProduceWeightedWriteOutput() {
+        String query = GdsCypher.call()
             .withNodeLabel("User")
             .withRelationshipType("LINK")
             .withRelationshipProperty("weight")
@@ -72,15 +149,45 @@ class WccDocTest extends ProcTestBase {
             .addParameter("threshold", 1.0D)
             .yields("nodePropertiesWritten", "componentCount", "writeProperty");
 
-        String r1 = runQuery(q1).resultAsString();
-//        System.out.println(r1);
+        String expected = "+--------------------------------------------------------+\n" +
+                          "| nodePropertiesWritten | componentCount | writeProperty |\n" +
+                          "+--------------------------------------------------------+\n" +
+                          "| 6                     | 3              | \"componentId\" |\n" +
+                          "+--------------------------------------------------------+\n" +
+                          "1 row\n";
 
-        String q2 = "MATCH (b:User {name: 'Bridget'}) " +
-                    "CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})";
-        String r2 = runQuery(q2).resultAsString();
-//        System.out.println(r2);
+        assertEquals(expected, runQuery(query).resultAsString());
+    }
 
-        String q3 = GdsCypher.call()
+    @Test
+    void shouldProduceSeededStreamOutput() {
+        String initQuery = GdsCypher.call()
+            .withNodeLabel("User")
+            .withRelationshipType("LINK")
+            .withRelationshipProperty("weight")
+            .algo("wcc")
+            .writeMode()
+            .addParameter("writeProperty", "componentId")
+            .addParameter("weightProperty", "weight")
+            .addParameter("threshold", 1.0D)
+            .yields("nodePropertiesWritten", "componentCount", "writeProperty");
+
+        String expected = "+--------------------------------------------------------+\n" +
+                          "| nodePropertiesWritten | componentCount | writeProperty |\n" +
+                          "+--------------------------------------------------------+\n" +
+                          "| 6                     | 3              | \"componentId\" |\n" +
+                          "+--------------------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(initQuery).resultAsString());
+
+        // create new node and relationship
+        String dataQuery = "MATCH (b:User {name: 'Bridget'}) " +
+                           "CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})";
+        runQuery(dataQuery);
+
+        // stream with seeding
+        String query = GdsCypher.call()
             .withNodeLabel("User")
             .withNodeProperty("componentId")
             .withRelationshipType("LINK")
@@ -92,13 +199,54 @@ class WccDocTest extends ProcTestBase {
             .addParameter("threshold", 1.0D)
             .yields("nodeId", "componentId");
 
-        q3 += " RETURN algo.asNode(nodeId).name AS name, componentId" +
-              " ORDER BY componentId, name";
+        query += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+                 " ORDER BY componentId, name";
 
-        String r3 = runQuery(q3).resultAsString();
-//        System.out.println(r3);
+        expected = "+-------------------------+\n" +
+                   "| name      | componentId |\n" +
+                   "+-------------------------+\n" +
+                   "| \"Alice\"   | 0           |\n" +
+                   "| \"Charles\" | 0           |\n" +
+                   "| \"Bridget\" | 1           |\n" +
+                   "| \"Mats\"    | 1           |\n" +
+                   "| \"Doug\"    | 3           |\n" +
+                   "| \"Mark\"    | 3           |\n" +
+                   "| \"Michael\" | 3           |\n" +
+                   "+-------------------------+\n" +
+                   "7 rows\n";
 
-        String q4 = GdsCypher.call()
+        assertEquals(expected, runQuery(query).resultAsString());
+    }
+
+    @Test
+    void shouldProduceSeededWriteOutput() {
+        String initQuery = GdsCypher.call()
+            .withNodeLabel("User")
+            .withRelationshipType("LINK")
+            .withRelationshipProperty("weight")
+            .algo("wcc")
+            .writeMode()
+            .addParameter("writeProperty", "componentId")
+            .addParameter("weightProperty", "weight")
+            .addParameter("threshold", 1.0D)
+            .yields("nodePropertiesWritten", "componentCount", "writeProperty");
+
+        String expected = "+--------------------------------------------------------+\n" +
+                          "| nodePropertiesWritten | componentCount | writeProperty |\n" +
+                          "+--------------------------------------------------------+\n" +
+                          "| 6                     | 3              | \"componentId\" |\n" +
+                          "+--------------------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(initQuery).resultAsString());
+
+        String dataQuery = "MATCH (b:User {name: 'Bridget'}) " +
+                           "CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})";
+
+        System.out.println(runQuery(dataQuery).resultAsString());
+
+        // write with seeding
+        String query = GdsCypher.call()
             .withNodeLabel("User")
             .withNodeProperty("componentId")
             .withRelationshipType("LINK")
@@ -106,47 +254,74 @@ class WccDocTest extends ProcTestBase {
             .algo("wcc")
             .writeMode()
             .addParameter("seedProperty", "componentId")
-            .addParameter("weightProperty", "weight")
             .addParameter("writeProperty", "componentId")
+            .addParameter("weightProperty", "weight")
             .addParameter("threshold", 1.0D)
             .yields("nodePropertiesWritten", "componentCount", "writeProperty");
 
-        String r4 = runQuery(q4).resultAsString();
-//        System.out.println(r4);
+        System.out.println(query);
 
-        // graph end-state
-        System.out.println(runQuery("MATCH (n) RETURN n").resultAsString());
+        expected = "+--------------------------------------------------------+\n" +
+                   "| nodePropertiesWritten | componentCount | writeProperty |\n" +
+                   "+--------------------------------------------------------+\n" +
+                   "| 7                     | 3              | \"componentId\" |\n" +
+                   "+--------------------------------------------------------+\n" +
+                   "1 row\n";
+
+        assertEquals(expected, runQuery(query).resultAsString());
     }
 
-    // Queries from the named graph and Cypher projection example in wcc.adoc
-    // used to test that the results are correct in the docs
     @Test
-    void namedGraphAndCypherProjection() {
-        String q1 = "CALL algo.beta.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;";
-        String r1 = runQuery(q1).resultAsString();
-//        System.out.println(r1);
+    void shouldProduceStreamOutputOnLoadedGraph() {
+        String createGraphQuery = "CALL algo.beta.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;";
+        runQuery(createGraphQuery);
 
-        String q2 = GdsCypher.call()
+        String query = GdsCypher.call()
             .explicitCreation("myGraph")
             .algo("wcc")
             .streamMode()
             .yields("nodeId", "componentId");
 
-        q2 += " RETURN algo.asNode(nodeId).name AS name, componentId" +
-              " ORDER BY componentId, name;";
+        query += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+                 " ORDER BY componentId, name;";
 
-        String r2 = runQuery(q2).resultAsString();
-//        System.out.println(r2);
+        String expected = "+-------------------------+\n" +
+                          "| name      | componentId |\n" +
+                          "+-------------------------+\n" +
+                          "| \"Alice\"   | 0           |\n" +
+                          "| \"Bridget\" | 0           |\n" +
+                          "| \"Charles\" | 0           |\n" +
+                          "| \"Doug\"    | 3           |\n" +
+                          "| \"Mark\"    | 3           |\n" +
+                          "| \"Michael\" | 3           |\n" +
+                          "+-------------------------+\n" +
+                          "6 rows\n";
 
-        String q3 = "CALL gds.algo.wcc.stream({" +
-                    "   nodeQuery: 'MATCH (u:User) RETURN id(u) AS id', " +
-                    "   relationshipQuery: 'MATCH (u1:User)-[:LINK]->(u2:User) RETURN id(u1) AS source, id(u2) AS target'" +
-                    "}) " +
-                    "YIELD nodeId, componentId " +
-                    "RETURN algo.asNode(nodeId).name AS name, componentId " +
-                    "ORDER BY componentId, name";
+        assertEquals(expected, runQuery(query).resultAsString());
+    }
 
-        String r3 = runQuery(q3).resultAsString();
-//        System.out.println(r3);
+    @Test
+    void shouldProduceStreamOutputOnCypherProjection() {
+        String query = "CALL gds.algo.wcc.stream({" +
+                       "   nodeQuery: 'MATCH (u:User) RETURN id(u) AS id', " +
+                       "   relationshipQuery: 'MATCH (u1:User)-[:LINK]->(u2:User) RETURN id(u1) AS source, id(u2) AS target'" +
+                       "}) " +
+                       "YIELD nodeId, componentId " +
+                       "RETURN algo.asNode(nodeId).name AS name, componentId " +
+                       "ORDER BY componentId, name";
+
+        String expected = "+-------------------------+\n" +
+                          "| name      | componentId |\n" +
+                          "+-------------------------+\n" +
+                          "| \"Alice\"   | 0           |\n" +
+                          "| \"Bridget\" | 0           |\n" +
+                          "| \"Charles\" | 0           |\n" +
+                          "| \"Doug\"    | 3           |\n" +
+                          "| \"Mark\"    | 3           |\n" +
+                          "| \"Michael\" | 3           |\n" +
+                          "+-------------------------+\n" +
+                          "6 rows\n";
+
+        assertEquals(expected, runQuery(query).resultAsString());
     }
 }

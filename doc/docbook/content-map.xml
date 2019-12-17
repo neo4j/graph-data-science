@@ -62,8 +62,6 @@
                 </d:tocentry>
             </d:tocentry>
             <d:tocentry linkend="labs-algorithms-community"><?dbhtml filename="labs-algorithms/community/index.html"?>
-                <d:tocentry linkend="labs-algorithms-connected-components"><?dbhtml filename="labs-algorithms/connected-components/index.html"?>
-                </d:tocentry>
                 <d:tocentry linkend="labs-algorithms-strongly-connected-components"><?dbhtml filename="labs-algorithms/strongly-connected-components/index.html"?>
                 </d:tocentry>
                 <d:tocentry
