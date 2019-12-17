@@ -23,9 +23,15 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
 
 import java.util.Arrays;
@@ -83,6 +89,32 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
             );
             assertThat(e.getMessage(), containsString("foo"));
             assertThat(e.getMessage(), containsString("[a, b, c]"));
+        });
+    }
+
+    @Test
+    default void shouldFailWithInvalidWeightProperty() {
+        String loadedGraphName = "loadedGraph";
+        GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
+        Graph graph = new GraphLoader(graphDb())
+            .withGraphCreateConfig(graphCreateConfig)
+            .load(HugeGraphFactory.class);
+
+        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
+
+        applyOnProcedure((proc) -> {
+            CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("weightProperty", "owiejfoseifj"));
+            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
+            String error = "Weight property `owiejfoseifj` not found";
+            assertMissingProperty(error, () -> proc.compute(
+                loadedGraphName,
+                configMap
+            ));
+
+            assertMissingProperty(error, () -> proc.compute(
+                configMap,
+                Collections.emptyMap()
+            ));
         });
     }
 }

@@ -33,8 +33,6 @@ import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
-import org.neo4j.graphalgo.newapi.SeedConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Procedure;
@@ -55,7 +53,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.neo4j.graphalgo.core.utils.ExceptionUtil.rootCause;
 
 /**
@@ -122,60 +119,6 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
                 graphCreateConfig,
                 "GraphCreateConfig should be empty."
             );
-        });
-    }
-
-    @Test
-    default void shouldFailWithInvalidWeightProperty() {
-        assumeTrue(createConfig(createMinimalConfig(CypherMapWrapper.empty())) instanceof WeightConfig);
-        String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
-        Graph graph = new GraphLoader(graphDb())
-            .withGraphCreateConfig(graphCreateConfig)
-            .load(HugeGraphFactory.class);
-
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
-
-        applyOnProcedure((proc) -> {
-            CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("weightProperty", "owiejfoseifj"));
-            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Weight property `owiejfoseifj` not found";
-            assertMissingProperty(error, () -> proc.compute(
-                loadedGraphName,
-                configMap
-            ));
-
-            assertMissingProperty(error, () -> proc.compute(
-                configMap,
-                Collections.emptyMap()
-            ));
-        });
-    }
-
-    @Test
-    default void shouldFailWithInvalidSeedProperty() {
-        assumeTrue(createConfig(createMinimalConfig(CypherMapWrapper.empty())) instanceof SeedConfig);
-        String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
-        Graph graph = new GraphLoader(graphDb())
-            .withGraphCreateConfig(graphCreateConfig)
-            .load(HugeGraphFactory.class);
-
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
-
-        applyOnProcedure((proc) -> {
-            CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", "owiejfoseifj"));
-            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Seed property `owiejfoseifj` not found";
-            assertMissingProperty(error, () -> proc.compute(
-                loadedGraphName,
-                configMap
-            ));
-
-            assertMissingProperty(error, () -> proc.compute(
-                configMap,
-                Collections.emptyMap()
-            ));
         });
     }
 
