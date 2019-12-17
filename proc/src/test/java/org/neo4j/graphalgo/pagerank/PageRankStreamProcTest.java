@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -34,6 +33,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> {
 
@@ -48,7 +48,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testPageRankParallelExecution(String graphSnippet, String testName) {
         final Map<Long, Double> actual = new HashMap<>();
 
@@ -68,7 +68,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsEqual")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testWeightedPageRankWithAllRelationshipsEqual(String graphSnippet, String testCase) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.algo.pageRank.stream(" +
@@ -101,9 +101,8 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
         assertEquals(1, distinctValues);
     }
 
-    @Disabled(value = "Disabled because Graph Filter is not currently implemented and the Graph doesn't `remember` what properties were loaded")
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariations")
     void testWeightedPageRankThrowsIfWeightPropertyDoesNotExist(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.stream(" +
                        graphSnippet +
@@ -115,11 +114,13 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
             runQuery(query, row -> {});
         });
         Throwable rootCause = ExceptionUtil.rootCause(exception);
-        assertEquals("Relationship properties not found: 'does_not_exist'", rootCause.getMessage());
+        assertTrue(
+            rootCause.getMessage().contains("Weight property `does_not_exist` not found in graph") ||
+            rootCause.getMessage().contains("No graph was loaded for property does_not_exist"));
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testWeightedPageRankWithCachedWeights(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.stream(" +
                        graphSnippet +
@@ -135,11 +136,12 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1NoProps")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testPageRank(String graphSnippet, String testCaseName) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.algo.pageRank.stream(" +
                        graphSnippet +
+                       "        dampingFactor: 0.85" +
                        "    }" +
                        ") YIELD nodeId, score";
 
@@ -150,7 +152,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testWeightedPageRank(String graphSnippet, String testCaseName) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.algo.pageRank.stream(" +

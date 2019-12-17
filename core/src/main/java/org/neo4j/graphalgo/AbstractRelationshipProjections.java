@@ -27,10 +27,10 @@ import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.stream.Streams;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -149,6 +149,19 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             return RelationshipProjections.copyOf(this);
         }
         return modifyProjections(p -> p.withAdditionalPropertyMappings(mappings));
+    }
+
+    public RelationshipProjections filterPropertyMappings(String... propertyNames) {
+        return modifyProjections(p ->
+            p.withProperties(PropertyMappings.of(
+                p.properties().stream()
+                    .filter(mapping ->
+                        Arrays.stream(propertyNames)
+                            .anyMatch(propertyName -> mapping.propertyKey().equals(propertyName)))
+                    .collect(Collectors.toList())
+                )
+            )
+        );
     }
 
     private RelationshipProjections modifyProjections(UnaryOperator<RelationshipProjection> operator) {

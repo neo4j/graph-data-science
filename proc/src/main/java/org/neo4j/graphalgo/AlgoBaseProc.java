@@ -181,6 +181,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 .findFirst().orElseThrow(
                     () -> new NoSuchElementException(String.format("Cannot find graph with name %s", maybeGraphName.get()))
                 );
+
             validateConfig(catalogEntry.getKey(), config);
             return catalogEntry.getValue();
         } else if (config.implicitCreateConfig().isPresent()) {

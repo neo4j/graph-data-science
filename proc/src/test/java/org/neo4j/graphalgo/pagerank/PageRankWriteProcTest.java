@@ -42,7 +42,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testPageRankWriteBack(String graphSnippet, String testCaseName) {
         String writeProperty = "myFancyScore";
         String query = "CALL gds.algo.pageRank.write(" +
@@ -59,7 +59,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testWeightedPageRankWriteBack(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.write(" +
                        graphSnippet +
@@ -77,7 +77,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testPageRankParallelWriteBack(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.write(" +
                        graphSnippet +
@@ -92,7 +92,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testPageRankWithToleranceParam(String graphSnippet, String testCaseName) {
         graphSnippet += " writeProperty: 'writeProp',";
         String graphName = "myGraph1";
@@ -134,7 +134,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testWriteYieldRanAndMaxIterationsAndDidConverge(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.write(" +
                        graphSnippet +
@@ -153,7 +153,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testStatsYieldRanAndMaxIterationsAndDidConverge(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.stats(" +
                        graphSnippet +

@@ -35,6 +35,9 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.utils.Pools;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_WEIGHT_KEY;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -165,6 +168,8 @@ public interface GraphCreateConfig extends BaseConfig {
             "relationshipProjection",
             config.get("relationshipProjection", (Object) RelationshipProjections.empty())
         ));
+        relationshipProjections = relationshipProjections.filterPropertyMappings(config.getString(DEPRECATED_RELATIONSHIP_PROPERTY_KEY)
+            .orElse(config.getString(RELATIONSHIP_WEIGHT_KEY).orElse(null)));
         NodeProjections nodeProjections = NodeProjections.fromObject(CypherMapWrapper.failOnNull(
             "nodeProjection",
             config.get("nodeProjection", (Object) NodeProjections.empty())

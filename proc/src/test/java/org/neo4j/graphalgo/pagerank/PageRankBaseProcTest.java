@@ -122,23 +122,12 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
         runQuery(cypher);
 
         runQuery("CALL algo.beta.graph.create(" +
-                 "'equalWeightGraph'," +
-                 "'Label1'," +
-                 "   {" +
-                 "      TYPE1: {" +
-                 "          type: 'TYPE1'," +
-                 "          properties: ['equalWeight']" +
-                 "      } " +
-                 "   }" +
-                 ")");
-
-        runQuery("CALL algo.beta.graph.create(" +
                  "'graphLabel1'," +
                  "'Label1'," +
                  "   {" +
                  "      TYPE1: {" +
                  "          type: 'TYPE1'," +
-                 "          properties: ['weight']" +
+                 "          properties: ['weight', 'equalWeight']" +
                  "      } " +
                  "   }" +
                  ")");
@@ -187,7 +176,7 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
         GraphCatalog.removeAllLoadedGraphs();
     }
 
-    static Stream<Arguments> graphVariationsLabel1() {
+    static Stream<Arguments> graphVariations() {
         return Stream.of(
             arguments("'graphLabel1', {", "explicit graph"),
             arguments(
@@ -196,25 +185,9 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
                 "  relationshipProjection: {" +
                 "      TYPE1: {" +
                 "          type: 'TYPE1'," +
-                "          properties: ['weight']" +
+                "          properties: ['weight', 'equalWeight']" +
                 "      } " +
                 "  },",
-                "  implicit graph"
-            )
-        );
-    }
-
-    static Stream<Arguments> graphVariationsLabel1NoProps() {
-        return Stream.of(
-            arguments("'graphLabel1', {", "explicit graph"),
-            arguments(
-                "{" +
-                "  nodeProjection: 'Label1'," +
-                "  relationshipProjection: {" +
-                "      TYPE1: {" +
-                "          type: 'TYPE1'" +
-                "      } " +
-                "  }",
                 "  implicit graph"
             )
         );
@@ -229,25 +202,8 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
                 "  relationshipProjection: {" +
                 "      TYPE3: {" +
                 "          type: 'TYPE3'," +
-                "          properties: ['equalWeight'], " +
+                "          properties: ['weight', 'equalWeight'], " +
                 "          projection: 'UNDIRECTED'" +
-                "      } " +
-                "  },",
-                "  implicit graph"
-            )
-        );
-    }
-
-    static Stream<Arguments> graphVariationsEqual() {
-        return Stream.of(
-            arguments("'equalWeightGraph', {", "explicit graph"),
-            arguments(
-                "{" +
-                "  nodeProjection: 'Label1'," +
-                "  relationshipProjection: {" +
-                "      TYPE1: {" +
-                "          type: 'TYPE1'," +
-                "          properties: ['equalWeight']" +
                 "      } " +
                 "  },",
                 "  implicit graph"
