@@ -56,7 +56,7 @@ public interface PageRankBaseConfig extends
         return 0.85;
     }
 
-    default List<Node> sourceNodeIds() {
+    default List<Node> sourceNodes() {
         return Collections.emptyList();
     }
 

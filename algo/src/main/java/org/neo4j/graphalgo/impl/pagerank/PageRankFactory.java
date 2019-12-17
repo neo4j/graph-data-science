@@ -55,7 +55,7 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends Algorith
             final AllocationTracker tracker,
             final Log log) {
 
-        LongStream sourceNodeIds = configuration.sourceNodeIds().stream().mapToLong(Node::getId);
+        LongStream sourceNodeIds = configuration.sourceNodes().stream().mapToLong(Node::getId);
         return algorithmType.create(
                 graph,
                 Pools.DEFAULT,
