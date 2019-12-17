@@ -170,7 +170,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
 
     public Stream<NodeSimilarityWriteResult> write(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult, boolean write) {
         NodeSimilarityWriteConfig config = computationResult.config();
-        if (computationResult.isEmpty()) {
+        if (computationResult.isGraphEmpty()) {
             return Stream.of(
                 new NodeSimilarityWriteResult(
                     config,
