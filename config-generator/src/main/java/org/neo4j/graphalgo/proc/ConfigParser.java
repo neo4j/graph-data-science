@@ -184,7 +184,6 @@ final class ConfigParser {
                     asType(am.getAnnotationType().asElement())
                         .getQualifiedName()
                         .contentEquals(annotationType.getName()))
-                .distinct()
                 .collect(Collectors.toCollection(() -> new TreeSet<>(
                     Comparator.comparing(am -> asType(am.getAnnotationType().asElement()).getQualifiedName().toString())
                 )));

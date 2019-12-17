@@ -86,7 +86,7 @@ public class LouvainStreamProc extends LouvainProcBase<LouvainStreamConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     // TODO: inline

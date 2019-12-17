@@ -81,7 +81,7 @@ public class LabelPropagationStreamProc extends LabelPropagationProcBase<LabelPr
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     private Stream<LabelPropagationStreamProc.StreamResult> stream(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult) {

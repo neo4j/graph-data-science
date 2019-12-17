@@ -90,7 +90,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
     protected abstract AlgorithmFactory<A, CONFIG> algorithmFactory(CONFIG config);
 
-    protected MemoryTreeWithDimensions memoryEstimation(final CONFIG config) {
+    protected MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
         GraphDimensions dimensions;
 
@@ -309,7 +309,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         }
     }
 
-    protected Stream<MemoryEstimateResult> computeMemoryEstimate(Object graphNameOrConfig, Map<String, Object> configuration) {
+    protected Stream<MemoryEstimateResult> computeEstimate(Object graphNameOrConfig, Map<String, Object> configuration) {
         Pair<CONFIG, Optional<String>> configAndGraphName = processInput(
             graphNameOrConfig,
             configuration

@@ -77,7 +77,7 @@ public class PageRankStreamProc extends PageRankProcBase<PageRankStreamConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     private Stream<StreamResult> stream(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult) {

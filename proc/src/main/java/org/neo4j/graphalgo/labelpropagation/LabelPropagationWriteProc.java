@@ -170,7 +170,7 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Procedure(value = "gds.algo.labelPropagation.stats.estimate", mode = READ)
@@ -194,7 +194,7 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

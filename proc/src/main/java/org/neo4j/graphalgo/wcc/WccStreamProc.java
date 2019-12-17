@@ -58,7 +58,7 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     private Stream<StreamResult> stream(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {

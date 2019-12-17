@@ -67,7 +67,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Procedure(name = "gds.algo.nodeSimilarity.stats", mode = Mode.WRITE)
@@ -89,7 +89,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     public Stream<NodeSimilarityWriteResult> write(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult, boolean write) {

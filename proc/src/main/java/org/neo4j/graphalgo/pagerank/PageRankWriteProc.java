@@ -119,7 +119,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Procedure(value = "gds.algo.pageRank.stats.estimate", mode = READ)
@@ -141,7 +141,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     private Stream<WriteResult> write(

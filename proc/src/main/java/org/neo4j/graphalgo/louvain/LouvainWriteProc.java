@@ -148,7 +148,7 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Procedure(value = "gds.algo.louvain.stats.estimate", mode = READ)
@@ -172,7 +172,7 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     private Stream<WriteResult> write(

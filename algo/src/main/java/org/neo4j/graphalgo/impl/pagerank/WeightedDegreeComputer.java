@@ -39,11 +39,13 @@ public class WeightedDegreeComputer implements DegreeComputer {
             ExecutorService executor,
             int concurrency,
             AllocationTracker tracker) {
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph,
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
+            graph,
             concurrency,
             cacheWeights,
             executor,
-            tracker);
+            tracker
+        );
         degreeCentrality.compute();
         return new DegreeCache(degreeCentrality.degrees(), degreeCentrality.weights(), -1D);
     }

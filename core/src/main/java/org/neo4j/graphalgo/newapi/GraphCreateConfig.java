@@ -158,22 +158,22 @@ public interface GraphCreateConfig extends BaseConfig {
     }
 
     static GraphCreateConfig implicitCreate(
-        String userName,
+        String username,
         CypherMapWrapper config
     ) {
-        RelationshipProjections relP = RelationshipProjections.fromObject(CypherMapWrapper.failOnNull(
+        RelationshipProjections relationshipProjections = RelationshipProjections.fromObject(CypherMapWrapper.failOnNull(
             "relationshipProjection",
             config.get("relationshipProjection", (Object) RelationshipProjections.empty())
         ));
-        NodeProjections nodeP = NodeProjections.fromObject(CypherMapWrapper.failOnNull(
+        NodeProjections nodeProjections = NodeProjections.fromObject(CypherMapWrapper.failOnNull(
             "nodeProjection",
             config.get("nodeProjection", (Object) NodeProjections.empty())
         ));
         GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
             IMPLICIT_GRAPH_NAME,
-            nodeP,
-            relP,
-            userName,
+            nodeProjections,
+            relationshipProjections,
+            username,
             config
         );
         return graphCreateConfig.withNormalizedPropertyMappings();

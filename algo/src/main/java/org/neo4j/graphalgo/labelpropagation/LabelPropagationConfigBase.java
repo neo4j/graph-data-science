@@ -40,7 +40,6 @@ public interface LabelPropagationConfigBase extends
         return 10;
     }
 
-    //TODO remove later
     @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
     @Value.Default
     default Direction direction() {

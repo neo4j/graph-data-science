@@ -158,11 +158,12 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         }
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
-                graph,
+            graph,
             1,
             true,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY);
+            AllocationTracker.EMPTY
+        );
         degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -188,11 +189,12 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
 
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
             new WeightedDegreeCentrality(
-                    graph,
+                graph,
                 1,
                 false,
                 Pools.DEFAULT,
-                AllocationTracker.EMPTY);
+                AllocationTracker.EMPTY
+            );
         });
 
         assertEquals(

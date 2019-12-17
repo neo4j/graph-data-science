@@ -58,7 +58,6 @@ public interface LouvainConfigBase extends
         return false;
     }
 
-    //TODO remove later
     @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
     @Value.Default
     default Direction direction() {

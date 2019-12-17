@@ -74,7 +74,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Procedure(value = "gds.algo.wcc.stats.estimate", mode = READ)
@@ -82,7 +82,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeMemoryEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
