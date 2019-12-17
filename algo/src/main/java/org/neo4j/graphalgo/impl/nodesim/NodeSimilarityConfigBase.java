@@ -163,32 +163,4 @@ public interface NodeSimilarityConfigBase extends BaseAlgoConfig {
             throw new IllegalArgumentException(String.format(nMessage, TOP_N_KEY));
         }
     }
-
-    interface Builder {
-
-        Builder username(String username);
-
-        Builder concurrency(int concurrency);
-
-        Builder graphName(String graphName);
-
-        Builder implicitCreateConfig(GraphCreateConfig implicitCreateConfig);
-
-        Builder similarityCutoff(double similarityCutoff);
-
-        Builder degreeCutoff(int degreeCutoff);
-
-        Builder topK(int topK);
-
-        Builder topN(int topN);
-
-        Builder bottomK(int bottomK);
-
-        Builder bottomN(int bottomN);
-
-        Builder direction(Direction direction);
-
-        NodeSimilarityConfigBase build();
-    }
-
 }

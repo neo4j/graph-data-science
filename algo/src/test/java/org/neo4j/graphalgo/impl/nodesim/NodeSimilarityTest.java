@@ -111,18 +111,12 @@ final class NodeSimilarityTest extends AlgoTestBase {
     private static final int COMPARED_ITEMS = 3;
     private static final int COMPARED_PERSONS = 4;
 
-    private static NodeSimilarityConfigBase.Builder configBuilder() {
-        return configBuilder(true);
-    }
-
-    private static NodeSimilarityConfigBase.Builder configBuilder(boolean streamMode) {
-        NodeSimilarityConfigBase.Builder builder = streamMode
-            ? ImmutableNodeSimilarityStreamConfig.builder()
-            : ImmutableNodeSimilarityWriteConfig.builder()
-                .writeProperty("writeProperty")
-                .writeRelationshipType("writeRelationshipType");
-
-        return builder.similarityCutoff(0.0);
+    private static ImmutableNodeSimilarityWriteConfig.Builder configBuilder() {
+        return ImmutableNodeSimilarityWriteConfig
+            .builder()
+            .writeProperty("writeProperty")
+            .writeRelationshipType("writeRelationshipType")
+            .similarityCutoff(0.0);
     }
 
     static {
@@ -361,7 +355,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder(false)
+            configBuilder()
                 .concurrency(concurrency)
                 .topK(10)
                 .bottomK(1)
@@ -482,7 +476,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder(false).concurrency(concurrency).direction(algoDirection).build(),
+            configBuilder().concurrency(concurrency).direction(algoDirection).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -544,7 +538,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder(false)
+            configBuilder()
                 .concurrency(concurrency)
                 .topK(100)
                 .topN(1)
@@ -681,7 +675,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder(false).topN(100).topK(topK).concurrency(concurrency).build(),
+            configBuilder().topN(100).topK(topK).concurrency(concurrency).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         ).withProgressLogger(log);

@@ -49,16 +49,4 @@ public interface NodeSimilarityWriteConfig extends NodeSimilarityConfigBase, Wri
     }
 
     String writeRelationshipType();
-
-    interface Builder extends NodeSimilarityConfigBase.Builder {
-
-        Builder writeProperty(String writeProperty);
-
-        Builder writeConcurrency(int writeConcurrency);
-
-        Builder writeRelationshipType(String writeRelationshipType);
-
-        @Override
-        NodeSimilarityWriteConfig build();
-    }
 }
