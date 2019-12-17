@@ -244,7 +244,6 @@ public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 .build();
         }
 
-
         A algo = newAlgorithm(graph, config, tracker);
 
         RESULT result = runWithExceptionLogging(
