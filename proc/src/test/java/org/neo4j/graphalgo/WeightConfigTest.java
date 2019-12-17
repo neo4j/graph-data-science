@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -32,12 +33,22 @@ import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphdb.DependencyResolver;
+import org.neo4j.graphdb.Direction;
+import org.neo4j.helpers.collection.Pair;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.kernel.impl.proc.Procedures;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -118,6 +129,73 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
                 configMap,
                 Collections.emptyMap()
             ));
+        });
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = { "weight1, 0.0", "weight2, 1.0"})
+    default void testFilteringOnPropertiesOnLoadedGraph(String propertyName, double expectedWeight) throws KernelException {
+        GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
+
+        Procedures procedures = db
+            .getDependencyResolver()
+            .resolveDependency(Procedures.class, DependencyResolver.SelectionStrategy.ONLY);
+        procedures.registerProcedure(GraphCatalogProcs.class);
+
+        String createQuery = "CREATE" +
+                             "  (a: Label)" +
+                             ", (b: Label)" +
+                             ", (c: Label)" +
+                             ", (a)-[:TYPE { weight1: 0.0, weight2: 1.0 }]->(b)" +
+                             ", (a)-[:TYPE { weight2: 1.0 }]->(c)" +
+                             ", (b)-[:TYPE { weight1: 0.0 }]->(c)";
+
+        db.execute(createQuery);
+
+        String graphName = "foo";
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
+            .graphName(graphName)
+            .nodeProjection(NodeProjections.empty())
+            .relationshipProjection(RelationshipProjections.builder()
+                .putProjection(
+                    ElementIdentifier.of("TYPE"),
+                    RelationshipProjection.builder()
+                        .type("TYPE")
+                        .properties(
+                            PropertyMappings.of(
+                                PropertyMapping.of("weight1", 0.0),
+                                PropertyMapping.of("weight2", 1.0)
+                            )
+                        )
+                        .build()
+                )
+                .build()
+            )
+            .build();
+
+        GraphsByRelationshipType graphsByRelationshipType = new GraphLoader(db)
+            .withGraphCreateConfig(graphCreateConfig)
+            .build(HugeGraphFactory.class)
+            .importAllGraphs();
+
+        GraphCatalog.set(graphCreateConfig, graphsByRelationshipType);
+
+        CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("weightProperty", propertyName));
+        CypherMapWrapper algoConfig = createMinimallyValidConfig(weightConfig);
+
+        applyOnProcedure((proc) -> {
+            CONFIG config = proc.newConfig(Optional.of(graphName), algoConfig);
+            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(graphName));
+
+            Graph graph = proc.createGraph(configAndName);
+            graph.forEachNode(nodeId -> {
+                graph.forEachRelationship(nodeId, Direction.OUTGOING, Double.NaN, (s, t, w) -> {
+                    assertEquals(expectedWeight, w);
+                    return true;
+                });
+                return true;
+            });
+
         });
     }
 }
