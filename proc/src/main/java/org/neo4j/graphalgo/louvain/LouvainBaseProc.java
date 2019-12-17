@@ -25,6 +25,9 @@ import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 
 abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBaseProc<Louvain, Louvain, CONFIG> {
 
+    static final String LOUVAIN_DESCRIPTION =
+        "The Louvain method for community detection is an algorithm for detecting communities in networks.";
+
     @Override
     protected final LouvainFactory<CONFIG> algorithmFactory(CONFIG config) {
         return new LouvainFactory<>();

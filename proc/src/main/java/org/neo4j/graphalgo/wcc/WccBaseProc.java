@@ -32,6 +32,9 @@ import org.neo4j.graphalgo.impl.wcc.WccFactory;
 
 public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBaseProc<Wcc, DisjointSetStruct, CONFIG> {
 
+    static final String WCC_DESCRIPTION =
+        "The WCC algorithm finds sets of connected nodes in an undirected graph, where all nodes in the same set form a connected component.";
+
     @Override
     protected final WccFactory<CONFIG> algorithmFactory(WccBaseConfig config) {
         return new WccFactory<>();

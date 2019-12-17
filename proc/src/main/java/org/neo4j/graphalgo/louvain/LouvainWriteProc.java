@@ -48,34 +48,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
 
     @Procedure(value = "gds.algo.louvain.write", mode = WRITE)
-    @Description("CALL gds.algo.louvain.write(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
-                 "    weightProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  writeProperty: STRING," +
-                 "  nodePropertiesWritten: INTEGER," +
-                 "  relationshipPropertiesWritten: INTEGER," +
-                 "  createMillis: INTEGER," +
-                 "  computeMillis: INTEGER," +
-                 "  writeMillis: INTEGER," +
-                 "  maxIterations: INTEGER," +
-                 "  maxLevels: INTEGER," +
-                 "  includeIntermediateCommunities: BOOLEAN," +
-                 "  seedProperty: STRING," +
-                 "  weightProperty: STRING," +
-                 "  postProcessingMillis: INTEGER," +
-                 "  communityCount: INTEGER," +
-                 "  ranIterations: INTEGER," +
-                 "  ranLevels: INTEGER," +
-                 "  modularity: FLOAT," +
-                 "  modularities: LIST OF FLOAT," +
-                 "  didConverge: LIST OF BOOLEAN," +
-                 "  communityDistribution: MAP")
+    @Description(LOUVAIN_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -88,34 +61,7 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
     }
 
     @Procedure(value = "gds.algo.louvain.stats", mode = READ)
-    @Description("CALL gds.algo.louvain.stats(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
-                 "    weightProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  writeProperty: STRING," +
-                 "  nodePropertiesWritten: INTEGER," +
-                 "  relationshipPropertiesWritten: INTEGER," +
-                 "  createMillis: INTEGER," +
-                 "  computeMillis: INTEGER," +
-                 "  writeMillis: INTEGER," +
-                 "  maxIterations: INTEGER," +
-                 "  maxLevels: INTEGER," +
-                 "  includeIntermediateCommunities: BOOLEAN," +
-                 "  seedProperty: STRING," +
-                 "  weightProperty: STRING," +
-                 "  postProcessingMillis: INTEGER," +
-                 "  communityCount: INTEGER," +
-                 "  ranIterations: INTEGER," +
-                 "  ranLevels: INTEGER," +
-                 "  modularity: FLOAT," +
-                 "  modularities: LIST OF FLOAT," +
-                 "  didConverge: LIST OF BOOLEAN," +
-                 "  communityDistribution: MAP")
+    @Description(LOUVAIN_DESCRIPTION)
     public Stream<WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -128,22 +74,7 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
     }
 
     @Procedure(value = "gds.algo.louvain.write.estimate", mode = READ)
-    @Description("CALL gds.algo.louvain.write.estimate(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
-                 "    weightProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodes: INTEGER, "+
-                 "  relationships: INTEGER," +
-                 "  bytesMin: INTEGER," +
-                 "  bytesMax: INTEGER," +
-                 "  requiredMemory: STRING," +
-                 "  mapView: MAP," +
-                 "  treeView: STRING")
+    @Description(LOUVAIN_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -152,22 +83,7 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
     }
 
     @Procedure(value = "gds.algo.louvain.stats.estimate", mode = READ)
-    @Description("CALL gds.algo.louvain.stats.estimate(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
-                 "    weightProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodes: INTEGER, "+
-                 "  relationships: INTEGER," +
-                 "  bytesMin: INTEGER," +
-                 "  bytesMax: INTEGER," +
-                 "  requiredMemory: STRING," +
-                 "  mapView: MAP," +
-                 "  treeView: STRING")
+    @Description(LOUVAIN_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

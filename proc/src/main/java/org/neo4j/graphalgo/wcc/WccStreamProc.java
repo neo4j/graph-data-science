@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.impl.wcc.Wcc;
 import org.neo4j.graphalgo.impl.wcc.WccStreamConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -42,6 +43,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
 
     @Procedure(value = "gds.algo.wcc.stream", mode = READ)
+    @Description(WCC_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -54,6 +56,7 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
     }
 
     @Procedure(value = "gds.algo.wcc.stream.estimate", mode = READ)
+    @Description(WCC_DESCRIPTION)
     public Stream<MemoryEstimateResult> streamEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

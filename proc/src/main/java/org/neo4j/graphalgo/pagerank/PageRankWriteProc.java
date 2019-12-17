@@ -41,24 +41,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
 
     @Procedure(value = "gds.algo.pageRank.write", mode = WRITE)
-    @Description("CALL gds.algo.pageRank.write(graphName: STRING, configuration: MAP {" +
-                 "    maxIterations: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    dampingFactor: FLOAT" +
-                 "    weightProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  ranIterations: INTEGER," +
-                 "  writeProperty: STRING," +
-                 "  nodePropertiesWritten: INTEGER," +
-                 "  relationshipPropertiesWritten: INTEGER," +
-                 "  createMillis: INTEGER," +
-                 "  computeMillis: INTEGER," +
-                 "  writeMillis: INTEGER," +
-                 "  maxIterations: INTEGER," +
-                 "  weightProperty: STRING," +
-                 "  postProcessingMillis: INTEGER," +
-                 "  didConverge: BOOLEAN")
+    @Description(PAGE_RANK_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -71,24 +54,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
     }
 
     @Procedure(value = "gds.algo.pageRank.stats", mode = READ)
-    @Description("CALL gds.algo.pageRank.stats(graphName: STRING, configuration: MAP {" +
-                 "    maxIterations: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    dampingFactor: FLOAT" +
-                 "    weightProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  ranIterations: INTEGER," +
-                 "  writeProperty: STRING," +
-                 "  nodePropertiesWritten: INTEGER," +
-                 "  relationshipPropertiesWritten: INTEGER," +
-                 "  createMillis: INTEGER," +
-                 "  computeMillis: INTEGER," +
-                 "  writeMillis: INTEGER," +
-                 "  maxIterations: INTEGER," +
-                 "  weightProperty: STRING," +
-                 "  postProcessingMillis: INTEGER," +
-                 "  didConverge: BOOLEAN")
+    @Description(PAGE_RANK_DESCRIPTION)
     public Stream<WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -101,20 +67,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
     }
 
     @Procedure(value = "gds.algo.pageRank.write.estimate", mode = READ)
-    @Description("CALL gds.algo.pageRank.write.estimate(graphName: STRING, configuration: MAP {" +
-                 "    maxIterations: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    dampingFactor: FLOAT" +
-                 "    weightProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodes: INTEGER, "+
-                 "  relationships: INTEGER," +
-                 "  bytesMin: INTEGER," +
-                 "  bytesMax: INTEGER," +
-                 "  requiredMemory: STRING," +
-                 "  mapView: MAP," +
-                 "  treeView: STRING")
+    @Description(PAGE_RANK_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -123,20 +76,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
     }
 
     @Procedure(value = "gds.algo.pageRank.stats.estimate", mode = READ)
-    @Description("CALL gds.algo.pageRank.stats.estimate(graphName: STRING, configuration: MAP {" +
-                 "    maxIterations: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    dampingFactor: FLOAT" +
-                 "    weightProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodes: INTEGER, "+
-                 "  relationships: INTEGER," +
-                 "  bytesMin: INTEGER," +
-                 "  bytesMax: INTEGER," +
-                 "  requiredMemory: STRING," +
-                 "  mapView: MAP," +
-                 "  treeView: STRING")
+    @Description(PAGE_RANK_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

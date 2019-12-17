@@ -43,17 +43,7 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
 
     // TODO maps need to be comma-separated
     @Procedure(value = "gds.algo.louvain.stream", mode = READ)
-    @Description("CALL gds.algo.louvain.stream(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodeId: INTEGER" +
-                 "  communityId: INTEGER" +
-                 "  communityIds: LIST OF INTEGER")
+    @Description(LOUVAIN_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -66,22 +56,7 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
     }
 
     @Procedure(value = "gds.algo.louvain.stream.estimate", mode = READ)
-    @Description("CALL gds.algo.louvain.stream.estimate(graphName: STRING, configuration: MAP {" +
-                 "    maxIteration: INTEGER" +
-                 "    maxLevels: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    includeIntermediateCommunities: BOOLEAN" +
-                 "    seedProperty: STRING" +
-                 "    weightProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodes: INTEGER, "+
-                 "  relationships: INTEGER," +
-                 "  bytesMin: INTEGER," +
-                 "  bytesMax: INTEGER," +
-                 "  requiredMemory: STRING," +
-                 "  mapView: MAP," +
-                 "  treeView: STRING")
+    @Description(LOUVAIN_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

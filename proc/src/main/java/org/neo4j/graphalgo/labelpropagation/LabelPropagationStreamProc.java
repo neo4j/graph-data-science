@@ -40,18 +40,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPropagationStreamConfig> {
 
     @Procedure(value = "gds.algo.labelPropagation.stream", mode = READ)
-    @Description("CALL gds.algo.labelPropagation.stream(" +
-                 "  graphName: STRING," +
-                 "  configuration: MAP {" +
-                 "     maxIterations: INTEGER, " +
-                 "     weightProperty: STRING, " +
-                 "     seedProperty: STRING, " +
-                 "     concurrency: INTEGER"+
-                 "  }" +
-                 ")" +
-                 "YIELD" +
-                 "  nodeId: INTEGER" +
-                 "  communityId: INTEGER")
+    @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -65,18 +54,7 @@ public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPr
     }
 
     @Procedure(value = "gds.algo.labelPropagation.stream.estimate", mode = READ)
-    @Description("CALL gds.algo.labelPropagation.stream.estimate(" +
-                 "  graphName: STRING," +
-                 "  configuration: MAP {" +
-                 "     maxIterations: INTEGER, " +
-                 "     weightProperty: STRING, " +
-                 "     seedProperty: STRING, " +
-                 "     concurrency: INTEGER"+
-                 "  }" +
-                 ")" +
-                 "YIELD" +
-                 "  nodeId: INTEGER" +
-                 "  communityId: INTEGER")
+    @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

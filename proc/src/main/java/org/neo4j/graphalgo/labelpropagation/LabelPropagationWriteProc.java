@@ -44,30 +44,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPropagationWriteConfig> {
 
     @Procedure(value = "gds.algo.labelPropagation.write", mode = Mode.WRITE)
-    @Description("CALL gds.algo.labelPropagation.write(" +
-                 "  graphName: STRING," +
-                 "  configuration: MAP {" +
-                 "     maxIterations: INTEGER, " +
-                 "     weightProperty: STRING, " +
-                 "     seedProperty: STRING, " +
-                 "     concurrency: INTEGER" +
-                 "  }" +
-                 ")" +
-                 "YIELD" +
-                 "  writeProperty: STRING," +
-                 "  nodePropertiesWritten: INTEGER," +
-                 "  relationshipPropertiesWritten: INTEGER," +
-                 "  createMillis: INTEGER," +
-                 "  computeMillis: INTEGER," +
-                 "  writeMillis: INTEGER" +
-                 "  maxIterations: INTEGER," +
-                 "  seedProperty: STRING," +
-                 "  weightProperty: STRING," +
-                 "  postProcessingMillis: INTEGER," +
-                 "  communityCount: INTEGER," +
-                 "  ranIterations: INTEGER," +
-                 "  didConverge: BOOLEAN," +
-                 "  communityDistribution: MAP")
+    @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -80,30 +57,7 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
     }
 
     @Procedure(value = "gds.algo.labelPropagation.stats", mode = READ)
-    @Description("CALL gds.algo.labelPropagation.stats(" +
-                 "  graphName: STRING," +
-                 "  configuration: MAP {" +
-                 "     maxIterations: INTEGER, " +
-                 "     weightProperty: STRING, " +
-                 "     seedProperty: STRING, " +
-                 "     concurrency: INTEGER" +
-                 "  }" +
-                 ")" +
-                 "YIELD" +
-                 "  writeProperty: STRING," +
-                 "  nodePropertiesWritten: INTEGER," +
-                 "  relationshipPropertiesWritten: INTEGER," +
-                 "  createMillis: INTEGER," +
-                 "  computeMillis: INTEGER," +
-                 "  writeMillis: INTEGER" +
-                 "  maxIterations: INTEGER," +
-                 "  seedProperty: STRING," +
-                 "  weightProperty: STRING," +
-                 "  postProcessingMillis: INTEGER," +
-                 "  communityCount: INTEGER," +
-                 "  ranIterations: INTEGER," +
-                 "  didConverge: BOOLEAN," +
-                 "  communityDistribution: MAP")
+    @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<LabelPropagationWriteProc.WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

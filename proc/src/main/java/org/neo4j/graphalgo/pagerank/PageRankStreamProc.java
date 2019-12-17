@@ -38,15 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
 
     @Procedure(value = "gds.algo.pageRank.stream", mode = READ)
-    @Description("CALL gds.algo.pageRank.stream(graphName: STRING, configuration: MAP {" +
-                 "    maxIterations: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    dampingFactor: FLOAT" +
-                 "    weightProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodeId: INTEGER" +
-                 "  score: FLOAT")
+    @Description(PAGE_RANK_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -59,20 +51,7 @@ public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
     }
 
     @Procedure(value = "gds.algo.pageRank.stream.estimate", mode = READ)
-    @Description("CALL gds.algo.pageRank.stream.estimate(graphName: STRING, configuration: MAP {" +
-                 "    maxIterations: INTEGER" +
-                 "    tolerance: FLOAT" +
-                 "    dampingFactor: FLOAT" +
-                 "    weightProperty: STRING" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodes: INTEGER, "+
-                 "  relationships: INTEGER," +
-                 "  bytesMin: INTEGER," +
-                 "  bytesMax: INTEGER," +
-                 "  requiredMemory: STRING," +
-                 "  mapView: MAP," +
-                 "  treeView: STRING")
+    @Description(PAGE_RANK_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

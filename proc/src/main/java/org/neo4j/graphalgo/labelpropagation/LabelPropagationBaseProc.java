@@ -26,6 +26,9 @@ import org.neo4j.graphalgo.impl.labelprop.LabelPropagationFactory;
 
 public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBaseConfig> extends AlgoBaseProc<LabelPropagation, LabelPropagation, CONFIG> {
 
+    static final String LABEL_PROPAGATION_DESCRIPTION =
+        "The Label Propagation algorithm is a fast algorithm for finding communities in a graph.";
+
     @Override
     protected LabelPropagationFactory<CONFIG> algorithmFactory(LabelPropagationBaseConfig config) {
         return new LabelPropagationFactory<>(config);

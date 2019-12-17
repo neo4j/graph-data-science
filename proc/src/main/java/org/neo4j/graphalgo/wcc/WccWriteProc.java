@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.impl.wcc.WccWriteConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -46,6 +47,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
 
     @Procedure(value = "gds.algo.wcc.write", mode = WRITE)
+    @Description(WCC_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -58,6 +60,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
     }
 
     @Procedure(value = "gds.algo.wcc.stats", mode = READ)
+    @Description(WCC_DESCRIPTION)
     public Stream<WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -70,6 +73,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
     }
 
     @Procedure(value = "gds.algo.wcc.write.estimate", mode = READ)
+    @Description(WCC_DESCRIPTION)
     public Stream<MemoryEstimateResult> writeEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -78,6 +82,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
     }
 
     @Procedure(value = "gds.algo.wcc.stats.estimate", mode = READ)
+    @Description(WCC_DESCRIPTION)
     public Stream<MemoryEstimateResult> statsEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
