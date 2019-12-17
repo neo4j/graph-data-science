@@ -256,7 +256,7 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends P
     }
 
     @Override
-    public void compareResults(PageRank result1, PageRank result2) {
+    public void assertResultEquals(PageRank result1, PageRank result2) {
         HugeDoubleArray resultArray1 = result1.result().array();
         HugeDoubleArray resultArray2 = result2.result().array();
         assertArrayEquals(resultArray1.toArray(), resultArray2.toArray());

@@ -199,7 +199,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
     }
 
     @Override
-    public void compareResults(LabelPropagation result1, LabelPropagation result2) {
+    public void assertResultEquals(LabelPropagation result1, LabelPropagation result2) {
         assertArrayEquals(result1.labels().toArray(), result2.labels().toArray());
         assertEquals(result1.didConverge(), result2.didConverge());
         assertEquals(result1.ranIterations(), result2.ranIterations());

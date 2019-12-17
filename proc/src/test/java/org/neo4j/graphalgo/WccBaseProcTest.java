@@ -93,7 +93,7 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends ProcTestBas
     }
 
     @Override
-    public void compareResults(DisjointSetStruct result1, DisjointSetStruct result2) {
+    public void assertResultEquals(DisjointSetStruct result1, DisjointSetStruct result2) {
         assertEquals(result1.size(), result2.size(), "DSS sizes are supposed to be equal.");
         long nodeCount = result1.size();
         for (long i = 0; i < nodeCount; i++) {

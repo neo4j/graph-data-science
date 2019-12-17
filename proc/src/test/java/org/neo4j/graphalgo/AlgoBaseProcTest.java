@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -69,13 +70,18 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         return Stream.of(null, "");
     }
 
+    @AfterEach
+    default void clearLoadedGraphs() {
+        GraphCatalog.removeAllLoadedGraphs();
+    }
+
     Class<? extends AlgoBaseProc<?, RESULT, CONFIG>> getProcedureClazz();
 
     GraphDatabaseAPI graphDb();
 
     CONFIG createConfig(CypherMapWrapper mapWrapper);
 
-    void compareResults(RESULT result1, RESULT result2);
+    void assertResultEquals(RESULT result1, RESULT result2);
 
     default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper;
@@ -102,16 +108,20 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     }
 
     @Test
-    default void testImplicitGraphLoading() {
+    default void testGraphCreateConfig() {
         CypherMapWrapper wrapper = createMinimalConfig(CypherMapWrapper.empty());
         applyOnProcedure(proc -> {
             CONFIG config = proc.newConfig(Optional.empty(), wrapper);
-            assertEquals(Optional.empty(), config.graphName());
+            assertEquals(Optional.empty(), config.graphName(), "Graph name should be empty.");
             Optional<GraphCreateConfig> maybeGraphCreateConfig = config.implicitCreateConfig();
-            assertTrue(maybeGraphCreateConfig.isPresent());
+            assertTrue(maybeGraphCreateConfig.isPresent(), "Config should contain a GraphCreateConfig.");
             GraphCreateConfig graphCreateConfig = maybeGraphCreateConfig.get();
             graphCreateConfig = ImmutableGraphCreateConfig.copyOf(graphCreateConfig);
-            assertEquals(GraphCreateConfig.emptyWithName("", ""), graphCreateConfig);
+            assertEquals(
+                GraphCreateConfig.emptyWithName("", ""),
+                graphCreateConfig,
+                "GraphCreateConfig should be empty."
+            );
         });
     }
 
@@ -199,7 +209,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
                 Collections.emptyMap()
             );
 
-            compareResults(resultOnImplicitGraph.result(), resultOnLoadedGraph.result());
+            assertResultEquals(resultOnImplicitGraph.result(), resultOnLoadedGraph.result());
         });
     }
 
@@ -218,7 +228,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap);
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(loadedGraphName, configMap);
 
-            compareResults(resultRun1.result(), resultRun2.result());
+            assertResultEquals(resultRun1.result(), resultRun2.result());
         });
     }
 
@@ -235,7 +245,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
                         Stream<?> result = (Stream) method.invoke(proc, configMap, Collections.emptyMap());
 
                         if (getProcedureMethodName(method).endsWith("stream")) {
-                            assertEquals(0, result.count());
+                            assertEquals(0, result.count(), "Stream result should be empty.");
                         } else {
                             assertEquals(1, result.count());
                         }

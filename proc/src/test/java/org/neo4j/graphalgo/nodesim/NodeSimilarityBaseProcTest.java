@@ -161,7 +161,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityConfigBas
     }
 
     @Override
-    public void compareResults(NodeSimilarityResult result1, NodeSimilarityResult result2) {
+    public void assertResultEquals(NodeSimilarityResult result1, NodeSimilarityResult result2) {
         Optional<Stream<SimilarityResult>> maybeStream1 = result1.maybeStreamResult();
         if (maybeStream1.isPresent()) {
             Optional<Stream<SimilarityResult>> maybeStream2 = result2.maybeStreamResult();

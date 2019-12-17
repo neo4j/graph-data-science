@@ -178,7 +178,7 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Pro
     }
 
     @Override
-    public void compareResults(Louvain result1, Louvain result2) {
+    public void assertResultEquals(Louvain result1, Louvain result2) {
         assertEquals(result1.levels(), result2.levels());
         assertEquals(result1.modularities()[result1.levels() - 1], result2.modularities()[result2.levels() - 1]);
         assertArrayEquals(result1.finalDendrogram().toArray(), result2.finalDendrogram().toArray());
