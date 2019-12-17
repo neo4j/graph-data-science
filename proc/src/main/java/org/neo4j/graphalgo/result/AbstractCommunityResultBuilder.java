@@ -40,15 +40,12 @@ public abstract class AbstractCommunityResultBuilder<CONFIG extends WriteConfig,
 
     private final boolean buildHistogram;
     private final boolean buildCommunityCount;
+    private final AllocationTracker tracker;
 
+    protected long nodeCount;
     protected long postProcessingDuration = -1L;
-
-    private LongUnaryOperator communityFunction = null;
-    private OptionalLong maybeExpectedCommunityCount = OptionalLong.empty();
-
     protected OptionalLong maybeCommunityCount = OptionalLong.empty();
     protected Optional<Histogram> maybeCommunityHistogram = Optional.empty();
-
     protected @Nullable Map<String, Object> communityHistogramOrNull() {
         return maybeCommunityHistogram.map(histogram -> MapUtil.map(
             "min", histogram.getMinValue(),
@@ -63,17 +60,24 @@ public abstract class AbstractCommunityResultBuilder<CONFIG extends WriteConfig,
         )).orElse(null);
     }
 
-    private final AllocationTracker tracker;
+    private LongUnaryOperator communityFunction = null;
+    private OptionalLong maybeExpectedCommunityCount = OptionalLong.empty();
 
     protected AbstractCommunityResultBuilder(
         CONFIG config,
+        long nodeCount,
         ProcedureCallContext callContext,
         AllocationTracker tracker
     ) {
         super(config);
-        this.buildHistogram = callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("communityDistribution"));
-        this.buildCommunityCount = callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("communityCount"));
+        this.buildHistogram = callContext
+            .outputFields()
+            .anyMatch(s -> s.equalsIgnoreCase("communityDistribution") || s.equalsIgnoreCase("componentDistribution"));
+        this.buildCommunityCount = callContext
+            .outputFields()
+            .anyMatch(s -> s.equalsIgnoreCase("communityCount") || s.equalsIgnoreCase("componentCount"));
         this.tracker = tracker;
+        this.nodeCount = nodeCount;
     }
 
     protected abstract WRITE_RESULT buildResult();
@@ -95,7 +99,7 @@ public abstract class AbstractCommunityResultBuilder<CONFIG extends WriteConfig,
         if (buildCommunityCount && communityFunction != null) {
             long expectedNumberOfCommunities = maybeExpectedCommunityCount.orElse(EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT);
             HugeLongLongMap communitySizeMap = new HugeLongLongMap(expectedNumberOfCommunities, tracker);
-            for (long nodeId = 0L; nodeId < nodePropertiesWritten; nodeId++) {
+            for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
                 final long communityId = communityFunction.applyAsLong(nodeId);
                 communitySizeMap.addTo(communityId, 1L);
             }

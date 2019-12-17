@@ -206,7 +206,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
         AllocationTracker tracker
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-            write(graph, coloring, configuration, writeProperty, terminationFlag, tracker);
+            write(graph, coloring, configuration, writeProperty, resultBuilder, terminationFlag, tracker);
         }
     }
 
@@ -215,6 +215,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
         HugeLongArray coloring,
         ProcedureConfiguration procedureConfiguration,
         String writeProperty,
+        WriteResultBuilder resultBuilder,
         TerminationFlag terminationFlag,
         AllocationTracker tracker
     ) {
@@ -229,6 +230,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
             coloring,
             HugeLongArray.Translator.INSTANCE
         );
+        resultBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
     }
 
     public static class ProcedureSetup {

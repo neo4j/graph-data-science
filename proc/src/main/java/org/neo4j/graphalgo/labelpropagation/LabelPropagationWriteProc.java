@@ -127,6 +127,7 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
 
         WriteResultBuilder builder = new WriteResultBuilder(
             config,
+            graph.nodeCount(),
             callContext,
             computationResult.tracker()
         );
@@ -235,11 +236,13 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
 
         WriteResultBuilder(
             LabelPropagationWriteConfig config,
+            long nodeCount,
             ProcedureCallContext context,
             AllocationTracker tracker
         ) {
             super(
                 config,
+                nodeCount,
                 context,
                 tracker
             );

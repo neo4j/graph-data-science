@@ -194,7 +194,12 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
         Graph graph = computeResult.graph();
         Louvain louvain = computeResult.algorithm();
 
-        WriteResultBuilder builder = new WriteResultBuilder(config, callContext, computeResult.tracker());
+        WriteResultBuilder builder = new WriteResultBuilder(
+            config,
+            graph.nodeCount(),
+            callContext,
+            computeResult.tracker()
+        );
 
         builder.withCreateMillis(computeResult.createMillis());
         builder.withComputeMillis(computeResult.computeMillis());
@@ -303,9 +308,15 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
         private double[] modularities = new double[]{};
         private double modularity = -1;
 
-        WriteResultBuilder(LouvainWriteConfig config, ProcedureCallContext context, AllocationTracker tracker) {
+        WriteResultBuilder(
+            LouvainWriteConfig config,
+            long nodeCount,
+            ProcedureCallContext context,
+            AllocationTracker tracker
+        ) {
             super(
                 config,
+                nodeCount,
                 context,
                 tracker
             );

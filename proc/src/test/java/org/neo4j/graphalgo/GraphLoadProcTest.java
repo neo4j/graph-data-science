@@ -458,7 +458,7 @@ class GraphLoadProcTest extends ProcTestBase {
 
         runQuery(loadQuery, singletonMap("graph", graph));
 
-        String algoQuery = "CALL gds.algo.pageRank.stats(" +
+        String algoQuery = "CALL gds.algo.pageRank.write(" +
                            "    'foo', {" +
                            "        writeProperty: 'writingOnLoadedGraph'" +
                            "    }" +
@@ -481,7 +481,7 @@ class GraphLoadProcTest extends ProcTestBase {
 
         runQuery(loadQuery, singletonMap("graph", graph));
 
-        String algoQuery = "CALL gds.algo.pageRank.stats(" +
+        String algoQuery = "CALL gds.algo.pageRank.write(" +
                            "    'foo', {" +
                            "        writeProperty: 'multiUseLoadedGraph'" +
                            "    }" +

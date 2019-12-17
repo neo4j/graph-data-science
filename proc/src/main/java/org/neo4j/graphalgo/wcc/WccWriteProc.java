@@ -128,7 +128,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
             WccWriteConfig config = computeResult.config();
             Graph graph = computeResult.graph();
 
-            WriteResultBuilder builder = new WriteResultBuilder(config, callContext, computeResult.tracker());
+            WriteResultBuilder builder = new WriteResultBuilder(config, graph.nodeCount(), callContext, computeResult.tracker());
             DisjointSetStruct dss = computeResult.result();
 
             builder.withCreateMillis(computeResult.createMillis());
@@ -201,9 +201,10 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
 
         private final WccWriteConfig config;
 
-        WriteResultBuilder(WccWriteConfig config, ProcedureCallContext context, AllocationTracker tracker) {
+        WriteResultBuilder(WccWriteConfig config, long nodeCount, ProcedureCallContext context, AllocationTracker tracker) {
             super(
                 config,
+                nodeCount,
                 context,
                 tracker
             );

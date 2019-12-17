@@ -241,9 +241,11 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
     ) {
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
-        WriteResultBuilder builder = new WriteResultBuilder(configuration, context, tracker);
+        WriteResultBuilder builder = new WriteResultBuilder(configuration, 0, context, tracker);
 
         Graph graph = loadGraph(configuration, tracker, builder);
+
+        builder.withNodeCount(graph.nodeCount());
 
         return new ProcedureSetup(builder, graph, tracker, configuration);
     }
@@ -330,8 +332,8 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
         private boolean didConverge;
         private double modularity;
 
-        WriteResultBuilder(ProcedureConfiguration config, ProcedureCallContext context, AllocationTracker tracker) {
-            super(config, context, tracker);
+        WriteResultBuilder(ProcedureConfiguration config, long nodeCount, ProcedureCallContext context, AllocationTracker tracker) {
+            super(config, nodeCount, context, tracker);
         }
 
         public WriteResultBuilder withRanIterations(long ranIterations) {
@@ -371,6 +373,10 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
                 maybeCommunityCount.orElse(0),
                 communityHistogramOrNull()
             );
+        }
+
+        void withNodeCount(long nodeCount) {
+            this.nodeCount = nodeCount;
         }
     }
 

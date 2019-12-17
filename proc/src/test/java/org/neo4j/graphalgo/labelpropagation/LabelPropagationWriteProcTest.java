@@ -281,7 +281,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
 
         runQuery(query, concurrencySeedWeightAndWriteParams(concurrency),
             row -> {
-                assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
+                assertEquals(2, row.getNumber("nodePropertiesWritten").intValue());
                 assertEquals("seed", row.getString("seedProperty"));
                 assertEquals("seed", row.getString("writeProperty"));
                 checkMillisSet(row);
