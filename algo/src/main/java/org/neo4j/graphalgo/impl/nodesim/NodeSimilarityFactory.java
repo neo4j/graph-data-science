@@ -41,8 +41,8 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityConfigBase> exte
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        int topN = config.hasTopN() ? Math.abs(config.normalizedN()) : 0;
-        int topK = config.hasTopK() ? Math.abs(config.normalizedK()) : 0;
+        int topN = Math.abs(config.normalizedN());
+        int topK = Math.abs(config.normalizedK());
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder(NodeSimilarity.class)
             .perNode("node filter", nodeCount -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
