@@ -36,7 +36,7 @@ public class CentralityScore {
         public final boolean write;
         public final String writeProperty;
 
-        Stats(
+        public Stats(
                 long nodes,
                 long loadMillis,
                 long computeMillis,
