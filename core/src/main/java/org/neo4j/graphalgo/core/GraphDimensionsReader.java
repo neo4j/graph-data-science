@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
@@ -66,7 +67,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         }
 
         RelationshipTypeMappings.Builder mappingsBuilder = new RelationshipTypeMappings.Builder();
-        if (readTokens && !setup.loadAnyRelationshipType()) {
+        if (readTokens && !loadAnyRelationshipType()) {
             Set<String> types = ProjectionParser.parse(setup.relationshipType());
             for (String typeName : types) {
                 int typeId = tokenRead.relationshipType(typeName);
@@ -103,6 +104,10 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .setRelationshipTypeMappings(relationshipTypeMappings)
                 .setRelationshipProperties(relProperties)
                 .build();
+    }
+
+    private boolean loadAnyRelationshipType() {
+        return StringUtils.isEmpty(setup.relationshipType());
     }
 
     private ResolvedPropertyMappings loadPropertyMapping(TokenRead tokenRead, PropertyMappings propertyMappings) {

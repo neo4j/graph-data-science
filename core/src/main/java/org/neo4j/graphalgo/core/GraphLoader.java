@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.GraphSetupImpl;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -551,7 +552,7 @@ public class GraphLoader {
                 .build();
         }
 
-        return new GraphSetup(
+        return new GraphSetupImpl(
             params,
             executorService,
             batchSize,
