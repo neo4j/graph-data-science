@@ -104,7 +104,8 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
         this.similarityComputer = similarityComputer;
     }
 
-    public Boolean compute() {
+    @Override
+    public Void compute() {
         double sampleSize = Math.min(this.p, 1.0) * Math.abs(this.topK);
         Collection<Runnable> tasks = createInitTasks();
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
@@ -146,7 +147,7 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
             }
 
         }
-        return true;
+        return null;
     }
 
     private Collection<Runnable> setupTasks(

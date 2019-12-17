@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo;
 
-public abstract class LegacyAlgorithm<ME extends LegacyAlgorithm<ME>> extends Algorithm<ME, Boolean> {
+public abstract class LegacyAlgorithm<ME extends LegacyAlgorithm<ME>> extends Algorithm<ME, Void> {
 
     @Override
-    public Boolean compute() {
-        return false;
+    public Void compute() {
+        return null;
     }
 }

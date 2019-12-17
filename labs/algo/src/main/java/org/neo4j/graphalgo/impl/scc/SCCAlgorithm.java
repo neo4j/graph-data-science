@@ -91,7 +91,7 @@ public class SCCAlgorithm extends LegacyAlgorithm<SCCAlgorithm> {
      * compute scc
      * @return
      */
-    public Boolean compute() {
+    public Void compute() {
         setCount = 0;
         minSetSize = Integer.MAX_VALUE;
         maxSetSize = 0;
@@ -101,7 +101,7 @@ public class SCCAlgorithm extends LegacyAlgorithm<SCCAlgorithm> {
         boundaries.clear();
         stack.clear();
         graph.forEachNode(this::compute);
-        return true;
+        return null;
     }
 
     @Override

@@ -55,7 +55,8 @@ public class AverageDegreeCentrality extends LegacyAlgorithm<AverageDegreeCentra
         this.histogram = new AtomicHistogram(nodeCount, 3);
     }
 
-    public Boolean compute() {
+    @Override
+    public Void compute() {
         nodeQueue.set(0);
 
         List<Runnable> tasks = new ArrayList<>();
@@ -64,7 +65,7 @@ public class AverageDegreeCentrality extends LegacyAlgorithm<AverageDegreeCentra
         }
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
-        return true;
+        return null;
     }
 
     @Override

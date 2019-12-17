@@ -104,14 +104,15 @@ public class ParallelBetweennessCentrality extends LegacyAlgorithm<ParallelBetwe
      *
      * @return itself for method chaining
      */
-    public Boolean compute() {
+    @Override
+    public Void compute() {
         nodeQueue.set(0); //
         final ArrayList<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {
             futures.add(executorService.submit(new BCTask()));
         }
         ParallelUtil.awaitTermination(futures);
-        return true;
+        return null;
     }
 
     /**

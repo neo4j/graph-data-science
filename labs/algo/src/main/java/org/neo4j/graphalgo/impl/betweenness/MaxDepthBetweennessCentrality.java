@@ -87,10 +87,11 @@ public class MaxDepthBetweennessCentrality extends LegacyAlgorithm<MaxDepthBetwe
      *
      * @return itself for method chaining
      */
-    public Boolean compute() {
+    @Override
+    public Void compute() {
         Arrays.fill(centrality, 0);
         graph.forEachNode(this::compute);
-        return true;
+        return null;
     }
 
     /**

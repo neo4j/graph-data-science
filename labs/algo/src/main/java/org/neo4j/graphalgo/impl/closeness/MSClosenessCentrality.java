@@ -135,9 +135,10 @@ public class MSClosenessCentrality extends LegacyAlgorithm<MSClosenessCentrality
         farness = null;
     }
 
-    public Boolean compute() {
+    @Override
+    public Void compute() {
         compute(Direction.OUTGOING);
-        return true;
+        return null;
     }
 
     public final double[] exportToArray() {

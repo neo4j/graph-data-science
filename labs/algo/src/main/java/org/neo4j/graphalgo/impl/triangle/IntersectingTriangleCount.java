@@ -120,7 +120,8 @@ public class IntersectingTriangleCount extends LegacyAlgorithm<IntersectingTrian
         triangles = null;
     }
 
-    public Boolean compute() {
+    @Override
+    public Void compute() {
         visitedNodes.set(0);
         queue.set(0);
         triangleCount.reset();
@@ -129,7 +130,7 @@ public class IntersectingTriangleCount extends LegacyAlgorithm<IntersectingTrian
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(graph));
         // run
         ParallelUtil.run(tasks, executorService);
-        return true;
+        return null;
     }
 
     private class IntersectTask implements Runnable, IntersectionConsumer {

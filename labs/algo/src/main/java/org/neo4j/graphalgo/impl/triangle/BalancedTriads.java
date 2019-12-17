@@ -112,7 +112,8 @@ public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
      *
      * @return
      */
-    public Boolean compute() {
+    @Override
+    public Void compute() {
         visitedNodes.set(0);
         queue.set(0);
         balancedTriangleCount.reset();
@@ -121,7 +122,7 @@ public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(concurrency, () -> new HugeTask(graph));
         // run
         ParallelUtil.run(tasks, executorService);
-        return true;
+        return null;
     }
 
     /**

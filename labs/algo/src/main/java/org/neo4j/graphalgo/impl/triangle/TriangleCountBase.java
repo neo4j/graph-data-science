@@ -115,10 +115,10 @@ public abstract class TriangleCountBase<Coeff, Self extends TriangleCountBase<Co
      * compute triangles
      * @return
      */
-    public final Boolean compute() {
+    public final Void compute() {
         visitedNodes.set(0);
         runCompute();
-        return true;
+        return null;
     }
 
     abstract void runCompute();

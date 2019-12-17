@@ -76,10 +76,11 @@ public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality
      *
      * @return itself for method chaining
      */
-    public Boolean compute() {
+    @Override
+    public Void compute() {
         Arrays.fill(centrality, 0);
         graph.forEachNode(this::compute);
-        return true;
+        return null;
     }
 
     /**
