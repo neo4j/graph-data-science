@@ -57,7 +57,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityConfigBase> exte
                         .perNode("array", nodeCount -> nodeCount * averageVectorSize).build();
                 })
             );
-        if (!config.computeToStream() && !config.hasTopK()) {
+        if (config.computeToGraph() && !config.hasTopK()) {
             builder.add(
                 "similarity graph",
                 SimilarityGraphBuilder.memoryEstimation(topK, topN)
