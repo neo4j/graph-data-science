@@ -62,7 +62,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
     }
 
     @Procedure(value = "gds.algo.nodeSimilarity.write.estimate", mode = READ)
-    @Description(NODE_SIMILARITY_DESCRIPTION)
+    @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -71,7 +71,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
     }
 
     @Procedure(name = "gds.algo.nodeSimilarity.stats", mode = Mode.WRITE)
-    @Description(NODE_SIMILARITY_DESCRIPTION)
+    @Description(STATS_DESCRIPTION)
     public Stream<NodeSimilarityWriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -84,7 +84,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
     }
 
     @Procedure(value = "gds.algo.nodeSimilarity.stats.estimate", mode = READ)
-    @Description(NODE_SIMILARITY_DESCRIPTION)
+    @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -54,7 +54,7 @@ public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPr
     }
 
     @Procedure(value = "gds.algo.labelPropagation.stream.estimate", mode = READ)
-    @Description(LABEL_PROPAGATION_DESCRIPTION)
+    @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -57,7 +57,7 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
     }
 
     @Procedure(value = "gds.algo.labelPropagation.stats", mode = READ)
-    @Description(LABEL_PROPAGATION_DESCRIPTION)
+    @Description(STATS_DESCRIPTION)
     public Stream<LabelPropagationWriteProc.WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -69,57 +69,8 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
         return write(computationResult, false);
     }
 
-    private Stream<WriteResult> write(
-        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult,
-        boolean write
-    ) {
-        log.debug("Writing results");
-
-        LabelPropagationWriteConfig config = computationResult.config();
-        Graph graph = computationResult.graph();
-        LabelPropagation result = computationResult.result();
-
-        WriteResultBuilder builder = new WriteResultBuilder(
-            config,
-            graph.nodeCount(),
-            callContext,
-            computationResult.tracker()
-        );
-        builder.withCreateMillis(computationResult.createMillis());
-        builder.withComputeMillis(computationResult.computeMillis());
-
-        if (!computationResult.isGraphEmpty()) {
-            builder
-                .didConverge(result.didConverge())
-                .ranIterations(result.ranIterations())
-                .withCommunityFunction((nodeId) -> result.labels().get(nodeId));
-            if (write) {
-                writeNodeProperties(builder, computationResult);
-                graph.releaseProperties();
-            }
-        }
-        return Stream.of(builder.build());
-    }
-
     @Procedure(value = "gds.algo.labelPropagation.write.estimate", mode = READ)
-    @Description("CALL gds.algo.labelPropagation.write.estimate(" +
-                 "  graphName: STRING," +
-                 "  configuration: MAP {" +
-                 "     maxIterations: INTEGER, " +
-                 "     weightProperty: STRING, " +
-                 "     seedProperty: STRING, " +
-                 "     concurrency: INTEGER" +
-                 "  }" +
-                 ")" +
-                 "YIELD" +
-                 "  nodes: INTEGER, " +
-                 "  relationships: INTEGER," +
-                 "  bytesMin: INTEGER," +
-                 "  bytesMax: INTEGER," +
-                 "  requiredMemory: STRING," +
-                 "  mapView: MAP," +
-                 "  treeView: STRING")
-
+    @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -128,22 +79,7 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
     }
 
     @Procedure(value = "gds.algo.labelPropagation.stats.estimate", mode = READ)
-    @Description("CALL gds.algo.labelPropagation.stats.estimate(" +
-                 "  graphName: STRING," +
-                 "  configuration: MAP {" +
-                 "     maxIterations: INTEGER, " +
-                 "     weightProperty: STRING, " +
-                 "     seedProperty: STRING, " +
-                 "     concurrency: INTEGER" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodes: INTEGER, " +
-                 "  relationships: INTEGER," +
-                 "  bytesMin: INTEGER," +
-                 "  bytesMax: INTEGER," +
-                 "  requiredMemory: STRING," +
-                 "  mapView: MAP," +
-                 "  treeView: STRING")
+    @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -179,6 +115,38 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
         CypherMapWrapper config
     ) {
         return LabelPropagationWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    private Stream<WriteResult> write(
+        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult,
+        boolean write
+    ) {
+        log.debug("Writing results");
+
+        LabelPropagationWriteConfig config = computationResult.config();
+        Graph graph = computationResult.graph();
+        LabelPropagation result = computationResult.result();
+
+        WriteResultBuilder builder = new WriteResultBuilder(
+            config,
+            graph.nodeCount(),
+            callContext,
+            computationResult.tracker()
+        );
+        builder.withCreateMillis(computationResult.createMillis());
+        builder.withComputeMillis(computationResult.computeMillis());
+
+        if (!computationResult.isGraphEmpty()) {
+            builder
+                .didConverge(result.didConverge())
+                .ranIterations(result.ranIterations())
+                .withCommunityFunction((nodeId) -> result.labels().get(nodeId));
+            if (write) {
+                writeNodeProperties(builder, computationResult);
+                graph.releaseProperties();
+            }
+        }
+        return Stream.of(builder.build());
     }
 
     public static class WriteResultBuilder extends AbstractCommunityResultBuilder<LabelPropagationWriteConfig, WriteResult> {

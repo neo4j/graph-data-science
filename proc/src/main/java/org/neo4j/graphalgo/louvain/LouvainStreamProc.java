@@ -56,7 +56,7 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
     }
 
     @Procedure(value = "gds.algo.louvain.stream.estimate", mode = READ)
-    @Description(LOUVAIN_DESCRIPTION)
+    @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -56,7 +56,7 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
     }
 
     @Procedure(value = "gds.algo.wcc.stream.estimate", mode = READ)
-    @Description(WCC_DESCRIPTION)
+    @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> streamEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

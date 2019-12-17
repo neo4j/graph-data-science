@@ -51,7 +51,7 @@ public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
     }
 
     @Procedure(value = "gds.algo.pageRank.stream.estimate", mode = READ)
-    @Description(PAGE_RANK_DESCRIPTION)
+    @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

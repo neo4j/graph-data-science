@@ -65,7 +65,7 @@ public class NodeSimilarityStreamProc extends NodeSimilarityBaseProc<NodeSimilar
     }
 
     @Procedure(value = "gds.algo.nodeSimilarity.stream.estimate", mode = Mode.READ)
-    @Description(NODE_SIMILARITY_DESCRIPTION)
+    @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
