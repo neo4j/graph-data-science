@@ -264,7 +264,7 @@ class WccDocTest extends ProcTestBase {
         expected = "+--------------------------------------------------------+\n" +
                    "| nodePropertiesWritten | componentCount | writeProperty |\n" +
                    "+--------------------------------------------------------+\n" +
-                   "| 7                     | 3              | \"componentId\" |\n" +
+                   "| 1                     | 3              | \"componentId\" |\n" +
                    "+--------------------------------------------------------+\n" +
                    "1 row\n";
 
