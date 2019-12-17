@@ -30,7 +30,7 @@ public abstract class AbstractResultBuilder<CONFIG extends WriteConfig, WRITE_RE
     protected long computeMillis = -1;
     protected long writeMillis = -1;
     protected long nodePropertiesWritten;
-    protected long relationshipPropertiesWritten;
+    protected long relationshipsWritten;
 
     protected AbstractResultBuilder(CONFIG config) {
         this.config = config;
@@ -53,8 +53,8 @@ public abstract class AbstractResultBuilder<CONFIG extends WriteConfig, WRITE_RE
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public void withRelationshipPropertiesWritten(long relationshipPropertiesWritten) {
-        this.relationshipPropertiesWritten = relationshipPropertiesWritten;
+    public void withRelationshipsWritten(long relationshipPropertiesWritten) {
+        this.relationshipsWritten = relationshipPropertiesWritten;
     }
 
     public abstract WRITE_RESULT build();

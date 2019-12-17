@@ -77,7 +77,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTestBase<Node
                 "computeMillis",
                 "loadMillis",
                 "nodesCompared ",
-                "relationships",
+                "relationshipsWritten",
                 "writeMillis",
                 "writeProperty",
                 "writeRelationshipType",
@@ -87,7 +87,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTestBase<Node
 
         runQuery(query, row -> {
             assertEquals(3, row.getNumber("nodesCompared").longValue());
-            assertEquals(6, row.getNumber("relationships").longValue());
+            assertEquals(6, row.getNumber("relationshipsWritten").longValue());
             assertEquals("SIMILAR", row.getString("writeRelationshipType"));
             assertEquals("score", row.getString("writeProperty"));
             assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));

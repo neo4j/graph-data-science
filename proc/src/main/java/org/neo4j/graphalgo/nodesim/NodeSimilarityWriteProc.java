@@ -30,9 +30,9 @@ import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityWriteConfig;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityGraphResult;
-import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -119,17 +119,16 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
         WriteResultBuilder resultBuilder = new WriteResultBuilder(config);
         resultBuilder
             .withNodesCompared(similarityGraphResult.comparedNodes())
-            .withWriteProperty(config.writeProperty())
-            .withRelationshipCount(similarityGraphResult.similarityGraph().relationshipCount());
-        resultBuilder.setLoadMillis(computationResult.createMillis());
-        resultBuilder.setComputeMillis(computationResult.computeMillis());
+            .withRelationshipsWritten(similarityGraphResult.similarityGraph().relationshipCount());
+        resultBuilder.withCreateMillis(computationResult.createMillis());
+        resultBuilder.withComputeMillis(computationResult.computeMillis());
 
         boolean shouldComputeHistogram = callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
         if (write && similarityGraph.relationshipCount() > 0) {
             runWithExceptionLogging(
                 "NodeSimilarity write-back failed",
-                () -> resultBuilder.timeWrite(
-                    () -> {
+                () -> {
+                    try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
                         RelationshipExporter exporter = RelationshipExporter
                             .of(api, similarityGraph, similarityGraph.getLoadDirection(), algorithm.getTerminationFlag())
                             .withLog(log)
@@ -149,7 +148,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
                             exporter.write(writeRelationshipType, writeProperty);
                         }
                     }
-                )
+                }
             );
         } else if (shouldComputeHistogram) {
             try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
@@ -181,7 +180,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
         return NodeSimilarityWriteConfig.of(username, graphName, maybeImplicitCreate, userInput);
     }
 
-    public static class WriteResultBuilder extends AbstractResultBuilder<NodeSimilarityWriteResult> {
+    public static class WriteResultBuilder extends AbstractResultBuilder<NodeSimilarityWriteConfig, NodeSimilarityWriteResult> {
 
         private final NodeSimilarityWriteConfig config;
         private long nodesCompared = 0L;
@@ -191,6 +190,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
         private Optional<DoubleHistogram> maybeHistogram = Optional.empty();
 
         WriteResultBuilder(NodeSimilarityWriteConfig config) {
+            super(config);
             this.config = config;
         }
 
@@ -244,7 +244,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
                 writeMillis,
                 postProcessingMillis,
                 nodesCompared,
-                relationshipCount,
+                relationshipsWritten,
                 distribution()
             );
         }
@@ -257,7 +257,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
         public final long postProcessingMillis;
 
         public final long nodesCompared;
-        public final long relationships;
+        public final long relationshipsWritten;
         public final String writeRelationshipType;
         public final String writeProperty;
 
@@ -270,7 +270,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
             long writeMillis,
             long postProcessingMillis,
             long nodesCompared,
-            long relationships,
+            long relationshipsWritten,
             Map<String, Object> similarityDistribution
         ) {
             this.loadMillis = loadMillis;
@@ -278,7 +278,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
             this.writeMillis = writeMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.nodesCompared = nodesCompared;
-            this.relationships = relationships;
+            this.relationshipsWritten = relationshipsWritten;
             this.writeRelationshipType = config.writeRelationshipType();
             this.writeProperty = config.writeProperty();
             this.similarityDistribution = similarityDistribution;
