@@ -43,7 +43,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Deprecated
-public abstract class LegacyBaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT> extends BaseAlgoProc<A, RESULT, ProcedureConfiguration> {
+public abstract class LegacyAlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT> extends AlgoBaseProc<A, RESULT, ProcedureConfiguration> {
 
     protected double getDefaultWeightProperty(ProcedureConfiguration config) {
         return ProcedureConstants.DEFAULT_VALUE_DEFAULT;

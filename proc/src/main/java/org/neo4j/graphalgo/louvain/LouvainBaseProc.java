@@ -17,20 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.pagerank;
+package org.neo4j.graphalgo.louvain;
 
-import org.neo4j.graphalgo.BaseAlgoProc;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
-import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.impl.louvain.Louvain;
+import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 
-abstract class PageRankProcBase<CONFIG extends PageRankConfigBase> extends BaseAlgoProc<PageRank, PageRank, CONFIG> {
+abstract class LouvainBaseProc<CONFIG extends LouvainConfigBase> extends AlgoBaseProc<Louvain, Louvain, CONFIG> {
 
     @Override
-    protected final PageRankFactory<CONFIG> algorithmFactory(PageRankConfigBase config) {
-        if (config.weightProperty() == null) {
-            return new PageRankFactory<>();
-        }
-        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
+    protected final LouvainFactory<CONFIG> algorithmFactory(CONFIG config) {
+        return new LouvainFactory<>();
     }
 }

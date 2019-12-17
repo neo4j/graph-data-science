@@ -23,7 +23,7 @@ package org.neo4j.graphalgo.nodesim;
 import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.Projection;
@@ -45,10 +45,10 @@ import static org.neo4j.graphalgo.Projection.REVERSE;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimilarityStreamConfig> {
+class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimilarityStreamConfig> {
 
     @Override
-    public Class<? extends BaseAlgoProc<?, NodeSimilarityResult, NodeSimilarityStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, NodeSimilarityResult, NodeSimilarityStreamConfig>> getProcedureClazz() {
         return NodeSimilarityStreamProc.class;
     }
 
@@ -91,7 +91,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allGraphVariations")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allGraphVariations")
     void shouldDealWithAnyIdSpace(GdsCypher.QueryBuilder queryBuilder, String testName) throws Exception {
         String graphCreate =
             "CALL algo.beta.graph.create(" +
@@ -139,7 +139,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidGraphVariationsWithProjections")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
     void shouldStreamResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
         Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         String query = queryBuilder
@@ -166,7 +166,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidGraphVariationsWithProjections")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
     void shouldStreamTopResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
         Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         int topN = 2;
@@ -194,7 +194,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTestBase<NodeSimila
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidGraphVariationsWithProjections")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
     void shouldIgnoreParallelEdges(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
         Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         // Add parallel edges

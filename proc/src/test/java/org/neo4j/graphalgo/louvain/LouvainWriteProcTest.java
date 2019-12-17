@@ -24,10 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.graphalgo.WriteConfigTests;
+import org.neo4j.graphalgo.WriteConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -50,16 +50,16 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.GRAPH_IMPL_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 
-class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> implements
-    WriteConfigTests<LouvainWriteConfig, Louvain> {
+class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> implements
+    WriteConfigTest<LouvainWriteConfig, Louvain> {
 
     @Override
-    public Class<? extends BaseAlgoProc<?, Louvain, LouvainWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, Louvain, LouvainWriteConfig>> getProcedureClazz() {
         return LouvainWriteProc.class;
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTestBase#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
     void testWrite(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyCommunity";
         @Language("Cypher") String query = queryBuilder
@@ -102,7 +102,7 @@ class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> imple
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTestBase#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
     void testWriteIntermediateCommunities(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyCommunity";
         String query = queryBuilder
@@ -154,7 +154,7 @@ class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> imple
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTestBase#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
     void testWriteWithSeeding(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyWriteProperty";
         String query = queryBuilder
@@ -181,7 +181,7 @@ class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> imple
             "",
             Optional.empty(),
             Optional.empty(),
-            createMinimallyValidConfig(CypherMapWrapper.empty())
+            createMinimalConfig(CypherMapWrapper.empty())
         );
         assertFalse(louvainConfig.includeIntermediateCommunities());
         assertEquals(10, louvainConfig.maxLevels());
@@ -201,7 +201,7 @@ class LouvainWriteProcTest extends LouvainProcTestBase<LouvainWriteConfig> imple
     }
 
     @Override
-    public CypherMapWrapper createMinimallyValidConfig(CypherMapWrapper mapWrapper) {
+    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         if (!mapWrapper.containsKey("writeProperty")) {
             return mapWrapper.withString("writeProperty", "writeProperty");
         }

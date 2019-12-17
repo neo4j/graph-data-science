@@ -23,7 +23,7 @@ package org.neo4j.graphalgo.nodesim;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
@@ -50,10 +50,10 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTestBase<NodeSimilarityWriteConfig> {
+public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<NodeSimilarityWriteConfig> {
 
     @Override
-    public Class<? extends BaseAlgoProc<?, NodeSimilarityResult, NodeSimilarityWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, NodeSimilarityResult, NodeSimilarityWriteConfig>> getProcedureClazz() {
         return NodeSimilarityWriteProc.class;
     }
 
@@ -63,7 +63,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTestBase<Node
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTestBase#allValidGraphVariationsWithProjections")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
     void shouldWriteResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
         Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         String query = queryBuilder
@@ -180,7 +180,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTestBase<Node
     @ParameterizedTest(name = "missing parameter: {0}")
     @ValueSource(strings = {"writeProperty", "writeRelationshipType"})
     void shouldFailIfConfigIsMissingWriteParameters(String parameter) {
-        CypherMapWrapper input = createMinimallyValidConfig(CypherMapWrapper.empty())
+        CypherMapWrapper input = createMinimalConfig(CypherMapWrapper.empty())
             .withoutEntry(parameter);
 
         IllegalArgumentException illegalArgumentException = assertThrows(

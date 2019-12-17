@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LouvainStreamProc extends LouvainProcBase<LouvainStreamConfig> {
+public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
 
     // TODO maps need to be comma-separated
     @Procedure(value = "gds.algo.louvain.stream", mode = READ)

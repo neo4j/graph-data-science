@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.wcc;
 
-import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.impl.wcc.Wcc;
 import org.neo4j.graphalgo.impl.wcc.WccBaseConfig;
 import org.neo4j.graphalgo.impl.wcc.WccFactory;
 
-public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends BaseAlgoProc<Wcc, DisjointSetStruct, CONFIG> {
+public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBaseProc<Wcc, DisjointSetStruct, CONFIG> {
 
     @Override
     protected final WccFactory<CONFIG> algorithmFactory(WccBaseConfig config) {

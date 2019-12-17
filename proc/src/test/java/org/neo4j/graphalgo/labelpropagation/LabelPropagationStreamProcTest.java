@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.labelpropagation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -35,9 +35,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class LabelPropagationStreamProcTest extends LabelPropagationProcTestBase<LabelPropagationStreamConfig> {
+class LabelPropagationStreamProcTest extends LabelPropagationBaseProcTest<LabelPropagationStreamConfig> {
     @Override
-    public Class<? extends BaseAlgoProc<?, LabelPropagation, LabelPropagationStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, LabelPropagation, LabelPropagationStreamConfig>> getProcedureClazz() {
         return LabelPropagationStreamProc.class;
     }
 
@@ -66,7 +66,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTestBase<LabelP
             .explicitCreation(TEST_GRAPH_NAME)
             .algo("labelPropagation")
             .streamEstimation()
-            .addAllParameters(createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 4))).toMap())
+            .addAllParameters(createMinimalConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 4))).toMap())
             .yields(Arrays.asList("bytesMin", "bytesMax", "nodeCount", "relationshipCount"));
 
         assertCypherResult(query, Arrays.asList(MapUtil.map(

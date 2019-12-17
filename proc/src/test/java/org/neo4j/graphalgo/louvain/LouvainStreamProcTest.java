@@ -23,7 +23,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
@@ -37,14 +37,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
-class LouvainStreamProcTest extends LouvainProcTestBase<LouvainStreamConfig> {
+class LouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
     @Override
-    public Class<? extends BaseAlgoProc<?, Louvain, LouvainStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, Louvain, LouvainStreamConfig>> getProcedureClazz() {
         return LouvainStreamProc.class;
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTestBase#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
     void testStream(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         @Language("Cypher") String query = queryBuilder
             .algo("louvain")
@@ -62,7 +62,7 @@ class LouvainStreamProcTest extends LouvainProcTestBase<LouvainStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTestBase#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
     void testStreamCommunities(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         @Language("Cypher") String query = queryBuilder
             .algo("louvain")

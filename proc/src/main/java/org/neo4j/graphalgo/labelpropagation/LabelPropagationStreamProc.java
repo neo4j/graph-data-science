@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LabelPropagationStreamProc extends LabelPropagationProcBase<LabelPropagationStreamConfig> {
+public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPropagationStreamConfig> {
 
     @Procedure(value = "gds.algo.labelPropagation.stream", mode = READ)
     @Description("CALL gds.algo.labelPropagation.stream(" +

@@ -39,27 +39,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public interface SeedConfigTests<CONFIG extends SeedConfig & BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
+public interface SeedConfigTest<CONFIG extends SeedConfig & BaseAlgoConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
     @Test
     default void testDefaultSeedPropertyIsNull() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.empty();
-        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertNull(config.seedProperty());
     }
 
     @Test
     default void testSeedPropertyFromConfig() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", "foo"));
-        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertEquals("foo", config.seedProperty());
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.BaseAlgoProcTests#emptyStringPropertyValues")
+    @MethodSource("org.neo4j.graphalgo.AlgoBaseProcTest#emptyStringPropertyValues")
     default void testEmptySeedPropertyValues(String seedPropertyParameter) {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", seedPropertyParameter));
-        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertNull(config.seedProperty());
     }
 
@@ -75,7 +75,7 @@ public interface SeedConfigTests<CONFIG extends SeedConfig & BaseAlgoConfig, RES
             )
         );
 
-        Map<String, Object> config = createMinimallyValidConfig(CypherMapWrapper.create(tempConfig)).toMap();
+        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
 
         applyOnProcedure(proc -> {
             IllegalArgumentException e = assertThrows(

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.pagerank;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
@@ -35,10 +35,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class PageRankStreamProcTest extends PageRankProcTestBase<PageRankStreamConfig> {
+class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> {
 
     @Override
-    public Class<? extends BaseAlgoProc<?, PageRank, PageRankStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, PageRank, PageRankStreamConfig>> getProcedureClazz() {
         return PageRankStreamProc.class;
     }
 
@@ -48,7 +48,7 @@ class PageRankStreamProcTest extends PageRankProcTestBase<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
     void testPageRankParallelExecution(String graphSnippet, String testName) {
         final Map<Long, Double> actual = new HashMap<>();
 
@@ -68,7 +68,7 @@ class PageRankStreamProcTest extends PageRankProcTestBase<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsEqual")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsEqual")
     void testWeightedPageRankWithAllRelationshipsEqual(String graphSnippet, String testCase) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.algo.pageRank.stream(" +
@@ -83,7 +83,7 @@ class PageRankStreamProcTest extends PageRankProcTestBase<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel3")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel3")
     void testWeightedPageRankFromLoadedGraphWithDirectionBoth(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.stream(" +
                        graphSnippet +
@@ -119,7 +119,7 @@ class PageRankStreamProcTest extends PageRankProcTestBase<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
     void testWeightedPageRankWithCachedWeights(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.stream(" +
                        graphSnippet +
@@ -135,7 +135,7 @@ class PageRankStreamProcTest extends PageRankProcTestBase<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1NoProps")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1NoProps")
     void testPageRank(String graphSnippet, String testCaseName) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.algo.pageRank.stream(" +
@@ -150,7 +150,7 @@ class PageRankStreamProcTest extends PageRankProcTestBase<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
     void testWeightedPageRank(String graphSnippet, String testCaseName) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.algo.pageRank.stream(" +

@@ -48,7 +48,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
-public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
+public class K1ColoringProc extends LegacyAlgoBaseProc<K1Coloring, K1Coloring> {
 
     public static final String COLOR_COUNT_FIELD_NAME = "colorCount";
 

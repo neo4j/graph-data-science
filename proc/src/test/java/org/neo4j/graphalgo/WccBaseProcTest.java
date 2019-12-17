@@ -43,11 +43,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBase implements
-    BaseAlgoProcTests<CONFIG, DisjointSetStruct>,
-    SeedConfigTests<CONFIG, DisjointSetStruct>,
+abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends ProcTestBase implements
+    AlgoBaseProcTest<CONFIG, DisjointSetStruct>,
+    SeedConfigTest<CONFIG, DisjointSetStruct>,
     WeightConfigTest<CONFIG, DisjointSetStruct>,
-    MemoryEstimateTests<CONFIG, DisjointSetStruct> {
+    MemoryEstimateTest<CONFIG, DisjointSetStruct> {
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -103,7 +103,7 @@ abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBas
 
     @Test
     void testThreshold() {
-        CypherMapWrapper config = createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map(
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             "threshold", 3.14,
             "weightProperty", "threshold"
         )));
@@ -117,7 +117,7 @@ abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBas
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testConsecutiveIds(boolean consecutiveIds) {
-        CypherMapWrapper config = createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map(
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             "consecutiveIds", consecutiveIds
         )));
 
@@ -129,7 +129,7 @@ abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBas
 
     @Test
     void testFailSeedingAndConsecutiveIds() {
-        CypherMapWrapper config = createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map(
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             "consecutiveIds", true,
             "seedProperty", "seed"
         )));
@@ -148,7 +148,7 @@ abstract class WccProcBaseTest<CONFIG extends WccBaseConfig> extends ProcTestBas
 
     @Test
     void testFailThresholdWithoutRelationshipWeight() {
-        CypherMapWrapper config = createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map(
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             "threshold", 3.14
         )));
 

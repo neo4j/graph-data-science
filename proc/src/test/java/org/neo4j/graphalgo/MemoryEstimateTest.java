@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public interface MemoryEstimateTests<CONFIG extends BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
+public interface MemoryEstimateTest<CONFIG extends BaseAlgoConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
     @Test
     default void testEstimateExistsForEveryProcedure() {
@@ -58,7 +58,7 @@ public interface MemoryEstimateTests<CONFIG extends BaseAlgoConfig, RESULT> exte
             getProcedureMethods(proc)
                 .filter(procMethod -> getProcedureMethodName(procMethod).endsWith(".estimate"))
                 .forEach(estimateMethod -> {
-                    Map<String, Object> config = createMinimallyValidConfig(CypherMapWrapper.empty()).toMap();
+                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     try {
                         Stream<MemoryEstimateResult> result = (Stream)estimateMethod.invoke(proc, config, Collections.emptyMap());
                         result.forEach(row -> {

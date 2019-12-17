@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilarityWriteConfig> {
+public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilarityWriteConfig> {
 
     @Procedure(name = "gds.algo.nodeSimilarity.write", mode = Mode.WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)

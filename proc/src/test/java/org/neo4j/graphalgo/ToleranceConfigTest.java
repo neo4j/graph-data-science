@@ -28,11 +28,11 @@ import org.neo4j.graphalgo.newapi.ToleranceConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public interface ToleranceConfigTest <CONFIG extends ToleranceConfig & BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
+public interface ToleranceConfigTest <CONFIG extends ToleranceConfig & BaseAlgoConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
     @Test
     default void testToleranceFromConfig() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("tolerance", 42.42));
-        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertEquals(42.42, config.tolerance());
     }
 }

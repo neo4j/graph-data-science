@@ -24,11 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.WriteConfigTests;
+import org.neo4j.graphalgo.WriteConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
@@ -43,11 +43,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPropagationWriteConfig> implements
-    WriteConfigTests<LabelPropagationWriteConfig, LabelPropagation> {
+class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPropagationWriteConfig> implements
+    WriteConfigTest<LabelPropagationWriteConfig, LabelPropagation> {
 
     @Override
-    public Class<? extends BaseAlgoProc<?, LabelPropagation, LabelPropagationWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, LabelPropagation, LabelPropagationWriteConfig>> getProcedureClazz() {
         return LabelPropagationWriteProc.class;
     }
 
@@ -62,7 +62,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
     }
 
     @Override
-    public CypherMapWrapper createMinimallyValidConfig(CypherMapWrapper mapWrapper) {
+    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         // TODO: generalise for all WriteProcTests
         if (!mapWrapper.containsKey("writeProperty")) {
             return mapWrapper.withString("writeProperty", "writeProperty");
@@ -71,7 +71,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTestBase#gdsGraphVariations")
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#gdsGraphVariations")
     void testWrite(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyCommunity";
         @Language("Cypher") String query = queryBuilder
@@ -108,7 +108,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTestBase#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#graphVariations")
     void respectsMaxIterations(String graphSnippet, String desc) {
         String query = "CALL gds.algo.labelPropagation.write(" +
                        graphSnippet +
@@ -141,7 +141,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
 
     static Stream<Arguments> concurrenciesExplicitAndImplicitCreate() {
         return TestSupport.crossArguments(() -> Stream.of(1, 4, 8).map(Arguments::of),
-            LabelPropagationProcTestBase::graphVariations
+            LabelPropagationBaseProcTest::graphVariations
         );
     }
 
@@ -341,7 +341,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTestBase<LabelPr
             .explicitCreation(TEST_GRAPH_NAME)
             .algo("labelPropagation")
             .writeEstimation()
-            .addAllParameters(createMinimallyValidConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 4))).toMap())
+            .addAllParameters(createMinimalConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 4))).toMap())
             .yields(Arrays.asList("bytesMin", "bytesMax", "nodeCount", "relationshipCount"));
 
         assertCypherResult(query, Arrays.asList(MapUtil.map(

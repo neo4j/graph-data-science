@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
+public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
 
     @Procedure(value = "gds.algo.pageRank.write", mode = WRITE)
     @Description("CALL gds.algo.pageRank.write(graphName: STRING, configuration: MAP {" +

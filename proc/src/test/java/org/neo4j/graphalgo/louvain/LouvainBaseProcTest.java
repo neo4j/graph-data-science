@@ -23,18 +23,18 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
-import org.neo4j.graphalgo.BaseAlgoProcTests;
+import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.MemoryEstimateTests;
+import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.SeedConfigTests;
+import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -54,13 +54,13 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-abstract class LouvainProcTestBase<CONFIG extends LouvainConfigBase> extends ProcTestBase implements
-    BaseAlgoProcTests<CONFIG, Louvain>,
-    SeedConfigTests<CONFIG, Louvain>,
+abstract class LouvainBaseProcTest<CONFIG extends LouvainConfigBase> extends ProcTestBase implements
+    AlgoBaseProcTest<CONFIG, Louvain>,
+    SeedConfigTest<CONFIG, Louvain>,
     IterationsConfigTest<CONFIG, Louvain>,
     WeightConfigTest<CONFIG, Louvain>,
     ToleranceConfigTest<CONFIG, Louvain>,
-    MemoryEstimateTests<CONFIG, Louvain>
+    MemoryEstimateTest<CONFIG, Louvain>
 {
 
     static final List<List<Long>> RESULT = Arrays.asList(

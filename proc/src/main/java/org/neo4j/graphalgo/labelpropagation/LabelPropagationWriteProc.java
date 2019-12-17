@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPropagationWriteConfig> {
+public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPropagationWriteConfig> {
 
     @Procedure(value = "gds.algo.labelPropagation.write", mode = Mode.WRITE)
     @Description("CALL gds.algo.labelPropagation.write(" +

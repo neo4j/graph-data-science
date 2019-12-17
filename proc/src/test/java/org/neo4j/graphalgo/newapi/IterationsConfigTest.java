@@ -21,17 +21,17 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseAlgoProcTests;
+import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public interface IterationsConfigTest <CONFIG extends IterationsConfig & BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
+public interface IterationsConfigTest <CONFIG extends IterationsConfig & BaseAlgoConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
     @Test
     default void testIterationsPropertyFromConfig() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("maxIterations", 42));
-        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertEquals(42, config.maxIterations());
     }
 }

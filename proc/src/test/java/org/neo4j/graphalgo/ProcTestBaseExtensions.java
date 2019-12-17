@@ -34,7 +34,7 @@ public interface ProcTestBaseExtensions {
 
     default <
         A extends Algorithm<A, ?>,
-        P extends LegacyBaseAlgoProc<A, ?>,
+        P extends LegacyAlgoBaseProc<A, ?>,
         F extends AlgorithmFactory<A, ProcedureConfiguration>>
     void getAlgorithmFactory(
         Class<? extends P> procClazz,
@@ -52,7 +52,7 @@ public interface ProcTestBaseExtensions {
 
     default <
         A extends Algorithm<A, ?>,
-        P extends LegacyBaseAlgoProc<A, ?>>
+        P extends LegacyAlgoBaseProc<A, ?>>
     void getGraphSetup(
         Class<? extends P> procClazz,
         GraphDatabaseAPI db,
@@ -69,7 +69,7 @@ public interface ProcTestBaseExtensions {
 
     default <
         A extends Algorithm<A, ?>,
-        P extends BaseAlgoProc<A, ?, ProcedureConfiguration>>
+        P extends AlgoBaseProc<A, ?, ProcedureConfiguration>>
     void getAlgorithmProc(
         Class<? extends P> procClazz,
         GraphDatabaseAPI db,

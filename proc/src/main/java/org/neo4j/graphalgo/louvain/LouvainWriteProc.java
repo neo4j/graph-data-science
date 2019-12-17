@@ -45,7 +45,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
+public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
 
     @Procedure(value = "gds.algo.louvain.write", mode = WRITE)
     @Description("CALL gds.algo.louvain.write(graphName: STRING, configuration: MAP {" +

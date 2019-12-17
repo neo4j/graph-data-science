@@ -23,18 +23,18 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
-import org.neo4j.graphalgo.BaseAlgoProcTests;
+import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.MemoryEstimateTests;
+import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.SeedConfigTests;
+import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -54,12 +54,12 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-abstract class LabelPropagationProcTestBase<CONFIG extends LabelPropagationConfigBase> extends ProcTestBase implements
-    BaseAlgoProcTests<CONFIG, LabelPropagation>,
-    SeedConfigTests<CONFIG, LabelPropagation>,
+abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationConfigBase> extends ProcTestBase implements
+    AlgoBaseProcTest<CONFIG, LabelPropagation>,
+    SeedConfigTest<CONFIG, LabelPropagation>,
     IterationsConfigTest<CONFIG, LabelPropagation>,
     WeightConfigTest<CONFIG, LabelPropagation>,
-    MemoryEstimateTests<CONFIG, LabelPropagation>
+    MemoryEstimateTest<CONFIG, LabelPropagation>
 {
 
     static final List<Long> RESULT = Arrays.asList(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);

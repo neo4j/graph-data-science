@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class PageRankStreamProc extends PageRankProcBase<PageRankStreamConfig> {
+public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
 
     @Procedure(value = "gds.algo.pageRank.stream", mode = READ)
     @Description("CALL gds.algo.pageRank.stream(graphName: STRING, configuration: MAP {" +

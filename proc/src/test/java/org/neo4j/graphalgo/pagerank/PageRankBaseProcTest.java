@@ -24,9 +24,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
-import org.neo4j.graphalgo.BaseAlgoProcTests;
+import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.MemoryEstimateTests;
+import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
@@ -51,12 +51,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-abstract class PageRankProcTestBase<CONFIG extends PageRankConfigBase> extends ProcTestBase implements
-    BaseAlgoProcTests<CONFIG, PageRank>,
+abstract class PageRankBaseProcTest<CONFIG extends PageRankConfigBase> extends ProcTestBase implements
+    AlgoBaseProcTest<CONFIG, PageRank>,
     IterationsConfigTest<CONFIG, PageRank>,
     WeightConfigTest<CONFIG, PageRank>,
     ToleranceConfigTest<CONFIG, PageRank>,
-    MemoryEstimateTests<CONFIG, PageRank>
+    MemoryEstimateTest<CONFIG, PageRank>
 {
 
     static Map<Long, Double> expected = new HashMap<>();
@@ -265,7 +265,7 @@ abstract class PageRankProcTestBase<CONFIG extends PageRankConfigBase> extends P
     @Test
     void testDampingFactorFromConfig() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("dampingFactor", 0.85));
-        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertEquals(0.85, config.dampingFactor());
     }
 }

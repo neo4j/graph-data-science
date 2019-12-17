@@ -17,17 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.neo4j.graphalgo.pagerank;
 
-package org.neo4j.graphalgo.labelpropagation;
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRank;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 
-import org.neo4j.graphalgo.BaseAlgoProc;
-import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
-import org.neo4j.graphalgo.impl.labelprop.LabelPropagationFactory;
-
-public abstract class LabelPropagationProcBase<CONFIG extends LabelPropagationConfigBase> extends BaseAlgoProc<LabelPropagation, LabelPropagation, CONFIG> {
+abstract class PageRankBaseProc<CONFIG extends PageRankConfigBase> extends AlgoBaseProc<PageRank, PageRank, CONFIG> {
 
     @Override
-    protected LabelPropagationFactory<CONFIG> algorithmFactory(LabelPropagationConfigBase config) {
-        return new LabelPropagationFactory<>(config);
+    protected final PageRankFactory<CONFIG> algorithmFactory(PageRankConfigBase config) {
+        if (config.weightProperty() == null) {
+            return new PageRankFactory<>();
+        }
+        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
     }
 }

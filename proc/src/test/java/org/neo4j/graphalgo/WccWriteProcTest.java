@@ -37,13 +37,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
+class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
 
     private static final String WRITE_PROPERTY = "componentId";
     private static final String SEED_PROPERTY = "seedId";
 
     @Override
-    public Class<? extends BaseAlgoProc<?, DisjointSetStruct, WccWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, DisjointSetStruct, WccWriteConfig>> getProcedureClazz() {
         return WccWriteProc.class;
     }
 
@@ -53,7 +53,7 @@ class WccWriteProcTest extends WccProcBaseTest<WccWriteConfig> {
     }
 
     @Override
-    public CypherMapWrapper createMinimallyValidConfig(CypherMapWrapper mapWrapper) {
+    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         if (!mapWrapper.containsKey("writeProperty")) {
             return mapWrapper.withString("writeProperty", WRITE_PROPERTY);
         }

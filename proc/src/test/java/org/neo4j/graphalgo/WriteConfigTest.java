@@ -33,12 +33,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public interface WriteConfigTests<CONFIG extends WriteConfig & BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
+public interface WriteConfigTest<CONFIG extends WriteConfig & BaseAlgoConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
     @Test
     default void testMissingWritePropertyFails() {
         CypherMapWrapper mapWrapper =
-            createMinimallyValidConfig(CypherMapWrapper.empty())
+            createMinimalConfig(CypherMapWrapper.empty())
                 .withoutEntry("writeProperty");
 
         IllegalArgumentException exception = assertThrows(
@@ -52,7 +52,7 @@ public interface WriteConfigTests<CONFIG extends WriteConfig & BaseAlgoConfig, R
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.BaseAlgoProcTests#emptyStringPropertyValues")
+    @MethodSource("org.neo4j.graphalgo.AlgoBaseProcTest#emptyStringPropertyValues")
     default void testEmptyWritePropertyValues(String writePropertyParameter) {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("writeProperty", writePropertyParameter));
         assertThrows(IllegalArgumentException.class, () -> createConfig(mapWrapper));
@@ -64,7 +64,7 @@ public interface WriteConfigTests<CONFIG extends WriteConfig & BaseAlgoConfig, R
             "writeProperty", "writeProperty",
             "writeConcurrency", 42
         ));
-        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertEquals("writeProperty", config.writeProperty());
         assertEquals(42, config.writeConcurrency());
     }

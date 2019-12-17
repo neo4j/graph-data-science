@@ -35,12 +35,12 @@ import org.neo4j.graphalgo.wcc.WccStreamProc;
 
 import java.util.Optional;
 
-class WccStreamProcTest extends WccProcBaseTest<WccStreamConfig> {
+class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
 
     private static final long[][] EXPECTED_COMMUNITIES = {new long[]{0L, 1L, 2L, 3L, 4, 5, 6}, new long[]{7, 8}, new long[]{9}};
 
     @Override
-    public Class<? extends BaseAlgoProc<?, DisjointSetStruct, WccStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, DisjointSetStruct, WccStreamConfig>> getProcedureClazz() {
         return WccStreamProc.class;
     }
 

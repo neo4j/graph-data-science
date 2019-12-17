@@ -58,17 +58,18 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.neo4j.graphalgo.core.utils.ExceptionUtil.rootCause;
 
 /**
- * Suite of Base test that should be used for every algorithm procedure.
- * This test assumes that the implementing test method populates the database returned by `graphDb` and clears the
- * data after each test.
+ * Base test that should be used for every algorithm procedure.
+ * This test assumes that the implementing test method populates
+ * the database returned by {@link AlgoBaseProcTest#graphDb} and
+ * clears the data after each test.
  */
-public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
+public interface AlgoBaseProcTest<CONFIG extends BaseAlgoConfig, RESULT> {
 
     static Stream<String> emptyStringPropertyValues() {
         return Stream.of(null, "");
     }
 
-    Class<? extends BaseAlgoProc<?, RESULT, CONFIG>> getProcedureClazz();
+    Class<? extends AlgoBaseProc<?, RESULT, CONFIG>> getProcedureClazz();
 
     GraphDatabaseAPI graphDb();
 
@@ -76,15 +77,15 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
     void compareResults(RESULT result1, RESULT result2);
 
-    default CypherMapWrapper createMinimallyValidConfig(CypherMapWrapper mapWrapper) {
+    default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper;
     }
 
     default void applyOnProcedure(
-        Consumer<? super BaseAlgoProc<?, RESULT, CONFIG>> func
+        Consumer<? super AlgoBaseProc<?, RESULT, CONFIG>> func
     ) {
         new TransactionWrapper(graphDb()).accept((tx -> {
-            BaseAlgoProc<?, RESULT, CONFIG> proc;
+            AlgoBaseProc<?, RESULT, CONFIG> proc;
             try {
                 proc = getProcedureClazz().newInstance();
             } catch (ReflectiveOperationException e) {
@@ -102,7 +103,7 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
     @Test
     default void testImplicitGraphLoading() {
-        CypherMapWrapper wrapper = createMinimallyValidConfig(CypherMapWrapper.empty());
+        CypherMapWrapper wrapper = createMinimalConfig(CypherMapWrapper.empty());
         applyOnProcedure(proc -> {
             CONFIG config = proc.newConfig(Optional.empty(), wrapper);
             assertEquals(Optional.empty(), config.graphName());
@@ -116,7 +117,7 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
     @Test
     default void shouldFailWithInvalidWeightProperty() {
-        assumeTrue(createConfig(createMinimallyValidConfig(CypherMapWrapper.empty())) instanceof WeightConfig);
+        assumeTrue(createConfig(createMinimalConfig(CypherMapWrapper.empty())) instanceof WeightConfig);
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
         Graph graph = new GraphLoader(graphDb())
@@ -127,7 +128,7 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
         applyOnProcedure((proc) -> {
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("weightProperty", "owiejfoseifj"));
-            Map<String, Object> configMap = createMinimallyValidConfig(mapWrapper).toMap();
+            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
             String error = "Weight property `owiejfoseifj` not found";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
@@ -143,7 +144,7 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
     @Test
     default void shouldFailWithInvalidSeedProperty() {
-        assumeTrue(createConfig(createMinimallyValidConfig(CypherMapWrapper.empty())) instanceof SeedConfig);
+        assumeTrue(createConfig(createMinimalConfig(CypherMapWrapper.empty())) instanceof SeedConfig);
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
         Graph graph = new GraphLoader(graphDb())
@@ -154,7 +155,7 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
 
         applyOnProcedure((proc) -> {
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", "owiejfoseifj"));
-            Map<String, Object> configMap = createMinimallyValidConfig(mapWrapper).toMap();
+            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
             String error = "Seed property `owiejfoseifj` not found";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
@@ -187,13 +188,13 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
         GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
 
         applyOnProcedure((proc) -> {
-            Map<String, Object> configMap = createMinimallyValidConfig(CypherMapWrapper.empty()).toMap();
-            BaseAlgoProc.ComputationResult<?, RESULT, CONFIG> resultOnLoadedGraph = proc.compute(
+            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnLoadedGraph = proc.compute(
                 loadedGraphName,
                 configMap
             );
 
-            BaseAlgoProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraph = proc.compute(
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraph = proc.compute(
                 configMap,
                 Collections.emptyMap()
             );
@@ -213,9 +214,9 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
         GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
 
         applyOnProcedure((proc) -> {
-            Map<String, Object> configMap = createMinimallyValidConfig(CypherMapWrapper.empty()).toMap();
-            BaseAlgoProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap);
-            BaseAlgoProc.ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(loadedGraphName, configMap);
+            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap);
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(loadedGraphName, configMap);
 
             compareResults(resultRun1.result(), resultRun2.result());
         });
@@ -228,7 +229,7 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
         applyOnProcedure((proc) -> {
             getWriteAndStreamProcedures(proc)
                 .forEach(method -> {
-                    Map<String, Object> configMap = createMinimallyValidConfig(CypherMapWrapper.empty()).toMap();
+                    Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
 
                     try {
                         Stream<?> result = (Stream) method.invoke(proc, configMap, Collections.emptyMap());
@@ -257,7 +258,7 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
                         Collections.singletonList(missingLabel)
                     );
 
-                    Map<String, Object> configMap = createMinimallyValidConfig(CypherMapWrapper.create(tempConfig)).toMap();
+                    Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
 
                     Exception ex = assertThrows(
                         Exception.class,
@@ -287,7 +288,7 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
                         Collections.singletonList(missingRelType)
                     );
 
-                    Map<String, Object> configMap = createMinimallyValidConfig(CypherMapWrapper.create(tempConfig)).toMap();
+                    Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
 
                     Exception ex = assertThrows(
                         Exception.class,
@@ -319,12 +320,12 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
         });
     }
 
-    default boolean methodExists(BaseAlgoProc<?, RESULT, CONFIG> proc, String methodSuffix) {
+    default boolean methodExists(AlgoBaseProc<?, RESULT, CONFIG> proc, String methodSuffix) {
         return getProcedureMethods(proc)
             .anyMatch(method -> getProcedureMethodName(method).endsWith(methodSuffix));
     }
 
-    default Stream<Method> getProcedureMethods(BaseAlgoProc<?, RESULT, CONFIG> proc) {
+    default Stream<Method> getProcedureMethods(AlgoBaseProc<?, RESULT, CONFIG> proc) {
         return Arrays.stream(proc.getClass().getDeclaredMethods())
             .filter(method -> method.getDeclaredAnnotation(Procedure.class) != null);
     }
@@ -339,7 +340,7 @@ public interface BaseAlgoProcTests<CONFIG extends BaseAlgoConfig, RESULT> {
         return name;
     }
 
-    default Stream<Method> getWriteAndStreamProcedures(BaseAlgoProc<?, RESULT, CONFIG> proc) {
+    default Stream<Method> getWriteAndStreamProcedures(AlgoBaseProc<?, RESULT, CONFIG> proc) {
         return getProcedureMethods(proc)
             .filter(method -> {
                 String procedureMethodName = getProcedureMethodName(method);

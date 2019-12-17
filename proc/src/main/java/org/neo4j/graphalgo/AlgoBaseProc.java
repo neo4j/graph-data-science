@@ -53,7 +53,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public abstract class BaseAlgoProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> extends BaseProc {
+public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> extends BaseProc {
 
     public String algoName() {
         return this.getClass().getSimpleName();

@@ -29,10 +29,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.BaseAlgoProcTests;
+import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.MemoryEstimateTests;
+import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -65,9 +65,9 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.Projection.NATURAL;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBase> extends ProcTestBase implements
-    BaseAlgoProcTests<CONFIG, NodeSimilarityResult>,
-    MemoryEstimateTests<CONFIG, NodeSimilarityResult> {
+abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityConfigBase> extends ProcTestBase implements
+    AlgoBaseProcTest<CONFIG, NodeSimilarityResult>,
+    MemoryEstimateTest<CONFIG, NodeSimilarityResult> {
 
     static final String DB_CYPHER =
         "CREATE" +
@@ -91,7 +91,7 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
     }
 
     static Stream<Arguments> allValidGraphVariationsWithProjections() {
-        return TestSupport.allDirectedProjections().flatMap(NodeSimilarityProcTestBase::graphVariationForProjection);
+        return TestSupport.allDirectedProjections().flatMap(NodeSimilarityBaseProcTest::graphVariationForProjection);
     }
 
     private static Stream<Arguments> graphVariationForProjection(Projection projection) {
@@ -195,7 +195,7 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
     }
 
     @Override
-    public CypherMapWrapper createMinimallyValidConfig(CypherMapWrapper mapWrapper) {
+    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         if (!mapWrapper.containsKey("writeProperty")) {
             mapWrapper = mapWrapper.withString("writeProperty", "foo");
         }
@@ -275,7 +275,7 @@ abstract class NodeSimilarityProcTestBase<CONFIG extends NodeSimilarityConfigBas
     }
 
     private CypherMapWrapper baseUserInput() {
-        return createMinimallyValidConfig(CypherMapWrapper.empty());
+        return createMinimalConfig(CypherMapWrapper.empty());
     }
 
     private CONFIG config(CypherMapWrapper input) {

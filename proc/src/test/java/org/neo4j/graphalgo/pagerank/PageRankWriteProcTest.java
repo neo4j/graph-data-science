@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.BaseAlgoProc;
-import org.neo4j.graphalgo.WriteConfigTests;
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.WriteConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
@@ -33,16 +33,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> implements
-    WriteConfigTests<PageRankWriteConfig, PageRank> {
+class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> implements
+    WriteConfigTest<PageRankWriteConfig, PageRank> {
 
     @Override
-    public Class<? extends BaseAlgoProc<?, PageRank, PageRankWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, PageRank, PageRankWriteConfig>> getProcedureClazz() {
         return PageRankWriteProc.class;
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
     void testPageRankWriteBack(String graphSnippet, String testCaseName) {
         String writeProperty = "myFancyScore";
         String query = "CALL gds.algo.pageRank.write(" +
@@ -59,7 +59,7 @@ class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
     void testWeightedPageRankWriteBack(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.write(" +
                        graphSnippet +
@@ -77,7 +77,7 @@ class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
     void testPageRankParallelWriteBack(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.write(" +
                        graphSnippet +
@@ -92,7 +92,7 @@ class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
     void testPageRankWithToleranceParam(String graphSnippet, String testCaseName) {
         graphSnippet += " writeProperty: 'writeProp',";
         String graphName = "myGraph1";
@@ -134,7 +134,7 @@ class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
     void testWriteYieldRanAndMaxIterationsAndDidConverge(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.write(" +
                        graphSnippet +
@@ -153,7 +153,7 @@ class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariationsLabel1")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel1")
     void testStatsYieldRanAndMaxIterationsAndDidConverge(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.stats(" +
                        graphSnippet +
@@ -182,7 +182,7 @@ class PageRankWriteProcTest extends PageRankProcTestBase<PageRankWriteConfig> im
     }
 
     @Override
-    public CypherMapWrapper createMinimallyValidConfig(CypherMapWrapper mapWrapper) {
+    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         if (!mapWrapper.containsKey("writeProperty")) {
             return mapWrapper.withString("writeProperty", "writeProperty");
         }

@@ -17,16 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.louvain;
 
-import org.neo4j.graphalgo.BaseAlgoProc;
-import org.neo4j.graphalgo.impl.louvain.Louvain;
-import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
+package org.neo4j.graphalgo.labelpropagation;
 
-abstract class LouvainProcBase<CONFIG extends LouvainConfigBase> extends BaseAlgoProc<Louvain, Louvain, CONFIG> {
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
+import org.neo4j.graphalgo.impl.labelprop.LabelPropagationFactory;
+
+public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationConfigBase> extends AlgoBaseProc<LabelPropagation, LabelPropagation, CONFIG> {
 
     @Override
-    protected final LouvainFactory<CONFIG> algorithmFactory(CONFIG config) {
-        return new LouvainFactory<>();
+    protected LabelPropagationFactory<CONFIG> algorithmFactory(LabelPropagationConfigBase config) {
+        return new LabelPropagationFactory<>(config);
     }
 }

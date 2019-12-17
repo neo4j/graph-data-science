@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class NodeSimilarityStreamProc extends NodeSimilarityProcBase<NodeSimilarityStreamConfig> {
+public class NodeSimilarityStreamProc extends NodeSimilarityBaseProc<NodeSimilarityStreamConfig> {
 
     @Procedure(value = "gds.algo.nodeSimilarity.stream", mode = Mode.READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)

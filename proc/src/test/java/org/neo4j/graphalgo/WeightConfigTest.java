@@ -39,26 +39,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig, RESULT> extends BaseAlgoProcTests<CONFIG, RESULT> {
+public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
     @Test
     default void testDefaultWeightPropertyIsNull() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.empty();
-        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertNull(config.weightProperty());
     }
 
     @Test
     default void testWeightPropertyFromConfig() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("weightProperty", "weight"));
-        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertEquals("weight", config.weightProperty());
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.BaseAlgoProcTests#emptyStringPropertyValues")
+    @MethodSource("org.neo4j.graphalgo.AlgoBaseProcTest#emptyStringPropertyValues")
     default void testEmptyWeightPropertyValues(String weightPropertyParameter) {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("weightProperty", weightPropertyParameter));
-        CONFIG config = createConfig(createMinimallyValidConfig(mapWrapper));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertNull(config.weightProperty());
     }
 
@@ -74,7 +74,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & BaseAlgoConfig,
             )
         );
 
-        Map<String, Object> config = createMinimallyValidConfig(CypherMapWrapper.create(tempConfig)).toMap();
+        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
 
         applyOnProcedure(proc -> {
             IllegalArgumentException e = assertThrows(
