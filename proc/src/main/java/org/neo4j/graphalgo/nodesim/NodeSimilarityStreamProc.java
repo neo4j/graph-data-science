@@ -40,20 +40,7 @@ import java.util.stream.Stream;
 public class NodeSimilarityStreamProc extends NodeSimilarityProcBase<NodeSimilarityStreamConfig> {
 
     @Procedure(value = "gds.algo.nodeSimilarity.stream", mode = Mode.READ)
-    @Description("CALL gds.algo.nodeSimilarity.stream(graphName: STRING, configuration: MAP {" +
-                 "    similarityCutoff: 0.0," +
-                 "    degreeCutoff: 1," +
-                 "    topK: 10," +
-                 "    bottomK: 10," +
-                 "    topN: 0," +
-                 "    bottomN: 0," +
-                 "    concurrency: 4," +
-                 "    readConcurrency: 4" +
-                 "  }" +
-                 ") YIELD" +
-                 "  node1," +
-                 "  node2," +
-                 "  similarity")
+    @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<SimilarityResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -78,20 +65,7 @@ public class NodeSimilarityStreamProc extends NodeSimilarityProcBase<NodeSimilar
     }
 
     @Procedure(value = "gds.algo.nodeSimilarity.stream.estimate", mode = Mode.READ)
-    @Description("CALL gds.algo.nodeSimilarity.stream.estimate(graphName: STRING, configuration: MAP {" +
-                 "    similarityCutoff: 0.0," +
-                 "    degreeCutoff: 1," +
-                 "    topK: 10," +
-                 "    bottomK: 10," +
-                 "    topN: 0," +
-                 "    bottomN: 0," +
-                 "    concurrency: 4," +
-                 "    readConcurrency: 4" +
-                 "  }" +
-                 ") YIELD" +
-                 "  node1," +
-                 "  node2," +
-                 "  similarity")
+    @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

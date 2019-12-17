@@ -49,25 +49,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilarityWriteConfig> {
 
     @Procedure(name = "gds.algo.nodeSimilarity.write", mode = Mode.WRITE)
-    @Description("CALL gds.algo.nodeSimilarity.write(graphName: STRING, configuration: MAP {" +
-                 "    similarityCutoff: 0.0," +
-                 "    degreeCutoff: 0," +
-                 "    topK: 10," +
-                 "    bottomK: 10," +
-                 "    topN: 0," +
-                 "    bottomN: 0," +
-                 "    concurrency: 4," +
-                 "    readConcurrency: 4," +
-                 "    writeRelationshipType: ," +
-                 "    writeProperty: ," +
-                 "    writeConcurrency: 4" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodesCompared," +
-                 "  relationships," +
-                 "  writeRelationshipType," +
-                 "  writeProperty," +
-                 "  similarityDistribution")
+    @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<NodeSimilarityWriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -80,27 +62,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
     }
 
     @Procedure(value = "gds.algo.nodeSimilarity.write.estimate", mode = READ)
-    @Description("CALL gds.algo.nodeSimilarity.write.estimate(graphName: STRING, configuration: MAP {" +
-                 "    similarityCutoff: 0.0," +
-                 "    degreeCutoff: 0," +
-                 "    topK: 10," +
-                 "    bottomK: 10," +
-                 "    topN: 0," +
-                 "    bottomN: 0," +
-                 "    concurrency: 4," +
-                 "    readConcurrency: 4," +
-                 "    writeRelationshipType: ," +
-                 "    writeProperty: ," +
-                 "    writeConcurrency: 4" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodes: INTEGER, "+
-                 "  relationships: INTEGER," +
-                 "  bytesMin: INTEGER," +
-                 "  bytesMax: INTEGER," +
-                 "  requiredMemory: STRING," +
-                 "  mapView: MAP," +
-                 "  treeView: STRING")
+    @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -109,25 +71,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
     }
 
     @Procedure(name = "gds.algo.nodeSimilarity.stats", mode = Mode.WRITE)
-    @Description("CALL algo.nodeSimilarity(graphName: STRING, configuration: MAP {" +
-                 "    similarityCutoff: 0.0," +
-                 "    degreeCutoff: 0," +
-                 "    topK: 10," +
-                 "    bottomK: 10," +
-                 "    topN: 0," +
-                 "    bottomN: 0," +
-                 "    concurrency: 4," +
-                 "    readConcurrency: 4," +
-                 "    writeRelationshipType: ," +
-                 "    writeProperty: ," +
-                 "    writeConcurrency: 4" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodesCompared," +
-                 "  relationships," +
-                 "  writeRelationshipType," +
-                 "  writeProperty," +
-                 "  similarityDistribution")
+    @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<NodeSimilarityWriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -140,27 +84,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
     }
 
     @Procedure(value = "gds.algo.nodeSimilarity.stats.estimate", mode = READ)
-    @Description("CALL gds.algo.nodeSimilarity.stats.estimate(graphName: STRING, configuration: MAP {" +
-                 "    similarityCutoff: 0.0," +
-                 "    degreeCutoff: 0," +
-                 "    topK: 10," +
-                 "    bottomK: 10," +
-                 "    topN: 0," +
-                 "    bottomN: 0," +
-                 "    concurrency: 4," +
-                 "    readConcurrency: 4," +
-                 "    writeRelationshipType: ," +
-                 "    writeProperty: ," +
-                 "    writeConcurrency: 4" +
-                 "  }" +
-                 ") YIELD" +
-                 "  nodes: INTEGER, "+
-                 "  relationships: INTEGER," +
-                 "  bytesMin: INTEGER," +
-                 "  bytesMax: INTEGER," +
-                 "  requiredMemory: STRING," +
-                 "  mapView: MAP," +
-                 "  treeView: STRING")
+    @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

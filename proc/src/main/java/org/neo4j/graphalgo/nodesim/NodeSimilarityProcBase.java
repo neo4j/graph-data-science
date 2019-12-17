@@ -33,6 +33,11 @@ import java.util.Optional;
 
 public abstract class NodeSimilarityProcBase<CONFIG extends NodeSimilarityConfigBase> extends BaseAlgoProc<NodeSimilarity, NodeSimilarityResult, CONFIG> {
 
+    static final String NODE_SIMILARITY_DESCRIPTION =
+        "The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to. " +
+        "Two nodes are considered similar if they share many of the same neighbors. " +
+        "Node Similarity computes pair-wise similarities based on the Jaccard metric.";
+
     protected abstract CONFIG newConfig(
         String username,
         Optional<String> graphName,
