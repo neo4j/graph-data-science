@@ -25,18 +25,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-
-import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-class GraphDropProcTest extends ProcTestBase {
+class GraphDropProcTest extends BaseProcTest {
     private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
     private static final String GRAPH_NAME = "graphNameToDrop";
 

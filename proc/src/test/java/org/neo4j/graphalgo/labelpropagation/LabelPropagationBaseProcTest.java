@@ -146,7 +146,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
                 GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
                     .builder()
                     .graphName("")
-                    .nodeProjection(NodeProjections.of(MapUtil.map("A", "A | B")))
+                    .nodeProjection(NodeProjections.fromObject(MapUtil.map("A", "A | B")))
                     .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed", "weight", "score")))
                     .relationshipProjection(RelationshipProjections.builder()
                         .putProjection(

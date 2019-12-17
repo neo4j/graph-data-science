@@ -46,7 +46,7 @@ import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityGraphResult;
 import org.neo4j.graphalgo.impl.nodesim.SimilarityResult;
-import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -125,7 +125,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
             NodeSimilarityWriteProc.class,
             NodeSimilarityStreamProc.class,
             GraphLoadProc.class,
-            GraphCatalogProcs.class
+            GraphCreateProc.class
         );
         runQuery(DB_CYPHER);
 

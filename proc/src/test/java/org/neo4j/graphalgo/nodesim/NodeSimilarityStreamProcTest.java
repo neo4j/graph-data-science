@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityStreamConfig;
-import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -102,7 +102,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
 
         int idOffset = 100;
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, NodeSimilarityStreamProc.class, GraphCatalogProcs.class, GraphLoadProc.class);
+        registerProcedures(localDb, NodeSimilarityStreamProc.class, GraphCreateProc.class, GraphLoadProc.class);
         QueryRunner.runQuery(localDb, "MATCH (n) DETACH DELETE n");
         QueryRunner.runQuery(localDb, String.format("UNWIND range(1, %d) AS i CREATE (:IncrementIdSpace)", idOffset));
         QueryRunner.runQuery(localDb, DB_CYPHER);

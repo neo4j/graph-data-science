@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
@@ -37,7 +37,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-class GraphExistsProcTest extends ProcTestBase {
+class GraphExistsProcTest extends BaseProcTest {
     private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
 
     @BeforeEach
