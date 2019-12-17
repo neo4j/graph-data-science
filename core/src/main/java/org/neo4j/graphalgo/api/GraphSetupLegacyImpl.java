@@ -203,11 +203,6 @@ public final class GraphSetupLegacyImpl implements GraphSetup {
     }
 
     @Override
-    public int batchSize() {
-        return batchSize;
-    }
-
-    @Override
     public boolean loadAsUndirected() {
         return loadAsUndirected;
     }

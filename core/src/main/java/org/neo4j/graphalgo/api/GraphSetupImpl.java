@@ -58,17 +58,13 @@ public class GraphSetupImpl implements GraphSetup {
 
     // the executor service for parallel execution. null means single threaded evaluation.
     private final ExecutorService executor;
-    // batchSize for parallel computation
-    private final int batchSize;
 
     /**
      * @param executor  the executor. null means single threaded evaluation
-     * @param batchSize batch size for parallel loading
      */
     public GraphSetupImpl(
         Map<String, Object> params,
         ExecutorService executor,
-        int batchSize,
         Log log,
         long logMillis,
         AllocationTracker tracker,
@@ -77,7 +73,6 @@ public class GraphSetupImpl implements GraphSetup {
     ) {
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
-        this.batchSize = batchSize;
         this.log = log;
         this.logMillis = logMillis;
         this.tracker = tracker;
@@ -295,10 +290,6 @@ public class GraphSetupImpl implements GraphSetup {
 
     public ExecutorService executor() {
         return executor;
-    }
-
-    public int batchSize() {
-        return batchSize;
     }
 
     private boolean loadConcurrent() {

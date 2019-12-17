@@ -106,7 +106,4 @@ public interface GraphSetup {
     TerminationFlag terminationFlag();
 
     ExecutorService executor();
-
-    int batchSize();
-
 }
