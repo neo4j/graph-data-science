@@ -20,16 +20,16 @@
 
 package org.neo4j.graphalgo.centrality;
 
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.degree.DegreeCentrality;
-import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
@@ -44,7 +44,7 @@ import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 import static org.neo4j.procedure.Mode.READ;
 
-public class DegreeCentralityProcBase extends BaseAlgoProc<DegreeCentrality, DegreeCentrality, DegreeCentralityConfig> {
+public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeCentrality, DegreeCentralityConfig> {
 
     @Procedure(value = "gds.alpha.degree.write", mode = Mode.WRITE)
     public Stream<CentralityScore.Stats> write(

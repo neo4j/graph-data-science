@@ -24,14 +24,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.graphdb.Direction;
 
 @Configuration("DegreeCentralityConfigImpl")
 @ValueClass
-public interface DegreeCentralityConfig extends BaseAlgoConfig, WeightConfig, WriteConfig {
+public interface DegreeCentralityConfig extends AlgoBaseConfig, WeightConfig, WriteConfig {
 
     public static final String DEFAULT_SCORE_PROPERTY = "degree";
 

@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -41,7 +40,7 @@ import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-class DegreeCentralityProcBaseTest extends ProcTestBase {
+class DegreeCentralityProcTest extends BaseProcTest {
 
     private static final Map<Long, Double> incomingExpected = new HashMap<>();
     private static final Map<Long, Double> bothExpected = new HashMap<>();
@@ -69,7 +68,7 @@ class DegreeCentralityProcBaseTest extends ProcTestBase {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-        registerProcedures(DegreeCentralityProcBase.class);
+        registerProcedures(DegreeCentralityProc.class);
 
         runInTransaction(db, () -> {
             Label label = Label.label("Label1");
