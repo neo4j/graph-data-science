@@ -30,7 +30,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("LouvainWriteConfigImpl")
-public interface LouvainWriteConfig extends LouvainConfigBase, WriteConfig {
+public interface LouvainWriteConfig extends LouvainBaseConfig, WriteConfig {
 
     static LouvainWriteConfig of(
         String username,

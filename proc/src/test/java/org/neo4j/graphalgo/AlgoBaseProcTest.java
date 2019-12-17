@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TransactionWrapper;
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
@@ -63,7 +63,7 @@ import static org.neo4j.graphalgo.core.utils.ExceptionUtil.rootCause;
  * the database returned by {@link AlgoBaseProcTest#graphDb} and
  * clears the data after each test.
  */
-public interface AlgoBaseProcTest<CONFIG extends BaseAlgoConfig, RESULT> {
+public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
     static Stream<String> emptyStringPropertyValues() {
         return Stream.of(null, "");

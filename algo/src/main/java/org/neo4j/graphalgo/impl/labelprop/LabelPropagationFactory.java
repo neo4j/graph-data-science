@@ -29,17 +29,17 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.labelpropagation.LabelPropagationConfigBase;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class LabelPropagationFactory<CONFIG extends LabelPropagationConfigBase> extends AlgorithmFactory<LabelPropagation, CONFIG> {
+public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> extends AlgorithmFactory<LabelPropagation, CONFIG> {
 
-    private final LabelPropagationConfigBase config;
+    private final LabelPropagationBaseConfig config;
 
-    public LabelPropagationFactory(LabelPropagationConfigBase config) {
+    public LabelPropagationFactory(LabelPropagationBaseConfig config) {
         this.config = config;
     }
 

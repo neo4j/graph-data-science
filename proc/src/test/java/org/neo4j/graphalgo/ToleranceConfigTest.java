@@ -23,12 +23,12 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.ToleranceConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public interface ToleranceConfigTest <CONFIG extends ToleranceConfig & BaseAlgoConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
+public interface ToleranceConfigTest <CONFIG extends ToleranceConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
     @Test
     default void testToleranceFromConfig() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("tolerance", 42.42));

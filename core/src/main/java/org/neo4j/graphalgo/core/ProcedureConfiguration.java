@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.graphdb.Direction;
@@ -56,7 +56,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.RELCOUNT_KEY;
 /**
  * Wrapper around configuration options map
  */
-public class ProcedureConfiguration implements BaseAlgoConfig, WriteConfig {
+public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
 
     public static final String HEAVY_GRAPH_TYPE = "heavy";
     public static final String LIGHT_GRAPH_TYPE = "light";

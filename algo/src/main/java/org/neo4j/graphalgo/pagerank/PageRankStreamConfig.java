@@ -29,7 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("PageRankStreamConfigImpl")
-public interface PageRankStreamConfig extends PageRankConfigBase {
+public interface PageRankStreamConfig extends PageRankBaseConfig {
 
     static PageRankStreamConfig of(
         String username,

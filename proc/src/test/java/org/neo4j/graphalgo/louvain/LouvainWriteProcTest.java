@@ -177,7 +177,7 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
     // TODO: add a variation of the below with non-defaults
     @Test
     void testCreateConfigWithDefaults() {
-        LouvainConfigBase louvainConfig = LouvainWriteConfig.of(
+        LouvainBaseConfig louvainConfig = LouvainWriteConfig.of(
             "",
             Optional.empty(),
             Optional.empty(),

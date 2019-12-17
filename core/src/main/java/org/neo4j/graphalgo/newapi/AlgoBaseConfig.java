@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 
 import java.util.Optional;
 
-public interface BaseAlgoConfig extends BaseConfig {
+public interface AlgoBaseConfig extends BaseConfig {
 
     @Value.Default
     default int concurrency() {

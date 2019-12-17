@@ -81,7 +81,7 @@ class LouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
 
     @Test
     void testCreateConfigWithDefaults() {
-        LouvainConfigBase louvainConfig = LouvainStreamConfig.of(
+        LouvainBaseConfig louvainConfig = LouvainStreamConfig.of(
             "",
             Optional.empty(),
             Optional.empty(),

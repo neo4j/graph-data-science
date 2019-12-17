@@ -23,7 +23,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public interface MemoryEstimateTest<CONFIG extends BaseAlgoConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
+public interface MemoryEstimateTest<CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
     @Test
     default void testEstimateExistsForEveryProcedure() {

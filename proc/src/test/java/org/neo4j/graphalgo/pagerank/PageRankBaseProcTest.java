@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-abstract class PageRankBaseProcTest<CONFIG extends PageRankConfigBase> extends ProcTestBase implements
+abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends ProcTestBase implements
     AlgoBaseProcTest<CONFIG, PageRank>,
     IterationsConfigTest<CONFIG, PageRank>,
     WeightConfigTest<CONFIG, PageRank>,

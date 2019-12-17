@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationConfigBase> extends ProcTestBase implements
+abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseConfig> extends ProcTestBase implements
     AlgoBaseProcTest<CONFIG, LabelPropagation>,
     SeedConfigTest<CONFIG, LabelPropagation>,
     IterationsConfigTest<CONFIG, LabelPropagation>,

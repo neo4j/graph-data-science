@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.labelpropagation.LabelPropagationConfigBase;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.StatementConstants;
 
@@ -48,7 +48,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
     private final AllocationTracker tracker;
     private final NodeProperties nodeProperties;
     private final NodeProperties nodeWeights;
-    private final LabelPropagationConfigBase config;
+    private final LabelPropagationBaseConfig config;
     private final ExecutorService executor;
 
     private Graph graph;
@@ -60,7 +60,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
 
     public LabelPropagation(
         Graph graph,
-        LabelPropagationConfigBase config,
+        LabelPropagationBaseConfig config,
         ExecutorService executor,
         AllocationTracker tracker
     ) {

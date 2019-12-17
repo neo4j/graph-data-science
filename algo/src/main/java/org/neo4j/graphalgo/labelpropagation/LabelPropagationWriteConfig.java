@@ -30,7 +30,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("LabelPropagationWriteConfigImpl")
-public interface LabelPropagationWriteConfig extends LabelPropagationConfigBase, WriteConfig {
+public interface LabelPropagationWriteConfig extends LabelPropagationBaseConfig, WriteConfig {
 
     static LabelPropagationWriteConfig of(
         String username,

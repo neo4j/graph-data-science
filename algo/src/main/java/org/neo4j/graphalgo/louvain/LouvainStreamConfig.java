@@ -29,7 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("LouvainStreamConfigImpl")
-public interface LouvainStreamConfig extends LouvainConfigBase {
+public interface LouvainStreamConfig extends LouvainBaseConfig {
 
     static LouvainStreamConfig of(
         String username,

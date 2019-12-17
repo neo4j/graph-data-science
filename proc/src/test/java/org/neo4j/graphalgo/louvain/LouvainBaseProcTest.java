@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-abstract class LouvainBaseProcTest<CONFIG extends LouvainConfigBase> extends ProcTestBase implements
+abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends ProcTestBase implements
     AlgoBaseProcTest<CONFIG, Louvain>,
     SeedConfigTest<CONFIG, Louvain>,
     IterationsConfigTest<CONFIG, Louvain>,

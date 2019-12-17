@@ -23,14 +23,13 @@ package org.neo4j.graphalgo.labelpropagation;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.labelpropagation.LouvainStreamConfigImpl;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration("LouvainStreamConfigImpl")
-public interface LabelPropagationStreamConfig extends LabelPropagationConfigBase {
+public interface LabelPropagationStreamConfig extends LabelPropagationBaseConfig {
 
     static LabelPropagationStreamConfig of(
         String username,

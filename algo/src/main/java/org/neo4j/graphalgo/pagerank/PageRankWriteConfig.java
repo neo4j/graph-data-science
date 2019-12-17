@@ -30,7 +30,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("PageRankWriteConfigImpl")
-public interface PageRankWriteConfig extends PageRankConfigBase, WriteConfig {
+public interface PageRankWriteConfig extends PageRankBaseConfig, WriteConfig {
 
     static PageRankWriteConfig of(
         String username,

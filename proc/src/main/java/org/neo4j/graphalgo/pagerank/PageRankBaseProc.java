@@ -24,10 +24,10 @@ import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 
-abstract class PageRankBaseProc<CONFIG extends PageRankConfigBase> extends AlgoBaseProc<PageRank, PageRank, CONFIG> {
+abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoBaseProc<PageRank, PageRank, CONFIG> {
 
     @Override
-    protected final PageRankFactory<CONFIG> algorithmFactory(PageRankConfigBase config) {
+    protected final PageRankFactory<CONFIG> algorithmFactory(PageRankBaseConfig config) {
         if (config.weightProperty() == null) {
             return new PageRankFactory<>();
         }

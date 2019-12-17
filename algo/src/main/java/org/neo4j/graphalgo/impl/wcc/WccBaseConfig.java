@@ -22,11 +22,11 @@ package org.neo4j.graphalgo.impl.wcc;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
 
-public interface WccBaseConfig extends BaseAlgoConfig, SeedConfig, WeightConfig {
+public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, WeightConfig {
 
     @Value.Default
     default boolean consecutiveIds() {

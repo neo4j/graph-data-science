@@ -24,10 +24,10 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagationFactory;
 
-public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationConfigBase> extends AlgoBaseProc<LabelPropagation, LabelPropagation, CONFIG> {
+public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBaseConfig> extends AlgoBaseProc<LabelPropagation, LabelPropagation, CONFIG> {
 
     @Override
-    protected LabelPropagationFactory<CONFIG> algorithmFactory(LabelPropagationConfigBase config) {
+    protected LabelPropagationFactory<CONFIG> algorithmFactory(LabelPropagationBaseConfig config) {
         return new LabelPropagationFactory<>(config);
     }
 }

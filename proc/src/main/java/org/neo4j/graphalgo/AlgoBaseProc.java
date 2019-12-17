@@ -38,7 +38,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.newapi.BaseAlgoConfig;
+import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
@@ -53,7 +53,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> extends BaseProc {
+public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends AlgoBaseConfig> extends BaseProc {
 
     public String algoName() {
         return this.getClass().getSimpleName();
@@ -322,7 +322,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     @ValueClass
-    public interface ComputationResult<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends BaseAlgoConfig> {
+    public interface ComputationResult<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends AlgoBaseConfig> {
         long createMillis();
 
         long computeMillis();

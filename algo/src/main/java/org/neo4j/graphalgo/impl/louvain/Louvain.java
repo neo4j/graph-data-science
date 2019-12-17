@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
-import org.neo4j.graphalgo.louvain.LouvainConfigBase;
+import org.neo4j.graphalgo.louvain.LouvainBaseConfig;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -41,7 +41,7 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 public final class Louvain extends Algorithm<Louvain, Louvain> {
 
     private final Graph rootGraph;
-    private final LouvainConfigBase config;
+    private final LouvainBaseConfig config;
     private final NodeProperties seedingValues;
     private final ExecutorService executorService;
     private final Log log;
@@ -54,7 +54,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
     public Louvain(
         Graph graph,
-        LouvainConfigBase config,
+        LouvainBaseConfig config,
         ExecutorService executorService,
         Log log,
         AllocationTracker tracker
@@ -207,7 +207,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         return !(currentModularity > previousModularity && Math.abs(currentModularity - previousModularity) > config.tolerance());
     }
 
-    public LouvainConfigBase config() {
+    public LouvainBaseConfig config() {
         return this.config;
     }
 

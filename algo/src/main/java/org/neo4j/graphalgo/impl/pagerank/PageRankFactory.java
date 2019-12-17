@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
-import org.neo4j.graphalgo.pagerank.PageRankConfigBase;
+import org.neo4j.graphalgo.pagerank.PageRankBaseConfig;
 import org.neo4j.graphdb.Node;
 import org.neo4j.logging.Log;
 
@@ -36,7 +36,7 @@ import java.util.stream.LongStream;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
-public class PageRankFactory<CONFIG extends PageRankConfigBase> extends AlgorithmFactory<PageRank, CONFIG> {
+public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends AlgorithmFactory<PageRank, CONFIG> {
 
     private final PageRankAlgorithmType algorithmType;
 
@@ -51,7 +51,7 @@ public class PageRankFactory<CONFIG extends PageRankConfigBase> extends Algorith
     @Override
     public PageRank build(
             final Graph graph,
-            final PageRankConfigBase configuration,
+            final PageRankBaseConfig configuration,
             final AllocationTracker tracker,
             final Log log) {
 

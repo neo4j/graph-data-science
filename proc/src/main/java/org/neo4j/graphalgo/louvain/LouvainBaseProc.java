@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 
-abstract class LouvainBaseProc<CONFIG extends LouvainConfigBase> extends AlgoBaseProc<Louvain, Louvain, CONFIG> {
+abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBaseProc<Louvain, Louvain, CONFIG> {
 
     @Override
     protected final LouvainFactory<CONFIG> algorithmFactory(CONFIG config) {
