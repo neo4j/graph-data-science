@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.shortestPath.DijkstraConfig;
-import org.neo4j.graphalgo.shortestPath.ImmutableDijkstraConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 
@@ -104,7 +103,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     @Test
     void testOutgoing() {
         StringBuilder path = new StringBuilder();
-        DijkstraConfig config = config(id("a"), id("f"), Direction.OUTGOING);
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"), Direction.OUTGOING);
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -117,7 +116,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
 
     @Test
     void testIncoming() {
-        DijkstraConfig config = config(id("a"), id("f"), Direction.INCOMING);
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"), Direction.INCOMING);
         StringBuilder path = new StringBuilder();
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
@@ -132,7 +131,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     @Test
     void testBoth() {
         StringBuilder path = new StringBuilder();
-        DijkstraConfig config = config(id("a"), id("f"), Direction.BOTH);
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"), Direction.BOTH);
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute(id("a"), id("f"), Direction.BOTH);
 
@@ -146,7 +145,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     @Test
     void testUnreachableOutgoing() {
         StringBuilder path = new StringBuilder();
-        DijkstraConfig config = config(id("a"), id("x"), Direction.OUTGOING);
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"), Direction.OUTGOING);
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -159,7 +158,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     @Test
     void testUnreachableIncoming() {
         StringBuilder path = new StringBuilder();
-        DijkstraConfig config = config(id("a"), id("x"), Direction.INCOMING);
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"), Direction.INCOMING);
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -172,7 +171,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     @Test
     void testUnreachableBoth() {
         StringBuilder path = new StringBuilder();
-        DijkstraConfig config = config(id("a"), id("x"), Direction.BOTH);
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"), Direction.BOTH);
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -180,14 +179,5 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
         assertEquals(0, path.length());
         assertEquals(0, dijkstra.getPathLength());
         assertEquals(ShortestPathDijkstra.NO_PATH_FOUND, dijkstra.getTotalCost(), 0.1);
-    }
-
-    private DijkstraConfig config(long startNode, long endNode, Direction direction) {
-        return ImmutableDijkstraConfig
-            .builder()
-            .startNode(startNode)
-            .endNode(endNode)
-            .direction(direction)
-            .build();
     }
 }

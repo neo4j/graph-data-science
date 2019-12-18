@@ -62,6 +62,14 @@ public interface DijkstraConfig extends AlgoBaseConfig, WeightConfig, WriteConfi
     @Configuration.ConvertWith("nodeId")
     long endNode();
 
+    static DijkstraConfig of(long startNode, long endNode) {
+        return ImmutableDijkstraConfig.builder().startNode(startNode).endNode(endNode).build();
+    }
+
+    static DijkstraConfig of(long startNode, long endNode, Direction direction) {
+        return ImmutableDijkstraConfig.builder().startNode(startNode).endNode(endNode).direction(direction).build();
+    }
+
     static long nodeId(Node node) {
         return node.getId();
     }

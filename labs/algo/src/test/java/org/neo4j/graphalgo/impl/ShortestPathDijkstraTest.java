@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.shortestPath.DijkstraConfig;
-import org.neo4j.graphalgo.shortestPath.ImmutableDijkstraConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -142,7 +141,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
-        DijkstraConfig config = config(nodeIds[0], nodeIds[nodeIds.length - 1]);
+        DijkstraConfig config = DijkstraConfig.of(nodeIds[0], nodeIds[nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
         shortestPathDijkstra.compute();
         long[] path = Arrays
@@ -172,7 +171,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
-        DijkstraConfig config = config(nodeIds[0], nodeIds[nodeIds.length - 1]);
+        DijkstraConfig config = DijkstraConfig.of(nodeIds[0], nodeIds[nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
         shortestPathDijkstra.compute();
         long[] path = Arrays
@@ -203,7 +202,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
-        DijkstraConfig config = config(expected.nodeIds[0], expected.nodeIds[expected.nodeIds.length - 1]);
+        DijkstraConfig config = DijkstraConfig.of(expected.nodeIds[0], expected.nodeIds[expected.nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
         shortestPathDijkstra.compute();
         long[] path = Arrays
@@ -234,7 +233,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
-        DijkstraConfig config = config(head, tail);
+        DijkstraConfig config = DijkstraConfig.of(head, tail);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
         shortestPathDijkstra.compute();
         Stream<ShortestPathDijkstra.Result> resultStream = shortestPathDijkstra.resultStream();
@@ -278,13 +277,4 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
             this.weight = weight;
         }
     }
-
-    private DijkstraConfig config(long startNode, long endNode) {
-        return ImmutableDijkstraConfig
-            .builder()
-            .startNode(startNode)
-            .endNode(endNode)
-            .build();
-    }
-
 }

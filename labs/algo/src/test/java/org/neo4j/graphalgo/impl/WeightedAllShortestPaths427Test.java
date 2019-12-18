@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.impl.shortestpath.SingleSourceShortestPathDijkstra;
 import org.neo4j.graphalgo.impl.util.DoubleAdder;
 import org.neo4j.graphalgo.impl.util.DoubleEvaluator;
 import org.neo4j.graphalgo.shortestPath.DijkstraConfig;
-import org.neo4j.graphalgo.shortestPath.ImmutableDijkstraConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -462,7 +461,7 @@ public class WeightedAllShortestPaths427Test extends AlgoTestBase {
                         }
 
                         if (withWeights) {
-                            DijkstraConfig config = config(neoSourceId, neoTargetId, Direction.OUTGOING);
+                            DijkstraConfig config = DijkstraConfig.of(neoSourceId, neoTargetId, Direction.OUTGOING);
                             ShortestPathDijkstra spd = new ShortestPathDijkstra(graph, config);
                             spd.compute(neoSourceId, neoTargetId, Direction.OUTGOING);
                             double totalCost = spd.getTotalCost();
@@ -519,15 +518,6 @@ public class WeightedAllShortestPaths427Test extends AlgoTestBase {
                     );
                 })
         );
-    }
-
-    private DijkstraConfig config(long startNode, long endNode, Direction direction) {
-        return ImmutableDijkstraConfig
-            .builder()
-            .startNode(startNode)
-            .endNode(endNode)
-            .direction(direction)
-            .build();
     }
 
     private static final class TestDijkstra extends SingleSourceShortestPathDijkstra<Double> {
