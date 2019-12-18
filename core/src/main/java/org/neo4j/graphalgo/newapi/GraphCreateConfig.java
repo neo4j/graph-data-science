@@ -83,19 +83,17 @@ public interface GraphCreateConfig extends BaseConfig {
         PropertyMappings nodeProperties = nodeProperties();
         PropertyMappings relationshipProperties = relationshipProperties();
 
-        verifyProjectionAndProperties(
+        verifyProperties(
             nodeProperties.stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet()),
             nodeProjection().allProperties(),
             "node"
         );
 
-
-        verifyProjectionAndProperties(
+        verifyProperties(
             relationshipProperties.stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet()),
             relationshipProjection().allProperties(),
             "relationship"
         );
-
 
         if (nodeProperties.hasMappings() || relationshipProperties.hasMappings()) {
             return ImmutableGraphCreateConfig
@@ -111,7 +109,7 @@ public interface GraphCreateConfig extends BaseConfig {
     }
 
     @Configuration.Ignore
-    default void verifyProjectionAndProperties(
+    default void verifyProperties(
         Set<String> propertiesFromMapping,
         Set<String> propertiesFromProjection,
         String type

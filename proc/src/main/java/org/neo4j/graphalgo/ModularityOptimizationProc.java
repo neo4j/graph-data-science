@@ -359,7 +359,7 @@ public class ModularityOptimizationProc extends LegacyBaseAlgoProc<ModularityOpt
         @Override
         protected WriteResult buildResult() {
             return new WriteResult(
-                loadMillis,
+                createMillis,
                 computeMillis,
                 postProcessingDuration,
                 writeMillis,

@@ -127,7 +127,7 @@ public class PrimProc extends LabsProc {
         final Prim mstPrim = new Prim(graph, graph)
                 .withProgressLogger(ProgressLogger.wrap(log, "Prim(MaximumSpanningTree)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
-        builder.timeEval(() -> {
+        builder.timeCompute(() -> {
             if (max) {
                 mstPrim.computeMaximumSpanningTree(root);
             } else {

@@ -187,7 +187,7 @@ public final class EigenvectorCentralityProc extends LabsProc {
                 .withProgressLogger(log)
                 .withTerminationFlag(terminationFlag);
 
-        statsBuilder.timeEval(prAlgo::compute);
+        statsBuilder.timeCompute(prAlgo::compute);
         statsBuilder.withIterations(prAlgo.iterations()).withDampingFactor(prAlgo.dampingFactor());
 
         CentralityResultWithStatistics result = CentralityResultWithStatistics.of(prAlgo.result());

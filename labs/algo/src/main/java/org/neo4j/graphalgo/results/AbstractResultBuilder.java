@@ -39,7 +39,7 @@ public abstract class AbstractResultBuilder<R> {
         this.loadMillis = loadMillis;
     }
 
-    public void setEvalMillis(long computeMillis) {
+    public void setComputeMillis(long computeMillis) {
         this.computeMillis = computeMillis;
     }
 
@@ -51,8 +51,8 @@ public abstract class AbstractResultBuilder<R> {
         return ProgressTimer.start(this::setLoadMillis);
     }
 
-    public ProgressTimer timeEval() {
-        return ProgressTimer.start(this::setEvalMillis);
+    public ProgressTimer timeCompute() {
+        return ProgressTimer.start(this::setComputeMillis);
     }
 
     public ProgressTimer timeWrite() {
@@ -65,14 +65,14 @@ public abstract class AbstractResultBuilder<R> {
         }
     }
 
-    public void timeEval(Runnable runnable) {
-        try (ProgressTimer ignored = timeEval()) {
+    public void timeCompute(Runnable runnable) {
+        try (ProgressTimer ignored = timeCompute()) {
             runnable.run();
         }
     }
 
-    public <U> U timeEval(Supplier<U> supplier) {
-        try (ProgressTimer ignored = timeEval()) {
+    public <U> U timeCompute(Supplier<U> supplier) {
+        try (ProgressTimer ignored = timeCompute()) {
             return supplier.get();
         }
     }

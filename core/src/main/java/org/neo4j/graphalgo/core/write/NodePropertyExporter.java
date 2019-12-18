@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongUnaryOperator;
 
 public final class NodePropertyExporter extends StatementApi {
@@ -47,7 +48,7 @@ public final class NodePropertyExporter extends StatementApi {
     private final int concurrency;
     private final long nodeCount;
     private final LongUnaryOperator toOriginalId;
-    private final AtomicLong propertiesWritten;
+    private final LongAdder propertiesWritten;
 
     public static Builder of(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
         return new Builder(db, idMapping, terminationFlag);
@@ -94,7 +95,7 @@ public final class NodePropertyExporter extends StatementApi {
         this.progressLogger = log;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        propertiesWritten = new AtomicLong(0);
+        this.propertiesWritten = new LongAdder();
     }
 
     public <T> void write(
@@ -135,7 +136,7 @@ public final class NodePropertyExporter extends StatementApi {
     }
 
     public long propertiesWritten() {
-        return propertiesWritten.get();
+        return propertiesWritten.longValue();
     }
 
     private <T> void writeSequential(
@@ -265,7 +266,7 @@ public final class NodePropertyExporter extends StatementApi {
                     propertyId,
                     prop
             );
-            propertiesWritten.incrementAndGet();
+            propertiesWritten.increment();
         }
     }
 
@@ -282,12 +283,12 @@ public final class NodePropertyExporter extends StatementApi {
         Value prop1 = translator1.toProperty(propertyId1, data1, nodeId);
         if (prop1 != null) {
             ops.nodeSetProperty(originalNodeId, propertyId1, prop1);
-            propertiesWritten.incrementAndGet();
+            propertiesWritten.increment();
         }
         Value prop2 = translator2.toProperty(propertyId2, data2, nodeId);
         if (prop2 != null) {
             ops.nodeSetProperty(originalNodeId, propertyId2, prop2);
-            propertiesWritten.incrementAndGet();
+            propertiesWritten.increment();
         }
     }
 }

@@ -265,7 +265,7 @@ public class LabelPropagationWriteProc extends LabelPropagationProcBase<LabelPro
                 config,
                 nodePropertiesWritten,
                 0L,
-                loadMillis,
+                createMillis,
                 computeMillis,
                 writeMillis,
                 postProcessingDuration,

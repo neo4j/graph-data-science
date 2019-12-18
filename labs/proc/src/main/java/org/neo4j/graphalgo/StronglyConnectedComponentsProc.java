@@ -110,7 +110,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(Tarjan)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 
-        builder.timeEval(tarjan::compute);
+        builder.timeCompute(tarjan::compute);
 
         final int[] connectedComponents = tarjan.getConnectedComponents();
         if (configuration.isWriteFlag()) {
@@ -171,7 +171,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(TunedTarjan)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 
-        builder.timeEval(tarjan::compute);
+        builder.timeCompute(tarjan::compute);
 
         if (configuration.isWriteFlag()) {
             builder.withWrite(true);
@@ -258,7 +258,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(IterativeTarjan)"))
                 .withTerminationFlag(terminationFlag);
 
-        builder.timeEval(tarjan::compute);
+        builder.timeCompute(tarjan::compute);
 
         if (configuration.isWriteFlag()) {
             builder.withWrite(true);
@@ -354,7 +354,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))
                 .withTerminationFlag(terminationFlag);
 
-        builder.timeEval(multistep::compute);
+        builder.timeCompute(multistep::compute);
 
         final int[] connectedComponents = multistep.getConnectedComponents();
 

@@ -335,7 +335,7 @@ public class K1ColoringProc extends LegacyBaseAlgoProc<K1Coloring, K1Coloring> {
         @Override
         public WriteResult build() {
             return new WriteResult(
-                loadMillis,
+                createMillis,
                 computeMillis,
                 writeMillis,
                 nodePropertiesWritten,

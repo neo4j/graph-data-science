@@ -105,7 +105,7 @@ public class KSpanningTreeProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "KSpanningTrees"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 
-        builder.timeEval(() -> {
+        builder.timeCompute(() -> {
             kSpanningTree.compute(root, k, max);
             builder.withEffectiveNodeCount(kSpanningTree.getSpanningTree().effectiveNodeCount);
         });

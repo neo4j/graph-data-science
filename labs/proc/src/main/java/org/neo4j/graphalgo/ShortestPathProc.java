@@ -147,7 +147,7 @@ public class ShortestPathProc extends LabsProc {
             return Stream.of(builder.build());
         }
 
-        try (ProgressTimer timer = builder.timeEval()) {
+        try (ProgressTimer timer = builder.timeCompute()) {
             dijkstra = new ShortestPathDijkstra(graph)
                     .withProgressLogger(ProgressLogger.wrap(log, "ShortestPath(Dijkstra)"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction))

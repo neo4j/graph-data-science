@@ -124,7 +124,7 @@ public class BalancedTriadsProc extends LabsProc {
 
         // compute
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        try (ProgressTimer timer = builder.timeEval()) {
+        try (ProgressTimer timer = builder.timeCompute()) {
             balancedTriads = new BalancedTriads(graph, Pools.DEFAULT, configuration.concurrency(),
                 tracker
             )

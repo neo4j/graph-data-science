@@ -28,10 +28,9 @@ import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
-import java.util.HashMap;
+import java.util.Collections;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -42,16 +41,15 @@ class GraphCreateConfigTest {
 
     @Test
     void testThrowOnOverlappingNodeProperties() {
-        final PropertyMappings propertyMappings = PropertyMappings.builder()
+        PropertyMappings propertyMappings = PropertyMappings.builder()
             .addMapping("duplicate", "foo", 0.0, DeduplicationStrategy.NONE)
             .build();
 
-        final NodeProjections nodeProjections = NodeProjections.create(MapUtil.genericMap(
-            new HashMap<>(),
+        NodeProjections nodeProjections = NodeProjections.create(Collections.singletonMap(
             ElementIdentifier.of("A"), NodeProjection.of("A", propertyMappings)
         ));
 
-        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
             ImmutableGraphCreateConfig.builder()
                 .graphName("graph")
                 .relationshipProjection(RelationshipProjections.of())
@@ -65,11 +63,11 @@ class GraphCreateConfigTest {
 
     @Test
     void testThrowOnOverlappingRelProperties() {
-        final PropertyMappings propertyMappings = PropertyMappings.builder()
+        PropertyMappings propertyMappings = PropertyMappings.builder()
             .addMapping("duplicate", "foo", 0.0, DeduplicationStrategy.NONE)
             .build();
 
-        final RelationshipProjections relProjections = RelationshipProjections.single(
+        RelationshipProjections relProjections = RelationshipProjections.single(
             ElementIdentifier.of("A"),
             RelationshipProjection.builder()
                 .type("A")
@@ -78,7 +76,7 @@ class GraphCreateConfigTest {
                 .build()
         );
 
-        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
             ImmutableGraphCreateConfig.builder()
                 .graphName("graph")
                 .relationshipProperties(propertyMappings)

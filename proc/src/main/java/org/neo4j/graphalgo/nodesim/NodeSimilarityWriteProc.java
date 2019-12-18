@@ -239,7 +239,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityProcBase<NodeSimilari
         public NodeSimilarityWriteResult build() {
             return new NodeSimilarityWriteResult(
                 config,
-                loadMillis,
+                createMillis,
                 computeMillis,
                 writeMillis,
                 postProcessingMillis,

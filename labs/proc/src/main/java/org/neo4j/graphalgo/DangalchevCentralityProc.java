@@ -114,7 +114,7 @@ public class DangalchevCentralityProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "DangalchevCentrality"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 
-        builder.timeEval(algo::compute);
+        builder.timeCompute(algo::compute);
 
         if (configuration.isWriteFlag()) {
             graph.release();

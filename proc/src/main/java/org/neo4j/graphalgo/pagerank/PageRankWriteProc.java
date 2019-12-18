@@ -261,7 +261,7 @@ public class PageRankWriteProc extends PageRankProcBase<PageRankWriteConfig> {
                 config.weightProperty(),
                 config.maxIterations(),
                 nodePropertiesWritten,
-                loadMillis,
+                createMillis,
                 computeMillis,
                 writeMillis,
                 ranIterations,

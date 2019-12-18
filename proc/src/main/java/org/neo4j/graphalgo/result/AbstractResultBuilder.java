@@ -26,7 +26,7 @@ public abstract class AbstractResultBuilder<CONFIG extends WriteConfig, WRITE_RE
     protected final CONFIG config;
     protected final String writeProperty;
 
-    protected long loadMillis = -1;
+    protected long createMillis = -1;
     protected long computeMillis = -1;
     protected long writeMillis = -1;
     protected long nodePropertiesWritten;
@@ -37,8 +37,8 @@ public abstract class AbstractResultBuilder<CONFIG extends WriteConfig, WRITE_RE
         this.writeProperty = config.writeProperty();
     }
 
-    public void withCreateMillis(long loadMillis) {
-        this.loadMillis = loadMillis;
+    public void withCreateMillis(long createMillis) {
+        this.createMillis = createMillis;
     }
 
     public void withComputeMillis(long computeMillis) {

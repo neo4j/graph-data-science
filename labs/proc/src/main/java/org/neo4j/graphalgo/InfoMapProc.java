@@ -315,7 +315,7 @@ public class InfoMapProc extends LabsProc {
         }
 
         // eval
-        builder.timeEval(infoMap::compute);
+        builder.timeCompute(infoMap::compute);
         // result
         builder.withCommunityCount(infoMap.getCommunityCount());
         builder.withNodeCount(graph.nodeCount());

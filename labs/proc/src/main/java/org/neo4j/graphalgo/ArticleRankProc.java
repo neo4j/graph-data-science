@@ -193,7 +193,7 @@ public final class ArticleRankProc extends LabsProc{
                 .withProgressLogger(log)
                 .withTerminationFlag(terminationFlag);
 
-        statsBuilder.timeEval(prAlgo::compute);
+        statsBuilder.timeCompute(prAlgo::compute);
         statsBuilder.withConfig(algoConfig);
 
         final CentralityResult pageRank = prAlgo.result();

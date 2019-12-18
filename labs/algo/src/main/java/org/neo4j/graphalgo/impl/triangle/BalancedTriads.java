@@ -44,10 +44,10 @@ import java.util.stream.Stream;
  *
  * positive:                negative:
  *
- *        (b)                   (b)
- *      +/  \+                -/   \-
- *    (a)---(c)              (a)---(c)
- *        -                      -
+ * (b)                   (b)
+ * +/  \+                -/   \-
+ * (a)---(c)              (a)---(c)
+ * -                      -
  *
  * see: https://en.wikipedia.org/wiki/Balance_theory
  *
@@ -109,6 +109,7 @@ public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
 
     /**
      * compute number of balanced and unbalanced triangles
+     *
      * @return
      */
     public Boolean compute() {
@@ -126,14 +127,16 @@ public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
     /**
      * get result stream of original node id to number of balanced
      * and unbalanced triangles
+     *
      * @return
      */
     public Stream<Result> stream() {
         return IntStream.range(0, Math.toIntExact(nodeCount))
-                .mapToObj(i -> new Result(
-                        graph.toOriginalNodeId(i),
-                        balancedTriangles.get(i),
-                        unbalancedTriangles.get(i)));
+            .mapToObj(i -> new Result(
+                graph.toOriginalNodeId(i),
+                balancedTriangles.get(i),
+                unbalancedTriangles.get(i)
+            ));
     }
 
     /**
@@ -152,6 +155,7 @@ public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
 
     /**
      * get number of balanced triads
+     *
      * @return
      */
     public long getBalancedTriangleCount() {
@@ -160,6 +164,7 @@ public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
 
     /**
      * get number of unbalanced triads
+     *
      * @return
      */
     public long getUnbalancedTriangleCount() {
@@ -184,10 +189,10 @@ public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
         @Override
         public String toString() {
             return "Result{" +
-                    "nodeId=" + nodeId +
-                    ", balanced=" + balanced +
-                    ", unbalanced=" + unbalanced +
-                    '}';
+                   "nodeId=" + nodeId +
+                   ", balanced=" + balanced +
+                   ", unbalanced=" + unbalanced +
+                   '}';
         }
     }
 
@@ -210,7 +215,11 @@ public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
 
         @Override
         public void accept(final long a, final long b, final long c) {
-            if (balancedPredicate.isBalanced(graph.relationshipProperty(a, b, 1.0D), graph.relationshipProperty(a, c, 1.0D), graph.relationshipProperty(b, c, 1.0D))) {
+            if (balancedPredicate.isBalanced(
+                graph.relationshipProperty(a, b, 1.0D),
+                graph.relationshipProperty(a, c, 1.0D),
+                graph.relationshipProperty(b, c, 1.0D)
+            )) {
                 balancedTriangles.add(a, 1);
                 balancedTriangles.add(b, 1);
                 balancedTriangles.add(c, 1);

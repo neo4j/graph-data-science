@@ -342,7 +342,7 @@ public class LouvainWriteProc extends LouvainProcBase<LouvainWriteConfig> {
             return new WriteResult(
                 config,
                 nodePropertiesWritten,  // should be nodePropertiesWritten
-                loadMillis,
+                createMillis,
                 computeMillis,
                 writeMillis,
                 postProcessingDuration,

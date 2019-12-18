@@ -120,7 +120,7 @@ public class HarmonicCentralityProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "HarmonicCentrality"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 
-        builder.timeEval(algo::compute);
+        builder.timeCompute(algo::compute);
 
         if (configuration.isWriteFlag()) {
             graph.release();

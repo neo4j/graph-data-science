@@ -95,7 +95,7 @@ public class KShortestPathsProc extends LabsProc {
         }
 
         // eval
-        try (ProgressTimer timer = builder.timeEval()) {
+        try (ProgressTimer timer = builder.timeCompute()) {
             Direction computeDirection = direction == Direction.BOTH ? Direction.OUTGOING : direction;
 
             algorithm = new YensKShortestPaths(graph)
@@ -157,7 +157,7 @@ public class KShortestPathsProc extends LabsProc {
         }
 
         // eval
-        try (ProgressTimer timer = builder.timeEval()) {
+        try (ProgressTimer timer = builder.timeCompute()) {
             algorithm = new YensKShortestPaths(graph)
                     .withProgressLogger(ProgressLogger.wrap(log, "KShortestPaths(Yen)"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction))

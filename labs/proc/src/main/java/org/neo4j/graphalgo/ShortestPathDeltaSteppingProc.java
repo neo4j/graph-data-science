@@ -157,7 +157,7 @@ public class ShortestPathDeltaSteppingProc extends LabsProc {
                 .withTerminationFlag(terminationFlag)
                 .withExecutorService(Pools.DEFAULT);
 
-        builder.timeEval(() -> algorithm.compute(startNode.getId()));
+        builder.timeCompute(() -> algorithm.compute(startNode.getId()));
 
         if (configuration.isWriteFlag()) {
             final double[] shortestPaths = algorithm.getShortestPaths();

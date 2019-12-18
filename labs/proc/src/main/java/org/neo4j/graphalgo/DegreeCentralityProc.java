@@ -205,7 +205,7 @@ public final class DegreeCentralityProc extends LabsProc {
                 weightPropertyKey != null,
                 tracker
         );
-        statsBuilder.timeEval(algo::compute);
+        statsBuilder.timeCompute(algo::compute);
         Algorithm<?, ?> algorithm = algo.algorithm();
         algorithm.withTerminationFlag(terminationFlag);
 

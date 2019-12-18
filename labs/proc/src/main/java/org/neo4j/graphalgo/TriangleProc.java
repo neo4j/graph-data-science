@@ -57,24 +57,25 @@ public class TriangleProc extends LabsProc {
 
     @Procedure(name = "algo.triangle.stream", mode = READ)
     @Description("CALL algo.triangle.stream(label, relationship, {concurrency:4}) " +
-            "YIELD nodeA, nodeB, nodeC - yield nodeA, nodeB and nodeC which form a triangle")
+                 "YIELD nodeA, nodeB, nodeC - yield nodeA, nodeB and nodeC which form a triangle")
     public Stream<TriangleStream.Result> triangleStream(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
-                .setNodeLabelOrQuery(label)
-                .setRelationshipTypeOrQuery(relationship);
+            .setNodeLabelOrQuery(label)
+            .setRelationshipTypeOrQuery(relationship);
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .withOptionalLabel(configuration.getNodeLabelOrQuery())
-                .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
-                .withDirection(TriangleCountBase.D)
-                .sorted()
-                .undirected()
-                .load(configuration.getGraphImpl());
+            .init(log, label, relationship, configuration)
+            .withOptionalLabel(configuration.getNodeLabelOrQuery())
+            .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
+            .withDirection(TriangleCountBase.D)
+            .sorted()
+            .undirected()
+            .load(configuration.getGraphImpl());
 
         if (graph.isEmpty()) {
             graph.release();
@@ -82,32 +83,33 @@ public class TriangleProc extends LabsProc {
         }
 
         final TriangleStream triangleStream = new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
-                .withProgressLogger(ProgressLogger.wrap(log, "triangleStream"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
+            .withProgressLogger(ProgressLogger.wrap(log, "triangleStream"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
 
         return triangleStream.resultStream();
     }
 
     @Procedure(name = "algo.triangleCount.stream", mode = READ)
     @Description("CALL algo.triangleCount.stream(label, relationship, {concurrency:8}) " +
-            "YIELD nodeId, triangles - yield nodeId, number of triangles")
+                 "YIELD nodeId, triangles - yield nodeId, number of triangles")
     public Stream<IntersectingTriangleCount.Result> triangleCountQueueStream(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
-                .setNodeLabelOrQuery(label)
-                .setRelationshipTypeOrQuery(relationship);
+            .setNodeLabelOrQuery(label)
+            .setRelationshipTypeOrQuery(relationship);
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .withOptionalLabel(configuration.getNodeLabelOrQuery())
-                .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
-                .withDirection(TriangleCountBase.D)
-                .sorted()
-                .undirected()
-                .load(configuration.getGraphImpl());
+            .init(log, label, relationship, configuration)
+            .withOptionalLabel(configuration.getNodeLabelOrQuery())
+            .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
+            .withDirection(TriangleCountBase.D)
+            .sorted()
+            .undirected()
+            .load(configuration.getGraphImpl());
 
         if (graph.isEmpty()) {
             graph.release();
@@ -129,24 +131,25 @@ public class TriangleProc extends LabsProc {
 
     @Procedure(name = "algo.triangleCount.forkJoin.stream", mode = READ)
     @Description("CALL algo.triangleCount.forkJoin.stream(label, relationship, {concurrency:8}) " +
-            "YIELD nodeId, triangles - yield nodeId, number of triangles")
+                 "YIELD nodeId, triangles - yield nodeId, number of triangles")
     public Stream<TriangleCountBase.Result> triangleCountForkJoinStream(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
-                .setNodeLabelOrQuery(label)
-                .setRelationshipTypeOrQuery(relationship);
+            .setNodeLabelOrQuery(label)
+            .setRelationshipTypeOrQuery(relationship);
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .withOptionalLabel(configuration.getNodeLabelOrQuery())
-                .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
-                .withDirection(TriangleCountBase.D)
-                .sorted()
-                .undirected()
-                .load(configuration.getGraphImpl());
+            .init(log, label, relationship, configuration)
+            .withOptionalLabel(configuration.getNodeLabelOrQuery())
+            .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
+            .withDirection(TriangleCountBase.D)
+            .sorted()
+            .undirected()
+            .load(configuration.getGraphImpl());
 
         TriangleCountForkJoin algo = new TriangleCountForkJoin(
             graph,
@@ -163,44 +166,45 @@ public class TriangleProc extends LabsProc {
 
     @Procedure(value = "algo.triangleCount", mode = Mode.WRITE)
     @Description("CALL algo.triangleCount(label, relationship, " +
-            "{concurrency:4, write:true, writeProperty:'triangles', clusteringCoefficientProperty:'coefficient'}) " +
-            "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient")
+                 "{concurrency:4, write:true, writeProperty:'triangles', clusteringCoefficientProperty:'coefficient'}) " +
+                 "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient")
     public Stream<Result> triangleCountQueue(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         final Graph graph;
         final IntersectingTriangleCount triangleCount;
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
-                .setNodeLabelOrQuery(label)
-                .setRelationshipTypeOrQuery(relationship);
+            .setNodeLabelOrQuery(label)
+            .setRelationshipTypeOrQuery(relationship);
 
         final AllocationTracker tracker = AllocationTracker.create();
         final TriangleCountResultBuilder builder = new TriangleCountResultBuilder(true, true, tracker);
 
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = new GraphLoader(api, Pools.DEFAULT)
-                    .init(log, label, relationship, configuration)
-                    .withOptionalLabel(configuration.getNodeLabelOrQuery())
-                    .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
-                    .withDirection(TriangleCountBase.D)
-                    .sorted()
-                    .undirected()
-                    .load(configuration.getGraphImpl());
+                .init(log, label, relationship, configuration)
+                .withOptionalLabel(configuration.getNodeLabelOrQuery())
+                .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
+                .withDirection(TriangleCountBase.D)
+                .sorted()
+                .undirected()
+                .load(configuration.getGraphImpl());
         }
 
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        try (ProgressTimer timer = builder.timeEval()) {
+        try (ProgressTimer timer = builder.timeCompute()) {
             triangleCount = new IntersectingTriangleCount(
-                    graph,
-                    Pools.DEFAULT,
-                    configuration.concurrency(),
+                graph,
+                Pools.DEFAULT,
+                configuration.concurrency(),
                 tracker
             )
-                    .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+                .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
             triangleCount.compute();
             triangleCount.getCoefficients();
         }
@@ -210,17 +214,19 @@ public class TriangleProc extends LabsProc {
             try (ProgressTimer timer = builder.timeWrite()) {
                 String writeProperty = configuration.getWriteProperty(DEFAULT_WRITE_PROPERTY_VALUE);
                 Optional<String> clusteringCoefficientProperty = configuration.getString(
-                        COEFFICIENT_WRITE_PROPERTY_VALUE);
+                    COEFFICIENT_WRITE_PROPERTY_VALUE
+                );
 
                 builder.withWriteProperty(writeProperty);
                 builder.withClusteringCoefficientProperty(clusteringCoefficientProperty);
 
                 write(
-                        graph,
-                        triangleCount,
-                        configuration,
-                        writeProperty,
-                        clusteringCoefficientProperty);
+                    graph,
+                    triangleCount,
+                    configuration,
+                    writeProperty,
+                    clusteringCoefficientProperty
+                );
             }
         }
 
@@ -244,16 +250,17 @@ public class TriangleProc extends LabsProc {
      * @param coefficientProperty
      */
     private void write(
-            Graph graph,
-            IntersectingTriangleCount algorithm,
-            ProcedureConfiguration configuration,
-            String writeProperty,
-            Optional<String> coefficientProperty) {
+        Graph graph,
+        IntersectingTriangleCount algorithm,
+        ProcedureConfiguration configuration,
+        String writeProperty,
+        Optional<String> coefficientProperty
+    ) {
 
         final NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, algorithm.terminationFlag)
-                .withLog(log)
-                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                .build();
+            .withLog(log)
+            .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
+            .build();
 
 
         if (coefficientProperty.isPresent()) {
@@ -261,20 +268,20 @@ public class TriangleProc extends LabsProc {
             final HugeDoubleArray coefficients = algorithm.getCoefficients();
             final PagedAtomicIntegerArray triangles = algorithm.getTriangles();
             exporter.write(
-                    writeProperty,
-                    triangles,
-                    PagedAtomicIntegerArray.Translator.INSTANCE,
-                    coefficientProperty.get(),
-                    coefficients,
-                    HugeDoubleArray.Translator.INSTANCE
+                writeProperty,
+                triangles,
+                PagedAtomicIntegerArray.Translator.INSTANCE,
+                coefficientProperty.get(),
+                coefficients,
+                HugeDoubleArray.Translator.INSTANCE
             );
         } else {
             // huge without coefficients
             final PagedAtomicIntegerArray triangles = algorithm.getTriangles();
             exporter.write(
-                    writeProperty,
-                    triangles,
-                    PagedAtomicIntegerArray.Translator.INSTANCE
+                writeProperty,
+                triangles,
+                PagedAtomicIntegerArray.Translator.INSTANCE
             );
         }
 
@@ -282,40 +289,42 @@ public class TriangleProc extends LabsProc {
 
     @Procedure(value = "algo.triangleCount.forkJoin", mode = Mode.WRITE)
     @Description("CALL algo.triangleCount.forkJoin(label, relationship, " +
-            "{concurrency:4, write:true, writeProperty:'triangles', clusteringCoefficientProperty:'coefficient'}) " +
-            "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient")
+                 "{concurrency:4, write:true, writeProperty:'triangles', clusteringCoefficientProperty:'coefficient'}) " +
+                 "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient")
     public Stream<Result> triangleCountExp3(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationship,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         final Graph graph;
         final TriangleCountForkJoin triangleCount;
         final AtomicDoubleArray clusteringCoefficients;
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
-                .setNodeLabelOrQuery(label)
-                .setRelationshipTypeOrQuery(relationship);
+            .setNodeLabelOrQuery(label)
+            .setRelationshipTypeOrQuery(relationship);
         final TriangleCountResultBuilder builder = new TriangleCountResultBuilder(true, true, AllocationTracker.EMPTY);
 
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = new GraphLoader(api, Pools.DEFAULT)
-                    .init(log, label, relationship, configuration)
-                    .withOptionalLabel(configuration.getNodeLabelOrQuery())
-                    .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
-                    .withDirection(TriangleCountBase.D)
-                    .sorted()
-                    .undirected()
-                    .load(configuration.getGraphImpl());
+                .init(log, label, relationship, configuration)
+                .withOptionalLabel(configuration.getNodeLabelOrQuery())
+                .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
+                .withDirection(TriangleCountBase.D)
+                .sorted()
+                .undirected()
+                .load(configuration.getGraphImpl());
         }
 
-        try (ProgressTimer timer = builder.timeEval()) {
+        try (ProgressTimer timer = builder.timeCompute()) {
             triangleCount = new TriangleCountForkJoin(
-                    graph,
-                    ForkJoinPool.commonPool(),
-                    configuration.getNumber("threshold", 10_000).intValue())
-                    .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+                graph,
+                ForkJoinPool.commonPool(),
+                configuration.getNumber("threshold", 10_000).intValue()
+            )
+                .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
             triangleCount.compute();
             clusteringCoefficients = triangleCount.getClusteringCoefficients();
         }
@@ -324,30 +333,30 @@ public class TriangleProc extends LabsProc {
             try (ProgressTimer timer = builder.timeWrite()) {
                 final Optional<String> coefficientProperty = configuration.getString(COEFFICIENT_WRITE_PROPERTY_VALUE);
                 final NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, triangleCount.terminationFlag)
-                        .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                        .build();
+                    .withLog(log)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
+                    .build();
                 if (coefficientProperty.isPresent()) {
                     exporter.write(
-                            configuration.getWriteProperty(DEFAULT_WRITE_PROPERTY_VALUE),
-                            triangleCount.getTriangles(),
-                            Translators.ATOMIC_INTEGER_ARRAY_TRANSLATOR,
-                            coefficientProperty.get(),
-                            clusteringCoefficients,
-                            Translators.ATOMIC_DOUBLE_ARRAY_TRANSLATOR
+                        configuration.getWriteProperty(DEFAULT_WRITE_PROPERTY_VALUE),
+                        triangleCount.getTriangles(),
+                        Translators.ATOMIC_INTEGER_ARRAY_TRANSLATOR,
+                        coefficientProperty.get(),
+                        clusteringCoefficients,
+                        Translators.ATOMIC_DOUBLE_ARRAY_TRANSLATOR
                     );
                 } else {
                     exporter.write(
-                            configuration.getWriteProperty(DEFAULT_WRITE_PROPERTY_VALUE),
-                            triangleCount.getTriangles(),
-                            Translators.ATOMIC_INTEGER_ARRAY_TRANSLATOR
+                        configuration.getWriteProperty(DEFAULT_WRITE_PROPERTY_VALUE),
+                        triangleCount.getTriangles(),
+                        Translators.ATOMIC_INTEGER_ARRAY_TRANSLATOR
                     );
                 }
             }
         }
 
         builder.withAverageClusteringCoefficient(triangleCount.getAverageClusteringCoefficient())
-                .withTriangleCount(triangleCount.getTriangleCount());
+            .withTriangleCount(triangleCount.getTriangleCount());
 
         final AtomicIntegerArray triangles = triangleCount.getTriangles();
 
@@ -365,23 +374,24 @@ public class TriangleProc extends LabsProc {
 
 
         public static final Result EMPTY = new Result(
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                .0, false, null, null);
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            .0, false, null, null
+        );
 
         public final long loadMillis;
         public final long computeMillis;
@@ -405,26 +415,27 @@ public class TriangleProc extends LabsProc {
         public final String clusteringCoefficientProperty;
 
         public Result(
-                long loadMillis,
-                long computeMillis,
-                long postProcessingMillis,
-                long writeMillis,
-                long nodeCount,
-                long triangleCount,
-                long p100,
-                long p99,
-                long p95,
-                long p90,
-                long p75,
-                long p50,
-                long p25,
-                long p10,
-                long p5,
-                long p1,
-                double averageClusteringCoefficient,
-                boolean write,
-                String writeProperty,
-                String clusteringCoefficientProperty) {
+            long loadMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long writeMillis,
+            long nodeCount,
+            long triangleCount,
+            long p100,
+            long p99,
+            long p95,
+            long p90,
+            long p75,
+            long p50,
+            long p25,
+            long p10,
+            long p5,
+            long p1,
+            double averageClusteringCoefficient,
+            boolean write,
+            String writeProperty,
+            String clusteringCoefficientProperty
+        ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;

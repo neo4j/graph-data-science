@@ -79,7 +79,7 @@ public class MSColoringProc extends LabsProc {
 
         // evaluation
         final AtomicIntegerArray struct;
-        try (ProgressTimer timer = builder.timeEval()) {
+        try (ProgressTimer timer = builder.timeCompute()) {
             struct = evaluate(graph, configuration);
         }
         builder.withCommunityFunction(n -> (long) struct.get((int) n));

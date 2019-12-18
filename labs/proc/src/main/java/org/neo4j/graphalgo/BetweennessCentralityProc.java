@@ -199,7 +199,7 @@ public class BetweennessCentralityProc extends LabsProc {
                         .withDirection(configuration.getDirection(Direction.OUTGOING))
                         .withMaxDepth(configuration.getNumber("maxDepth", Integer.MAX_VALUE).intValue());
 
-        builder.timeEval(() -> {
+        builder.timeCompute(() -> {
             bc.compute();
             if (configuration.isStatsFlag()) {
                 computeStats(builder, bc.getCentrality());
@@ -253,7 +253,7 @@ public class BetweennessCentralityProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality(sequential)"))
                 .withDirection(configuration.getDirection(Direction.OUTGOING));
 
-        builder.timeEval(() -> {
+        builder.timeCompute(() -> {
             bc.compute();
             if (configuration.isStatsFlag()) {
                 computeStats(builder, bc.getCentrality());
@@ -313,7 +313,7 @@ public class BetweennessCentralityProc extends LabsProc {
                         .withTerminationFlag(terminationFlag)
                         .withDirection(configuration.getDirection(Direction.OUTGOING));
 
-        builder.timeEval(() -> {
+        builder.timeCompute(() -> {
             bc.compute();
             if (configuration.isStatsFlag()) {
                 computeStats(builder, bc.getCentrality());

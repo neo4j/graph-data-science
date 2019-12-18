@@ -114,7 +114,7 @@ public class ShortestPathsProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "ShortestPaths"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 
-        builder.timeEval(() -> algorithm.compute(startNode.getId()));
+        builder.timeCompute(() -> algorithm.compute(startNode.getId()));
 
         if (configuration.isWriteFlag()) {
             builder.timeWrite(() -> {
