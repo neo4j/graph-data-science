@@ -139,7 +139,9 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         Graph graph = ImmutableModernGraphLoader
             .builder()
             .api(graphDb())
+            .username("")
             .createConfig(graphCreateConfig)
+            .log(new TestLog())
             .build()
             .load(HugeGraphFactory.class);
 

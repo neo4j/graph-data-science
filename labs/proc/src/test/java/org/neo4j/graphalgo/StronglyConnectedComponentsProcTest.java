@@ -60,32 +60,6 @@ class StronglyConnectedComponentsProcTest extends BaseProcTest {
         db.shutdown();
     }
 
-    @Test
-    void testSccOnLoadedGraph() {
-        String graphName = "aliceGraph";
-        String loadQuery = "CALL algo.graph.load(" +
-                           "    $name, 'Node', 'TYPE', {}" +
-                           ")" +
-                           "YIELD nodes, relationships";
-
-        runQuery(loadQuery, MapUtil.map("name", graphName));
-
-        String algoQuery = "CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "'}) " +
-                           "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty";
-
-        runQuery(algoQuery, MapUtil.map("name", graphName), row -> {
-            assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
-            assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
-            assertEquals(2, row.getNumber("setCount").longValue());
-            assertEquals(2, row.getNumber("minSetSize").longValue());
-            assertEquals(3, row.getNumber("maxSetSize").longValue());
-            assertEquals("partition", row.getString("partitionProperty"));
-            assertEquals("partition", row.getString("writeProperty"));
-        });
-
-        runQuery("CALL algo.graph.remove($name)", MapUtil.map("name", graphName));
-    }
-
     @AllGraphNamesTest
     void testScc(String graphName) {
         runQuery(

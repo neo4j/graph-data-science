@@ -23,6 +23,7 @@ package org.neo4j.graphalgo;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -89,40 +90,11 @@ class ModularityOptimizationProcTest extends BaseProcTest {
     }
 
     @Test
-    void writingOnExplicitlyLoadedGraph() {
-        String loadQuery = "CALL algo.graph.load(" +
-                           "    'myGraph', null, null, {" +
-                           "        graph: 'huge', direction: 'BOTH'" +
-                           "    }" +
-                           ")";
-        runQuery(loadQuery);
+    @Disabled
+    void weightedWritingOnImplicitlyLoadedGraph() {
         String query = "CALL algo.beta.modularityOptimization.write(" +
                        "    null, null, {" +
-                       "        graph: 'myGraph', write: true, writeProperty: 'community', direction: 'BOTH'" +
-                       "    }" +
-                       ")";
-
-        runQuery(query, row -> {
-            assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(0.12244, row.getNumber("modularity").doubleValue(), 0.001);
-            assertEquals(2, row.getNumber("communityCount").longValue());
-            assertTrue(row.getNumber("ranIterations").longValue() <= 3);
-        });
-
-        assertWriteResult(UNWEIGHTED_COMMUNITIES);
-    }
-
-    @Test
-    void weightedWritingOnexplicitlyLoadedGraph() {
-        String loadQuery = "CALL algo.graph.load(" +
-                           "    'myGraph', null, null, {" +
-                           "        graph: 'huge', direction: 'BOTH', relationshipProperties: 'weight'" +
-                           "    }" +
-                           ")";
-        runQuery(loadQuery);
-        String query = "CALL algo.beta.modularityOptimization.write(" +
-                       "    null, null, {" +
-                       "        graph: 'myGraph', write: true, writeProperty: 'community', direction: 'BOTH'" +
+                       "        write: true, writeProperty: 'community', direction: 'BOTH', relationshipProperties: 'weight'" +
                        "    }" +
                        ")";
 
@@ -137,16 +109,10 @@ class ModularityOptimizationProcTest extends BaseProcTest {
     }
 
     @Test
-    void streamingOnExplicitlyLoadedGraph() {
-        String loadQuery = "CALL algo.graph.load(" +
-                           "    'myGraph', null, null, {" +
-                           "        graph: 'huge', direction: 'BOTH'" +
-                           "    }" +
-                           ")";
-        runQuery(loadQuery);
+    void streamingOnImplicitlyLoadedGraph() {
         String query = "CALL algo.beta.modularityOptimization.stream(" +
                        "    null, null, {" +
-                       "        graph: 'myGraph', direction: 'BOTH'" +
+                       "        direction: 'BOTH'" +
                        "    }" +
                        ") YIELD nodeId, community";
 
@@ -160,16 +126,11 @@ class ModularityOptimizationProcTest extends BaseProcTest {
     }
 
     @Test
-    void weightedStreamingOnExplicitlyLoadedGraph() {
-        String loadQuery = "CALL algo.graph.load(" +
-                           "    'myGraph', null, null, {" +
-                           "        graph: 'huge', direction: 'BOTH', relationshipProperties: 'weight'" +
-                           "    }" +
-                           ")";
-        runQuery(loadQuery);
+    @Disabled
+    void weightedStreamingOnImplicitlyLoadedGraph() {
         String query = "CALL algo.beta.modularityOptimization.stream(" +
                        "    null, null, {" +
-                       "        graph: 'myGraph', direction: 'BOTH'" +
+                       "        direction: 'BOTH', relationshipProperties: 'weight'" +
                        "    }" +
                        ") YIELD nodeId, community";
 

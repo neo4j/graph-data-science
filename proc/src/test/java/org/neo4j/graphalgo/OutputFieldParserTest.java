@@ -32,14 +32,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class OutputFieldParserTest {
     private static final Set<String> COMMUNITY_COUNT_FIELD = Collections.singleton("communityCount");
     private static final Set<String> SET_COUNT_FIELD = Collections.singleton("setCount");
     private static final Set<String> HISTOGRAM_FIELDS = new HashSet<>(Arrays.asList("p01", "p75", "p100"));
+    private static final Pattern PERCENTILE_PATTERN = Pattern.compile("^p\\d{1,3}$");
 
     @Test
     void testParseCommunityCount() {
@@ -58,6 +61,7 @@ class OutputFieldParserTest {
 
     @Property
     void testNegativeFields(@ForAll @StringLength(min = 1, max = 15) @UpperChars @LowerChars @NumericChars String field) {
+        assumeFalse(PERCENTILE_PATTERN.matcher(field).matches());
         assertFalse(BaseProc.OutputFieldParser.computeCommunityCount(Collections.singleton(field)));
         assertFalse(BaseProc.OutputFieldParser.computeHistogram(Collections.singleton(field)));
     }
