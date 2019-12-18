@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  *             / \
  *           (7)-(8)
  */
-class StronglyConnectedComponentsTest extends ProcTestBase {
+class StronglyConnectedComponentsTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +
