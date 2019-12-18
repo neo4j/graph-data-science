@@ -19,24 +19,16 @@
  */
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.IntArrayDeque;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.ShortestPathAStar;
-import org.neo4j.graphalgo.impl.ShortestPathDijkstra;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -47,48 +39,37 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathProc extends LabsProc {
 
-    public static final String DEFAULT_TARGET_PROPERTY = "sssp";
-
-    /**
-     * single threaded dijkstra impl.
-     * takes a startNode and endNode id and tries to find the best path
-     * supports direction flag in configuration ( see {@link org.neo4j.graphalgo.core.utils.Directions})
-     * default is: BOTH
-     *
-     * @param startNode
-     * @param endNode
-     * @param propertyName
-     * @param config
-     * @return
-     */
-    @Procedure(name = "algo.shortestPath.stream", mode = READ)
-    @Description("CALL algo.shortestPath.stream(startNode:Node, endNode:Node, weightProperty:String" +
-            "{nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'BOTH', defaultValue:1.0}) " +
-            "YIELD nodeId, cost - yields a stream of {nodeId, cost} from start to end (inclusive)")
-    public Stream<ShortestPathDijkstra.Result> dijkstraStream(
-            @Name("startNode") Node startNode,
-            @Name("endNode") Node endNode,
-            @Name(value = "propertyName", defaultValue = "") String propertyName,
-            @Name(value = "config", defaultValue = "{}")
-                    Map<String, Object> config) {
+    @Procedure(name = "algo.shortestPath.astar.stream", mode = READ)
+    @Description("CALL algo.shortestPath.astar.stream(startNode:Node, endNode:Node, weightProperty:String, propertyKeyLat:String," +
+                 "propertyKeyLon:String, {nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'BOTH', defaultValue:1.0}) " +
+                 "YIELD nodeId, cost - yields a stream of {nodeId, cost} from start to end (inclusive)")
+    public Stream<ShortestPathAStar.Result> astarStream(
+        @Name("startNode") Node startNode,
+        @Name("endNode") Node endNode,
+        @Name("propertyName") String propertyName,
+        @Name(value = "propertyKeyLat", defaultValue = "latitude") String propertyKeyLat,
+        @Name(value = "propertyKeyLon", defaultValue = "longitude") String propertyKeyLon,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-
         Direction direction = configuration.getDirection(Direction.BOTH);
 
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
-                .withRelationshipProperties(PropertyMapping.of(
-                        propertyName,
-                        configuration.getWeightPropertyDefaultValue(1.0)));
+            .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
+            .withRelationshipProperties(PropertyMapping.of(
+                propertyName,
+                configuration.getWeightPropertyDefaultValue(1.0)
+            ))
+            .withDirection(direction);
 
-        if(direction == Direction.BOTH) {
+
+        if (direction == Direction.BOTH) {
             direction = Direction.OUTGOING;
             graphLoader.undirected().withDirection(direction);
         } else {
             graphLoader.withDirection(direction);
         }
-
 
         final Graph graph = graphLoader.load(configuration.getGraphImpl());
 
@@ -97,207 +78,10 @@ public class ShortestPathProc extends LabsProc {
             return Stream.empty();
         }
 
-        return new ShortestPathDijkstra(graph)
-                .withProgressLogger(ProgressLogger.wrap(log, "ShortestPath(Dijkstra)"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .compute(startNode.getId(), endNode.getId(), direction)
-                .resultStream();
-    }
-
-    @Procedure(value = "algo.shortestPath", mode = Mode.WRITE)
-    @Description("CALL algo.shortestPath(startNode:Node, endNode:Node, weightProperty:String" +
-            "{nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'BOTH', defaultValue:1.0, write:'true', writeProperty:'sssp'}) " +
-            "YIELD nodeId, cost, loadMillis, evalMillis, writeMillis - yields nodeCount, totalCost, loadMillis, evalMillis, writeMillis")
-    public Stream<DijkstraResult> dijkstra(
-            @Name("startNode") Node startNode,
-            @Name("endNode") Node endNode,
-            @Name(value = "propertyName", defaultValue = "") String propertyName,
-            @Name(value = "config", defaultValue = "{}")
-                    Map<String, Object> config) {
-
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-
-        DijkstraResult.Builder builder = DijkstraResult.builder();
-
-        final Graph graph;
-        final ShortestPathDijkstra dijkstra;
-
-        Direction direction = configuration.getDirection(Direction.BOTH);
-        try (ProgressTimer timer = builder.timeLoad()) {
-            GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
-                    .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
-                    .withRelationshipProperties(PropertyMapping.of(
-                            propertyName,
-                            configuration.getWeightPropertyDefaultValue(1.0)))
-                    .withDirection(direction);
-
-            if(direction == Direction.BOTH) {
-                direction = Direction.OUTGOING;
-                graphLoader.undirected().withDirection(direction);
-            } else {
-                graphLoader.withDirection(direction);
-            }
-
-
-            graph = graphLoader.load(configuration.getGraphImpl());
-        }
-
-        if (graph.isEmpty() || startNode == null || endNode == null) {
-            graph.release();
-            return Stream.of(builder.build());
-        }
-
-        try (ProgressTimer timer = builder.timeCompute()) {
-            dijkstra = new ShortestPathDijkstra(graph)
-                    .withProgressLogger(ProgressLogger.wrap(log, "ShortestPath(Dijkstra)"))
-                    .withTerminationFlag(TerminationFlag.wrap(transaction))
-                    .compute(startNode.getId(), endNode.getId(), direction);
-            builder.withNodeCount(dijkstra.getPathLength())
-                    .withTotalCosts(dijkstra.getTotalCost());
-        }
-
-        if (configuration.isWriteFlag()) {
-            try (ProgressTimer timer = builder.timeWrite()) {
-                final IntArrayDeque finalPath = dijkstra.getFinalPath();
-                final double[] finalPathCost = dijkstra.getFinalPathCosts();
-                dijkstra.release();
-
-                final DequeMapping mapping = new DequeMapping(graph, finalPath);
-                NodePropertyExporter.of(api, mapping, dijkstra.terminationFlag)
-                        .withLog(log)
-                        .build()
-                        .write(
-                                configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY),
-                                finalPathCost,
-                                Translators.DOUBLE_ARRAY_TRANSLATOR
-                        );
-            }
-        }
-
-        return Stream.of(builder.build());
-    }
-
-    @Procedure(name = "algo.shortestPath.astar.stream", mode = READ)
-    @Description("CALL algo.shortestPath.astar.stream(startNode:Node, endNode:Node, weightProperty:String, propertyKeyLat:String," +
-    		"propertyKeyLon:String, {nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'BOTH', defaultValue:1.0}) " +
-    		"YIELD nodeId, cost - yields a stream of {nodeId, cost} from start to end (inclusive)")
-    public Stream<ShortestPathAStar.Result> astarStream(
-    			@Name("startNode") Node startNode,
-            @Name("endNode") Node endNode,
-            @Name("propertyName") String propertyName,
-            @Name(value = "propertyKeyLat", defaultValue = "latitude") String propertyKeyLat,
-            @Name(value = "propertyKeyLon", defaultValue = "longitude") String propertyKeyLon,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-        Direction direction = configuration.getDirection(Direction.BOTH);
-
-        GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
-                .withRelationshipProperties(PropertyMapping.of(propertyName, configuration.getWeightPropertyDefaultValue(1.0)))
-                .withDirection(direction);
-
-
-        if(direction == Direction.BOTH) {
-            direction = Direction.OUTGOING;
-            graphLoader.undirected().withDirection(direction);
-        } else {
-            graphLoader.withDirection(direction);
-        }
-
-        final Graph graph = graphLoader.load(configuration.getGraphImpl());
-
-            if (graph.isEmpty() || startNode == null || endNode == null) {
-                graph.release();
-                return Stream.empty();
-            }
-
-    		return new ShortestPathAStar(graph, api)
-    				.withProgressLogger(ProgressLogger.wrap(log, "ShortestPath(AStar)"))
-    				.withTerminationFlag(TerminationFlag.wrap(transaction))
-    				.compute(startNode.getId(), endNode.getId(), propertyKeyLat, propertyKeyLon, direction)
-    				.resultStream();
-    }
-
-    private static final class DequeMapping implements IdMapping {
-        private final IdMapping mapping;
-        private final int[] data;
-        private final int offset;
-        private final int length;
-
-        private DequeMapping(IdMapping mapping, IntArrayDeque data) {
-            this.mapping = mapping;
-            if (data.head <= data.tail) {
-                this.data = data.buffer;
-                this.offset = data.head;
-                this.length = data.tail - data.head;
-            } else {
-                this.data = data.toArray();
-                this.offset = 0;
-                this.length = this.data.length;
-            }
-        }
-
-        @Override
-        public long toMappedNodeId(final long nodeId) {
-            return mapping.toMappedNodeId(nodeId);
-        }
-
-        @Override
-        public long toOriginalNodeId(final long nodeId) {
-            assert nodeId < length;
-            return mapping.toOriginalNodeId(data[offset + Math.toIntExact(nodeId)]);
-        }
-
-        @Override
-        public boolean contains(final long nodeId) {
-            return true;
-        }
-
-        @Override
-        public long nodeCount() {
-            return length;
-        }
-    }
-
-    public static class DijkstraResult {
-
-        public final long loadMillis;
-        public final long evalMillis;
-        public final long writeMillis;
-        public final long nodeCount;
-        public final double totalCost;
-
-        public DijkstraResult(long loadMillis, long evalMillis, long writeMillis, long nodeCount, double totalCost) {
-            this.loadMillis = loadMillis;
-            this.evalMillis = evalMillis;
-            this.writeMillis = writeMillis;
-            this.nodeCount = nodeCount;
-            this.totalCost = totalCost;
-        }
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        public static class Builder extends AbstractResultBuilder<DijkstraResult> {
-
-            protected long nodeCount = 0;
-            protected double totalCosts = 0.0;
-
-            public Builder withNodeCount(long nodeCount) {
-                this.nodeCount = nodeCount;
-                return this;
-            }
-
-            public Builder withTotalCosts(double totalCosts) {
-                this.totalCosts = totalCosts;
-                return this;
-            }
-
-            public DijkstraResult build() {
-                return new DijkstraResult(loadMillis, computeMillis, writeMillis, nodeCount, totalCosts);
-            }
-        }
+        return new ShortestPathAStar(graph, api)
+            .withProgressLogger(ProgressLogger.wrap(log, "ShortestPath(AStar)"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction))
+            .compute(startNode.getId(), endNode.getId(), propertyKeyLat, propertyKeyLon, direction)
+            .resultStream();
     }
 }

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.shortestpath.DijkstraProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,6 +44,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             PrimProc.class,
             ShortestPathDeltaSteppingProc.class,
             ShortestPathProc.class,
+            DijkstraProc.class,
             ShortestPathsProc.class,
             StronglyConnectedComponentsProc.class,
             TriangleProc.class
@@ -161,13 +163,13 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testShortestPathStream() {
-        Result result = runQuery("CALL algo.shortestPath.stream(null, null, '', {graph:'" + graphImpl + "'})");
+        Result result = runQuery("CALL gds.alpha.shortestPath.stream(null, null, '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
-    void testShortestPath() {
-        runQuery("CALL algo.shortestPath(null, null, '', {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
+    void testShortestPathWrite() {
+        runQuery("CALL gds.alpha.shortestPath.stream(null, null, '', {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
     }
 
     @Test

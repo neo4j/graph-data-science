@@ -151,7 +151,7 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
 
             @Override
             public MemoryEstimation memoryEstimation(DegreeCentralityConfig configuration) {
-                throw new UnsupportedOperationException("Estimation is not implmented for this algorithm.");
+                throw new UnsupportedOperationException("Estimation is not implemented for this algorithm.");
             }
         };
     }

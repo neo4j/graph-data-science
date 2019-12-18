@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.shortestPath.DijkstraConfig;
+import org.neo4j.graphalgo.shortestPath.ImmutableDijkstraConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -122,7 +124,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
 
     @AllGraphTypesWithoutCypherTest
     void test1(Class<? extends GraphFactory> graphImpl) {
-        final Label label = Label.label("Label1");
+        Label label = Label.label("Label1");
         RelationshipType type = RelationshipType.withName("TYPE1");
 
         ShortestPath expected = expected(label, type,
@@ -133,16 +135,17 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 "name", "f");
         long[] nodeIds = expected.nodeIds;
 
-        final Graph graph = new GraphLoader(db)
+        Graph graph = new GraphLoader(db)
                 .withLabel(label)
                 .withRelationshipType(type)
                 .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
-        final ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph);
-        shortestPathDijkstra.compute(nodeIds[0], nodeIds[nodeIds.length - 1], Direction.OUTGOING);
-        final long[] path = Arrays
+        DijkstraConfig config = config(nodeIds[0], nodeIds[nodeIds.length - 1]);
+        ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
+        shortestPathDijkstra.compute();
+        long[] path = Arrays
                 .stream(shortestPathDijkstra.getFinalPath().toArray())
                 .mapToLong(graph::toOriginalNodeId)
                 .toArray();
@@ -153,7 +156,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
 
     @AllGraphTypesWithoutCypherTest
     void test2(Class<? extends GraphFactory> graphImpl) {
-        final Label label = Label.label("Label2");
+        Label label = Label.label("Label2");
         RelationshipType type = RelationshipType.withName("TYPE2");
         ShortestPath expected = expected(label, type,
                 "name", "1",
@@ -162,16 +165,17 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 "name", "7");
         long[] nodeIds = expected.nodeIds;
 
-        final Graph graph = new GraphLoader(db)
+        Graph graph = new GraphLoader(db)
                 .withLabel(label)
                 .withRelationshipType(type)
                 .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
-        final ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph);
-        shortestPathDijkstra.compute(nodeIds[0], nodeIds[nodeIds.length - 1], Direction.OUTGOING);
-        final long[] path = Arrays
+        DijkstraConfig config = config(nodeIds[0], nodeIds[nodeIds.length - 1]);
+        ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
+        shortestPathDijkstra.compute();
+        long[] path = Arrays
                 .stream(shortestPathDijkstra.getFinalPath().toArray())
                 .mapToLong(graph::toOriginalNodeId)
                 .toArray();
@@ -199,12 +203,9 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
-        ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph);
-        shortestPathDijkstra.compute(
-                expected.nodeIds[0],
-                expected.nodeIds[expected.nodeIds.length - 1],
-                Direction.OUTGOING
-        );
+        DijkstraConfig config = config(expected.nodeIds[0], expected.nodeIds[expected.nodeIds.length - 1]);
+        ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
+        shortestPathDijkstra.compute();
         long[] path = Arrays
                 .stream(shortestPathDijkstra.getFinalPath().toArray())
                 .mapToLong(graph::toOriginalNodeId)
@@ -216,7 +217,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
 
     @AllGraphTypesWithoutCypherTest
     void testResultStream(Class<? extends GraphFactory> graphImpl) {
-        final Label label = Label.label("Label1");
+        Label label = Label.label("Label1");
         RelationshipType type = RelationshipType.withName("TYPE1");
         ShortestPath expected = expected(label, type,
                 "name", "a",
@@ -224,19 +225,19 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 "name", "e",
                 "name", "d",
                 "name", "f");
-        final long head = expected.nodeIds[0], tail = expected.nodeIds[expected.nodeIds.length - 1];
+        long head = expected.nodeIds[0], tail = expected.nodeIds[expected.nodeIds.length - 1];
 
-        final Graph graph = new GraphLoader(db)
+        Graph graph = new GraphLoader(db)
                 .withLabel(label)
                 .withRelationshipType("TYPE1")
                 .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
-        final ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph);
-        Stream<ShortestPathDijkstra.Result> resultStream = shortestPathDijkstra
-                .compute(head, tail, Direction.OUTGOING)
-                .resultStream();
+        DijkstraConfig config = config(head, tail);
+        ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
+        shortestPathDijkstra.compute();
+        Stream<ShortestPathDijkstra.Result> resultStream = shortestPathDijkstra.resultStream();
 
         assertEquals(expected.weight, shortestPathDijkstra.getTotalCost(), 0.1);
         assertEquals(expected.nodeIds.length, resultStream.count());
@@ -277,4 +278,13 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
             this.weight = weight;
         }
     }
+
+    private DijkstraConfig config(long startNode, long endNode) {
+        return ImmutableDijkstraConfig
+            .builder()
+            .startNode(startNode)
+            .endNode(endNode)
+            .build();
+    }
+
 }
