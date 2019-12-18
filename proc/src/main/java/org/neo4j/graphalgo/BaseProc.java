@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
+import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
@@ -53,15 +53,19 @@ public abstract class BaseProc {
     }
 
 
-    protected final GraphLoader newLoader(
+    protected final ModernGraphLoader newLoader(
         AllocationTracker tracker,
         GraphCreateConfig config
     ) {
-        return new GraphLoader(api, Pools.DEFAULT)
-            .init(log, getUsername())
-            .withAllocationTracker(tracker)
-            .withTerminationFlag(TerminationFlag.wrap(transaction))
-            .withGraphCreateConfig(config);
+        return ImmutableModernGraphLoader
+            .builder()
+            .api(api)
+            .log(log)
+            .username(getUsername())
+            .tracker(tracker)
+            .terminationFlag(TerminationFlag.wrap(transaction))
+            .createConfig(config)
+            .build();
     }
 
     protected void runWithExceptionLogging(String message, Runnable runnable) {

@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -134,8 +135,11 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     default void testRunOnLoadedGraph() {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
-        Graph graph = new GraphLoader(graphDb())
-            .withGraphCreateConfig(graphCreateConfig)
+        Graph graph = ImmutableModernGraphLoader
+            .builder()
+            .api(graphDb())
+            .createConfig(graphCreateConfig)
+            .build()
             .load(HugeGraphFactory.class);
 
         GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));

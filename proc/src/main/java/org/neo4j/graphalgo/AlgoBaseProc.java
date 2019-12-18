@@ -26,7 +26,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
+import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -100,7 +101,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         GraphDimensions dimensions;
 
         if (config.implicitCreateConfig().isPresent()) {
-            GraphLoader loader = newLoader(AllocationTracker.EMPTY, config.implicitCreateConfig().get());
+            ModernGraphLoader loader = newLoader(AllocationTracker.EMPTY, config.implicitCreateConfig().get());
             GraphFactory graphFactory = loader.build(config.getGraphImpl());
             dimensions = graphFactory.dimensions();
             estimationBuilder.add("graph", graphFactory.memoryEstimation());
@@ -116,7 +117,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 .findFirst()
                 .get();
 
-            GraphLoader loader = newLoader(AllocationTracker.EMPTY, graphCreateConfig);
+            ModernGraphLoader loader = newLoader(AllocationTracker.EMPTY, graphCreateConfig);
             GraphFactory graphFactory = loader.build(config.getGraphImpl());
             dimensions = graphFactory.dimensions();
         }
@@ -178,17 +179,12 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 );
 
             validateConfig(catalogEntry.getKey(), config);
+
             return catalogEntry.getValue();
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-
             validateConfig(createConfig, config);
-
-            GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, getUsername())
-                .withGraphCreateConfig(createConfig)
-                .withAllocationTracker(AllocationTracker.EMPTY)
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
+            ModernGraphLoader loader = newLoader(AllocationTracker.EMPTY, createConfig);
 
             return loader.load(createConfig.getGraphImpl());
         } else {

@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -81,7 +81,7 @@ public class GraphCreateProc extends CatalogProc {
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             ResolvedPropertyMappings propertyMappings = ResolvedPropertyMappings.empty();
 
-            GraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
+            ModernGraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
             HugeGraphFactory graphFactory = loader.build(HugeGraphFactory.class);
             GraphsByRelationshipType graphFromType =
                 !config.relationshipProjection().isEmpty() || propertyMappings.hasMappings()
