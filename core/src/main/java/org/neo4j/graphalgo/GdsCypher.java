@@ -32,11 +32,14 @@ import org.neo4j.cypher.internal.v3_5.expressions.Expression;
 import org.neo4j.cypher.internal.v3_5.expressions.False;
 import org.neo4j.cypher.internal.v3_5.expressions.ListLiteral;
 import org.neo4j.cypher.internal.v3_5.expressions.MapExpression;
+import org.neo4j.cypher.internal.v3_5.expressions.Parameter;
 import org.neo4j.cypher.internal.v3_5.expressions.PropertyKeyName;
 import org.neo4j.cypher.internal.v3_5.expressions.SignedDecimalIntegerLiteral;
 import org.neo4j.cypher.internal.v3_5.expressions.StringLiteral;
 import org.neo4j.cypher.internal.v3_5.expressions.True;
 import org.neo4j.cypher.internal.v3_5.util.InputPosition;
+import org.neo4j.cypher.internal.v3_5.util.symbols.AnyType;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
@@ -295,6 +298,8 @@ public abstract class GdsCypher {
 
         ParametersBuildStage addParameter(Map.Entry<String, ?> entry);
 
+        ParametersBuildStage addPlaceholder(String key, String placeholder);
+
         ParametersBuildStage addAllParameters(Map<String, ?> entries);
 
         @Language("Cypher")
@@ -302,6 +307,11 @@ public abstract class GdsCypher {
 
         @Language("Cypher")
         String yields(Iterable<String> elements);
+    }
+
+    @ValueClass
+    interface Placeholder {
+        String name();
     }
 
     private enum InternalExecutionMode implements ExecutionMode {
@@ -446,6 +456,14 @@ public abstract class GdsCypher {
             Enum<?> enumValue = (Enum<?>) value;
             Expression expression = StringLiteral.apply(enumValue.name(), InputPosition.NONE());
             return Optional.of(expression);
+        } else if (value instanceof Placeholder) {
+            Expression expression = Parameter.apply(
+                ((Placeholder) value).name(),
+                AnyType.instance(),
+                InputPosition.NONE()
+            );
+
+            return Optional.of(expression);
         } else if (value == null) {
             return Optional.empty();
         } else {
@@ -563,6 +581,12 @@ public abstract class GdsCypher {
         @Override
         public StagedBuilder addParameter(String key, Object value) {
             builder.putParameter(key, value);
+            return this;
+        }
+
+        @Override
+        public StagedBuilder addPlaceholder(String key, String placeholder) {
+            builder.putParameter(key, ImmutablePlaceholder.of(placeholder));
             return this;
         }
 

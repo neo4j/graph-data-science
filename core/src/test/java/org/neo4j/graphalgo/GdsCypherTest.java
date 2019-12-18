@@ -39,10 +39,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class GdsCypherTest {
@@ -527,6 +529,53 @@ class GdsCypherTest {
             query
         );
     }
+
+    static Stream<Arguments> placeholders() {
+        return Stream.of(
+            arguments("g"               , "$g"),
+            arguments("var"             , "$var"),
+            arguments("graphName"       , "$graphName"),
+            arguments("\"$graphName\""  , "$`\"$graphName\"`"),
+            arguments("'$graphName'"    , "$`'$graphName'`"),
+            arguments("\"graphName\""   , "$`\"graphName\"`"),
+            arguments("'graphName'"     , "$`'graphName'`"),
+            arguments("     "           , "$`     `"),
+            arguments(" "               , "$` `"),
+            arguments("%"               , "$`%`")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("placeholders")
+    void testPlaceholders(String placeholder, String expected) {
+        String query = GdsCypher
+            .call()
+            .explicitCreation("")
+            .algo("algoName")
+            .writeMode()
+            .addPlaceholder("foo", placeholder)
+            .yields();
+
+        assertEquals(
+            String.format("CALL gds.algo.algoName.write(\"\", {foo: %s})", expected),
+            query
+        );
+    }
+
+    @Test
+    void testEmptyPlaceholder() {
+        assertThrows(NoSuchElementException.class, () -> {
+            GdsCypher
+                .call()
+                .explicitCreation("")
+                .algo("algoName")
+                .writeMode()
+                .addPlaceholder("foo", "")
+                .yields();
+        });
+
+    }
+
 
     @Test
     void testNoYield() {
