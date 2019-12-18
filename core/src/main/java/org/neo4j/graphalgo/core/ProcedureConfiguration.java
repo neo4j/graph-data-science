@@ -479,12 +479,9 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
             case HEAVY_GRAPH_TYPE:
             case HugeGraph.TYPE:
                 return HugeGraphFactory.class;
-                // TODO: remove this
             default:
-                if (validCustomName(graphImpl) && GraphCatalog.exists(getUsername(), graphImpl)) {
-                    return GraphCatalog.class;
-                }
-                throw new IllegalArgumentException("Unknown impl: " + graphImpl);
+                throw new IllegalArgumentException("Unknown impl: " + graphImpl
+                                                   + " or usage of graph catalogue which is not supported by Labs.");
         }
     }
 
