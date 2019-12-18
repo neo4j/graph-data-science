@@ -52,7 +52,6 @@ public class GraphSetupImpl implements GraphSetup {
     private final Map<String, Object> params;
 
     private final Log log;
-    private final long logMillis;
     private final AllocationTracker tracker;
     private final TerminationFlag terminationFlag;
 
@@ -66,7 +65,6 @@ public class GraphSetupImpl implements GraphSetup {
         Map<String, Object> params,
         ExecutorService executor,
         Log log,
-        long logMillis,
         AllocationTracker tracker,
         TerminationFlag terminationFlag,
         GraphCreateConfig createConfig
@@ -74,7 +72,6 @@ public class GraphSetupImpl implements GraphSetup {
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
         this.log = log;
-        this.logMillis = logMillis;
         this.tracker = tracker;
         this.terminationFlag = terminationFlag;
         this.createConfig = createConfig;
@@ -277,7 +274,7 @@ public class GraphSetupImpl implements GraphSetup {
     }
 
     public long logMillis() {
-        return logMillis;
+        return -1;
     }
 
     public AllocationTracker tracker() {
