@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.logging.Log;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
@@ -39,12 +40,20 @@ public interface ModernGraphLoader extends SharedGraphLoader {
     default ExecutorService executorService() {
         return Pools.DEFAULT;
     }
-
+    @Value.Default
+    default AllocationTracker tracker() {
+        return AllocationTracker.EMPTY;
+    }
+    @Value.Default
+    default TerminationFlag terminationFlag() {
+        return TerminationFlag.RUNNING_TRUE;
+    }
+    @Value.Default
+    default Map<String, Object> params() {
+        return new HashMap<>();
+    }
     String username();
     Log log();
-    AllocationTracker tracker();
-    Map<String, Object> params();
-    TerminationFlag terminationFlag();
     GraphCreateConfig createConfig();
 
     @Override
