@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.ShortestPathDijkstra;
+import org.neo4j.graphalgo.shortestPath.DijkstraConfig;
+import org.neo4j.graphalgo.shortestpath.DijkstraProc;
 import org.neo4j.graphdb.Label;
 
 import java.util.function.DoubleConsumer;
@@ -38,7 +40,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-class ShortestPathProcTest_152 extends BaseProcTest {
+class DijkstraProcTest_152 extends BaseProcTest {
 
     private static long startNodeId;
     private static long endNodeId;
@@ -65,7 +67,7 @@ class ShortestPathProcTest_152 extends BaseProcTest {
                 " (e)-[:ROAD {d:40}]->(f),\n" +
                 " (e)-[:RAIL {d:20}]->(f);";
 
-        registerProcedures(ShortestPathProc.class);
+        registerProcedures(DijkstraProc.class);
         runQuery(cypher);
         runInTransaction(db, () -> {
             startNodeId = db.findNode(Label.label("Loc"), "name", "A").getId();
@@ -88,10 +90,9 @@ class ShortestPathProcTest_152 extends BaseProcTest {
                 .withRelationshipProperties(PropertyMapping.of("d", 0))
                 .load(HugeGraphFactory.class);
 
-        new ShortestPathDijkstra(graph)
-                .compute(startNodeId, endNodeId)
-                .resultStream()
-                .forEach(r -> mock.accept(r.cost));
+        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, DijkstraConfig.of(startNodeId, endNodeId));
+        dijkstra.compute();
+        dijkstra.resultStream().forEach(r -> mock.accept(r.cost));
 
         verify(mock, times(1)).accept(eq(0.0));
         verify(mock, times(1)).accept(eq(50.0));
@@ -111,28 +112,30 @@ class ShortestPathProcTest_152 extends BaseProcTest {
                 .withRelationshipProperties(PropertyMapping.of("d", 0))
                 .load(HugeGraphFactory.class);
 
-        new ShortestPathDijkstra(graph)
-                .compute(startNodeId, endNodeId)
-                .resultStream()
-                .forEach(r -> mock.accept(r.cost));
+        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, DijkstraConfig.of(startNodeId, endNodeId));
+        dijkstra.compute();
+        dijkstra.resultStream().forEach(r -> mock.accept(r.cost));
 
-        // TODO: this is actually wrong, order should be 0/50/80/100
-        // see https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/722 and fix test afterwards
-        // 2019-04-18: This test now succeeds with the "correct" values and order
         verify(mock, times(1)).accept(eq(0.0));
         verify(mock, times(1)).accept(eq(50.0));
         verify(mock, times(1)).accept(eq(80.0));
         verify(mock, times(1)).accept(eq(100.0));
-//        verify(mock, times(1)).accept(eq(140.0));
     }
 
     @Test
     void testDijkstraProcedure() {
         DoubleConsumer mock = mock(DoubleConsumer.class);
 
-        String cypher = "MATCH (from:Loc{name:'A'}), (to:Loc{name:'F'}) " +
-                "CALL algo.shortestPath.stream(from, to, 'd', {relationshipQuery:'ROAD', defaultValue:999999.0}) " +
-                "YIELD nodeId, cost with nodeId, cost MATCH(n) WHERE id(n) = nodeId RETURN n.name as name, cost;";
+        String cypher =
+            "MATCH (from:Loc{name:'A'}), (to:Loc{name:'F'}) " +
+            "CALL gds.alpha.shortestPath.stream({" +
+            "startNode: from, endNode: to, weightProperty: 'd'," +
+            "nodeProjection: 'Loc'," +
+            "relationshipProjection: 'ROAD'," +
+            "relationshipProperties: {" +
+            "d: { property: 'd', defaultValue:999999.0 }" +
+            "}}) " +
+            "YIELD nodeId, cost with nodeId, cost MATCH(n) WHERE id(n) = nodeId RETURN n.name as name, cost;";
 
         runQuery(cypher, row -> {
             System.out.println(row.get("name") + ":" + row.get("cost"));

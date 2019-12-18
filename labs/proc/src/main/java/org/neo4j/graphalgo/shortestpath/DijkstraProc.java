@@ -78,6 +78,8 @@ public class DijkstraProc extends BaseAlgoProc<ShortestPathDijkstra, Boolean, Di
             configuration
         );
         DijkstraResult.Builder builder = DijkstraResult.builder();
+        builder.setLoadMillis(computationResult.createMillis());
+        builder.setComputeMillis(computationResult.computeMillis());
 
         Graph graph = computationResult.graph();
         ShortestPathDijkstra dijkstra = computationResult.algorithm();
