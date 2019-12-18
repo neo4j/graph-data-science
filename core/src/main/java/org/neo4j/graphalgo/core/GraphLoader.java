@@ -63,14 +63,7 @@ import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
  * node label or relationship type is made.
  * Weights are also not loaded by default.
  */
-public class GraphLoader {
-
-    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
-    private static final MethodType CTOR_METHOD = MethodType.methodType(
-        void.class,
-        GraphDatabaseAPI.class,
-        GraphSetup.class
-    );
+public class GraphLoader implements SharedGraphLoader {
 
     private String username = AuthSubject.ANONYMOUS.username();
     private String graphName = "";
@@ -94,7 +87,6 @@ public class GraphLoader {
     private final AbstractPropertyMappings.Builder nodePropertyMappings = AbstractPropertyMappings.builder();
     private final AbstractPropertyMappings.Builder relPropertyMappings = AbstractPropertyMappings.builder();
     private boolean isLoadedGraph = false;
-    private GraphCreateConfig createConfig;
 
     /**
      * Creates a new serial GraphLoader.
@@ -137,8 +129,13 @@ public class GraphLoader {
         return withLog(log).withUsername(username);
     }
 
+    @Override
+    public GraphDatabaseAPI api() {
+        return api;
+    }
+
+    //TODO: remove this
     public GraphLoader withGraphCreateConfig(GraphCreateConfig createConfig) {
-        this.createConfig = createConfig;
         return this;
     }
 
@@ -428,27 +425,6 @@ public class GraphLoader {
     }
 
     /**
-     * Returns an instance of the factory that can be used to load the graph.
-     */
-    public final <T extends GraphFactory> T build(final Class<T> factoryType) {
-        final MethodHandle constructor = findConstructor(factoryType);
-        return factoryType.cast(invokeConstructor(constructor));
-    }
-
-    /**
-     * Loads the graph using the provided GraphFactory, passing the built
-     * configuration as parameters.
-     * <p>
-     * The chosen implementation determines the performance characteristics
-     * during load and usage of the Graph.
-     *
-     * @return the freshly loaded graph
-     */
-    public Graph load(Class<? extends GraphFactory> factoryType) {
-        return build(factoryType).build();
-    }
-
-    /**
      * Calculates the required memory to load the graph.
      *
      * @return
@@ -457,60 +433,26 @@ public class GraphLoader {
         return build(factoryType).memoryEstimation();
     }
 
-    private MethodHandle findConstructor(Class<?> factoryType) {
-        try {
-            return LOOKUP.findConstructor(factoryType, CTOR_METHOD);
-        } catch (NoSuchMethodException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private GraphFactory invokeConstructor(MethodHandle constructor) {
-
-        final GraphSetup setup = toSetup();
-
-        try {
-            return (GraphFactory) constructor.invoke(api, setup);
-        } catch (Throwable throwable) {
-            throwIfUnchecked(throwable);
-            throw new RuntimeException(throwable.getMessage(), throwable);
-        }
-    }
-
     public GraphSetup toSetup() {
         this.relPropertyMappings.setGlobalDeduplicationStrategy(deduplicationStrategy);
-        if (createConfig == null) {
-            // uh-oh Labs are calling us
-            return new GraphSetupLegacyImpl(
-                username,
-                label,
-                relationshipType,
-                direction,
-                params,
-                executorService,
-                concurrency,
-                batchSize,
-                deduplicationStrategy,
-                log,
-                logMillis,
-                undirected,
-                tracker,
-                terminationFlag,
-                graphName,
-                nodePropertyMappings.build(),
-                relPropertyMappings.build()
-            );
-        }
-
-        return new GraphSetupImpl(
+        return new GraphSetupLegacyImpl(
+            username,
+            label,
+            relationshipType,
+            direction,
             params,
             executorService,
+            concurrency,
             batchSize,
+            deduplicationStrategy,
             log,
             logMillis,
+            undirected,
             tracker,
             terminationFlag,
-            createConfig
+            graphName,
+            nodePropertyMappings.build(),
+            relPropertyMappings.build()
         );
     }
 }
