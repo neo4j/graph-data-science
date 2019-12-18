@@ -123,7 +123,7 @@ public class ClosenessCentralityProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "ClosenessCentrality(MultiSource)"))
                 .withTerminationFlag(terminationFlag);
 
-        builder.timeCompute((Supplier<Boolean>) algo::compute);
+        builder.timeCompute((Supplier<Void>) algo::compute);
 
         if (configuration.isWriteFlag()) {
             graph.release();
