@@ -206,11 +206,9 @@ public class ShortestPathDijkstra extends LegacyAlgorithm<ShortestPathDijkstra> 
 
     @Override
     public void release() {
-        graph = null;
         costs = null;
         queue = null;
         path = null;
-        finalPath = null;
         visited = null;
     }
 
