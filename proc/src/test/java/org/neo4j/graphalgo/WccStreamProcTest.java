@@ -82,7 +82,7 @@ class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
             .relationshipProjection(RelationshipProjections.empty())
             .build();
 
-        Graph graph = new GraphLoader(db).withGraphCreateConfig(createGraphConfig).load(HugeGraphFactory.class);
+        Graph graph = graphLoader(createGraphConfig).load(HugeGraphFactory.class);
         GraphCatalog.set(createGraphConfig, GraphsByRelationshipType.of(graph));
 
         String query = GdsCypher.call()

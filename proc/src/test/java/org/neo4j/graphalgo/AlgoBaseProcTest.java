@@ -20,13 +20,14 @@
 
 package org.neo4j.graphalgo;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
+import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -164,8 +165,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     default void testRunMultipleTimesOnLoadedGraph() {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
-        Graph graph = new GraphLoader(graphDb())
-            .withGraphCreateConfig(graphCreateConfig)
+        Graph graph = graphLoader(graphCreateConfig)
             .load(HugeGraphFactory.class);
 
         GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
@@ -304,4 +304,15 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
                 return procedureMethodName.endsWith("stream") || procedureMethodName.endsWith("write");
             });
     }
+
+    @NotNull
+    default ModernGraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
+        return ImmutableModernGraphLoader
+            .builder()
+            .api(graphDb())
+            .username("")
+            .log(new TestLog())
+            .createConfig(graphCreateConfig).build();
+    }
+
 }

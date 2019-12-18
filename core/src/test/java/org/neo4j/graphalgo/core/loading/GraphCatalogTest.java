@@ -32,9 +32,10 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -116,8 +117,12 @@ class GraphCatalogTest {
                     .build()
             ).build();
 
-        GraphsByRelationshipType importedGraphs = new GraphLoader(db)
-            .withGraphCreateConfig(graphCreateConfig)
+        GraphsByRelationshipType importedGraphs = ImmutableModernGraphLoader
+            .builder()
+            .api(db)
+            .username("")
+            .log(new TestLog())
+            .createConfig(graphCreateConfig).build()
             .build(HugeGraphFactory.class).importAllGraphs();
 
         GraphCatalog.set(graphCreateConfig, importedGraphs);

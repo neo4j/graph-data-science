@@ -35,8 +35,10 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
+import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -112,7 +114,14 @@ public class WccThresholdTest extends AlgoTestBase {
             .implicitCreateConfig(createConfig)
             .build();
 
-        Graph graph = new GraphLoader(db).withGraphCreateConfig(createConfig).load(HugeGraphFactory.class);
+        ModernGraphLoader loader = ImmutableModernGraphLoader
+            .builder()
+            .api(db)
+            .username("")
+            .log(new TestLog())
+            .createConfig(createConfig).build();
+
+        Graph graph = loader.load(HugeGraphFactory.class);
 
         DisjointSetStruct dss = new Wcc(
             graph,

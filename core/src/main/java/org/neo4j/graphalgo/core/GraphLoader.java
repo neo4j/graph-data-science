@@ -134,11 +134,6 @@ public class GraphLoader implements SharedGraphLoader {
         return api;
     }
 
-    //TODO: remove this
-    public GraphLoader withGraphCreateConfig(GraphCreateConfig createConfig) {
-        return this;
-    }
-
     /**
      * Use the given {@link Log}instance to log the progress during loading.
      */
