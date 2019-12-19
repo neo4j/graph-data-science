@@ -40,20 +40,22 @@ import java.util.stream.StreamSupport;
 
 public class SimilarityStreamGenerator<T> {
     private final TerminationFlag terminationFlag;
-    private final ProcedureConfiguration configuration;
     private final Supplier<RleDecoder> decoderFactory;
     private final SimilarityComputer<T> computer;
+    private final int concurrency;
 
     public SimilarityStreamGenerator(TerminationFlag terminationFlag, ProcedureConfiguration configuration, Supplier<RleDecoder> decoderFactory, SimilarityComputer<T> computer) {
+        this(terminationFlag, configuration.concurrency(), decoderFactory, computer);
+    }
+
+    public SimilarityStreamGenerator(TerminationFlag terminationFlag, int concurrency, Supplier<RleDecoder> decoderFactory, SimilarityComputer<T> computer) {
         this.terminationFlag = terminationFlag;
-        this.configuration = configuration;
+        this.concurrency = concurrency;
         this.decoderFactory = decoderFactory;
         this.computer = computer;
     }
 
     public Stream<SimilarityResult> stream(T[] inputs, int[] sourceIndexIds, int[] targetIndexIds, double cutoff, int topK) {
-        int concurrency = configuration.concurrency();
-
         int length = inputs.length;
         if (concurrency == 1) {
             if (topK != 0) {
@@ -71,8 +73,6 @@ public class SimilarityStreamGenerator<T> {
     }
 
     public Stream<SimilarityResult> stream(T[] inputs, double cutoff, int topK) {
-        int concurrency = configuration.concurrency();
-
         int length = inputs.length;
         if (concurrency == 1) {
             if (topK != 0) {

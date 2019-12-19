@@ -59,6 +59,10 @@ public interface SimilarityInput {
 
     static int[] indexesFor(long[] inputIds, ProcedureConfiguration configuration, String key) {
         List<Long> sourceIds = configuration.get(key, Collections.emptyList());
+        return indexesFor(inputIds, sourceIds, key);
+    }
+
+    static int[] indexesFor(long[] inputIds, List<Long> sourceIds, String key) {
         try {
             return indexes(inputIds, sourceIds);
         } catch(IllegalArgumentException exception) {
