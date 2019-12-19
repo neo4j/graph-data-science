@@ -40,7 +40,9 @@ public interface AlgoBaseConfig extends BaseConfig {
 
     @Value.Default
     default List<String> relationshipTypes() {
-        return new ArrayList<>();
+        List<String> relationshipTypes = new ArrayList<>();
+        relationshipTypes.add("*");
+        return relationshipTypes;
     }
 
     @Configuration.Parameter

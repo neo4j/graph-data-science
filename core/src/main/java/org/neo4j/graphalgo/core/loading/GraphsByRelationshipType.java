@@ -150,6 +150,9 @@ public interface GraphsByRelationshipType {
             }
 
             boolean allRelationshipTypes = relationshipTypes.contains("*");
+            if (allRelationshipTypes && !maybeRelationshipProperty.isPresent()) {
+                return getUnion();
+            }
 
             Collection<Graph> graphParts = new ArrayList<>();
             if (allRelationshipTypes) {
