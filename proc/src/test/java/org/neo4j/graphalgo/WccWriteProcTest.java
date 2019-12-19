@@ -184,7 +184,7 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
         String graphName = "seedGraph";
         String loadQuery = "CALL gds.graph.create(" +
                            "   $graphName, " +
-                           "    {}, {}, {nodeProperties: ['seedId']}  " +
+                           "   '*', '*', {nodeProperties: ['seedId']}  " +
                            ")";
         runQuery(loadQuery, MapUtil.map("graphName", graphName));
 
