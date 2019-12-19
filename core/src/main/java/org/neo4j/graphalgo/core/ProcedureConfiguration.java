@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
@@ -38,6 +39,7 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -400,6 +402,13 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
     @Override
     public Optional<String> graphName() {
         return Optional.ofNullable(getGraphName(null));
+    }
+
+    @Override
+    public List<String> relationshipTypes() {
+        String relationshipTypes = configurationMap.getString(ProcedureConstants.RELATIONSHIP_TYPES).orElse("");
+        Set<String> parsedRelationshipTypes = ProjectionParser.parse(relationshipTypes);
+        return new ArrayList<>(parsedRelationshipTypes);
     }
 
     @Override

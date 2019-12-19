@@ -22,9 +22,10 @@ package org.neo4j.graphalgo.newapi;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public interface AlgoBaseConfig extends BaseConfig {
@@ -36,6 +37,11 @@ public interface AlgoBaseConfig extends BaseConfig {
 
     @Configuration.Parameter
     Optional<String> graphName();
+
+    @Value.Default
+    default List<String> relationshipTypes() {
+        return new ArrayList<>();
+    }
 
     @Configuration.Parameter
     Optional<GraphCreateConfig> implicitCreateConfig();

@@ -174,7 +174,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
         if (maybeGraphName.isPresent()) {
             catalogEntry = GraphCatalog
-                .filterLoadedGraphs(getUsername(), maybeGraphName.get(), ALL_REL_TYPES, weightProperty)
+                .filterLoadedGraphs(getUsername(), maybeGraphName.get(), config.relationshipTypes(), weightProperty)
                 .entrySet()
                 .stream()
                 .filter(e -> e.getKey().graphName().equals(maybeGraphName.get()))

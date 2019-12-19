@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -157,7 +158,7 @@ public final class GraphCatalog extends GraphFactory {
     public static Map<GraphCreateConfig, Graph> filterLoadedGraphs(
         String username,
         String graphName,
-        String relType,
+        List<String> relType,
         Optional<String> propertyName
     ) {
         return getUserCatalog(username).filterLoadedGraphs(graphName, relType, propertyName);
@@ -251,17 +252,17 @@ public final class GraphCatalog extends GraphFactory {
 
         Map<GraphCreateConfig, Graph> filterLoadedGraphs(
             String graphName,
-            String relType,
+            List<String> relTypes,
             Optional<String> propertyName
         ) {
             Map<GraphCreateConfig, Graph> filteredGraphs = new HashMap<>();
             if (StringUtils.isBlank(graphName)) {
                 graphsByName.values().forEach(gwc ->
-                    filteredGraphs.put(gwc.config(), gwc.graph().getGraph(relType, propertyName)
+                    filteredGraphs.put(gwc.config(), gwc.graph().getGraph(relTypes, propertyName)
                     ));
             } else {
                 GraphWithConfig graphWithConfig = graphsByName.get(graphName);
-                filteredGraphs.put(graphWithConfig.config(), graphWithConfig.graph().getGraph(relType, propertyName));
+                filteredGraphs.put(graphWithConfig.config(), graphWithConfig.graph().getGraph(relTypes, propertyName));
             }
 
             return filteredGraphs;

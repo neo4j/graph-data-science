@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
@@ -29,6 +30,7 @@ import org.neo4j.helpers.collection.Iterables;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -54,7 +56,10 @@ public interface GraphsByRelationshipType {
         return getGraph(relationshipType, Optional.empty());
     }
 
+    @Deprecated
     Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty);
+
+    Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty);
 
     Graph getUnion();
 
@@ -78,6 +83,11 @@ public interface GraphsByRelationshipType {
 
         @Override
         public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
+            return graph;
+        }
+
+        @Override
+        public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
             return graph;
         }
 
@@ -124,12 +134,25 @@ public interface GraphsByRelationshipType {
         public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
             Set<String> types = ProjectionParser.parse(relationshipType);
 
-            if (types.isEmpty() && !maybeRelationshipProperty.isPresent()) {
-                return getUnion();
+            ArrayList<String> relationshipTypes = new ArrayList<>(types);
+            if (types.isEmpty()) {
+                relationshipTypes.add("*");
+            }
+            return getGraph(relationshipTypes, maybeRelationshipProperty);
+        }
+
+        @Override
+        public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+            if (relationshipTypes.isEmpty()) {
+                throw new IllegalArgumentException(String.format("The parameter %s should not be empty. Use `*` to load all relationship types.",
+                    ProcedureConstants.RELATIONSHIP_TYPES
+                ));
             }
 
+            boolean allRelationshipTypes = relationshipTypes.contains("*");
+
             Collection<Graph> graphParts = new ArrayList<>();
-            if (types.isEmpty()) {
+            if (allRelationshipTypes) {
                 String weightProperty = maybeRelationshipProperty.get();
                 for (Map<String, ? extends Graph> graphsByProperty : graphs.values()) {
                     Graph graph = getExistingByProperty(weightProperty, graphsByProperty);
@@ -138,13 +161,13 @@ public interface GraphsByRelationshipType {
             } else {
                 if (maybeRelationshipProperty.isPresent()) {
                     String weightProperty = maybeRelationshipProperty.get();
-                    for (String type : types) {
+                    for (String type : relationshipTypes) {
                         Map<String, ? extends Graph> graphsByProperty = getExistingByType(type);
                         Graph graph = getExistingByProperty(weightProperty, graphsByProperty);
                         graphParts.add(graph);
                     }
                 } else {
-                    for (String type : types) {
+                    for (String type : relationshipTypes) {
                         Map<String, ? extends Graph> graphsByProperty = getExistingByType(type);
                         graphParts.addAll(graphsByProperty.values());
                     }
