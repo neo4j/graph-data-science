@@ -121,7 +121,7 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
         registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphLoadProc.class, GraphCreateProc.class);
         runQuery(cypher);
 
-        runQuery("CALL algo.beta.graph.create(" +
+        runQuery("CALL gds.graph.create(" +
                  "'graphLabel1'," +
                  "'Label1'," +
                  "   {" +
@@ -132,7 +132,7 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
                  "   }" +
                  ")");
 
-        runQuery("CALL algo.beta.graph.create(" +
+        runQuery("CALL gds.graph.create(" +
                  "'graphLabel3'," +
                  "'Label3'," +
                  "   {" +

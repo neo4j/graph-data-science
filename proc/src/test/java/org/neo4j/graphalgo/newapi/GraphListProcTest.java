@@ -65,9 +65,9 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void listASingleGraph() {
         String name = "name";
-        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
 
-        assertCypherResult("CALL algo.beta.graph.list()", singletonList(
+        assertCypherResult("CALL gds.graph.list()", singletonList(
             map(
                 "graphName", name,
                 "nodeProjection", map(
@@ -104,9 +104,9 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void histogramComputationIsOptOut() {
         String name = "name";
-        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
 
-        assertCypherResult("CALL algo.beta.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodes, relationships", singletonList(
+        assertCypherResult("CALL gds.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodes, relationships", singletonList(
             map(
                 "graphName", name,
                 "nodeProjection", map(
@@ -131,9 +131,9 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void calculateHistogramForUndirectedNodesWhenAskedTo() {
         String name = "name";
-        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
 
-        assertCypherResult("CALL algo.beta.graph.list() YIELD histogram", singletonList(
+        assertCypherResult("CALL gds.graph.list() YIELD histogram", singletonList(
             map(
                 "histogram", map(
                     "min", 0L,
@@ -154,9 +154,9 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void calculateHistogramForOutgoingRelationshipsWhenAskedTo() {
         String name = "name";
-        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL>')", map("name", name));
+        runQuery("CALL gds.graph.create($name, 'A', 'REL>')", map("name", name));
 
-        assertCypherResult("CALL algo.beta.graph.list() YIELD histogram", singletonList(
+        assertCypherResult("CALL gds.graph.list() YIELD histogram", singletonList(
             map(
                 "histogram", map(
                     "min", 1,
@@ -177,9 +177,9 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void calculateHistogramForIncomingRelationshipsWhenAskedTo() {
         String name = "name";
-        runQuery("CALL algo.beta.graph.create($name, 'A', '<REL')", map("name", name));
+        runQuery("CALL gds.graph.create($name, 'A', '<REL')", map("name", name));
 
-        assertCypherResult("CALL algo.beta.graph.list() YIELD histogram", singletonList(
+        assertCypherResult("CALL gds.graph.list() YIELD histogram", singletonList(
             map(
                 "histogram", map(
                     "min", 1,
@@ -201,11 +201,11 @@ class GraphListProcTest extends BaseProcTest {
     void listAllGraphsWhenCalledWithoutArgumentOrAnEmptyArgument(String argument) {
         String[] names = {"a", "b", "c"};
         for (String name : names) {
-            runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+            runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
         }
 
         List<String> actualNames = db
-            .execute("CALL algo.beta.graph.list(" + argument + ")")
+            .execute("CALL gds.graph.list(" + argument + ")")
             .<String>columnAs("graphName")
             .stream()
             .collect(toList());
@@ -216,19 +216,19 @@ class GraphListProcTest extends BaseProcTest {
     @ParameterizedTest(name = "Invalid Graph Name: {0}")
     @ValueSource(strings = {"{ a: 'b' }", "[]", "1", "true", "false", "[1, 2, 3]", "1.4"})
     void failForInvalidGraphNameTypeDueToObjectSignature(String graphName) {
-        assertError(String.format("CALL algo.beta.graph.list(%s)", graphName), "`graphName` parameter must be a STRING");
+        assertError(String.format("CALL gds.graph.list(%s)", graphName), "`graphName` parameter must be a STRING");
     }
 
     @Test
     void filterOnExactMatchUsingTheFirstArgument() {
         String[] names = {"b", "bb", "ab", "ba", "B", "ʙ"};
         for (String name : names) {
-            runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+            runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
         }
 
         String name = names[0];
         List<String> actualNames = db
-            .execute("CALL algo.beta.graph.list($name)", map("name", name))
+            .execute("CALL gds.graph.list($name)", map("name", name))
             .<String>columnAs("graphName")
             .stream()
             .collect(toList());
@@ -240,7 +240,7 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void returnEmptyStreamWhenNoGraphsAreLoaded() {
         long numberOfRows = db
-            .execute("CALL algo.beta.graph.list()")
+            .execute("CALL gds.graph.list()")
             .stream()
             .count();
 
@@ -252,11 +252,11 @@ class GraphListProcTest extends BaseProcTest {
     void returnEmptyStreamWhenNoGraphMatchesTheFilterArgument(String argument) {
         String[] names = {"a", "b", "c"};
         for (String name : names) {
-            runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", name));
+            runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
         }
 
         long numberOfRows = db
-            .execute("CALL algo.beta.graph.list($argument)", map("argument", argument))
+            .execute("CALL gds.graph.list($argument)", map("argument", argument))
             .stream()
             .count();
 
@@ -268,7 +268,7 @@ class GraphListProcTest extends BaseProcTest {
     void failsOnInvalidGraphName(String invalidName) {
         if (invalidName != null) { // null is not a valid name, but we use it to mean 'list all'
             assertError(
-                "CALL algo.beta.graph.list($graphName)",
+                "CALL gds.graph.list($graphName)",
                 map("graphName", invalidName),
                 String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
             );

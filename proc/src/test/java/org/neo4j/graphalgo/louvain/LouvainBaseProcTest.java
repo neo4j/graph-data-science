@@ -125,7 +125,7 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Bas
 
         registerProcedures(LouvainStreamProc.class, LouvainWriteProc.class, GraphLoadProc.class, GraphCreateProc.class);
         runQuery(cypher);
-        runQuery("CALL algo.beta.graph.create(" +
+        runQuery("CALL gds.graph.create(" +
                  "    'myGraph'," +
                  "    {" +
                  "      Node: {" +

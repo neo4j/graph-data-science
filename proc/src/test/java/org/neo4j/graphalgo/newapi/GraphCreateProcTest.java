@@ -96,7 +96,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, $nodeProjection, $relProjection)",
+            "CALL gds.graph.create($name, $nodeProjection, $relProjection)",
             map("name", name, "nodeProjection", nodeProjection, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
@@ -111,7 +111,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void shouldProjectAllNodesWithSpecialStar() {
-        String query = "CALL algo.beta.graph.create('g', '*', 'REL') YIELD nodes";
+        String query = "CALL gds.graph.create('g', '*', 'REL') YIELD nodes";
 
         runQuery("CREATE (), (:B), (:C:D:E)");
         assertCypherResult(query, singletonList(
@@ -121,7 +121,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void shouldProjectAllRelsWithSpecialStar() {
-        String query = "CALL algo.beta.graph.create('g', 'A', '*') YIELD relationships";
+        String query = "CALL gds.graph.create('g', 'A', '*') YIELD relationships";
 
         runQuery("CREATE (:A)-[:R]->(:A), (:B:A)-[:T]->(:A:B), (cde:C:D:E)-[:SELF]->(cde)");
         assertCypherResult(query, singletonList(
@@ -132,7 +132,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @ParameterizedTest(name = "projections: {0}")
     @ValueSource(strings = {"'*', {}", "{}, '*'"})
     void emptyProjectionDisallowed(String projection) {
-        String query = "CALL algo.beta.graph.create('g', " + projection + ")";
+        String query = "CALL gds.graph.create('g', " + projection + ")";
 
         assertErrorRegex(
             query,
@@ -162,15 +162,15 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failForNulls() {
         assertError(
-            "CALL algo.beta.graph.create(null, null, null)",
+            "CALL gds.graph.create(null, null, null)",
             "`graphName` can not be null or blank, but it was `null`"
         );
         assertError(
-            "CALL algo.beta.graph.create('name', null, null)",
+            "CALL gds.graph.create('name', null, null)",
             "No value specified for the mandatory configuration parameter `nodeProjection`"
         );
         assertError(
-            "CALL algo.beta.graph.create('name', 'A', null)",
+            "CALL gds.graph.create('name', 'A', null)",
             "No value specified for the mandatory configuration parameter `relationshipProjection`"
         );
     }
@@ -179,7 +179,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @MethodSource("org.neo4j.graphalgo.newapi.GraphCreateProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
-            "CALL algo.beta.graph.create($graphName, {}, {})",
+            "CALL gds.graph.create($graphName, {}, {})",
             map("graphName", invalidName),
             String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
@@ -188,7 +188,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failOnMissingMandatory() {
         assertError(
-            "CALL algo.beta.graph.create()",
+            "CALL gds.graph.create()",
             "Procedure call does not provide the required number of arguments"
         );
     }
@@ -199,7 +199,7 @@ class GraphCreateProcTest extends BaseProcTest {
         Map nodeProjection = map("A", map(LABEL_KEY, "INVALID"));
 
         assertError(
-            "CALL algo.beta.graph.create($name, $nodeProjection, '*')",
+            "CALL gds.graph.create($name, $nodeProjection, '*')",
             map("name", name, "nodeProjection", nodeProjection),
             "Invalid node projection, one or more labels not found: 'INVALID'"
         );
@@ -212,7 +212,7 @@ class GraphCreateProcTest extends BaseProcTest {
         Map<String, Object> nodeProjection = map("A", map(LABEL_KEY, "A"), "B", map(LABEL_KEY, "A"));
 
         assertError(
-            "CALL algo.beta.graph.create('g', $nodeProjection, {})",
+            "CALL gds.graph.create('g', $nodeProjection, {})",
             map("nodeProjection", nodeProjection),
             "Multiple node projections are not supported; please use a single projection with a `|` operator to project nodes with different labels into the in-memory graph."
         );
@@ -224,7 +224,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String name = "g";
 
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, $nodeProjection, '*')",
+            "CALL gds.graph.create($name, $nodeProjection, '*')",
             map("name", name, "nodeProjection", nodeProjection),
             singletonList(map(
                 "graphName", name,
@@ -246,7 +246,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertError(
-            "CALL algo.beta.graph.create($name, $nodeProjection, '*')",
+            "CALL gds.graph.create($name, $nodeProjection, '*')",
             map("name", name, "nodeProjection", nodeProjection),
             "Node properties not found: 'invalid'"
         );
@@ -260,7 +260,7 @@ class GraphCreateProcTest extends BaseProcTest {
         Map<String, Object> expectedNodeProjection = map("B", map(LABEL_KEY, "A", PROPERTIES_KEY, expectedProperties));
 
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, $nodeProjection, '*')",
+            "CALL gds.graph.create($name, $nodeProjection, '*')",
             map("name", name, "nodeProjection", nodeProjection),
             singletonList(map(
                 "graphName", name,
@@ -282,7 +282,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String name = "g";
 
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, '*', $relProjection)",
+            "CALL gds.graph.create($name, '*', $relProjection)",
             map("name", name, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
@@ -313,7 +313,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         // TODO: Validate reverse
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, '*', $relProjections)",
+            "CALL gds.graph.create($name, '*', $relProjections)",
             map("name", name, "relProjections", relProjections),
             singletonList(map(
                 "graphName", name,
@@ -338,7 +338,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         // TODO: check property values on graph
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, '*', $relProjection)",
+            "CALL gds.graph.create($name, '*', $relProjection)",
             map("name", name, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
@@ -367,7 +367,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         // TODO: check property values on graph
         assertCypherResult(
-            "CALL algo.beta.graph.create($name, '*', $relProjection)",
+            "CALL gds.graph.create($name, '*', $relProjection)",
             map("name", name, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
@@ -386,7 +386,7 @@ class GraphCreateProcTest extends BaseProcTest {
         Map relProjection = map("REL", map("type", "INVALID"));
 
         assertError(
-            "CALL algo.beta.graph.create($name, '*', $relProjection)",
+            "CALL gds.graph.create($name, '*', $relProjection)",
             map("name", name, "relProjection", relProjection),
             "Invalid relationship projection, one or more relationship types not found: 'INVALID'"
         );

@@ -131,7 +131,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
 
         TestSupport.allDirectedProjections().forEach(projection -> {
             String name = "myGraph" + projection.name();
-            runQuery("CALL algo.beta.graph.create(" +
+            runQuery("CALL gds.graph.create(" +
                      "    $graphName," +
                      "    'Person | Item'," +
                      "    {" +

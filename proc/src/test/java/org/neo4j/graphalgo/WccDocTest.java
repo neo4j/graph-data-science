@@ -273,7 +273,7 @@ class WccDocTest extends BaseProcTest {
 
     @Test
     void shouldProduceStreamOutputOnLoadedGraph() {
-        String createGraphQuery = "CALL algo.beta.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;";
+        String createGraphQuery = "CALL gds.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;";
         runQuery(createGraphQuery);
 
         String query = GdsCypher.call()

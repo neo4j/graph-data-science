@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.newapi;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -32,7 +33,8 @@ import java.util.stream.Stream;
 
 public class GraphListProc extends CatalogProc {
 
-    @Procedure(name = "algo.beta.graph.list", mode = Mode.READ)
+    @Procedure(name = "gds.graph.list", mode = Mode.READ)
+    @Description("Lists information about named graphs stored in the catalog.")
     public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = "null") Object graphName) {
         if (Objects.nonNull(graphName) && !(graphName instanceof String)) {
             throw new IllegalArgumentException("`graphName` parameter must be a STRING");

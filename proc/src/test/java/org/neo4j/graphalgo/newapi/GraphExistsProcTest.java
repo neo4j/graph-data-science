@@ -44,7 +44,7 @@ class GraphExistsProcTest extends BaseProcTest {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(
             GraphDatabaseSettings.procedure_unrestricted,
-            "algo.*"
+            "gds.*"
         ));
         registerProcedures(GraphCreateProc.class, GraphExistsProc.class);
         registerFunctions(GraphExistsFunc.class);
@@ -61,10 +61,10 @@ class GraphExistsProcTest extends BaseProcTest {
     @ParameterizedTest(name = "Existing Graphs: {0}, Lookup: {1}, Exists: {2}")
     @MethodSource("graphNameExistsCombinations")
     void shouldReportOnGraphExistenceProc(String graphNameToCreate, String graphNameToCheck, boolean exists) {
-        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", graphNameToCreate));
+        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", graphNameToCreate));
 
         assertCypherResult(
-            "CALL algo.beta.graph.exists($graphName)",
+            "CALL gds.graph.exists($graphName)",
             map("graphName", graphNameToCheck),
             singletonList(
                 map("graphName", graphNameToCheck, "exists", exists)
@@ -75,10 +75,10 @@ class GraphExistsProcTest extends BaseProcTest {
     @ParameterizedTest(name = "Existing Graphs: {0}, Lookup: {1}, Exists: {2}")
     @MethodSource("graphNameExistsCombinations")
     void shouldReportOnGraphExistenceFunc(String graphNameToCreate, String graphNameToCheck, boolean exists) {
-        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", graphNameToCreate));
+        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", graphNameToCreate));
 
         assertCypherResult(
-            "RETURN algo.beta.graph.exists($graphName) AS exists",
+            "RETURN gds.graph.exists($graphName) AS exists",
             map("graphName", graphNameToCheck),
             singletonList(
                 map("exists", exists)
@@ -90,12 +90,12 @@ class GraphExistsProcTest extends BaseProcTest {
     @MethodSource("org.neo4j.graphalgo.newapi.GraphCreateProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
-            "CALL algo.beta.graph.exists($graphName)",
+            "CALL gds.graph.exists($graphName)",
             map("graphName", invalidName),
             String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
         assertError(
-            "RETURN algo.beta.graph.exists($graphName)",
+            "RETURN gds.graph.exists($graphName)",
             map("graphName", invalidName),
             String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );

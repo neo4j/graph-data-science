@@ -30,12 +30,8 @@ import java.util.stream.Stream;
 
 public class GraphExistsProc extends CatalogProc {
 
-    @Procedure(name = "algo.beta.graph.exists", mode = Mode.READ)
-    @Description("CALL graph.exists(" +
-                 "  graphName: STRING" +
-                 ") YIELD" +
-                 "  graphName: STRING," +
-                 "  exists: BOOLEAN")
+    @Procedure(name = "gds.graph.exists", mode = Mode.READ)
+    @Description("Checks if a graph exists in the catalog.")
     public Stream<GraphExistsResult> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
         validateGraphName(graphName);
         return Stream.of(new GraphExistsResult(graphName, GraphCatalog.exists(getUsername(), graphName)));

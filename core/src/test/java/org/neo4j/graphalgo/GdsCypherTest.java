@@ -241,7 +241,7 @@ class GdsCypherTest {
 
         assertEquals(
             String.format(
-                "CALL algo.beta.graph.create(\"foo42\", %s, %s, {nodeProjection: \"SOMETHING | ELSE\"})",
+                "CALL gds.graph.create(\"foo42\", %s, %s, {nodeProjection: \"SOMETHING | ELSE\"})",
                 expectedNodeProjection(),
                 expectedRelationshipProjection()
             ),

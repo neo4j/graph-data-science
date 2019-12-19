@@ -423,7 +423,7 @@ See <<projected-graph-model, Projected Graph Model>> for more details.
 .Using a named graph:
 [source, cypher]
 ----
-CALL algo.beta.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;
+CALL gds.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;
 
 CALL gds.algo.wcc.stream('myGraph')
 YIELD nodeId, componentId

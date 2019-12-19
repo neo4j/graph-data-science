@@ -112,7 +112,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
 
     String createGraphQuery(Projection projection, String graphName) {
         return String.format(
-            "CALL algo.beta.graph.create(" +
+            "CALL gds.graph.create(" +
             "    '%s'," +
             "    {" +
             "      A: {" +

@@ -182,7 +182,7 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
     @Test
     void testWriteWithSeedOnExplicitGraph() {
         String graphName = "seedGraph";
-        String loadQuery = "CALL algo.beta.graph.create(" +
+        String loadQuery = "CALL gds.graph.create(" +
                            "   $graphName, " +
                            "    {}, {}, {nodeProperties: ['seedId']}  " +
                            ")";
