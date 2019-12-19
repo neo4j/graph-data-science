@@ -60,9 +60,6 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     protected static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
 
-
-    public static final String ALL_REL_TYPES = "";
-
     public String algoName() {
         return this.getClass().getSimpleName();
     }
