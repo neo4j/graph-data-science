@@ -102,7 +102,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTestBase#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testWeightedPageRankThrowsIfWeightPropertyDoesNotExist(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.stream(" +
                        graphSnippet +

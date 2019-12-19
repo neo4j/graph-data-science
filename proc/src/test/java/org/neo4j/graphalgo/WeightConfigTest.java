@@ -33,8 +33,7 @@ import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphdb.DependencyResolver;
@@ -141,7 +140,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
         loadExplicitGraph(graphName);
 
         CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("relationshipTypes", Collections.singletonList("*"), "weightProperty", propertyName));
-        CypherMapWrapper algoConfig = createMinimallyValidConfig(weightConfig);
+        CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
 
         applyOnProcedure((proc) -> {
             CONFIG config = proc.newConfig(Optional.of(graphName), algoConfig);
@@ -165,7 +164,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
         loadExplicitGraph(graphName);
 
         CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("relationshipTypes", Collections.singletonList("TYPE1"), "weightProperty", "weight1"));
-        CypherMapWrapper algoConfig = createMinimallyValidConfig(weightConfig);
+        CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
 
         applyOnProcedure((proc) -> {
             CONFIG config = proc.newConfig(Optional.of(graphName), algoConfig);
@@ -183,7 +182,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
             Procedures procedures = db
                 .getDependencyResolver()
                 .resolveDependency(Procedures.class, DependencyResolver.SelectionStrategy.ONLY);
-            procedures.registerProcedure(GraphCatalogProcs.class);
+            procedures.registerProcedure(GraphCreateProc.class);
         } catch(KernelException ke) {
             ke.printStackTrace();
         }
