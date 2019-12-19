@@ -119,72 +119,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
                 graphCreateConfig,
                 "GraphCreateConfig should be empty."
             );
-            assertEquals(GraphCreateConfig.emptyWithName("", ""), graphCreateConfig);
         });
-    }
-
-    @Test
-    default void shouldFailWithInvalidWeightProperty() {
-        assumeTrue(createConfig(createMinimallyValidConfig(CypherMapWrapper.empty())) instanceof WeightConfig);
-        String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
-        Graph graph = new GraphLoader(graphDb())
-            .withGraphCreateConfig(graphCreateConfig)
-            .load(HugeGraphFactory.class);
-
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
-
-        applyOnProcedure((proc) -> {
-            CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
-                "weightProperty",
-                "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
-            ));
-            Map<String, Object> configMap = createMinimallyValidConfig(mapWrapper).toMap();
-            String error = "Weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found";
-            assertMissingProperty(error, () -> proc.compute(
-                loadedGraphName,
-                configMap
-            ));
-
-            assertMissingProperty(error, () -> proc.compute(
-                configMap,
-                Collections.emptyMap()
-            ));
-        });
-
-        GraphCatalog.removeAllLoadedGraphs();
-    }
-
-    @Test
-    default void shouldFailWithInvalidSeedProperty() {
-        assumeTrue(createConfig(createMinimallyValidConfig(CypherMapWrapper.empty())) instanceof SeedConfig);
-        String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
-        Graph graph = new GraphLoader(graphDb())
-            .withGraphCreateConfig(graphCreateConfig)
-            .load(HugeGraphFactory.class);
-
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
-
-        applyOnProcedure((proc) -> {
-            CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
-                "seedProperty",
-                "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
-            ));
-            Map<String, Object> configMap = createMinimallyValidConfig(mapWrapper).toMap();
-            String error = "Seed property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found";
-            assertMissingProperty(error, () -> proc.compute(
-                loadedGraphName,
-                configMap
-            ));
-
-            assertMissingProperty(error, () -> proc.compute(
-                configMap,
-                Collections.emptyMap()
-            ));
-        });
-
-        GraphCatalog.removeAllLoadedGraphs();
     }
 
     default void assertMissingProperty(String error, Runnable runnable) {

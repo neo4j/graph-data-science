@@ -105,9 +105,12 @@ public interface SeedConfigTest<CONFIG extends SeedConfig & AlgoBaseConfig, RESU
         GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
 
         applyOnProcedure((proc) -> {
-            CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", "owiejfoseifj"));
+            CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
+                "seedProperty",
+                "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
+            ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Seed property `owiejfoseifj` not found";
+            String error = "Seed property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap
