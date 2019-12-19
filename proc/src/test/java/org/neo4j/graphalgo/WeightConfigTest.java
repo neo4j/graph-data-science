@@ -55,6 +55,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
     @Test
@@ -135,52 +137,10 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
     @ParameterizedTest
     @CsvSource(value = { "weight1, 0.0", "weight2, 1.0"})
     default void testFilteringOnPropertiesOnLoadedGraph(String propertyName, double expectedWeight) throws KernelException {
-        GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
-
-        Procedures procedures = db
-            .getDependencyResolver()
-            .resolveDependency(Procedures.class, DependencyResolver.SelectionStrategy.ONLY);
-        procedures.registerProcedure(GraphCatalogProcs.class);
-
-        String createQuery = "CREATE" +
-                             "  (a: Label)" +
-                             ", (b: Label)" +
-                             ", (c: Label)" +
-                             ", (a)-[:TYPE { weight1: 0.0, weight2: 1.0 }]->(b)" +
-                             ", (a)-[:TYPE { weight2: 1.0 }]->(c)" +
-                             ", (b)-[:TYPE { weight1: 0.0 }]->(c)";
-
-        db.execute(createQuery);
-
         String graphName = "foo";
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
-            .graphName(graphName)
-            .nodeProjection(NodeProjections.empty())
-            .relationshipProjection(RelationshipProjections.builder()
-                .putProjection(
-                    ElementIdentifier.of("TYPE"),
-                    RelationshipProjection.builder()
-                        .type("TYPE")
-                        .properties(
-                            PropertyMappings.of(
-                                PropertyMapping.of("weight1", 0.0),
-                                PropertyMapping.of("weight2", 1.0)
-                            )
-                        )
-                        .build()
-                )
-                .build()
-            )
-            .build();
+        loadExplicitGraph(graphName);
 
-        GraphsByRelationshipType graphsByRelationshipType = new GraphLoader(db)
-            .withGraphCreateConfig(graphCreateConfig)
-            .build(HugeGraphFactory.class)
-            .importAllGraphs();
-
-        GraphCatalog.set(graphCreateConfig, graphsByRelationshipType);
-
-        CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("weightProperty", propertyName));
+        CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("relationshipTypes", Collections.singletonList("*"), "weightProperty", propertyName));
         CypherMapWrapper algoConfig = createMinimallyValidConfig(weightConfig);
 
         applyOnProcedure((proc) -> {
@@ -197,5 +157,79 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
             });
 
         });
+    }
+
+    @Test
+    default void testFilteringOnRelTypesOnLoadedGraph() {
+        String graphName = "foo";
+        loadExplicitGraph(graphName);
+
+        CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("relationshipTypes", Collections.singletonList("TYPE1"), "weightProperty", "weight1"));
+        CypherMapWrapper algoConfig = createMinimallyValidConfig(weightConfig);
+
+        applyOnProcedure((proc) -> {
+            CONFIG config = proc.newConfig(Optional.of(graphName), algoConfig);
+            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(graphName));
+
+            Graph graph = proc.createGraph(configAndName);
+            assertGraphEquals(fromGdl("()-[{w1: 0.0}]->(), ()"), graph);
+        });
+    }
+
+    default void loadExplicitGraph(String graphName) {
+        GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
+
+        try {
+            Procedures procedures = db
+                .getDependencyResolver()
+                .resolveDependency(Procedures.class, DependencyResolver.SelectionStrategy.ONLY);
+            procedures.registerProcedure(GraphCatalogProcs.class);
+        } catch(KernelException ke) {
+            ke.printStackTrace();
+        }
+
+        String createQuery = "CREATE" +
+                             "  (a: Label)" +
+                             ", (b: Label)" +
+                             ", (c: Label)" +
+                             ", (a)-[:TYPE { weight1: 0.0, weight2: 1.0 }]->(b)" +
+                             ", (a)-[:TYPE { weight2: 1.0 }]->(c)" +
+                             ", (b)-[:TYPE { weight1: 0.0 }]->(c)" +
+                             ", (c)-[:TYPE1 { weight1: 0.0 }]->(a)";
+
+        db.execute(createQuery);
+
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
+            .graphName(graphName)
+            .nodeProjection(NodeProjections.empty())
+            .relationshipProjection(RelationshipProjections.builder()
+                .putProjection(
+                    ElementIdentifier.of("TYPE"),
+                    RelationshipProjection.builder()
+                        .type("TYPE")
+                        .properties(
+                            PropertyMappings.of(
+                                PropertyMapping.of("weight1", 0.0),
+                                PropertyMapping.of("weight2", 1.0)
+                            )
+                        )
+                        .build()
+                )
+                .putProjection(
+                    ElementIdentifier.of("TYPE1"),
+                    RelationshipProjection.builder()
+                        .type("TYPE1")
+                        .build()
+                )
+                .build()
+            )
+            .build();
+
+        GraphsByRelationshipType graphsByRelationshipType = new GraphLoader(db)
+            .withGraphCreateConfig(graphCreateConfig)
+            .build(HugeGraphFactory.class)
+            .importAllGraphs();
+
+        GraphCatalog.set(graphCreateConfig, graphsByRelationshipType);
     }
 }
