@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.betweenness;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -69,7 +70,7 @@ class BetweennessCentralityTest3 extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @BeforeEach
+    @AfterEach
     void shutdownGraphDb() {
         if (db != null) db.shutdown();
     }

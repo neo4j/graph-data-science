@@ -17,5 +17,4 @@ test {
     useJUnitPlatform {
         includeEngines 'jqwik', 'junit-jupiter'
     }
-    include '**/*Test.class'
 }
