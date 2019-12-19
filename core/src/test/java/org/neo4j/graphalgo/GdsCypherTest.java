@@ -231,24 +231,6 @@ class GdsCypherTest {
         );
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("implicitBuilders")
-    void generatesBetaGraphCreateFromImplicitConfig(GdsCypher.QueryBuilder queryBuilder, String testName) {
-        String query = queryBuilder
-            .betaGraphCreate("foo42")
-            .addParameter("nodeProjection", "SOMETHING | ELSE")
-            .yields();
-
-        assertEquals(
-            String.format(
-                "CALL gds.graph.create(\"foo42\", %s, %s, {nodeProjection: \"SOMETHING | ELSE\"})",
-                expectedNodeProjection(),
-                expectedRelationshipProjection()
-            ),
-            query
-        );
-    }
-
     private String expectedImplicitGraphCreateCall() {
         //@formatter:off
         return
