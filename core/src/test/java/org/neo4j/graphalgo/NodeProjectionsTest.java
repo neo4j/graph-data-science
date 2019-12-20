@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -33,9 +32,13 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class NodeProjectionsTest {
@@ -116,6 +119,16 @@ class NodeProjectionsTest {
         assertThat(actual.labelProjection(), equalTo(Optional.of("")));
     }
 
+    @Test
+    void doesNotAllowMultipleNodeProjections() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> NodeProjections.fromObject(asList("A", "B"))
+        );
+
+        assertThat(ex.getMessage(), containsString("Multiple node projections are not supported"));
+    }
+
     static Stream<Arguments> syntacticSugarsSimple() {
         return Stream.of(
             Arguments.of(
@@ -125,10 +138,10 @@ class NodeProjectionsTest {
                 singletonList("A")
             ),
             Arguments.of(
-                map("A", map("label", "A"))
+                map("A", map(LABEL_KEY, "A"))
             ),
             Arguments.of(
-                map("A", map("label", "A", "properties", emptyMap()))
+                map("A", map(LABEL_KEY, "A", PROPERTIES_KEY, emptyMap()))
             )
         );
     }

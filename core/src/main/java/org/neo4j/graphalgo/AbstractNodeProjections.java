@@ -104,11 +104,13 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
     public static NodeProjections create(Map<ElementIdentifier, NodeProjection> projections) {
         if (projections.isEmpty()) {
             throw new IllegalArgumentException(
-                "An empty node projection was given; at least one node label must be projected.");
+                "An empty node projection was given; at least one node label must be projected."
+            );
         }
         if (projections.size() > 1) {
             throw new IllegalArgumentException(
-                "Multiple node projections are not supported; please use a single projection with a `|` operator to project nodes with different labels into the in-memory graph.");
+                "Multiple node projections are not supported; please use a single projection with a `|` operator to project nodes with different labels into the in-memory graph."
+            );
         }
         return NodeProjections.of(unmodifiableMap(projections));
     }
