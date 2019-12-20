@@ -59,7 +59,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsWeight")
     void testWeightedPageRankWriteBack(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.write(" +
                        graphSnippet +

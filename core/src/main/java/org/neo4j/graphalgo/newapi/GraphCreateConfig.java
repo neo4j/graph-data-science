@@ -168,6 +168,14 @@ public interface GraphCreateConfig extends BaseConfig {
             "relationshipProjection",
             config.get("relationshipProjection", (Object) RelationshipProjections.empty())
         ));
+
+        relationshipProjections.projections().values().forEach(relationshipProjection -> {
+            if (relationshipProjection.properties().mappings().size() > 1) {
+                throw new IllegalArgumentException(
+                    "Implicit graph loading does not allow loading multiple relationship properties per relationship type");
+            }
+        });
+
         NodeProjections nodeProjections = NodeProjections.fromObject(CypherMapWrapper.failOnNull(
             "nodeProjection",
             config.get("nodeProjection", (Object) NodeProjections.empty())

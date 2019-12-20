@@ -68,7 +68,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsEqualWeight")
     void testWeightedPageRankWithAllRelationshipsEqual(String graphSnippet, String testCase) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.algo.pageRank.stream(" +
@@ -120,7 +120,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsWeight")
     void testWeightedPageRankWithCachedWeights(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.pageRank.stream(" +
                        graphSnippet +
@@ -152,7 +152,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsWeight")
     void testWeightedPageRank(String graphSnippet, String testCaseName) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.algo.pageRank.stream(" +

@@ -82,7 +82,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
 
     @Test
     default void testWeightPropertyValidation() {
-        List<String> relationshipProperties = Arrays.asList("a", "b", "c");
+        List<String> relationshipProperties = Arrays.asList("a");
         Map<String, Object> tempConfig = MapUtil.map(
             "weightProperty", "foo",
             "relationshipProjection", MapUtil.map(
@@ -100,7 +100,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
                 () -> proc.compute(config, Collections.emptyMap())
             );
             assertThat(e.getMessage(), containsString("foo"));
-            assertThat(e.getMessage(), containsString("[a, b, c]"));
+            assertThat(e.getMessage(), containsString("[a]"));
         });
     }
 

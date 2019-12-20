@@ -182,12 +182,41 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
             arguments(
                 "{" +
                 "  nodeProjection: 'Label1'," +
+                "  relationshipProjection: ['TYPE1'],",
+                "  implicit graph"
+            )
+        );
+    }
+
+    static Stream<Arguments> graphVariationsWeight() {
+        return Stream.of(
+            arguments("'graphLabel1', {", "explicit graph"),
+            arguments(
+                "{" +
+                "  nodeProjection: 'Label1'," +
                 "  relationshipProjection: {" +
                 "      TYPE1: {" +
                 "          type: 'TYPE1'," +
-                "          properties: ['weight', 'equalWeight']" +
+                "          properties: ['weight']" +
                 "      } " +
-                "  },",
+                "},",
+                "  implicit graph"
+            )
+        );
+    }
+
+    static Stream<Arguments> graphVariationsEqualWeight() {
+        return Stream.of(
+            arguments("'graphLabel1', {", "explicit graph"),
+            arguments(
+                "{" +
+                "  nodeProjection: 'Label1'," +
+                "  relationshipProjection: {" +
+                "      TYPE1: {" +
+                "          type: 'TYPE1'," +
+                "          properties: ['equalWeight']" +
+                "      } " +
+                "},",
                 "  implicit graph"
             )
         );
@@ -202,7 +231,7 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
                 "  relationshipProjection: {" +
                 "      TYPE3: {" +
                 "          type: 'TYPE3'," +
-                "          properties: ['weight', 'equalWeight'], " +
+                "          properties: ['equalWeight'], " +
                 "          projection: 'UNDIRECTED'" +
                 "      } " +
                 "  },",
