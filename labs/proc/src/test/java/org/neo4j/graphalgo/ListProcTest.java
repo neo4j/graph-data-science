@@ -58,7 +58,7 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.shortestPath.write",
         "gds.alpha.shortestPath.stream",
         "algo.dfs.stream",
-        "algo.eigenvector",
+        "algo.eigenvector.write",
         "algo.eigenvector.stream",
         "algo.kShortestPaths",
         "algo.kShortestPaths.stream",

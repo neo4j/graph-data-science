@@ -21,7 +21,11 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.graphalgo.compat.MapUtil;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.centrality.EigenvectorCentralityProc;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -64,7 +68,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                  "MERGE (source)-[rel:INTERACTS_SEASON1]->(target) " +
                  "SET rel.weight = toInteger(row.Weight);");
 
-        registerProcedures(EigenvectorCentralityProc.class);
+        registerProcedures(EigenvectorCentralityProc.class, GraphCreateProc.class);
 
         runInTransaction(db, () -> {
             final Label label = Label.label("Character");
@@ -84,20 +88,32 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
+        GraphCatalog.removeAllLoadedGraphs();
     }
 
     @AllGraphNamesTest
     public void testStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
-        String query = "CALL algo.eigenvector.stream(" +
-                       "    'Character', 'INTERACTS_SEASON1', {" +
-                       "        graph: $graph, direction: 'BOTH'" +
+        runQuery("CALL  algo.beta.graph.create('eigenvectorTest', " +
+                 "'Character'," +
+                 "  {" +
+                 "      Character:{" +
+                 "        type:'INTERACTS_SEASON1'," +
+                 "        projection:'UNDIRECTED'," +
+                 "        aggregation: 'DEFAULT'" +
+                 "      }" +
+                 "  }" +
+                 ")");
+
+        String query = "CALL algo.eigenvector.stream('eigenvectorTest'," +
+                       "    {" +
+                       "        direction: 'BOTH'" +
                        "    }" +
                        ") YIELD nodeId, score " +
                        "RETURN nodeId, score " +
                        "ORDER BY score DESC " +
                        "LIMIT 10";
-        runQuery(query, MapUtil.map("graph", graphImpl),
+        runQuery(query,
                 row -> actual.put(
                         (Long)row.get("nodeId"),
                         (Double) row.get("score"))
@@ -105,14 +121,24 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         assertMapEquals(expected, actual);
     }
 
-    @AllGraphNamesTest
-    public void testWriteBack(String graphImpl) {
-        String query = "CALL algo.eigenvector(" +
-                       "    'Character', 'INTERACTS_SEASON1', {" +
-                       "        graph: $graph, direction: 'BOTH'" +
+    @Test
+    void testWriteBack() {
+        runQuery("CALL  algo.beta.graph.create('eigenvectorTest', " +
+                 "'Character'," +
+                 "  {" +
+                 "      Character:{" +
+                 "        type:'INTERACTS_SEASON1'," +
+                 "        projection:'UNDIRECTED'," +
+                 "        aggregation: 'DEFAULT'" +
+                 "      }" +
+                 "  }" +
+                 ")");
+        String query = "CALL algo.eigenvector.write('eigenvectorTest',"+
+                       "    {" +
+                       "        direction: 'BOTH'" +
                        "    }" +
                        ") YIELD writeMillis, write, writeProperty";
-        runQuery(query, MapUtil.map("graph", graphImpl),
+        runQuery(query,
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("eigenvector", row.getString("writeProperty"));
@@ -121,30 +147,55 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         assertResult("eigenvector", expected);
     }
 
-    @AllGraphNamesTest
-    public void testWriteBackUnderDifferentProperty(String graphImpl) {
-        String query = "CALL algo.eigenvector(" +
-                       "    'Character', 'INTERACTS_SEASON1', {" +
-                       "        writeProperty: 'foobar', graph: $graph, direction: 'BOTH'" +
+    @Test
+    void testWriteBackUnderDifferentProperty() {
+        runQuery("CALL  algo.beta.graph.create('eigenvectorTest', " +
+                 "'Character'," +
+                 "  {" +
+                 "      Character:{" +
+                 "        type:'INTERACTS_SEASON1'," +
+                 "        projection:'UNDIRECTED'," +
+                 "        aggregation: 'DEFAULT'" +
+                 "      }" +
+                 "  }" +
+                 ")");
+        String query = "CALL algo.eigenvector.write('eigenvectorTest',"+
+                       "    {" +
+                       "        direction: 'BOTH', writeProperty: 'foobar'" +
                        "    }" +
                        ") YIELD writeMillis, write, writeProperty";
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertTrue(row.getBoolean("write"));
-                    assertEquals("foobar", row.getString("writeProperty"));
-                    assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
-        });
+        runQuery(query,
+            row -> {
+                assertTrue(row.getBoolean("write"));
+                assertEquals("foobar", row.getString("writeProperty"));
+                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+            });
         assertResult("foobar", expected);
     }
 
+    //TODO: check if .addParameter("direction", "BOTH") is needed
     @AllGraphNamesTest
     public void testParallelWriteBack(String graphImpl) {
-        String query = "CALL algo.eigenvector(" +
-                       "    'Character', 'INTERACTS_SEASON1', {" +
-                       "        batchSize: 3, concurrency: 2, write: true, graph: $graph, direction: 'BOTH'" +
-                       "    }" +
-                       ") YIELD writeMillis, write, writeProperty, iterations";
-        runQuery(query, MapUtil.map("graph", graphImpl),
+        String query = GdsCypher
+            .call()
+            .implicitCreation(ImmutableGraphCreateConfig.builder()
+                .graphName("someCleverGraphName")
+                .nodeProjection(NodeProjections.of("Character"))
+                .relationshipProjection(RelationshipProjections.builder()
+                    .putProjection(
+                        ElementIdentifier.of("INTERACTS_SEASON1"),
+                        RelationshipProjection
+                            .builder()
+                            .type("INTERACTS_SEASON1")
+                            .projection(Projection.UNDIRECTED)
+                            .build()
+                    ).build()).build())
+            .algo("algo", "eigenvector")
+            .writeMode()
+            .addParameter("batchSize", 3)
+            .addParameter("concurrency", 2)
+            .yields("writeMillis", "writeProperty", "iterations");
+        runQuery(query,
                 row -> assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set")
         );
         assertResult("eigenvector", expected);
@@ -153,15 +204,30 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
     @AllGraphNamesTest
     public void testParallelExecution(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
-        String query = "CALL algo.eigenvector.stream(" +
-                       "    'Character', 'INTERACTS_SEASON1', {" +
-                       "        batchSize: 2, graph: $graph, direction: 'BOTH'" +
-                       "    }" +
-                       ") YIELD nodeId, score " +
-                       "RETURN nodeId, score " +
-                       "ORDER BY score DESC " +
-                       "LIMIT 10";
-        runQuery(query, MapUtil.map("graph", graphImpl),
+        String query = GdsCypher
+            .call()
+            .implicitCreation(ImmutableGraphCreateConfig.builder()
+                .graphName("someCleverGraphName")
+                .nodeProjection(NodeProjections.of("Character"))
+                .relationshipProjection(RelationshipProjections.builder()
+                    .putProjection(
+                        ElementIdentifier.of("INTERACTS_SEASON1"),
+                        RelationshipProjection
+                            .builder()
+                            .type("INTERACTS_SEASON1")
+                            .projection(Projection.UNDIRECTED)
+                            .build()
+                    ).build()).build())
+            .algo("algo", "eigenvector")
+            .streamMode()
+            .addParameter("batchSize", 3)
+            .addParameter("concurrency", 2)
+            .yields("nodeId", "score");
+        query = query +
+                " RETURN nodeId, score " +
+                "ORDER BY score DESC " +
+                "LIMIT 10";
+        runQuery(query,
                 row -> {
                     final long nodeId = row.getNumber("nodeId").longValue();
                     actual.put(nodeId, (Double) row.get("score"));
