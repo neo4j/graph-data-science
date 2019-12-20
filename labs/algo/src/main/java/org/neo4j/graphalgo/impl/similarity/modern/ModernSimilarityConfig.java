@@ -69,8 +69,7 @@ public interface ModernSimilarityConfig extends AlgoBaseConfig, WriteConfig {
     @Value.Derived
     @Configuration.Ignore
     default double normalizedSimilarityCutoff() {
-        double v = similarityCutoff();
-        return v > 0D ? v * v : v;
+        return similarityCutoff();
     }
 
     @Value.Default

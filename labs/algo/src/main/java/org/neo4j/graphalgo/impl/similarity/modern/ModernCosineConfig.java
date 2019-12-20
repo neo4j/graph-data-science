@@ -20,10 +20,18 @@
 
 package org.neo4j.graphalgo.impl.similarity.modern;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 @ValueClass
 @Configuration("ModernCosineConfigImpl")
 public interface ModernCosineConfig extends ModernSimilarityConfig {
+    @Value.Derived
+    @Configuration.Ignore
+    @Override
+    default double normalizedSimilarityCutoff() {
+        double v = similarityCutoff();
+        return v > 0D ? v * v : v;
+    }
 }

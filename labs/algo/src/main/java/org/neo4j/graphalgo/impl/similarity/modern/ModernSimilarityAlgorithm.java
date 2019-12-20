@@ -175,6 +175,10 @@ public abstract class ModernSimilarityAlgorithm<ME extends ModernSimilarityAlgor
         int[] targetIndexIds
     );
 
+    SimilarityResult modifyResult(SimilarityResult result) {
+        return result;
+    }
+
     Stream<SimilarityResult> generateWeightedStream(
         WeightedInput[] inputs,
         int[] sourceIndexIds,
@@ -194,7 +198,7 @@ public abstract class ModernSimilarityAlgorithm<ME extends ModernSimilarityAlgor
             similarityCutoff,
             topK
         ), topN)
-            .map(SimilarityResult::squareRooted);
+            .map(this::modifyResult);
     }
 
     protected Supplier<RleDecoder> createDecoderFactory(int size) {

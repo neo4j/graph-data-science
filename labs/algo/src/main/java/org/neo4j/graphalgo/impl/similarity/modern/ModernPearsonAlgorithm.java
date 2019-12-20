@@ -20,14 +20,13 @@
 
 package org.neo4j.graphalgo.impl.similarity.modern;
 
-import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
 import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-public class ModernCosineAlgorithm extends ModernSimilarityAlgorithm<ModernCosineAlgorithm> {
+public final class ModernPearsonAlgorithm extends ModernSimilarityAlgorithm<ModernPearsonAlgorithm> {
 
-    public ModernCosineAlgorithm(ModernCosineConfig config, GraphDatabaseAPI api) {
+    public ModernPearsonAlgorithm(ModernSimilarityConfig config, GraphDatabaseAPI api) {
         super(config, api);
     }
 
@@ -38,13 +37,9 @@ public class ModernCosineAlgorithm extends ModernSimilarityAlgorithm<ModernCosin
         int[] targetIndexIds
     ) {
         boolean bidirectional = sourceIndexIds.length == 0 && targetIndexIds.length == 0;
-        return skipValue == null ?
-            (decoder, s, t, cutoff) -> s.cosineSquares(decoder, cutoff, t, bidirectional) :
-            (decoder, s, t, cutoff) -> s.cosineSquaresSkip(decoder, cutoff, t, skipValue, bidirectional);
-    }
 
-    @Override
-    SimilarityResult modifyResult(SimilarityResult result) {
-        return result.squareRooted();
+        return skipValue == null ?
+            (decoder, s, t, cutoff) -> s.pearson(decoder, cutoff, t, bidirectional) :
+            (decoder, s, t, cutoff) -> s.pearsonSkip(decoder, cutoff, t, skipValue, bidirectional);
     }
 }

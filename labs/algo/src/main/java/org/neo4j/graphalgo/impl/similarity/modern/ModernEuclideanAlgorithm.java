@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.impl.similarity.modern;
 
+import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
 import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -40,5 +41,10 @@ public class ModernEuclideanAlgorithm extends ModernSimilarityAlgorithm<ModernEu
         return skipValue == null ?
             (decoder, s, t, cutoff) -> s.sumSquareDelta(decoder, cutoff, t, bidirectional) :
             (decoder, s, t, cutoff) -> s.sumSquareDeltaSkip(decoder, cutoff, t, skipValue, bidirectional);
+    }
+
+    @Override
+    SimilarityResult modifyResult(SimilarityResult result) {
+        return result.squareRooted();
     }
 }
