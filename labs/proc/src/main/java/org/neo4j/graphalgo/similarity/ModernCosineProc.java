@@ -23,6 +23,7 @@ package org.neo4j.graphalgo.similarity;
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -105,7 +106,7 @@ public class ModernCosineProc extends AlgoBaseProc<ModernCosineAlgorithm, Cosine
 
     @Override
     protected AlgorithmFactory<ModernCosineAlgorithm, ModernCosineConfig> algorithmFactory(ModernCosineConfig config) {
-        return new AlgorithmFactory<ModernCosineAlgorithm, ModernCosineConfig>() {
+        return new AlphaAlgorithmFactory<ModernCosineAlgorithm, ModernCosineConfig>() {
             @Override
             public ModernCosineAlgorithm build(
                 Graph graph,
@@ -114,11 +115,6 @@ public class ModernCosineProc extends AlgoBaseProc<ModernCosineAlgorithm, Cosine
                 Log log
             ) {
                 return new ModernCosineAlgorithm(config, api);
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(ModernCosineConfig configuration) {
-                throw new IllegalArgumentException("Memory estimation not implemented for Cosine Similarity");
             }
         };
     }
