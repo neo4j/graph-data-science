@@ -235,6 +235,8 @@ YIELD nodeId, label
 |===
 
 
+ifndef::env-docs[]
+
 [[algorithms-label-propagation-examples]]
 == Examples
 
