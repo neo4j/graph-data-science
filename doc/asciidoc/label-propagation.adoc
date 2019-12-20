@@ -6,11 +6,13 @@
 This section describes the Label Propagation algorithm in the Neo4j Graph Algorithms library.
 --
 
+// tag::introduction[]
 The Label Propagation algorithm (LPA) is a fast algorithm for finding communities in a graph.
 It detects these communities using network structure alone as its guide, and doesn't require a pre-defined objective function or prior information about the communities.
 
 One interesting feature of LPA is that nodes can be assigned preliminary labels to narrow down the range of solutions generated.
 This means that it can be used as semi-supervised way of finding communities where we hand-pick some initial communities.
+// end::introduction[]
 
 This section includes:
 
@@ -30,6 +32,7 @@ LPA works by propagating labels throughout the network and forming communities b
 The intuition behind the algorithm is that a single label can quickly become dominant in a densely connected group of nodes, but will have trouble crossing a sparsely connected region.
 Labels will get trapped inside a densely connected group of nodes, and those nodes that end up with the same label when the algorithms finish can be considered part of the same community.
 
+// tag::formula[]
 The algorithm works as follows:
 
 * Every node is initialized with a unique community label (an identifier).
@@ -42,6 +45,7 @@ The algorithm works as follows:
 As labels propagate, densely connected groups of nodes quickly reach a consensus on a unique label.
 At the end of the propagation only a few labels will remain - most will have disappeared.
 Nodes that have the same community label at convergence are said to belong to the same community.
+// end::formula[]
 
 For more information on this algorithm, see:
 
@@ -274,6 +278,7 @@ RETURN algo.asNode(nodeId).name AS Name, label AS CommunityId
   ORDER BY CommunityId, Name
 ----
 
+// tag::stream-sample-graph-result[]
 .Results
 [opts="header",cols="1,1"]
 |===
@@ -285,7 +290,7 @@ RETURN algo.asNode(nodeId).name AS Name, label AS CommunityId
 | "Mark"    | 4
 | "Michael" | 4
 |===
-
+// end::stream-sample-graph-result[]
 
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
@@ -306,10 +311,12 @@ YIELD nodes, iterations, communityCount, writeProperty;
 |===
 
 
+// tag::stream-sample-graph-explanation[]
 Our algorithm found two communities, with 3 members each.
 
 It appears that Michael, Bridget, and Alice belong together, as do Doug and Mark.
 Only Charles doesn't strongly fit into either side, but ends up with Doug and Mark.
+// end::stream-sample-graph-explanation[]
 
 // TODO: add weights to graph and create example
 //[[algorithms-label-propagation-examples-weighted]]
