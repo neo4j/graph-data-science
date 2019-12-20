@@ -21,25 +21,28 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.AbstractRelationshipProjection.PROJECTION_KEY;
+import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
+import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.SINGLE;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
@@ -84,6 +87,30 @@ class RelationshipProjectionsTest {
         assertThat(projections.typeFilter(), equalTo("T|FOO"));
     }
 
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.RelationshipProjectionsTest#syntacticSugarsSimple")
+    void syntacticSugars(Object argument) {
+        RelationshipProjections actual = RelationshipProjections.fromObject(argument);
+
+        RelationshipProjections expected = RelationshipProjections.builder().projections(singletonMap(
+            ElementIdentifier.of("T"),
+            RelationshipProjection
+                .builder()
+                .type("T")
+                .projection(Projection.NATURAL)
+                .aggregation(DeduplicationStrategy.DEFAULT)
+                .properties(PropertyMappings.of())
+                .build()
+        )).build();
+
+        assertThat(
+            actual,
+            equalTo(expected)
+        );
+        assertThat(actual.typeFilter(), equalTo("T"));
+    }
+
+
     @Test
     void shouldSupportStar() {
         RelationshipProjections actual = RelationshipProjections.fromObject("*");
@@ -112,5 +139,31 @@ class RelationshipProjectionsTest {
             () -> RelationshipProjections.fromObject(Arrays.asList("*", "T"))
         );
         assertThat(ex.getMessage(), matchesPattern("A star projection .* cannot be combined.*"));
+    }
+
+    static Stream<Arguments> syntacticSugarsSimple() {
+        return Stream.of(
+            Arguments.of(
+                "T"
+            ),
+            Arguments.of(
+                singletonList("T")
+            ),
+            Arguments.of(
+                MapUtil.map("T", MapUtil.map(TYPE_KEY, "T"))
+            ),
+            Arguments.of(
+                MapUtil.map("T", MapUtil.map(TYPE_KEY, "T", PROJECTION_KEY, Projection.NATURAL.name()))
+            ),
+            Arguments.of(
+                MapUtil.map("T", MapUtil.map(TYPE_KEY, "T", PROPERTIES_KEY, emptyMap()))
+            ),
+            Arguments.of(
+                MapUtil.map(
+                    "T",
+                    MapUtil.map(TYPE_KEY, "T", PROJECTION_KEY, Projection.NATURAL.name(), PROPERTIES_KEY, emptyMap())
+                )
+            )
+        );
     }
 }
