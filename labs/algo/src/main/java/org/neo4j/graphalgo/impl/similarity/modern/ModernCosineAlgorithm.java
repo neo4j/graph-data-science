@@ -24,12 +24,18 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
+import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
+import org.neo4j.graphalgo.impl.similarity.Computations;
+import org.neo4j.graphalgo.impl.similarity.RecordingSimilarityRecorder;
 import org.neo4j.graphalgo.impl.similarity.RleDecoder;
 import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
 import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
+import org.neo4j.graphalgo.impl.similarity.SimilarityRecorder;
 import org.neo4j.graphalgo.impl.similarity.SimilarityStreamGenerator;
 import org.neo4j.graphalgo.impl.similarity.TopKConsumer;
 import org.neo4j.graphalgo.impl.similarity.WeightedInput;
@@ -43,15 +49,17 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.similarity.SimilarityInput.indexesFor;
 
-public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, Stream<SimilarityResult>> {
+public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, ModernCosineAlgorithm.CosineSimilarityResult> {
 
     private final ModernCosineConfig config;
     private final GraphDatabaseAPI api;
+    private boolean emptyResult = false;
 
     public ModernCosineAlgorithm(ModernCosineConfig config, GraphDatabaseAPI api) {
         this.config = config;
@@ -59,32 +67,47 @@ public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, Stre
     }
 
     @Override
-    public Stream<SimilarityResult> compute() {
+    public CosineSimilarityResult compute() {
+        ImmutableCosineSimilarityResult.Builder builder = ImmutableCosineSimilarityResult.builder();
+
         Double skipValue = config.skipValue();
 
         WeightedInput[] inputs = prepareWeights(config.data(), skipValue);
 
-        if (inputs.length == 0) {
-            return Stream.empty();
-        }
         long[] inputIds = SimilarityInput.extractInputIds(inputs);
         int[] sourceIndexIds = indexesFor(inputIds, config.sourceIds(), "sourceIds");
         int[] targetIndexIds = indexesFor(inputIds, config.targetIds(), "targetIds");
         SimilarityComputer<WeightedInput> computer = similarityComputer(skipValue, sourceIndexIds, targetIndexIds);
+        builder.nodes(inputIds.length)
+            .sourceIdsLength(sourceIndexIds.length)
+            .targetIdsLength(targetIndexIds.length);
+
+        if (inputs.length == 0) {
+            return builder.stream(Stream.empty())
+                .isEmpty(true)
+                .build();
+        }
+
+        if (config.showComputations()) {
+            RecordingSimilarityRecorder<WeightedInput> recorder = new RecordingSimilarityRecorder<>( computer);
+            builder.computations(recorder);
+            computer = recorder;
+        }
 
         double similarityCutoff = config.similarityCutoff();
-        int topN = config.top();
-        int topK = config.topK();
 
-        return generateWeightedStream(
+        Stream<SimilarityResult> resultStream = generateWeightedStream(
             inputs,
             sourceIndexIds,
             targetIndexIds,
             similarityCutoff,
-            topN,
-            topK,
+            config.top(),
+            config.topK(),
             computer
         );
+        return builder.stream(resultStream)
+            .isEmpty(false)
+            .build();
     }
 
     @Override
@@ -94,6 +117,10 @@ public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, Stre
 
     @Override
     public void release() {
+    }
+
+    public boolean emptyResult() {
+        return emptyResult;
     }
 
     private WeightedInput[] prepareWeights(Object rawData, Double skipValue) {
@@ -222,5 +249,22 @@ public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, Stre
             return stream.sorted(comparator).limit(topN);
         }
         return TopKConsumer.topK(stream, topN, comparator);
+    }
+
+    @ValueClass
+    public interface CosineSimilarityResult {
+
+        Stream<SimilarityResult> stream();
+
+        int nodes();
+
+        int sourceIdsLength();
+
+        int targetIdsLength();
+
+        Optional<Computations> computations();
+
+        boolean isEmpty();
+
     }
 }

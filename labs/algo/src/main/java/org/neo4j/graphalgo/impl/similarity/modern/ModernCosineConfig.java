@@ -108,4 +108,15 @@ public interface ModernCosineConfig extends AlgoBaseConfig, WriteConfig {
     default String writeProperty() {
         return "score";
     }
+
+    @Value.Default
+    default long writeBatchSize() {
+        return 10_000L;
+    }
+
+    @Value.Default
+    default boolean write() {
+        return false;
+    }
+
 }

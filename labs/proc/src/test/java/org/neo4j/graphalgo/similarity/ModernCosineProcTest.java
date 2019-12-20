@@ -56,7 +56,9 @@ class ModernCosineProcTest extends BaseProcTest {
         ", (c)-[:LIKES {stars:4}]->(i3)";
 
     private static final String STATEMENT_STREAM =
-        " MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)" +
+        " MATCH (i:Item)" +
+        " WITH i ORDER BY id(i)" +
+        " MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)" +
         " WITH {item: id(p), weights: collect(coalesce(r.stars, $missingValue))} as userData" +
         " WITH collect(userData) AS data, $config AS config" +
         " WITH config {.*, data: data} AS input" +
@@ -78,7 +80,7 @@ class ModernCosineProcTest extends BaseProcTest {
         " WITH {item: id(p), weights: collect(coalesce(r.stars, 0))} AS userData" +
         " WITH collect(userData) AS data, $config AS config" +
         " WITH config {.*, data: data} AS input" +
-        " CALL gds.alpha.similarity.cosine(input)" +
+        " CALL gds.alpha.similarity.cosine.write(input)" +
         " yield p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations" +
         " RETURN *";
 
@@ -87,14 +89,15 @@ class ModernCosineProcTest extends BaseProcTest {
         " WITH i ORDER BY id(i)" +
         " MATCH (p:Person)" +
         " OPTIONAL MATCH (p)-[r:LIKES]->(i)" +
-        " WITH p, collect(coalesce(r.stars, 0)) AS userData\n" +
+        " WITH p, collect(coalesce(r.stars, 0)) AS userData" +
         " SET p.embedding = userData";
 
     private static final String EMBEDDING_STATEMENT =
         " MATCH (p:Person)" +
         " WITH {item: id(p), weights: p.embedding} as userData" +
-        " WITH collect(userData) as data" +
-        " CALL gds.alpha.similarity.cosine(data, $config)" +
+        " WITH collect(userData) as data, $config AS config" +
+        " WITH config {.*, data: data} AS input" +
+        " CALL gds.alpha.similarity.cosine.write(input)" +
         " yield p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs" +
         " RETURN *";
 
