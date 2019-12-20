@@ -151,27 +151,6 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         return modifyProjections(p -> p.withAdditionalPropertyMappings(mappings));
     }
 
-    public RelationshipProjections filterPropertyMappings(String... propertyNames) {
-        Boolean noMatch = Arrays
-            .stream(propertyNames)
-            .map(propertyName -> allProperties().stream().noneMatch(p -> p.equals(propertyName)))
-            .reduce(Boolean::logicalAnd)
-            .get();
-        if (noMatch) {
-            return modifyProjections(p -> p);
-        }
-        return modifyProjections(p ->
-            p.withProperties(PropertyMappings.of(
-                p.properties().stream()
-                    .filter(mapping ->
-                        Arrays.stream(propertyNames)
-                            .anyMatch(propertyName -> mapping.propertyKey().equals(propertyName)))
-                    .collect(Collectors.toList())
-                )
-            )
-        );
-    }
-
     private RelationshipProjections modifyProjections(UnaryOperator<RelationshipProjection> operator) {
         Map<ElementIdentifier, RelationshipProjection> newProjections = projections().entrySet().stream().collect(toMap(
             Map.Entry::getKey,

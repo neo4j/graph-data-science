@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.api.GraphFactory.ANY_REL_TYPE;
 
 public interface GraphsByRelationshipType {
 
@@ -52,6 +55,7 @@ public interface GraphsByRelationshipType {
         return new MultipleRelationshipTypes(graphs);
     }
 
+    @Deprecated
     default Graph getGraph(String relationshipType) {
         return getGraph(relationshipType, Optional.empty());
     }
@@ -149,35 +153,29 @@ public interface GraphsByRelationshipType {
                 ));
             }
 
-            boolean allRelationshipTypes = relationshipTypes.contains("*");
-            if (allRelationshipTypes && !maybeRelationshipProperty.isPresent()) {
-                return getUnion();
-            }
+            Map<String, Map<String, Graph>> graphsWithRelTypes = relationshipTypes.contains("*") ?
+                graphs :
+                graphs.entrySet()
+                    .stream()
+                    .filter(entry -> relationshipTypes.contains(entry.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            Collection<Graph> graphParts = new ArrayList<>();
-            if (allRelationshipTypes) {
-                String weightProperty = maybeRelationshipProperty.get();
-                for (Map<String, ? extends Graph> graphsByProperty : graphs.values()) {
-                    Graph graph = getExistingByProperty(weightProperty, graphsByProperty);
-                    graphParts.add(graph);
-                }
-            } else {
+
+            List<Graph> filteredGraphs = graphsWithRelTypes.values().stream().map(graphsByProperty -> {
                 if (maybeRelationshipProperty.isPresent()) {
-                    String weightProperty = maybeRelationshipProperty.get();
-                    for (String type : relationshipTypes) {
-                        Map<String, ? extends Graph> graphsByProperty = getExistingByType(type);
-                        Graph graph = getExistingByProperty(weightProperty, graphsByProperty);
-                        graphParts.add(graph);
-                    }
+                    return getExistingByProperty(maybeRelationshipProperty.get(), graphsByProperty);
                 } else {
-                    for (String type : relationshipTypes) {
-                        Map<String, ? extends Graph> graphsByProperty = getExistingByType(type);
-                        graphParts.addAll(graphsByProperty.values());
+                    if (graphsByProperty.containsKey(ANY_REL_TYPE)) {
+                        return graphsByProperty.get(ANY_REL_TYPE);
+                    } else {
+                        return graphsByProperty
+                            .get(graphsByProperty.keySet().iterator().next())
+                            .withoutProperties();
                     }
                 }
-            }
+            }).collect(Collectors.toList());
 
-            return UnionGraph.of(graphParts);
+            return UnionGraph.of(filteredGraphs);
         }
 
         @Override

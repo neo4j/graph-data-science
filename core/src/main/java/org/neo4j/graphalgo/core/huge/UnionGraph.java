@@ -216,4 +216,9 @@ public final class UnionGraph implements Graph {
     public boolean isUndirected() {
         return first.isUndirected();
     }
+
+    @Override
+    public Graph withoutProperties() {
+        return UnionGraph.of(graphs.stream().map(Graph::withoutProperties).collect(Collectors.toList()));
+    }
 }

@@ -168,8 +168,6 @@ public interface GraphCreateConfig extends BaseConfig {
             "relationshipProjection",
             config.get("relationshipProjection", (Object) RelationshipProjections.empty())
         ));
-        relationshipProjections = relationshipProjections.filterPropertyMappings(config.getString(DEPRECATED_RELATIONSHIP_PROPERTY_KEY)
-            .orElse(config.getString(RELATIONSHIP_WEIGHT_KEY).orElse(null)));
         NodeProjections nodeProjections = NodeProjections.fromObject(CypherMapWrapper.failOnNull(
             "nodeProjection",
             config.get("nodeProjection", (Object) NodeProjections.empty())

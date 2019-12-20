@@ -184,6 +184,7 @@ public final class GraphCatalog extends GraphFactory {
             graph.canRelease(false);
         }
 
+        @Deprecated
         Graph get(String graphName, String relationshipType, Optional<String> maybeRelationshipProperty) {
             if (!exists(graphName)) {
                 throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", graphName));

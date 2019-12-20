@@ -613,6 +613,31 @@ public class HugeGraph implements Graph {
         }
     }
 
+    @Override
+    public HugeGraph withoutProperties() {
+        if (!hasRelationshipProperty()) {
+            return this;
+        } else {
+            return new HugeGraph(
+                tracker,
+                idMapping,
+                nodeProperties,
+                relationshipCount,
+                inAdjacency,
+                outAdjacency,
+                inOffsets,
+                outOffsets,
+                false,
+                Double.NaN,
+                null,
+                null,
+                null,
+                null,
+                isUndirected
+            );
+        }
+    }
+
     private AdjacencyList.DecompressingCursor newAdjacencyCursor(final AdjacencyList adjacency) {
         return adjacency != null ? adjacency.rawDecompressingCursor() : null;
     }
