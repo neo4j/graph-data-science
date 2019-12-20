@@ -21,13 +21,25 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.SINGLE;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
@@ -72,4 +84,33 @@ class RelationshipProjectionsTest {
         assertThat(projections.typeFilter(), equalTo("T|FOO"));
     }
 
+    @Test
+    void shouldSupportStar() {
+        RelationshipProjections actual = RelationshipProjections.fromObject("*");
+
+        RelationshipProjections expected = RelationshipProjections.builder().projections(singletonMap(
+            PROJECT_ALL,
+            RelationshipProjection
+                .builder()
+                .type((String) null)
+                .aggregation(DeduplicationStrategy.DEFAULT)
+                .properties(PropertyMappings.of())
+                .build()
+        )).build();
+
+        assertThat(
+            actual,
+            equalTo(expected)
+        );
+        assertThat(actual.typeFilter(), equalTo(""));
+    }
+
+    @Test
+    void shouldNotAllowCombiningStarWithStandard() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> RelationshipProjections.fromObject(Arrays.asList("*", "T"))
+        );
+        assertThat(ex.getMessage(), matchesPattern("A star projection .* cannot be combined.*"));
+    }
 }

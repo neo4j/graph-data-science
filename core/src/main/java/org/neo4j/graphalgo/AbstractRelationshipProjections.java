@@ -126,6 +126,10 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             throw new IllegalArgumentException(
                 "An empty relationship projection was given; at least one relationship type must be projected.");
         }
+        if (projections.size() > 1 && projections.containsKey(PROJECT_ALL)) {
+            throw new IllegalArgumentException(
+                "A star projection (all relationships) cannot be combined with another projection.");
+        }
         return RelationshipProjections.of(projections);
     }
 
@@ -161,7 +165,6 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             e -> operator.apply(e.getValue())
         ));
         if (newProjections.isEmpty()) {
-            // TODO: special identifier for 'SELECT ALL'
             newProjections.put(
                 PROJECT_ALL,
                 operator.apply(RelationshipProjection.empty())

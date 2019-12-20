@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -34,6 +35,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class NodeProjectionsTest {
@@ -92,6 +94,26 @@ class NodeProjectionsTest {
         NodeProjections actual = NodeProjections.fromObject("A | B");
 
         assertThat(actual.labelProjection(), equalTo(Optional.of("A | B")));
+    }
+
+    @Test
+    void shouldSupportStar() {
+        NodeProjections actual = NodeProjections.fromObject("*");
+
+        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+            PROJECT_ALL,
+            NodeProjection
+                .builder()
+                .label((String) null)
+                .properties(PropertyMappings.of())
+                .build()
+        )).build();
+
+        assertThat(
+            actual,
+            equalTo(expected)
+        );
+        assertThat(actual.labelProjection(), equalTo(Optional.of("")));
     }
 
     static Stream<Arguments> syntacticSugarsSimple() {

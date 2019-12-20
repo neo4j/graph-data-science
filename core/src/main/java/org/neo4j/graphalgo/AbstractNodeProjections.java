@@ -138,7 +138,6 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
             e -> e.getValue().withAdditionalPropertyMappings(mappings)
         ));
         if (newProjections.isEmpty()) {
-            // TODO: special identifier for 'SELECT ALL'
             newProjections.put(PROJECT_ALL, NodeProjection.empty().withAdditionalPropertyMappings(mappings));
         }
         return create(newProjections);
