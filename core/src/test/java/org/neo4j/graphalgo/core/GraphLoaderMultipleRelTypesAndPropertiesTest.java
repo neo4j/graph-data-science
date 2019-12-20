@@ -199,7 +199,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     void multipleTypesWithProperties(Class<? extends GraphFactory> graphFactory) {
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
             .withRelationshipType("REL1 | REL2")
-            .withRelationshipProperties(PropertyMapping.of("prop1", 42D))
+            .withRelationshipProperties(PropertyMapping.of("prop1", 1337D))
             .buildGraphs(graphFactory);
 
         assertEquals(2, graphs.availableRelationshipTypes().size());
@@ -209,9 +209,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         Graph rel2Graph = graphs.getGraph("REL2");
         Graph unionGraph = graphs.getGraph("REL1 | REL2");
 
-        assertGraphEquals(fromGdl("(a)-[{w: 1.0d}]->(b)-[{w: 42.0d}]->(c)"), rel1Graph);
-        assertGraphEquals(fromGdl("(a)-[{w: 42.0d}]->(c), (b)"), rel2Graph);
-        assertGraphEquals(fromGdl("(a)-[{w: 1.0d}]->(b)-[{w: 42.0d}]->(c)<-[{w: 42.0d}]-(a)"), unionGraph);
+        assertGraphEquals(fromGdl("(a)-[]->(b)-[]->(c)"), rel1Graph);
+        assertGraphEquals(fromGdl("(a)-[]->(c), (b)"), rel2Graph);
+        assertGraphEquals(fromGdl("(a)-[]->(b)-[]->(c)<-[]-(a)"), unionGraph);
     }
 
     @AllGraphTypesTest

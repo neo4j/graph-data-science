@@ -259,8 +259,8 @@ public final class GraphCatalog extends GraphFactory {
             Map<GraphCreateConfig, Graph> filteredGraphs = new HashMap<>();
             if (StringUtils.isBlank(graphName)) {
                 graphsByName.values().forEach(gwc ->
-                    filteredGraphs.put(gwc.config(), gwc.graph().getGraph(relTypes, propertyName)
-                    ));
+                    filteredGraphs.put(gwc.config(), gwc.graph().getGraph(relTypes, propertyName))
+                );
             } else {
                 GraphWithConfig graphWithConfig = graphsByName.get(graphName);
                 filteredGraphs.put(graphWithConfig.config(), graphWithConfig.graph().getGraph(relTypes, propertyName));

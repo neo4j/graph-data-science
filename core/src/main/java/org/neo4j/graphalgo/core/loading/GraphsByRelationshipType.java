@@ -160,7 +160,6 @@ public interface GraphsByRelationshipType {
                     .filter(entry -> relationshipTypes.contains(entry.getKey()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-
             List<Graph> filteredGraphs = graphsWithRelTypes.values().stream().map(graphsByProperty -> {
                 if (maybeRelationshipProperty.isPresent()) {
                     return getExistingByProperty(maybeRelationshipProperty.get(), graphsByProperty);

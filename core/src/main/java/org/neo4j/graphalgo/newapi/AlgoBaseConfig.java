@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.utils.Pools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,9 +42,7 @@ public interface AlgoBaseConfig extends BaseConfig {
 
     @Value.Default
     default List<String> relationshipTypes() {
-        List<String> relationshipTypes = new ArrayList<>();
-        relationshipTypes.add("*");
-        return relationshipTypes;
+        return Collections.singletonList("*");
     }
 
     @Configuration.Parameter

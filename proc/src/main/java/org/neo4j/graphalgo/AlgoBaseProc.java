@@ -164,10 +164,8 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
         Map.Entry<GraphCreateConfig, Graph> catalogEntry;
 
-        Optional<String> weightProperty = Optional.empty();
-        if (config instanceof WeightConfig) {
-            weightProperty = Optional.ofNullable(((WeightConfig) config).weightProperty());
-        }
+        Optional<String> weightProperty = config instanceof WeightConfig ?
+            Optional.ofNullable(((WeightConfig) config).weightProperty()) : Optional.empty();
 
         if (maybeGraphName.isPresent()) {
             catalogEntry = GraphCatalog
