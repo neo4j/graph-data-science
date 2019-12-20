@@ -27,16 +27,15 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.SimilarityExporter;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
 import org.neo4j.graphalgo.impl.similarity.Computations;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanAlgorithm;
-import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanAlgorithm.EuclideanSimilarityResult;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanConfig;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanConfigImpl;
+import org.neo4j.graphalgo.impl.similarity.modern.ModernSimilarityAlgorithmResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.logging.Log;
@@ -52,14 +51,14 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModernEuclideanProc extends AlgoBaseProc<ModernEuclideanAlgorithm, EuclideanSimilarityResult, ModernEuclideanConfig> {
+public class ModernEuclideanProc extends AlgoBaseProc<ModernEuclideanAlgorithm, ModernSimilarityAlgorithmResult, ModernEuclideanConfig> {
 
     @Procedure(name = "gds.alpha.similarity.euclidean.stream", mode = READ)
     public Stream<SimilarityResult> euclideanStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModernEuclideanAlgorithm, EuclideanSimilarityResult, ModernEuclideanConfig> compute = compute(
+        ComputationResult<ModernEuclideanAlgorithm, ModernSimilarityAlgorithmResult, ModernEuclideanConfig> compute = compute(
             graphNameOrConfig,
             configuration
         );
@@ -71,15 +70,15 @@ public class ModernEuclideanProc extends AlgoBaseProc<ModernEuclideanAlgorithm, 
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModernEuclideanAlgorithm, EuclideanSimilarityResult, ModernEuclideanConfig> compute = compute(
+        ComputationResult<ModernEuclideanAlgorithm, ModernSimilarityAlgorithmResult, ModernEuclideanConfig> compute = compute(
             graphNameOrConfig,
             configuration
         );
 
         ModernEuclideanConfig config = compute.config();
-        EuclideanSimilarityResult result = compute.result();
+        ModernSimilarityAlgorithmResult result = compute.result();
 
-        if(result.isEmpty()) {
+        if (result.isEmpty()) {
             return emptyStream(config.writeRelationshipType(), config.writeProperty());
         }
 
@@ -136,7 +135,7 @@ public class ModernEuclideanProc extends AlgoBaseProc<ModernEuclideanAlgorithm, 
     }
 
     Stream<SimilaritySummaryResult> writeAndAggregateResults(
-        ModernEuclideanAlgorithm.EuclideanSimilarityResult algoResult,
+        ModernSimilarityAlgorithmResult algoResult,
         ModernEuclideanConfig config,
         TerminationFlag terminationFlag
     ) {
@@ -148,7 +147,12 @@ public class ModernEuclideanProc extends AlgoBaseProc<ModernEuclideanAlgorithm, 
         };
 
         if (config.write()) {
-            SimilarityExporter similarityExporter = new SimilarityExporter(api, config.writeRelationshipType(), config.writeProperty(), terminationFlag);
+            SimilarityExporter similarityExporter = new SimilarityExporter(
+                api,
+                config.writeRelationshipType(),
+                config.writeProperty(),
+                terminationFlag
+            );
             similarityExporter.export(algoResult.stream().peek(recorder), config.writeBatchSize());
         } else {
             algoResult.stream().forEach(recorder);

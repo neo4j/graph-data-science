@@ -25,10 +25,8 @@ import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
-import org.neo4j.graphalgo.impl.similarity.Computations;
 import org.neo4j.graphalgo.impl.similarity.RecordingSimilarityRecorder;
 import org.neo4j.graphalgo.impl.similarity.RleDecoder;
 import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
@@ -46,13 +44,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.similarity.SimilarityInput.indexesFor;
 
-public class ModernEuclideanAlgorithm extends Algorithm<ModernEuclideanAlgorithm, ModernEuclideanAlgorithm.EuclideanSimilarityResult> {
+public class ModernEuclideanAlgorithm extends Algorithm<ModernEuclideanAlgorithm, ModernSimilarityAlgorithmResult> {
 
     private final ModernEuclideanConfig config;
     private final GraphDatabaseAPI api;
@@ -63,8 +60,8 @@ public class ModernEuclideanAlgorithm extends Algorithm<ModernEuclideanAlgorithm
     }
 
     @Override
-    public EuclideanSimilarityResult compute() {
-        ImmutableEuclideanSimilarityResult.Builder builder = ImmutableEuclideanSimilarityResult.builder();
+    public ModernSimilarityAlgorithmResult compute() {
+        ImmutableModernSimilarityAlgorithmResult.Builder builder = ImmutableModernSimilarityAlgorithmResult.builder();
 
         Double skipValue = config.skipValue();
         WeightedInput[] inputs = prepareWeights(config.data(), skipValue);
@@ -78,7 +75,7 @@ public class ModernEuclideanAlgorithm extends Algorithm<ModernEuclideanAlgorithm
             .sourceIdsLength(sourceIndexIds.length)
             .targetIdsLength(targetIndexIds.length);
 
-        if(inputs.length == 0) {
+        if (inputs.length == 0) {
             return builder
                 .stream(Stream.empty())
                 .isEmpty(true)
@@ -172,7 +169,11 @@ public class ModernEuclideanAlgorithm extends Algorithm<ModernEuclideanAlgorithm
         return inputs;
     }
 
-    private SimilarityComputer<WeightedInput> similarityComputer(Double skipValue, int[] sourceIndexIds, int[] targetIndexIds) {
+    private SimilarityComputer<WeightedInput> similarityComputer(
+        Double skipValue,
+        int[] sourceIndexIds,
+        int[] targetIndexIds
+    ) {
         boolean bidirectional = sourceIndexIds.length == 0 && targetIndexIds.length == 0;
         return skipValue == null ?
             (decoder, s, t, cutoff) -> s.sumSquareDelta(decoder, cutoff, t, bidirectional) :
@@ -202,7 +203,7 @@ public class ModernEuclideanAlgorithm extends Algorithm<ModernEuclideanAlgorithm
     }
 
     protected Supplier<RleDecoder> createDecoderFactory(int size) {
-        if(ProcedureConstants.CYPHER_QUERY_KEY.equals(config.graph())) {
+        if (ProcedureConstants.CYPHER_QUERY_KEY.equals(config.graph())) {
             return () -> new RleDecoder(size);
         }
         return () -> null;
@@ -241,22 +242,5 @@ public class ModernEuclideanAlgorithm extends Algorithm<ModernEuclideanAlgorithm
         } else {
             return generator.stream(inputs, sourceIndexIds, targetIndexIds, cutoff, topK);
         }
-    }
-
-    @ValueClass
-    public interface EuclideanSimilarityResult {
-
-        Stream<SimilarityResult> stream();
-
-        int nodes();
-
-        int sourceIdsLength();
-
-        int targetIdsLength();
-
-        Optional<Computations> computations();
-
-        boolean isEmpty();
-
     }
 }

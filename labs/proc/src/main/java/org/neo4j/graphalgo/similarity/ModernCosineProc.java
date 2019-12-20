@@ -27,16 +27,15 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.SimilarityExporter;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
 import org.neo4j.graphalgo.impl.similarity.Computations;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineAlgorithm;
-import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineAlgorithm.CosineSimilarityResult;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineConfig;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineConfigImpl;
+import org.neo4j.graphalgo.impl.similarity.modern.ModernSimilarityAlgorithmResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.logging.Log;
@@ -52,14 +51,14 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModernCosineProc extends AlgoBaseProc<ModernCosineAlgorithm, CosineSimilarityResult, ModernCosineConfig> {
+public class ModernCosineProc extends AlgoBaseProc<ModernCosineAlgorithm, ModernSimilarityAlgorithmResult, ModernCosineConfig> {
 
     @Procedure(name = "gds.alpha.similarity.cosine.stream", mode = READ)
     public Stream<SimilarityResult> cosineStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModernCosineAlgorithm, CosineSimilarityResult, ModernCosineConfig> compute = compute(
+        ComputationResult<ModernCosineAlgorithm, ModernSimilarityAlgorithmResult, ModernCosineConfig> compute = compute(
             graphNameOrConfig,
             configuration
         );
@@ -71,13 +70,13 @@ public class ModernCosineProc extends AlgoBaseProc<ModernCosineAlgorithm, Cosine
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModernCosineAlgorithm, CosineSimilarityResult, ModernCosineConfig> compute = compute(
+        ComputationResult<ModernCosineAlgorithm, ModernSimilarityAlgorithmResult, ModernCosineConfig> compute = compute(
             graphNameOrConfig,
             configuration
         );
 
         ModernCosineConfig config = compute.config();
-        CosineSimilarityResult result = compute.result();
+        ModernSimilarityAlgorithmResult result = compute.result();
 
         if (result.isEmpty()) {
             return emptyStream(config.writeRelationshipType(), config.writeProperty());
@@ -120,7 +119,7 @@ public class ModernCosineProc extends AlgoBaseProc<ModernCosineAlgorithm, Cosine
     }
 
     Stream<SimilaritySummaryResult> writeAndAggregateResults(
-        CosineSimilarityResult algoResult,
+        ModernSimilarityAlgorithmResult algoResult,
         ModernCosineConfig config,
         TerminationFlag terminationFlag
     ) {
@@ -132,7 +131,12 @@ public class ModernCosineProc extends AlgoBaseProc<ModernCosineAlgorithm, Cosine
         };
 
         if (config.write()) {
-            SimilarityExporter similarityExporter = new SimilarityExporter(api, config.writeRelationshipType(), config.writeProperty(), terminationFlag);
+            SimilarityExporter similarityExporter = new SimilarityExporter(
+                api,
+                config.writeRelationshipType(),
+                config.writeProperty(),
+                terminationFlag
+            );
             similarityExporter.export(algoResult.stream().peek(recorder), config.writeBatchSize());
         } else {
             algoResult.stream().forEach(recorder);

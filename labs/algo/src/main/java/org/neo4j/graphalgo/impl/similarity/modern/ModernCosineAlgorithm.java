@@ -25,10 +25,8 @@ import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
-import org.neo4j.graphalgo.impl.similarity.Computations;
 import org.neo4j.graphalgo.impl.similarity.RecordingSimilarityRecorder;
 import org.neo4j.graphalgo.impl.similarity.RleDecoder;
 import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
@@ -46,13 +44,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.similarity.SimilarityInput.indexesFor;
 
-public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, ModernCosineAlgorithm.CosineSimilarityResult> {
+public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, ModernSimilarityAlgorithmResult> {
 
     private final ModernCosineConfig config;
     private final GraphDatabaseAPI api;
@@ -63,8 +60,8 @@ public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, Mode
     }
 
     @Override
-    public CosineSimilarityResult compute() {
-        ImmutableCosineSimilarityResult.Builder builder = ImmutableCosineSimilarityResult.builder();
+    public ModernSimilarityAlgorithmResult compute() {
+        ImmutableModernSimilarityAlgorithmResult.Builder builder = ImmutableModernSimilarityAlgorithmResult.builder();
 
         Double skipValue = config.skipValue();
 
@@ -85,7 +82,7 @@ public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, Mode
         }
 
         if (config.showComputations()) {
-            RecordingSimilarityRecorder<WeightedInput> recorder = new RecordingSimilarityRecorder<>( computer);
+            RecordingSimilarityRecorder<WeightedInput> recorder = new RecordingSimilarityRecorder<>(computer);
             builder.computations(recorder);
             computer = recorder;
         }
@@ -239,22 +236,5 @@ public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, Mode
             return stream.sorted(comparator).limit(topN);
         }
         return TopKConsumer.topK(stream, topN, comparator);
-    }
-
-    @ValueClass
-    public interface CosineSimilarityResult {
-
-        Stream<SimilarityResult> stream();
-
-        int nodes();
-
-        int sourceIdsLength();
-
-        int targetIdsLength();
-
-        Optional<Computations> computations();
-
-        boolean isEmpty();
-
     }
 }
