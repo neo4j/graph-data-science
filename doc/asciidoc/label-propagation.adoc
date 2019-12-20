@@ -21,7 +21,6 @@ This section includes:
 ** <<algorithms-label-propagation-examples-weighted, Weighted>>
 ** <<algorithms-label-propagation-examples-seeded, Seeded>>
 ** <<algorithms-label-propagation-examples-projection, Named graphs and Cypher projections>>
-* <<algorithms-label-propagation-usage, Usage>>
 
 [[algorithms-label-propagation-intro]]
 == Introduction
@@ -500,8 +499,4 @@ ORDER BY Community, Name;
 Again, results are identical, as the Cypher projection we use mimics the behaviour of the default loading configuration.
 Of course, the Cypher projection feature enables more advanced control over which exact parts of the graph to compute over; please see <<cypher-projection>> for more details.
 
-[[algorithms-label-propagation-usage]]
-=== Usage
 
-When executing LabelPropagation in parallel with direction 'BOTH', it is possible that results are flaky because of the asynchronous execution fashion of the algorithm.
-This might also happen in an direction 'OUTGOING' graph, if two nodes have relationships that point to each other.
