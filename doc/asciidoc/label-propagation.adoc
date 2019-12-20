@@ -363,28 +363,7 @@ RETURN algo.asNode(nodeId).name AS Name, label AS CommunityId
 | "Michael" | 21
 |===
 
-As we can see, the communityIds are based on the `seed_label` property, concretely `19` is from the user `Mark` and `21` from `Doug`.
-
-.The following will load the graph, run the algorithm, and write back results:
-[source, cypher]
-----
-CALL algo.labelPropagation('User', 'FOLLOW', {
-  direction: 'OUTGOING',
-  iterations: 10,
-  seedProperty: 'seed_label',
-  writeProperty: 'community',
-  write: true
-  })
-YIELD nodes, iterations, communityCount, writeProperty;
-----
-
-.Results
-[opts="header",cols="1m,1m,1m,1m"]
-|===
-| nodes | iterations | communityCount | PropertyName
-| 6     | 3          | 2               | "componentId"
-|===
-
+// TODO: explain result
 
 [[algorithms-label-propagation-examples-projection]]
 === Cypher projection
