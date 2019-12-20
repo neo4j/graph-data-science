@@ -47,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
+import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRegex;
 import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
 public class BaseProcTest {
@@ -264,11 +265,34 @@ public class BaseProcTest {
         Map<String, Object> queryParameters,
         String messageSubstring
     ) {
+        assertError(query, queryParameters, containsMessage(messageSubstring));
+    }
+
+    protected void assertErrorRegex(
+        @Language("Cypher") String query,
+        String regex
+    ) {
+        assertErrorRegex(query, emptyMap(), regex);
+    }
+
+    protected void assertErrorRegex(
+        @Language("Cypher") String query,
+        Map<String, Object> queryParameters,
+        String regex
+    ) {
+        assertError(query, queryParameters, containsMessageRegex(regex));
+    }
+
+    private void assertError(
+        @Language("Cypher") String query,
+        Map<String, Object> queryParameters,
+        Matcher<Throwable> matcher
+    ) {
         try {
             consume(runQuery(query, queryParameters));
             fail(format("Expected an exception to be thrown by query:\n%s", query));
-        } catch (Exception e) {
-            assertThat(e, containsMessage(messageSubstring));
+        } catch (Throwable e) {
+            assertThat(e, matcher);
         }
     }
 

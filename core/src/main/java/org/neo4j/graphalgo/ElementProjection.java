@@ -32,9 +32,9 @@ import java.util.function.Supplier;
 
 import static java.util.Collections.emptyMap;
 
-abstract class ElementProjection {
+public abstract class ElementProjection {
 
-    private static final String PROPERTIES_KEY = "properties";
+    public static final String PROPERTIES_KEY = "properties";
 
     @Value.Default
     @Value.Parameter
@@ -43,8 +43,6 @@ abstract class ElementProjection {
     }
 
     public abstract ElementProjection withAdditionalPropertyMappings(PropertyMappings mappings);
-
-    public abstract boolean isMatchAll();
 
     public final Map<String, Object> toObject() {
         Map<String, Object> value = new LinkedHashMap<>();

@@ -42,19 +42,8 @@ import java.util.stream.Stream;
 
 public class GraphCreateProc extends CatalogProc {
 
-    @Procedure(name = "algo.beta.graph.create", mode = Mode.READ)
-    @Description("CALL graph.create(" +
-                 "  graphName: STRING," +
-                 "  nodeProjection: MAP," +
-                 "  relationshipProjection: MAP," +
-                 "  configuration: MAP" +
-                 ") YIELD" +
-                 "  graphName: STRING," +
-                 "  nodeProjection: MAP," +
-                 "  relationshipProjection: MAP," +
-                 "  nodes: INTEGER," +
-                 "  relationships: INTEGER," +
-                 "  createMillis: INTEGER")
+    @Procedure(name = "gds.graph.create", mode = Mode.READ)
+    @Description("Creates a named graph in the catalog for use by algorithms.")
     public Stream<GraphCreateResult> create(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProjection") @Nullable Object nodeProjection,

@@ -494,7 +494,7 @@ class GraphLoadProcTest extends BaseProcTest {
 
     @Disabled
     void multiUseLoadedGraphWithMultipleRelationships() {
-        String query = "CALL algo.beta.graph.create(" +
+        String query = "CALL gds.graph.create(" +
                        "    'foo', {}, 'X | Y'" +
                        ")";
 

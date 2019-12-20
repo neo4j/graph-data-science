@@ -58,10 +58,10 @@ class GraphDropProcTest extends BaseProcTest {
 
     @Test
     void shouldDropGraphFromCatalog() {
-        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
+        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
 
         assertCypherResult(
-            "CALL algo.beta.graph.exists($graphName)",
+            "CALL gds.graph.exists($graphName)",
             map("graphName", GRAPH_NAME),
             singletonList(
                 map("graphName", GRAPH_NAME, "exists", true)
@@ -69,7 +69,7 @@ class GraphDropProcTest extends BaseProcTest {
         );
 
         assertCypherResult(
-            "CALL algo.beta.graph.drop($graphName)",
+            "CALL gds.graph.drop($graphName)",
             map("graphName", GRAPH_NAME),
             singletonList(
                 map(
@@ -106,7 +106,7 @@ class GraphDropProcTest extends BaseProcTest {
         );
 
         assertCypherResult(
-            "CALL algo.beta.graph.exists($graphName)",
+            "CALL gds.graph.exists($graphName)",
             map("graphName", GRAPH_NAME),
             singletonList(
                 map("graphName", GRAPH_NAME, "exists", false)
@@ -117,10 +117,10 @@ class GraphDropProcTest extends BaseProcTest {
 
     @Test
     void dropWithHistogramComputationOptOut() {
-        runQuery("CALL algo.beta.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
+        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
 
         assertCypherResult(
-            "CALL algo.beta.graph.exists($graphName)",
+            "CALL gds.graph.exists($graphName)",
             map("graphName", GRAPH_NAME),
             singletonList(
                 map("graphName", GRAPH_NAME, "exists", true)
@@ -128,7 +128,7 @@ class GraphDropProcTest extends BaseProcTest {
         );
 
         assertCypherResult(
-            "CALL algo.beta.graph.drop($graphName) " +
+            "CALL gds.graph.drop($graphName) " +
             "YIELD graphName, nodeProjection, relationshipProjection, nodes, relationships",
             map("graphName", GRAPH_NAME),
             singletonList(
@@ -154,7 +154,7 @@ class GraphDropProcTest extends BaseProcTest {
         );
 
         assertCypherResult(
-            "CALL algo.beta.graph.exists($graphName)",
+            "CALL gds.graph.exists($graphName)",
             map("graphName", GRAPH_NAME),
             singletonList(
                 map("graphName", GRAPH_NAME, "exists", false)
@@ -165,7 +165,7 @@ class GraphDropProcTest extends BaseProcTest {
     @Test
     void failOnNonExistingGraph() {
         assertCypherResult(
-            "CALL algo.beta.graph.exists($graphName)",
+            "CALL gds.graph.exists($graphName)",
             map("graphName", GRAPH_NAME),
             singletonList(
                 map("graphName", GRAPH_NAME, "exists", false)
@@ -173,13 +173,13 @@ class GraphDropProcTest extends BaseProcTest {
         );
 
         assertError(
-            "CALL algo.beta.graph.drop($graphName)",
+            "CALL gds.graph.drop($graphName)",
             map("graphName", GRAPH_NAME),
             String.format("Graph with name `%s` does not exist and can't be removed.", GRAPH_NAME)
         );
 
         assertCypherResult(
-            "CALL algo.beta.graph.exists($graphName)",
+            "CALL gds.graph.exists($graphName)",
             map("graphName", GRAPH_NAME),
             singletonList(
                 map("graphName", GRAPH_NAME, "exists", false)
@@ -191,7 +191,7 @@ class GraphDropProcTest extends BaseProcTest {
     @MethodSource("org.neo4j.graphalgo.newapi.GraphCreateProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
-            "CALL algo.beta.graph.drop($graphName)",
+            "CALL gds.graph.drop($graphName)",
             map("graphName", invalidName),
             String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );

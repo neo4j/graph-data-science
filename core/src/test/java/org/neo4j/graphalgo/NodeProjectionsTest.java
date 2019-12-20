@@ -21,50 +21,59 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.neo4j.helpers.collection.MapUtil.map;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class NodeProjectionsTest {
 
-    @Test
-    void shouldParseWithoutProperties() {
-        Map<String, Object> noProperties = map(
-            "MY_LABEL", map(
-                "label", "A"
-            )
-        );
+    @ParameterizedTest(name = "argument: {0}")
+    @MethodSource("syntacticSugarsSimple")
+    void syntacticSugars(Object argument) {
+        NodeProjections actual = NodeProjections.fromObject(argument);
 
-        NodeProjections projections = NodeProjections.fromObject(noProperties);
-        assertThat(projections.allProjections(), hasSize(1));
+        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+            ElementIdentifier.of("A"),
+            NodeProjection.builder().label("A").properties(PropertyMappings.of()).build()
+        )).build();
+
         assertThat(
-            projections.getProjection(ElementIdentifier.of("MY_LABEL")),
-            equalTo(NodeProjection.of("A", PropertyMappings.of()))
+            actual,
+            equalTo(expected)
         );
-        assertThat(projections.labelProjection(), equalTo(Optional.of("A")));
+        assertThat(actual.labelProjection(), equalTo(Optional.of("A")));
     }
 
     @Test
     void shouldParseWithProperties() {
-        Map<String, Object> withProperties = map(
+        NodeProjections actual = NodeProjections.fromObject(map(
             "MY_LABEL", map(
                 "label", "A",
-                "properties", Arrays.asList(
+                "properties", asList(
                     "prop1", "prop2"
                 )
             )
-        );
+        ));
 
-        NodeProjections projections = NodeProjections.fromObject(withProperties);
-        assertThat(
-            projections.getProjection(ElementIdentifier.of("MY_LABEL")),
-            equalTo(NodeProjection
+        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+            ElementIdentifier.of("MY_LABEL"),
+            NodeProjection
                 .builder()
                 .label("A")
                 .properties(PropertyMappings
@@ -74,8 +83,66 @@ class NodeProjectionsTest {
                     .build()
                 )
                 .build()
+        )).build();
+
+        assertThat(
+            actual,
+            equalTo(expected)
+        );
+        assertThat(actual.labelProjection(), equalTo(Optional.of("A")));
+    }
+
+    @Test
+    void shouldParseSpecialMultipleLabels() {
+        NodeProjections actual = NodeProjections.fromObject("A | B");
+
+        assertThat(actual.labelProjection(), equalTo(Optional.of("A | B")));
+    }
+
+    @Test
+    void shouldSupportStar() {
+        NodeProjections actual = NodeProjections.fromObject("*");
+
+        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+            PROJECT_ALL,
+            NodeProjection
+                .builder()
+                .label((String) null)
+                .properties(PropertyMappings.of())
+                .build()
+        )).build();
+
+        assertThat(
+            actual,
+            equalTo(expected)
+        );
+        assertThat(actual.labelProjection(), equalTo(Optional.of("")));
+    }
+
+    @Test
+    void doesNotAllowMultipleNodeProjections() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> NodeProjections.fromObject(asList("A", "B"))
+        );
+
+        assertThat(ex.getMessage(), containsString("Multiple node projections are not supported"));
+    }
+
+    static Stream<Arguments> syntacticSugarsSimple() {
+        return Stream.of(
+            Arguments.of(
+                "A"
+            ),
+            Arguments.of(
+                singletonList("A")
+            ),
+            Arguments.of(
+                map("A", map(LABEL_KEY, "A"))
+            ),
+            Arguments.of(
+                map("A", map(LABEL_KEY, "A", PROPERTIES_KEY, emptyMap()))
             )
         );
-        assertThat(projections.labelProjection(), equalTo(Optional.of("A")));
     }
 }

@@ -214,8 +214,6 @@ public abstract class GdsCypher {
     public interface QueryBuilder {
         ParametersBuildStage graphCreate(String graphName);
 
-        ParametersBuildStage betaGraphCreate(String graphName);
-
         ModeBuildStage algo(Iterable<String> namespace, String algoName);
 
         default ModeBuildStage algo(String algoName) {
@@ -451,11 +449,6 @@ public abstract class GdsCypher {
         @Override
         public StagedBuilder graphCreate(String graphName) {
             return createGraph(graphName, "gds", "graph");
-        }
-
-        @Override
-        public StagedBuilder betaGraphCreate(String graphName) {
-            return createGraph(graphName, "algo", "beta", "graph");
         }
 
         private StagedBuilder createGraph(String graphName, String... namespace) {

@@ -46,11 +46,20 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 
 class GdsCypherTest {
 
-    private static final GraphCreateConfig EMPTY_GRAPH_CREATE =
-        GraphCreateConfig.emptyWithName("", "");
+    private static final GraphCreateConfig GRAPH_CREATE_PROJECT_STAR =
+        ImmutableGraphCreateConfig.of(
+            "",
+            "",
+            NodeProjections.fromString(PROJECT_ALL.name),
+            RelationshipProjections.fromString(PROJECT_ALL.name)
+        );
+
+    private static final String STAR_PROJECTION_CYPHER_SYNTAX =
+        "{nodeProjection: {`*`: {label: \"\"}}, relationshipProjection: {`*`: {type: \"\", projection: \"NATURAL\", aggregation: \"DEFAULT\"}}}";
 
     static Stream<Arguments> testExplicitCreationWithAnyName() {
         //@formatter:off
@@ -231,24 +240,6 @@ class GdsCypherTest {
         );
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("implicitBuilders")
-    void generatesBetaGraphCreateFromImplicitConfig(GdsCypher.QueryBuilder queryBuilder, String testName) {
-        String query = queryBuilder
-            .betaGraphCreate("foo42")
-            .addParameter("nodeProjection", "SOMETHING | ELSE")
-            .yields();
-
-        assertEquals(
-            String.format(
-                "CALL algo.beta.graph.create(\"foo42\", %s, %s, {nodeProjection: \"SOMETHING | ELSE\"})",
-                expectedNodeProjection(),
-                expectedRelationshipProjection()
-            ),
-            query
-        );
-    }
-
     private String expectedImplicitGraphCreateCall() {
         //@formatter:off
         return
@@ -325,13 +316,13 @@ class GdsCypherTest {
     void algoNameIsInsertedVerbatim(String algoName) {
         String query = GdsCypher
             .call()
-            .implicitCreation(EMPTY_GRAPH_CREATE)
+            .implicitCreation(GRAPH_CREATE_PROJECT_STAR)
             .algo(algoName)
             .writeMode()
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.%s.write({})", algoName),
+            String.format("CALL gds.algo.%s.write(%s)", algoName, STAR_PROJECTION_CYPHER_SYNTAX),
             query
         );
     }
@@ -341,13 +332,13 @@ class GdsCypherTest {
     void algoNameWithPeriodsOverridesDefaultNamespace(String algoName) {
         String query = GdsCypher
             .call()
-            .implicitCreation(EMPTY_GRAPH_CREATE)
+            .implicitCreation(GRAPH_CREATE_PROJECT_STAR)
             .algo(algoName)
             .writeMode()
             .yields();
 
         assertEquals(
-            String.format("CALL %s.write({})", algoName),
+            String.format("CALL %s.write(%s)", algoName, STAR_PROJECTION_CYPHER_SYNTAX),
             query
         );
     }
@@ -367,13 +358,13 @@ class GdsCypherTest {
     void algoNamePartsCanBeSpecifiedAsSeparateArguments(String[] algoNameParts) {
         String query = GdsCypher
             .call()
-            .implicitCreation(EMPTY_GRAPH_CREATE)
+            .implicitCreation(GRAPH_CREATE_PROJECT_STAR)
             .algo(algoNameParts)
             .writeMode()
             .yields();
 
         assertEquals(
-            String.format("CALL %s.write({})", String.join(".", algoNameParts)),
+            String.format("CALL %s.write(%s)", String.join(".", algoNameParts), STAR_PROJECTION_CYPHER_SYNTAX),
             query
         );
     }
@@ -383,13 +374,17 @@ class GdsCypherTest {
     void testExecutionModesViaEnum(GdsCypher.ExecutionModes executionMode) {
         String query = GdsCypher
             .call()
-            .implicitCreation(EMPTY_GRAPH_CREATE)
+            .implicitCreation(GRAPH_CREATE_PROJECT_STAR)
             .algo("algoName")
             .executionMode(executionMode)
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.%s({})", executionModeName(executionMode)),
+            String.format(
+                "CALL gds.algo.algoName.%s(%s)",
+                executionModeName(executionMode),
+                STAR_PROJECTION_CYPHER_SYNTAX
+            ),
             query
         );
     }
@@ -397,7 +392,10 @@ class GdsCypherTest {
     @ParameterizedTest
     @EnumSource(GdsCypher.ExecutionModes.class)
     void testExecutionModesViaExplicitMethodCalls(GdsCypher.ExecutionModes executionMode) {
-        GdsCypher.ModeBuildStage builder = GdsCypher.call().implicitCreation(EMPTY_GRAPH_CREATE).algo("algoName");
+        GdsCypher.ModeBuildStage builder = GdsCypher
+            .call()
+            .implicitCreation(GRAPH_CREATE_PROJECT_STAR)
+            .algo("algoName");
         GdsCypher.ParametersBuildStage nextBuilder;
 
         switch (executionMode) {
@@ -416,7 +414,11 @@ class GdsCypherTest {
         String query = nextBuilder.yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.%s({})", executionModeName(executionMode)),
+            String.format(
+                "CALL gds.algo.algoName.%s(%s)",
+                executionModeName(executionMode),
+                STAR_PROJECTION_CYPHER_SYNTAX
+            ),
             query
         );
     }
@@ -426,13 +428,17 @@ class GdsCypherTest {
     void testEstimateModesViaEnum(GdsCypher.ExecutionModes executionMode) {
         String query = GdsCypher
             .call()
-            .implicitCreation(EMPTY_GRAPH_CREATE)
+            .implicitCreation(GRAPH_CREATE_PROJECT_STAR)
             .algo("algoName")
             .estimationMode(executionMode)
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.%s.estimate({})", executionModeName(executionMode)),
+            String.format(
+                "CALL gds.algo.algoName.%s.estimate(%s)",
+                executionModeName(executionMode),
+                STAR_PROJECTION_CYPHER_SYNTAX
+            ),
             query
         );
     }
@@ -440,7 +446,10 @@ class GdsCypherTest {
     @ParameterizedTest
     @EnumSource(GdsCypher.ExecutionModes.class)
     void testEstimatesModesViaExplicitMethodCalls(GdsCypher.ExecutionModes executionMode) {
-        GdsCypher.ModeBuildStage builder = GdsCypher.call().implicitCreation(EMPTY_GRAPH_CREATE).algo("algoName");
+        GdsCypher.ModeBuildStage builder = GdsCypher
+            .call()
+            .implicitCreation(GRAPH_CREATE_PROJECT_STAR)
+            .algo("algoName");
         GdsCypher.ParametersBuildStage nextBuilder;
 
         switch (executionMode) {
@@ -459,7 +468,11 @@ class GdsCypherTest {
         String query = nextBuilder.yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.%s.estimate({})", executionModeName(executionMode)),
+            String.format(
+                "CALL gds.algo.algoName.%s.estimate(%s)",
+                executionModeName(executionMode),
+                STAR_PROJECTION_CYPHER_SYNTAX
+            ),
             query
         );
     }

@@ -32,15 +32,8 @@ import java.util.stream.Stream;
 
 public class GraphDropProc extends CatalogProc {
 
-    @Procedure(name = "algo.beta.graph.drop", mode = Mode.READ)
-    @Description("CALL gds.graph.drop(" +
-                 "  graphName: STRING" +
-                 ") YIELD" +
-                 "  graphName: STRING," +
-                 "  nodeProjection: MAP," +
-                 "  relationshipProjection: MAP," +
-                 "  nodes: INTEGER," +
-                 "  relationships: INTEGER")
+    @Procedure(name = "gds.graph.drop", mode = Mode.READ)
+    @Description("Drops a named graph from the catalog and frees up the resources it occupies.")
     public Stream<GraphInfo> drop(@Name(value = "graphName") String graphName) {
         validateGraphName(graphName);
 

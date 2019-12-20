@@ -51,9 +51,9 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         return super.properties();
     }
 
-    private static final String TYPE_KEY = "type";
-    private static final String PROJECTION_KEY = "projection";
-    private static final String AGGREGATION_KEY = "aggregation";
+    public static final String TYPE_KEY = "type";
+    public static final String PROJECTION_KEY = "projection";
+    public static final String AGGREGATION_KEY = "aggregation";
 
     public static RelationshipProjection fromMap(Map<String, Object> map, ElementIdentifier identifier) {
         RelationshipProjection.Builder builder = RelationshipProjection.builder();
@@ -91,11 +91,6 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     public boolean hasMappings() {
         return properties().hasMappings();
-    }
-
-    @Override
-    public boolean isMatchAll() {
-        return this == RelationshipProjection.of();
     }
 
     @Override

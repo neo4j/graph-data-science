@@ -71,6 +71,9 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         if (StringUtils.isEmpty(type)) {
             return empty();
         }
+        if (type.equals(PROJECT_ALL.name)) {
+            return create(singletonMap(PROJECT_ALL, RelationshipProjection.of()));
+        }
         ElementIdentifier identifier = new ElementIdentifier(type);
         RelationshipProjection filter = RelationshipProjection.fromString(type);
         return create(singletonMap(identifier, filter));
@@ -119,8 +122,13 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
     }
 
     private static RelationshipProjections create(Map<ElementIdentifier, RelationshipProjection> projections) {
-        if (projections.values().stream().allMatch(RelationshipProjection::isMatchAll)) {
-            return empty();
+        if (projections.isEmpty()) {
+            throw new IllegalArgumentException(
+                "An empty relationship projection was given; at least one relationship type must be projected.");
+        }
+        if (projections.size() > 1 && projections.containsKey(PROJECT_ALL)) {
+            throw new IllegalArgumentException(
+                "A star projection (all relationships) cannot be combined with another projection.");
         }
         return RelationshipProjections.of(projections);
     }
@@ -157,9 +165,8 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             e -> operator.apply(e.getValue())
         ));
         if (newProjections.isEmpty()) {
-            // TODO: special identifier for 'SELECT ALL'
             newProjections.put(
-                new ElementIdentifier("*"),
+                PROJECT_ALL,
                 operator.apply(RelationshipProjection.empty())
             );
         }

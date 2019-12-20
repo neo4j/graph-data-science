@@ -52,7 +52,7 @@ public interface GraphCreateConfig extends BaseConfig {
     String graphName();
 
     @Configuration.Parameter
-    @ConvertWith("org.neo4j.graphalgo.NodeProjections#fromObject")
+    @ConvertWith("org.neo4j.graphalgo.AbstractNodeProjections#fromObject")
     NodeProjections nodeProjection();
 
     @Configuration.Parameter
