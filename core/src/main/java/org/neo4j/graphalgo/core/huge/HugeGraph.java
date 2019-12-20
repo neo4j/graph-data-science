@@ -618,7 +618,7 @@ public class HugeGraph implements Graph {
         if (!hasRelationshipProperty()) {
             return this;
         } else {
-            return new HugeGraph(
+            HugeGraph graphWithoutProperties = new HugeGraph(
                 tracker,
                 idMapping,
                 nodeProperties,
@@ -635,6 +635,8 @@ public class HugeGraph implements Graph {
                 null,
                 isUndirected
             );
+            graphWithoutProperties.canRelease(canRelease);
+            return graphWithoutProperties;
         }
     }
 
