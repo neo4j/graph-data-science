@@ -69,7 +69,6 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
             configuration
         );
         return CentralityUtils.streamResults(computeResult.graph(), computeResult.algorithm().result());
-
     }
 
     private Stream<CentralityScore.Stats> write(
@@ -91,7 +90,6 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
         Graph graph = computeResult.graph();
         DegreeCentrality algorithm = computeResult.algorithm();
 
-
         CentralityScore.Stats.Builder builder = new CentralityScore.Stats.Builder();
         builder.setLoadMillis(computeResult.createMillis());
         builder.setComputeMillis(computeResult.computeMillis());
@@ -110,8 +108,6 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
 
         return Stream.of(builder.build());
     }
-
-
 
     @Override
     protected DegreeCentralityConfig newConfig(

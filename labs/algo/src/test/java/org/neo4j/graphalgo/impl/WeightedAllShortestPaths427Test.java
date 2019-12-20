@@ -461,7 +461,7 @@ public class WeightedAllShortestPaths427Test extends AlgoTestBase {
                         }
 
                         if (withWeights) {
-                            DijkstraConfig config = DijkstraConfig.of(neoSourceId, neoTargetId, Direction.OUTGOING);
+                            DijkstraConfig config = DijkstraConfig.of(neoSourceId, neoTargetId);
                             ShortestPathDijkstra spd = new ShortestPathDijkstra(graph, config);
                             spd.compute(neoSourceId, neoTargetId, Direction.OUTGOING);
                             double totalCost = spd.getTotalCost();

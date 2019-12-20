@@ -33,7 +33,7 @@ import org.neo4j.graphdb.Direction;
 @ValueClass
 public interface DegreeCentralityConfig extends AlgoBaseConfig, WeightConfig, WriteConfig {
 
-    public static final String DEFAULT_SCORE_PROPERTY = "degree";
+    String DEFAULT_SCORE_PROPERTY = "degree";
 
     @Configuration.Ignore
     @Value.Default
@@ -41,7 +41,6 @@ public interface DegreeCentralityConfig extends AlgoBaseConfig, WeightConfig, Wr
         return StringUtils.isNotEmpty(weightProperty());
     }
 
-    //TODO remove later
     @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
     @Value.Default
     default Direction direction() {

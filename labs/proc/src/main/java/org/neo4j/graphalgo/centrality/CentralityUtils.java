@@ -26,9 +26,9 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.newapi.WriteConfig;
+import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -41,23 +41,24 @@ public final class CentralityUtils {
     private CentralityUtils() {}
 
     public static <R> void write(
-            GraphDatabaseAPI api,
-            Log log,
-            IdMapping graph,
-            TerminationFlag terminationFlag,
-            CentralityResult result,
-            ProcedureConfiguration configuration,
-            AbstractResultBuilder<R> statsBuilder,
-            String defaultScoreProperty) {
+        GraphDatabaseAPI api,
+        Log log,
+        IdMapping graph,
+        TerminationFlag terminationFlag,
+        CentralityResult result,
+        ProcedureConfiguration configuration,
+        AbstractResultBuilder<R> statsBuilder,
+        String defaultScoreProperty
+    ) {
         if (configuration.isWriteFlag(true)) {
             log.debug("Writing results");
             String propertyName = configuration.getWriteProperty(defaultScoreProperty);
             try (ProgressTimer ignored = statsBuilder.timeWrite()) {
                 NodePropertyExporter exporter = NodePropertyExporter
-                        .of(api, graph, terminationFlag)
-                        .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                        .build();
+                    .of(api, graph, terminationFlag)
+                    .withLog(log)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
+                    .build();
                 result.export(propertyName, exporter);
             }
             statsBuilder.withWrite(true).withWriteProperty(propertyName);
@@ -89,13 +90,14 @@ public final class CentralityUtils {
     }
 
     public static Stream<CentralityScore> streamResults(Graph graph, CentralityResult scores) {
-            return LongStream.range(0, graph.nodeCount())
-                    .mapToObj(i -> {
-                        final long nodeId = graph.toOriginalNodeId(i);
-                        return new CentralityScore(
-                                nodeId,
-                                scores.score(i)
-                        );
-                    });
+        return LongStream.range(0, graph.nodeCount())
+            .mapToObj(i -> {
+                    final long nodeId = graph.toOriginalNodeId(i);
+                    return new CentralityScore(
+                        nodeId,
+                        scores.score(i)
+                    );
+                }
+            );
     }
 }

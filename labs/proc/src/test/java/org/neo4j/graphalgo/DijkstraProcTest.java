@@ -33,7 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class DisjkstraProcTest extends BaseProcTest {
+class DijkstraProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +

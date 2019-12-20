@@ -150,7 +150,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(
                     row.getNumber("writeMillis").intValue() >= 0,
-                    "write time not set");
+                    "write time not set"
+                );
             }
         );
         assertResult("degree", incomingWeightedExpected);
