@@ -17,18 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.graphalgo.compat.MapUtil;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-
-class DegreeProcIssue848Test extends BaseProcTest {
+class DegreeCentralityProcIssue848Test extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "UNWIND range(1, 10001) AS s " +
@@ -46,13 +46,12 @@ class DegreeProcIssue848Test extends BaseProcTest {
         db.shutdown();
     }
 
-    @AllGraphNamesTest
-    void multipleBatches(String graphImpl) {
+    @Test
+    void multipleBatches() {
         final Map<Long, Double> actual = new HashMap<>();
-        String query = "CALL algo.degree.stream('Node', '', {graph: $graph, direction: 'incoming'}) " +
+        String query = "CALL gds.alpha.degree.stream({nodeProjection: 'Node', relationshipProjection: '', direction: 'OUTGOING'}) " +
                        "YIELD nodeId, score";
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> actual.put(
+        runQuery(query, row -> actual.put(
                         (Long)row.get("nodeId"),
                         (Double) row.get("score")));
 

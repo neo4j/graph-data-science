@@ -160,17 +160,6 @@ class EmptyGraphProcTest extends BaseProcTest {
     }
 
     @Test
-    void testShortestPathStream() {
-        Result result = runQuery("CALL algo.shortestPath.stream(null, null, '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    void testShortestPath() {
-        runQuery("CALL algo.shortestPath(null, null, '', {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
-    }
-
-    @Test
     void testShortestPathsStream() {
         Result result = runQuery("CALL algo.shortestPaths.stream(null, '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());

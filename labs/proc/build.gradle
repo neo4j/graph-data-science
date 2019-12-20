@@ -3,6 +3,8 @@ description = 'Neo4j Labs :: Graph Data Science :: Procedures'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
+    annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
 
     compileOnly project(':proc')
     compile project(':labs-algo')

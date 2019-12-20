@@ -22,8 +22,10 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
+import org.neo4j.graphalgo.shortestpath.DijkstraProc;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -51,8 +53,10 @@ class ListProcTest extends BaseProcTest {
         "algo.bfs.stream",
         "algo.closeness",
         "algo.closeness.stream",
-        "algo.degree",
-        "algo.degree.stream",
+        "gds.alpha.degree.write",
+        "gds.alpha.degree.stream",
+        "gds.alpha.shortestPath.write",
+        "gds.alpha.shortestPath.stream",
         "algo.dfs.stream",
         "algo.eigenvector",
         "algo.eigenvector.stream",
@@ -64,11 +68,9 @@ class ListProcTest extends BaseProcTest {
         "algo.randomWalk.stream",
         "algo.scc",
         "algo.scc.stream",
-        "algo.shortestPath",
         "algo.shortestPath.astar.stream",
         "algo.shortestPath.deltaStepping",
         "algo.shortestPath.deltaStepping.stream",
-        "algo.shortestPath.stream",
         "algo.shortestPaths",
         "algo.shortestPaths.stream",
         "algo.similarity.cosine",
@@ -123,6 +125,7 @@ class ListProcTest extends BaseProcTest {
             ClosenessCentralityProc.class,
             CosineProc.class,
             DegreeCentralityProc.class,
+            DijkstraProc.class,
             EigenvectorCentralityProc.class,
             EuclideanProc.class,
             IsFiniteFunc.class,

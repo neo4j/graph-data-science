@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.shortestpath.SingleSourceShortestPathDijkstra;
 import org.neo4j.graphalgo.impl.util.DoubleAdder;
 import org.neo4j.graphalgo.impl.util.DoubleEvaluator;
+import org.neo4j.graphalgo.shortestPath.DijkstraConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -434,7 +435,6 @@ public class WeightedAllShortestPaths427Test extends AlgoTestBase {
 
     private List<Result> calculateExpected(Graph graph, boolean withWeights) {
         List<Result> expected = new ArrayList<>();
-        ShortestPathDijkstra spd = new ShortestPathDijkstra(graph);
         List<Executable> assertions = new ArrayList<>();
         QueryRunner.runInTransaction(
             db,
@@ -461,6 +461,8 @@ public class WeightedAllShortestPaths427Test extends AlgoTestBase {
                         }
 
                         if (withWeights) {
+                            DijkstraConfig config = DijkstraConfig.of(neoSourceId, neoTargetId);
+                            ShortestPathDijkstra spd = new ShortestPathDijkstra(graph, config);
                             spd.compute(neoSourceId, neoTargetId, Direction.OUTGOING);
                             double totalCost = spd.getTotalCost();
                             if (totalCost != ShortestPathDijkstra.NO_PATH_FOUND) {

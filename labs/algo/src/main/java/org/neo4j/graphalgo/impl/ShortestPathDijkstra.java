@@ -26,11 +26,12 @@ import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntScatterMap;
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
+import org.neo4j.graphalgo.shortestPath.DijkstraConfig;
 import org.neo4j.graphdb.Direction;
 
 import java.util.stream.Stream;
@@ -45,7 +46,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  * between a given start and target-NodeId. It returns result tuples of
  * [nodeId, distance] of each node in the path.
  */
-public class ShortestPathDijkstra extends LegacyAlgorithm<ShortestPathDijkstra> {
+public class ShortestPathDijkstra extends Algorithm<ShortestPathDijkstra, ShortestPathDijkstra> {
 
     private static final int PATH_END = -1;
     public static final double NO_PATH_FOUND = -1.0;
@@ -65,32 +66,29 @@ public class ShortestPathDijkstra extends LegacyAlgorithm<ShortestPathDijkstra> 
     // visited set
     private BitSet visited;
     private final int nodeCount;
+    private final DijkstraConfig config;
     // overall cost of the path
     private double totalCost;
     private ProgressLogger progressLogger;
 
-    public ShortestPathDijkstra(Graph graph) {
+    public ShortestPathDijkstra(Graph graph, DijkstraConfig config) {
         this.graph = graph;
-        nodeCount = Math.toIntExact(graph.nodeCount());
-        costs = new IntDoubleScatterMap();
-        queue = SharedIntPriorityQueue.min(
+        this.nodeCount = Math.toIntExact(graph.nodeCount());
+        this.config = config;
+        this.costs = new IntDoubleScatterMap();
+        this.queue = SharedIntPriorityQueue.min(
                 IntPriorityQueue.DEFAULT_CAPACITY,
                 costs,
                 Double.MAX_VALUE);
-        path = new IntIntScatterMap();
-        visited = new BitSet();
-        finalPath = new IntArrayDeque();
-        finalPathCosts = new DoubleArrayDeque();
-        progressLogger = getProgressLogger();
+        this.path = new IntIntScatterMap();
+        this.visited = new BitSet();
+        this.finalPath = new IntArrayDeque();
+        this.finalPathCosts = new DoubleArrayDeque();
+        this.progressLogger = getProgressLogger();
     }
 
-    /**
-     * compute shortest path between startNode and goalNode
-     *
-     * @return itself
-     */
-    public ShortestPathDijkstra compute(long startNode, long goalNode) {
-        return compute(startNode, goalNode, Direction.BOTH);
+    public ShortestPathDijkstra compute() {
+        return compute(config.startNode(), config.endNode(), config.resolvedDirection());
     }
 
     public ShortestPathDijkstra compute(long startNode, long goalNode, Direction direction) {
@@ -200,11 +198,9 @@ public class ShortestPathDijkstra extends LegacyAlgorithm<ShortestPathDijkstra> 
 
     @Override
     public void release() {
-        graph = null;
         costs = null;
         queue = null;
         path = null;
-        finalPath = null;
         visited = null;
     }
 

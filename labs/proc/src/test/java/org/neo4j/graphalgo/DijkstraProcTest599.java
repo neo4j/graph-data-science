@@ -22,6 +22,8 @@ package org.neo4j.graphalgo;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.shortestpath.DijkstraProc;
 import org.neo4j.graphdb.Result;
 
 import java.util.Arrays;
@@ -32,7 +34,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ShortestPathProcTest599 extends BaseProcTest {
+class DijkstraProcTest599 extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -57,7 +59,7 @@ class ShortestPathProcTest599 extends BaseProcTest {
     void setupGraphDb() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-        registerProcedures(ShortestPathProc.class);
+        registerProcedures(DijkstraProc.class);
     }
 
     @AfterEach
@@ -66,16 +68,15 @@ class ShortestPathProcTest599 extends BaseProcTest {
     }
 
     /** @see <a href="https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/599">Issue #599</a> */
-    @TestSupport.AllGraphNamesTest
-    void test599(String graphName) {
-        final String totalCostCommand = String.format("" +
-                "MATCH (startNode {VID: 1}), (endNode {VID: 4})\n" +
-                "CALL algo.shortestPath(startNode, endNode, 'WEIGHT', {graph: '%s', direction: 'OUTGOING'})\n" +
-                "YIELD nodeCount, totalCost, loadMillis, evalMillis, writeMillis\n" +
-                "RETURN totalCost\n", graphName);
+    @Test
+    void test599() {
+        String totalCostCommand =
+            "MATCH (startNode {VID: 1}), (endNode {VID: 4})\n" +
+            "CALL gds.alpha.shortestPath.write({startNode: startNode, endNode: endNode, weightProperty: 'WEIGHT', relationshipProperties: 'WEIGHT'})\n" +
+            "YIELD nodeCount, totalCost, loadMillis, evalMillis, writeMillis\n" +
+            "RETURN totalCost\n";
 
-        double totalCost = db
-                .execute(totalCostCommand)
+        double totalCost = runQuery(totalCostCommand)
                 .<Double>columnAs("totalCost")
                 .stream()
                 .findFirst()
@@ -83,12 +84,12 @@ class ShortestPathProcTest599 extends BaseProcTest {
 
         assertEquals(4.0, totalCost, 1e-4);
 
-        final String pathCommand = String.format("" +
-                "MATCH (startNode {VID: 1}), (endNode {VID: 4})\n" +
-                "CALL algo.shortestPath.stream(startNode, endNode, 'WEIGHT', {graph: '%s', direction: 'OUTGOING'})\n" +
-                "YIELD nodeId, cost\n" +
-                "MATCH (n1) WHERE id(n1) = nodeId\n" +
-                "RETURN n1.VID as id, cost as weight\n", graphName);
+        String pathCommand =
+            "MATCH (startNode {VID: 1}), (endNode {VID: 4})\n" +
+            "CALL gds.alpha.shortestPath.stream({startNode: startNode, endNode: endNode, weightProperty: 'WEIGHT', relationshipProperties: 'WEIGHT'})\n" +
+            "YIELD nodeId, cost\n" +
+            "MATCH (n1) WHERE id(n1) = nodeId\n" +
+            "RETURN n1.VID as id, cost as weight\n";
 
         List<Matcher<Number>> expectedList = Arrays.asList(
                 is(1L), is(0.0),

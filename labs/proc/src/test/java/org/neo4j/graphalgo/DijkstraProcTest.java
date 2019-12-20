@@ -21,7 +21,8 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.shortestpath.DijkstraProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class ShortestPathIntegrationTest extends BaseProcTest {
+class DijkstraProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -55,7 +56,7 @@ class ShortestPathIntegrationTest extends BaseProcTest {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-        registerProcedures(ShortestPathProc.class);
+        registerProcedures(DijkstraProc.class);
     }
 
     @AfterEach
@@ -63,13 +64,13 @@ class ShortestPathIntegrationTest extends BaseProcTest {
         db.shutdown();
     }
 
-    @AllGraphNamesTest
-    void noWeightStream(String graphName) throws Exception {
+    @Test
+    void noWeightStream() {
         PathConsumer consumer = mock(PathConsumer.class);
         runQuery(
-            String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-                          "CALL algo.shortestPath.stream(start, end, '', { graph: '%s' }) " +
-                          "YIELD nodeId, cost RETURN nodeId, cost", graphName),
+            "MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
+            "CALL gds.alpha.shortestPath.stream({startNode: start, endNode: end}) " +
+            "YIELD nodeId, cost RETURN nodeId, cost",
             row -> consumer.accept((Long) row.getNumber("nodeId"), (Double) row.getNumber("cost"))
         );
         verify(consumer, times(2)).accept(anyLong(), anyDouble());
@@ -77,13 +78,14 @@ class ShortestPathIntegrationTest extends BaseProcTest {
         verify(consumer, times(1)).accept(anyLong(), eq(1.0));
     }
 
-    @AllGraphNamesTest
-    void noWeightWrite(String graphName) throws Exception {
+    @Test
+    void noWeightWrite() {
         runQuery(
-            String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-                          "CALL algo.shortestPath(start, end, '', { graph: '%s' }) " +
-                          "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
-                          "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost", graphName), row -> {
+            "MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
+            "CALL gds.alpha.shortestPath.write({startNode: start, endNode: end}) " +
+            "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
+            "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost",
+            row -> {
                 assertEquals(1.0, (Double) row.getNumber("totalCost"), 0.01);
                 assertEquals(2L, row.getNumber("nodeCount"));
                 assertNotEquals(-1L, row.getNumber("loadMillis"));
@@ -106,13 +108,13 @@ class ShortestPathIntegrationTest extends BaseProcTest {
         verify(mock, times(1)).accept(anyLong(), eq(1.0));
     }
 
-    @AllGraphNamesTest
-    void testDijkstraStream(String graphName) throws Exception {
+    @Test
+    void testDijkstraStream() {
         PathConsumer consumer = mock(PathConsumer.class);
         runQuery(
-            String.format("MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-                          "CALL algo.shortestPath.stream(start, end, 'cost',{graph:'%s'}) " +
-                          "YIELD nodeId, cost RETURN nodeId, cost", graphName),
+            "MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
+            "CALL gds.alpha.shortestPath.stream({startNode: start, endNode: end, weightProperty: 'cost', relationshipProperties: 'cost'}) " +
+            "YIELD nodeId, cost RETURN nodeId, cost",
             row -> consumer.accept((Long) row.getNumber("nodeId"), (Double) row.getNumber("cost"))
         );
         verify(consumer, times(4)).accept(anyLong(), anyDouble());
@@ -122,14 +124,14 @@ class ShortestPathIntegrationTest extends BaseProcTest {
         verify(consumer, times(1)).accept(anyLong(), eq(6.0));
     }
 
-    @AllGraphNamesTest
-    void testDijkstra(String graphName) throws Exception {
+    @Test
+    void testDijkstra() {
         runQuery(
-            String.format(
-                "MATCH (start:Node {type:'start'}), (end:Node {type:'end'}) " +
-                "CALL algo.shortestPath(start, end, 'cost',{graph:'%s', write:true, writeProperty:'cost'}) " +
-                "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
-                "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost", graphName), row -> {
+            "MATCH (start:Node {type:'start'}), (end:Node {type:'end'}) " +
+            "CALL gds.alpha.shortestPath.write({startNode: start, endNode: end, weightProperty: 'cost', writeProperty:'cost', relationshipProperties: 'cost'}) " +
+            "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
+            "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost",
+            row -> {
                 assertEquals(3.0, (Double) row.getNumber("totalCost"), 10E2);
                 assertEquals(4L, row.getNumber("nodeCount"));
                 assertNotEquals(-1L, row.getNumber("loadMillis"));
