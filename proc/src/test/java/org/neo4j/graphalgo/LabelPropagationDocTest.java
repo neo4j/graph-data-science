@@ -117,9 +117,9 @@ class LabelPropagationDocTest extends ProcTestBase {
         System.out.println(r1);
 
         String q2 = "CALL algo.labelPropagation.stream(" +
-                    "  'MATCH (p:User) RETURN id(p) AS id'," +
+                    "  'MATCH (p:User) RETURN id(p) AS id, p.weight AS weight, id(p) AS value'," +
                     "  'MATCH (p1:User)-[f:FOLLOW]->(p2:User)" +
-                    "   RETURN id(p1) AS source, id(p2) AS target',{" +
+                    "   RETURN id(p1) AS source, id(p2) AS target, f.weight AS weight',{" +
                     "   iterations: 10," +
                     "   graph: 'cypher'})" +
                     "YIELD nodeId, label " +
