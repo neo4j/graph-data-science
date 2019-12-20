@@ -93,9 +93,21 @@ public interface ModernSimilarityConfig extends AlgoBaseConfig, WriteConfig {
         return TOP_N_DEFAULT;
     }
 
+    @Value.Derived
+    @Configuration.Ignore
+    default int normalizedTopN() {
+        return top();
+    }
+
     @Value.Default
     default int topK() {
         return TOP_K_DEFAULT;
+    }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default int normalizedTopK() {
+        return topK();
     }
 
     @Value.Default

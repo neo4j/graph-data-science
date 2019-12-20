@@ -20,10 +20,25 @@
 
 package org.neo4j.graphalgo.impl.similarity.modern;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 @ValueClass
 @Configuration("ModernEuclideanConfigImpl")
 public interface ModernEuclideanConfig extends ModernSimilarityConfig {
+
+    @Value.Derived
+    @Configuration.Ignore
+    @Override
+    default int normalizedTopN() {
+        return -top();
+    }
+
+    @Value.Derived
+    @Configuration.Ignore
+    @Override
+    default int normalizedTopK() {
+        return -topK();
+    }
 }
