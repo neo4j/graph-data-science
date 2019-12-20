@@ -39,16 +39,16 @@ class LabelPropagationDocTest extends ProcTestBase {
             "CREATE (nMark:User {name:'Mark', seed_label:19})" +
             "CREATE (nMichael:User {name:'Michael', seed_label:52})" +
 
-            "CREATE (nAlice)-[:FOLLOW {weight:1}]->(nBridget)" +
-            "CREATE (nAlice)-[:FOLLOW {weight:10}]->(nCharles)" +
-            "CREATE (nMark)-[:FOLLOW {weight:1}]->(nDoug)" +
-            "CREATE (nBridget)-[:FOLLOW {weight:1}]->(nMichael)" +
-            "CREATE (nDoug)-[:FOLLOW {weight:1}]->(nMark)" +
-            "CREATE (nMichael)-[:FOLLOW {weight:1}]->(nAlice)" +
-            "CREATE (nAlice)-[:FOLLOW {weight:1}]->(nMichael)" +
-            "CREATE (nBridget)-[:FOLLOW {weight:1}]->(nAlice)" +
-            "CREATE (nMichael)-[:FOLLOW {weight:1}]->(nBridget)" +
-            "CREATE (nCharles)-[:FOLLOW {weight:1}]->(nDoug);";
+            "CREATE (nAlice)-[:FOLLOW]->(nBridget)" +
+            "CREATE (nAlice)-[:FOLLOW]->(nCharles)" +
+            "CREATE (nMark)-[:FOLLOW]->(nDoug)" +
+            "CREATE (nBridget)-[:FOLLOW]->(nMichael)" +
+            "CREATE (nDoug)-[:FOLLOW]->(nMark)" +
+            "CREATE (nMichael)-[:FOLLOW]->(nAlice)" +
+            "CREATE (nAlice)-[:FOLLOW]->(nMichael)" +
+            "CREATE (nBridget)-[:FOLLOW]->(nAlice)" +
+            "CREATE (nMichael)-[:FOLLOW]->(nBridget)" +
+            "CREATE (nCharles)-[:FOLLOW]->(nDoug);";
 
         db = TestDatabaseCreator.createTestDatabase(builder ->
                 builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
@@ -99,53 +99,8 @@ class LabelPropagationDocTest extends ProcTestBase {
                     "  iterations: 10," +
                     "  writeProperty: 'community'," +
                     "  write: true," +
-                    "  direction: 'OUTGOING'" +
-                    "})" +
+                    "  direction: 'OUTGOING'})" +
                     "YIELD nodes, iterations, communityCount, writeProperty;";
-
-        assertEquals(expectedString, db.execute(q2).resultAsString());
-    }
-
-    @Test
-    void weighted() {
-        String q1 = "CALL algo.labelPropagation.stream('User', 'FOLLOW', {" +
-                    "  direction: 'OUTGOING'," +
-                    "  iterations: 10," +
-                    "  weightProperty: 'weight'" +
-                    "})" +
-                    "YIELD nodeId, label AS Community " +
-                    "RETURN algo.asNode(nodeId).name AS Name, Community " +
-                    "ORDER BY Community, Name";
-
-        String expectedString = "+-----------------------+\n" +
-                                "| Name      | Community |\n" +
-                                "+-----------------------+\n" +
-                                "| \"Bridget\" | 2         |\n" +
-                                "| \"Michael\" | 2         |\n" +
-                                "| \"Alice\"   | 4         |\n" +
-                                "| \"Charles\" | 4         |\n" +
-                                "| \"Doug\"    | 4         |\n" +
-                                "| \"Mark\"    | 4         |\n" +
-                                "+-----------------------+\n" +
-                                "6 rows\n";
-
-        assertEquals(expectedString, db.execute(q1).resultAsString());
-
-        String q2 = "CALL algo.labelPropagation('User', 'FOLLOW', {" +
-                    "  iterations: 10," +
-                    "  writeProperty: 'community'," +
-                    "  write: true," +
-                    "  direction: 'OUTGOING'," +
-                    "  weightProperty: 'weight'" +
-                    "})" +
-                    "YIELD nodes, iterations, communityCount, writeProperty, weightProperty;";
-
-        expectedString = "+----------------------------------------------------------------------+\n" +
-                         "| nodes | iterations | communityCount | writeProperty | weightProperty |\n" +
-                         "+----------------------------------------------------------------------+\n" +
-                         "| 6     | 4          | 2              | \"community\"   | \"weight\"       |\n" +
-                         "+----------------------------------------------------------------------+\n" +
-                         "1 row\n";
 
         assertEquals(expectedString, db.execute(q2).resultAsString());
     }
@@ -181,7 +136,7 @@ class LabelPropagationDocTest extends ProcTestBase {
                     "  seedProperty: 'seed_label'," +
                     "  writeProperty: 'community'," +
                     "  write: true" +
-                    " })" +
+                    "  })" +
                     "YIELD nodes, iterations, communityCount, writeProperty;";
 
         expectedString = "+-----------------------------------------------------+\n" +
