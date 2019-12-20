@@ -20,69 +20,39 @@
 
 package org.neo4j.graphalgo.similarity;
 
-import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.AlphaAlgorithmFactory;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.results.SimilarityExporter;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
-import org.neo4j.graphalgo.impl.similarity.Computations;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanConfig;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanConfigImpl;
-import org.neo4j.graphalgo.impl.similarity.modern.ModernSimilarityAlgorithmResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.helpers.collection.Pair;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModernEuclideanProc extends AlgoBaseProc<ModernEuclideanAlgorithm, ModernSimilarityAlgorithmResult, ModernEuclideanConfig> {
+public class ModernEuclideanProc extends ModernSimilarityProc<ModernEuclideanAlgorithm, ModernEuclideanConfig> {
 
     @Procedure(name = "gds.alpha.similarity.euclidean.stream", mode = READ)
     public Stream<SimilarityResult> euclideanStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModernEuclideanAlgorithm, ModernSimilarityAlgorithmResult, ModernEuclideanConfig> compute = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return compute.result().stream();
+        return stream(graphNameOrConfig, configuration);
     }
 
     @Procedure(name = "gds.alpha.similarity.euclidean.write", mode = Mode.WRITE)
-    public Stream<SimilaritySummaryResult> euclidean(
+    public Stream<SimilaritySummaryResult> euclideanWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModernEuclideanAlgorithm, ModernSimilarityAlgorithmResult, ModernEuclideanConfig> compute = compute(
-            graphNameOrConfig,
-            configuration
-        );
-
-        ModernEuclideanConfig config = compute.config();
-        ModernSimilarityAlgorithmResult result = compute.result();
-
-        if (result.isEmpty()) {
-            return emptyStream(config.writeRelationshipType(), config.writeProperty());
-        }
-
-        return writeAndAggregateResults(result, config, compute.algorithm().getTerminationFlag());
+        return write(graphNameOrConfig, configuration);
     }
 
     @Override
@@ -96,78 +66,7 @@ public class ModernEuclideanProc extends AlgoBaseProc<ModernEuclideanAlgorithm, 
     }
 
     @Override
-    protected AlgorithmFactory<ModernEuclideanAlgorithm, ModernEuclideanConfig> algorithmFactory(ModernEuclideanConfig config) {
-        return new AlphaAlgorithmFactory<ModernEuclideanAlgorithm, ModernEuclideanConfig>() {
-            @Override
-            public ModernEuclideanAlgorithm build(
-                Graph graph,
-                ModernEuclideanConfig configuration,
-                AllocationTracker tracker,
-                Log log
-            ) {
-                return new ModernEuclideanAlgorithm(config, api);
-            }
-        };
-    }
-
-    @Override
-    protected Graph createGraph(Pair<ModernEuclideanConfig, Optional<String>> configAndName) {
-        if (configAndName.other().isPresent()) {
-            throw new IllegalArgumentException("Euclidean Similarity does not run on an explicitly created graph");
-        }
-        return new NullGraph();
-    }
-
-    protected Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
-        return Stream.of(
-            SimilaritySummaryResult.from(
-                0,
-                0,
-                0,
-                new AtomicLong(0),
-                -1,
-                writeRelationshipType,
-                writeProperty,
-                false,
-                new DoubleHistogram(5)
-            )
-        );
-    }
-
-    Stream<SimilaritySummaryResult> writeAndAggregateResults(
-        ModernSimilarityAlgorithmResult algoResult,
-        ModernEuclideanConfig config,
-        TerminationFlag terminationFlag
-    ) {
-        AtomicLong similarityPairs = new AtomicLong();
-        DoubleHistogram histogram = new DoubleHistogram(5);
-        Consumer<SimilarityResult> recorder = result -> {
-            result.record(histogram);
-            similarityPairs.getAndIncrement();
-        };
-
-        if (config.write()) {
-            SimilarityExporter similarityExporter = new SimilarityExporter(
-                api,
-                config.writeRelationshipType(),
-                config.writeProperty(),
-                terminationFlag
-            );
-            similarityExporter.export(algoResult.stream().peek(recorder), config.writeBatchSize());
-        } else {
-            algoResult.stream().forEach(recorder);
-        }
-
-        return Stream.of(SimilaritySummaryResult.from(
-            algoResult.nodes(),
-            algoResult.sourceIdsLength(),
-            algoResult.targetIdsLength(),
-            similarityPairs,
-            algoResult.computations().map(Computations::count).orElse(-1L),
-            config.writeRelationshipType(),
-            config.writeProperty(),
-            config.write(),
-            histogram
-        ));
+    ModernEuclideanAlgorithm newAlgo(ModernEuclideanConfig config) {
+        return new ModernEuclideanAlgorithm(config, api);
     }
 }
