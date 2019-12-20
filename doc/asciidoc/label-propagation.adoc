@@ -64,108 +64,41 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.labelPropagation(label:String, relationship:String, {iterations:10,
-    weightProperty:'weight', writeProperty:'community', write:true, concurrency:4})
-YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, writeProperty
+CALL gds.algo.labelPropagation.write(graphNameOrConfig: STRING|MAP, configuration: MAP})
+YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
+
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type    | Default        | Optional | Description
-| node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
-| direction         | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm.
-| config            | map     | n/a            | yes      | Additional configuration.
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, optional if the first parameter was a map.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type    | Default                | Optional | Description
-| direction         | string  | 'OUTGOING'             | yes      | The relationship-direction to use in the algorithm.
-| iterations        | int     | 10                     | yes      | The maximum number of iterations to run.
+| maxIterations     | int     | 10                     | yes      | The maximum number of iterations to run.
 | concurrency       | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | weightProperty    | string  | 'weight'               | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
 | seedProperty      | string  | n/a                    | yes      | Used to define initial set of labels (must be a number).
-| partitionProperty | string  | n/a                    | yes      | Deprecated. Replaced by 'seedProperty'.
 | writeProperty     | string  | n/a                    | yes      | The property name written back to the partition of the graph in which the node resides.
-| write             | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
 | graph             | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
+
+
+// TODO: return nodes, relationships for estimate mode
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name | Type | Description
-| loadMillis | int | Milliseconds for loading data.
-| computeMillis | int | Milliseconds for running the algorithm.
-| writeMillis | int | Milliseconds for writing result data back.
-| postProcessingMillis    | int  | Milliseconds for computing percentiles and community count.
-
-| nodes | int | The number of nodes considered.
-| communityCount | int  | The number of communities found.
-| iterations | int | The number of iterations that were executed.
-| didConverge | boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
-
-| p1                   | double  | The 1 percentile of community size.
-| p5                   | double  | The 5 percentile of community size.
-| p10                   | double  | The 10 percentile of community size.
-| p25                   | double  | The 25 percentile of community size.
-| p50                   | double  | The 50 percentile of community size.
-| p75                   | double  | The 75 percentile of community size.
-| p90                   | double  | The 90 percentile of community size.
-| p95                   | double  | The 95 percentile of community size.
-| p99                   | double  | The 99 percentile of community size.
-| p100                  | double  | The 100 percentile of community size.
-
-| write | boolean | Specifies if the result was written back as a node property.
-| writeProperty | string | The property name written back to.
-| weightProperty | string | The property name that contains weight.
-
-|===
-
-.Or use the beta procedure:
-[source, cypher]
-----
-CALL algo.beta.labelPropagation(label:String, relationship:String, {iterations:10,
-    weightProperty:'weight', writeProperty:'community', write:true, concurrency:4})
-YIELD nodes, ranIterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, writeProperty
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type    | Default        | Optional | Description
-| node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config            | map     | n/a            | yes      | Additional configuration.
-|===
-
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type    | Default                | Optional | Description
-| direction         | string  | 'OUTGOING'             | yes      | The relationship-direction to use in the algorithm.
-| iterations        | int     | 10                     | yes      | The maximum number of iterations to run.
-| concurrency       | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| weightProperty    | string  | 'weight'               | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
-| seedProperty      | string  | n/a                    | yes      | Used to define initial set of labels (must be a number).
-| partitionProperty | string  | n/a                    | yes      | Deprecated. Replaced by `seedProperty`.
-| writeProperty     | string  | n/a                    | yes      | The property name written back to the partition of the graph in which the node resides.
-| write             | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
-| graph             | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name | Type | Description
-| loadMillis | int | Milliseconds for loading data.
+| createMillis | int | Milliseconds for loading data.
 | computeMillis | int | Milliseconds for running the algorithm.
 | writeMillis | int | Milliseconds for writing result data back.
 | postProcessingMillis    | int  | Milliseconds for computing percentiles and community count.
@@ -175,51 +108,37 @@ YIELD nodes, ranIterations, didConverge, loadMillis, computeMillis, writeMillis,
 | ranIterations | int | The number of iterations that were executed.
 | didConverge | boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
 
-| p1                   | double  | The 1 percentile of community size.
-| p5                   | double  | The 5 percentile of community size.
-| p10                   | double  | The 10 percentile of community size.
-| p25                   | double  | The 25 percentile of community size.
-| p50                   | double  | The 50 percentile of community size.
-| p75                   | double  | The 75 percentile of community size.
-| p90                   | double  | The 90 percentile of community size.
-| p95                   | double  | The 95 percentile of community size.
-| p99                   | double  | The 99 percentile of community size.
-| p100                  | double  | The 100 percentile of community size.
+| communityDistribution    | map  | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
 
-| write | boolean | Specifies if the result was written back as a node property.
+| maxIterations | int | The given maximum number of iterations to run.
 | writeProperty | string | The property name written back to.
 | weightProperty | string | The property name that contains weight.
-
 |===
 
 .The following will run the algorithm and stream back results:
 [source,cypher]
 ----
-CALL algo.labelPropagation.stream(label:String, relationship:String, {iterations:10,
-    weightProperty:'weight', writeProperty:'partition', concurrency:4, direction:'OUTGOING'})
-YIELD nodeId, label
+CALL algo.labelPropagation.stream(graphNameOrConfig: STRING|MAP, configuration: MAP})
+YIELD nodeId, communityId
 ----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type    | Default        | Optional | Description
-| node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config            | map     | n/a            | yes      | Additional configuration.
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, optional if the first parameter was a map.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type   | Default                | Optional | Description
-| direction         | string | 'OUTGOING'             | yes      | The relationship-direction to use in the algorithm.
-| iterations        | int    | 10                     | yes      | The maximum number of iterations to run.
+| maxIterations        | int    | 10                     | yes      | The maximum number of iterations to run.
 | concurrency       | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency   | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | weightProperty    | string | 'weight'               | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
 | seedProperty      | string | n/a                    | yes      | Used to define initial set of labels (must be a number).
-| partitionProperty | string | n/a                    | yes      | Deprecated. Replaced by `seedProperty`.
 | graph             | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
@@ -228,9 +147,90 @@ YIELD nodeId, label
 |===
 | Name   | Type | Description
 | nodeId | int  | Node ID
-| label  | int  | Community ID
+| communityId  | int  | Community ID
 |===
 
+.The following will run the algorithm and returns the result in form of statistical and measurement values:
+[source, cypher]
+----
+CALL gds.algo.labelPropagation.stats(graphNameOrConfig: STRING|MAP, configuration: MAP})
+YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMillis
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, optional if the first parameter was a map.
+|===
+
+The configuration is the same as for the `write` mode.
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name | Type | Description
+| createMillis | int | Milliseconds for loading data.
+| computeMillis | int | Milliseconds for running the algorithm.
+// TODO: stats mode should not have writeMillis in the result
+| writeMillis | int | Milliseconds for writing result data back.
+| postProcessingMillis    | int  | Milliseconds for computing percentiles and community count.
+
+| nodes | int | The number of nodes considered.
+| communityCount | int  | The number of communities found.
+| ranIterations | int | The number of iterations that were executed.
+| didConverge | boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
+
+| communityDistribution    | map  | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
+
+| maxIterations | int | The given maximum number of iterations to run.
+// TODO: stats mode should not have a writeProperty in the result
+| writeProperty | string | The property name written back to.
+| weightProperty | string | The property name that contains weight.
+|===
+
+.The following will estimate the memory requirements for running the algorithm:
+[source,cypher]
+----
+CALL algo.labelPropagation.<mode>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
+YIELD nodes, relationships, bytesMin, bytesMax, requiredMemory, mapView
+----
+
+The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, optional if the first parameter was a map.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type   | Default                | Optional | Description
+| nodeCount         | int       | 0                 | yes       | The number of nodes in a fictive graph.
+| relationshipCount | int       | 0                 | yes       | The number of relationships in a fictive graph.
+|===
+
+Setting the `nodeCount` and `relationshipCount` parameters allows a memory estimation without loading the graph.
+For explicitly loaded graphs, the config-map needs to contain the graph name in the `graph` key.
+Additionally algorithm specific parameters can also be provided as config.
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type    | Description
+| requiredMemory         | String     | The required memory in human readable format.
+| bytesMin    | int     | The minimum number of bytes required.
+| bytesMax | int   | The maximum number of bytes required.
+| mapView | Map  | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
+
+| nodes         | int     | The number of nodes in the graph.
+| relationships         | int     | The number of relationships in the graph.
+|===
 
 [[algorithms-label-propagation-examples]]
 == Examples
@@ -255,7 +255,7 @@ CREATE (michael)-[:FOLLOW {weight: 1}]->(alice)
 CREATE (alice)-[:FOLLOW {weight: 1}]->(michael)
 CREATE (bridget)-[:FOLLOW {weight: 1}]->(alice)
 CREATE (michael)-[:FOLLOW {weight: 1}]->(bridget)
-CREATE (charles)-[:FOLLOW {weight: 1}]->(doug);
+CREATE (charles)-[:FOLLOW {weight: 1}]->(doug)
 ----
 
 This graph represents six users, some of whom follow each other.
@@ -270,11 +270,11 @@ In addition, each relationship has a weight property.
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.labelPropagation.stream('User', 'FOLLOW', {
-  direction: 'OUTGOING',
-  iterations: 10
+CALL gds.algo.labelPropagation.stream({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOW'
 })
-YIELD nodeId, label AS Community
+YIELD nodeId, communityId AS Community
 RETURN algo.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
 ----
@@ -295,19 +295,19 @@ ORDER BY Community, Name
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL algo.labelPropagation('User', 'FOLLOW', {
-  iterations: 10,
-  writeProperty: 'community',
-  write: true,
-  direction: 'OUTGOING'})
-YIELD nodes, iterations, communityCount, writeProperty;
+CALL gds.algo.labelPropagation.write({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOW',
+  writeProperty: 'community'
+})
+YIELD ranIterations, communityCount
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m"]
+[opts="header",cols="1m,1m"]
 |===
-| nodes | iterations | communityCount | writeProperty
-| 6     | 3          | 2               | "community"
+| ranIterations | communityCount
+| 3             | 2
 |===
 
 
@@ -325,12 +325,13 @@ taking the given relationship or node weights into concern when forming the comm
 .The following will run the algorithm on a weighted graph and stream results:
 [source, cypher]
 ----
-CALL algo.labelPropagation.stream('User', 'FOLLOW', {
-  direction: 'OUTGOING',
-  iterations: 10,
+CALL gds.algo.labelPropagation.stream({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOW',
+  relationshipProperties: 'weight',
   weightProperty: 'weight'
 })
-YIELD nodeId, label AS Community
+YIELD nodeId, communityId AS Community
 RETURN algo.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
 ----
@@ -353,24 +354,24 @@ Using the weighted relationships, `Alice` and `Charles` are now in the same comm
 .The following will load the graph, run the algorithm on a weighted graph and write back results:
 [source, cypher]
 ----
-CALL algo.labelPropagation('User', 'FOLLOW', {
-  iterations: 10,
+CALL gds.algo.labelPropagation.write({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOW',
+  relationshipProperties: 'weight',
   writeProperty: 'community',
-  write: true,
-  direction: 'OUTGOING',
   weightProperty: 'weight'
 })
-YIELD nodes, iterations, communityCount, writeProperty;
+YIELD ranIterations, communityCount
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m"]
+[opts="header",cols="1m,1m"]
 |===
-| nodes | iterations | communityCount | writeProperty
-| 6     | 4          | 2               | "community"
+| ranIterations | communityCount
+| 4             | 2
 |===
 
-As we can see, the weighted example takes 4 iteration to converge, instead of 3 for the unweighted case.
+As we can see, the weighted example takes 4 iterations to converge, instead of 3 for the unweighted case.
 
 
 [[algorithms-label-propagation-examples-seeded]]
@@ -390,12 +391,13 @@ Using this preliminary set of labels, it then sequentially updates each node's l
 .The following will run the algorithm with pre-defined labels:
 [source, cypher]
 ----
-CALL algo.labelPropagation.stream('User', 'FOLLOW', {
-  iterations: 10,
-  seedProperty: 'seed_label',
-  direction: 'OUTGOING'
+CALL gds.algo.labelPropagation.stream({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOW',
+  nodeProperties: 'seed_label',
+  seedProperty: 'seed_label'
 })
-YIELD nodeId, label AS Community
+YIELD nodeId, communityId AS Community
 RETURN algo.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
 ----
@@ -417,21 +419,21 @@ As we can see, the communities are based on the `seed_label` property, concretel
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL algo.labelPropagation('User', 'FOLLOW', {
-  direction: 'OUTGOING',
-  iterations: 10,
-  seedProperty: 'seed_label',
+CALL gds.algo.labelPropagation.write({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOW',
+  nodeProperties: 'seed_label',
   writeProperty: 'community',
-  write: true
+  seedProperty: 'seed_label'
   })
-YIELD nodes, iterations, communityCount, writeProperty;
+YIELD ranIterations, communityCount
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m"]
+[opts="header",cols="1m,1m"]
 |===
-| nodes | iterations | communityCount | writeProperty
-| 6     | 3          | 2               | "community"
+| ranIterations | communityCount
+| 3             | 2
 |===
 
 
@@ -445,16 +447,12 @@ See <<projected-graph-model, Projected Graph Model>> for more details.
 .Using a named graph:
 [source,cypher]
 ----
-CALL algo.graph.load('myGraph', 'User', 'FOLLOW');
+CALL algo.beta.graph.create('myGraph', 'User', 'FOLLOW');
 
-CALL algo.labelPropagation.stream(null, null, {
-  graph: 'myGraph',
-  direction: 'OUTGOING',
-  iterations: 10
-})
-YIELD nodeId, label
-RETURN algo.asNode(nodeId).name AS Name, label AS Community
-ORDER BY Community, Name;
+CALL gds.algo.labelPropagation.stream('myGraph', {})
+YIELD nodeId, communityId AS Community
+RETURN algo.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
 ----
 
 .Results
@@ -474,17 +472,15 @@ As we can see, the results are identical to the results in the <<algorithms-labe
 .Set `graph:'cypher'` in the config:
 [source, cypher]
 ----
-CALL algo.labelPropagation.stream(
-  'MATCH (p:User) RETURN id(p) AS id',
-  'MATCH (p1:User)-[f:FOLLOW]->(p2:User)
-   RETURN id(p1) AS source, id(p2) AS target', {
-  graph: 'cypher',
-  direction: 'OUTGOING',
-  iterations: 10
+CALL gds.algo.labelPropagation.stream({
+  nodeQuery: 'MATCH (p:User) RETURN id(p) AS id',
+  relationshipQuery: 'MATCH (p1:User)-[f:FOLLOW]->(p2:User)
+    RETURN id(p1) AS source, id(p2) AS target',
+  graph: 'cypher'
 })
-YIELD nodeId, label
-RETURN algo.asNode(nodeId).name AS Name, label AS Community
-ORDER BY Community, Name;
+YIELD nodeId, communityId AS Community
+RETURN algo.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
 ----
 
 .Results
