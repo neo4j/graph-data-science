@@ -26,14 +26,12 @@ import org.neo4j.graphalgo.impl.similarity.RleDecoder;
 import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
 import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
 import org.neo4j.graphalgo.impl.similarity.SimilarityRecorder;
-import org.neo4j.graphalgo.impl.similarity.TopKConsumer;
 import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Comparator;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;

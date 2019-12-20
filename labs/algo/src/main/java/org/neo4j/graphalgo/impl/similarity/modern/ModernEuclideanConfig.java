@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.Map;
 
 @ValueClass
-@Configuration("ModernCosineConfigImpl")
-public interface ModernCosineConfig extends AlgoBaseConfig, WriteConfig {
+@Configuration("ModernEuclideanConfigImpl")
+public interface ModernEuclideanConfig extends AlgoBaseConfig, WriteConfig {
 
     int TOP_K_DEFAULT = 0;
 
@@ -125,5 +125,4 @@ public interface ModernCosineConfig extends AlgoBaseConfig, WriteConfig {
     default boolean write() {
         return false;
     }
-
 }

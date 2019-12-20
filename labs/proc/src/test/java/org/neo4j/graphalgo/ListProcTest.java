@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.shortestpath.DijkstraProc;
+import org.neo4j.graphalgo.similarity.ModernCosineProc;
+import org.neo4j.graphalgo.similarity.ModernEuclideanProc;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -127,10 +129,12 @@ class ListProcTest extends BaseProcTest {
             BetweennessCentralityProc.class,
             ClosenessCentralityProc.class,
             CosineProc.class,
+            ModernCosineProc.class,
             DegreeCentralityProc.class,
             DijkstraProc.class,
             EigenvectorCentralityProc.class,
             EuclideanProc.class,
+            ModernEuclideanProc.class,
             IsFiniteFunc.class,
             JaccardProc.class,
             KShortestPathsProc.class,

@@ -32,10 +32,10 @@ import org.neo4j.graphalgo.impl.results.SimilarityExporter;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
 import org.neo4j.graphalgo.impl.similarity.Computations;
-import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineAlgorithm;
-import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineAlgorithm.CosineSimilarityResult;
-import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineConfig;
-import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineConfigImpl;
+import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanAlgorithm.EuclideanSimilarityResult;
+import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanConfig;
+import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanConfigImpl;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.logging.Log;
@@ -51,34 +51,34 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModernCosineProc extends AlgoBaseProc<ModernCosineAlgorithm, CosineSimilarityResult, ModernCosineConfig> {
+public class ModernEuclideanProc extends AlgoBaseProc<ModernEuclideanAlgorithm, EuclideanSimilarityResult, ModernEuclideanConfig> {
 
-    @Procedure(name = "gds.alpha.similarity.cosine.stream", mode = READ)
-    public Stream<SimilarityResult> cosineStream(
+    @Procedure(name = "gds.alpha.similarity.euclidean.stream", mode = READ)
+    public Stream<SimilarityResult> euclideanStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModernCosineAlgorithm, CosineSimilarityResult, ModernCosineConfig> compute = compute(
+        ComputationResult<ModernEuclideanAlgorithm, EuclideanSimilarityResult, ModernEuclideanConfig> compute = compute(
             graphNameOrConfig,
             configuration
         );
         return compute.result().stream();
     }
 
-    @Procedure(name = "gds.alpha.similarity.cosine.write", mode = Mode.WRITE)
-    public Stream<SimilaritySummaryResult> cosine(
+    @Procedure(name = "gds.alpha.similarity.euclidean.write", mode = Mode.WRITE)
+    public Stream<SimilaritySummaryResult> euclidean(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModernCosineAlgorithm, CosineSimilarityResult, ModernCosineConfig> compute = compute(
+        ComputationResult<ModernEuclideanAlgorithm, EuclideanSimilarityResult, ModernEuclideanConfig> compute = compute(
             graphNameOrConfig,
             configuration
         );
 
-        ModernCosineConfig config = compute.config();
-        CosineSimilarityResult result = compute.result();
+        ModernEuclideanConfig config = compute.config();
+        EuclideanSimilarityResult result = compute.result();
 
-        if (result.isEmpty()) {
+        if(result.isEmpty()) {
             return emptyStream(config.writeRelationshipType(), config.writeProperty());
         }
 
@@ -86,46 +86,64 @@ public class ModernCosineProc extends AlgoBaseProc<ModernCosineAlgorithm, Cosine
     }
 
     @Override
-    protected Graph createGraph(Pair<ModernCosineConfig, Optional<String>> configAndName) {
-        if (configAndName.other().isPresent()) {
-            throw new IllegalArgumentException("Cosine Similarity does not run on an explicitly created graph");
-        }
-        return new NullGraph();
-    }
-
-    @Override
-    protected ModernCosineConfig newConfig(
+    protected ModernEuclideanConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new ModernCosineConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new ModernEuclideanConfigImpl(graphName, maybeImplicitCreate, username, userInput);
     }
 
     @Override
-    protected AlgorithmFactory<ModernCosineAlgorithm, ModernCosineConfig> algorithmFactory(ModernCosineConfig config) {
-        return new AlgorithmFactory<ModernCosineAlgorithm, ModernCosineConfig>() {
+    protected AlgorithmFactory<ModernEuclideanAlgorithm, ModernEuclideanConfig> algorithmFactory(ModernEuclideanConfig config) {
+
+        return new AlgorithmFactory<ModernEuclideanAlgorithm, ModernEuclideanConfig>() {
+
             @Override
-            public ModernCosineAlgorithm build(
+            public ModernEuclideanAlgorithm build(
                 Graph graph,
-                ModernCosineConfig configuration,
+                ModernEuclideanConfig configuration,
                 AllocationTracker tracker,
                 Log log
             ) {
-                return new ModernCosineAlgorithm(config, api);
+                return new ModernEuclideanAlgorithm(config, api);
             }
 
             @Override
-            public MemoryEstimation memoryEstimation(ModernCosineConfig configuration) {
-                throw new IllegalArgumentException("Memory estimation not implemented for Cosine Similarity");
+            public MemoryEstimation memoryEstimation(ModernEuclideanConfig configuration) {
+                throw new IllegalArgumentException("Memory estimation not implemented for Euclidean Similarity");
             }
         };
     }
 
+    @Override
+    protected Graph createGraph(Pair<ModernEuclideanConfig, Optional<String>> configAndName) {
+        if (configAndName.other().isPresent()) {
+            throw new IllegalArgumentException("Euclidean Similarity does not run on an explicitly created graph");
+        }
+        return new NullGraph();
+    }
+
+    protected Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
+        return Stream.of(
+            SimilaritySummaryResult.from(
+                0,
+                0,
+                0,
+                new AtomicLong(0),
+                -1,
+                writeRelationshipType,
+                writeProperty,
+                false,
+                new DoubleHistogram(5)
+            )
+        );
+    }
+
     Stream<SimilaritySummaryResult> writeAndAggregateResults(
-        CosineSimilarityResult algoResult,
-        ModernCosineConfig config,
+        ModernEuclideanAlgorithm.EuclideanSimilarityResult algoResult,
+        ModernEuclideanConfig config,
         TerminationFlag terminationFlag
     ) {
         AtomicLong similarityPairs = new AtomicLong();
@@ -153,21 +171,5 @@ public class ModernCosineProc extends AlgoBaseProc<ModernCosineAlgorithm, Cosine
             config.write(),
             histogram
         ));
-    }
-
-    protected Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
-        return Stream.of(
-            SimilaritySummaryResult.from(
-                0,
-                0,
-                0,
-                new AtomicLong(0),
-                -1,
-                writeRelationshipType,
-                writeProperty,
-                false,
-                new DoubleHistogram(5)
-            )
-        );
     }
 }

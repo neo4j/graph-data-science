@@ -52,40 +52,41 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.similarity.SimilarityInput.indexesFor;
 
-public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, ModernCosineAlgorithm.CosineSimilarityResult> {
+public class ModernEuclideanAlgorithm extends Algorithm<ModernEuclideanAlgorithm, ModernEuclideanAlgorithm.EuclideanSimilarityResult> {
 
-    private final ModernCosineConfig config;
+    private final ModernEuclideanConfig config;
     private final GraphDatabaseAPI api;
 
-    public ModernCosineAlgorithm(ModernCosineConfig config, GraphDatabaseAPI api) {
+    public ModernEuclideanAlgorithm(ModernEuclideanConfig config, GraphDatabaseAPI api) {
         this.config = config;
         this.api = api;
     }
 
     @Override
-    public CosineSimilarityResult compute() {
-        ImmutableCosineSimilarityResult.Builder builder = ImmutableCosineSimilarityResult.builder();
+    public EuclideanSimilarityResult compute() {
+        ImmutableEuclideanSimilarityResult.Builder builder = ImmutableEuclideanSimilarityResult.builder();
 
         Double skipValue = config.skipValue();
-
         WeightedInput[] inputs = prepareWeights(config.data(), skipValue);
 
         long[] inputIds = SimilarityInput.extractInputIds(inputs);
         int[] sourceIndexIds = indexesFor(inputIds, config.sourceIds(), "sourceIds");
         int[] targetIndexIds = indexesFor(inputIds, config.targetIds(), "targetIds");
         SimilarityComputer<WeightedInput> computer = similarityComputer(skipValue, sourceIndexIds, targetIndexIds);
+
         builder.nodes(inputIds.length)
             .sourceIdsLength(sourceIndexIds.length)
             .targetIdsLength(targetIndexIds.length);
 
-        if (inputs.length == 0) {
-            return builder.stream(Stream.empty())
+        if(inputs.length == 0) {
+            return builder
+                .stream(Stream.empty())
                 .isEmpty(true)
                 .build();
         }
 
         if (config.showComputations()) {
-            RecordingSimilarityRecorder<WeightedInput> recorder = new RecordingSimilarityRecorder<>( computer);
+            RecordingSimilarityRecorder<WeightedInput> recorder = new RecordingSimilarityRecorder<>(computer);
             builder.computations(recorder);
             computer = recorder;
         }
@@ -95,23 +96,24 @@ public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, Mode
             sourceIndexIds,
             targetIndexIds,
             config.normalizedSimilarityCutoff(),
-            config.top(),
-            config.topK(),
+            -config.top(),
+            -config.topK(),
             computer
         );
-        return builder.stream(resultStream)
+
+        return builder
+            .stream(resultStream)
             .isEmpty(false)
             .build();
     }
 
     @Override
-    public ModernCosineAlgorithm me() {
+    public ModernEuclideanAlgorithm me() {
         return this;
     }
 
     @Override
-    public void release() {
-    }
+    public void release() {}
 
     private WeightedInput[] prepareWeights(Object rawData, Double skipValue) {
         if (ProcedureConstants.CYPHER_QUERY_KEY.equals(config.graph())) {
@@ -170,23 +172,23 @@ public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, Mode
         return inputs;
     }
 
-    private SimilarityComputer<WeightedInput> similarityComputer(
-        Double skipValue,
-        int[] sourceIndexIds,
-        int[] targetIndexIds
-    ) {
+    private SimilarityComputer<WeightedInput> similarityComputer(Double skipValue, int[] sourceIndexIds, int[] targetIndexIds) {
         boolean bidirectional = sourceIndexIds.length == 0 && targetIndexIds.length == 0;
         return skipValue == null ?
-            (decoder, s, t, cutoff) -> s.cosineSquares(decoder, cutoff, t, bidirectional) :
-            (decoder, s, t, cutoff) -> s.cosineSquaresSkip(decoder, cutoff, t, skipValue, bidirectional);
+            (decoder, s, t, cutoff) -> s.sumSquareDelta(decoder, cutoff, t, bidirectional) :
+            (decoder, s, t, cutoff) -> s.sumSquareDeltaSkip(decoder, cutoff, t, skipValue, bidirectional);
     }
 
     Stream<SimilarityResult> generateWeightedStream(
         WeightedInput[] inputs,
-        int[] sourceIndexIds, int[] targetIndexIds, double similarityCutoff, int topN, int topK,
+        int[] sourceIndexIds,
+        int[] targetIndexIds,
+        double similarityCutoff,
+        int topN,
+        int topK,
         SimilarityComputer<WeightedInput> computer
     ) {
-        Supplier<RleDecoder> decoderFactory = createDecoderFactory(inputs[0]);
+        Supplier<RleDecoder> decoderFactory = createDecoderFactory(inputs[0].initialSize());
         return topN(similarityStream(
             inputs,
             sourceIndexIds,
@@ -199,11 +201,24 @@ public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, Mode
             .map(SimilarityResult::squareRooted);
     }
 
-    private Supplier<RleDecoder> createDecoderFactory(WeightedInput input) {
-        if (ProcedureConstants.CYPHER_QUERY_KEY.equals(config.graph())) {
-            return () -> new RleDecoder(input.initialSize());
+    protected Supplier<RleDecoder> createDecoderFactory(int size) {
+        if(ProcedureConstants.CYPHER_QUERY_KEY.equals(config.graph())) {
+            return () -> new RleDecoder(size);
         }
         return () -> null;
+    }
+
+    public static Stream<SimilarityResult> topN(Stream<SimilarityResult> stream, int topN) {
+        if (topN == 0) {
+            return stream;
+        }
+        Comparator<SimilarityResult> comparator = topN > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
+        topN = Math.abs(topN);
+
+        if (topN > 10000) {
+            return stream.sorted(comparator).limit(topN);
+        }
+        return TopKConsumer.topK(stream, topN, comparator);
     }
 
     protected <T> Stream<SimilarityResult> similarityStream(
@@ -228,21 +243,8 @@ public class ModernCosineAlgorithm extends Algorithm<ModernCosineAlgorithm, Mode
         }
     }
 
-    public static Stream<SimilarityResult> topN(Stream<SimilarityResult> stream, int topN) {
-        if (topN == 0) {
-            return stream;
-        }
-        Comparator<SimilarityResult> comparator = topN > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        topN = Math.abs(topN);
-
-        if (topN > 10000) {
-            return stream.sorted(comparator).limit(topN);
-        }
-        return TopKConsumer.topK(stream, topN, comparator);
-    }
-
     @ValueClass
-    public interface CosineSimilarityResult {
+    public interface EuclideanSimilarityResult {
 
         Stream<SimilarityResult> stream();
 
