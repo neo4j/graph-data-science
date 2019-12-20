@@ -80,8 +80,17 @@ public final class CypherPrinter {
         return _CypherParameter.of(value);
     }
 
+    public CypherVariable variable(String value) {
+        return _CypherVariable.of(value);
+    }
+
     @Value.Immutable
     interface CypherParameter {
+        String name();
+    }
+
+    @Value.Immutable
+    interface CypherVariable {
         String name();
     }
 

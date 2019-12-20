@@ -573,9 +573,52 @@ class GdsCypherTest {
                 .addPlaceholder("foo", "")
                 .yields();
         });
-
     }
 
+    static Stream<Arguments> variables() {
+        return Stream.of(
+            arguments("g"               , "g"),
+            arguments("var"             , "var"),
+            arguments("graphName"       , "graphName"),
+            arguments("\"$graphName\""  , "`\"$graphName\"`"),
+            arguments("'$graphName'"    , "`'$graphName'`"),
+            arguments("\"graphName\""   , "`\"graphName\"`"),
+            arguments("'graphName'"     , "`'graphName'`"),
+            arguments("     "           , "`     `"),
+            arguments(" "               , "` `"),
+            arguments("%"               , "`%`")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("variables")
+    void testVariables(String variable, String expected) {
+        String query = GdsCypher
+            .call()
+            .explicitCreation("")
+            .algo("algoName")
+            .writeMode()
+            .addVariable("foo", variable)
+            .yields();
+
+        assertEquals(
+            String.format("CALL gds.algo.algoName.write(\"\", {foo: %s})", expected),
+            query
+        );
+    }
+
+    @Test
+    void testEmptyVariable() {
+        assertThrows(NoSuchElementException.class, () -> {
+            GdsCypher
+                .call()
+                .explicitCreation("")
+                .algo("algoName")
+                .writeMode()
+                .addVariable("foo", "")
+                .yields();
+        });
+    }
 
     @Test
     void testNoYield() {
