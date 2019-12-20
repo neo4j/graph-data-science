@@ -239,27 +239,29 @@ Consider the graph created by the following Cypher statement:
 
 [source, cypher]
 ----
-CREATE (nAlice:User {name:'Alice', seed_label:52})
-CREATE (nBridget:User {name:'Bridget', seed_label:21})
-CREATE (nCharles:User {name:'Charles', seed_label:43})
-CREATE (nDoug:User {name:'Doug', seed_label:21})
-CREATE (nMark:User {name:'Mark', seed_label:19})
-CREATE (nMichael:User {name:'Michael', seed_label:52})
+CREATE (alice:User {name: 'Alice', seed_label: 52})
+CREATE (bridget:User {name: 'Bridget', seed_label: 21})
+CREATE (charles:User {name: 'Charles', seed_label: 43})
+CREATE (doug:User {name: 'Doug', seed_label: 21})
+CREATE (mark:User {name: 'Mark', seed_label: 19})
+CREATE (michael:User {name: 'Michael', seed_label: 52})
 
-CREATE (nAlice)-[:FOLLOW {weight:1}]->(nBridget)
-CREATE (nAlice)-[:FOLLOW {weight:10}]->(nCharles)
-CREATE (nMark)-[:FOLLOW {weight:1}]->(nDoug)
-CREATE (nBridget)-[:FOLLOW {weight:1}]->(nMichael)
-CREATE (nDoug)-[:FOLLOW {weight:1}]->(nMark)
-CREATE (nMichael)-[:FOLLOW {weight:1}]->(nAlice)
-CREATE (nAlice)-[:FOLLOW {weight:1}]->(nMichael)
-CREATE (nBridget)-[:FOLLOW {weight:1}]->(nAlice)
-CREATE (nMichael)-[:FOLLOW {weight:1}]->(nBridget)
-CREATE (nCharles)-[:FOLLOW {weight:1}]->(nDoug);
+CREATE (alice)-[:FOLLOW {weight: 1}]->(bridget)
+CREATE (alice)-[:FOLLOW {weight: 10}]->(charles)
+CREATE (mark)-[:FOLLOW {weight: 1}]->(doug)
+CREATE (bridget)-[:FOLLOW {weight: 1}]->(michael)
+CREATE (doug)-[:FOLLOW {weight: 1}]->(mark)
+CREATE (michael)-[:FOLLOW {weight: 1}]->(alice)
+CREATE (alice)-[:FOLLOW {weight: 1}]->(michael)
+CREATE (bridget)-[:FOLLOW {weight: 1}]->(alice)
+CREATE (michael)-[:FOLLOW {weight: 1}]->(bridget)
+CREATE (charles)-[:FOLLOW {weight: 1}]->(doug);
 ----
 
-This graph represents 6 user and who follows who.
-Besides a `name` a name, each user also has a `seed_label`, which may be generated from previous label-propagation runs.
+This graph represents six users, some of whom follow each other.
+Besides a `name` property, each user also has a `seed_label`  property.
+The `seed_label` property represents a value in the graph used to seed the node with a label.
+For example, this can be a result from a previous run of the Label Propagation algorithm.
 In addition, each relationship has a weight property.
 
 [[algorithms-label-propagation-examples-unweighted]]
@@ -281,8 +283,8 @@ ORDER BY Community, Name
 [opts="header",cols="1,1"]
 |===
 | Name    | Community
-| "Alice   | 1
-| Bridget" | 1
+| "Alice"   | 1
+| "Bridget" | 1
 | "Michael" | 1
 | "Charles" | 4
 | "Doug"    | 4
@@ -317,8 +319,8 @@ Only Charles doesn't strongly fit into either side, but ends up with Doug and Ma
 [[algorithms-label-propagation-examples-weighted]]
 === Weighted
 
-The Label-Propagation algorithm can also run on weighted graphs, taking the given relationship weights into concern when forming the communities.
-
+The Label-Propagation algorithm can also run on weighted graphs,
+taking the given relationship or node weights into concern when forming the communities.
 
 .The following will run the algorithm on a weighted graph and stream results:
 [source, cypher]
@@ -337,9 +339,9 @@ ORDER BY Community, Name
 [opts="header",cols="1,1"]
 |===
 | Name    | Community
-| Bridget" | 2
+| "Bridget" | 2
 | "Michael" | 2
-| "Alice   | 4
+| "Alice"   | 4
 | "Charles" | 4
 | "Doug"    | 4
 | "Mark"    | 4
@@ -460,7 +462,7 @@ ORDER BY Community, Name;
 |===
 | Name    | Community
 | "Alice   | 1
-| Bridget" | 1
+| "Bridget" | 1
 | "Michael" | 1
 | "Charles" | 4
 | "Doug"    | 4
@@ -489,8 +491,8 @@ ORDER BY Community, Name;
 [opts="header",cols="1,1"]
 |===
 | Name    | Community
-| "Alice   | 1
-| Bridget" | 1
+| "Alice"   | 1
+| "Bridget" | 1
 | "Michael" | 1
 | "Charles" | 4
 | "Doug"    | 4
