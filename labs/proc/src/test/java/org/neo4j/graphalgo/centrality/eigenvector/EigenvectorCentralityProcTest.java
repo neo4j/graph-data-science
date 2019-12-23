@@ -17,12 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.centrality.eigenvector;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.centrality.EigenvectorCentralityProc;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
