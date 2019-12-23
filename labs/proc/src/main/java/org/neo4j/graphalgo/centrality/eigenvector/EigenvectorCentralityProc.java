@@ -21,16 +21,11 @@ package org.neo4j.graphalgo.centrality.eigenvector;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.impl.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
@@ -39,28 +34,22 @@ import org.neo4j.graphalgo.results.CentralityResultWithStatistics;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphalgo.results.PageRankScore;
 import org.neo4j.graphalgo.utils.CentralityUtils;
-import org.neo4j.graphdb.Node;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
 public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, PageRank, EigenvectorCentralityConfig> {
-    public static final String DEFAULT_SCORE_PROPERTY = "eigenvector";
-    //TODO
-    static final String EIGENVECTOR_CENTRALITY_DESCRIPTION = "TODO";
+    private static final String DESCRIPTION = "Eigenvector Centrality measures the transitive influence or connectivity of nodes";
 
     @Procedure(value = "gds.alpha.eigenvector.write", mode = Mode.WRITE)
-    @Description(EIGENVECTOR_CENTRALITY_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<PageRankScore.Stats> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -97,9 +86,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
     }
 
     @Procedure(name = "gds.alpha.eigenvector.stream", mode = READ)
-    @Description("CALL algo.eigenvector.stream(label:String, relationship:String, " +
-                 "{weightProperty: null, concurrency:4}) " +
-                 "YIELD node, score - calculates eigenvector centrality and streams results")
+    @Description(DESCRIPTION)
     public Stream<CentralityScore> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -114,41 +101,9 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
     }
 
 
-    // TODO: extract the body into a Class
     @Override
     protected AlgorithmFactory<PageRank, EigenvectorCentralityConfig> algorithmFactory(EigenvectorCentralityConfig config) {
-        return new AlgorithmFactory<PageRank, EigenvectorCentralityConfig>() {
-            @Override
-            public PageRank build(
-                Graph graph,
-                EigenvectorCentralityConfig configuration,
-                AllocationTracker tracker,
-                Log log
-            ) {
-                PageRank.Config algoConfig = new PageRank.Config(
-                    configuration.maxIterations(),
-                    1.0,
-                    PageRank.DEFAULT_TOLERANCE
-                );
-                List<Node> sourceNodes = configuration.sourceNodes();
-                LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
-                return LabsPageRankAlgorithmType.EIGENVECTOR_CENTRALITY
-                    .create(
-                        graph,
-                        Pools.DEFAULT,
-                        configuration.concurrency(),
-                        ParallelUtil.DEFAULT_BATCH_SIZE,
-                        algoConfig,
-                        sourceNodeIds,
-                        tracker
-                    );
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(EigenvectorCentralityConfig configuration) {
-                throw new UnsupportedOperationException("Estimation is not implemented for this algorithm.");
-            }
-        };
+        return new EigenvectorCentralityAlgorithmFactory();
     }
 
     @Override
@@ -161,7 +116,8 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         return EigenvectorCentralityConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
-    public NormalizationFunction normalization(String normalization) {
+    private NormalizationFunction normalization(String normalization) {
         return NormalizationFunction.valueOf(normalization.toUpperCase());
     }
+
 }
