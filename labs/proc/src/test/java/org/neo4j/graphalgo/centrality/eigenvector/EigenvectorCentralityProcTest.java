@@ -182,7 +182,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         String eigenvectorStreamQuery = GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
             .builder()
             .graphName("eigenvectorImplicitNorm")
-            .nodeProjection(NodeProjections.of("Character"))
+            .nodeProjection(NodeProjections.fromString("Character"))
             .relationshipProjection(RelationshipProjections.single(
                 ElementIdentifier.of("INTERACTS_SEASON1"),
                 RelationshipProjection.builder()
@@ -249,7 +249,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         String eigenvectorWriteQuery = GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
             .builder()
             .graphName("eigenvectorImplicitNorm")
-            .nodeProjection(NodeProjections.of("Character"))
+            .nodeProjection(NodeProjections.fromString("Character"))
             .relationshipProjection(RelationshipProjections.single(
                 ElementIdentifier.of("INTERACTS_SEASON1"),
                 RelationshipProjection.builder()
@@ -377,7 +377,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                 GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
                     .builder()
                     .graphName("eigenvectorImplicitTest")
-                    .nodeProjection(NodeProjections.of("Character"))
+                    .nodeProjection(NodeProjections.fromString("Character"))
                     .relationshipProjection(RelationshipProjections.single(
                         ElementIdentifier.of("INTERACTS_SEASON1"),
                         RelationshipProjection.builder()
@@ -400,7 +400,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                     .projection(Projection.UNDIRECTED)
                     .build()
             )
-            .betaGraphCreate(graphName)
+            .graphCreate(graphName)
             .yields();
 
         runQuery(graphCreateQuery);
