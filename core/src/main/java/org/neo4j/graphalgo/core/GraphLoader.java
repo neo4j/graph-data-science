@@ -27,8 +27,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.GraphSetupImpl;
-import org.neo4j.graphalgo.api.GraphSetupLegacyImpl;
+import org.neo4j.graphalgo.api.LegacyGraphSetup;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -44,16 +43,11 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
 
 /**
  * The GraphLoader provides a fluent interface and default values to configure
@@ -430,7 +424,7 @@ public class GraphLoader implements SharedGraphLoader {
 
     public GraphSetup toSetup() {
         this.relPropertyMappings.setGlobalDeduplicationStrategy(deduplicationStrategy);
-        return new GraphSetupLegacyImpl(
+        return new LegacyGraphSetup(
             username,
             label,
             relationshipType,

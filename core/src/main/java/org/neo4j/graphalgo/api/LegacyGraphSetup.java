@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-public final class GraphSetupLegacyImpl implements GraphSetup {
+public final class LegacyGraphSetup implements GraphSetup {
 
     // user name
     private final String username;
@@ -82,7 +82,7 @@ public final class GraphSetupLegacyImpl implements GraphSetup {
      * @param batchSize             batch size for parallel loading
      * @param deduplicationStrategy strategy for handling relationship duplicates
      */
-    public GraphSetupLegacyImpl(
+    public LegacyGraphSetup(
         String username,
         String nodeLabel,
         String relationshipType,

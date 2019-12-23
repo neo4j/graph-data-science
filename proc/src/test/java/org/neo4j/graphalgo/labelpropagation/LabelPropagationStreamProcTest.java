@@ -42,7 +42,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationBaseProcTest<LabelP
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("graphVariations")
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#graphVariations")
     void testStream(String graphSnippet, String testCaseName) {
         String query = "CALL gds.algo.labelPropagation.stream(" +
                        graphSnippet +

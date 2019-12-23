@@ -136,13 +136,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     default void testRunOnLoadedGraph() {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
-        Graph graph = ImmutableModernGraphLoader
-            .builder()
-            .api(graphDb())
-            .username("")
-            .createConfig(graphCreateConfig)
-            .log(new TestLog())
-            .build()
+        Graph graph = graphLoader(graphCreateConfig)
             .load(HugeGraphFactory.class);
 
         GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
@@ -309,9 +303,14 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
     @NotNull
     default ModernGraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
+        return graphLoader(graphDb(), graphCreateConfig);
+    }
+
+    @NotNull
+    default ModernGraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateConfig graphCreateConfig) {
         return ImmutableModernGraphLoader
             .builder()
-            .api(graphDb())
+            .api(db)
             .username("")
             .log(new TestLog())
             .createConfig(graphCreateConfig).build();

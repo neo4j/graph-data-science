@@ -222,10 +222,11 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
             )
             .build();
 
-        GraphsByRelationshipType graphsByRelationshipType = graphLoader(graphCreateConfig)
+        GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig)
             .build(HugeGraphFactory.class)
             .importAllGraphs();
 
         GraphCatalog.set(graphCreateConfig, graphsByRelationshipType);
+        db.shutdown();
     }
 }

@@ -23,7 +23,7 @@ package org.neo4j.graphalgo.core;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.GraphSetupImpl;
+import org.neo4j.graphalgo.api.ModernGraphSetup;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -59,7 +59,7 @@ public interface ModernGraphLoader extends SharedGraphLoader {
     @Override
     @Value.Lazy
     default GraphSetup toSetup() {
-        return new GraphSetupImpl(
+        return new ModernGraphSetup(
             params(),
             executorService(),
             log(),

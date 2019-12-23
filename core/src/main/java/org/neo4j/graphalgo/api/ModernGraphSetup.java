@@ -19,16 +19,12 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -45,7 +41,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
-public class GraphSetupImpl implements GraphSetup {
+public class ModernGraphSetup implements GraphSetup {
 
     private final GraphCreateConfig createConfig;
 
@@ -61,7 +57,7 @@ public class GraphSetupImpl implements GraphSetup {
     /**
      * @param executor  the executor. null means single threaded evaluation
      */
-    public GraphSetupImpl(
+    public ModernGraphSetup(
         Map<String, Object> params,
         ExecutorService executor,
         Log log,
@@ -77,14 +73,17 @@ public class GraphSetupImpl implements GraphSetup {
         this.createConfig = createConfig;
     }
 
+    @Override
     public String username() {
         return createConfig.username();
     }
 
+    @Override
     public String name() {
         return createConfig.graphName();
     }
 
+    @Override
     public int concurrency() {
         if (!loadConcurrent()) {
             return 1;
@@ -92,42 +91,21 @@ public class GraphSetupImpl implements GraphSetup {
         return createConfig.concurrency();
     }
 
-    /**
-     * @deprecated This feature is going away and will mean load nothing instead
-     */
-    @Deprecated
-    public boolean loadAnyLabel() {
-        return StringUtils.isEmpty(nodeLabel());
-    }
-
-    /**
-     * @deprecated This feature is going away and will mean load nothing instead
-     */
-    @Deprecated
-    public boolean loadAnyRelationshipType() {
-        return StringUtils.isEmpty(relationshipType());
-    }
-
+    @Override
     public @NotNull String nodeLabel() {
         return createConfig.nodeProjection().labelProjection().orElse("");
     }
 
+    @Override
     public @NotNull String relationshipType() {
         return createConfig.relationshipProjection().typeFilter();
-    }
-
-    public NodeProjections nodeProjections() {
-        return createConfig.nodeProjection();
-    }
-
-    public RelationshipProjections relationshipProjections() {
-        return createConfig.relationshipProjection();
     }
 
     /**
      * @deprecated There is no global direction anymore
      */
     @Deprecated
+    @Override
     public Direction direction() {
         Direction direction = createConfig
             .relationshipProjection()
@@ -164,6 +142,7 @@ public class GraphSetupImpl implements GraphSetup {
      * @deprecated There is no global direction anymore
      */
     @Deprecated
+    @Override
     public boolean loadIncoming() {
         return direction() == Direction.INCOMING || direction() == Direction.BOTH;
     }
@@ -172,6 +151,7 @@ public class GraphSetupImpl implements GraphSetup {
      * @deprecated There is no global direction anymore
      */
     @Deprecated
+    @Override
     public boolean loadOutgoing() {
         return direction() == Direction.OUTGOING || direction() == Direction.BOTH;
     }
@@ -180,6 +160,7 @@ public class GraphSetupImpl implements GraphSetup {
      * @deprecated There is no global direction anymore
      */
     @Deprecated
+    @Override
     public boolean loadAsUndirected() {
         return createConfig
             .relationshipProjection()
@@ -201,6 +182,7 @@ public class GraphSetupImpl implements GraphSetup {
      * @deprecated There is no global relationship property anymore
      */
     @Deprecated
+    @Override
     public Optional<Double> relationshipDefaultPropertyValue() {
         return createConfig.relationshipProjection().allFilters().stream().flatMap(
             f -> Streams.ofOptional(f.properties().defaultWeight())
@@ -211,6 +193,7 @@ public class GraphSetupImpl implements GraphSetup {
      * @deprecated There is no global node property configuration anymore
      */
     @Deprecated
+    @Override
     public PropertyMappings nodePropertyMappings() {
         Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.nodeProjection()
             .allProjections()
@@ -225,14 +208,11 @@ public class GraphSetupImpl implements GraphSetup {
         return builder.build();
     }
 
-    public PropertyMappings nodePropertyMappings(ElementIdentifier identifier) {
-        return createConfig.nodeProjection().getProjection(identifier).properties();
-    }
-
     /**
      * @deprecated There is no global relationship property configuration anymore
      */
     @Deprecated
+    @Override
     public PropertyMappings relationshipPropertyMappings() {
         Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.relationshipProjection()
             .allFilters()
@@ -247,14 +227,11 @@ public class GraphSetupImpl implements GraphSetup {
         return builder.build();
     }
 
-    public PropertyMappings relationshipPropertyMappings(ElementIdentifier identifier) {
-        return createConfig.relationshipProjection().getFilter(identifier).properties();
-    }
-
     /**
      * @deprecated There is no global relationship deduplication strategy anymore
      */
     @Deprecated
+    @Override
     public DeduplicationStrategy deduplicationStrategy() {
         return createConfig
             .relationshipProjection()
@@ -265,26 +242,32 @@ public class GraphSetupImpl implements GraphSetup {
             .orElse(DeduplicationStrategy.DEFAULT);
     }
 
+    @Override
     public Map<String, Object> params() {
         return params;
     }
 
+    @Override
     public Log log() {
         return log;
     }
 
+    @Override
     public long logMillis() {
         return -1;
     }
 
+    @Override
     public AllocationTracker tracker() {
         return tracker;
     }
 
+    @Override
     public TerminationFlag terminationFlag() {
         return terminationFlag;
     }
 
+    @Override
     public ExecutorService executor() {
         return executor;
     }
