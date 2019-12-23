@@ -74,8 +74,8 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
         ",  (todd)-[:PURCHASED]->(hobbit)";
 
     private Map<Long, Double> expected;
-    public static final Label PERSON_LABEL = Label.label("Person");
-    public static final Label PRODUCT_LABEL = Label.label("Product");
+    private static final Label PERSON_LABEL = Label.label("Person");
+    private static final Label PRODUCT_LABEL = Label.label("Product");
 
     @BeforeEach
     void setupGraph() throws KernelException {
@@ -224,7 +224,6 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
                  "  }" +
                  ")");
 
-        @Language("Cypher")
         String query = GdsCypher.call().explicitCreation("personalisedGraph")
             .algo("pageRank").streamMode()
             .addPlaceholder("sourceNodes", "startNodes")
