@@ -21,8 +21,13 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.centrality.EigenvectorCentralityProc;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -32,18 +37,21 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 class EigenvectorCentralityNormalizationProcTest extends BaseProcTest {
 
-    private final Map<Long, Double> expected = new HashMap<>();
-    private final Map<Long, Double> maxNormExpected = new HashMap<>();
-    private final Map<Long, Double> l2NormExpected = new HashMap<>();
-    private final Map<Long, Double> l1NormExpected = new HashMap<>();
+    private static final Map<Long, Double> noNormExpected = new HashMap<>();
+    private static final Map<Long, Double> maxNormExpected = new HashMap<>();
+    private static final Map<Long, Double> l2NormExpected = new HashMap<>();
+    private static final Map<Long, Double> l1NormExpected = new HashMap<>();
 
     @AfterEach
     void tearDown() {
+        GraphCatalog.removeAllLoadedGraphs();
         db.shutdown();
     }
 
@@ -52,11 +60,11 @@ class EigenvectorCentralityNormalizationProcTest extends BaseProcTest {
         ClassLoader classLoader = EigenvectorCentralityNormalizationProcTest.class.getClassLoader();
         File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
 
-        db = (GraphDatabaseAPI)new TestGraphDatabaseFactory()
-                .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
-                .setConfig(GraphDatabaseSettings.load_csv_file_url_root,file.getParent())
-                .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")
-                .newGraphDatabase();
+        db = (GraphDatabaseAPI) new TestGraphDatabaseFactory()
+            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
+            .setConfig(GraphDatabaseSettings.load_csv_file_url_root, file.getParent())
+            .setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            .newGraphDatabase();
 
         runQuery("CREATE CONSTRAINT ON (c:Character)\n" +
                  "ASSERT c.id IS UNIQUE;");
@@ -71,28 +79,31 @@ class EigenvectorCentralityNormalizationProcTest extends BaseProcTest {
                  "MERGE (source)-[rel:INTERACTS_SEASON1]->(target)\n" +
                  "SET rel.weight = toInteger(row.Weight);");
 
-        registerProcedures(EigenvectorCentralityProc.class);
+        registerProcedures(
+            EigenvectorCentralityProc.class,
+            GraphCreateProc.class
+        );
 
         runInTransaction(db, () -> {
             final Label label = Label.label("Character");
-            expected.put(db.findNode(label, "name", "Ned").getId(), 111.68570401574802);
-            expected.put(db.findNode(label, "name", "Robert").getId(), 88.09448401574804);
-            expected.put(db.findNode(label, "name", "Cersei").getId(), 		84.59226401574804);
-            expected.put(db.findNode(label, "name", "Catelyn").getId(), 	84.51566401574803);
-            expected.put(db.findNode(label, "name", "Tyrion").getId(), 82.00291401574802);
-            expected.put(db.findNode(label, "name", "Joffrey").getId(), 77.67397401574803);
-            expected.put(db.findNode(label, "name", "Robb").getId(), 73.56551401574802);
-            expected.put(db.findNode(label, "name", "Arya").getId(), 73.32532401574804	);
-            expected.put(db.findNode(label, "name", "Petyr").getId(), 72.26733401574802);
-            expected.put(db.findNode(label, "name", "Sansa").getId(), 71.56470401574803);
+            noNormExpected.put(db.findNode(label, "name", "Ned").getId(), 111.68570401574802);
+            noNormExpected.put(db.findNode(label, "name", "Robert").getId(), 88.09448401574804);
+            noNormExpected.put(db.findNode(label, "name", "Cersei").getId(), 84.59226401574804);
+            noNormExpected.put(db.findNode(label, "name", "Catelyn").getId(), 84.51566401574803);
+            noNormExpected.put(db.findNode(label, "name", "Tyrion").getId(), 82.00291401574802);
+            noNormExpected.put(db.findNode(label, "name", "Joffrey").getId(), 77.67397401574803);
+            noNormExpected.put(db.findNode(label, "name", "Robb").getId(), 73.56551401574802);
+            noNormExpected.put(db.findNode(label, "name", "Arya").getId(), 73.32532401574804);
+            noNormExpected.put(db.findNode(label, "name", "Petyr").getId(), 72.26733401574802);
+            noNormExpected.put(db.findNode(label, "name", "Sansa").getId(), 71.56470401574803);
         });
 
         runInTransaction(db, () -> {
             final Label label = Label.label("Character");
             maxNormExpected.put(db.findNode(label, "name", "Ned").getId(), 1.0);
             maxNormExpected.put(db.findNode(label, "name", "Robert").getId(), 0.78823475553106);
-            maxNormExpected.put(db.findNode(label, "name", "Cersei").getId(), 		0.7567972769062152);
-            maxNormExpected.put(db.findNode(label, "name", "Catelyn").getId(), 	0.7561096813631987);
+            maxNormExpected.put(db.findNode(label, "name", "Cersei").getId(), 0.7567972769062152);
+            maxNormExpected.put(db.findNode(label, "name", "Catelyn").getId(), 0.7561096813631987);
             maxNormExpected.put(db.findNode(label, "name", "Tyrion").getId(), 0.7335541239126161);
             maxNormExpected.put(db.findNode(label, "name", "Joffrey").getId(), 0.694695640231341);
             maxNormExpected.put(db.findNode(label, "name", "Robb").getId(), 0.6578162827292336);
@@ -105,8 +116,8 @@ class EigenvectorCentralityNormalizationProcTest extends BaseProcTest {
             final Label label = Label.label("Character");
             l2NormExpected.put(db.findNode(label, "name", "Ned").getId(), 0.31424020248680057);
             l2NormExpected.put(db.findNode(label, "name", "Robert").getId(), 0.2478636701002979);
-            l2NormExpected.put(db.findNode(label, "name", "Cersei").getId(), 		0.23800978296539527);
-            l2NormExpected.put(db.findNode(label, "name", "Catelyn").getId(), 	0.23779426030989856);
+            l2NormExpected.put(db.findNode(label, "name", "Cersei").getId(), 0.23800978296539527);
+            l2NormExpected.put(db.findNode(label, "name", "Catelyn").getId(), 0.23779426030989856);
             l2NormExpected.put(db.findNode(label, "name", "Tyrion").getId(), 0.23072435753445136);
             l2NormExpected.put(db.findNode(label, "name", "Joffrey").getId(), 0.21854440134273145);
             l2NormExpected.put(db.findNode(label, "name", "Robb").getId(), 0.2069847902565455);
@@ -119,8 +130,8 @@ class EigenvectorCentralityNormalizationProcTest extends BaseProcTest {
             final Label label = Label.label("Character");
             l1NormExpected.put(db.findNode(label, "name", "Ned").getId(), 0.04193172127455592);
             l1NormExpected.put(db.findNode(label, "name", "Robert").getId(), 0.03307454057909963);
-            l1NormExpected.put(db.findNode(label, "name", "Cersei").getId(), 		0.031759653287334266);
-            l1NormExpected.put(db.findNode(label, "name", "Catelyn").getId(), 	0.03173089428117553);
+            l1NormExpected.put(db.findNode(label, "name", "Cersei").getId(), 0.031759653287334266);
+            l1NormExpected.put(db.findNode(label, "name", "Catelyn").getId(), 0.03173089428117553);
             l1NormExpected.put(db.findNode(label, "name", "Tyrion").getId(), 0.030787497509304138);
             l1NormExpected.put(db.findNode(label, "name", "Joffrey").getId(), 0.029162223199633484);
             l1NormExpected.put(db.findNode(label, "name", "Robb").getId(), 0.027619726770875055);
@@ -130,87 +141,158 @@ class EigenvectorCentralityNormalizationProcTest extends BaseProcTest {
         });
     }
 
-    @Test
-    void noNormalizing() {
+    @ParameterizedTest(name = "Normalizatoin: {0}")
+    @MethodSource("normalizations")
+    void eigenvectorCentralityOnExplicitGraph(String normalizationType, Map<Long, Double> expected) {
+        createExplicitGraph();
+        String eigenvectorStreamQuery = GdsCypher.call()
+            .explicitCreation("eigenvectorNorm")
+            .algo("gds", "alpha", "eigenvector")
+            .streamMode()
+            .addParameter("direction", "BOTH")
+            .addParameter("normalization", normalizationType)
+            .yields("nodeId", "score");
+
         final Map<Long, Double> actual = new HashMap<>();
+
+        runQuery(eigenvectorStreamQuery +
+            " RETURN nodeId, score" +
+            " ORDER BY score DESC" +
+            " LIMIT 10",
+            row -> actual.put(
+                (Long) row.get("nodeId"),
+                (Double) row.get("score")
+            )
+        );
+        assertMapEquals(expected, actual);
+    }
+
+    @ParameterizedTest(name = "Normalizatoin: {0}")
+    @MethodSource("normalizations")
+    void eigenvectorCentralityOnImplicitGraph(String normalizationType, Map<Long, Double> expected) {
+        String query = GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
+            .builder()
+            .graphName("eigenvectorImplicitNorm")
+            .nodeProjection(NodeProjections.of("Character"))
+            .relationshipProjection(RelationshipProjections.single(
+                ElementIdentifier.of("INTERACTS_SEASON1"),
+                RelationshipProjection.builder()
+                    .type("INTERACTS_SEASON1")
+                    .projection(Projection.UNDIRECTED)
+                    .build()
+            )).build())
+            .algo("gds", "alpha", "eigenvector")
+            .streamMode()
+            .addParameter("direction", "BOTH")
+            .addParameter("normalization", normalizationType)
+            .addParameter("writeProperty", "eigen")
+            .yields("nodeId", "score");
+
+        final Map<Long, Double> actual = new HashMap<>();
+
         runQuery(
-                "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {direction: 'BOTH'}) " +
-                        "YIELD nodeId, score " +
-                        "RETURN nodeId, score " +
-                        "ORDER BY score DESC " +
-                        "LIMIT 10",
-                row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
+            query +
+            " RETURN nodeId, score" +
+            " ORDER BY score DESC" +
+            " LIMIT 10",
+            row -> actual.put(
+                (Long) row.get("nodeId"),
+                (Double) row.get("score")
+            )
+        );
+        assertMapEquals(expected, actual);
+    }
+
+    @ParameterizedTest(name = "Normalizatoin: {0}")
+    @MethodSource("normalizations")
+    void eigenvectorCentralityWriteOnExplicitGraph(String normalizationType, Map<Long, Double> expected) {
+        createExplicitGraph();
+        final Map<Long, Double> actual = new HashMap<>();
+        String eigenvectorWriteQuery = GdsCypher.call()
+            .explicitCreation("eigenvectorNorm")
+            .algo("gds", "alpha", "eigenvector")
+            .writeMode()
+            .addParameter("direction", "BOTH")
+            .addParameter("normalization", normalizationType)
+            .addParameter("writeProperty", "eigen")
+            .yields();
+
+        runQuery(eigenvectorWriteQuery);
+
+        runQuery(
+            "MATCH (c:Character) " +
+            "RETURN id(c) AS nodeId, c.eigen AS score " +
+            "ORDER BY score DESC " +
+            "LIMIT 10",
+            row -> actual.put(
+                (Long) row.get("nodeId"),
+                (Double) row.get("score")
+            )
+        );
 
         assertMapEquals(expected, actual);
     }
 
-    @Test
-    void maxNorm() {
+    @ParameterizedTest(name = "Normalizatoin: {0}")
+    @MethodSource("normalizations")
+    void eigenvectorCentralityWriteOnImplicitGraph(String normalizationType, Map<Long, Double> expected) {
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {direction: 'BOTH', normalization: 'max'}) " +
-                        "YIELD nodeId, score " +
-                        "RETURN nodeId, score " +
-                        "ORDER BY score DESC " +
-                        "LIMIT 10",
-                row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
+        String query = GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
+            .builder()
+            .graphName("eigenvectorImplicitNorm")
+            .nodeProjection(NodeProjections.of("Character"))
+            .relationshipProjection(RelationshipProjections.single(
+                ElementIdentifier.of("INTERACTS_SEASON1"),
+                RelationshipProjection.builder()
+                    .type("INTERACTS_SEASON1")
+                    .projection(Projection.UNDIRECTED)
+                    .build()
+            )).build())
+            .algo("gds", "alpha", "eigenvector")
+            .writeMode()
+            .addParameter("direction", "BOTH")
+            .addParameter("normalization", normalizationType)
+            .addParameter("writeProperty", "eigen")
+            .yields();
 
-        assertMapEquals(maxNormExpected, actual);
+        runQuery(query);
+
+        runQuery(
+            "MATCH (c:Character) " +
+            "RETURN id(c) AS nodeId, c.eigen AS score " +
+            "ORDER BY score DESC " +
+            "LIMIT 10",
+            row -> actual.put(
+                (Long) row.get("nodeId"),
+                (Double) row.get("score")
+            )
+        );
+
+        assertMapEquals(expected, actual);
     }
 
-    @Test
-    void l2Norm() {
-        final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {direction: 'BOTH', normalization: 'l2Norm'}) " +
-                        "YIELD nodeId, score " +
 
-                        "RETURN nodeId, score " +
-                        "ORDER BY score DESC " +
-                        "LIMIT 10",
-                row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
-
-        assertMapEquals(l2NormExpected, actual);
+    static Stream<Arguments> normalizations() {
+        return Stream.of(
+            arguments("none", noNormExpected),
+            arguments("max", maxNormExpected),
+            arguments("l1Norm", l1NormExpected),
+            arguments("l2Norm", l2NormExpected)
+        );
     }
 
-    @Test
-    void l1Norm() {
-        final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {direction: 'BOTH', normalization: 'l1Norm'}) " +
-                        "YIELD nodeId, score " +
-                        "RETURN nodeId, score " +
-                        "ORDER BY score DESC " +
-                        "LIMIT 10",
-                row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
-
-        assertMapEquals(l1NormExpected, actual);
-    }
-
-    @Test
-    void l1NormWrite() {
-        final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.eigenvector('Character', 'INTERACTS_SEASON1', {direction: 'BOTH', normalization: 'l1Norm', writeProperty: 'eigen'}) ",
-                row -> {});
-
-        runQuery(
-                "MATCH (c:Character) " +
-                       "RETURN id(c) AS nodeId, c.eigen AS score " +
-                       "ORDER BY score DESC " +
-                       "LIMIT 10",
-                row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
-
-        assertMapEquals(l1NormExpected, actual);
+    private void createExplicitGraph() {
+        String graphCreateQuery = GdsCypher.call()
+            .withNodeLabel("Character")
+            .withRelationshipType(
+                "INTERACTS_SEASON1",
+                RelationshipProjection.builder()
+                    .type("INTERACTS_SEASON1")
+                    .projection(Projection.UNDIRECTED)
+                    .build()
+            )
+            .betaGraphCreate("eigenvectorNorm")
+            .yields();
+        runQuery(graphCreateQuery);
     }
 }

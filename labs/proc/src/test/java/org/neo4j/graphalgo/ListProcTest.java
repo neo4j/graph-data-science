@@ -19,14 +19,17 @@
  */
 package org.neo4j.graphalgo;
 
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
+import org.neo4j.graphalgo.centrality.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.shortestpath.DijkstraProc;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ListProcTest extends BaseProcTest {
 
-    private static final Set<String> PROCEDURES = new HashSet<>(asList(
+    private static final Collection<String> PROCEDURES = new HashSet<>(asList(
         "algo.allShortestPaths.stream",
         "algo.articleRank",
         "algo.articleRank.stream",
@@ -58,8 +61,8 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.shortestPath.write",
         "gds.alpha.shortestPath.stream",
         "algo.dfs.stream",
-        "algo.eigenvector.write",
-        "algo.eigenvector.stream",
+        "gds.alpha.eigenvector.write",
+        "gds.alpha.eigenvector.stream",
         "algo.kShortestPaths",
         "algo.kShortestPaths.stream",
         "algo.labs.ml.ann",
@@ -93,7 +96,7 @@ class ListProcTest extends BaseProcTest {
         "algo.triangleCount.stream"
     ));
 
-    private static final Set<String> FUNCTIONS = new HashSet<>(asList(
+    private static final Collection<String> FUNCTIONS = new HashSet<>(asList(
         "algo.linkprediction.adamicAdar",
         "algo.linkprediction.resourceAllocation",
         "algo.linkprediction.commonNeighbors",
@@ -188,7 +191,7 @@ class ListProcTest extends BaseProcTest {
         );
     }
 
-    private Set<String> listProcs(Object name) {
+    private Set<String> listProcs(@Nullable Object name) {
         String query = "CALL gds.list($name)";
         return runQuery(query, MapUtil.map("name", name))
             .<String>columnAs("name")

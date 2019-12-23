@@ -59,7 +59,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
     //TODO
     static final String EIGENVECTOR_CENTRALITY_DESCRIPTION = "TODO";
 
-    @Procedure(value = "algo.eigenvector.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.eigenvector.write", mode = Mode.WRITE)
     @Description(EIGENVECTOR_CENTRALITY_DESCRIPTION)
     public Stream<PageRankScore.Stats> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -77,24 +77,26 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         CentralityResult normalizedResults = normalization(normalization).apply(stats);
 
         PageRank prAlgo = result.algorithm();
-        String propertyName = result.config().writeProperty();
+        String writePropertyName = result.config().writeProperty();
         try (ProgressTimer ignored = statsBuilder.timeWrite()) {
             NodePropertyExporter exporter = NodePropertyExporter
                 .of(api, result.graph(), TerminationFlag.wrap(transaction))
                 .withLog(log)
                 .parallel(Pools.DEFAULT, result.config().writeConcurrency())
                 .build();
-            normalizedResults.export(propertyName, exporter);
+            normalizedResults.export(writePropertyName, exporter);
         }
 
-        statsBuilder.withWrite(true).withWriteProperty(propertyName);
+        statsBuilder.withWrite(true).withWriteProperty(writePropertyName);
 
-        statsBuilder.withIterations(prAlgo.iterations()).withDampingFactor(prAlgo.dampingFactor());
+        statsBuilder
+            .withIterations(prAlgo.iterations())
+            .withDampingFactor(prAlgo.dampingFactor());
 
         return Stream.of(statsBuilder.build());
     }
 
-    @Procedure(name = "algo.eigenvector.stream", mode = READ)
+    @Procedure(name = "gds.alpha.eigenvector.stream", mode = READ)
     @Description("CALL algo.eigenvector.stream(label:String, relationship:String, " +
                  "{weightProperty: null, concurrency:4}) " +
                  "YIELD node, score - calculates eigenvector centrality and streams results")
@@ -111,6 +113,8 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         return CentralityUtils.streamResults(result.graph(), normalization(normalization).apply(centralityResult));
     }
 
+
+    // TODO: extract the body into a Class
     @Override
     protected AlgorithmFactory<PageRank, EigenvectorCentralityConfig> algorithmFactory(EigenvectorCentralityConfig config) {
         return new AlgorithmFactory<PageRank, EigenvectorCentralityConfig>() {

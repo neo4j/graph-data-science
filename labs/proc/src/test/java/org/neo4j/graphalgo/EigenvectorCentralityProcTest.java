@@ -68,7 +68,10 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                  "MERGE (source)-[rel:INTERACTS_SEASON1]->(target) " +
                  "SET rel.weight = toInteger(row.Weight);");
 
-        registerProcedures(EigenvectorCentralityProc.class, GraphCreateProc.class);
+        registerProcedures(
+            EigenvectorCentralityProc.class,
+            GraphCreateProc.class
+        );
 
         runInTransaction(db, () -> {
             final Label label = Label.label("Character");
@@ -87,12 +90,12 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        db.shutdown();
         GraphCatalog.removeAllLoadedGraphs();
+        db.shutdown();
     }
 
     @AllGraphNamesTest
-    public void testStream(String graphImpl) {
+    void testStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         runQuery("CALL  algo.beta.graph.create('eigenvectorTest', " +
                  "'Character'," +
@@ -105,7 +108,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                  "  }" +
                  ")");
 
-        String query = "CALL algo.eigenvector.stream('eigenvectorTest'," +
+        String query = "CALL gds.alpha.eigenvector.stream('eigenvectorTest'," +
                        "    {" +
                        "        direction: 'BOTH'" +
                        "    }" +
@@ -133,7 +136,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                  "      }" +
                  "  }" +
                  ")");
-        String query = "CALL algo.eigenvector.write('eigenvectorTest',"+
+        String query = "CALL gds.alpha.eigenvector.write('eigenvectorTest',"+
                        "    {" +
                        "        direction: 'BOTH'" +
                        "    }" +
@@ -159,7 +162,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                  "      }" +
                  "  }" +
                  ")");
-        String query = "CALL algo.eigenvector.write('eigenvectorTest',"+
+        String query = "CALL gds.alpha.eigenvector.write('eigenvectorTest',"+
                        "    {" +
                        "        direction: 'BOTH', writeProperty: 'foobar'" +
                        "    }" +
@@ -175,7 +178,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
 
     //TODO: check if .addParameter("direction", "BOTH") is needed
     @AllGraphNamesTest
-    public void testParallelWriteBack(String graphImpl) {
+    void testParallelWriteOnImplicitGraph() {
         String query = GdsCypher
             .call()
             .implicitCreation(ImmutableGraphCreateConfig.builder()
@@ -190,7 +193,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                             .projection(Projection.UNDIRECTED)
                             .build()
                     ).build()).build())
-            .algo("algo", "eigenvector")
+            .algo("gds", "alpha", "eigenvector")
             .writeMode()
             .addParameter("batchSize", 3)
             .addParameter("concurrency", 2)
@@ -202,7 +205,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
     }
 
     @AllGraphNamesTest
-    public void testParallelExecution(String graphImpl) {
+    void testParallelStreamOnImplicitGraph() {
         final Map<Long, Double> actual = new HashMap<>();
         String query = GdsCypher
             .call()
@@ -218,7 +221,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                             .projection(Projection.UNDIRECTED)
                             .build()
                     ).build()).build())
-            .algo("algo", "eigenvector")
+            .algo("gds", "alpha", "eigenvector")
             .streamMode()
             .addParameter("batchSize", 3)
             .addParameter("concurrency", 2)
