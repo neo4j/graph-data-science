@@ -59,7 +59,6 @@ These algorithms evaluate how a group is clustered or partitioned, as well as it
 
 These algorithms help find the shortest path or evaluate the availability and quality of routes:
 
-* https://neo4j.com/docs/graph-algorithms/current/algorithms/minimum-weight-spanning-tree/[Minimum Weight Spanning Tree^] (`algo.mst`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/shortest-path/[Shortest Path^] (`algo.shortestPath`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/single-source-shortest-path/[Single Source Shortest Path^] (`algo.shortestPath.deltastepping`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/all-pairs-shortest-path/[All Pairs Shortest Path^] (`algo.allShortestPaths`)

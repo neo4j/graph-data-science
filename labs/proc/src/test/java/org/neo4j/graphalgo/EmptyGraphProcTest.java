@@ -134,11 +134,6 @@ class EmptyGraphProcTest extends BaseProcTest {
     }
 
     @Test
-    void testMST() {
-        runQuery("CALL algo.mst('', '', '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
-    }
-
-    @Test
     void testSpanningTree() {
         runQuery("CALL algo.spanningTree('', '', '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
