@@ -55,6 +55,10 @@ final class AstHelpers {
         return Parameter.apply(value, AnyType.instance(), NO_POS);
     }
 
+    private static Expression variable(@NotNull String value) {
+        return Variable.apply(value, NO_POS);
+    }
+
     private static Expression number(@NotNull Number value) {
         double v = value.doubleValue();
         if (Double.isNaN(v)) {
@@ -129,6 +133,9 @@ final class AstHelpers {
         }
         if (value instanceof CypherPrinter.CypherParameter) {
             return parameter(((CypherPrinter.CypherParameter) value).name());
+        }
+        if (value instanceof CypherPrinter.CypherVariable) {
+            return variable(((CypherPrinter.CypherVariable) value).name());
         }
         if (value instanceof Iterable) {
             return list((Iterable<?>) value);

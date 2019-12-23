@@ -282,6 +282,8 @@ public abstract class GdsCypher {
 
         ParametersBuildStage addPlaceholder(String key, String placeholder);
 
+        ParametersBuildStage addVariable(String key, String variable);
+
         ParametersBuildStage addAllParameters(Map<String, ?> entries);
 
         @Language("Cypher")
@@ -492,6 +494,12 @@ public abstract class GdsCypher {
         @Override
         public StagedBuilder addPlaceholder(String key, String placeholder) {
             builder.putParameter(key, PRINTER.parameter(placeholder));
+            return this;
+        }
+
+        @Override
+        public StagedBuilder addVariable(String key, String variable) {
+            builder.putParameter(key, PRINTER.variable(variable));
             return this;
         }
 
