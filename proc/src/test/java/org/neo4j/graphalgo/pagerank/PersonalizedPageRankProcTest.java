@@ -23,16 +23,16 @@ package org.neo4j.graphalgo.pagerank;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -46,7 +46,7 @@ import java.util.Map;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-class PersonalizedPageRankProcTest extends ProcTestBase {
+class PersonalizedPageRankProcTest extends BaseProcTest {
     @Language("Cypher")
     private static final String DB_CYPHER =
         "CREATE" +
@@ -86,7 +86,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
             PageRankStreamProc.class,
             PageRankWriteProc.class,
             GraphLoadProc.class,
-            GraphCatalogProcs.class
+            GraphCreateProc.class
         );
         runQuery(DB_CYPHER);
 
@@ -118,7 +118,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
         String query = GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
             .builder()
             .graphName("personalisedGraph")
-            .nodeProjection(NodeProjections.of(map("Person", "Person | Product")))
+            .nodeProjection(NodeProjections.fromObject(map("Person", "Person | Product")))
             .relationshipProjection(RelationshipProjections.builder()
                 .putProjection(
                     ElementIdentifier.of("Product"),
@@ -132,7 +132,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
             .build()
         )
             .algo("pageRank").streamMode()
-            .addParameter("sourceNodes", "$startNodes")
+            .addPlaceholder("sourceNodes", "startNodes")
             .yields("nodeId", "score");
 
         Map<Long, Double> actual = new HashMap<>();
@@ -161,7 +161,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
         String query = GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
             .builder()
             .graphName("personalisedGraph")
-            .nodeProjection(NodeProjections.of(map("Person", "Person | Product")))
+            .nodeProjection(NodeProjections.fromObject(map("Person", "Person | Product")))
             .relationshipProjection(RelationshipProjections.builder()
                 .putProjection(
                     ElementIdentifier.of("Product"),
@@ -175,7 +175,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
             .build()
         )
             .algo("pageRank").streamMode()
-            .addParameter("sourceNodes", "$startNodes")
+            .addPlaceholder("sourceNodes", "startNodes")
             .yields("nodeId", "score");
 
         Map<Long, Double> actual = new HashMap<>();
@@ -213,7 +213,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
             startNodes.add(db.findNode(PERSON_LABEL, "name", "John"));
         });
 
-        runQuery("CALL  algo.beta.graph.create('personalisedGraph', " +
+        runQuery("CALL  gds.graph.create('personalisedGraph', " +
                  "'Person | Product'," +
                  "  {" +
                  "      Product:{" +
@@ -227,7 +227,7 @@ class PersonalizedPageRankProcTest extends ProcTestBase {
         @Language("Cypher")
         String query = GdsCypher.call().explicitCreation("personalisedGraph")
             .algo("pageRank").streamMode()
-            .addParameter("sourceNodes", "$startNodes")
+            .addPlaceholder("sourceNodes", "startNodes")
             .yields("nodeId", "score");
 
         Map<Long, Double> actual = new HashMap<>();
