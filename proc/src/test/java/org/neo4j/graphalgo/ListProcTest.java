@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.k1coloring.K1ColoringStreamProc;
+import org.neo4j.graphalgo.k1coloring.K1ColoringWriteProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
@@ -44,9 +46,9 @@ class ListProcTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
         "algo.beta.graph.generate",
-        "algo.beta.k1coloring",
-        "algo.beta.k1coloring.memrec",
         "algo.beta.k1coloring.stream",
+        "algo.beta.k1coloring.stream.estimate",
+        "algo.beta.k1coloring.write",
         "algo.graph.info",
         "algo.graph.list",
         "algo.graph.load",
@@ -107,7 +109,8 @@ class ListProcTest extends BaseProcTest {
         registerProcedures(
             GraphLoadProc.class,
             GraphGenerateProc.class,
-            K1ColoringProc.class,
+            K1ColoringWriteProc.class,
+            K1ColoringStreamProc.class,
             LabelPropagationWriteProc.class,
             LabelPropagationStreamProc.class,
             ListProc.class,
