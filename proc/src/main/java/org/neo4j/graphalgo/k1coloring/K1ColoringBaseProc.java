@@ -22,27 +22,13 @@ package org.neo4j.graphalgo.k1coloring;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.coloring.K1Coloring;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
-import java.util.Optional;
-
-public class K1ColoringBaseProc<T extends K1ColoringConfig> extends AlgoBaseProc<K1Coloring, K1Coloring, T> {
+public abstract class K1ColoringBaseProc<T extends K1ColoringConfig> extends AlgoBaseProc<K1Coloring, K1Coloring, T> {
     static final String DESCRIPTION = "TODO";
 
     @Override
-    protected T newConfig(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    ) {
-        return (T) K1ColoringConfig.of(username, graphName, maybeImplicitCreate, config);
-    }
-
-    @Override
-    protected AlgorithmFactory<K1Coloring, T> algorithmFactory(K1ColoringConfig config) {
+    protected AlgorithmFactory<K1Coloring, T> algorithmFactory(T config) {
         return new K1ColoringFactory<>();
     }
 }

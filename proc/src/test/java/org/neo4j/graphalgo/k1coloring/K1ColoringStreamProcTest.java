@@ -20,8 +20,10 @@
 
 package org.neo4j.graphalgo.k1coloring;
 
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
@@ -31,11 +33,16 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class K1ColoringProcTest extends K1ColoringProcBaseTest {
+class K1ColoringStreamProcTest extends K1ColoringProcBaseTest {
+
+    @Override
+    void registerProcs() throws Exception {
+        registerProcedures(K1ColoringStreamProc.class, GraphLoadProc.class);
+    }
 
     @Test
     void testStreamingImplicit() {
-
+        @Language("Cypher")
         String yields = GdsCypher.call()
             .implicitCreation(
                 ImmutableGraphCreateConfig.builder()

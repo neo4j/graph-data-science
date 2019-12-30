@@ -50,7 +50,6 @@ interface K1ColoringConfig extends AlgoBaseConfig, IterationsConfig {
             config);
     }
 
-
     @Override
     @Configuration.Ignore
     @Value.Default

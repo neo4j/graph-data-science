@@ -21,12 +21,15 @@
 package org.neo4j.graphalgo.k1coloring;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.coloring.K1Coloring;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -41,12 +44,31 @@ public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringConfig> {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<K1Coloring, K1Coloring, K1ColoringConfig> compute = compute(graphNameOrConfig, configuration);
-        Graph graph = compute.graph();
-        return LongStream.range(0, graph.nodeCount())
-            .mapToObj(nodeId -> {
-                long neoNodeId = graph.toOriginalNodeId(nodeId);
-                return new StreamResult(neoNodeId, compute.result().colors().get(nodeId));
-            });
+        K1Coloring coloring = compute.result();
+
+        Stream<StreamResult> stream;
+        if (coloring == null) {
+            stream = Stream.empty();
+        } else {
+            Graph graph = compute.graph();
+            stream = LongStream.range(0, graph.nodeCount())
+                .mapToObj(nodeId -> {
+                    long neoNodeId = graph.toOriginalNodeId(nodeId);
+                    return new StreamResult(neoNodeId, coloring.colors().get(nodeId));
+                });
+        }
+
+        return stream;
+    }
+
+    @Override
+    protected K1ColoringConfig newConfig(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        return K1ColoringConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     public static class StreamResult {

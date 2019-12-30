@@ -20,34 +20,30 @@
 
 package org.neo4j.graphalgo.k1coloring;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.WriteConfig;
 
-abstract class K1ColoringProcBaseTest extends BaseProcTest {
-    private final String DB_CYPHER =
-        "CREATE" +
-        " (a)" +
-        ",(b)" +
-        ",(c)" +
-        ",(d)" +
-        ",(a)-[:REL]->(b)" +
-        ",(a)-[:REL]->(c)";
+import java.util.Optional;
 
-    @BeforeEach
-    void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcs();
-        runQuery(DB_CYPHER);
+@Configuration("K1ColoringWriteConfigImpl")
+@ValueClass
+interface K1ColoringWriteConfig extends K1ColoringConfig, WriteConfig {
+
+    static K1ColoringWriteConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        return new K1ColoringWriteConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            config
+        );
     }
 
-    abstract void registerProcs() throws Exception;
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
-        GraphCatalog.removeAllLoadedGraphs();
-    }
 }
