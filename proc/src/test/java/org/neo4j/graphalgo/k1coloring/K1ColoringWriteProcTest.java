@@ -22,11 +22,7 @@ package org.neo4j.graphalgo.k1coloring;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,15 +41,7 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest {
     @Test
     void testWriting() {
         @Language("Cypher")
-        String query = GdsCypher.call()
-            .implicitCreation(
-                ImmutableGraphCreateConfig.builder()
-                    .graphName("k1-write")
-                    .nodeProjection(NodeProjections.fromString("*"))
-                    .relationshipProjection(RelationshipProjections.fromString("*"))
-                    .build()
-            )
-            .algo("algo", "beta", "k1coloring")
+        String query = algoBuildStage()
             .writeMode()
             .addParameter("writeProperty", "color")
             .yields("nodes", "colorCount", "didConverge", "ranIterations", "writeProperty");

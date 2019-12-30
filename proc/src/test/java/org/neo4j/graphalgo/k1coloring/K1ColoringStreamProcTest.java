@@ -24,14 +24,14 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class K1ColoringStreamProcTest extends K1ColoringProcBaseTest {
 
@@ -43,15 +43,7 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest {
     @Test
     void testStreamingImplicit() {
         @Language("Cypher")
-        String yields = GdsCypher.call()
-            .implicitCreation(
-                ImmutableGraphCreateConfig.builder()
-                    .graphName("k1")
-                    .nodeProjection(NodeProjections.fromString("*"))
-                    .relationshipProjection(RelationshipProjections.fromString("*"))
-                    .build()
-            )
-            .algo("algo", "beta", "k1coloring")
+        String yields = algoBuildStage()
             .streamMode()
             .yields("nodeId", "color");
 
@@ -66,4 +58,20 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest {
         assertNotEquals(coloringResult.get(0L), coloringResult.get(2L));
     }
 
+    @Test
+    void testStreamingEstimate() {
+        @Language("Cypher")
+        String query = algoBuildStage()
+            .estimationMode(GdsCypher.ExecutionModes.STREAM)
+            .yields("requiredMemory", "treeView", "bytesMin", "bytesMax");
+
+        runQuery(query, row -> {
+            assertTrue(row.getNumber("bytesMin").longValue() > 0);
+            assertTrue(row.getNumber("bytesMax").longValue() > 0);
+
+            String bytesHuman = MemoryUsage.humanReadable(row.getNumber("bytesMin").longValue());
+            assertNotNull(bytesHuman);
+            assertTrue(row.getString("requiredMemory").contains(bytesHuman));
+        });
+    }
 }

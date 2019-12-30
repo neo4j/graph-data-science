@@ -23,8 +23,12 @@ package org.neo4j.graphalgo.k1coloring;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 
 abstract class K1ColoringProcBaseTest extends BaseProcTest {
     private final String DB_CYPHER =
@@ -49,5 +53,17 @@ abstract class K1ColoringProcBaseTest extends BaseProcTest {
     void tearDown() {
         db.shutdown();
         GraphCatalog.removeAllLoadedGraphs();
+    }
+
+    GdsCypher.ModeBuildStage algoBuildStage() {
+        return GdsCypher.call()
+            .implicitCreation(
+                ImmutableGraphCreateConfig.builder()
+                    .graphName("k1")
+                    .nodeProjection(NodeProjections.fromString("*"))
+                    .relationshipProjection(RelationshipProjections.fromString("*"))
+                    .build()
+            )
+            .algo("algo", "beta", "k1coloring");
     }
 }
