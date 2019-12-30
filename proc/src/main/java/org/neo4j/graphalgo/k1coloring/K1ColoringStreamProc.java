@@ -45,21 +45,17 @@ public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringConfig> {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<K1Coloring, K1Coloring, K1ColoringConfig> compute = compute(graphNameOrConfig, configuration);
-        K1Coloring coloring = compute.result();
 
-        Stream<StreamResult> stream;
-        if (coloring == null) {
-            stream = Stream.empty();
-        } else {
-            Graph graph = compute.graph();
-            stream = LongStream.range(0, graph.nodeCount())
-                .mapToObj(nodeId -> {
-                    long neoNodeId = graph.toOriginalNodeId(nodeId);
-                    return new StreamResult(neoNodeId, coloring.colors().get(nodeId));
-                });
-        }
+        return Optional.ofNullable(compute.result())
+            .map(coloring -> {
+                Graph graph = compute.graph();
+                return LongStream.range(0, graph.nodeCount())
+                    .mapToObj(nodeId -> {
+                        long neoNodeId = graph.toOriginalNodeId(nodeId);
+                        return new StreamResult(neoNodeId, coloring.colors().get(nodeId));
+                    });
 
-        return stream;
+            }).orElse(Stream.empty());
     }
 
     @Procedure(value = "algo.beta.k1coloring.stream.estimate", mode = READ)

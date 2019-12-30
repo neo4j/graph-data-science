@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.k1coloring;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -47,16 +48,23 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<K1Coloring, K1Coloring, K1ColoringWriteConfig> compute = compute(
+        ComputationResult<K1Coloring, K1Coloring, K1ColoringWriteConfig> computed = compute(
             graphNameOrConfig,
             configuration
         );
+
+        return Optional.ofNullable(computed.result())
+            .map(coloring -> write(computed, coloring))
+            .orElse(Stream.empty());
+    }
+
+    @NotNull
+    private Stream<WriteResult> write(
+        ComputationResult<K1Coloring, K1Coloring, K1ColoringWriteConfig> compute,
+        K1Coloring coloring
+    ) {
         K1ColoringWriteConfig config = compute.config();
         WriteResultBuilder builder = new WriteResultBuilder(config);
-        K1Coloring coloring = compute.result();
-        if (coloring == null) {
-            return Stream.empty();
-        }
 
         if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
             builder.withColorCount(coloring.usedColors().cardinality());
@@ -67,9 +75,14 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             .withRanIterations(coloring.ranIterations())
             .withDidConverge(coloring.didConverge());
 
-        HugeLongArray colors = coloring.colors();
-        TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        write(compute.graph(), colors, config.writeProperty(), builder, terminationFlag, config.writeConcurrency());
+        write(
+            compute.graph(),
+            coloring.colors(),
+            config.writeProperty(),
+            builder,
+            TerminationFlag.wrap(transaction),
+            config.writeConcurrency()
+        );
 
         return Stream.of(builder.build());
     }
@@ -117,7 +130,7 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             super(config);
         }
 
-        public WriteResultBuilder withColorCount(long colorCount) {
+        WriteResultBuilder withColorCount(long colorCount) {
             this.colorCount = colorCount;
             return this;
         }
@@ -153,45 +166,6 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         }
     }
 
-//    public Stream<K1ColoringProc.WriteResult> run(String label, String relationshipType, Map<String, Object> config) {
-//        K1ColoringProc.ProcedureSetup setup = setup(label, relationshipType, config);
-//
-//        if (setup.graph.isEmpty()) {
-//            setup.graph.release();
-//            return Stream.of(K1ColoringProc.WriteResult.EMPTY);
-//        }
-//
-//        K1Coloring coloring = compute(setup);
-//
-//        if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
-//            setup.builder.withColorCount(coloring.usedColors().cardinality());
-//        }
-//
-//        Optional<String> writeProperty = setup.procedureConfig.getString(WRITE_PROPERTY_KEY);
-//
-//        setup.builder
-//            .withRanIterations(coloring.ranIterations())
-//            .withDidConverge(coloring.didConverge());
-//
-//        if (setup.procedureConfig.isWriteFlag() && writeProperty.isPresent() && !writeProperty.get().equals("")) {
-//            setup.builder.withWriteProperty(writeProperty.get());
-//            write(
-//                setup.builder,
-//                setup.graph,
-//                coloring.colors(),
-//                setup.procedureConfig,
-//                writeProperty.get(),
-//                coloring.terminationFlag,
-//                setup.tracker
-//            );
-//
-//            setup.graph.releaseProperties();
-//        }
-//
-//        return Stream.of(setup.builder.build());
-//    }
-
-
     public static class WriteResult {
 
         public static final WriteResult EMPTY = new WriteResult(
@@ -218,7 +192,7 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
 
         public final boolean write;
 
-        public WriteResult(
+        WriteResult(
             long loadMillis,
             long computeMillis,
             long writeMillis,
