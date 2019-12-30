@@ -72,7 +72,7 @@ public abstract class BaseProc {
         try {
             runnable.run();
         } catch (Exception e) {
-            log.debug(message, e);
+            log.warn(message, e);
             throw e;
         }
     }
@@ -81,7 +81,7 @@ public abstract class BaseProc {
         try {
             return supplier.get();
         } catch (Exception e) {
-            log.debug(message, e);
+            log.warn(message, e);
             throw e;
         }
     }
