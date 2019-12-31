@@ -52,66 +52,101 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
 
     /**
      * start BFS without aggregator
-     * @param sourceId source node id
-     * @param direction traversal direction
+     *
+     * @param sourceId      source node id
+     * @param direction     traversal direction
      * @param exitCondition
      * @return
      */
     public long[] computeBfs(long sourceId, Direction direction, ExitPredicate exitCondition) {
-        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, (s, t, w) -> .0, LongArrayDeque::addLast, DoubleArrayDeque::addLast);
+        return traverse(
+            graph.toMappedNodeId(sourceId),
+            direction,
+            exitCondition,
+            (s, t, w) -> .0,
+            LongArrayDeque::addLast,
+            DoubleArrayDeque::addLast
+        );
     }
 
     /**
      * start DSF without aggregator
-     * @param sourceId source node id
-     * @param direction traversal direction
+     *
+     * @param sourceId      source node id
+     * @param direction     traversal direction
      * @param exitCondition
      * @return
      */
     public long[] computeDfs(long sourceId, Direction direction, ExitPredicate exitCondition) {
-        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, (s, t, w) -> .0, LongArrayDeque::addFirst, DoubleArrayDeque::addFirst);
+        return traverse(
+            graph.toMappedNodeId(sourceId),
+            direction,
+            exitCondition,
+            (s, t, w) -> .0,
+            LongArrayDeque::addFirst,
+            DoubleArrayDeque::addFirst
+        );
     }
 
     /**
      * start BFS using an aggregator function
-     * @param sourceId source node id
-     * @param direction traversal direction
+     *
+     * @param sourceId      source node id
+     * @param direction     traversal direction
      * @param exitCondition
      * @param aggregator
      * @return
      */
     public long[] computeBfs(long sourceId, Direction direction, ExitPredicate exitCondition, Aggregator aggregator) {
-        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, aggregator, LongArrayDeque::addLast, DoubleArrayDeque::addLast);
+        return traverse(
+            graph.toMappedNodeId(sourceId),
+            direction,
+            exitCondition,
+            aggregator,
+            LongArrayDeque::addLast,
+            DoubleArrayDeque::addLast
+        );
     }
 
     /**
      * start DFS using an aggregator function
-     * @param sourceId source node id
-     * @param direction traversal direction
+     *
+     * @param sourceId      source node id
+     * @param direction     traversal direction
      * @param exitCondition
      * @param aggregator
      * @return
      */
     public long[] computeDfs(long sourceId, Direction direction, ExitPredicate exitCondition, Aggregator aggregator) {
-        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, aggregator, LongArrayDeque::addFirst, DoubleArrayDeque::addFirst);
+        return traverse(
+            graph.toMappedNodeId(sourceId),
+            direction,
+            exitCondition,
+            aggregator,
+            LongArrayDeque::addFirst,
+            DoubleArrayDeque::addFirst
+        );
     }
 
     /**
      * traverse along the path
-     * @param sourceNode source node (mapped id)
-     * @param direction the traversal direction
+     *
+     * @param sourceNode    source node (mapped id)
+     * @param direction     the traversal direction
      * @param exitCondition exit condition
-     * @param agg weight accumulator function
-     * @param nodeFunc node accessor function (either ::addLast or ::addFirst to switch between fifo and lifo behaviour)
-     * @param weightFunc weight accessor function (either ::addLast or ::addFirst to switch between fifo and lifo behaviour)
+     * @param agg           weight accumulator function
+     * @param nodeFunc      node accessor function (either ::addLast or ::addFirst to switch between fifo and lifo behaviour)
+     * @param weightFunc    weight accessor function (either ::addLast or ::addFirst to switch between fifo and lifo behaviour)
      * @return a list of nodes that have been visited
      */
-    private long[] traverse(long sourceNode,
-                            Direction direction,
-                            ExitPredicate exitCondition,
-                            Aggregator agg,
-                            ObjLongConsumer<LongArrayDeque> nodeFunc,
-                            ObjDoubleConsumer<DoubleArrayDeque> weightFunc) {
+    private long[] traverse(
+        long sourceNode,
+        Direction direction,
+        ExitPredicate exitCondition,
+        Aggregator agg,
+        ObjLongConsumer<LongArrayDeque> nodeFunc,
+        ObjDoubleConsumer<DoubleArrayDeque> weightFunc
+    ) {
         final LongArrayList list = new LongArrayList(nodeCount);
         nodes.clear();
         sources.clear();
@@ -130,23 +165,31 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
                     list.add(graph.toOriginalNodeId(node));
                     break loop;
                 case CONTINUE:
+                    // remove from the visited nodes to allow revisiting in case the node is accessible via more than one paths.
+                    if (visited.get(node)) {
+                        visited.flip(node);
+                    }
+
                     continue loop;
                 case FOLLOW:
                     list.add(graph.toOriginalNodeId(node));
                     break;
             }
+
             graph.forEachRelationship(
-                    node,
-                    direction, longToIntConsumer((s, t) -> {
-                        if (!visited.get(t)) {
-                            visited.set(t);
-                            nodeFunc.accept(sources, node);
-                            nodeFunc.accept(nodes, t);
-                            weightFunc.accept(weights, agg.apply(s, t, weight));
-                        }
-                        return running();
-                    }));
+                node,
+                direction, longToIntConsumer((s, t) -> {
+                    if (!visited.get(t)) {
+                        visited.set(t);
+                        nodeFunc.accept(sources, node);
+                        nodeFunc.accept(nodes, t);
+                        weightFunc.accept(weights, agg.apply(s, t, weight));
+                    }
+                    return running();
+                })
+            );
         }
+
         return list.toArray();
     }
 
@@ -183,8 +226,8 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
         /**
          * called once for each accepted node during traversal
          *
-         * @param sourceNode the source node
-         * @param currentNode the current node
+         * @param sourceNode     the source node
+         * @param currentNode    the current node
          * @param weightAtSource the total weight that has been collected by the Aggregator during the traversal
          * @return a result
          */
@@ -196,8 +239,9 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
 
         /**
          * aggregate weight between source and current node
-         * @param sourceNode source node
-         * @param currentNode the current node
+         *
+         * @param sourceNode     source node
+         * @param currentNode    the current node
          * @param weightAtSource the weight that has been aggregated for the currentNode so far
          * @return new weight (e.g. weightAtSource + 1.)
          */
