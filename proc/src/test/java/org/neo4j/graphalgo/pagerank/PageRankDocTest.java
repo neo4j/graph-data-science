@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 "Neo4j,"
+ * Copyright (c) 2017-2020 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -17,15 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.GetNodeFunc;
+import org.neo4j.graphalgo.ProcTestBase;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
-import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
-import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -78,7 +79,12 @@ class PageRankDocTest extends ProcTestBase {
     @Test
     void unweighted() {
         String q1 =
-                "CALL gds.algo.pageRank.stream({ nodeProjection: 'Page', relationshipProjection: 'LINKS', iterations: 20, dampingFactor: 0.85}) " +
+                "CALL gds.algo.pageRank.stream({ " +
+                "   nodeProjection: 'Page', " +
+                "   relationshipProjection: 'LINKS', " +
+                "   maxIterations: 20, " +
+                "   dampingFactor: 0.85" +
+                "}) " +
                 "YIELD nodeId, score " +
                 "RETURN algo.asNode(nodeId).name AS name, score " +
                 "ORDER BY score DESC ";
@@ -101,8 +107,12 @@ class PageRankDocTest extends ProcTestBase {
 
         String q2 =
             "CALL gds.algo.pageRank.write({" +
-            "  nodeProjection: 'Page', relationshipProjection: 'LINKS'," +
-            "  iterations: 20, dampingFactor: 0.85, writeProperty: 'pagerank'})" +
+            "  nodeProjection: 'Page', " +
+            "  relationshipProjection: 'LINKS'," +
+            "  iterations: 20, " +
+            "  dampingFactor: 0.85, " +
+            "  writeProperty: 'pagerank'" +
+            "})" +
             "YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
         String r2 = db.execute(q2).resultAsString();
 
@@ -128,7 +138,10 @@ class PageRankDocTest extends ProcTestBase {
             "      properties: ['weight']" +
             "    }" +
             "  }," +
-            "  iterations: 20, dampingFactor: 0.85, weightProperty: 'weight'}) " +
+            "  maxIterations: 20, " +
+            "  dampingFactor: 0.85," +
+            "  weightProperty: 'weight'" +
+            "}) " +
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC ";
@@ -158,7 +171,11 @@ class PageRankDocTest extends ProcTestBase {
             "      properties: ['weight']" +
             "    }" +
             "  }," +
-            "  iterations: 20, dampingFactor: 0.85, writeProperty: 'pagerank', weightProperty: 'weight'})" +
+            "  maxIterations: 20, " +
+            "  dampingFactor: 0.85, " +
+            "  writeProperty: 'pagerank', " +
+            "  weightProperty: 'weight'" +
+            "})" +
             "YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
 
         expectedString = "+-------------------------------------------------------------------+\n" +
@@ -176,8 +193,13 @@ class PageRankDocTest extends ProcTestBase {
     void personalized() {
         String q1 =
             "MATCH (siteA:Page {name: 'Site A'})" +
-            "CALL gds.algo.pageRank.stream({ nodeProjection: 'Page', relationshipProjection: 'LINKS', " +
-            "  iterations: 20, dampingFactor: 0.85,  sourceNodes: [siteA]}) " +
+            "CALL gds.algo.pageRank.stream({ " +
+            "  nodeProjection: 'Page', " +
+            "  relationshipProjection: 'LINKS', " +
+            "  maxIterations: 20, " +
+            "  dampingFactor: 0.85, " +
+            "  sourceNodes: [siteA]" +
+            "}) " +
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC ";
@@ -200,8 +222,13 @@ class PageRankDocTest extends ProcTestBase {
 
         String q2 =
             "MATCH (siteA:Page {name: 'Site A'})" +
-            "CALL gds.algo.pageRank.write({ nodeProjection: 'Page', relationshipProjection: 'LINKS', " +
-            "   iterations: 20, dampingFactor: 0.85, writeProperty: 'pagerank', sourceNodes: [siteA]})" +
+            "CALL gds.algo.pageRank.write({ " +
+            "   nodeProjection: 'Page', " +
+            "   relationshipProjection: 'LINKS', " +
+            "   maxIterations: 20, " +
+            "   dampingFactor: 0.85, " +
+            "   writeProperty: 'pagerank', " +
+            "   sourceNodes: [siteA]})" +
             "YIELD nodePropertiesWritten, ranIterations, dampingFactor, writeProperty " +
             "RETURN nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
 
@@ -251,9 +278,9 @@ class PageRankDocTest extends ProcTestBase {
             "  nodeQuery: 'MATCH (p:Page) RETURN id(p) AS id'," +
             "  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page)" +
             "                      RETURN id(p1) AS source, id(p2) AS target'," +
-            "    iterations:20," +
-            "    dampingFactor:0.85," +
-            "    graph:'cypher'" +
+            "   maxIterations:20," +
+            "   dampingFactor:0.85," +
+            "   graph:'cypher'" +
             "})" +
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).name AS name, score " +
