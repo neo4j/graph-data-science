@@ -433,14 +433,14 @@ CALL gds.algo.pageRank.stats({
   dampingFactor: 0.85,
   writeProperty: 'pagerank'
 })
-YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProp
+YIELD ranIterations, dampingFactor
 ----
 
 .Results
-[opts="header",cols="1,1,1,1"]
+[opts="header",cols="1,1"]
 |===
-| writtenProperties | ranIterations | dampingFactor | writeProperty
-| 8                 | 20            | 0.85          | "pagerank"
+| ranIterations | dampingFactor
+| 20            | 0.85
 |===
 
 [[algorithms-pagerank-examples-projection]]

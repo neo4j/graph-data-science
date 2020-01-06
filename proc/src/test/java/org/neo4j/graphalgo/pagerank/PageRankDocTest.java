@@ -297,15 +297,15 @@ class PageRankDocTest extends BaseProcTest {
             "  dampingFactor: 0.85, " +
             "  writeProperty: 'pagerank'" +
             "})" +
-            "YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
+            "YIELD ranIterations, dampingFactor";
         String r2 = db.execute(q2).resultAsString();
 
-        String expectedString = "+-------------------------------------------------------------------+\n" +
-                         "| writtenProperties | ranIterations | dampingFactor | writeProperty |\n" +
-                         "+-------------------------------------------------------------------+\n" +
-                         "| 8                 | 20            | 0.85          | \"pagerank\"    |\n" +
-                         "+-------------------------------------------------------------------+\n" +
-                         "1 row\n";
+        String expectedString = "+-------------------------------+\n" +
+                                "| ranIterations | dampingFactor |\n" +
+                                "+-------------------------------+\n" +
+                                "| 20            | 0.85          |\n" +
+                                "+-------------------------------+\n" +
+                                "1 row\n";
 
         assertEquals(expectedString, r2);
     }
