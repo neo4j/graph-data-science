@@ -23,16 +23,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
-import org.neo4j.graphalgo.ProcTestBase;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.newapi.GraphCatalogProcs;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PageRankDocTest extends ProcTestBase {
+class PageRankDocTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws KernelException {
@@ -64,7 +64,7 @@ class PageRankDocTest extends ProcTestBase {
                 builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );
         db.execute(createGraph);
-        registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCatalogProcs.class);
+        registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
     }
 
@@ -246,7 +246,7 @@ class PageRankDocTest extends ProcTestBase {
     // used to test that the results are correct in the docs
     @Test
     void namedGraphAndCypherProjection() {
-        String loadGraph = "CALL algo.beta.graph.create('myGraph', ['Page'], ['LINKS'])";
+        String loadGraph = "CALL gds.graph.create('myGraph', ['Page'], ['LINKS'])";
         db.execute(loadGraph);
 
         String q1 =
