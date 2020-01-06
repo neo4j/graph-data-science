@@ -318,9 +318,7 @@ class PageRankDocTest extends ProcTestBase {
             "CALL gds.algo.pageRank.write.estimate({" +
             "  nodeProjection: 'Page', " +
             "  relationshipProjection: 'LINKS'," +
-            "  writeProperty: 'pagerank'," +
-            "  nodeCount: 10," +
-            "  relationshipCount: 100" +
+            "  writeProperty: 'pagerank'" +
             "})" +
             "YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory";
         String r2 = db.execute(q2).resultAsString();

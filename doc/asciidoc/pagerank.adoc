@@ -408,9 +408,7 @@ RETURN nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor,
 CALL gds.algo.pageRank.write.estimate({
   nodeProjection: 'Page',
   relationshipProjection: 'LINKS',
-  writeProperty: 'pagerank',
-  nodeCount: 10,
-  relationshipCount: 100
+  writeProperty: 'pagerank'
 })
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
