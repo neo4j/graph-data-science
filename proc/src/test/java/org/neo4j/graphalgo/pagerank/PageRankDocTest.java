@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2019 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -109,7 +109,7 @@ class PageRankDocTest extends ProcTestBase {
             "CALL gds.algo.pageRank.write({" +
             "  nodeProjection: 'Page', " +
             "  relationshipProjection: 'LINKS'," +
-            "  iterations: 20, " +
+            "  maxIterations: 20, " +
             "  dampingFactor: 0.85, " +
             "  writeProperty: 'pagerank'" +
             "})" +
@@ -287,6 +287,52 @@ class PageRankDocTest extends ProcTestBase {
             "ORDER BY score DESC";
 
         assertEquals(namedQueryResult, db.execute(q2).resultAsString());
+    }
+
+    @Test
+    void statsMode() {
+        String q2 =
+            "CALL gds.algo.pageRank.stats({" +
+            "  nodeProjection: 'Page', " +
+            "  relationshipProjection: 'LINKS'," +
+            "  maxIterations: 20, " +
+            "  dampingFactor: 0.85, " +
+            "  writeProperty: 'pagerank'" +
+            "})" +
+            "YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
+        String r2 = db.execute(q2).resultAsString();
+
+        String expectedString = "+-------------------------------------------------------------------+\n" +
+                         "| writtenProperties | ranIterations | dampingFactor | writeProperty |\n" +
+                         "+-------------------------------------------------------------------+\n" +
+                         "| 8                 | 20            | 0.85          | \"pagerank\"    |\n" +
+                         "+-------------------------------------------------------------------+\n" +
+                         "1 row\n";
+
+        assertEquals(expectedString, r2);
+    }
+
+    @Test
+    void estimateMode() {
+        String q2 =
+            "CALL gds.algo.pageRank.write.estimate({" +
+            "  nodeProjection: 'Page', " +
+            "  relationshipProjection: 'LINKS'," +
+            "  writeProperty: 'pagerank'," +
+            "  nodeCount: 10," +
+            "  relationshipCount: 100" +
+            "})" +
+            "YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory";
+        String r2 = db.execute(q2).resultAsString();
+
+        String expectedString = "+----------------------------------------------------------------------+\n" +
+                                "| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory |\n" +
+                                "+----------------------------------------------------------------------+\n" +
+                                "| 8         | 14                | 305024   | 305024   | \"297 KiB\"      |\n" +
+                                "+----------------------------------------------------------------------+\n" +
+                                "1 row\n";
+
+        assertEquals(expectedString, r2);
     }
 
 }

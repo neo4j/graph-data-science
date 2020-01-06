@@ -21,6 +21,8 @@ This section includes:
 ** <<algorithms-pagerank-examples-unweighted, Unweighted>>
 ** <<algorithms-pagerank-examples-weighted, Weighted>>
 ** <<algorithms-pagerank-examples-personalized, Personalized>>
+** <<algorithms-pagerank-examples-memory-estimation, Memory Estimation>>
+** <<algorithms-pagerank-examples-stats, Stats>>
 ** <<algorithms-pagerank-examples-projection, Named graphs and Cypher projections>>
 * <<algorithms-pagerank-usage, Usage>>
 
@@ -395,6 +397,52 @@ RETURN nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor,
 
 .Results
 [opts="header",cols="1m,1m,1m,1m"]
+|===
+| writtenProperties | ranIterations | dampingFactor | writeProperty
+| 8                 | 20            | 0.85          | "pagerank"
+|===
+
+[[algorithms-pagerank-examples-memory-estimation]]
+=== Memory Estimation
+
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.algo.pageRank.write.estimate({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  writeProperty: 'pagerank',
+  nodeCount: 10,
+  relationshipCount: 100
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 8         | 14                | 305024   | 305024   | "297 KiB"
+|===
+
+[[algorithms-pagerank-examples-stats]]
+=== Stats
+
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher]
+----
+CALL gds.algo.pageRank.stats({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  writeProperty: 'pagerank'
+})
+YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProp
+----
+
+.Results
+[opts="header",cols="1,1,1,1"]
 |===
 | writtenProperties | ranIterations | dampingFactor | writeProperty
 | 8                 | 20            | 0.85          | "pagerank"
