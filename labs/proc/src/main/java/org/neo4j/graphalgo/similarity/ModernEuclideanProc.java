@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanConfig;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanConfigImpl;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -35,6 +34,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class ModernEuclideanProc extends ModernSimilarityProc<ModernEuclideanAlgorithm, ModernEuclideanConfig> {
 
@@ -46,7 +46,7 @@ public class ModernEuclideanProc extends ModernSimilarityProc<ModernEuclideanAlg
         return stream(graphNameOrConfig, configuration);
     }
 
-    @Procedure(name = "gds.alpha.similarity.euclidean.write", mode = Mode.WRITE)
+    @Procedure(name = "gds.alpha.similarity.euclidean.write", mode = WRITE)
     public Stream<SimilaritySummaryResult> euclideanWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

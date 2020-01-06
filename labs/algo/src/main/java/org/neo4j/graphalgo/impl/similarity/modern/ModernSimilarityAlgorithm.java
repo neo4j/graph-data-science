@@ -19,10 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.similarity.modern;
 
-import com.carrotsearch.hppc.LongDoubleHashMap;
-import com.carrotsearch.hppc.LongDoubleMap;
-import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.hppc.LongSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
@@ -32,26 +28,18 @@ import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
 import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
 import org.neo4j.graphalgo.impl.similarity.SimilarityStreamGenerator;
 import org.neo4j.graphalgo.impl.similarity.TopKConsumer;
-import org.neo4j.graphalgo.impl.similarity.WeightedInput;
-import org.neo4j.graphalgo.impl.similarity.Weights;
-import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.similarity.SimilarityInput.indexesFor;
 
-public abstract class ModernSimilarityAlgorithm<ME extends ModernSimilarityAlgorithm<ME>> extends Algorithm<ME, ModernSimilarityAlgorithmResult> {
+public abstract class ModernSimilarityAlgorithm<ME extends ModernSimilarityAlgorithm<ME, INPUT>, INPUT extends SimilarityInput> extends Algorithm<ME, ModernSimilarityAlgorithmResult> {
 
-    private final ModernSimilarityConfig config;
-    private final GraphDatabaseAPI api;
+    final ModernSimilarityConfig config;
+    final GraphDatabaseAPI api;
 
     public ModernSimilarityAlgorithm(ModernSimilarityConfig config, GraphDatabaseAPI api) {
         this.config = config;
@@ -62,13 +50,11 @@ public abstract class ModernSimilarityAlgorithm<ME extends ModernSimilarityAlgor
     public ModernSimilarityAlgorithmResult compute() {
         ImmutableModernSimilarityAlgorithmResult.Builder builder = ImmutableModernSimilarityAlgorithmResult.builder();
 
-        Double skipValue = config.skipValue();
-        WeightedInput[] inputs = prepareWeights(config.data(), skipValue);
-
+        INPUT[] inputs = prepareInputs(config.data(), config);
         long[] inputIds = SimilarityInput.extractInputIds(inputs);
         int[] sourceIndexIds = indexesFor(inputIds, config.sourceIds(), "sourceIds");
         int[] targetIndexIds = indexesFor(inputIds, config.targetIds(), "targetIds");
-        SimilarityComputer<WeightedInput> computer = similarityComputer(skipValue, sourceIndexIds, targetIndexIds);
+        SimilarityComputer<INPUT> computer = similarityComputer(config.skipValue(), sourceIndexIds, targetIndexIds);
 
         builder.nodes(inputIds.length)
             .sourceIdsLength(sourceIndexIds.length)
@@ -82,7 +68,7 @@ public abstract class ModernSimilarityAlgorithm<ME extends ModernSimilarityAlgor
         }
 
         if (config.showComputations()) {
-            RecordingSimilarityRecorder<WeightedInput> recorder = new RecordingSimilarityRecorder<>(computer);
+            RecordingSimilarityRecorder<INPUT> recorder = new RecordingSimilarityRecorder<>(computer);
             builder.computations(recorder);
             computer = recorder;
         }
@@ -111,64 +97,9 @@ public abstract class ModernSimilarityAlgorithm<ME extends ModernSimilarityAlgor
     @Override
     public void release() {}
 
-    private WeightedInput[] prepareWeights(Object rawData, Double skipValue) {
-        if (ProcedureConstants.CYPHER_QUERY_KEY.equals(config.graph())) {
-            return prepareSparseWeights(api, (String) rawData, skipValue);
-        } else {
-            List<Map<String, Object>> data = (List<Map<String, Object>>) rawData;
-            return WeightedInput.prepareDenseWeights(data, config.degreeCutoff(), skipValue);
-        }
-    }
+    abstract INPUT[] prepareInputs(Object rawData, ModernSimilarityConfig config);
 
-    private WeightedInput[] prepareSparseWeights(GraphDatabaseAPI api, String query, Double skipValue) {
-        Map<String, Object> params = config.params();
-        long degreeCutoff = config.degreeCutoff();
-        int repeatCutoff = config.sparseVectorRepeatCutoff();
-
-        Result result = api.execute(query, params);
-
-        Map<Long, LongDoubleMap> map = new HashMap<>();
-        LongSet ids = new LongHashSet();
-        result.accept(resultRow -> {
-            long item = resultRow.getNumber("item").longValue();
-            long id = resultRow.getNumber("category").longValue();
-            ids.add(id);
-            double weight = resultRow.getNumber("weight").doubleValue();
-            map.compute(item, (key, agg) -> {
-                if (agg == null) agg = new LongDoubleHashMap();
-                agg.put(id, weight);
-                return agg;
-            });
-            return true;
-        });
-
-        WeightedInput[] inputs = new WeightedInput[map.size()];
-        int idx = 0;
-
-        long[] idsArray = ids.toArray();
-        for (Map.Entry<Long, LongDoubleMap> entry : map.entrySet()) {
-            Long item = entry.getKey();
-            LongDoubleMap sparseWeights = entry.getValue();
-
-            if (sparseWeights.size() > degreeCutoff) {
-                List<Number> weightsList = new ArrayList<>(ids.size());
-                for (long id : idsArray) {
-                    weightsList.add(sparseWeights.getOrDefault(id, skipValue));
-                }
-                int size = weightsList.size();
-                int nonSkipSize = sparseWeights.size();
-                double[] weights = Weights.buildRleWeights(weightsList, repeatCutoff);
-
-                inputs[idx++] = WeightedInput.sparse(item, weights, size, nonSkipSize);
-            }
-        }
-
-        if (idx != inputs.length) inputs = Arrays.copyOf(inputs, idx);
-        Arrays.sort(inputs);
-        return inputs;
-    }
-
-    abstract SimilarityComputer<WeightedInput> similarityComputer(
+    abstract SimilarityComputer<INPUT> similarityComputer(
         Double skipValue,
         int[] sourceIndexIds,
         int[] targetIndexIds
@@ -178,16 +109,18 @@ public abstract class ModernSimilarityAlgorithm<ME extends ModernSimilarityAlgor
         return result;
     }
 
+    abstract Supplier<RleDecoder> inputDecoderFactory(INPUT[] inputs);
+
     Stream<SimilarityResult> generateWeightedStream(
-        WeightedInput[] inputs,
+        INPUT[] inputs,
         int[] sourceIndexIds,
         int[] targetIndexIds,
         double similarityCutoff,
         int topN,
         int topK,
-        SimilarityComputer<WeightedInput> computer
+        SimilarityComputer<INPUT> computer
     ) {
-        Supplier<RleDecoder> decoderFactory = createDecoderFactory(inputs[0].initialSize());
+        Supplier<RleDecoder> decoderFactory = inputDecoderFactory(inputs);
         return topN(similarityStream(
             inputs,
             sourceIndexIds,
@@ -220,16 +153,16 @@ public abstract class ModernSimilarityAlgorithm<ME extends ModernSimilarityAlgor
         return TopKConsumer.topK(stream, topN, comparator);
     }
 
-    protected <T> Stream<SimilarityResult> similarityStream(
-        T[] inputs,
+    protected Stream<SimilarityResult> similarityStream(
+        INPUT[] inputs,
         int[] sourceIndexIds,
         int[] targetIndexIds,
-        SimilarityComputer<T> computer,
+        SimilarityComputer<INPUT> computer,
         Supplier<RleDecoder> decoderFactory,
         double cutoff,
         int topK
     ) {
-        SimilarityStreamGenerator<T> generator = new SimilarityStreamGenerator<>(
+        SimilarityStreamGenerator<INPUT> generator = new SimilarityStreamGenerator<>(
             terminationFlag,
             config.concurrency(),
             decoderFactory,

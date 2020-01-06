@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
 import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-public final class ModernPearsonAlgorithm extends ModernSimilarityAlgorithm<ModernPearsonAlgorithm> {
+public final class ModernPearsonAlgorithm extends ModernWeightedSimilarityAlgorithm<ModernPearsonAlgorithm> {
 
     public ModernPearsonAlgorithm(ModernSimilarityConfig config, GraphDatabaseAPI api) {
         super(config, api);
