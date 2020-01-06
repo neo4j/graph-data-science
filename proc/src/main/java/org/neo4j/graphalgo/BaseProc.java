@@ -65,7 +65,7 @@ public abstract class BaseProc {
             .build();
     }
 
-    protected final ModernGraphLoader newLoader(GraphCreateCypherConfig createCypherConfig, AllocationTracker tracker) {
+    protected final ModernGraphLoader newLoader(GraphCreateConfig createConfig, GraphCreateCypherConfig createCypherConfig, AllocationTracker tracker) {
         return ImmutableModernGraphLoader
             .builder()
             .api(api)
@@ -73,6 +73,7 @@ public abstract class BaseProc {
             .username(getUsername())
             .tracker(tracker)
             .terminationFlag(TerminationFlag.wrap(transaction))
+            .createConfig(createConfig)
             .createCypherConfig(createCypherConfig)
             .build();
     }

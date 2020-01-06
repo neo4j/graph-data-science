@@ -38,18 +38,18 @@ public class GraphListProc extends CatalogProc {
         if (Objects.nonNull(graphName) && !(graphName instanceof String)) {
             throw new IllegalArgumentException("`graphName` parameter must be a STRING");
         }
-        String graphNameS = (String) graphName;
+        String graphNames = (String) graphName;
 
         Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries = GraphCatalog
             .getLoadedGraphs(getUsername())
             .entrySet()
             .stream();
 
-        if (graphNameS != null) {
-            validateGraphName(graphNameS);
+        if (graphNames != null) {
+            validateGraphName(graphNames);
 
             // we should only list the provided graph
-            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphNameS));
+            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphNames));
         }
 
         return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram()));

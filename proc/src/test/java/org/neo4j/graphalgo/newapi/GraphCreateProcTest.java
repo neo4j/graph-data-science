@@ -110,6 +110,27 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
+    void createCypherGraph() {
+        String name = "name";
+
+        String nodeQuery = "MATCH (n:A) RETURN id(n) AS id";
+        String relationshipQuery = "MATCH (a)-[r:REL]->(b) RETURN id(a) AS source, id(b) AS target";
+
+        assertCypherResult(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            map("name", name, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
+            singletonList(map(
+                "graphName", name,
+                "nodeQuery", nodeQuery,
+                "relationshipQuery", relationshipQuery,
+                "nodes", nodeCount,
+                "relationships", relCount,
+                "createMillis", instanceOf(Long.class)
+            ))
+        );
+    }
+
+    @Test
     void shouldProjectAllNodesWithSpecialStar() {
         String query = "CALL gds.graph.create('g', '*', 'REL') YIELD nodes";
 

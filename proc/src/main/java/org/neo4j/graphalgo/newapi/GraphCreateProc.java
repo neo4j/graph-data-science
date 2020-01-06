@@ -121,15 +121,6 @@ public class GraphCreateProc extends CatalogProc {
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             ResolvedPropertyMappings propertyMappings = ResolvedPropertyMappings.empty();
 
-            ModernGraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-            CypherGraphFactory graphFactory = loader.build(CypherGraphFactory.class);
-            GraphsByRelationshipType graphFromType =
-                !config.relationshipProperties().hasMappings()
-                    ? graphFactory.importAllGraphs()
-                    : GraphsByRelationshipType.of(graphFactory.build());
-
-            builder.withGraph(graphFromType);
-
             GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
                 config.graphName(),
                 NodeProjections.of(),
@@ -140,6 +131,16 @@ public class GraphCreateProc extends CatalogProc {
                 config.concurrency(),
                 config.username()
             );
+
+            ModernGraphLoader loader = newLoader(graphCreateConfig, config, AllocationTracker.EMPTY);
+            CypherGraphFactory graphFactory = loader.build(CypherGraphFactory.class);
+            GraphsByRelationshipType graphFromType =
+                !config.relationshipProperties().hasMappings()
+                    ? graphFactory.importAllGraphs()
+                    : GraphsByRelationshipType.of(graphFactory.build());
+
+            builder.withGraph(graphFromType);
+
             GraphCatalog.set(graphCreateConfig, graphFromType);
         }
 
