@@ -34,38 +34,39 @@ public class MemoryEstimateResult {
     public final long bytesMin, bytesMax;
     public long nodeCount, relationshipCount;
 
-    public MemoryEstimateResult(final MemoryTreeWithDimensions memory) {
+    public MemoryEstimateResult(MemoryTreeWithDimensions memory) {
         this(memory.memoryTree, memory.graphDimensions);
     }
 
-    private MemoryEstimateResult(final MemoryTree memory, final GraphDimensions dimensions) {
+    private MemoryEstimateResult(MemoryTree memory, GraphDimensions dimensions) {
         this(memory.render(), memory.renderMap(), memory.memoryUsage(), dimensions);
     }
 
     private MemoryEstimateResult(
-            final String treeView,
-            final Map<String, Object> mapView,
-            final MemoryRange estimateMemoryUsage,
-            final GraphDimensions dimensions) {
+        String treeView,
+        Map<String, Object> mapView,
+        MemoryRange estimateMemoryUsage,
+        GraphDimensions dimensions
+    ) {
         this(
-                estimateMemoryUsage.toString(),
-                treeView,
-                mapView,
-                estimateMemoryUsage.min,
-                estimateMemoryUsage.max,
-                dimensions.nodeCount(),
-                dimensions.maxRelCount()
+            estimateMemoryUsage.toString(),
+            treeView,
+            mapView,
+            estimateMemoryUsage.min,
+            estimateMemoryUsage.max,
+            dimensions.nodeCount(),
+            dimensions.maxRelCount()
         );
     }
 
     private MemoryEstimateResult(
-            final String requiredMemory,
-            final String treeView,
-            final Map<String, Object> mapView,
-            final long bytesMin,
-            final long bytesMax,
-            final long nodeCount,
-            final long relationshipCount
+        String requiredMemory,
+        String treeView,
+        Map<String, Object> mapView,
+        long bytesMin,
+        long bytesMax,
+        long nodeCount,
+        long relationshipCount
     ) {
         this.requiredMemory = requiredMemory;
         this.treeView = treeView;
@@ -76,15 +77,15 @@ public class MemoryEstimateResult {
         this.relationshipCount = relationshipCount;
     }
 
-    public MemoryEstimateResult(final Result.ResultRow row) {
+    public MemoryEstimateResult(Result.ResultRow row) {
         this(
-                row.getString("requiredMemory"),
-                row.getString("treeView"),
-                (Map<String, Object>) row.get("mapView"),
-                row.getNumber("bytesMin").longValue(),
-                row.getNumber("bytesMax").longValue(),
-                row.getNumber("nodeCount").longValue(),
-                row.getNumber("relationshipCount").longValue()
+            row.getString("requiredMemory"),
+            row.getString("treeView"),
+            (Map<String, Object>) row.get("mapView"),
+            row.getNumber("bytesMin").longValue(),
+            row.getNumber("bytesMax").longValue(),
+            row.getNumber("nodeCount").longValue(),
+            row.getNumber("relationshipCount").longValue()
         );
     }
 }
