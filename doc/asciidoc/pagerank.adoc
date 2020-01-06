@@ -64,31 +64,29 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.pageRank.write(label:String, relationship:String,
-    {direction: 'OUTGOING', maxIterations: 20, tolerance: 0.0000001, dampingFactor: 0.85, write: true, writeProperty: 'pagerank', concurrency: 4})
+CALL algo.pageRank.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD nodes, maxIterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
 ----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name               | Type    | Default        | Optional | Description
-| node label         | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type  | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config             | map     | n/a            | yes      | Additional configuration.
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| maxIterations        | int     | 20                     | yes | The maximum number of iterations of PageRank to run.
+| dampingFactor     | float   | 0.85                   | yes | The damping factor of the PageRank calculation.
+| maxIterations     | int     | 20                     | yes | The maximum number of iterations of PageRank to run.
 | tolerance         | float   | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
 | concurrency       | int     | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency   | int     | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
 | writeConcurrency  | int     | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
-| dampingFactor     | float   | 0.85                   | yes | The damping factor of the PageRank calculation.
 | weightProperty    | string  | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue      | float   | 0.0                    | yes | The default value of the weight in case it is missing or invalid.
+| writeProperty     | string  | n/a                    | no  | The property name written back to.
 | graph             | string  | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
@@ -96,11 +94,11 @@ YIELD nodes, maxIterations, loadMillis, computeMillis, writeMillis, dampingFacto
 [opts="header",cols="1,1,6"]
 |===
 | Name          | Type    | Description
-| ranIterations    | int     | The number of iterations run.
+| ranIterations | int     | The number of iterations run.
 | dampingFactor | float   | The damping factor used.
-| maxIterations    | int     | The given maximum number of iterations.
+| maxIterations | int     | The given maximum number of iterations.
 | writeProperty | string  | The property name written back to.
-| createMillis    | int     | Milliseconds for creating the graph.
+| createMillis  | int     | Milliseconds for creating the graph.
 | computeMillis | int     | Milliseconds for running the algorithm.
 | writeMillis   | int     | Milliseconds for writing result data back.
 |===
@@ -108,8 +106,7 @@ YIELD nodes, maxIterations, loadMillis, computeMillis, writeMillis, dampingFacto
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.pageRank.stream(label:String, relationship:String,
-    {direction:'OUTGOING', maxIterations:20, dampingFactor:0.85, concurrency:4})
+CALL algo.pageRank.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD node, score
 ----
 
@@ -117,22 +114,20 @@ YIELD node, score
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name               | Type    | Default        | Optional | Description
-| node label         | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type  | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config             | map     | n/a            | yes      | Additional configuration.
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| maxIterations       | int    | 20                     | yes | The maximum number of iterations of PageRank to run.
+| dampingFactor    | float  | 0.85                   | yes | The damping factor of the PageRank calculation.
+| maxIterations    | int    | 20                     | yes | The maximum number of iterations of PageRank to run.
 | tolerance        | float  | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
 | concurrency      | int    | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency  | int    | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
 | writeConcurrency | int    | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
-| dampingFactor    | float  | 0.85                   | yes | The damping factor of the PageRank calculation.
 | weightProperty   | string | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue     | float  | 0.0                    | yes | The default value of the weight in case it is missing or invalid.
 | graph            | string | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
@@ -143,6 +138,52 @@ YIELD node, score
 | nodeId  | long  | Node ID
 | score | float | PageRank weight
 |===
+
+.The following will run the algorithm and returns the result in form of statistical and measurement values:
+[source, cypher]
+----
+CALL gds.algo.pageRank.stats(graphNameOrConfig: STRING|MAP, configuration: MAP})
+YIELD nodes, relationships, ranIterations, didConverge, createMillis, computeMillis, writeMillis
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+|===
+
+The configuration is the same as for the `write` mode.
+
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL algo.labelPropagation.<mode>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory, mapView
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+|===
+
+The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type   | Default           | Optional | Description
+| nodeCount         | int    | 0                 | yes      | The number of nodes in a fictive graph.
+| relationshipCount | int    | 0                 | yes      | The number of relationships in a fictive graph.
+|===
+
+Setting the `nodeCount` and `relationshipCount` parameters allows a memory estimation without loading the graph.
+For explicitly loaded graphs, the config-map needs to contain the graph name in the `graph` key.
+Additionally algorithm specific parameters can also be provided as config.
 
 [[algorithms-pagerank-examples]]
 == Examples
