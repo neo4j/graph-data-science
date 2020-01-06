@@ -150,7 +150,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         createExplicitGraph(EXPLICIT_GRAPH_NAME);
     }
 
-    @ParameterizedTest(name = "Normalizatoin: {0}")
+    @ParameterizedTest(name = "Normalization: {0}")
     @MethodSource("normalizations")
     void eigenvectorCentralityOnExplicitGraph(String normalizationType, Map<Long, Double> expected) {
         String eigenvectorStreamQuery = GdsCypher.call()
@@ -176,7 +176,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         assertMapEquals(expected, actual);
     }
 
-    @ParameterizedTest(name = "Normalizatoin: {0}")
+    @ParameterizedTest(name = "Normalization: {0}")
     @MethodSource("normalizations")
     void eigenvectorCentralityOnImplicitGraph(String normalizationType, Map<Long, Double> expected) {
         String eigenvectorStreamQuery = GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
@@ -212,7 +212,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         assertMapEquals(expected, actual);
     }
 
-    @ParameterizedTest(name = "Normalizatoin: {0}")
+    @ParameterizedTest(name = "Normalization: {0}")
     @MethodSource("normalizations")
     void eigenvectorCentralityWriteOnExplicitGraph(String normalizationType, Map<Long, Double> expected) {
 
@@ -242,7 +242,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         assertMapEquals(expected, actual);
     }
 
-    @ParameterizedTest(name = "Normalizatoin: {0}")
+    @ParameterizedTest(name = "Normalization: {0}")
     @MethodSource("normalizations")
     void eigenvectorCentralityWriteOnImplicitGraph(String normalizationType, Map<Long, Double> expected) {
         final Map<Long, Double> actual = new HashMap<>();

@@ -20,11 +20,21 @@
 
 package org.neo4j.graphalgo.newapi;
 
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphdb.Node;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.LongStream;
 
-public interface SourceNodesConfig extends AlgoBaseConfig {
+public interface SourceNodesConfig {
 
-    List<Node> sourceNodes();
+    default List<Node> sourceNodes() {
+        return Collections.emptyList();
+    }
+
+    @Configuration.Ignore
+    default LongStream sourceNodeIds() {
+        return sourceNodes().stream().mapToLong(Node::getId);
+    }
 }

@@ -30,10 +30,7 @@ import org.neo4j.graphalgo.newapi.IterationsConfig;
 import org.neo4j.graphalgo.newapi.SourceNodesConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
-import org.neo4j.graphdb.Node;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @ValueClass
@@ -49,12 +46,6 @@ public interface EigenvectorCentralityConfig extends
     @Override
     default int maxIterations() {
         return 20;
-    }
-
-    @Value.Default
-    @Override
-    default List<Node> sourceNodes() {
-        return new ArrayList<>();
     }
 
     @Value.Default

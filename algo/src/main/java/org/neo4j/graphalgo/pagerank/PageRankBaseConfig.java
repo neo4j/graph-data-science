@@ -24,19 +24,17 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfig;
+import org.neo4j.graphalgo.newapi.SourceNodesConfig;
 import org.neo4j.graphalgo.newapi.ToleranceConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Node;
-
-import java.util.Collections;
-import java.util.List;
 
 public interface PageRankBaseConfig extends
     AlgoBaseConfig,
     WeightConfig,
     ToleranceConfig,
-    IterationsConfig {
+    IterationsConfig,
+    SourceNodesConfig {
 
     @Value.Default
     @Override
@@ -53,10 +51,6 @@ public interface PageRankBaseConfig extends
     @Value.Default
     default double dampingFactor() {
         return 0.85;
-    }
-
-    default List<Node> sourceNodes() {
-        return Collections.emptyList();
     }
 
     // TODO: consider moving this to WeightConfig or create a sub interface of that

@@ -28,11 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphdb.Node;
 import org.neo4j.logging.Log;
-
-import java.util.List;
-import java.util.stream.LongStream;
 
 class EigenvectorCentralityAlgorithmFactory extends AlgorithmFactory<PageRank, EigenvectorCentralityConfig> {
     @Override
@@ -47,8 +43,6 @@ class EigenvectorCentralityAlgorithmFactory extends AlgorithmFactory<PageRank, E
             1.0,
             PageRank.DEFAULT_TOLERANCE
         );
-        List<Node> sourceNodes = configuration.sourceNodes();
-        LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
         return LabsPageRankAlgorithmType.EIGENVECTOR_CENTRALITY
             .create(
                 graph,
@@ -56,7 +50,7 @@ class EigenvectorCentralityAlgorithmFactory extends AlgorithmFactory<PageRank, E
                 configuration.concurrency(),
                 ParallelUtil.DEFAULT_BATCH_SIZE,
                 algoConfig,
-                sourceNodeIds,
+                configuration.sourceNodeIds(),
                 tracker
             );
     }

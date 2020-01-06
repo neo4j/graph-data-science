@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphalgo.results.PageRankScore;
 import org.neo4j.graphalgo.utils.CentralityUtils;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -44,11 +43,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, PageRank, EigenvectorCentralityConfig> {
     private static final String DESCRIPTION = "Eigenvector Centrality measures the transitive influence or connectivity of nodes";
 
-    @Procedure(value = "gds.alpha.eigenvector.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.eigenvector.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<PageRankScore.Stats> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -65,6 +65,8 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         String normalization = result.config().normalization();
         CentralityResult normalizedResults = normalization(normalization).apply(stats);
 
+        // NOTE: could not use `writeNodeProperties` just yet, as this requires changes to
+        //  the PageRank class and therefore to all product PageRank procs as well.
         PageRank prAlgo = result.algorithm();
         String writePropertyName = result.config().writeProperty();
         try (ProgressTimer ignored = statsBuilder.timeWrite()) {

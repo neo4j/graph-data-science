@@ -28,10 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.pagerank.PageRankBaseConfig;
-import org.neo4j.graphdb.Node;
 import org.neo4j.logging.Log;
-
-import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
@@ -50,48 +47,47 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends Algorith
 
     @Override
     public PageRank build(
-            final Graph graph,
-            final PageRankBaseConfig configuration,
-            final AllocationTracker tracker,
-            final Log log) {
-
-        LongStream sourceNodeIds = configuration.sourceNodes().stream().mapToLong(Node::getId);
+        Graph graph,
+        PageRankBaseConfig configuration,
+        AllocationTracker tracker,
+        Log log
+    ) {
         return algorithmType.create(
-                graph,
-                Pools.DEFAULT,
-                DEFAULT_BATCH_SIZE,
-                configuration.concurrency(),
-                configuration.toOldConfig(),
-                sourceNodeIds,
-                tracker
+            graph,
+            Pools.DEFAULT,
+            DEFAULT_BATCH_SIZE,
+            configuration.concurrency(),
+            configuration.toOldConfig(),
+            configuration.sourceNodeIds(),
+            tracker
         );
     }
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
         return MemoryEstimations.builder(PageRank.class)
-                .add(MemoryEstimations.setup("computeSteps", (dimensions, concurrency) -> {
-                    // adjust concurrency, if necessary
-                    long nodeCount = dimensions.nodeCount();
-                    long nodesPerThread = ceilDiv(nodeCount, concurrency);
-                    if (nodesPerThread > Partition.MAX_NODE_COUNT) {
-                        concurrency = (int) ceilDiv(nodeCount, Partition.MAX_NODE_COUNT);
+            .add(MemoryEstimations.setup("computeSteps", (dimensions, concurrency) -> {
+                // adjust concurrency, if necessary
+                long nodeCount = dimensions.nodeCount();
+                long nodesPerThread = ceilDiv(nodeCount, concurrency);
+                if (nodesPerThread > Partition.MAX_NODE_COUNT) {
+                    concurrency = (int) ceilDiv(nodeCount, Partition.MAX_NODE_COUNT);
+                    nodesPerThread = ceilDiv(nodeCount, concurrency);
+                    while (nodesPerThread > Partition.MAX_NODE_COUNT) {
+                        concurrency++;
                         nodesPerThread = ceilDiv(nodeCount, concurrency);
-                        while (nodesPerThread > Partition.MAX_NODE_COUNT) {
-                            concurrency++;
-                            nodesPerThread = ceilDiv(nodeCount, concurrency);
-                        }
                     }
+                }
 
-                    return MemoryEstimations
-                            .builder(PageRank.ComputeSteps.class)
-                            .perThread("scores[] wrapper", MemoryUsage::sizeOfObjectArray)
-                            .perThread("starts[]", MemoryUsage::sizeOfLongArray)
-                            .perThread("lengths[]", MemoryUsage::sizeOfLongArray)
-                            .perThread("list of computeSteps", MemoryUsage::sizeOfObjectArray)
-                            .perThread("ComputeStep", algorithmType.memoryEstimation())
-                            .build();
-                }))
-                .build();
+                return MemoryEstimations
+                    .builder(PageRank.ComputeSteps.class)
+                    .perThread("scores[] wrapper", MemoryUsage::sizeOfObjectArray)
+                    .perThread("starts[]", MemoryUsage::sizeOfLongArray)
+                    .perThread("lengths[]", MemoryUsage::sizeOfLongArray)
+                    .perThread("list of computeSteps", MemoryUsage::sizeOfObjectArray)
+                    .perThread("ComputeStep", algorithmType.memoryEstimation())
+                    .build();
+            }))
+            .build();
     }
 }
