@@ -89,19 +89,20 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
         boolean write
     ) {
         if (computeResult.isGraphEmpty()) {
-            return Stream.of(
-                new WriteResult(
-                    computeResult.config().writeProperty(),
-                    computeResult.config().weightProperty(),
-                    computeResult.config().maxIterations(),
-                    0,
-                    computeResult.createMillis(),
-                    0,
-                    0,
-                    0,
-                    false
-                )
-            );
+          return Stream.of(
+              new WriteResult(
+                  computeResult.config().writeProperty(),
+                  computeResult.config().weightProperty(),
+                  computeResult.config().maxIterations(),
+                  0,
+                  computeResult.createMillis(),
+                  0,
+                  0,
+                  0,
+                  computeResult.config().dampingFactor(),
+                  false
+              )
+          );
         } else {
             PageRankWriteConfig config = computeResult.config();
             Graph graph = computeResult.graph();
@@ -149,6 +150,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
         public long writeMillis;
         public long maxIterations;
         public long ranIterations;
+        public double dampingFactor;
         public boolean didConverge;
 
         WriteResult(
@@ -160,6 +162,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
             long computeMillis,
             long writeMillis,
             long ranIterations,
+            double dampingFactor,
             boolean didConverge
         ) {
             this.relationshipPropertiesWritten = 0;
@@ -172,6 +175,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
             this.writeMillis = writeMillis;
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
+            this.dampingFactor = dampingFactor;
         }
     }
 
@@ -205,6 +209,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
                 computeMillis,
                 writeMillis,
                 ranIterations,
+                config.dampingFactor(),
                 didConverge
             );
         }
