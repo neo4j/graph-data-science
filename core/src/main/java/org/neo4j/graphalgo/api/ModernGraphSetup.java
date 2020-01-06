@@ -28,8 +28,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateCypherConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateBaseConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.logging.Log;
@@ -44,8 +43,7 @@ import java.util.stream.Collectors;
 
 public class ModernGraphSetup implements GraphSetup {
 
-    private final GraphCreateConfig createConfig;
-    private final Optional<GraphCreateCypherConfig> maybeCreateCypherConfig;
+    private final GraphCreateBaseConfig createConfig;
 
     private final Map<String, Object> params;
 
@@ -65,8 +63,7 @@ public class ModernGraphSetup implements GraphSetup {
         Log log,
         AllocationTracker tracker,
         TerminationFlag terminationFlag,
-        GraphCreateConfig createConfig,
-        Optional<GraphCreateCypherConfig> maybeCreateCypherConfig
+        GraphCreateBaseConfig createConfig
     ) {
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
@@ -74,7 +71,6 @@ public class ModernGraphSetup implements GraphSetup {
         this.tracker = tracker;
         this.terminationFlag = terminationFlag;
         this.createConfig = createConfig;
-        this.maybeCreateCypherConfig = maybeCreateCypherConfig;
     }
 
     @Override
@@ -107,12 +103,12 @@ public class ModernGraphSetup implements GraphSetup {
 
     @Override
     public Optional<String> nodeQuery() {
-        return maybeCreateCypherConfig.map(GraphCreateCypherConfig::nodeQuery);
+        return Optional.ofNullable(createConfig.nodeQuery());
     }
 
     @Override
     public Optional<String> relationshipQuery() {
-        return maybeCreateCypherConfig.map(GraphCreateCypherConfig::relationshipQuery);
+        return Optional.ofNullable(createConfig.relationshipQuery());
     }
 
     /**
@@ -184,14 +180,6 @@ public class ModernGraphSetup implements GraphSetup {
             .anyMatch(p -> p == Projection.UNDIRECTED);
     }
 
-    public boolean shouldLoadRelationshipProperties() {
-        return createConfig
-            .relationshipProjection()
-            .allFilters()
-            .stream()
-            .anyMatch(RelationshipProjection::hasMappings);
-    }
-
     /**
      * @deprecated There is no global relationship property anymore
      */
@@ -219,6 +207,10 @@ public class ModernGraphSetup implements GraphSetup {
         groupedPropertyMappings.values().stream()
             .map(Iterables::first)
             .forEach(builder::addMapping);
+
+        // Necessary for Cypher projections
+        createConfig.nodeProperties().forEach(builder::addMapping);
+
         return builder.build();
     }
 
@@ -238,6 +230,10 @@ public class ModernGraphSetup implements GraphSetup {
         groupedPropertyMappings.values().stream()
             .map(Iterables::first)
             .forEach(builder::addMapping);
+
+        // Necessary for Cypher projections
+        createConfig.relationshipProperties().forEach(builder::addMapping);
+
         return builder.build();
     }
 

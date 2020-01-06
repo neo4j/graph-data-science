@@ -20,19 +20,20 @@
 
 package org.neo4j.graphalgo.newapi;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 
 @ValueClass
 @Configuration("GraphCreateCypherConfigImpl")
-public interface GraphCreateCypherConfig extends BaseConfig {
+public interface GraphCreateCypherConfig extends GraphCreateBaseConfig {
 
     @NotNull String IMPLICIT_GRAPH_NAME = "";
     @NotNull String NODE_QUERY_KEY = "nodeQuery";
@@ -41,40 +42,33 @@ public interface GraphCreateCypherConfig extends BaseConfig {
     @NotNull String NODE_PROPERTIES_KEY = "nodeProperties";
     @NotNull String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
 
-    @Configuration.Parameter
-    String graphName();
+    @Override
+    @Configuration.Ignore
+    default Class<? extends GraphFactory> getGraphImpl() {
+        return CypherGraphFactory.class;
+    }
 
+    @Override
+    @Configuration.Ignore
+    default NodeProjections nodeProjection() {
+        return NodeProjections.of();
+    }
+
+    @Override
+    @Configuration.Ignore
+    default RelationshipProjections relationshipProjection() {
+        return RelationshipProjections.of();
+    }
+
+    @Override
     @Configuration.Parameter
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String nodeQuery();
 
+    @Override
     @Configuration.Parameter
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String relationshipQuery();
-
-    @Value.Default
-    @Value.Parameter(false)
-    @ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
-    default PropertyMappings nodeProperties() {
-        return PropertyMappings.of();
-    }
-
-    @Value.Default
-    @Value.Parameter(false)
-    @ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
-    default PropertyMappings relationshipProperties() {
-        return PropertyMappings.of();
-    }
-
-    @Value.Default
-    @Value.Parameter(false)
-    @Configuration.Key(ProcedureConstants.READ_CONCURRENCY_KEY)
-    default int concurrency() {
-        return Pools.DEFAULT_CONCURRENCY;
-    }
-
-//    @TestOnly
-//    static GraphCreateCypherConfig emptyWithName(String userName, String name) {
-//        return ImmutableGraphCreateConfig.of(userName, name, NodeProjections.empty(), RelationshipProjections.empty());
-//    }
 
     static GraphCreateCypherConfig of(
         String userName,
@@ -84,9 +78,9 @@ public interface GraphCreateCypherConfig extends BaseConfig {
         CypherMapWrapper config
     ) {
         return new GraphCreateCypherConfigImpl(
-            graphName,
             nodeQuery,
             relationshipQuery,
+            graphName,
             userName,
             config
         );
@@ -108,9 +102,9 @@ public interface GraphCreateCypherConfig extends BaseConfig {
             : PropertyMappings.of();
 
         return new GraphCreateCypherConfigImpl(
-            IMPLICIT_GRAPH_NAME,
             nodeQuery,
             relationshipQuery,
+            IMPLICIT_GRAPH_NAME,
             nodeProperties,
             relationshipProperties,
             Pools.DEFAULT_CONCURRENCY,

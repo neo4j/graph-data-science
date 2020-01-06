@@ -119,20 +119,7 @@ public class GraphCreateProc extends CatalogProc {
     private GraphCreateCypherResult createCypherGraph(GraphCreateCypherConfig config) {
         GraphCreateCypherResult.Builder builder = new GraphCreateCypherResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
-            ResolvedPropertyMappings propertyMappings = ResolvedPropertyMappings.empty();
-
-            GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
-                config.graphName(),
-                NodeProjections.of(),
-                // TODO: convert GraphsByRelationshipType to RelationshipProjection in GraphCreateConfig
-                RelationshipProjections.of(),
-                PropertyMappings.of(),
-                PropertyMappings.of(),
-                config.concurrency(),
-                config.username()
-            );
-
-            ModernGraphLoader loader = newLoader(graphCreateConfig, config, AllocationTracker.EMPTY);
+            ModernGraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
             CypherGraphFactory graphFactory = loader.build(CypherGraphFactory.class);
             GraphsByRelationshipType graphFromType =
                 !config.relationshipProperties().hasMappings()
@@ -140,6 +127,17 @@ public class GraphCreateProc extends CatalogProc {
                     : GraphsByRelationshipType.of(graphFactory.build());
 
             builder.withGraph(graphFromType);
+
+            GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
+                NodeProjections.of(),
+                // TODO: convert GraphsByRelationshipType to RelationshipProjection in GraphCreateConfig
+                RelationshipProjections.of(),
+                config.graphName(),
+                PropertyMappings.of(),
+                PropertyMappings.of(),
+                config.concurrency(),
+                config.username()
+            );
 
             GraphCatalog.set(graphCreateConfig, graphFromType);
         }

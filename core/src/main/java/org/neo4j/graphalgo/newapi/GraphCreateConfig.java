@@ -31,11 +31,6 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.ProcedureConstants;
-import org.neo4j.graphalgo.core.utils.Pools;
-
-import static org.neo4j.graphalgo.core.ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_WEIGHT_KEY;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -43,40 +38,30 @@ import java.util.stream.Collectors;
 
 @ValueClass
 @Configuration("GraphCreateConfigImpl")
-public interface GraphCreateConfig extends BaseConfig {
+public interface GraphCreateConfig extends GraphCreateBaseConfig {
 
     @NotNull String IMPLICIT_GRAPH_NAME = "";
 
-    @Configuration.Parameter
-    String graphName();
-
+    @Override
     @Configuration.Parameter
     @ConvertWith("org.neo4j.graphalgo.AbstractNodeProjections#fromObject")
     NodeProjections nodeProjection();
 
+    @Override
     @Configuration.Parameter
     @ConvertWith("org.neo4j.graphalgo.AbstractRelationshipProjections#fromObject")
     RelationshipProjections relationshipProjection();
 
-    @Value.Default
-    @Value.Parameter(false)
-    @ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
-    default PropertyMappings nodeProperties() {
-        return PropertyMappings.of();
+    @Override
+    @Configuration.Ignore
+    @Nullable default String nodeQuery() {
+        return null;
     }
 
-    @Value.Default
-    @Value.Parameter(false)
-    @ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
-    default PropertyMappings relationshipProperties() {
-        return PropertyMappings.of();
-    }
-
-    @Value.Default
-    @Value.Parameter(false)
-    @Configuration.Key(ProcedureConstants.READ_CONCURRENCY_KEY)
-    default int concurrency() {
-        return Pools.DEFAULT_CONCURRENCY;
+    @Override
+    @Configuration.Ignore
+    @Nullable default String relationshipQuery() {
+        return null;
     }
 
     @Value.Default
@@ -141,17 +126,6 @@ public interface GraphCreateConfig extends BaseConfig {
         }
     }
 
-    static GraphCreateConfig legacyFactory(String graphName) {
-        return ImmutableGraphCreateConfig
-            .builder()
-            .graphName(graphName)
-            .nodeProjection(NodeProjections.empty())
-            .relationshipProjection(RelationshipProjections.empty())
-            .concurrency(-1)
-            .build();
-    }
-
-    @TestOnly
     static GraphCreateConfig emptyWithName(String userName, String name) {
         return ImmutableGraphCreateConfig.of(userName, name, NodeProjections.empty(), RelationshipProjections.empty());
     }
@@ -159,14 +133,14 @@ public interface GraphCreateConfig extends BaseConfig {
     static GraphCreateConfig of(
         String userName,
         String graphName,
-        @Nullable Object nodeFilter,
-        @Nullable Object relationshipFilter,
+        Object nodeProjections,
+        Object relationshipProjections,
         CypherMapWrapper config
     ) {
         GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
+            nodeProjections,
+            relationshipProjections,
             graphName,
-            nodeFilter,
-            relationshipFilter,
             userName,
             config
         );
@@ -194,9 +168,9 @@ public interface GraphCreateConfig extends BaseConfig {
             config.get("nodeProjection", (Object) NodeProjections.empty())
         ));
         GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
-            IMPLICIT_GRAPH_NAME,
             nodeProjections,
             relationshipProjections,
+            IMPLICIT_GRAPH_NAME,
             username,
             config
         );
