@@ -167,9 +167,8 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
                 case CONTINUE:
                     // remove from the visited nodes to allow revisiting in case the node is accessible via more than one paths.
                     if (visited.get(node)) {
-                        visited.flip(node);
+                        visited.clear(node);
                     }
-
                     continue loop;
                 case FOLLOW:
                     list.add(graph.toOriginalNodeId(node));

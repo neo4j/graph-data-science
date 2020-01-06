@@ -35,6 +35,8 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -150,6 +152,7 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
                 }
             );
 
+        final Collection<String> names = new HashSet<>(5);
         try (Transaction tx = db.beginTx()) {
             List<Node> resultNodes = Arrays
                 .stream(nodes)
@@ -157,10 +160,11 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
                 .collect(Collectors.toList());
             List<String> explicitIds = resultNodes
                 .stream()
+                .peek(node -> names.add(name(node.getId())))
                 .map(node -> node.getProperty("id"))
                 .map(Objects::toString)
                 .collect(Collectors.toList());
-            System.out.println(explicitIds);
+            System.out.println(String.join(", ", names));
 
             assertEquals(dfsExpected.size(), explicitIds.size());
             explicitIds.forEach(id -> assertTrue(dfsExpected.contains(id)));
