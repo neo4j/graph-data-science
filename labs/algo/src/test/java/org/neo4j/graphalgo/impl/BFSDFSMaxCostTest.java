@@ -54,8 +54,11 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
 
     private static Graph graph;
 
-    private static List<String> dfsExpected = Arrays.asList("a", "c", "d", "e", "b");
-    private static List<String> bfsExpected = Arrays.asList("a", "b", "c", "d", "e");
+    private final List<String> dfsExpected = Arrays.asList("a", "c", "d", "e", "b");
+    private final List<String> bfsExpected = Arrays.asList("a", "b", "c", "d", "e");
+    private Traverse.ExitPredicate exitPredicate;
+    private Traverse.Aggregator aggregator;
+    private final double maxCost = 5.;
 
     @BeforeEach
     void setup() {
@@ -82,6 +85,16 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
             .withDirection(Direction.BOTH)
             .load(HugeGraphFactory.class);
 
+        exitPredicate = (s, t, w) -> {
+            Traverse.ExitPredicate.Result result = w > maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
+            System.out.println("Exit Function: " + name(s) + " -(" + w + ")-> " + name(t) + " --> " + result);
+            return result;
+        };
+        aggregator = (s, t, w) -> {
+            final double v = graph.relationshipProperty(s, t, 0.0D);
+            System.out.println("Aggregator: " + name(s) + " -(" + (w + v) + ")-> " + name(t));
+            return w + v;
+        };
     }
 
     @AfterEach
@@ -92,20 +105,12 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
     @Test
     void testDfsMaxCostOut() {
         final long source = id("a");
-        final double maxCost = 5.;
         final long[] nodes = new Traverse(graph)
             .computeDfs(
                 source,
                 Direction.OUTGOING,
-                (s, t, w) -> {
-                    Traverse.ExitPredicate.Result result = w >= maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
-                    System.out.println("Exit Function: " + name(s) + " -(" + w + ")-> " + name(t) + " --> " + result);
-                    return result;
-                }, (s, t, w) -> {
-                    final double v = graph.relationshipProperty(s, t, 0.0D);
-                    System.out.println("Aggregator: " + name(s) + " -(" + (w + v) + ")-> " + name(t));
-                    return w + v;
-                }
+                exitPredicate,
+                aggregator
             );
 
         try (Transaction tx = db.beginTx()) {
@@ -128,20 +133,13 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
     @Test
     void testBfsMaxCostOut() {
         final long source = id("a");
-        final double maxCost = 5.;
+
         final long[] nodes = new Traverse(graph)
             .computeBfs(
                 source,
                 Direction.OUTGOING,
-                (s, t, w) -> {
-                    Traverse.ExitPredicate.Result result = w >= maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
-                    System.out.println("Exit Function: " + name(s) + " -(" + w + ")-> " + name(t) + " --> " + result);
-                    return result;
-                }, (s, t, w) -> {
-                    final double v = graph.relationshipProperty(s, t, 0.0D);
-                    System.out.println("Aggregator: " + name(s) + " -(" + (w + v) + ")-> " + name(t));
-                    return w + v;
-                }
+                exitPredicate,
+                aggregator
             );
 
         try (Transaction tx = db.beginTx()) {

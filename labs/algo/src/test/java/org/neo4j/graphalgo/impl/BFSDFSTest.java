@@ -229,6 +229,24 @@ class BFSDFSTest extends AlgoTestBase {
         assertEquals(4, nodes.length);
     }
 
+    @Test
+    void testDfsMaxCostOut() {
+        final long source = id("a");
+        final double maxCost = 3.;
+        final long[] nodes = new Traverse(graph)
+                .computeDfs(
+                        source,
+                        Direction.OUTGOING,
+                        (s, t, w) -> w > maxCost ? Result.CONTINUE : Result.FOLLOW,
+                        (s, t, w) -> {
+                            final double v = graph.relationshipProperty(s, t, Double.NaN);
+                            System.out.println(s + " -> " + t + " : " + (w + v));
+                            return w + v;
+                        });
+        System.out.println(Arrays.toString(nodes));
+        assertEquals(4, nodes.length);
+    }
+
     /**
      * test if all both arrays contain the same nodes. not necessarily in
      * same order

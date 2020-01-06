@@ -59,13 +59,11 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
      * @return
      */
     public long[] computeBfs(long sourceId, Direction direction, ExitPredicate exitCondition) {
-        return traverse(
+        return computeBfs(
             graph.toMappedNodeId(sourceId),
             direction,
             exitCondition,
-            (s, t, w) -> .0,
-            LongArrayDeque::addLast,
-            DoubleArrayDeque::addLast
+            (s, t, w) -> .0
         );
     }
 
@@ -78,13 +76,11 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
      * @return
      */
     public long[] computeDfs(long sourceId, Direction direction, ExitPredicate exitCondition) {
-        return traverse(
+        return computeDfs(
             graph.toMappedNodeId(sourceId),
             direction,
             exitCondition,
-            (s, t, w) -> .0,
-            LongArrayDeque::addFirst,
-            DoubleArrayDeque::addFirst
+            (s, t, w) -> .0
         );
     }
 
@@ -155,6 +151,7 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
         nodeFunc.accept(sources, sourceNode);
         weightFunc.accept(weights, .0);
         visited.set(sourceNode);
+
         loop:
         while (!nodes.isEmpty() && running()) {
             final long source = sources.removeFirst();
@@ -180,6 +177,7 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
                 direction, longToIntConsumer((s, t) -> {
                     if (!visited.get(t)) {
                         visited.set(t);
+
                         nodeFunc.accept(sources, node);
                         nodeFunc.accept(nodes, t);
                         weightFunc.accept(weights, agg.apply(s, t, weight));
