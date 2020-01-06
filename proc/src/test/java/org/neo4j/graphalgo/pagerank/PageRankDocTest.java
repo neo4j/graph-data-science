@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
@@ -189,7 +188,6 @@ class PageRankDocTest extends BaseProcTest {
     }
 
     @Test
-    @Disabled(value = "Disabled as the personalized page rank algorithm is currently not triggered")
     void personalized() {
         String q1 =
             "MATCH (siteA:Page {name: 'Site A'})" +
