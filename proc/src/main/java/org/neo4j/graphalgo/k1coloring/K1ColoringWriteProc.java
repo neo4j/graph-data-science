@@ -21,12 +21,9 @@
 package org.neo4j.graphalgo.k1coloring;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.coloring.K1Coloring;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -48,19 +45,20 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<K1Coloring, K1Coloring, K1ColoringWriteConfig> computed = compute(
+        ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computed = compute(
             graphNameOrConfig,
             configuration
         );
 
-        return Optional.ofNullable(computed.result())
+        // TODO product: check for an empty graph (not algorithm) and return a single "empty write result" value
+        return Optional.ofNullable(computed.algorithm())
             .map(coloring -> write(computed, coloring))
             .orElse(Stream.empty());
     }
 
     @NotNull
     private Stream<WriteResult> write(
-        ComputationResult<K1Coloring, K1Coloring, K1ColoringWriteConfig> compute,
+        ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> compute,
         K1Coloring coloring
     ) {
         K1ColoringWriteConfig config = compute.config();
@@ -75,38 +73,8 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             .withRanIterations(coloring.ranIterations())
             .withDidConverge(coloring.didConverge());
 
-        write(
-            compute.graph(),
-            coloring.colors(),
-            config.writeProperty(),
-            builder,
-            TerminationFlag.wrap(transaction),
-            config.writeConcurrency()
-        );
-
+        writeNodeProperties(builder, compute);
         return Stream.of(builder.build());
-    }
-
-    private void write(
-        Graph graph,
-        HugeLongArray coloring,
-        String writeProperty,
-        WriteResultBuilder resultBuilder,
-        TerminationFlag terminationFlag,
-        int writeConcurrency
-    ) {
-        log.debug("Writing results");
-
-        NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, terminationFlag)
-            .withLog(log)
-            .parallel(Pools.DEFAULT, writeConcurrency)
-            .build();
-        exporter.write(
-            writeProperty,
-            coloring,
-            HugeLongArray.Translator.INSTANCE
-        );
-        resultBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
     }
 
     @Override
@@ -117,6 +85,11 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         CypherMapWrapper config
     ) {
         return K1ColoringWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    protected PropertyTranslator<HugeLongArray> nodePropertyTranslator(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult) {
+        return HugeLongArray.Translator.INSTANCE;
     }
 
     public static class WriteResultBuilder extends AbstractResultBuilder<K1ColoringWriteConfig, WriteResult> {

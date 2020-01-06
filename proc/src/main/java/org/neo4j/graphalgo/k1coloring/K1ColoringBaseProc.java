@@ -22,10 +22,11 @@ package org.neo4j.graphalgo.k1coloring;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.coloring.K1Coloring;
 
-public abstract class K1ColoringBaseProc<T extends K1ColoringConfig> extends AlgoBaseProc<K1Coloring, K1Coloring, T> {
     static final String DESCRIPTION = "TODO";
+public abstract class K1ColoringBaseProc<T extends K1ColoringConfig> extends AlgoBaseProc<K1Coloring, HugeLongArray, T> {
 
     @Override
     protected AlgorithmFactory<K1Coloring, T> algorithmFactory(T config) {

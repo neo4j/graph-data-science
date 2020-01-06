@@ -160,10 +160,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             tracker
         )
             .withProgressLogger(progressLogger)
-            .withTerminationFlag(terminationFlag)
-            .compute();
+            .withTerminationFlag(terminationFlag);
 
-        this.colors = coloring.colors();
+        this.colors = coloring.compute();
         this.colorsUsed = coloring.usedColors();
     }
 

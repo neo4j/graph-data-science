@@ -61,7 +61,7 @@ import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
  * and contain more colors as needed.
  * </p>
  */
-public class K1Coloring extends Algorithm<K1Coloring, K1Coloring> {
+public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
 
     private final Graph graph;
     private final long nodeCount;
@@ -142,7 +142,7 @@ public class K1Coloring extends Algorithm<K1Coloring, K1Coloring> {
     }
 
     @Override
-    public K1Coloring compute() {
+    public HugeLongArray compute() {
         colors = HugeLongArray.newArray(nodeCount, tracker);
         colors.setAll((nodeId) -> ColoringStep.INITIAL_FORBIDDEN_COLORS);
 
@@ -159,7 +159,7 @@ public class K1Coloring extends Algorithm<K1Coloring, K1Coloring> {
 
         this.didConverge = ranIterations < maxIterations;
 
-        return this;
+        return colors();
     }
 
     private void runColoring() {

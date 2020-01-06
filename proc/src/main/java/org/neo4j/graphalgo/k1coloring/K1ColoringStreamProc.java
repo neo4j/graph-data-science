@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.k1coloring;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.coloring.K1Coloring;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
@@ -44,7 +45,7 @@ public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<K1Coloring, K1Coloring, K1ColoringConfig> compute = compute(graphNameOrConfig, configuration);
+        ComputationResult<K1Coloring, HugeLongArray, K1ColoringConfig> compute = compute(graphNameOrConfig, configuration);
 
         return Optional.ofNullable(compute.result())
             .map(coloring -> {
@@ -52,7 +53,7 @@ public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringConfig> {
                 return LongStream.range(0, graph.nodeCount())
                     .mapToObj(nodeId -> {
                         long neoNodeId = graph.toOriginalNodeId(nodeId);
-                        return new StreamResult(neoNodeId, coloring.colors().get(nodeId));
+                        return new StreamResult(neoNodeId, coloring.get(nodeId));
                     });
 
             }).orElse(Stream.empty());
