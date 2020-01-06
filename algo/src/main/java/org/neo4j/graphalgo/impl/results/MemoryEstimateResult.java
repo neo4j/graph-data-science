@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphdb.Result;
 
 import java.util.Map;
 
@@ -48,44 +47,12 @@ public class MemoryEstimateResult {
         MemoryRange estimateMemoryUsage,
         GraphDimensions dimensions
     ) {
-        this(
-            estimateMemoryUsage.toString(),
-            treeView,
-            mapView,
-            estimateMemoryUsage.min,
-            estimateMemoryUsage.max,
-            dimensions.nodeCount(),
-            dimensions.maxRelCount()
-        );
-    }
-
-    private MemoryEstimateResult(
-        String requiredMemory,
-        String treeView,
-        Map<String, Object> mapView,
-        long bytesMin,
-        long bytesMax,
-        long nodeCount,
-        long relationshipCount
-    ) {
-        this.requiredMemory = requiredMemory;
+        this.requiredMemory = estimateMemoryUsage.toString();
         this.treeView = treeView;
         this.mapView = mapView;
-        this.bytesMin = bytesMin;
-        this.bytesMax = bytesMax;
-        this.nodeCount = nodeCount;
-        this.relationshipCount = relationshipCount;
-    }
-
-    public MemoryEstimateResult(Result.ResultRow row) {
-        this(
-            row.getString("requiredMemory"),
-            row.getString("treeView"),
-            (Map<String, Object>) row.get("mapView"),
-            row.getNumber("bytesMin").longValue(),
-            row.getNumber("bytesMax").longValue(),
-            row.getNumber("nodeCount").longValue(),
-            row.getNumber("relationshipCount").longValue()
-        );
+        this.bytesMin = estimateMemoryUsage.min;
+        this.bytesMax = estimateMemoryUsage.max;
+        this.nodeCount = dimensions.nodeCount();
+        this.relationshipCount = dimensions.maxRelCount();
     }
 }
