@@ -50,8 +50,8 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
     private long maxNodeId;
     private boolean initializedFromResult;
 
-    CypherNodeLoader(long nodeCount, GraphDatabaseAPI api, GraphSetup setup) {
-        super(setup.nodeLabel(), nodeCount, api, setup);
+    CypherNodeLoader(String nodeQuery, long nodeCount, GraphDatabaseAPI api, GraphSetup setup) {
+        super(nodeQuery, nodeCount, api, setup);
         this.nodeCount = nodeCount;
         this.maxNodeId = 0L;
         this.hasExplicitPropertyMappings = setup.nodePropertyMappings().hasMappings();

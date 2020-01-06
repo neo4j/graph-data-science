@@ -74,12 +74,13 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
     private GraphDimensions resultDimensions;
 
     CypherRelationshipLoader(
+        String relationshipQuery,
         IdMap idMap,
         GraphDatabaseAPI api,
         GraphSetup setup,
         GraphDimensions dimensions
     ) {
-        super(setup.relationshipType(), idMap.nodeCount(), api, setup);
+        super(relationshipQuery, idMap.nodeCount(), api, setup);
         this.idMap = idMap;
         this.outerDimensions = dimensions;
         this.loaderContext = new Context();

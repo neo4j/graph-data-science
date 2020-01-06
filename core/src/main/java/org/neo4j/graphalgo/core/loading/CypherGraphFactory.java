@@ -71,10 +71,17 @@ public class CypherGraphFactory extends GraphFactory {
     protected void validateTokens() { }
 
     public final MemoryEstimation memoryEstimation() {
-        BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.nodeLabel(), api, setup).load();
+        String nodeQuery = setup
+            .nodeQuery()
+            .orElseThrow(() -> new IllegalArgumentException("Missing node query"));
+        String relationshipQuery = setup
+            .relationshipQuery()
+            .orElseThrow(() -> new IllegalArgumentException("Missing relationship query"));
+
+        BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery, api, setup).load();
         dimensions.nodeCount(nodeCount.rows());
 
-        BatchLoadResult relCount = new CountingCypherRecordLoader(setup.relationshipType(), api, setup).load();
+        BatchLoadResult relCount = new CountingCypherRecordLoader(relationshipQuery, api, setup).load();
         dimensions.maxRelCount(relCount.rows());
 
         return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
@@ -106,16 +113,20 @@ public class CypherGraphFactory extends GraphFactory {
     public GraphsByRelationshipType importAllGraphs() {
         // Temporarily override the security context to enforce read-only access during load
         try (Revertable ignored = setReadOnlySecurityContext()) {
-            BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.nodeLabel(), api, setup).load();
-            IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
-            Map<String, Map<String, Graph>> graphs = loadRelationships(nodes);
+            String nodeQuery = setup.nodeQuery().orElseThrow(() -> new IllegalArgumentException("Missing node query"));
+            String relationshipQuery = setup.relationshipQuery().orElseThrow(() -> new IllegalArgumentException("Missing relationship query"));
+
+            BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery, api, setup).load();
+            IdsAndProperties nodes = new CypherNodeLoader(nodeQuery, nodeCount.rows(), api, setup).load();
+            Map<String, Map<String, Graph>> graphs = loadRelationships(relationshipQuery, nodes);
             progressLogger.logDone(setup.tracker());
             return GraphsByRelationshipType.of(graphs);
         }
     }
 
-    private Map<String, Map<String, Graph>> loadRelationships(IdsAndProperties idsAndProperties) {
+    private Map<String, Map<String, Graph>> loadRelationships(String relationshipQuery, IdsAndProperties idsAndProperties) {
         CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
+            relationshipQuery,
             idsAndProperties.idMap(),
             api,
             setup,

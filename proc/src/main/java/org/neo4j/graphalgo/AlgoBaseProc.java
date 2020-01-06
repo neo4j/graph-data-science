@@ -101,7 +101,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
         if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-            ModernGraphLoader loader = newLoader(AllocationTracker.EMPTY, createConfig);
+            ModernGraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
             GraphFactory graphFactory = loader.build(config.getGraphImpl());
             dimensions = graphFactory.dimensions();
 
@@ -109,6 +109,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 dimensions.nodeCount(createConfig.nodeCount());
                 dimensions.maxRelCount(createConfig.relationshipCount());
             }
+
             estimationBuilder.add("graph", graphFactory.memoryEstimation(graphFactory.setup(), dimensions));
         } else {
             String graphName = config.graphName().get();
@@ -122,7 +123,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 .findFirst()
                 .get();
 
-            ModernGraphLoader loader = newLoader(AllocationTracker.EMPTY, graphCreateConfig);
+            ModernGraphLoader loader = newLoader(graphCreateConfig, AllocationTracker.EMPTY);
             GraphFactory graphFactory = loader.build(config.getGraphImpl());
             dimensions = graphFactory.dimensions();
         }
@@ -189,7 +190,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             validateConfig(createConfig, config);
-            ModernGraphLoader loader = newLoader(AllocationTracker.EMPTY, createConfig);
+            ModernGraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
 
             return loader.load(createConfig.getGraphImpl());
         } else {

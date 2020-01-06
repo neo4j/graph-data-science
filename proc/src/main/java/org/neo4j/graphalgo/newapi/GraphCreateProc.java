@@ -20,12 +20,13 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
+import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -49,7 +50,7 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        CypherMapWrapper.failOnBlank("graphName", graphName);
+        validateGraphName(getUsername(), graphName);
 
         // input
         GraphCreateConfig config = GraphCreateConfig.of(
@@ -69,18 +70,11 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     private GraphCreateResult createGraph(GraphCreateConfig config) {
-        if (GraphCatalog.exists(config.username(), config.graphName())) {
-            throw new IllegalArgumentException(String.format(
-                "A graph with name '%s' already exists.",
-                config.graphName()
-            ));
-        }
-
         GraphCreateResult.Builder builder = new GraphCreateResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             ResolvedPropertyMappings propertyMappings = ResolvedPropertyMappings.empty();
 
-            ModernGraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
+            ModernGraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
             HugeGraphFactory graphFactory = loader.build(HugeGraphFactory.class);
             GraphsByRelationshipType graphFromType =
                 !config.relationshipProjection().isEmpty() || propertyMappings.hasMappings()
@@ -92,6 +86,74 @@ public class GraphCreateProc extends CatalogProc {
         }
 
         return builder.build();
+    }
+
+    @Procedure(name = "gds.graph.create.cypher", mode = Mode.READ)
+    @Description("Creates a named graph in the catalog for use by algorithms.")
+    public Stream<GraphCreateCypherResult> create(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeQuery") String nodeQuery,
+        @Name(value = "relationshipQuery") String relationshipQuery,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        validateGraphName(getUsername(), graphName);
+
+        // input
+        GraphCreateCypherConfig config = GraphCreateCypherConfig.of(
+            getUsername(),
+            graphName,
+            nodeQuery,
+            relationshipQuery,
+            CypherMapWrapper.create(configuration)
+        );
+
+        // computation
+        GraphCreateCypherResult result = runWithExceptionLogging(
+            "Graph creation failed",
+            () -> createCypherGraph(config)
+        );
+        // result
+        return Stream.of(result);
+    }
+
+    private GraphCreateCypherResult createCypherGraph(GraphCreateCypherConfig config) {
+        GraphCreateCypherResult.Builder builder = new GraphCreateCypherResult.Builder(config);
+        try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
+            ResolvedPropertyMappings propertyMappings = ResolvedPropertyMappings.empty();
+
+            ModernGraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+            CypherGraphFactory graphFactory = loader.build(CypherGraphFactory.class);
+            GraphsByRelationshipType graphFromType =
+                !config.relationshipProperties().hasMappings()
+                    ? graphFactory.importAllGraphs()
+                    : GraphsByRelationshipType.of(graphFactory.build());
+
+            builder.withGraph(graphFromType);
+
+            GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
+                config.graphName(),
+                NodeProjections.of(),
+                // TODO: convert GraphsByRelationshipType to RelationshipProjection in GraphCreateConfig
+                RelationshipProjections.of(),
+                PropertyMappings.of(),
+                PropertyMappings.of(),
+                config.concurrency(),
+                config.username()
+            );
+            GraphCatalog.set(graphCreateConfig, graphFromType);
+        }
+
+        return builder.build();
+    }
+
+    private void validateGraphName(String username, String graphName) {
+        CypherMapWrapper.failOnBlank("graphName", graphName);
+        if (GraphCatalog.exists(username, graphName)) {
+            throw new IllegalArgumentException(String.format(
+                "A graph with name '%s' already exists.",
+                graphName
+            ));
+        }
     }
 
     public static class GraphCreateResult {
@@ -142,6 +204,63 @@ public class GraphCreateProc extends CatalogProc {
                     graphName,
                     nodeProjections.toObject(),
                     relationshipProjections.toObject(),
+                    nodes,
+                    relationships,
+                    createMillis
+                );
+            }
+        }
+    }
+
+    public static class GraphCreateCypherResult {
+
+        public final String graphName;
+        public final String nodeQuery;
+        public final String relationshipQuery;
+        public final long nodes, relationships, createMillis;
+
+        GraphCreateCypherResult(
+            String graphName,
+            String nodeQuery,
+            String relationshipQuery,
+            long nodes,
+            long relationships,
+            long createMillis
+        ) {
+            this.graphName = graphName;
+            this.nodeQuery = nodeQuery;
+            this.relationshipQuery = relationshipQuery;
+            this.nodes = nodes;
+            this.relationships = relationships;
+            this.createMillis = createMillis;
+        }
+
+        static final class Builder {
+            private final String graphName;
+            private final String nodeQuery;
+            private final String relationshipQuery;
+            private long nodes, relationships, createMillis;
+
+            Builder(GraphCreateCypherConfig config) {
+                this.graphName = config.graphName();
+                this.nodeQuery = config.nodeQuery();
+                this.relationshipQuery = config.relationshipQuery();
+            }
+
+            void withGraph(GraphsByRelationshipType graph) {
+                this.relationships = graph.relationshipCount();
+                this.nodes = graph.nodeCount();
+            }
+
+            void withCreateMillis(long createMillis) {
+                this.createMillis = createMillis;
+            }
+
+            GraphCreateCypherResult build() {
+                return new GraphCreateCypherResult(
+                    graphName,
+                    nodeQuery,
+                    relationshipQuery,
                     nodes,
                     relationships,
                     createMillis

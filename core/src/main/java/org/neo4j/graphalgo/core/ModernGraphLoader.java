@@ -27,10 +27,12 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateCypherConfig;
 import org.neo4j.logging.Log;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 @ValueClass
@@ -39,21 +41,29 @@ public interface ModernGraphLoader extends SharedGraphLoader {
     default ExecutorService executorService() {
         return Pools.DEFAULT;
     }
+
     @Value.Default
     default AllocationTracker tracker() {
         return AllocationTracker.EMPTY;
     }
+
     @Value.Default
     default TerminationFlag terminationFlag() {
         return TerminationFlag.RUNNING_TRUE;
     }
+
     @Value.Default
     default Map<String, Object> params() {
         return new HashMap<>();
     }
+
     String username();
+
     Log log();
+
     GraphCreateConfig createConfig();
+
+    Optional<GraphCreateCypherConfig> createCypherConfig();
 
     @Override
     @Value.Lazy
@@ -64,7 +74,8 @@ public interface ModernGraphLoader extends SharedGraphLoader {
             log(),
             tracker(),
             terminationFlag(),
-            createConfig()
+            createConfig(),
+            createCypherConfig()
         );
     }
 }

@@ -152,6 +152,16 @@ public final class LegacyGraphSetup implements GraphSetup {
     }
 
     @Override
+    public Optional<String> nodeQuery() {
+        return Optional.of(nodeLabel());
+    }
+
+    @Override
+    public Optional<String> relationshipQuery() {
+        return Optional.of(relationshipType());
+    }
+
+    @Override
     public Direction direction() {
         return direction;
     }

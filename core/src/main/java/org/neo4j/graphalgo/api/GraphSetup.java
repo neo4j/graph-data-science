@@ -47,6 +47,10 @@ public interface GraphSetup {
 
     @NotNull String relationshipType();
 
+    Optional<String> nodeQuery();
+
+    Optional<String> relationshipQuery();
+
     /**
      * @deprecated There is no global direction anymore
      */
