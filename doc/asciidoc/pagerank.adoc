@@ -340,7 +340,7 @@ ORDER BY score DESC
 [source, cypher]
 ----
 MATCH (siteA:Page {name: 'Site A'})
-CALL gds.algo.pageRank.write(
+CALL gds.algo.pageRank.write({
   nodeProjection: 'Page',
   relationshipProjection: 'LINKS',
   maxIterations: 20,
@@ -362,7 +362,7 @@ RETURN nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor,
 [[algorithms-pagerank-examples-projection]]
 === Named graphs and Cypher projections
 
-In the examples above, we have relied on the _implicit_ loading of graphs for the algorithm computation.
+In the examples above, we have relied on the _implicit_ creation of graphs for the algorithm computation.
 However, like other algorithms PageRank also accepts _named graphs_ and _Cypher projections_ as inputs.
 See <<projected-graph-model, Projected Graph Model>> for more details.
 
@@ -402,7 +402,7 @@ CALL gds.algo.pageRank.stream({
   relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page)"
                       RETURN id(p1) AS source, id(p2) AS target',
   maxIterations:20,
-  dampingFactor:0.85,
+  dampingFactor:0.85
 })
 YIELD nodeId, score
 RETURN algo.asNode(nodeId).name AS name, score
