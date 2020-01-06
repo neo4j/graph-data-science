@@ -126,8 +126,8 @@ public interface GraphCreateConfig extends GraphCreateBaseConfig {
         }
     }
 
-    static GraphCreateConfig emptyWithName(String userName, String name) {
-        return ImmutableGraphCreateConfig.of(userName, name, NodeProjections.empty(), RelationshipProjections.empty());
+    static GraphCreateConfig emptyWithName(String userName, String graphName) {
+        return ImmutableGraphCreateConfig.of(userName, graphName, NodeProjections.empty(), RelationshipProjections.empty());
     }
 
     static GraphCreateConfig of(

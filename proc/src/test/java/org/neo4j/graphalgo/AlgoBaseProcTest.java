@@ -22,7 +22,8 @@ package org.neo4j.graphalgo;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
@@ -32,7 +33,9 @@ import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateCypherConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -131,14 +134,14 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         assertTrue(exception.getMessage().contains(error));
     }
 
-    @Test
-    default void testRunOnLoadedGraph() {
+    @AllGraphTypesTest
+    default void testRunOnLoadedGraph(Class<? extends GraphFactory> graphFactory) {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
-        Graph graph = graphLoader(graphCreateConfig)
-            .load(HugeGraphFactory.class);
+        GraphCreateBaseConfig graphCreateConfig = (graphFactory.isAssignableFrom(HugeGraphFactory.class))
+            ? GraphCreateConfig.emptyWithName("", loadedGraphName)
+            : GraphCreateCypherConfig.emptyWithName("", loadedGraphName);
 
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
+        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graphLoader(graphCreateConfig).load(graphFactory)));
 
         applyOnProcedure((proc) -> {
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
@@ -156,14 +159,14 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         });
     }
 
-    @Test
-    default void testRunMultipleTimesOnLoadedGraph() {
+    @AllGraphTypesTest
+    default void testRunMultipleTimesOnLoadedGraph(Class<? extends GraphFactory> graphFactory) {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
-        Graph graph = graphLoader(graphCreateConfig)
-            .load(HugeGraphFactory.class);
+        GraphCreateBaseConfig graphCreateConfig = (graphFactory.isAssignableFrom(HugeGraphFactory.class))
+            ? GraphCreateConfig.emptyWithName("", loadedGraphName)
+            : GraphCreateCypherConfig.emptyWithName("", loadedGraphName);
 
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
+        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graphLoader(graphCreateConfig).load(graphFactory)));
 
         applyOnProcedure((proc) -> {
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
@@ -301,12 +304,12 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     }
 
     @NotNull
-    default ModernGraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
+    default ModernGraphLoader graphLoader(GraphCreateBaseConfig graphCreateConfig) {
         return graphLoader(graphDb(), graphCreateConfig);
     }
 
     @NotNull
-    default ModernGraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateConfig graphCreateConfig) {
+    default ModernGraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateBaseConfig graphCreateConfig) {
         return ImmutableModernGraphLoader
             .builder()
             .api(db)

@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -83,6 +84,17 @@ public interface GraphCreateCypherConfig extends GraphCreateBaseConfig {
             graphName,
             userName,
             config
+        );
+    }
+
+    @TestOnly
+    static GraphCreateCypherConfig emptyWithName(String userName, String graphName) {
+        return GraphCreateCypherConfig.of(
+            userName,
+            graphName,
+            "MATCH (n) RETURN id(n) AS id",
+            "MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target",
+            CypherMapWrapper.empty()
         );
     }
 

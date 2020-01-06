@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateBaseConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
@@ -89,7 +89,7 @@ public final class GraphCatalog extends GraphFactory {
         return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
     }
 
-    public static void set(GraphCreateConfig config, GraphsByRelationshipType graph) {
+    public static void set(GraphCreateBaseConfig config, GraphsByRelationshipType graph) {
         graph.canRelease(false);
         userGraphCatalogs.compute(config.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
@@ -150,7 +150,7 @@ public final class GraphCatalog extends GraphFactory {
         userGraphCatalogs.clear();
     }
 
-    public static Map<GraphCreateConfig, Graph> getLoadedGraphs(String username) {
+    public static Map<GraphCreateBaseConfig, Graph> getLoadedGraphs(String username) {
         return getUserCatalog(username).getLoadedGraphs();
     }
 
@@ -161,7 +161,7 @@ public final class GraphCatalog extends GraphFactory {
         ));
     }
 
-    public static Map<GraphCreateConfig, Graph> filterLoadedGraphs(
+    public static Map<GraphCreateBaseConfig, Graph> filterLoadedGraphs(
         String username,
         String graphName,
         List<String> relType,
@@ -176,7 +176,7 @@ public final class GraphCatalog extends GraphFactory {
 
         private final Map<String, GraphWithConfig> graphsByName = new ConcurrentHashMap<>();
 
-        void set(GraphCreateConfig config, GraphsByRelationshipType graph) {
+        void set(GraphCreateBaseConfig config, GraphsByRelationshipType graph) {
             if (config.graphName() == null || graph == null) {
                 throw new IllegalArgumentException("Both name and graph must be not null");
             }
@@ -251,18 +251,18 @@ public final class GraphCatalog extends GraphFactory {
             ));
         }
 
-        Map<GraphCreateConfig, Graph> getLoadedGraphs() {
+        Map<GraphCreateBaseConfig, Graph> getLoadedGraphs() {
             return graphsByName.values().stream().collect(Collectors.toMap(
                 GraphWithConfig::config, GraphWithConfig::getGraph
             ));
         }
 
-        Map<GraphCreateConfig, Graph> filterLoadedGraphs(
+        Map<GraphCreateBaseConfig, Graph> filterLoadedGraphs(
             String graphName,
             List<String> relTypes,
             Optional<String> propertyName
         ) {
-            Map<GraphCreateConfig, Graph> filteredGraphs = new HashMap<>();
+            Map<GraphCreateBaseConfig, Graph> filteredGraphs = new HashMap<>();
             if (StringUtils.isBlank(graphName)) {
                 graphsByName.values().forEach(gwc ->
                     filteredGraphs.put(gwc.config(), gwc.graph().getGraph(relTypes, propertyName))
