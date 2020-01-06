@@ -59,8 +59,6 @@ Random Walk is often used as part of other algorithms:
 
 You can read about more use cases in https://arxiv.org/pdf/1612.03281.pdf[Random walks and diffusion on networks^].
 
-Many of the use-cases of <<algorithms-pagerank-usecase,PageRank>> also apply to Random Walks.
-
 // end::use-case[]
 
 
@@ -68,7 +66,7 @@ Many of the use-cases of <<algorithms-pagerank-usecase,PageRank>> also apply to 
 == Constraints - when not to use the Random Walk algorithm
 
 // tag::constraint[]
-The constraints of <<algorithms-pagerank-limitations,PageRank>> also apply to Random Walks:
+The constraints of <<algorithms-pagerank-usage,PageRank>> also apply to Random Walks:
 
 * Dead-ends occur when pages have no out-links.
   In this case, the random walk will abort and a path containing only the first first node will be returned.

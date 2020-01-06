@@ -6,40 +6,29 @@
 This section describes the PageRank algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 PageRank is an algorithm that measures the *transitive* influence or connectivity of nodes.
 
 It can be computed by either iteratively distributing one node's rank (originally based on degree) over its neighbours or by randomly traversing the graph and counting the frequency of hitting each node during these walks.
 
-PageRank is a variant of <<labs-algorithms-eigenvector, Eigenvector Centrality>>.
-// end::introduction[]
-
 This section includes:
 
-* <<algorithms-pagerank-context, History and explanation>>
-* <<algorithms-pagerank-usecase, Use-cases - when to use the PageRank algorithm>>
-* <<algorithms-pagerank-limitations, Constraints - when not to use the PageRank algorithm>>
-* <<algorithms-pagerank-sample, PageRank algorithm sample>>
-* <<algorithms-pagerank-weighted-sample, Weighted PageRank algorithm sample>>
-** <<algorithms-pagerank-personalized, Personalized PageRank>>
-* <<algorithms-pagerank-example, Example usage>>
-* <<algorithms-pagerank-hgp, Huge graph projection>>
-* <<algorithms-pagerank-cp, Cypher projection>>
+* <<algorithms-pagerank-intro, Introduction>>
 * <<algorithms-pagerank-syntax, Syntax>>
-* <<algorithms-pagerank-support, Graph type support>>
-* <<algorithms-pagerank-memory-requirements, Memory Requirements>>
+* <<algorithms-pagerank-examples, Examples>>
+** <<algorithms-pagerank-examples-unweighted, Unweighted>>
+** <<algorithms-pagerank-examples-weighted, Weighted>>
+** <<algorithms-pagerank-examples-personalized, Personalized>>
+** <<algorithms-pagerank-examples-memory-estimation, Memory Estimation>>
+** <<algorithms-pagerank-examples-stats, Stats>>
+** <<algorithms-pagerank-examples-projection, Named graphs and Cypher projections>>
+* <<algorithms-pagerank-usage, Usage>>
 
+[[algorithms-pagerank-intro]]
+== Introduction
 
-[[algorithms-pagerank-context]]
-== History and explanation
-
-// tag::explanation[]
-PageRank is named after Google co-founder Larry Page, and is used to rank websites in Google's search results.
-It counts the number, and quality, of links to a page which determines an estimation of how important the page is.
+The PageRank algorithm measures the importance of each node within the graph, based on the number and quality of incoming relationships.
 The underlying assumption is that pages of importance are more likely to receive a higher volume of links from other pages.
-// end::explanation[]
 
-// tag::formula[]
 PageRank is defined in the original Google paper as follows:
 
 ----
@@ -52,233 +41,21 @@ where,
 * `d` is a damping factor which can be set between 0 and 1.
   It is usually set to 0.85.
 * `C(A)` is defined as the number of links going out of page `A`.
-// end::formula[]
 
 
-[[algorithms-pagerank-usecase]]
-== Use-cases - when to use the PageRank algorithm
+For more information on this algorithm, see:
 
-// tag::use-case[]
-PageRank can be applied across a wide range of domains.
-The following are some notable use-cases:
-
-* Personalized PageRank is used by Twitter to present users with recommendations of other accounts that they may wish to follow.
-  The algorithm is run over a graph which contains shared interests and common connections.
-  Their approach is described in more detail in https://web.stanford.edu/~rezab/papers/wtf_overview.pdf["WTF: The Who to Follow Service at Twitter"^].
-
-* PageRank has been used to rank public spaces or streets, predicting traffic flow and human movement in these areas.
-  The algorithm is run over a graph which contains intersections connected by roads, where the PageRank score reflects the tendency of people to park, or end their journey, on each street.
-  This is described in more detail in https://arxiv.org/pdf/0804.1630.pdf["Self-organized Natural Roads for Predicting Traffic Flow: A Sensitivity Study"^].
-
-* PageRank can be used as part of an anomaly or fraud detection system in the healthcare and insurance industries.
-  It can help find doctors or providers that are behaving in an unusual manner, and then feed the score into a machine learning algorithm.
-
-There are many more use cases, which you can read about in David Gleich's https://arxiv.org/pdf/1407.5107.pdf["PageRank beyond the web"^]
-// end::use-case[]
+* http://infolab.stanford.edu/~backrub/google.html[The original google paper^]
+// according to java doc implantation based on
+* http://delab.csd.auth.gr/~dimitris/courses/ir_spring06/page_rank_computing/01531136.pdf[An Efficient Partition-Based Parallel PageRank Algorithm^]
+* https://arxiv.org/pdf/1407.5107.pdf[PageRank beyond the web^] for use cases
 
 
-[[algorithms-pagerank-limitations]]
-== Constraints - when not to use the PageRank algorithm
-
-// tag::constraint[]
-There are some things to be aware of when using the PageRank algorithm:
-
-* If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
-
-* Rank sink can occur when a network of pages form an infinite cycle.
-
-* Dead-ends occur when pages have no out-links.
-  If a page contains a link to another page which has no out-links, the link would be known as a dangling link.
-
-If you see unexpected results from running the algorithm, it is worth doing some exploratory analysis of the graph to see if any of these problems are the cause.
-You can read http://www.cs.princeton.edu/~chazelle/courses/BIB/pagerank.htm[The Google PageRank Algorithm and How It Works^] to learn more.
-// end::constraint[]
-
-
-[[algorithms-pagerank-sample]]
-== PageRank algorithm sample
-
-This sample will explain the PageRank algorithm, using a simple graph:
-
-image::pagerank.png[]
-
-.The following will create a sample graph:
-[source, cypher]
-----
-include::scripts/pagerank.cypher[tag=create-sample-graph]
-----
-
-.The following will run the algorithm and stream results:
-[source, cypher]
-----
-include::scripts/pagerank.cypher[tag=stream-sample-graph]
-----
-
-.The following will run the algorithm and write back results:
-[source, cypher]
-----
-include::scripts/pagerank.cypher[tag=write-sample-graph]
-----
-
-// tag::stream-sample-graph-result[]
-.Results
-[opts="header",cols="1,1"]
-|===
-| Name    | PageRank
-| Home    | 3.232
-| Product | 1.059
-| Links   | 1.059
-| About   | 1.059
-| Site A  | 0.328
-| Site B  | 0.328
-| Site C  | 0.328
-| Site D  | 0.328
-|===
-// end::stream-sample-graph-result[]
-
-// tag::stream-sample-graph-explanation[]
-As we might expect, the Home page has the highest PageRank because it has incoming links from all other pages.
-We can also see that it's not only the number of incoming links that is important, but also the importance of the pages behind those links.
-// end::stream-sample-graph-explanation[]
-
-
-[[algorithms-pagerank-weighted-sample]]
-== Weighted PageRank algorithm sample
-
-This sample will explain the PageRank algorithm, using a simple graph:
-
-image::weighted_pagerank.svg[]
-
-.The following will create a sample graph:
-[source, cypher]
-----
-include::scripts/pagerank.cypher[tag=create-sample-weighted-graph]
-----
-
-.The following will run the algorithm and stream results:
-[source, cypher]
-----
-include::scripts/pagerank.cypher[tag=stream-sample-weighted-graph]
-----
-
-.The following will run the algorithm and write back results:
-[source, cypher]
-----
-include::scripts/pagerank.cypher[tag=write-sample-weighted-graph]
-----
-
-// tag::stream-sample-weighted-graph-result[]
-.Results
-[opts="header",cols="1,1"]
-|===
-| Name    | PageRank
-| Home    | 3.550
-| Product | 1.953
-| Links   | 0.7509
-| About   | 0.7509
-| Site A  | 0.1816
-| Site B  | 0.1816
-| Site C  | 0.1816
-| Site D  | 0.1816
-|===
-// end::stream-sample-weighted-graph-result[]
-
-// tag::stream-sample-weighted-graph-explanation[]
-As we might expect, the Home page has the highest PageRank because it has incoming links from all other pages.
-It's even more important now that the Links page links to it with a high weight.
-The Product page has now become the 2nd most important page in its own right because of the high weighted link from the Home page.
-// end::stream-sample-weighted-graph-explanation[]
-
-
-[[algorithms-pagerank-personalized]]
-=== Personalized PageRank
-
-Personalized PageRank is a variation of PageRank which is biased towards a set of `sourceNodes`.
-This variant of PageRank is often used as part of https://www.r-bloggers.com/from-random-walks-to-personalized-pagerank/[recommender systems^].
-
-The following examples show how to run PageRank centered around 'Site A'.
-
-.The following will run the algorithm and stream results:
-[source,cypher]
-----
-include::scripts/pagerank.cypher[tag=ppr-stream-sample-graph]
-----
-
-.The following will run the algorithm and write back results:
-[source,cypher]
-----
-include::scripts/pagerank.cypher[tag=ppr-write-sample-graph]
-----
-
-// tag::ppr-stream-graph-result[]
-.Results
-[opts="header",cols="1,1"]
-|===
-| Name    | PageRank
-| Home    | 0.399
-| Site A  | 0.169
-| About   | 0.112
-| Product | 0.112
-| Links   | 0.112
-| Site B  | 0.019
-| Site C  | 0.019
-| Site D  | 0.019
-|===
-// end::ppr-stream-graph-result[]
-
-
-[[algorithms-pagerank-example]]
-== Example usage
-
-In this example we will run PageRank on Yelp's social network to find potential influencers.
-
-When <<yelp-import, importing the Yelp dataset>> we stored the social network as a https://en.wikipedia.org/wiki/Bidirected_graph[undirected graph^].
-Relationships in Neo4j always have a direction, but in this domain the direction is irrelevant.
-If `Person A` is a `FRIEND` with `Person B`, we can say that `Person B` is also a `FRIEND` with `Person A`.
-
-The default label and relationship type selection syntax won't work for us here, because it will project a directed social network.
-Instead, we can project our undirected social network using *Cypher loading*.
-We can also apply this approach to other algorithms that use *Cypher loading*.
-
-.The following will run the algorithm on Yelp social network:
-[source, cypher]
-----
-include::scripts/pagerank.cypher[tag=pagerank-stream-yelp-social]
-----
-
-
-[[algorithms-pagerank-example-tolerance]]
-=== Tolerance
-
-The PageRank algorithm accepts a tolerance value.
-When the rank computation stabilizes and changes are smaller than the tolerance value the algorithm will reuturn.
-
-
-[[algorithms-pagerank-hgp]]
-== Huge graph projection
-
-include::huge-projection.adoc[tag=explanation]
-
-.Set `graph:'huge'` in the config:
-
-[source, cypher]
-----
-include::scripts/pagerank.cypher[tag=huge-projection]
-----
-
-
-[[algorithms-pagerank-cp]]
-== Cypher projection
-
-include::projected-graph-model/cypher-projection.adoc[tag=explanation]
-
-.Set `graph:'cypher'` in the config:
-
-[source, cypher]
-----
-include::scripts/pagerank.cypher[tag=cypher-loading]
-----
-
+[NOTE]
+====
+Running this algorithm requires sufficient memory availability.
+Before running this algorithm, we recommend that you read <<memory-requirements>>.
+====
 
 [[algorithms-pagerank-syntax]]
 == Syntax
@@ -286,33 +63,29 @@ include::scripts/pagerank.cypher[tag=cypher-loading]
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.pageRank(label:String, relationship:String,
-    {direction: 'OUTGOING', iterations: 20, tolerance: 0.0000001, dampingFactor: 0.85, write: true, writeProperty: 'pagerank', concurrency: 4})
-YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
+CALL algo.pageRank.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
+YIELD nodes, maxIterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
 ----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name               | Type    | Default        | Optional | Description
-| node label         | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type  | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config             | map     | n/a            | yes      | Additional configuration.
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| direction         | string  | 'OUTGOING'             | yes | The relationship direction to use in the algorithm.
-| iterations        | int     | 20                     | yes | How many iterations of PageRank to run.
+| dampingFactor     | float   | 0.85                   | yes | The damping factor of the PageRank calculation.
+| maxIterations     | int     | 20                     | yes | The maximum number of iterations of PageRank to run.
 | tolerance         | float   | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
 | concurrency       | int     | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency   | int     | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
 | writeConcurrency  | int     | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
-| dampingFactor     | float   | 0.85                   | yes | The damping factor of the PageRank calculation.
 | weightProperty    | string  | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue      | float   | 0.0                    | yes | The default value of the weight in case it is missing or invalid.
-| write             | boolean | true                   | yes | Specify if the result should be written back as a node property.
+| writeProperty     | string  | n/a                    | no  | The property name written back to.
 | graph             | string  | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
@@ -320,12 +93,11 @@ YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, 
 [opts="header",cols="1,1,6"]
 |===
 | Name          | Type    | Description
-| nodes         | int     | The number of nodes considered.
-| iterations    | int     | The number of iterations run.
+| ranIterations | int     | The number of iterations run.
 | dampingFactor | float   | The damping factor used.
+| maxIterations | int     | The given maximum number of iterations.
 | writeProperty | string  | The property name written back to.
-| write         | boolean | Specifies if the result was written back as node property.
-| loadMillis    | int     | Milliseconds for loading data.
+| createMillis  | int     | Milliseconds for creating the graph.
 | computeMillis | int     | Milliseconds for running the algorithm.
 | writeMillis   | int     | Milliseconds for writing result data back.
 |===
@@ -333,282 +105,421 @@ YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, 
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.pageRank.stream(label:String, relationship:String,
-    {direction:'OUTGOING', iterations:20, dampingFactor:0.85, concurrency:4})
+CALL algo.pageRank.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD node, score
 ----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name               | Type    | Default        | Optional | Description
-| node label         | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type  | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config             | map     | n/a            | yes      | Additional configuration.
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| direction        | string | 'OUTGOING'             | yes | The relationship direction to use in the algorithm.
-| iterations       | int    | 20                     | yes | Specify how many iterations of PageRank to run.
+| dampingFactor    | float  | 0.85                   | yes | The damping factor of the PageRank calculation.
+| maxIterations    | int    | 20                     | yes | The maximum number of iterations of PageRank to run.
 | tolerance        | float  | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
 | concurrency      | int    | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency  | int    | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
 | writeConcurrency | int    | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
-| dampingFactor    | float  | 0.85                   | yes | The damping factor of the PageRank calculation.
 | weightProperty   | string | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue     | float  | 0.0                    | yes | The default value of the weight in case it is missing or invalid.
 | graph            | string | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
 [opts="header"]
 |===
-| Name  | Type  | Description
+| Name    | Type  | Description
 | nodeId  | long  | Node ID
-| score | float | PageRank weight
+| score   | float | PageRank weight
 |===
 
+.The following will run the algorithm and returns the result in form of statistical and measurement values:
+[source, cypher]
+----
+CALL gds.algo.pageRank.stats(graphNameOrConfig: STRING|MAP, configuration: MAP})
+YIELD nodes, relationships, ranIterations, didConverge, createMillis, computeMillis, writeMillis
+----
 
-[[algorithms-pagerank-support]]
-== Graph type support
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+|===
 
-The PageRank algorithm supports the following graph types:
+The configuration is the same as for the `write` mode.
 
-* [x] directed, unweighted:
-** direction: 'INCOMING' or 'OUTGOING', weightProperty: null
-* [x] directed, weighted
-** direction: 'INCOMING' or 'OUTGOING', weightProperty : 'weight'
-* [x] undirected, unweighted
-** direction: 'BOTH', weightProperty: null
-* [x] undirected, weighted
-** direction: 'BOTH', weightProperty: 'weight'
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL algo.labelPropagation.<mode>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory, mapView
+----
 
-[[algorithms-pagerank-memory-requirements]]
-== Memory Requirements for the PageRank algorithm
-:algorithm: "pageRank"
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+|===
 
-We can use the <<algo-memrec-procedure>> to compute the memory requirements of running graph algorithms.
+The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
 
-.The following returns the memory requirements for running PageRank on the Huge Graph:
-:graph: "huge"
-include::memrec.adoc[tags=overview]
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type   | Default           | Optional | Description
+| nodeCount         | int    | 0                 | yes      | The number of nodes in a fictive graph.
+| relationshipCount | int    | 0                 | yes      | The number of relationships in a fictive graph.
+|===
+
+Setting the `nodeCount` and `relationshipCount` parameters allows a memory estimation without loading the graph.
+For explicitly loaded graphs, the config-map needs to contain the graph name in the `graph` key.
+Additionally algorithm specific parameters can also be provided as config.
+
+[[algorithms-pagerank-examples]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher]
+----
+CREATE (home:Page {name:'Home'})
+CREATE (about:Page {name:'About'})
+CREATE (product:Page {name:'Product'})
+CREATE (links:Page {name:'Links'})
+CREATE (a:Page {name:'Site A'})
+CREATE (b:Page {name:'Site B'})
+CREATE (c:Page {name:'Site C'})
+CREATE (d:Page {name:'Site D'})
+
+CREATE (home)-[:LINKS {weight: 0.2}]->(about)
+CREATE (home)-[:LINKS {weight: 0.2}]->(links)
+CREATE (home)-[:LINKS {weight: 0.6}]->(product)
+CREATE (about)-[:LINKS {weight: 1.0}]->(home)
+CREATE (product)-[:LINKS {weight: 1.0}]->(home)
+CREATE (a)-[:LINKS {weight: 1.0}]->(home)
+CREATE (b)-[:LINKS {weight: 1.0}]->(home)
+CREATE (c)-[:LINKS {weight: 1.0}]->(home)
+CREATE (d)-[:LINKS {weight: 1.0}]->(home)
+CREATE (links)-[:LINKS {weight: 0.8}]->(home)
+CREATE (links)-[:LINKS {weight: 0.05}]->(a)
+CREATE (links)-[:LINKS {weight: 0.05}]->(b)
+CREATE (links)-[:LINKS {weight: 0.05}]->(c)
+CREATE (links)-[:LINKS {weight: 0.05}]->(d)
+----
+
+This graph represents seven pages, linking to another.
+Each relationship has a property called `weight`, which describes the importance of the relationship.
+
+[[algorithms-pagerank-examples-unweighted]]
+=== Unweighted
+
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+CALL gds.algo.pageRank.stream({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  maxIterations: 20,
+  dampingFactor: 0.85
+})
+YIELD nodeId, score
+RETURN algo.asNode(nodeId).name AS name, score
+ORDER BY score DESC
+----
 
 .Results
-[opts="header",cols="1,1,2"]
+[opts="header",cols="1,1"]
 |===
-| Nodes | Relationships | Required Memory
-| 8 | 14 | 4344 Bytes
+| name    | score
+| Home    | 3.236
+| Product | 1.061
+| Links   | 1.061
+| About   | 1.061
+| Site A  | 0.329
+| Site B  | 0.329
+| Site C  | 0.329
+| Site D  | 0.329
 |===
 
-.The following returns the memory requirements for running PageRank on the Huge Graph:
-:graph: "huge"
-include::memrec.adoc[tags=overview]
+To instead write the page-rank score to a node property in the Neo4j graph, use this query:
+
+.The following will run the algorithm and write back results:
+[source, cypher]
+----
+CALL gds.algo.pageRank.write({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  writeProperty: 'pagerank'
+})
+YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty
+----
 
 .Results
-[opts="header",cols="1,1,2"]
+[opts="header",cols="1m,1m,1m,1m"]
 |===
-| Nodes | Relationships | Required Memory
-| 8 | 14 | 299 KiB
+| writtenProperties | ranIterations | dampingFactor | writeProperty
+| 8                 | 20            | 0.85          | "pagerank"
 |===
 
-We can also get a break down of where that memory is assigned from the `mapView` field.
+[[algorithms-pagerank-examples-weighted]]
+=== Weighted
 
-.The following returns the memory break down for running PageRank on the Huge Graph:
-:graph: "huge"
-include::memrec.adoc[tags=component]
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+CALL gds.algo.pageRank.stream({
+  nodeProjection: 'Page',
+  relationshipProjection: {
+    LINKS: {
+      properties: ['weight']
+    }
+  },
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  weightProperty: 'weight'
+})
+YIELD nodeId, score
+RETURN algo.asNode(nodeId).name AS name, score
+ORDER BY score DESC
+----
 
 .Results
-[opts="header",cols="1,2"]
+[opts="header",cols="1,1"]
 |===
-| Component  | Memory Usage
-| PageRank   | 3648 Bytes
-| HugeGraph | 832 Bytes
+| name    | score
+| Home    | 3.550
+| Product | 1.954
+| Links   | 0.751
+| About   | 0.751
+| Site A  | 0.182
+| Site B  | 0.182
+| Site C  | 0.182
+| Site D  | 0.182
 |===
 
-.The following returns the memory break down for running PageRank on the Huge Graph:
-:graph: "huge"
-include::memrec.adoc[tags=component]
+To instead write the page-rank score to a node property in the Neo4j graph, use this query:
 
-
+.The following will run the algorithm and write back results:
+[source, cypher]
+----
+CALL gds.algo.pageRank.write({
+  nodeProjection: 'Page',
+  relationshipProjection: {
+    LINKS: {
+      properties: ['weight']
+    }
+  },
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  writeProperty: 'pagerank',
+  weightProperty: 'weight'
+})
+YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty
+----
 
 .Results
-[opts="header",cols="1,2"]
+[opts="header",cols="1m,1m,1m,1m"]
 |===
-| Component | Memory Usage
-| PageRank | 3648 Bytes
-| HugeGraph | 296 KiB
-|===
-
-Below are the memory requirements for various sample datasets.
-
-=== Pokec
-
-This dataset contains people and friends relationships from https://snap.stanford.edu/data/soc-Pokec.html[Pokec^], the most popular online social network in Slovakia.
-
-.Memory Usage
-[opts="header", cols="1,1,1,2,2,2"]
-|===
-| Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
-| Huge | 1,632,803 | 30,622,564 | 	[149 MiB...205 MiB] | [74 MiB...130 MiB] | 74 MiB
+| writtenProperties | ranIterations | dampingFactor | writeProperty
+| 8                 | 20            | 0.85          | "pagerank"
 |===
 
 
-=== Dbpedia
+[[algorithms-pagerank-examples-personalized]]
+=== Personalized
 
-This dataset contains Wikipedia pages and the links between them.
-Instructions for importing this dataset are available from https://github.com/jexp/graphipedia[jexp/graphipedia^].
+Personalized PageRank is a variation of PageRank which is biased towards a set of `sourceNodes`.
+This variant of PageRank is often used as part of https://www.r-bloggers.com/from-random-walks-to-personalized-pagerank/[recommender systems^].
 
-.Memory Usage
-[opts="header", cols="1,1,1,2,2,2"]
+The following examples show how to run PageRank centered around 'Site A'.
+
+
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+MATCH (siteA:Page {name: 'Site A'})
+CALL gds.algo.pageRank.stream({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  sourceNodes: [siteA]
+})
+YIELD nodeId, score
+RETURN algo.asNode(nodeId).name AS name, score
+ORDER BY score DESC
+----
+
+.Results
+[opts="header",cols="1,1"]
 |===
-| Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
-| Huge | 11,474,730 | 116,601,029 | 	[963 MiB...1182 MiB] | [438 MiB...657 MiB] | 525 MiB
-|===
-
-=== Twitter 2010
-
-This dataset contains users and followers from a crawl of Twitter presented by Haewoon Kwak, Changhyun Lee, Hosung Park, and Sue Moon in “What is Twitter, a Social Network or a News Media?”
-
-.Memory Usage
-[opts="header", cols="1,1,1,2,2,2"]
-|===
-| Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
-| Huge | 41,652,230 | 1,468,365,182 | 	[4491 MiB...7272 MiB]  | [2584 MiB...5365 MiB]   | 1906 MiB
-|===
-
-=== Friendster
-
-This dataset contains people and friends relationships from https://snap.stanford.edu/data/com-Friendster.html[Friendster^], the online gaming network.
-
-.Memory Usage
-[opts="header", cols="1,1,1,2,2,2"]
-|===
-| Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
-| Huge | 65,608,366 | 1,806,067,135 | 	[6573 MiB...11642 MiB]  | [3570 MiB...8638 MiB]   | 3003 MiB
+| name    | score
+| Home    | 0.402
+| Site A  | 0.169
+| About   | 0.113
+| Product | 0.113
+| Links   | 0.113
+| Site B  | 0.019
+| Site C  | 0.019
+| Site D  | 0.019
 |===
 
 
+.The following will run the algorithm and write back results:
+[source, cypher]
+----
+MATCH (siteA:Page {name: 'Site A'})
+CALL gds.algo.pageRank.write({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  writeProperty: 'pagerank',
+  sourceNodes: [siteA]
+})
+YIELD nodePropertiesWritten, ranIterations, dampingFactor, writeProperty
+RETURN nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty
+----
 
-ifndef::env-docs[]
-== References
+.Results
+[opts="header",cols="1m,1m,1m,1m"]
+|===
+| writtenProperties | ranIterations | dampingFactor | writeProperty
+| 8                 | 20            | 0.85          | "pagerank"
+|===
 
-// tag::references[]
+[[algorithms-pagerank-examples-memory-estimation]]
+=== Memory Estimation
 
-* https://en.wikipedia.org/wiki/PageRank
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.algo.pageRank.write.estimate({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  writeProperty: 'pagerank'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
 
-* http://infolab.stanford.edu/~ullman/mmds/book.pdf
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 8         | 14                | 304064   | 304064   | "297 KiB"
+|===
 
-* https://anthonybonato.com/2016/04/13/the-mathematics-of-game-of-thrones/
+[[algorithms-pagerank-examples-stats]]
+=== Stats
 
-* [1] http://research.ijcaonline.org/volume110/number12/pxc3901035.pdf
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher]
+----
+CALL gds.algo.pageRank.stats({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  writeProperty: 'pagerank'
+})
+YIELD ranIterations, dampingFactor
+----
 
-* [2] http://nmis.isti.cnr.it/sebastiani/Publications/ACL07.pdf
+.Results
+[opts="header",cols="1,1"]
+|===
+| ranIterations | dampingFactor
+| 20            | 0.85
+|===
 
-* [3] http://news.bbc.co.uk/2/hi/8238462.stm
+[[algorithms-pagerank-examples-projection]]
+=== Named graphs and Cypher projections
 
-* [4] https://web.stanford.edu/class/msande233/handouts/lecture8.pdf
+In the examples above, we have relied on the _implicit_ creation of graphs for the algorithm computation.
+However, like other algorithms PageRank also accepts _named graphs_ and _Cypher projections_ as inputs.
+See <<projected-graph-model, Projected Graph Model>> for more details.
 
-* [5] http://ilpubs.stanford.edu:8090/422/1/1999-66.pdf
+.Using a named graph:
+[source, cypher]
+----
+CALL algo.beta.graph.create('myGraph', ['Page'], ['LINKS']);
 
-* [6] https://bmcbioinformatics.biomedcentral.com/track/pdf/10.1186/1471-2105-15-204?site=bmcbioinformatics.biomedcentral.com
+CALL gds.algo.pageRank.stream('myGraph')
+YIELD nodeId, score
+RETURN algo.asNode(nodeId).name AS name, score
+ORDER BY score DESC
+----
 
-* [7] http://www.cs.princeton.edu/~chazelle/courses/BIB/pagerank.htm
+.Results
+[opts="header",cols="1,1"]
+|===
+| name    | score
+| Home    | 3.236
+| Product | 1.061
+| Links   | 1.061
+| About   | 1.061
+| Site A  | 0.329
+| Site B  | 0.329
+| Site C  | 0.329
+| Site D  | 0.329
+|===
 
-// end::references[]
-endif::env-docs[]
+As we can see, the results are identical to the results in the <<algorithms-pagerank-examples-unweighted>> example.
 
+.Using a Cypher projection:
+[source, cypher]
+----
+CALL gds.algo.pageRank.stream({
+  graph:'cypher',
+  nodeQuery: 'MATCH (p:Page) RETURN id(p) AS id',
+  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page)"
+                      RETURN id(p1) AS source, id(p2) AS target',
+  maxIterations:20,
+  dampingFactor:0.85
+})
+YIELD nodeId, score
+RETURN algo.asNode(nodeId).name AS name, score
+ORDER BY score DESC
+----
 
-ifdef::implementation[]
-// tag::implementation[]
-== Implementation details
+.Results
+[opts="header",cols="1,1"]
+|===
+| name    | score
+| Home    | 3.236
+| Product | 1.061
+| Links   | 1.061
+| About   | 1.061
+| Site A  | 0.329
+| Site B  | 0.329
+| Site C  | 0.329
+| Site D  | 0.329
+|===
 
-// copied from: https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/78
-
-:leveloffset: +1
-
-PageRank is the popular search algorithm developed by Google.
-
-For more information, see the https://en.wikipedia.org/wiki/PageRank[PageRank page on Wikipedia].
-
-## Progress
-
-- [x] single threaded implementation
-- [x] tests
-- [x] simple benchmark
-- [x] implement procedure
-- [x] benchmark on bigger graphs
-- [x] parallelization
-- [x] evaluation
-
-## Requirements
-
-- NodeIterator
-- Incoming Relationships
-- Outgoing Degrees
-
-## Data structured involved
-
-Our current approach needs one double array for storing ranks.
-
-## ToDo
-
-### parallelization
-
-One approach to parallelize _PageRank_ might be to partition the node into batches - one for each thread. Nonetheless we may need to sync them at the end of each iteration.
-
-### evaluation
-
-- Performance tests on different dataset sizes / level of concurrency
-
-## Future Improvements
-
-- we might scale up the ranks to ints for faster multiplication.
+Again, results are identical, as the Cypher projection we use mimics the behaviour of the default loading configuration.
+Of course, the Cypher projection feature enables more advanced control over which exact parts of the graph to compute over; please see <<cypher-projection>> for more details.
 
 
-== Details
 
-Partition based parallel PageRank based on "An Efficient Partition-Based Parallel PageRank Algorithm" [1]-
+[[algorithms-pagerank-usage]]
+== Usage
 
-- Each partition thread has its local array of only the nodes that it is responsible for, not for all nodes.
-  Combined, all partitions hold all page rank scores for every node once.
-  Instead of writing partition files and transferring them across the network (as done in the paper since they were concerned with parallelising across multiple nodes), we use integer arrays to write the results to.
-  The actual score is upscaled from a double to an integer by multiplying it with {@code 100_000}.
+There are some things to be aware of when using the PageRank algorithm:
 
-- To avoid contention by writing to a shared array, we partition the result array.
-- During execution, the scores arrays are shaped like this:
+* If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
+* Rank sink can occur when a network of pages form an infinite cycle.
+* Dead-ends occur when pages have no out-links.
+If a page contains a link to another page which has no out-links, the link would be known as a dangling link.
 
-    [ executing partition ] -> [ calculated partition ] -> [ local page rank scores ]
 
-- Each single partition writes in a partitioned array, calculation the scores for every receiving partition.
-  A single partition only sees:
-
-    [ calculated partition ] -> [ local page rank scores ]
-
-- The coordinating thread then builds the transpose of all written partitions from every partition:
-
-    [ calculated partition ] -> [ executing partition ] -> [ local page rank scores ]
-
-- This step does not happen in parallel, but does not involve extensive copying.
-  The local page rank scores needn't be copied, only the partitioning arrays.
-  All in all, {@code concurrency^2} array element reads and assignments have to be performed.
-
-- For the next iteration, every partition first updates its scores, in parallel.
-  A single partition now sees:
-
-    [ executing partition ] -> [ local page rank scores ]
-
-- That is, a list of all calculated scores for it self, grouped by the partition that calculated these scores.
-  This means, most of the synchronization happens in parallel, too.
-
-- Partitioning is not done by number of nodes but by the accumulated degree – as described in "Fast Parallel PageRank: A Linear System Approach" [2].
-  Every partition should have about the same number of relationships to operate on.
-- This is done to avoid having one partition with super nodes and instead have all partitions run in approximately equal time.
-  Smaller partitions are merged down until we have at most {@code concurrency} partitions, in order to batch partitions and keep the number of threads in use predictable/configurable.
-
-[1]: An Efficient Partition-Based Parallel PageRank Algorithm
-[2]: <a href="https://www.cs.purdue.edu/homes/dgleich/
-
-// end::implementation[]
-endif::implementation[]

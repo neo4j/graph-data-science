@@ -40,7 +40,7 @@ It was the first of the centrality measures that considered the transitive impor
 == Use-cases - when to use the Eigenvector Centrality algorithm
 
 // tag::use-case[]
-Eigenvector Centrality can be used in many of the <<algorithms-pagerank-usecase, same use cases as the PageRank algorithm>>.
+Eigenvector Centrality can be used in many of the https://arxiv.org/pdf/1407.5107.pdf[same use cases as the PageRank algorithm].
 // end::use-case[]
 
 [[algorithms-eigenvector-sample]]

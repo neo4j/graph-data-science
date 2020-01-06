@@ -159,12 +159,13 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
                        graphSnippet +
                        "     writeProperty: 'writeProp', tolerance: 0.0001, batchSize: 2" +
                        "  }" +
-                       ") YIELD ranIterations, didConverge, maxIterations";
+                       ") YIELD ranIterations, didConverge, maxIterations, dampingFactor";
         runQuery(
             query,
             row -> {
                 assertEquals(20, row.getNumber("ranIterations").longValue());
                 assertEquals(20, row.getNumber("maxIterations").longValue());
+                assertEquals(0.85D, row.getNumber("dampingFactor").doubleValue());
                 assertFalse(row.getBoolean("didConverge"));
             }
         );
