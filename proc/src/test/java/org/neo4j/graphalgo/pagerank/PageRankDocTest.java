@@ -316,7 +316,8 @@ class PageRankDocTest extends BaseProcTest {
             "CALL gds.algo.pageRank.write.estimate({" +
             "  nodeProjection: 'Page', " +
             "  relationshipProjection: 'LINKS'," +
-            "  writeProperty: 'pagerank'" +
+            "  writeProperty: 'pagerank'," +
+            "  concurrency: 1"+
             "})" +
             "YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory";
         String r2 = db.execute(q2).resultAsString();
@@ -324,7 +325,7 @@ class PageRankDocTest extends BaseProcTest {
         String expectedString = "+----------------------------------------------------------------------+\n" +
                                 "| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory |\n" +
                                 "+----------------------------------------------------------------------+\n" +
-                                "| 8         | 14                | 305024   | 305024   | \"297 KiB\"      |\n" +
+                                "| 8         | 14                | 304064   | 304064   | \"296 KiB\"      |\n" +
                                 "+----------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
