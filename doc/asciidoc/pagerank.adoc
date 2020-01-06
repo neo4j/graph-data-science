@@ -10,9 +10,6 @@ PageRank is an algorithm that measures the *transitive* influence or connectivit
 
 It can be computed by either iteratively distributing one node's rank (originally based on degree) over its neighbours or by randomly traversing the graph and counting the frequency of hitting each node during these walks.
 
-// TODO: Eigenvector is labs, so "a variant" might be misleading?
-PageRank is a variant of <<labs-algorithms-eigenvector, Eigenvector Centrality>>.
-
 This section includes:
 
 * <<algorithms-pagerank-intro, Introduction>>
@@ -115,7 +112,7 @@ YIELD node, score
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name               | Type    | Default        | Optional | Description
+| Name              | Type    | Default        | Optional | Description
 | graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
 | configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
 |===
@@ -136,9 +133,9 @@ YIELD node, score
 .Results
 [opts="header"]
 |===
-| Name  | Type  | Description
+| Name    | Type  | Description
 | nodeId  | long  | Node ID
-| score | float | PageRank weight
+| score   | float | PageRank weight
 |===
 
 .The following will run the algorithm and returns the result in form of statistical and measurement values:
