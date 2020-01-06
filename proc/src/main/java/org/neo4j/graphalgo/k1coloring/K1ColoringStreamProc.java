@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringConfig> {
+public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringStreamConfig> {
 
     @Procedure(name = "gds.beta.k1coloring.stream", mode = READ)
     @Description(DESCRIPTION)
@@ -45,7 +45,7 @@ public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<K1Coloring, HugeLongArray, K1ColoringConfig> compute = compute(graphNameOrConfig, configuration);
+        ComputationResult<K1Coloring, HugeLongArray, K1ColoringStreamConfig> compute = compute(graphNameOrConfig, configuration);
 
         return Optional.ofNullable(compute.result())
             .map(coloring -> {
@@ -69,13 +69,13 @@ public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringConfig> {
     }
 
     @Override
-    protected K1ColoringConfig newConfig(
+    protected K1ColoringStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return K1ColoringConfig.of(username, graphName, maybeImplicitCreate, config);
+        return K1ColoringStreamConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     public static class StreamResult {
