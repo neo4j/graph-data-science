@@ -39,7 +39,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringConfig> {
 
-    @Procedure(name = "algo.beta.k1coloring.stream", mode = READ)
+    @Procedure(name = "gds.beta.k1coloring.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -59,7 +59,7 @@ public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringConfig> {
             }).orElse(Stream.empty());
     }
 
-    @Procedure(value = "algo.beta.k1coloring.stream.estimate", mode = READ)
+    @Procedure(value = "gds.beta.k1coloring.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

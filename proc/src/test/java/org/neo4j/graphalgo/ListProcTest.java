@@ -46,9 +46,6 @@ class ListProcTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
         "algo.beta.graph.generate",
-        "algo.beta.k1coloring.stream",
-        "algo.beta.k1coloring.stream.estimate",
-        "algo.beta.k1coloring.write",
         "algo.graph.info",
         "algo.graph.list",
         "algo.graph.load",
@@ -81,8 +78,12 @@ class ListProcTest extends BaseProcTest {
         "gds.algo.wcc.stream",
         "gds.algo.wcc.stream.estimate",
         "gds.algo.wcc.write",
-        "gds.algo.wcc.write.estimate"
-        );
+        "gds.algo.wcc.write.estimate",
+
+        "gds.beta.k1coloring.stream",
+        "gds.beta.k1coloring.stream.estimate",
+        "gds.beta.k1coloring.write"
+    );
 
     private static final List<String> FUNCTIONS = asList(
         "algo.asNode",

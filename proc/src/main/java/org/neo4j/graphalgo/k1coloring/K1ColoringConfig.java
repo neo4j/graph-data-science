@@ -24,6 +24,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfig;
@@ -51,7 +52,6 @@ interface K1ColoringConfig extends AlgoBaseConfig, IterationsConfig {
     }
 
     @Override
-    @Configuration.Ignore
     @Value.Default
     default int maxIterations() {
         return DEFAULT_ITERATIONS;
@@ -63,9 +63,8 @@ interface K1ColoringConfig extends AlgoBaseConfig, IterationsConfig {
         return DEFAULT_DIRECTION;
     }
 
-    @Configuration.Ignore
     @Value.Default
     default int batchSize() {
-        return 10;
+        return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
 }

@@ -39,9 +39,9 @@ import java.util.stream.Stream;
 public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfig> {
     private static final String COLOR_COUNT_FIELD_NAME = "colorCount";
 
-    @Procedure(name = "algo.beta.k1coloring.write", mode = Mode.WRITE)
+    @Procedure(name = "gds.beta.k1coloring.write", mode = Mode.WRITE)
     @Description(DESCRIPTION)
-    public Stream<WriteResult> betaK1Coloring(
+    public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

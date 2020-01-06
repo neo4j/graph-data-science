@@ -89,19 +89,19 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
         boolean write
     ) {
         if (computeResult.isGraphEmpty()) {
-          return Stream.of(
-              new WriteResult(
-                  computeResult.config().writeProperty(),
-                  computeResult.config().weightProperty(),
-                  computeResult.config().maxIterations(),
-                  0,
-                  computeResult.createMillis(),
-                  0,
-                  0,
-                  0,
-                  false
-              )
-          );
+            return Stream.of(
+                new WriteResult(
+                    computeResult.config().writeProperty(),
+                    computeResult.config().weightProperty(),
+                    computeResult.config().maxIterations(),
+                    0,
+                    computeResult.createMillis(),
+                    0,
+                    0,
+                    0,
+                    false
+                )
+            );
         } else {
             PageRankWriteConfig config = computeResult.config();
             Graph graph = computeResult.graph();
