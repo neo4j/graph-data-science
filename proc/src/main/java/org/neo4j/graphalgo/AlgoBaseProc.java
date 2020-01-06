@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -101,10 +100,16 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         GraphDimensions dimensions;
 
         if (config.implicitCreateConfig().isPresent()) {
-            ModernGraphLoader loader = newLoader(AllocationTracker.EMPTY, config.implicitCreateConfig().get());
+            GraphCreateConfig createConfig = config.implicitCreateConfig().get();
+            ModernGraphLoader loader = newLoader(AllocationTracker.EMPTY, createConfig);
             GraphFactory graphFactory = loader.build(config.getGraphImpl());
             dimensions = graphFactory.dimensions();
-            estimationBuilder.add("graph", graphFactory.memoryEstimation());
+
+            if (createConfig.nodeCount() >= 0 || createConfig.relationshipCount() >= 0) {
+                dimensions.nodeCount(createConfig.nodeCount());
+                dimensions.maxRelCount(createConfig.relationshipCount());
+            }
+            estimationBuilder.add("graph", graphFactory.memoryEstimation(graphFactory.setup, dimensions));
         } else {
             String graphName = config.graphName().get();
 

@@ -123,8 +123,7 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
             long relCount = get(RELCOUNT_KEY, 0L);
             dimensions.nodeCount(nodeCount);
             dimensions.maxRelCount(relCount);
-            estimation = HugeGraphFactory
-                .getMemoryEstimation(setup, dimensions, true);
+            estimation = factory.memoryEstimation(setup, dimensions);
         } else {
             estimation = factory.memoryEstimation();
         }

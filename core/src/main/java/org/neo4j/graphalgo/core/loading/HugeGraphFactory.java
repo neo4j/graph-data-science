@@ -58,23 +58,23 @@ public final class HugeGraphFactory extends GraphFactory {
 
     @Override
     public MemoryEstimation memoryEstimation() {
+        return memoryEstimation(setup, dimensions);
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(GraphSetup setup, GraphDimensions dimensions) {
         return getMemoryEstimation(setup, dimensions);
     }
 
     public static MemoryEstimation getMemoryEstimation(GraphSetup setup, GraphDimensions dimensions) {
-        return getMemoryEstimation(setup, dimensions, false);
-    }
-
-    public static MemoryEstimation getMemoryEstimation(GraphSetup setup, GraphDimensions dimensions, boolean nonExistingGraph) {
-        return getMemoryEstimation(setup.loadOutgoing(), setup.loadIncoming(), setup.loadAsUndirected(), dimensions, nonExistingGraph);
+        return getMemoryEstimation(setup.loadOutgoing(), setup.loadIncoming(), setup.loadAsUndirected(), dimensions);
     }
 
     public static MemoryEstimation getMemoryEstimation(
-            boolean loadOutgoing,
-            boolean loadIncoming,
-            boolean loadAsUndirected,
-            GraphDimensions dimensions,
-            boolean nonExistingGraph
+        boolean loadOutgoing,
+        boolean loadIncoming,
+        boolean loadAsUndirected,
+        GraphDimensions dimensions
     ) {
         MemoryEstimations.Builder builder = MemoryEstimations
             .builder(HugeGraph.class)
@@ -82,8 +82,7 @@ public final class HugeGraphFactory extends GraphFactory {
 
         // Node properties
         for (ResolvedPropertyMapping resolvedPropertyMapping : dimensions.nodeProperties()) {
-            // for estimations based on node/rel-counts, unresolved PropertyMappings should not throw on calling `exists()`
-            if (nonExistingGraph || resolvedPropertyMapping.exists()) {
+            if (resolvedPropertyMapping.exists()) {
                 builder.add(resolvedPropertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
             } else {
                 builder.add(resolvedPropertyMapping.propertyKey(), NullPropertyMap.MEMORY_USAGE);
@@ -92,7 +91,7 @@ public final class HugeGraphFactory extends GraphFactory {
 
         // Relationship properties
         for (ResolvedPropertyMapping mapping : dimensions.relProperties()) {
-            if (nonExistingGraph || mapping.exists()) {
+            if (mapping.exists()) {
                 // Adjacency lists and Adjacency offsets
                 MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(loadAsUndirected);
                 MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();

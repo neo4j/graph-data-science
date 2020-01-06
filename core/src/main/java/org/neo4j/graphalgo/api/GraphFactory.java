@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
@@ -42,7 +43,7 @@ public abstract class GraphFactory implements Assessable {
 
     protected final ExecutorService threadPool;
     protected final GraphDatabaseAPI api;
-    protected final GraphSetup setup;
+    public final GraphSetup setup;
     protected final GraphDimensions dimensions;
     protected final ImportProgress progress;
     protected final Log log;
@@ -71,6 +72,8 @@ public abstract class GraphFactory implements Assessable {
 
     public abstract GraphsByRelationshipType importAllGraphs();
 
+    public abstract MemoryEstimation memoryEstimation(GraphSetup setup, GraphDimensions dimensions);
+
     protected void validateTokens() {
         dimensions.checkValidNodePredicate(setup);
         dimensions.checkValidRelationshipTypePredicate(setup);
@@ -81,7 +84,6 @@ public abstract class GraphFactory implements Assessable {
     public GraphDimensions dimensions() {
         return this.dimensions;
     }
-
     protected ImportProgress importProgress(
             ProgressLogger progressLogger,
             GraphDimensions dimensions,

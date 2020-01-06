@@ -81,6 +81,11 @@ public class CypherGraphFactory extends GraphFactory {
     }
 
     @Override
+    public MemoryEstimation memoryEstimation(GraphSetup setup, GraphDimensions dimensions) {
+        return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
+    }
+
+    @Override
     public Graph importGraph() {
         RelationshipTypeMappings relationshipTypeIds = dimensions.relationshipTypeMappings();
         if (relationshipTypeIds.isMultipleTypes()) {
