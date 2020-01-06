@@ -35,14 +35,11 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Graph:
@@ -57,13 +54,11 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
 
     private static Graph graph;
 
-    private static List<String> dfsExpected = Arrays
-        .stream(new int[]{1, 3, 4, 5, 2})
-        .mapToObj(Objects::toString)
-        .collect(Collectors.toList());
+    private static List<String> dfsExpected = Arrays.asList("a", "c", "d", "e", "b");
+    private static List<String> bfsExpected = Arrays.asList("a", "b", "c", "d", "e");
 
     @BeforeEach
-    void setupGraph() {
+    void setup() {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher = "CREATE (a:Place {name: 'a', id:'1'})\n" +
                         "CREATE (b:Place {name: 'b', id:'2'})\n" +
@@ -90,7 +85,7 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
     }
 
     @AfterEach
-    void teardownGraph() {
+    void cleanup() {
         db.shutdown();
     }
 
@@ -114,19 +109,16 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
             );
 
         try (Transaction tx = db.beginTx()) {
-            List<Node> resultNodes = Arrays
+            List<String> resultNodeNames = Arrays
                 .stream(nodes)
                 .mapToObj(nodeId -> db.getNodeById(nodeId))
-                .collect(Collectors.toList());
-            List<String> explicitIds = resultNodes
-                .stream()
-                .map(node -> node.getProperty("id"))
+                .map(node -> node.getProperty("name"))
                 .map(Objects::toString)
                 .collect(Collectors.toList());
-            System.out.println(explicitIds);
 
-            assertEquals(dfsExpected.size(), explicitIds.size());
-            explicitIds.forEach(id -> assertTrue(dfsExpected.contains(id)));
+            System.out.println(resultNodeNames);
+
+            assertEquals(dfsExpected, resultNodeNames);
 
             tx.success();
         }
@@ -152,22 +144,17 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
                 }
             );
 
-        final Collection<String> names = new HashSet<>(5);
         try (Transaction tx = db.beginTx()) {
-            List<Node> resultNodes = Arrays
+            List<String> resultNodeNames = Arrays
                 .stream(nodes)
                 .mapToObj(nodeId -> db.getNodeById(nodeId))
-                .collect(Collectors.toList());
-            List<String> explicitIds = resultNodes
-                .stream()
-                .peek(node -> names.add(name(node.getId())))
-                .map(node -> node.getProperty("id"))
+                .map(node -> node.getProperty("name"))
                 .map(Objects::toString)
                 .collect(Collectors.toList());
-            System.out.println(String.join(", ", names));
 
-            assertEquals(dfsExpected.size(), explicitIds.size());
-            explicitIds.forEach(id -> assertTrue(dfsExpected.contains(id)));
+            System.out.println(resultNodeNames);
+
+            assertEquals(bfsExpected, resultNodeNames);
 
             tx.success();
         }
