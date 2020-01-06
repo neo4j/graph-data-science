@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.LongArrayDeque;
-import com.carrotsearch.hppc.LongArrayList;
+import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphdb.Direction;
@@ -143,7 +143,7 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
         ObjLongConsumer<LongArrayDeque> nodeFunc,
         ObjDoubleConsumer<DoubleArrayDeque> weightFunc
     ) {
-        final LongArrayList list = new LongArrayList(nodeCount);
+        final LongHashSet list = new LongHashSet(nodeCount);
         nodes.clear();
         sources.clear();
         visited.clear();
@@ -162,10 +162,6 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
                     list.add(graph.toOriginalNodeId(node));
                     break loop;
                 case CONTINUE:
-                    // remove from the visited nodes to allow revisiting in case the node is accessible via more than one paths.
-                    if (visited.get(node)) {
-                        visited.clear(node);
-                    }
                     continue loop;
                 case FOLLOW:
                     list.add(graph.toOriginalNodeId(node));
@@ -175,12 +171,19 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
             graph.forEachRelationship(
                 node,
                 direction, longToIntConsumer((s, t) -> {
+                    // remove from the visited nodes to allow revisiting in case the node is accessible via more than one paths.
+                    double aggregatedWeight = agg.apply(s, t, weight);
+                    final ExitPredicate.Result test = exitCondition.test(s, t, aggregatedWeight);
+                    if (test == ExitPredicate.Result.FOLLOW && visited.get(t)) {
+                        visited.clear(t);
+                    }
+
                     if (!visited.get(t)) {
                         visited.set(t);
 
-                        nodeFunc.accept(sources, node);
+                        nodeFunc.accept(sources, s);
                         nodeFunc.accept(nodes, t);
-                        weightFunc.accept(weights, agg.apply(s, t, weight));
+                        weightFunc.accept(weights, aggregatedWeight);
                     }
                     return running();
                 })
