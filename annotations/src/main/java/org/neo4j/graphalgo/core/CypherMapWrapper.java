@@ -221,10 +221,11 @@ public final class CypherMapWrapper {
         return value;
     }
 
-    public static void failOnBlank(String key, String value) {
+    public static String failOnBlank(String key, String value) {
         if (value == null || value.trim().isEmpty()) {
             throw blankValueFor(key, value);
         }
+        return value;
     }
 
     static <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
