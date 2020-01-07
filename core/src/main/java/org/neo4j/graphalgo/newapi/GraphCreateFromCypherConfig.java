@@ -118,6 +118,8 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
             nodeProperties,
             relationshipProperties,
             Pools.DEFAULT_CONCURRENCY,
+            -1,
+            -1,
             username
         );
     }
