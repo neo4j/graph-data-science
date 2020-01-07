@@ -88,9 +88,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         return mapWrapper;
     }
 
-    default void applyOnProcedure(
-        Consumer<? super AlgoBaseProc<?, RESULT, CONFIG>> func
-    ) {
+    default void applyOnProcedure(Consumer<? super AlgoBaseProc<?, RESULT, CONFIG>> func) {
         new TransactionWrapper(graphDb()).accept((tx -> {
             AlgoBaseProc<?, RESULT, CONFIG> proc;
             try {
@@ -141,9 +139,9 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             ? GraphCreateConfig.emptyWithName("", loadedGraphName)
             : GraphCreateCypherConfig.emptyWithName("", loadedGraphName);
 
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graphLoader(graphCreateConfig).load(graphFactory)));
-
         applyOnProcedure((proc) -> {
+            GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graphLoader(graphCreateConfig).load(graphFactory)));
+
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnLoadedGraph = proc.compute(
                 loadedGraphName,
@@ -166,9 +164,9 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             ? GraphCreateConfig.emptyWithName("", loadedGraphName)
             : GraphCreateCypherConfig.emptyWithName("", loadedGraphName);
 
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graphLoader(graphCreateConfig).load(graphFactory)));
-
         applyOnProcedure((proc) -> {
+            GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graphLoader(graphCreateConfig).load(graphFactory)));
+
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap);
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(loadedGraphName, configMap);
