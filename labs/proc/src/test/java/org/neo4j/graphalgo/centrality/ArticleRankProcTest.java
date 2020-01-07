@@ -83,6 +83,7 @@ class ArticleRankProcTest extends BaseProcTest {
             .streamMode()
             .addParameter("iterations", 20)
             .addParameter("dampingFactor", 0.85)
+            .addParameter("concurrency", 1)
             .yields("nodeId", "score")
             .concat(" RETURN algo.asNode(nodeId).name AS page, score")
             .concat(" ORDER BY score DESC");
@@ -91,8 +92,8 @@ class ArticleRankProcTest extends BaseProcTest {
             "+---------------------------------+" + NL +
             "| page      | score               |" + NL +
             "+---------------------------------+" + NL +
-            "| \"Paper 0\" | 0.34627692099638807 |" + NL +
-            "| \"Paper 1\" | 0.31950149248878007 |" + NL +
+            "| \"Paper 0\" | 0.3462769196110458  |" + NL +
+            "| \"Paper 1\" | 0.31950149268668615 |" + NL +
             "| \"Paper 4\" | 0.21375000253319743 |" + NL +
             "| \"Paper 2\" | 0.21092906260164457 |" + NL +
             "| \"Paper 3\" | 0.18028125041164458 |" + NL +
@@ -114,6 +115,7 @@ class ArticleRankProcTest extends BaseProcTest {
             .writeMode()
             .addParameter("iterations", 20)
             .addParameter("dampingFactor", 0.85)
+            .addParameter("concurrency", 1)
             .yields();
 
         String resultQuery =
@@ -125,8 +127,8 @@ class ArticleRankProcTest extends BaseProcTest {
             "+---------------------------------+" + NL +
             "| page      | score               |" + NL +
             "+---------------------------------+" + NL +
-            "| \"Paper 0\" | 0.34627692099638807 |" + NL +
-            "| \"Paper 1\" | 0.31950149248878007 |" + NL +
+            "| \"Paper 0\" | 0.3462769196110458  |" + NL +
+            "| \"Paper 1\" | 0.31950149268668615 |" + NL +
             "| \"Paper 4\" | 0.21375000253319743 |" + NL +
             "| \"Paper 2\" | 0.21092906260164457 |" + NL +
             "| \"Paper 3\" | 0.18028125041164458 |" + NL +
