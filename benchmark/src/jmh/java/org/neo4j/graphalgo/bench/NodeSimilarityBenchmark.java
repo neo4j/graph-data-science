@@ -20,14 +20,12 @@
 
 package org.neo4j.graphalgo.bench;
 
-import org.neo4j.graphalgo.JaccardProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.nodesim.ImmutableNodeSimilarityStreamConfig;
 import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
@@ -123,36 +121,12 @@ public class NodeSimilarityBenchmark {
         blackhole.consume(initAlgo(config).computeToGraph());
     }
 
-    @Benchmark
-    public void jaccardSimilarity(Blackhole blackhole) {
-        List<Map<String, Object>> jaccardInput = prepareProcedureInput();
-        Map<String, Object> procedureConfig = MapUtil.map("concurrency", concurrency, "top", topN, "topK", topK);
-        runJaccardProcedure(blackhole, jaccardInput, procedureConfig);
-    }
-
     private NodeSimilarity initAlgo(NodeSimilarityBaseConfig config) {
         return new NodeSimilarity(
             graph,
             config,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
-        );
-    }
-
-    private void runJaccardProcedure(
-        Blackhole blackhole,
-        List<Map<String, Object>> jaccardInput,
-        Map<String, Object> procedureConfig
-    ) {
-        JaccardProc jaccardProc = new JaccardProc();
-        TransactionWrapper transactionWrapper = new TransactionWrapper(db);
-        transactionWrapper.accept(
-            (ktx) -> {
-                jaccardProc.transaction = ktx;
-                jaccardProc
-                    .similarityStream(jaccardInput, procedureConfig)
-                    .forEach(blackhole::consume);
-            }
         );
     }
 
