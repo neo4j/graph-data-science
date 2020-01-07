@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
 import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-public class ModernEuclideanAlgorithm extends ModernSimilarityAlgorithm<ModernEuclideanAlgorithm> {
+public class ModernEuclideanAlgorithm extends ModernWeightedSimilarityAlgorithm<ModernEuclideanAlgorithm> {
 
     public ModernEuclideanAlgorithm(ModernEuclideanConfig config, GraphDatabaseAPI api) {
         super(config, api);

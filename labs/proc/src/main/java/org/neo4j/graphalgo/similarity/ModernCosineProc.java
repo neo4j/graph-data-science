@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineConfig;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineConfigImpl;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -35,6 +34,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class ModernCosineProc extends ModernSimilarityProc<ModernCosineAlgorithm, ModernCosineConfig> {
 
@@ -46,7 +46,7 @@ public class ModernCosineProc extends ModernSimilarityProc<ModernCosineAlgorithm
         return stream(graphNameOrConfig, configuration);
     }
 
-    @Procedure(name = "gds.alpha.similarity.cosine.write", mode = Mode.WRITE)
+    @Procedure(name = "gds.alpha.similarity.cosine.write", mode = WRITE)
     public Stream<SimilaritySummaryResult> cosineWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

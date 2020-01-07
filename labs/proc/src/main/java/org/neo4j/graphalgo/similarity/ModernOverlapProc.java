@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.similarity;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
-import org.neo4j.graphalgo.impl.similarity.modern.ModernPearsonAlgorithm;
-import org.neo4j.graphalgo.impl.similarity.modern.ModernPearsonConfig;
-import org.neo4j.graphalgo.impl.similarity.modern.ModernPearsonConfigImpl;
+import org.neo4j.graphalgo.impl.similarity.modern.ModernOverlapAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.modern.ModernOverlapConfig;
+import org.neo4j.graphalgo.impl.similarity.modern.ModernOverlapConfigImpl;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -36,18 +36,18 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public final class ModernPearsonProc extends ModernSimilarityProc<ModernPearsonAlgorithm, ModernPearsonConfig> {
+public class ModernOverlapProc extends ModernSimilarityProc<ModernOverlapAlgorithm, ModernOverlapConfig> {
 
-    @Procedure(name = "gds.alpha.similarity.pearson.stream", mode = READ)
-    public Stream<SimilarityResult> pearsonStream(
+    @Procedure(name = "gds.alpha.similarity.overlap.stream", mode = READ)
+    public Stream<SimilarityResult> overlapStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return stream(graphNameOrConfig, configuration);
     }
 
-    @Procedure(name = "gds.alpha.similarity.pearson.write", mode = WRITE)
-    public Stream<SimilaritySummaryResult> pearsonWrite(
+    @Procedure(name = "gds.alpha.similarity.overlap.write", mode = WRITE)
+    public Stream<SimilaritySummaryResult> overlapWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -55,17 +55,17 @@ public final class ModernPearsonProc extends ModernSimilarityProc<ModernPearsonA
     }
 
     @Override
-    protected ModernPearsonConfig newConfig(
+    protected ModernOverlapConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new ModernPearsonConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new ModernOverlapConfigImpl(graphName, maybeImplicitCreate, username, userInput);
     }
 
     @Override
-    ModernPearsonAlgorithm newAlgo(ModernPearsonConfig config) {
-        return new ModernPearsonAlgorithm(config, api);
+    ModernOverlapAlgorithm newAlgo(ModernOverlapConfig config) {
+        return new ModernOverlapAlgorithm(config, api);
     }
 }

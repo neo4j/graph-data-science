@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
@@ -44,7 +43,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 abstract class ModernSimilarityProc
-    <ALGO extends ModernSimilarityAlgorithm<ALGO>, CONFIG extends ModernSimilarityConfig>
+    <ALGO extends ModernSimilarityAlgorithm<ALGO, ?>, CONFIG extends ModernSimilarityConfig>
     extends AlgoBaseProc<ALGO, ModernSimilarityAlgorithmResult, CONFIG> {
 
     Stream<SimilarityResult> stream(

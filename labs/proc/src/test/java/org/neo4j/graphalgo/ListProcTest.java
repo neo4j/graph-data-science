@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.shortestpath.DijkstraProc;
 import org.neo4j.graphalgo.similarity.ModernCosineProc;
 import org.neo4j.graphalgo.similarity.ModernEuclideanProc;
+import org.neo4j.graphalgo.similarity.ModernOverlapProc;
 import org.neo4j.graphalgo.similarity.ModernPearsonProc;
 
 import java.util.Collection;
@@ -67,6 +68,8 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.similarity.cosine.stream",
         "gds.alpha.similarity.euclidean.write",
         "gds.alpha.similarity.euclidean.stream",
+        "gds.alpha.similarity.overlap.write",
+        "gds.alpha.similarity.overlap.stream",
         "gds.alpha.similarity.pearson.write",
         "gds.alpha.similarity.pearson.stream",
         "algo.dfs.stream",
@@ -86,8 +89,6 @@ class ListProcTest extends BaseProcTest {
         "algo.shortestPaths.stream",
         "algo.similarity.jaccard",
         "algo.similarity.jaccard.stream",
-        "algo.similarity.overlap",
-        "algo.similarity.overlap.stream",
         "algo.spanningTree",
         "algo.spanningTree.kmax",
         "algo.spanningTree.kmin",
@@ -121,7 +122,6 @@ class ListProcTest extends BaseProcTest {
     void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
-            ListProc.class,
             AllShortestPathsProc.class,
             ApproxNearestNeighborsProc.class,
             ArticleRankProc.class,
@@ -135,12 +135,13 @@ class ListProcTest extends BaseProcTest {
             JaccardProc.class,
             KShortestPathsProc.class,
             KSpanningTreeProc.class,
+            ListProc.class,
             ModernCosineProc.class,
             ModernEuclideanProc.class,
+            ModernOverlapProc.class,
             ModernPearsonProc.class,
             NodeWalkerProc.class,
             OneHotEncodingFunc.class,
-            OverlapProc.class,
             PrimProc.class,
             ShortestPathDeltaSteppingProc.class,
             ShortestPathProc.class,

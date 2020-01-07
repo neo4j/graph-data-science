@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
 import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-public class ModernCosineAlgorithm extends ModernSimilarityAlgorithm<ModernCosineAlgorithm> {
+public class ModernCosineAlgorithm extends ModernWeightedSimilarityAlgorithm<ModernCosineAlgorithm> {
 
     public ModernCosineAlgorithm(ModernCosineConfig config, GraphDatabaseAPI api) {
         super(config, api);
