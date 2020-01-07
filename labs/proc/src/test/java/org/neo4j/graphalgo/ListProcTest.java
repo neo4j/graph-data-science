@@ -172,7 +172,7 @@ class ListProcTest extends BaseProcTest {
     @Test
     void listFilteredResult() {
         assertEquals(SPANNING_TREE, listProcs("spanningTree"));
-        assertEquals(singleton("algo.articleRank.stream"), listProcs("algo.articleRank.stream"));
+        assertEquals(singleton("gds.alpha.articleRank.stream"), listProcs("gds.alpha.articleRank.stream"));
         assertEquals(emptySet(), listProcs("foo"));
     }
 
