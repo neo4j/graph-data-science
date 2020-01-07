@@ -22,55 +22,45 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.logging.Log;
 
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(MockitoExtension.class)
 class BaseProcUnitTest {
 
-    @Mock
-    private Log mockLog;
+    private TestLog log;
 
-    @Spy
     private BaseProc baseProc;
 
     @BeforeEach
     void setup() {
-        baseProc.log = mockLog;
+        log = new TestLog();
+        baseProc = new BaseProc() {};
+        baseProc.log = log;
     }
 
     @Test
     void testRunWithExceptionLoggingWithRunnable() {
-        RuntimeException exception = new RuntimeException();
+        RuntimeException exception = new RuntimeException("Exception when using Runnable");
         Runnable runnable = () -> {
             throw exception;
         };
 
         assertThrows(RuntimeException.class, () -> baseProc.runWithExceptionLogging("test message", runnable));
-        verify(mockLog, times(1)).warn("test message", exception);
-        verifyNoMoreInteractions(mockLog);
+        assertTrue(log.containsMessage("warn", "test message - Exception when using Runnable"));
     }
 
     @Test
     void testRunWithExceptionLoggingWithSupplier() {
-        RuntimeException exception = new RuntimeException();
+        RuntimeException exception = new RuntimeException("Exception when using Supplier");
         Supplier<?> supplier = () -> {
             throw exception;
         };
 
         assertThrows(RuntimeException.class, () -> baseProc.runWithExceptionLogging("test message", supplier));
-        verify(mockLog, times(1)).warn("test message", exception);
-        verifyNoMoreInteractions(mockLog);
+        assertTrue(log.containsMessage("warn", "test message - Exception when using Supplier"));
     }
 
 }
