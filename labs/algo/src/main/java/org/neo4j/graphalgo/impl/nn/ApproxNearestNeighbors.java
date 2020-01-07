@@ -60,45 +60,69 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
     private T[] inputs;
     private final int topK;
     private final int iterations;
+    private final double precision;
+    private final double p;
+    private final Random random;
+    private final boolean sampling;
+    private final int concurrency;
     private final AnnTopKConsumer[] topKConsumers;
     private final double similarityCutoff;
     private final Log log;
     private final Supplier<RleDecoder> rleDecoderFactory;
-    private final Random random;
     private final AtomicInteger actualIterations;
     private volatile AtomicLong nodeQueue = new AtomicLong();
-    private final int concurrency;
     private final ExecutorService executor;
     private final SimilarityComputer<T> similarityComputer;
-    private final double precision;
-    private final double p;
-    private final boolean sampling;
     private final RoaringBitmap[] visitedRelationships;
 
     public ApproxNearestNeighbors(
-            final ProcedureConfiguration configuration,
-            final T[] inputs,
-            final double similarityCutoff,
-            final Supplier<RleDecoder> rleDecoderFactory,
-            final SimilarityComputer<T> similarityComputer,
-            int topK,
-            Log log) {
+        ProcedureConfiguration configuration,
+        T[] inputs,
+        double similarityCutoff,
+        Supplier<RleDecoder> rleDecoderFactory,
+        SimilarityComputer<T> similarityComputer,
+        int topK,
+        Log log
+    ) {
+        this(
+            inputs,
+            configuration.getNumber("iterations", 10).intValue(),
+            configuration.getNumber("precision", 0.001).doubleValue(),
+            configuration.getNumber("p", 0.5).doubleValue(),
+            configuration.getNumber("randomSeed", 1).longValue(),
+            configuration.getBool("sampling", true),
+            configuration.concurrency(),
+            similarityCutoff, rleDecoderFactory, similarityComputer, topK, log
+        );
+    }
+
+    public ApproxNearestNeighbors(
+        T[] inputs,
+        int iterations,
+        double precision,
+        double p,
+        long randomSeed,
+        boolean sampling,
+        int concurrency,
+        double similarityCutoff,
+        Supplier<RleDecoder> rleDecoderFactory,
+        SimilarityComputer<T> similarityComputer,
+        int topK,
+        Log log
+    ) {
         this.inputs = inputs;
         this.topK = topK;
-        this.iterations = configuration.getNumber("iterations", 10).intValue();
-        this.precision = configuration.getNumber("precision", 0.001).doubleValue();
-        this.p = configuration.getNumber("p", 0.5).doubleValue();
-        this.random = new Random(configuration.getNumber("randomSeed", 1).longValue());
-        this.sampling = configuration.getBool("sampling", true);
-
+        this.iterations = iterations;
+        this.precision = precision;
+        this.p = p;
+        this.random = new Random(randomSeed);
+        this.sampling = sampling;
+        this.concurrency = concurrency;
         this.topKConsumers = AnnTopKConsumer.initializeTopKConsumers(inputs.length, topK);
-
         this.visitedRelationships = ANNUtils.initializeRoaringBitmaps(inputs.length);
-
         this.similarityCutoff = similarityCutoff;
         this.log = log;
         this.actualIterations = new AtomicInteger();
-        this.concurrency = configuration.concurrency();
         this.executor = Pools.DEFAULT;
         this.rleDecoderFactory = rleDecoderFactory;
         this.similarityComputer = similarityComputer;
@@ -120,7 +144,8 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
             }
             tempVisitedRelationships = ANNUtils.initializeRoaringBitmaps(inputs.length);
 
-            HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipBuilder = new HugeRelationshipsBuilder(nodes).withBuffer();
+            HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipBuilder = new HugeRelationshipsBuilder(
+                nodes).withBuffer();
             relationshipBuilder.addRelationshipsFrom(topKConsumers);
             Relationships hugeRels = relationshipBuilder.build();
 
@@ -128,7 +153,13 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
             HugeRelationshipsBuilder oldRelationshipsBuilder = new HugeRelationshipsBuilder(nodes);
             HugeRelationshipsBuilder newRelationshipBuilder = new HugeRelationshipsBuilder(nodes);
 
-            Collection<Runnable> setupTasks = setupTasks(sampleSize, tempVisitedRelationships, hugeGraph, oldRelationshipsBuilder, newRelationshipBuilder);
+            Collection<Runnable> setupTasks = setupTasks(
+                sampleSize,
+                tempVisitedRelationships,
+                hugeGraph,
+                oldRelationshipsBuilder,
+                newRelationshipBuilder
+            );
             ParallelUtil.runWithConcurrency(1, setupTasks, executor);
 
             HugeGraph oldHugeGraph = ANNUtils.hugeGraph(nodes, oldRelationshipsBuilder.build());
@@ -151,11 +182,12 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
     }
 
     private Collection<Runnable> setupTasks(
-            double sampleSize,
-            RoaringBitmap[] tempVisitedRelationships,
-            HugeGraph hugeGraph,
-            HugeRelationshipsBuilder oldRelationshipsBuilder,
-            HugeRelationshipsBuilder newRelationshipBuilder) {
+        double sampleSize,
+        RoaringBitmap[] tempVisitedRelationships,
+        HugeGraph hugeGraph,
+        HugeRelationshipsBuilder oldRelationshipsBuilder,
+        HugeRelationshipsBuilder newRelationshipBuilder
+    ) {
         int batchSize = ParallelUtil.adjustedBatchSize(inputs.length, concurrency, 100);
         int numberOfBatches = (inputs.length / batchSize) + 1;
         Collection<Runnable> setupTasks = new ArrayList<>(numberOfBatches);
@@ -164,32 +196,38 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
         for (int batch = 0; batch < numberOfBatches; batch++) {
             long nodeCount = Math.min(batchSize, inputs.length - (batch * batchSize));
             setupTasks.add(new SetupTask(
-                    new NewOldGraph(hugeGraph, visitedRelationships),
-                    tempVisitedRelationships,
-                    oldRelationshipsBuilder,
-                    newRelationshipBuilder,
-                    sampleSize,
-                    startNodeId,
-                    nodeCount));
+                new NewOldGraph(hugeGraph, visitedRelationships),
+                tempVisitedRelationships,
+                oldRelationshipsBuilder,
+                newRelationshipBuilder,
+                sampleSize,
+                startNodeId,
+                nodeCount
+            ));
             startNodeId += nodeCount;
         }
         return setupTasks;
     }
 
-    private Collection<NeighborhoodTask> computeTasks(double sampleSize, HugeGraph oldHugeGraph, HugeGraph newHugeGraph) {
+    private Collection<NeighborhoodTask> computeTasks(
+        double sampleSize,
+        HugeGraph oldHugeGraph,
+        HugeGraph newHugeGraph
+    ) {
         nodeQueue.set(0);
         Collection<NeighborhoodTask> computeTasks = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {
             computeTasks.add(new ComputeTask(
-                    rleDecoderFactory, inputs.length,
-                    oldHugeGraph,
-                    newHugeGraph,
-                    sampleSize));
+                rleDecoderFactory, inputs.length,
+                oldHugeGraph,
+                newHugeGraph,
+                sampleSize
+            ));
         }
         return computeTasks;
     }
 
-    private IdsAndProperties buildNodes(final T[] inputs) {
+    private IdsAndProperties buildNodes(T[] inputs) {
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(inputs.length, AllocationTracker.EMPTY);
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null);
         long maxNodeId = 0L;
@@ -221,7 +259,7 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
         return tasks;
     }
 
-    private int mergeConsumers(final Iterable<NeighborhoodTask> neighborhoodTasks) {
+    private int mergeConsumers(Iterable<NeighborhoodTask> neighborhoodTasks) {
         int changes = 0;
         for (NeighborhoodTask task : neighborhoodTasks) {
             changes += task.mergeInto(topKConsumers);
@@ -229,7 +267,7 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
         return changes;
     }
 
-    private boolean shouldTerminate(final int changes) {
+    private boolean shouldTerminate(int changes) {
         return changes == 0 || changes < inputs.length * Math.abs(this.topK) * precision;
     }
 
@@ -247,14 +285,14 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
 
         private final RleDecoder rleDecoder;
 
-        InitTask(final Supplier<RleDecoder> rleDecoderFactory) {
+        InitTask(Supplier<RleDecoder> rleDecoderFactory) {
             rleDecoder = rleDecoderFactory.get();
         }
 
         @Override
         public void run() {
             for (; ; ) {
-                final long nodeId = nodeQueue.getAndIncrement();
+                long nodeId = nodeQueue.getAndIncrement();
                 if (nodeId >= inputs.length || !running()) {
                     return;
                 }
@@ -262,12 +300,22 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
                 int index = Math.toIntExact(nodeId);
                 AnnTopKConsumer consumer = topKConsumers[index];
                 T me = inputs[index];
-                Set<Integer> randomNeighbors = ANNUtils.selectRandomNeighbors(Math.abs(topK), inputs.length, index, random);
+                Set<Integer> randomNeighbors = ANNUtils.selectRandomNeighbors(
+                    Math.abs(topK),
+                    inputs.length,
+                    index,
+                    random
+                );
 
                 for (Integer neighborIndex : randomNeighbors) {
                     T neighbour = inputs[neighborIndex];
-                    SimilarityResult result = similarityComputer.similarity(rleDecoder, me, neighbour, similarityCutoff);
-                    if(result != null) {
+                    SimilarityResult result = similarityComputer.similarity(
+                        rleDecoder,
+                        me,
+                        neighbour,
+                        similarityCutoff
+                    );
+                    if (result != null) {
                         consumer.applyAsInt(result);
                     }
                 }
@@ -290,13 +338,14 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
         private final long nodeCount;
 
         SetupTask(
-                final NewOldGraph graph,
-                RoaringBitmap[] visitedRelationships,
-                final HugeRelationshipsBuilder oldRelationshipBuilder,
-                final HugeRelationshipsBuilder newRelationshipBuilder,
-                final double sampleSize,
-                long startNodeId,
-                long nodeCount) {
+            NewOldGraph graph,
+            RoaringBitmap[] visitedRelationships,
+            HugeRelationshipsBuilder oldRelationshipBuilder,
+            HugeRelationshipsBuilder newRelationshipBuilder,
+            double sampleSize,
+            long startNodeId,
+            long nodeCount
+        ) {
             this.graph = graph;
             this.visitedRelationships = visitedRelationships;
             this.oldRelationshipBuilder = oldRelationshipBuilder.withBuffer();
@@ -321,9 +370,10 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
 
                 long[] potentialNewNeighbors = graph.findNewNeighbors(longNodeId).toArray();
                 long[] newOutgoingNeighbors = sampling ? ANNUtils.sampleNeighbors(
-                        potentialNewNeighbors,
-                        sampleSize,
-                        random) : potentialNewNeighbors;
+                    potentialNewNeighbors,
+                    sampleSize,
+                    random
+                ) : potentialNewNeighbors;
                 for (long neighbor : newOutgoingNeighbors) {
                     newRelationshipBuilder.addRelationship(longNodeId, neighbor);
                 }
@@ -346,11 +396,12 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
         private final double sampleRate;
 
         ComputeTask(
-                final Supplier<RleDecoder> rleDecoderFactory,
-                final int length,
-                final HugeGraph oldGraph,
-                final HugeGraph newGraph,
-                final double sampleRate) {
+            Supplier<RleDecoder> rleDecoderFactory,
+            int length,
+            HugeGraph oldGraph,
+            HugeGraph newGraph,
+            double sampleRate
+        ) {
             this.rleDecoder = rleDecoderFactory.get();
             this.localTopKConsumers = AnnTopKConsumer.initializeTopKConsumers(length, topK);
             this.oldGraph = oldGraph.concurrentCopy();
@@ -361,7 +412,7 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
         @Override
         public void run() {
             for (; ; ) {
-                final long nodeId = nodeQueue.getAndIncrement();
+                long nodeId = nodeQueue.getAndIncrement();
                 if (nodeId >= inputs.length || !running()) {
                     return;
                 }
@@ -376,10 +427,11 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
                         int targetNodeId = Math.toIntExact(newNeighbors[targetIndex]);
                         T targetNode = inputs[targetNodeId];
                         SimilarityResult result = similarityComputer.similarity(
-                                rleDecoder,
-                                sourceNode,
-                                targetNode,
-                                similarityCutoff);
+                            rleDecoder,
+                            sourceNode,
+                            targetNode,
+                            similarityCutoff
+                        );
                         if (result != null) {
                             localTopKConsumers[sourceNodeId].applyAsInt(result);
                             localTopKConsumers[targetNodeId].applyAsInt(result.reverse());
@@ -391,10 +443,11 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
                         T targetNode = inputs[targetNodeId];
                         if (sourceNodeId != targetNodeId) {
                             SimilarityResult result = similarityComputer.similarity(
-                                    rleDecoder,
-                                    sourceNode,
-                                    targetNode,
-                                    similarityCutoff);
+                                rleDecoder,
+                                sourceNode,
+                                targetNode,
+                                similarityCutoff
+                            );
                             if (result != null) {
                                 localTopKConsumers[sourceNodeId].applyAsInt(result);
                                 localTopKConsumers[targetNodeId].applyAsInt(result.reverse());
@@ -405,11 +458,11 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
             }
         }
 
-        private LongHashSet getNeighbors(final long nodeId, final Graph graph) {
+        private LongHashSet getNeighbors(long nodeId, Graph graph) {
             long[] potentialIncomingNeighbors = findNeighbors(nodeId, graph, Direction.INCOMING).toArray();
             long[] incomingNeighbors = sampling
-                    ? ANNUtils.sampleNeighbors(potentialIncomingNeighbors, sampleRate, random)
-                    : potentialIncomingNeighbors;
+                ? ANNUtils.sampleNeighbors(potentialIncomingNeighbors, sampleRate, random)
+                : potentialIncomingNeighbors;
 
             LongHashSet outgoingNeighbors = findNeighbors(nodeId, graph, Direction.OUTGOING);
 
@@ -437,8 +490,9 @@ public class ApproxNearestNeighbors<T extends SimilarityInput> extends LegacyAlg
     }
 
     private LongHashSet findNeighbors(
-            final long nodeId,
-            final RelationshipIterator graph, final Direction direction) {
+        long nodeId,
+        RelationshipIterator graph, Direction direction
+    ) {
         LongHashSet neighbors = new LongHashSet();
 
         graph.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
