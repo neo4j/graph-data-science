@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
@@ -179,7 +179,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
     @ParameterizedTest(name = "Normalization: {0}")
     @MethodSource("normalizations")
     void eigenvectorCentralityOnImplicitGraph(String normalizationType, Map<Long, Double> expected) {
-        String eigenvectorStreamQuery = GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
+        String eigenvectorStreamQuery = GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
             .builder()
             .graphName("eigenvectorImplicitNorm")
             .nodeProjection(NodeProjections.fromString("Character"))
@@ -246,7 +246,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
     @MethodSource("normalizations")
     void eigenvectorCentralityWriteOnImplicitGraph(String normalizationType, Map<Long, Double> expected) {
         final Map<Long, Double> actual = new HashMap<>();
-        String eigenvectorWriteQuery = GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
+        String eigenvectorWriteQuery = GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
             .builder()
             .graphName("eigenvectorImplicitNorm")
             .nodeProjection(NodeProjections.fromString("Character"))
@@ -374,7 +374,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             ),
             arguments(
                 "implicit",
-                GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
+                GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
                     .builder()
                     .graphName("eigenvectorImplicitTest")
                     .nodeProjection(NodeProjections.fromString("Character"))

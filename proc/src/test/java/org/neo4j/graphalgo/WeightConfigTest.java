@@ -31,8 +31,9 @@ import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.Direction;
@@ -105,7 +106,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
     @Test
     default void shouldFailWithInvalidWeightProperty() {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateConfig.emptyWithName("", loadedGraphName);
+        GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
         Graph graph = graphLoader(graphCreateConfig)
             .load(HugeGraphFactory.class);
 
@@ -195,7 +196,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
 
         db.execute(createQuery);
 
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName(graphName)
             .nodeProjection(NodeProjections.empty())
             .relationshipProjection(RelationshipProjections.builder()

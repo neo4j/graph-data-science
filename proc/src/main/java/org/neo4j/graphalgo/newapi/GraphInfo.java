@@ -39,7 +39,7 @@ public class GraphInfo {
     public final long nodes, relationships;
     public final Map<String, Object> histogram;
 
-    GraphInfo(GraphCreateBaseConfig config, Graph graph, boolean computeHistogram) {
+    GraphInfo(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
         this.graphName = config.graphName();
         nodeProjection = config.nodeProjection().toObject();
         relationshipProjection = config.relationshipProjection().toObject();

@@ -33,10 +33,9 @@ import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateCypherConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Procedure;
@@ -114,13 +113,13 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             assertEquals(Optional.empty(), config.graphName(), "Graph name should be empty.");
             Optional<GraphCreateConfig> maybeGraphCreateConfig = config.implicitCreateConfig();
             assertTrue(maybeGraphCreateConfig.isPresent(), "Config should contain a GraphCreateConfig.");
-            GraphCreateConfig graphCreateConfig = maybeGraphCreateConfig.get();
-            graphCreateConfig = ImmutableGraphCreateConfig.copyOf(graphCreateConfig);
-            assertEquals(
-                GraphCreateConfig.emptyWithName("", ""),
-                graphCreateConfig,
-                "GraphCreateConfig should be empty."
-            );
+            GraphCreateConfig actual = maybeGraphCreateConfig.get();
+            GraphCreateFromStoreConfig expected = GraphCreateFromStoreConfig.emptyWithName("", "");
+
+            assertEquals(expected.nodeProjection(), actual.nodeProjection());
+            assertEquals(expected.relationshipProjection(), actual.relationshipProjection());
+            assertEquals(expected.graphName(), actual.graphName());
+            assertEquals(expected.username(), actual.username());;
         });
     }
 
@@ -135,9 +134,9 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     @AllGraphTypesTest
     default void testRunOnLoadedGraph(Class<? extends GraphFactory> graphFactory) {
         String loadedGraphName = "loadedGraph";
-        GraphCreateBaseConfig graphCreateConfig = (graphFactory.isAssignableFrom(HugeGraphFactory.class))
-            ? GraphCreateConfig.emptyWithName("", loadedGraphName)
-            : GraphCreateCypherConfig.emptyWithName("", loadedGraphName);
+        GraphCreateConfig graphCreateConfig = (graphFactory.isAssignableFrom(HugeGraphFactory.class))
+            ? GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName)
+            : GraphCreateFromCypherConfig.emptyWithName("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
             GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graphLoader(graphCreateConfig).load(graphFactory)));
@@ -160,9 +159,9 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     @AllGraphTypesTest
     default void testRunMultipleTimesOnLoadedGraph(Class<? extends GraphFactory> graphFactory) {
         String loadedGraphName = "loadedGraph";
-        GraphCreateBaseConfig graphCreateConfig = (graphFactory.isAssignableFrom(HugeGraphFactory.class))
-            ? GraphCreateConfig.emptyWithName("", loadedGraphName)
-            : GraphCreateCypherConfig.emptyWithName("", loadedGraphName);
+        GraphCreateConfig graphCreateConfig = (graphFactory.isAssignableFrom(HugeGraphFactory.class))
+            ? GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName)
+            : GraphCreateFromCypherConfig.emptyWithName("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
             GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graphLoader(graphCreateConfig).load(graphFactory)));
@@ -302,12 +301,12 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     }
 
     @NotNull
-    default ModernGraphLoader graphLoader(GraphCreateBaseConfig graphCreateConfig) {
+    default ModernGraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
         return graphLoader(graphDb(), graphCreateConfig);
     }
 
     @NotNull
-    default ModernGraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateBaseConfig graphCreateConfig) {
+    default ModernGraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateConfig graphCreateConfig) {
         return ImmutableModernGraphLoader
             .builder()
             .api(db)

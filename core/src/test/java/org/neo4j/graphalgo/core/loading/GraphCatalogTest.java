@@ -36,7 +36,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -104,7 +104,7 @@ class GraphCatalogTest {
             ).build();
 
 
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .username("")
             .graphName("myGraph")
             .nodeProjection(NodeProjections.empty())

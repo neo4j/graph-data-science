@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 "Neo4j,"
+ * Copyright (c) 2017-2020 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -33,15 +33,16 @@ import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 
 @ValueClass
-@Configuration("GraphCreateCypherConfigImpl")
-public interface GraphCreateCypherConfig extends GraphCreateBaseConfig {
+@Configuration("GraphCreateFromCypherConfigImpl")
+public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
-    @NotNull String IMPLICIT_GRAPH_NAME = "";
     @NotNull String NODE_QUERY_KEY = "nodeQuery";
     @NotNull String RELATIONSHIP_QUERY_KEY = "relationshipQuery";
-    @NotNull String BLANK_QUERY = "";
     @NotNull String NODE_PROPERTIES_KEY = "nodeProperties";
     @NotNull String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
+    @NotNull String BLANK_QUERY = "";
+    @NotNull String ALL_NODES_QUERY = "MATCH (n) RETURN id(n) AS id";
+    @NotNull String ALL_RELATIONSHIPS_QUERY = "MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target";
 
     @Override
     @Configuration.Ignore
@@ -71,14 +72,14 @@ public interface GraphCreateCypherConfig extends GraphCreateBaseConfig {
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String relationshipQuery();
 
-    static GraphCreateCypherConfig of(
+    static GraphCreateFromCypherConfig of(
         String userName,
         String graphName,
         String nodeQuery,
         String relationshipQuery,
         CypherMapWrapper config
     ) {
-        return new GraphCreateCypherConfigImpl(
+        return new GraphCreateFromCypherConfigImpl(
             nodeQuery,
             relationshipQuery,
             graphName,
@@ -88,20 +89,17 @@ public interface GraphCreateCypherConfig extends GraphCreateBaseConfig {
     }
 
     @TestOnly
-    static GraphCreateCypherConfig emptyWithName(String userName, String graphName) {
-        return GraphCreateCypherConfig.of(
+    static GraphCreateFromCypherConfig emptyWithName(String userName, String graphName) {
+        return GraphCreateFromCypherConfig.of(
             userName,
             graphName,
-            "MATCH (n) RETURN id(n) AS id",
-            "MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target",
+            ALL_NODES_QUERY,
+            ALL_RELATIONSHIPS_QUERY,
             CypherMapWrapper.empty()
         );
     }
 
-    static GraphCreateCypherConfig implicitCreate(
-        String username,
-        CypherMapWrapper config
-    ) {
+    static GraphCreateFromCypherConfig fromProcedureConfig(String username, CypherMapWrapper config) {
         String nodeQuery = CypherMapWrapper.failOnBlank(NODE_QUERY_KEY, config.getString(NODE_QUERY_KEY, BLANK_QUERY));
         String relationshipQuery = CypherMapWrapper.failOnBlank(RELATIONSHIP_QUERY_KEY, config.getString(RELATIONSHIP_QUERY_KEY, BLANK_QUERY));
 
@@ -113,7 +111,7 @@ public interface GraphCreateCypherConfig extends GraphCreateBaseConfig {
             ? PropertyMappings.fromObject(config.get(RELATIONSHIP_PROPERTIES_KEY, null))
             : PropertyMappings.of();
 
-        return new GraphCreateCypherConfigImpl(
+        return new GraphCreateFromCypherConfigImpl(
             nodeQuery,
             relationshipQuery,
             IMPLICIT_GRAPH_NAME,

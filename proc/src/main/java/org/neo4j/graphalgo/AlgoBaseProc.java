@@ -39,7 +39,6 @@ import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
@@ -76,7 +75,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
         if (!graphName.isPresent()) {
             // we should do implicit loading
-            maybeImplicitCreate = Optional.of(GraphCreateConfig.implicitCreate(getUsername(), config));
+            maybeImplicitCreate = Optional.of(GraphCreateConfig.createImplicit(getUsername(), config));
         }
         return newConfig(getUsername(), graphName, maybeImplicitCreate, config);
     }
@@ -116,7 +115,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             String graphName = config.graphName().get();
 
             // TODO get the dimensions from the graph itself.
-            GraphCreateBaseConfig graphCreateConfig = GraphCatalog
+            GraphCreateConfig graphCreateConfig = GraphCatalog
                 .getLoadedGraphs(getUsername())
                 .keySet()
                 .stream()
@@ -170,7 +169,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         CONFIG config = configAndName.first();
         Optional<String> maybeGraphName = configAndName.other();
 
-        Map.Entry<GraphCreateBaseConfig, Graph> catalogEntry;
+        Map.Entry<GraphCreateConfig, Graph> catalogEntry;
 
         Optional<String> weightProperty = config instanceof WeightConfig ?
             Optional.ofNullable(((WeightConfig) config).weightProperty()) : Optional.empty();
@@ -199,7 +198,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         }
     }
 
-    private void validateConfig(GraphCreateBaseConfig graphCreateConfig, CONFIG config) {
+    private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
         if (graphCreateConfig.nodeProjection().labelProjection().orElse("not_cypher").equals(IS_EXPLICIT_CYPHER_GRAPH)) {
             return;
         }

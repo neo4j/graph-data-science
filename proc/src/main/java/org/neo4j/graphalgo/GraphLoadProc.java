@@ -42,6 +42,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -135,8 +136,13 @@ public final class GraphLoadProc extends BaseProc {
             stats.nodes = graph.nodeCount();
             stats.relationships = graph.relationshipCount();
             // TODO: remove this temporary hack; this is used for skipping validation in BaseAlgoProc for the cypher case
-            GraphCreateConfig graphCreateConfig = GraphCreateConfig.of(config.getUsername(), name, IS_EXPLICIT_CYPHER_GRAPH, "" , CypherMapWrapper
-                .empty());
+            GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.of(
+                config.getUsername(),
+                name,
+                IS_EXPLICIT_CYPHER_GRAPH,
+                "",
+                CypherMapWrapper.empty()
+            );
             GraphCatalog.set(graphCreateConfig, graph);
         }
 

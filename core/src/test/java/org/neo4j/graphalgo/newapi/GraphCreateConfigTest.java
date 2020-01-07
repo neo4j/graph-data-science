@@ -52,7 +52,7 @@ class GraphCreateConfigTest {
         ));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            ImmutableGraphCreateConfig.builder()
+            ImmutableGraphCreateFromStoreConfig.builder()
                 .graphName("graph")
                 .relationshipProjection(RelationshipProjections.of())
                 .nodeProperties(propertyMappings)
@@ -79,7 +79,7 @@ class GraphCreateConfigTest {
         );
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            ImmutableGraphCreateConfig.builder()
+            ImmutableGraphCreateFromStoreConfig.builder()
                 .graphName("graph")
                 .relationshipProperties(propertyMappings)
                 .relationshipProjection(relProjections)

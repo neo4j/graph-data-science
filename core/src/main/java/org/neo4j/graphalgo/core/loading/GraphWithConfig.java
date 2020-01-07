@@ -21,13 +21,13 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.newapi.GraphCreateBaseConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
 @ValueClass
 public interface GraphWithConfig {
     GraphsByRelationshipType graph();
 
-    GraphCreateBaseConfig config();
+    GraphCreateConfig config();
 
     default Graph getGraph() {
         return graph().getUnion();

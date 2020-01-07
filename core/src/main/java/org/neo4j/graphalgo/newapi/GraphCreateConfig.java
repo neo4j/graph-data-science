@@ -22,46 +22,51 @@ package org.neo4j.graphalgo.newapi;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.graphalgo.core.utils.Pools;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 
-@ValueClass
-@Configuration("GraphCreateConfigImpl")
-public interface GraphCreateConfig extends GraphCreateBaseConfig {
+public interface GraphCreateConfig extends BaseConfig {
 
     @NotNull String IMPLICIT_GRAPH_NAME = "";
 
-    @Override
     @Configuration.Parameter
-    @ConvertWith("org.neo4j.graphalgo.AbstractNodeProjections#fromObject")
+    String graphName();
+
     NodeProjections nodeProjection();
 
-    @Override
-    @Configuration.Parameter
-    @ConvertWith("org.neo4j.graphalgo.AbstractRelationshipProjections#fromObject")
     RelationshipProjections relationshipProjection();
 
-    @Override
-    @Configuration.Ignore
-    @Nullable default String nodeQuery() {
-        return null;
+    @Nullable String nodeQuery();
+
+    @Nullable String relationshipQuery();
+
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
+    default PropertyMappings nodeProperties() {
+        return PropertyMappings.of();
     }
 
-    @Override
-    @Configuration.Ignore
-    @Nullable default String relationshipQuery() {
-        return null;
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
+    default PropertyMappings relationshipProperties() {
+        return PropertyMappings.of();
+    }
+
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.Key(ProcedureConstants.READ_CONCURRENCY_KEY)
+    default int concurrency() {
+        return Pools.DEFAULT_CONCURRENCY;
     }
 
     @Value.Default
@@ -78,102 +83,12 @@ public interface GraphCreateConfig extends GraphCreateBaseConfig {
         return -1;
     }
 
-    @Value.Check
-    @Configuration.Ignore
-    default GraphCreateConfig withNormalizedPropertyMappings() {
-        PropertyMappings nodeProperties = nodeProperties();
-        PropertyMappings relationshipProperties = relationshipProperties();
 
-        verifyProperties(
-            nodeProperties.stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet()),
-            nodeProjection().allProperties(),
-            "node"
-        );
-
-        verifyProperties(
-            relationshipProperties.stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet()),
-            relationshipProjection().allProperties(),
-            "relationship"
-        );
-
-        if (nodeProperties.hasMappings() || relationshipProperties.hasMappings()) {
-            return ImmutableGraphCreateConfig
-                .builder()
-                .from(this)
-                .nodeProjection(nodeProjection().addPropertyMappings(nodeProperties))
-                .nodeProperties(PropertyMappings.of())
-                .relationshipProjection(relationshipProjection().addPropertyMappings(relationshipProperties))
-                .relationshipProperties(PropertyMappings.of())
-                .build();
+    static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
+        if (config.containsKey(NODE_QUERY_KEY) || config.containsKey(RELATIONSHIP_QUERY_KEY)) {
+            return GraphCreateFromCypherConfig.fromProcedureConfig(username, config);
+        } else {
+            return GraphCreateFromStoreConfig.fromProcedureConfig(username, config);
         }
-        return this;
-    }
-
-    @Configuration.Ignore
-    default void verifyProperties(
-        Set<String> propertiesFromMapping,
-        Set<String> propertiesFromProjection,
-        String type
-    ) {
-        Set<String> propertyIntersection = new HashSet<>(propertiesFromMapping);
-        propertyIntersection.retainAll(propertiesFromProjection);
-
-        if (!propertyIntersection.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
-                "Incompatible %s projection and %s property specification. Both specify properties named %s",
-                type, type, propertyIntersection
-            ));
-        }
-    }
-
-    static GraphCreateConfig emptyWithName(String userName, String graphName) {
-        return ImmutableGraphCreateConfig.of(userName, graphName, NodeProjections.empty(), RelationshipProjections.empty());
-    }
-
-    static GraphCreateConfig of(
-        String userName,
-        String graphName,
-        Object nodeProjections,
-        Object relationshipProjections,
-        CypherMapWrapper config
-    ) {
-        GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
-            nodeProjections,
-            relationshipProjections,
-            graphName,
-            userName,
-            config
-        );
-        return graphCreateConfig.withNormalizedPropertyMappings();
-    }
-
-    static GraphCreateConfig implicitCreate(
-        String username,
-        CypherMapWrapper config
-    ) {
-        RelationshipProjections relationshipProjections = RelationshipProjections.fromObject(CypherMapWrapper.failOnNull(
-            "relationshipProjection",
-            config.get("relationshipProjection", (Object) RelationshipProjections.empty())
-        ));
-
-        relationshipProjections.projections().values().forEach(relationshipProjection -> {
-            if (relationshipProjection.properties().mappings().size() > 1) {
-                throw new IllegalArgumentException(
-                    "Implicit graph loading does not allow loading multiple relationship properties per relationship type");
-            }
-        });
-
-        NodeProjections nodeProjections = NodeProjections.fromObject(CypherMapWrapper.failOnNull(
-            "nodeProjection",
-            config.get("nodeProjection", (Object) NodeProjections.empty())
-        ));
-        GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
-            nodeProjections,
-            relationshipProjections,
-            IMPLICIT_GRAPH_NAME,
-            username,
-            config
-        );
-        return graphCreateConfig.withNormalizedPropertyMappings();
     }
 }

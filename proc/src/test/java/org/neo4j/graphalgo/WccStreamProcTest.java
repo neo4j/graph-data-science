@@ -23,14 +23,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.wcc.WccStreamConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 
 import java.util.Optional;
@@ -75,7 +74,7 @@ class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
 
     @Test
     void testStreamRunsOnLoadedGraph() {
-        GraphCreateConfig createGraphConfig = ImmutableGraphCreateConfig
+        GraphCreateConfig createGraphConfig = ImmutableGraphCreateFromStoreConfig
             .builder()
             .graphName("testGraph")
             .nodeProjection(NodeProjections.empty())

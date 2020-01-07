@@ -53,7 +53,7 @@ public class GraphCreateProc extends CatalogProc {
         validateGraphName(getUsername(), graphName);
 
         // input
-        GraphCreateConfig config = GraphCreateConfig.of(
+        GraphCreateConfig config = GraphCreateFromStoreConfig.of(
             getUsername(),
             graphName,
             nodeProjection,
@@ -99,7 +99,7 @@ public class GraphCreateProc extends CatalogProc {
         validateGraphName(getUsername(), graphName);
 
         // input
-        GraphCreateCypherConfig config = GraphCreateCypherConfig.of(
+        GraphCreateFromCypherConfig config = GraphCreateFromCypherConfig.of(
             getUsername(),
             graphName,
             nodeQuery,
@@ -116,7 +116,7 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
-    private GraphCreateCypherResult createCypherGraph(GraphCreateCypherConfig config) {
+    private GraphCreateCypherResult createCypherGraph(GraphCreateFromCypherConfig config) {
         GraphCreateCypherResult.Builder builder = new GraphCreateCypherResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             ModernGraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
@@ -128,7 +128,7 @@ public class GraphCreateProc extends CatalogProc {
 
             builder.withGraph(graphFromType);
 
-            GraphCreateConfig graphCreateConfig = new GraphCreateConfigImpl(
+            GraphCreateConfig graphCreateConfig = new GraphCreateFromStoreConfigImpl(
                 NodeProjections.of(),
                 // TODO: convert GraphsByRelationshipType to RelationshipProjection in GraphCreateConfig
                 RelationshipProjections.of(),
@@ -240,7 +240,7 @@ public class GraphCreateProc extends CatalogProc {
             private final String relationshipQuery;
             private long nodes, relationships, createMillis;
 
-            Builder(GraphCreateCypherConfig config) {
+            Builder(GraphCreateFromCypherConfig config) {
                 this.graphName = config.graphName();
                 this.nodeQuery = config.nodeQuery();
                 this.relationshipQuery = config.relationshipQuery();

@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.api.ModernGraphSetup;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.newapi.GraphCreateBaseConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.logging.Log;
 
 import java.util.HashMap;
@@ -59,7 +59,7 @@ public interface ModernGraphLoader extends SharedGraphLoader {
 
     Log log();
 
-    GraphCreateBaseConfig createConfig();
+    GraphCreateConfig createConfig();
 
     @Override
     @Value.Lazy

@@ -32,7 +32,8 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -114,7 +115,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
         });
 
         @Language("Cypher")
-        String query = GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
+        String query = GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
             .builder()
             .graphName("personalisedGraph")
             .nodeProjection(NodeProjections.fromObject(map("Person", "Person | Product")))
@@ -157,7 +158,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
         });
 
         @Language("Cypher")
-        String query = GdsCypher.call().implicitCreation(ImmutableGraphCreateConfig
+        String query = GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
             .builder()
             .graphName("personalisedGraph")
             .nodeProjection(NodeProjections.fromObject(map("Person", "Person | Product")))

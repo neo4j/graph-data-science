@@ -40,7 +40,7 @@ public class GraphListProc extends CatalogProc {
         }
         String graphNames = (String) graphName;
 
-        Stream<Map.Entry<GraphCreateBaseConfig, Graph>> graphEntries = GraphCatalog
+        Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries = GraphCatalog
             .getLoadedGraphs(getUsername())
             .entrySet()
             .stream();

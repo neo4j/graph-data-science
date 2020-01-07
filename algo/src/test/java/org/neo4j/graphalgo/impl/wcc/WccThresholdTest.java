@@ -43,7 +43,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 
 import java.util.stream.Stream;
 
@@ -88,7 +88,7 @@ public class WccThresholdTest extends AlgoTestBase {
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.impl.wcc.WccThresholdTest#thresholdParams")
     void testThreshold(double threshold, long[][] expectedComponents) {
-        GraphCreateConfig createConfig = ImmutableGraphCreateConfig.builder()
+        GraphCreateConfig createConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName("myGraph")
             .nodeProjection(NodeProjections.empty())
             .relationshipProjection(

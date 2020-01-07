@@ -23,9 +23,7 @@ import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.newapi.GraphCreateBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateCypherConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -54,7 +52,7 @@ public abstract class BaseProc {
         return transaction.subjectOrAnonymous().username();
     }
 
-    protected final ModernGraphLoader newLoader(GraphCreateBaseConfig createConfig, AllocationTracker tracker) {
+    protected final ModernGraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
         return ImmutableModernGraphLoader
             .builder()
             .api(api)

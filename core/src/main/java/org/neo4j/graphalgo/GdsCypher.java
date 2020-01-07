@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.cypher.v3_5.CypherPrinter;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -558,7 +558,7 @@ public abstract class GdsCypher {
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relProperties
     ) {
-        return ImmutableGraphCreateConfig.builder()
+        return ImmutableGraphCreateFromStoreConfig.builder()
             .graphName(graphName.orElse(""))
             .nodeProjection(NodeProjections.create(nodeProjections))
             .relationshipProjection(RelationshipProjections.builder().putAllProjections(relProjections).build())

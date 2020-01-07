@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateConfig;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.impl.proc.MapConverter;
 
@@ -50,7 +50,7 @@ import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 class GdsCypherTest {
 
     private static final GraphCreateConfig GRAPH_CREATE_PROJECT_STAR =
-        ImmutableGraphCreateConfig.of(
+        ImmutableGraphCreateFromStoreConfig.of(
             "",
             "",
             NodeProjections.fromString(PROJECT_ALL.name),
@@ -129,7 +129,7 @@ class GdsCypherTest {
 
         @SuppressWarnings("unchecked") Map<String, Object> map =
             (Map<String, Object>) new MapConverter().apply(configString).value();
-        GraphCreateConfig parsedConfig = ImmutableGraphCreateConfig
+        GraphCreateConfig parsedConfig = ImmutableGraphCreateFromStoreConfig
             .builder()
             .username("")
             .graphName("")
@@ -151,7 +151,7 @@ class GdsCypherTest {
             .addProperty("relProp", "RelationshipPropertyName", 1337, DeduplicationStrategy.MAX)
             .build();
 
-        GraphCreateConfig configFromBuilder = ImmutableGraphCreateConfig
+        GraphCreateConfig configFromBuilder = ImmutableGraphCreateFromStoreConfig
             .builder()
             .username("")
             .graphName("")
