@@ -19,25 +19,26 @@
  */
 package org.neo4j.graphalgo.impl.similarity.modern;
 
-import org.neo4j.graphalgo.impl.similarity.CategoricalInput;
-import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
 
-public final class ModernOverlapAlgorithm extends ModernCategoricalSimilarityAlgorithm<ModernOverlapAlgorithm> {
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-    public ModernOverlapAlgorithm(ModernSimilarityConfig config, GraphDatabaseAPI api) {
-        super(config, api);
+@ValueClass
+@Configuration("ModernJaccardConfigImpl")
+public interface ModernJaccardConfig extends ModernSimilarityConfig {
+
+    @Override
+    @Configuration.Ignore
+    default String graph() {
+        throw new UnsupportedOperationException(
+            "Jaccard does not support loading via Graph/Cypher.");
     }
 
     @Override
-    SimilarityComputer<CategoricalInput> similarityComputer(
-        Double skipValue,
-        int[] sourceIndexIds,
-        int[] targetIndexIds
-    ) {
-        if (sourceIndexIds.length > 0 || targetIndexIds.length > 0) {
-            return (decoder, s, t, cutoff) -> s.overlap(cutoff, t, false);
-        }
-        return (decoder, s, t, cutoff) -> s.overlap(cutoff, t);
+    default List<Map<String,Object>> data() {
+        return Collections.emptyList();
     }
 }

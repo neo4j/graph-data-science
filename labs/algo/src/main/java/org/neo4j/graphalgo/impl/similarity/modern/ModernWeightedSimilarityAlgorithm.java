@@ -103,10 +103,6 @@ public abstract class ModernWeightedSimilarityAlgorithm<ME extends ModernWeighte
         return inputs;
     }
 
-    SimilarityResult modifyResult(SimilarityResult result) {
-        return result;
-    }
-
     @Override
     Supplier<RleDecoder> inputDecoderFactory(WeightedInput[] inputs) {
         return createDecoderFactory(inputs[0].initialSize());

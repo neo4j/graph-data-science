@@ -23,9 +23,9 @@ import org.neo4j.graphalgo.impl.similarity.CategoricalInput;
 import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-public final class ModernOverlapAlgorithm extends ModernCategoricalSimilarityAlgorithm<ModernOverlapAlgorithm> {
+public final class ModernJaccardAlgorithm extends ModernCategoricalSimilarityAlgorithm<ModernJaccardAlgorithm> {
 
-    public ModernOverlapAlgorithm(ModernSimilarityConfig config, GraphDatabaseAPI api) {
+    public ModernJaccardAlgorithm(ModernSimilarityConfig config, GraphDatabaseAPI api) {
         super(config, api);
     }
 
@@ -35,9 +35,6 @@ public final class ModernOverlapAlgorithm extends ModernCategoricalSimilarityAlg
         int[] sourceIndexIds,
         int[] targetIndexIds
     ) {
-        if (sourceIndexIds.length > 0 || targetIndexIds.length > 0) {
-            return (decoder, s, t, cutoff) -> s.overlap(cutoff, t, false);
-        }
-        return (decoder, s, t, cutoff) -> s.overlap(cutoff, t);
+        return (decoder, s, t, cutoff) -> s.jaccard(cutoff, t, false);
     }
 }
