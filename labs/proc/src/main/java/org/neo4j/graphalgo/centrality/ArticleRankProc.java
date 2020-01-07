@@ -46,7 +46,6 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-//TODO: Add acceptance tests ("integration tests")
 public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, ArticleRankConfig> {
 
     @Procedure(value = "gds.alpha.articleRank.write", mode = WRITE)
