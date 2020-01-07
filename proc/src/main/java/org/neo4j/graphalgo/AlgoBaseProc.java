@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
@@ -52,8 +53,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import static org.neo4j.graphalgo.core.ProcedureConstants.IS_EXPLICIT_CYPHER_GRAPH;
 
 public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends AlgoBaseConfig> extends BaseProc {
 
@@ -199,7 +198,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
-        if (graphCreateConfig.nodeProjection().labelProjection().orElse("not_cypher").equals(IS_EXPLICIT_CYPHER_GRAPH)) {
+        if (graphCreateConfig instanceof GraphCreateFromCypherConfig) {
             return;
         }
         if (config instanceof SeedConfig) {

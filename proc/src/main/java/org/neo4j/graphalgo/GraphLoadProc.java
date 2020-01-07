@@ -24,7 +24,6 @@ import org.HdrHistogram.Histogram;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -42,6 +41,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
@@ -54,8 +54,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import static org.neo4j.graphalgo.core.ProcedureConstants.IS_EXPLICIT_CYPHER_GRAPH;
 
 public final class GraphLoadProc extends BaseProc {
     @Procedure(name = "algo.graph.load", mode = Mode.READ)
@@ -101,18 +99,18 @@ public final class GraphLoadProc extends BaseProc {
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
         GraphDimensions dimensions = graphFactory.dimensions();;
 
-        MemoryTree memoryTree = config.estimate(loader.toSetup(), graphFactory)
+        MemoryTree memoryTree = config
+            .estimate(loader.toSetup(), graphFactory)
             .estimate(dimensions, config.concurrency());
 
         return Stream.of(new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
     }
 
+    private GraphLoadStats loadGraph(ProcedureConfiguration config, String graphName) {
+        GraphLoadStats stats = new GraphLoadStats(graphName, config);
 
-    private GraphLoadStats loadGraph(ProcedureConfiguration config, String name) {
-        GraphLoadStats stats = new GraphLoadStats(name, config);
-
-        if (GraphCatalog.exists(getUsername(), name)) {
-            throw new IllegalArgumentException(String.format("A graph with name '%s' is already loaded.", name));
+        if (GraphCatalog.exists(getUsername(), graphName)) {
+            throw new IllegalArgumentException(String.format("A graph with name '%s' is already loaded.", graphName));
         }
 
         try (ProgressTimer ignored = ProgressTimer.start(time -> stats.loadMillis = time)) {
@@ -135,15 +133,12 @@ public final class GraphLoadProc extends BaseProc {
 
             stats.nodes = graph.nodeCount();
             stats.relationships = graph.relationshipCount();
-            // TODO: remove this temporary hack; this is used for skipping validation in BaseAlgoProc for the cypher case
-            GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.of(
-                config.getUsername(),
-                name,
-                IS_EXPLICIT_CYPHER_GRAPH,
-                "",
-                CypherMapWrapper.empty()
-            );
-            GraphCatalog.set(graphCreateConfig, graph);
+
+            GraphCreateConfig createConfig = isCypher
+                ? GraphCreateFromCypherConfig.emptyWithName(config.getUsername(), graphName)
+                : GraphCreateFromStoreConfig.emptyWithName(config.getUsername(), graphName);
+
+            GraphCatalog.set(createConfig, graph);
         }
 
         return stats;
