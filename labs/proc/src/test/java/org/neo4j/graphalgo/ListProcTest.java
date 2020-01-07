@@ -91,8 +91,6 @@ class ListProcTest extends BaseProcTest {
         "algo.shortestPath.deltaStepping.stream",
         "algo.shortestPaths",
         "algo.shortestPaths.stream",
-        "algo.similarity.overlap",
-        "algo.similarity.overlap.stream",
         "algo.spanningTree",
         "algo.spanningTree.kmax",
         "algo.spanningTree.kmin",
