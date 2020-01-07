@@ -58,7 +58,6 @@ public final class TransactionWrapper {
         try (final Transaction tx = db.beginTx()) {
             final KernelTransaction transaction = bridge.getKernelTransactionBoundToThisThread(true);
             block.accept(transaction);
-            tx.success();
         }
     }
 
