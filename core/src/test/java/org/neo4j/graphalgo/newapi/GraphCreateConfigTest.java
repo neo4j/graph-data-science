@@ -30,11 +30,14 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.Collections;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GraphCreateConfigTest {
 
@@ -85,6 +88,67 @@ class GraphCreateConfigTest {
         );
 
         assertThat(ex.getMessage(), allOf(containsString("relationship"), containsString("duplicate")));
+    }
+
+    @Test
+    void testMergingOfNodePropertiesAndProjections() {
+        PropertyMappings propertyMappings1 = PropertyMappings.builder()
+            .addMapping("foo", "foo", 0.0, DeduplicationStrategy.NONE)
+            .build();
+
+        PropertyMappings propertyMappings2 = PropertyMappings.builder()
+            .addMapping("bar", "foo", 0.0, DeduplicationStrategy.NONE)
+            .build();
+
+        NodeProjections nodeProjections = NodeProjections.create(Collections.singletonMap(
+            ElementIdentifier.of("A"), NodeProjection.of("A", propertyMappings2)
+        ));
+
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
+            .graphName("graph")
+            .relationshipProjection(RelationshipProjections.of())
+            .nodeProperties(propertyMappings1)
+            .nodeProjection(nodeProjections)
+            .build();
+
+        GraphCreateConfig mergedProperties = graphCreateConfig.withNormalizedPropertyMappings();
+        Set<String> allProperties = mergedProperties.nodeProjection().allProperties();
+        assertTrue(allProperties.contains("foo"));
+        assertTrue(allProperties.contains("bar"));
+        assertEquals(0, mergedProperties.nodeProperties().numberOfMappings());
+    }
+
+    @Test
+    void testMergingOfRelationshipPropertiesAndProjections() {
+        PropertyMappings propertyMappings1 = PropertyMappings.builder()
+            .addMapping("foo", "foo", 0.0, DeduplicationStrategy.NONE)
+            .build();
+
+        PropertyMappings propertyMappings2 = PropertyMappings.builder()
+            .addMapping("bar", "foo", 0.0, DeduplicationStrategy.NONE)
+            .build();
+
+        RelationshipProjections relProjections = RelationshipProjections.single(
+            ElementIdentifier.of("A"),
+            RelationshipProjection.builder()
+                .type("A")
+                .projection(Projection.NATURAL)
+                .properties(propertyMappings2)
+                .build()
+        );
+
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateConfig.builder()
+            .graphName("graph")
+            .nodeProjection(NodeProjections.empty())
+            .relationshipProperties(propertyMappings1)
+            .relationshipProjection(relProjections)
+            .build();
+
+        GraphCreateConfig mergedProperties = graphCreateConfig.withNormalizedPropertyMappings();
+        Set<String> allProperties = mergedProperties.relationshipProjection().allProperties();
+        assertTrue(allProperties.contains("foo"));
+        assertTrue(allProperties.contains("bar"));
+        assertEquals(0, mergedProperties.relationshipProperties().numberOfMappings());
     }
 
 }
