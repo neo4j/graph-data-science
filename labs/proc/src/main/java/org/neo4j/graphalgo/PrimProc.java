@@ -44,19 +44,6 @@ public class PrimProc extends LabsProc {
     public static final String CONFIG_WRITE_RELATIONSHIP = "writeProperty";
     public static final String CONFIG_WRITE_RELATIONSHIP_DEFAULT = "MST";
 
-    @Procedure(value = "algo.mst", mode = Mode.WRITE)
-    @Description("CALL algo.mst(label:String, relationshipType:String, weightProperty:String, startNodeId:long, {" +
-            "writeProperty:String}) " +
-            "YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount")
-    public Stream<Prim.Result> deprecatedProc(
-            @Name(value = "label") String label,
-            @Name(value = "relationshipType") String relationship,
-            @Name(value = "weightProperty") String weightProperty,
-            @Name(value = "startNodeId") long startNode,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-        return minimumSpanningTree(label, relationship, weightProperty, startNode, config);
-    }
-
     @Procedure(value = "algo.spanningTree", mode = Mode.WRITE)
     @Description("CALL algo.spanningTree(label:String, relationshipType:String, weightProperty:String, startNodeId:long, {" +
             "writeProperty:String}) " +

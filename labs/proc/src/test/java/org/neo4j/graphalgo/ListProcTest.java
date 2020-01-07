@@ -76,7 +76,6 @@ class ListProcTest extends BaseProcTest {
         "algo.kShortestPaths.stream",
         "algo.labs.ml.ann",
         "algo.labs.ml.ann.stream",
-        "algo.mst",
         "algo.randomWalk.stream",
         "algo.scc",
         "algo.scc.stream",
@@ -171,7 +170,7 @@ class ListProcTest extends BaseProcTest {
     @Test
     void listFilteredResult() {
         assertEquals(SPANNING_TREE, listProcs("spanningTree"));
-        assertEquals(singleton("algo.mst"), listProcs("algo.mst"));
+        assertEquals(singleton("algo.articleRank.stream"), listProcs("algo.articleRank.stream"));
         assertEquals(emptySet(), listProcs("foo"));
     }
 
