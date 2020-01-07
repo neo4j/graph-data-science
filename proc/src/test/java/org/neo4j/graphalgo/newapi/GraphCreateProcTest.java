@@ -56,6 +56,8 @@ import static org.neo4j.graphalgo.AbstractRelationshipProjection.PROJECTION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 class GraphCreateProcTest extends BaseProcTest {
 
@@ -194,6 +196,18 @@ class GraphCreateProcTest extends BaseProcTest {
             "CALL gds.graph.create('name', 'A', null)",
             "No value specified for the mandatory configuration parameter `relationshipProjection`"
         );
+        assertError(
+            "CALL gds.graph.create.cypher(null, null, null)",
+            "`graphName` can not be null or blank, but it was `null`"
+        );
+        assertError(
+            "CALL gds.graph.create.cypher('name', null, null)",
+            "No value specified for the mandatory configuration parameter `nodeQuery`"
+        );
+        assertError(
+            "CALL gds.graph.create.cypher('name', 'A', null)",
+            "No value specified for the mandatory configuration parameter `relationshipQuery`"
+        );
     }
 
     @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
@@ -204,12 +218,21 @@ class GraphCreateProcTest extends BaseProcTest {
             map("graphName", invalidName),
             String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
+        assertError(
+            "CALL gds.graph.create.cypher($graphName, $nodeQuery, $relationshipQuery)",
+            map("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
+            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+        );
     }
 
     @Test
     void failOnMissingMandatory() {
         assertError(
             "CALL gds.graph.create()",
+            "Procedure call does not provide the required number of arguments"
+        );
+        assertError(
+            "CALL gds.graph.create.cypher()",
             "Procedure call does not provide the required number of arguments"
         );
     }
@@ -241,7 +264,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "{0}, nodeProjection = {1}")
     @MethodSource("nodeProjectionVariants")
-    void testnodeProjectionVariants(String descr, Object nodeProjection, Map<String, Object> desugarednodeProjection) {
+    void testNodeProjectionVariants(String descr, Object nodeProjection, Map<String, Object> desugarednodeProjection) {
         String name = "g";
 
         assertCypherResult(
@@ -259,7 +282,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void failsOnInvalidPropertKey() {
+    void failsOnInvalidPropertyKey() {
         String name = "g";
         Map<String, Object> nodeProjection = singletonMap(
             "A",
@@ -287,6 +310,28 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 "nodeProjection", expectedNodeProjection,
                 "relationshipProjection", isA(Map.class),
+                "nodes", nodeCount,
+                "relationships", relCount,
+                "createMillis", instanceOf(Long.class)
+            ))
+        );
+        List<Graph> graphs = new ArrayList<>(GraphCatalog.getLoadedGraphs("").values());
+        assertThat(graphs, hasSize(1));
+        assertThat(graphs.get(0).availableNodeProperties(), contains(expectedProperties.keySet().toArray()));
+    }
+
+    @ParameterizedTest(name = "properties = {0}")
+    @MethodSource(value = "nodeProperties")
+    void nodePropertiesAndNodeQuery(Object nodeProperties, Map<String, Object> expectedProperties) {
+        String name = "g";
+
+        assertCypherResult(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { nodeProperties: $nodeProperties })",
+            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "nodeProperties", nodeProperties),
+            singletonList(map(
+                "graphName", name,
+                "nodeQuery", ALL_NODES_QUERY,
+                "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -349,7 +394,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "properties = {0}")
     @MethodSource(value = "relationshipProperties")
-    void relPropertiesInRelProjection(Object properties, Map<String, Object> expectedProperties) {
+    void relPropertiesInRelationshipProjection(Object properties, Map<String, Object> expectedProperties) {
         String name = "g";
         Map<String, Object> relProjection = map("B", map("type", "REL", PROPERTIES_KEY, properties));
         Map<String, Object> expectedRelProjection = map(
@@ -372,9 +417,29 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
+    @ParameterizedTest(name = "properties = {0}")
+    @MethodSource(value = "relationshipProperties")
+    void relPropertiesAndRelationshipQuery(Object relationshipProperties, Map<String, Object> expectedProperties) {
+        String name = "g";
+
+        // TODO: check property values on graph
+        assertCypherResult(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
+            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "relationshipProperties", relationshipProperties),
+            singletonList(map(
+                "graphName", name,
+                "nodeQuery", ALL_NODES_QUERY,
+                "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
+                "nodes", nodeCount,
+                "relationships", relCount,
+                "createMillis", instanceOf(Long.class)
+            ))
+        );
+    }
+
     @ParameterizedTest(name = "aggregation={0}")
     @MethodSource("relAggregationTypes")
-    void relProjectionPropertyAggregations(String aggregation) {
+    void relationshipProjectionPropertyAggregations(String aggregation) {
         String name = "g";
         Map<String, Object> properties = map(
             "weight",
@@ -385,7 +450,6 @@ class GraphCreateProcTest extends BaseProcTest {
             map("type", "REL", PROJECTION_KEY, "NATURAL", AGGREGATION_KEY, "DEFAULT", PROPERTIES_KEY, properties)
         );
 
-
         // TODO: check property values on graph
         assertCypherResult(
             "CALL gds.graph.create($name, '*', $relProjection)",
@@ -394,6 +458,30 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 "nodeProjection", isA(Map.class),
                 "relationshipProjection", relProjection,
+                "nodes", nodeCount,
+                "relationships", relCount,
+                "createMillis", instanceOf(Long.class)
+            ))
+        );
+    }
+
+    @ParameterizedTest(name = "aggregation={0}")
+    @MethodSource("relAggregationTypes")
+    void relationshipQueryPropertyAggregations(String aggregation) {
+        String name = "g";
+        Map<String, Object> relationshipProperties = map(
+            "weight",
+            map("property", "weight", AGGREGATION_KEY, aggregation, "defaultValue", Double.NaN)
+        );
+
+        // TODO: check property values on graph
+        assertCypherResult(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
+            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "relationshipProperties", relationshipProperties),
+            singletonList(map(
+                "graphName", name,
+                "nodeQuery", ALL_NODES_QUERY,
+                "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
