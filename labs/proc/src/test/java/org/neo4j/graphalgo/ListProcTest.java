@@ -24,6 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
+import org.neo4j.graphalgo.centrality.ArticleRankProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
@@ -48,8 +49,8 @@ class ListProcTest extends BaseProcTest {
 
     private static final Collection<String> PROCEDURES = new HashSet<>(asList(
         "algo.allShortestPaths.stream",
-        "algo.articleRank",
-        "algo.articleRank.stream",
+        "gds.alpha.articleRank.write",
+        "gds.alpha.articleRank.stream",
         "algo.asPath",
         "algo.balancedTriads",
         "algo.balancedTriads.stream",
