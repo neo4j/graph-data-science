@@ -40,6 +40,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 class GraphListProcTest extends BaseProcTest {
@@ -63,7 +65,7 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @Test
-    void listASingleGraph() {
+    void listASingleLabelRelationshipTypeProjection() {
         String name = "name";
         runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
 
@@ -84,6 +86,39 @@ class GraphListProcTest extends BaseProcTest {
                         "properties", emptyMap()
                     )
                 ),
+                "nodeQuery", null,
+                "relationshipQuery", null,
+                "nodes", 2L,
+                "relationships", 1L,
+                "histogram", map(
+                    "min", 0L,
+                    "mean", 0.5D,
+                    "max", 1L,
+                    "p50", 0L,
+                    "p75", 1L,
+                    "p90", 1L,
+                    "p95", 1L,
+                    "p99", 1L,
+                    "p999", 1L
+                )
+            )
+        ));
+    }
+
+    @Test
+    void listASingleCypherProjection() {
+        String name = "name";
+        runQuery(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY));
+
+        assertCypherResult("CALL gds.graph.list()", singletonList(
+            map(
+                "graphName", name,
+                "nodeProjection", emptyMap(),
+                "relationshipProjection", emptyMap(),
+                "nodeQuery", ALL_NODES_QUERY,
+                "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
                 "nodes", 2L,
                 "relationships", 1L,
                 "histogram", map(

@@ -35,17 +35,23 @@ public class GraphInfo {
     private static final int PRECISION = 5;
 
     public final String graphName;
-    public final Map<String, Object> nodeProjection, relationshipProjection;
-    public final long nodes, relationships;
+    public final Map<String, Object> nodeProjection;
+    public final Map<String, Object> relationshipProjection;
+    public final String nodeQuery;
+    public final String relationshipQuery;
+    public final long nodes;
+    public final long relationships;
     public final Map<String, Object> histogram;
 
     GraphInfo(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
         this.graphName = config.graphName();
-        nodeProjection = config.nodeProjection().toObject();
-        relationshipProjection = config.relationshipProjection().toObject();
-        nodes = graph.nodeCount();
-        relationships = graph.relationshipCount();
-        histogram = computeHistogram ? computeHistogram(graph) : emptyMap();
+        this.nodeProjection = config.nodeProjection().toObject();
+        this.relationshipProjection = config.relationshipProjection().toObject();
+        this.nodeQuery = config.nodeQuery();
+        this.relationshipQuery = config.relationshipQuery();
+        this.nodes = graph.nodeCount();
+        this.relationships = graph.relationshipCount();
+        this.histogram = computeHistogram ? computeHistogram(graph) : emptyMap();
     }
 
     private Map<String, Object> computeHistogram(Graph graph) {

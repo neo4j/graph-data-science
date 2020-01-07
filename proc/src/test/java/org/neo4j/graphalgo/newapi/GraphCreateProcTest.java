@@ -58,6 +58,10 @@ import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 class GraphCreateProcTest extends BaseProcTest {
 
@@ -102,8 +106,10 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeProjection", nodeProjection, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeProjection", nodeProjection,
-                "relationshipProjection", relProjection,
+                NODE_PROJECTION_KEY, nodeProjection,
+                RELATIONSHIP_PROJECTION_KEY, relProjection,
+                NODE_QUERY_KEY, null,
+                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -123,8 +129,10 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
             singletonList(map(
                 "graphName", name,
-                "nodeQuery", nodeQuery,
-                "relationshipQuery", relationshipQuery,
+                NODE_PROJECTION_KEY, emptyMap(),
+                RELATIONSHIP_PROJECTION_KEY, emptyMap(),
+                NODE_QUERY_KEY, nodeQuery,
+                RELATIONSHIP_QUERY_KEY, relationshipQuery,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -272,8 +280,10 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeProjection", nodeProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeProjection", desugarednodeProjection,
-                "relationshipProjection", isA(Map.class),
+                NODE_PROJECTION_KEY, desugarednodeProjection,
+                RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
+                NODE_QUERY_KEY, null,
+                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -308,8 +318,10 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeProjection", nodeProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeProjection", expectedNodeProjection,
-                "relationshipProjection", isA(Map.class),
+                NODE_PROJECTION_KEY, expectedNodeProjection,
+                RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
+                NODE_QUERY_KEY, null,
+                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -330,8 +342,10 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "nodeProperties", nodeProperties),
             singletonList(map(
                 "graphName", name,
-                "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
+                NODE_PROJECTION_KEY, emptyMap(),
+                RELATIONSHIP_PROJECTION_KEY, emptyMap(),
+                NODE_QUERY_KEY, ALL_NODES_QUERY,
+                RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -352,8 +366,10 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeProjection", isA(Map.class),
-                "relationshipProjection", desugaredRelProjection,
+                NODE_PROJECTION_KEY, isA(Map.class),
+                RELATIONSHIP_PROJECTION_KEY, desugaredRelProjection,
+                NODE_QUERY_KEY, null,
+                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -383,8 +399,10 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "relProjections", relProjections),
             singletonList(map(
                 "graphName", name,
-                "nodeProjection", isA(Map.class),
-                "relationshipProjection", expectedRelProjections,
+                NODE_PROJECTION_KEY, isA(Map.class),
+                RELATIONSHIP_PROJECTION_KEY, expectedRelProjections,
+                NODE_QUERY_KEY, null,
+                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", expectedRels,
                 "createMillis", instanceOf(Long.class)
@@ -408,8 +426,10 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeProjection", isA(Map.class),
-                "relationshipProjection", expectedRelProjection,
+                NODE_PROJECTION_KEY, isA(Map.class),
+                RELATIONSHIP_PROJECTION_KEY, expectedRelProjection,
+                NODE_QUERY_KEY, null,
+                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -428,8 +448,10 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "relationshipProperties", relationshipProperties),
             singletonList(map(
                 "graphName", name,
-                "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
+                NODE_PROJECTION_KEY, emptyMap(),
+                RELATIONSHIP_PROJECTION_KEY, emptyMap(),
+                NODE_QUERY_KEY, ALL_NODES_QUERY,
+                RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -456,8 +478,10 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
-                "nodeProjection", isA(Map.class),
-                "relationshipProjection", relProjection,
+                NODE_PROJECTION_KEY, isA(Map.class),
+                RELATIONSHIP_PROJECTION_KEY, relProjection,
+                NODE_QUERY_KEY, null,
+                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -480,8 +504,10 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "relationshipProperties", relationshipProperties),
             singletonList(map(
                 "graphName", name,
-                "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
+                NODE_PROJECTION_KEY, emptyMap(),
+                RELATIONSHIP_PROJECTION_KEY, emptyMap(),
+                NODE_QUERY_KEY, ALL_NODES_QUERY,
+                RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
