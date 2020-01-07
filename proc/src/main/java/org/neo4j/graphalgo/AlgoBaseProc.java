@@ -109,7 +109,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 dimensions.nodeCount(createConfig.nodeCount());
                 dimensions.maxRelCount(createConfig.relationshipCount());
             }
-            estimationBuilder.add("graph", graphFactory.memoryEstimation(graphFactory.setup, dimensions));
+            estimationBuilder.add("graph", graphFactory.memoryEstimation(graphFactory.setup(), dimensions));
         } else {
             String graphName = config.graphName().get();
 

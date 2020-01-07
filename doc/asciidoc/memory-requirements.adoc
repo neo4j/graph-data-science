@@ -32,7 +32,7 @@ To make this process easier every algorithm supports the `.estimate` mode, which
 .Syntax
 [source, cypher]
 ----
-CALL gds.algo.ALGO.MODE.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.algo.<ALGO>.<MODE>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
 ----
 
@@ -44,7 +44,8 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 | config            | map           | {}        | yes       | If the first parameter is the name of a projected graph, this parameter is the algorithm config, otherwise it needs to be null or an empty map.
 |===
 
-The configuration parameter accepts the same configuration parameters as the estimated algorithm. See the algorithm documentation for more information.
+The configuration parameter accepts the same configuration parameters as the estimated algorithm.
+See the algorithm documentation for more information.
 Additionally the following parameters are supported:
 
 .Configuration
