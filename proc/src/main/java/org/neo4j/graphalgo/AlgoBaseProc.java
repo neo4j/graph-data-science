@@ -229,10 +229,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         }
     }
 
-    protected ComputationResult<A, RESULT, CONFIG> compute(
-        Object graphNameOrConfig,
-        Map<String, Object> configuration
-    ) {
+    protected ComputationResult<A, RESULT, CONFIG> compute(Object graphNameOrConfig, Map<String, Object> configuration) {
         ImmutableComputationResult.Builder<A, RESULT, CONFIG> builder = ImmutableComputationResult.builder();
         AllocationTracker tracker = AllocationTracker.create();
 

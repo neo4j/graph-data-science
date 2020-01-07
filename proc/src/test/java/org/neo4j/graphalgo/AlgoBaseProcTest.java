@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Procedure;
 
@@ -53,10 +54,19 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.core.utils.ExceptionUtil.rootCause;
+import static org.neo4j.graphalgo.newapi.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 /**
  * Base test that should be used for every algorithm procedure.
@@ -65,6 +75,8 @@ import static org.neo4j.graphalgo.core.utils.ExceptionUtil.rootCause;
  * clears the data after each test.
  */
 public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
+
+    String TEST_USERNAME = AuthSubject.ANONYMOUS.username();
 
     static Stream<String> emptyStringPropertyValues() {
         return Stream.of(null, "");
@@ -106,20 +118,63 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     }
 
     @Test
-    default void testGraphCreateConfig() {
-        CypherMapWrapper wrapper = createMinimalConfig(CypherMapWrapper.empty());
+    default void testImplicitGraphCreateFromStoreConfig() {
+        CypherMapWrapper wrapper = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+            NODE_PROJECTION_KEY, Collections.singletonList("*"),
+            RELATIONSHIP_PROJECTION_KEY, Collections.singletonList("*")
+        )));
         applyOnProcedure(proc -> {
             CONFIG config = proc.newConfig(Optional.empty(), wrapper);
             assertEquals(Optional.empty(), config.graphName(), "Graph name should be empty.");
             Optional<GraphCreateConfig> maybeGraphCreateConfig = config.implicitCreateConfig();
             assertTrue(maybeGraphCreateConfig.isPresent(), "Config should contain a GraphCreateConfig.");
             GraphCreateConfig actual = maybeGraphCreateConfig.get();
-            GraphCreateFromStoreConfig expected = GraphCreateFromStoreConfig.emptyWithName("", "");
+            assertTrue(
+                actual instanceof GraphCreateFromStoreConfig,
+                String.format("GraphCreateConfig should be %s.", GraphCreateFromStoreConfig.class.getSimpleName()));
 
-            assertEquals(expected.nodeProjection(), actual.nodeProjection());
-            assertEquals(expected.relationshipProjection(), actual.relationshipProjection());
-            assertEquals(expected.graphName(), actual.graphName());
-            assertEquals(expected.username(), actual.username());;
+            NodeProjections expectedNodeProjections = NodeProjections
+                .builder()
+                .putProjection(PROJECT_ALL, NodeProjection.empty())
+                .build();
+            RelationshipProjections expectedRelationshipProjections = RelationshipProjections
+                .builder()
+                .putProjection(PROJECT_ALL, RelationshipProjection.empty())
+                .build();
+
+            assertNull(actual.nodeQuery());
+            assertNull(actual.relationshipQuery());
+            assertEquals(expectedNodeProjections, actual.nodeProjection());
+            assertEquals(expectedRelationshipProjections, actual.relationshipProjection());
+            assertEquals(IMPLICIT_GRAPH_NAME, actual.graphName());
+            assertEquals(TEST_USERNAME, actual.username());;
+        });
+    }
+
+    @Test
+    default void testImplicitGraphCreateFromCypherConfig() {
+        Map<String, Object> tempConfig = MapUtil.map(
+            NODE_QUERY_KEY, ALL_NODES_QUERY,
+            RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY
+        );
+        CypherMapWrapper wrapper = createMinimalConfig(CypherMapWrapper.create(tempConfig));
+
+        applyOnProcedure(proc -> {
+            CONFIG config = proc.newConfig(Optional.empty(), wrapper);
+            assertEquals(Optional.empty(), config.graphName(), "Graph name should be empty.");
+            Optional<GraphCreateConfig> maybeGraphCreateConfig = config.implicitCreateConfig();
+            assertTrue(maybeGraphCreateConfig.isPresent(), "Config should contain a GraphCreateConfig.");
+            GraphCreateConfig actual = maybeGraphCreateConfig.get();
+            assertTrue(
+                actual instanceof GraphCreateFromCypherConfig,
+                String.format("GraphCreateConfig should be %s.", GraphCreateFromCypherConfig.class.getSimpleName()));
+
+            assertEquals(NodeProjections.of(), actual.nodeProjection());
+            assertEquals(RelationshipProjections.of(), actual.relationshipProjection());
+            assertEquals(ALL_NODES_QUERY, actual.nodeQuery());
+            assertEquals(ALL_RELATIONSHIPS_QUERY, actual.relationshipQuery());
+            assertEquals(IMPLICIT_GRAPH_NAME, actual.graphName());
+            assertEquals(TEST_USERNAME, actual.username());
         });
     }
 
@@ -156,12 +211,40 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         });
     }
 
+    @Test
+    default void testRunOnImplicitlyLoadedGraph() {
+        Map<String, Object> cypherConfig = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+            NODE_QUERY_KEY, ALL_NODES_QUERY,
+            RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY
+        ))).toMap();
+
+        Map<String, Object> storeConfig = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+            NODE_PROJECTION_KEY, Collections.singletonList("*"),
+            RELATIONSHIP_PROJECTION_KEY, Collections.singletonList("*")
+        ))).toMap();
+
+        applyOnProcedure((proc) -> {
+
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraphFromCypher = proc.compute(
+                cypherConfig,
+                Collections.emptyMap()
+            );
+
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraphFromStore = proc.compute(
+                storeConfig,
+                Collections.emptyMap()
+            );
+
+            assertResultEquals(resultOnImplicitGraphFromCypher.result(), resultOnImplicitGraphFromStore.result());
+        });
+    }
+
     @AllGraphTypesTest
     default void testRunMultipleTimesOnLoadedGraph(Class<? extends GraphFactory> graphFactory) {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = (graphFactory.isAssignableFrom(HugeGraphFactory.class))
-            ? GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName)
-            : GraphCreateFromCypherConfig.emptyWithName("", loadedGraphName);
+            ? GraphCreateFromStoreConfig.emptyWithName(TEST_USERNAME, loadedGraphName)
+            : GraphCreateFromCypherConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
 
         applyOnProcedure((proc) -> {
             GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graphLoader(graphCreateConfig).load(graphFactory)));
