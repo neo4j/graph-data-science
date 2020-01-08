@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
 import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
 import org.neo4j.graphalgo.impl.similarity.modern.ImmutableModernCosineConfig;
 import org.neo4j.graphalgo.impl.similarity.modern.ImmutableModernEuclideanConfig;
+import org.neo4j.graphalgo.impl.similarity.modern.ImmutableModernJaccardConfig;
 import org.neo4j.graphalgo.impl.similarity.modern.ImmutableModernPearsonConfig;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernApproxNearestNeighborsAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernApproximateNearestNeighborsConfig;
@@ -33,6 +34,8 @@ import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernCosineConfig;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernEuclideanConfig;
+import org.neo4j.graphalgo.impl.similarity.modern.ModernJaccardAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.modern.ModernJaccardConfig;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernPearsonAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernPearsonConfig;
 import org.neo4j.graphalgo.impl.similarity.modern.ModernSimilarityAlgorithm;
@@ -87,7 +90,8 @@ public class ModernApproxNearestNeighborsProc extends ModernSimilarityProc<Moder
     ModernSimilarityAlgorithm<?, ? extends SimilarityInput> similarityAlgorithm(ModernApproximateNearestNeighborsConfig config) {
         switch (config.algorithm()) {
             case jaccard:
-                throw new IllegalArgumentException("TODO");
+                ModernJaccardConfig jaccardConfig = ImmutableModernJaccardConfig.builder().from(config).build();
+                return new ModernJaccardAlgorithm(jaccardConfig, api);
             case cosine:
                 ModernCosineConfig cosineConfig = ImmutableModernCosineConfig.builder().from(config).build();
                 return new ModernCosineAlgorithm(cosineConfig, api);
@@ -95,8 +99,8 @@ public class ModernApproxNearestNeighborsProc extends ModernSimilarityProc<Moder
                 ModernPearsonConfig pearsonConfig = ImmutableModernPearsonConfig.builder().from(config).build();
                 return new ModernPearsonAlgorithm(pearsonConfig, api);
             case euclidean:
-                ModernEuclideanConfig eucideanConfig = ImmutableModernEuclideanConfig.builder().from(config).build();
-                return new ModernEuclideanAlgorithm(eucideanConfig, api);
+                ModernEuclideanConfig euclideanConfig = ImmutableModernEuclideanConfig.builder().from(config).build();
+                return new ModernEuclideanAlgorithm(euclideanConfig, api);
             default:
                 throw new IllegalArgumentException("Unexpected value: " + config.algorithm() + " (sad java 😞)");
         }
