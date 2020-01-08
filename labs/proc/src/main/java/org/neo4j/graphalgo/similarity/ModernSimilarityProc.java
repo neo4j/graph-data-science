@@ -101,7 +101,7 @@ abstract class ModernSimilarityProc
     @Override
     protected final Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
         if (configAndName.other().isPresent()) {
-            throw new IllegalArgumentException("Cosine Similarity does not run on an explicitly created graph");
+            throw new IllegalArgumentException("Similarity does not run on an explicitly created graph");
         }
         return new NullGraph();
     }

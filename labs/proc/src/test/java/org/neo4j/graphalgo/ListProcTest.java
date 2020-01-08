@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.shortestpath.DijkstraProc;
+import org.neo4j.graphalgo.similarity.ModernApproxNearestNeighborsProc;
 import org.neo4j.graphalgo.similarity.ModernCosineProc;
 import org.neo4j.graphalgo.similarity.ModernEuclideanProc;
 import org.neo4j.graphalgo.similarity.ModernOverlapProc;
@@ -80,6 +81,8 @@ class ListProcTest extends BaseProcTest {
         "algo.kShortestPaths.stream",
         "algo.labs.ml.ann",
         "algo.labs.ml.ann.stream",
+        "gds.alpha.ml.ann.write",
+        "gds.alpha.ml.ann.stream",
         "algo.randomWalk.stream",
         "algo.scc",
         "algo.scc.stream",
@@ -125,6 +128,7 @@ class ListProcTest extends BaseProcTest {
         registerProcedures(
             AllShortestPathsProc.class,
             ApproxNearestNeighborsProc.class,
+            ModernApproxNearestNeighborsProc.class,
             ArticleRankProc.class,
             BalancedTriadsProc.class,
             BetweennessCentralityProc.class,
