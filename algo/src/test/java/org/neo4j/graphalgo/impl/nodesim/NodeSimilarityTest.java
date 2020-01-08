@@ -683,16 +683,21 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         assertTrue(log.hasMessages(INFO));
 
-        assertTrue(log.containsMessage(TestLog.INFO, "NodeSimilarity#prepare"));
+        assertTrue(log.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#prepare"));
+        assertTrue(log.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#prepare"));
         assertTrue(log.containsMessage(TestLog.INFO, "NodeSimilarity#computeToStream"));
 
         if (concurrency > 1) {
-            assertTrue(log.containsMessage(TestLog.INFO, "NodeSimilarity#computeTopKMapParallel"));
+            assertTrue(log.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#computeTopKMapParallel"));
+            assertTrue(log.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#computeTopKMapParallel"));
         } else {
-            assertTrue(log.containsMessage(TestLog.INFO, "NodeSimilarity#computeTopKMap"));
+            assertTrue(log.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#computeTopKMap"));
+            assertTrue(log.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#computeTopKMap"));
         }
 
-        assertTrue(log.containsMessage(TestLog.INFO, "NodeSimilarity#computeTopN(TopKMap)"));    }
+        assertTrue(log.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#computeTopN(TopKMap)"));
+        assertTrue(log.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#computeTopN(TopKMap)"));
+    }
 
     @Timeout(value = 10)
     @Test
