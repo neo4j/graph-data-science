@@ -25,6 +25,9 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
+import java.util.Collection;
+import java.util.Collections;
+
 public interface BaseConfig {
     @Configuration.Parameter
     @Value.Default
@@ -35,5 +38,10 @@ public interface BaseConfig {
     @Configuration.Ignore
     default Class<? extends GraphFactory> getGraphImpl() {
         return HugeGraphFactory.class;
+    };
+
+    @Configuration.CollectKeys
+    default Collection<String> configKeys() {
+        return Collections.emptyList();
     };
 }

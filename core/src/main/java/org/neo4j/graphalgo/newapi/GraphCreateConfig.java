@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;

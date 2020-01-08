@@ -48,6 +48,7 @@ import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.helpers.collection.Pair;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -75,9 +76,13 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
         if (!graphName.isPresent()) {
             // we should do implicit loading
-            maybeImplicitCreate = Optional.of(GraphCreateConfig.createImplicit(getUsername(), config));
+            GraphCreateConfig createConfig = GraphCreateConfig.createImplicit(getUsername(), config);
+            maybeImplicitCreate = Optional.of(createConfig);
+            config = config.withoutAny(createConfig.configKeys());
         }
-        return newConfig(getUsername(), graphName, maybeImplicitCreate, config);
+        CONFIG algoConfig = newConfig(getUsername(), graphName, maybeImplicitCreate, config);
+        config.withoutAny(algoConfig.configKeys()).requireEmpty();
+        return algoConfig;
     }
 
     // TODO make AlgorithmFactory have a constructor that accepts CONFIG

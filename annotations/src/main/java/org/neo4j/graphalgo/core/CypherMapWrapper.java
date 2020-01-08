@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +49,10 @@ public final class CypherMapWrapper {
      */
     public boolean containsKey(String key) {
         return this.config.containsKey(key);
+    }
+
+    public boolean isEmpty() {
+        return config.isEmpty();
     }
 
     public Optional<String> getString(String key) {
@@ -193,6 +197,15 @@ public final class CypherMapWrapper {
         return typedValue(key, expectedType, config.get(key));
     }
 
+    public void requireEmpty() {
+        if (!isEmpty()) {
+            throw new IllegalArgumentException(String.format(
+                "Unexpected configuration key(s): %s",
+                config.keySet()
+            ));
+        }
+    }
+
     @SuppressWarnings("unchecked")
     @Contract("_, !null -> !null")
     @Deprecated
@@ -313,9 +326,9 @@ public final class CypherMapWrapper {
         return new CypherMapWrapper(newMap);
     }
 
-    public CypherMapWrapper withoutAny(String... keys) {
+    public CypherMapWrapper withoutAny(Collection<String> keys) {
         Map<String, Object> newMap = new HashMap<>(config);
-        newMap.keySet().removeAll(Arrays.asList(keys));
+        newMap.keySet().removeAll(keys);
         return new CypherMapWrapper(newMap);
     }
 }
