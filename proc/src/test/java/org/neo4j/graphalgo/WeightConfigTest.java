@@ -156,6 +156,23 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
     }
 
     @Test
+    default void testFilteringRelationshipWeightsOnLoadedGraph() {
+        String weightedGraphName = "weightedGraph";
+        loadExplicitGraph(weightedGraphName);
+
+        CypherMapWrapper configWithoutRelWeight = CypherMapWrapper.create(MapUtil.map("relationshipTypes", Collections.singletonList("TYPE1")));
+        CypherMapWrapper algoConfig = createMinimalConfig(configWithoutRelWeight);
+
+        applyOnProcedure((proc) -> {
+            CONFIG config = proc.newConfig(Optional.of(weightedGraphName), algoConfig);
+            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(weightedGraphName));
+
+            Graph graph = proc.createGraph(configAndName);
+            assertGraphEquals(fromGdl("()-[]->(), ()"), graph);
+        });
+    }
+
+    @Test
     default void testFilteringOnRelTypesOnLoadedGraph() {
         String graphName = "foo";
         loadExplicitGraph(graphName);
