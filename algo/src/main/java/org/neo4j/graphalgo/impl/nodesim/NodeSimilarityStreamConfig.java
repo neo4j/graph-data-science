@@ -36,14 +36,12 @@ public interface NodeSimilarityStreamConfig extends NodeSimilarityBaseConfig {
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        NodeSimilarityStreamConfig config = new NodeSimilarityStreamConfigImpl(
+        return new NodeSimilarityStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
             userInput
         );
-        config.validate();
-        return config;
     }
 
     @Override
