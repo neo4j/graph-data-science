@@ -298,16 +298,20 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private LongStream log(LongStream stream) {
-        long logInterval = Math.min(MAXIMUM_LOG_INTERVAL, Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100)));
-        return stream.peek(node -> {
-            if ((node & (logInterval - 1)) == 0) {
-                progressLogger.logProgress(node, nodesToCompare);
-            }
-        });
+        return peekLongStream(stream, (node) -> progressLogger.logProgress(node, nodesToCompare));
     }
 
     private LongStream assertRunning(LongStream stream) {
-        return stream.peek(node -> assertRunning());
+        return peekLongStream(stream, (node) -> assertRunning());
+    }
+
+    private LongStream peekLongStream(LongStream stream, Consumer<Long> fn) {
+        long logInterval = Math.min(MAXIMUM_LOG_INTERVAL, Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100)));
+        return stream.peek(node -> {
+            if ((node & (logInterval - 1)) == 0) {
+                fn.accept(node);
+            }
+        });
     }
 
     private double jaccard(long[] vector1, long[] vector2) {
