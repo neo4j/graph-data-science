@@ -41,6 +41,9 @@ public interface BaseConfig {
     };
 
     @Configuration.CollectKeys
+    @Value.Auxiliary
+    @Value.Default
+    @Value.Parameter(false)
     default Collection<String> configKeys() {
         return Collections.emptyList();
     };
