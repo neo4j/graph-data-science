@@ -62,7 +62,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void additionalKeyForExplicitLoading() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.algo.pageRank.stream('foo', {maxIterations: 1337, nodeProjection: '*'})")
+            () -> runQuery("CALL gds.pageRank.stream('foo', {maxIterations: 1337, nodeProjection: '*'})")
         );
 
         assertThat(
@@ -75,7 +75,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void additionalKeyForImplicitLoading() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.algo.pageRank.stream({maxIterations: 1337, nodeProjection: '*', some: 'key'})")
+            () -> runQuery("CALL gds.pageRank.stream({maxIterations: 1337, nodeProjection: '*', some: 'key'})")
         );
 
         assertThat(
