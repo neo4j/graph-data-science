@@ -44,10 +44,6 @@ public interface GraphCreateConfig extends BaseConfig {
 
     RelationshipProjections relationshipProjection();
 
-    @Nullable String nodeQuery();
-
-    @Nullable String relationshipQuery();
-
     @Value.Default
     @Value.Parameter(false)
     @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")

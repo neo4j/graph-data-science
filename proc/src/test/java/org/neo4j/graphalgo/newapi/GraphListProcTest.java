@@ -86,8 +86,6 @@ class GraphListProcTest extends BaseProcTest {
                         "properties", emptyMap()
                     )
                 ),
-                "nodeQuery", null,
-                "relationshipQuery", null,
                 "nodes", 2L,
                 "relationships", 1L,
                 "histogram", map(
@@ -117,8 +115,6 @@ class GraphListProcTest extends BaseProcTest {
                 "graphName", name,
                 "nodeProjection", emptyMap(),
                 "relationshipProjection", emptyMap(),
-                "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
                 "nodes", 2L,
                 "relationships", 1L,
                 "histogram", map(

@@ -62,12 +62,10 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         return RelationshipProjections.of();
     }
 
-    @Override
     @Configuration.Parameter
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String nodeQuery();
 
-    @Override
     @Configuration.Parameter
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String relationshipQuery();

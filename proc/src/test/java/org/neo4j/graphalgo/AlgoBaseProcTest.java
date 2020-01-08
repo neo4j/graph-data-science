@@ -142,8 +142,6 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
                 .putProjection(PROJECT_ALL, RelationshipProjection.empty())
                 .build();
 
-            assertNull(actual.nodeQuery());
-            assertNull(actual.relationshipQuery());
             assertEquals(expectedNodeProjections, actual.nodeProjection());
             assertEquals(expectedRelationshipProjections, actual.relationshipProjection());
             assertEquals(IMPLICIT_GRAPH_NAME, actual.graphName());
@@ -164,17 +162,18 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             assertEquals(Optional.empty(), config.graphName(), "Graph name should be empty.");
             Optional<GraphCreateConfig> maybeGraphCreateConfig = config.implicitCreateConfig();
             assertTrue(maybeGraphCreateConfig.isPresent(), "Config should contain a GraphCreateConfig.");
-            GraphCreateConfig actual = maybeGraphCreateConfig.get();
             assertTrue(
-                actual instanceof GraphCreateFromCypherConfig,
+                maybeGraphCreateConfig.get() instanceof GraphCreateFromCypherConfig,
                 String.format("GraphCreateConfig should be %s.", GraphCreateFromCypherConfig.class.getSimpleName()));
 
-            assertEquals(NodeProjections.of(), actual.nodeProjection());
-            assertEquals(RelationshipProjections.of(), actual.relationshipProjection());
-            assertEquals(ALL_NODES_QUERY, actual.nodeQuery());
-            assertEquals(ALL_RELATIONSHIPS_QUERY, actual.relationshipQuery());
-            assertEquals(IMPLICIT_GRAPH_NAME, actual.graphName());
-            assertEquals(TEST_USERNAME, actual.username());
+            GraphCreateFromCypherConfig actualConfig = (GraphCreateFromCypherConfig) maybeGraphCreateConfig.get();
+
+            assertEquals(NodeProjections.of(), actualConfig.nodeProjection());
+            assertEquals(RelationshipProjections.of(), actualConfig.relationshipProjection());
+            assertEquals(ALL_NODES_QUERY, actualConfig.nodeQuery());
+            assertEquals(ALL_RELATIONSHIPS_QUERY, actualConfig.relationshipQuery());
+            assertEquals(IMPLICIT_GRAPH_NAME, actualConfig.graphName());
+            assertEquals(TEST_USERNAME, actualConfig.username());
         });
     }
 

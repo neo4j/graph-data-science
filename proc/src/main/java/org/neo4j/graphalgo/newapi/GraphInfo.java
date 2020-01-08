@@ -37,8 +37,6 @@ public class GraphInfo {
     public final String graphName;
     public final Map<String, Object> nodeProjection;
     public final Map<String, Object> relationshipProjection;
-    public final String nodeQuery;
-    public final String relationshipQuery;
     public final long nodes;
     public final long relationships;
     public final Map<String, Object> histogram;
@@ -47,8 +45,6 @@ public class GraphInfo {
         this.graphName = config.graphName();
         this.nodeProjection = config.nodeProjection().toObject();
         this.relationshipProjection = config.relationshipProjection().toObject();
-        this.nodeQuery = config.nodeQuery();
-        this.relationshipQuery = config.relationshipQuery();
         this.nodes = graph.nodeCount();
         this.relationships = graph.relationshipCount();
         this.histogram = computeHistogram ? computeHistogram(graph) : emptyMap();

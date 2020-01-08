@@ -128,8 +128,6 @@ public class GraphCreateProc extends CatalogProc {
         public final String graphName;
         public final Map<String, Object> nodeProjection;
         public final Map<String, Object> relationshipProjection;
-        public final String nodeQuery;
-        public final String relationshipQuery;
         public final long nodes;
         public final long relationships;
         public final long createMillis;
@@ -138,8 +136,6 @@ public class GraphCreateProc extends CatalogProc {
             String graphName,
             Map<String, Object> nodeProjection,
             Map<String, Object> relationshipProjection,
-            String nodeQuery,
-            String relationshipQuery,
             long nodes,
             long relationships,
             long createMillis
@@ -147,8 +143,6 @@ public class GraphCreateProc extends CatalogProc {
             this.graphName = graphName;
             this.nodeProjection = nodeProjection;
             this.relationshipProjection = relationshipProjection;
-            this.nodeQuery = nodeQuery;
-            this.relationshipQuery = relationshipQuery;
             this.nodes = nodes;
             this.relationships = relationships;
             this.createMillis = createMillis;
@@ -158,8 +152,6 @@ public class GraphCreateProc extends CatalogProc {
             private final String graphName;
             private final NodeProjections nodeProjections;
             private final RelationshipProjections relationshipProjections;
-            public final String nodeQuery;
-            public final String relationshipQuery;
             private long nodes;
             private long relationships;
             private long createMillis;
@@ -168,8 +160,6 @@ public class GraphCreateProc extends CatalogProc {
                 this.graphName = config.graphName();
                 this.nodeProjections = config.nodeProjection();
                 this.relationshipProjections = config.relationshipProjection();
-                this.nodeQuery = config.nodeQuery();
-                this.relationshipQuery = config.relationshipQuery();
             }
 
             void withGraph(GraphsByRelationshipType graph) {
@@ -186,8 +176,6 @@ public class GraphCreateProc extends CatalogProc {
                     graphName,
                     nodeProjections.toObject(),
                     relationshipProjections.toObject(),
-                    nodeQuery,
-                    relationshipQuery,
                     nodes,
                     relationships,
                     createMillis

@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.logging.Log;
@@ -103,12 +104,16 @@ public class ModernGraphSetup implements GraphSetup {
 
     @Override
     public Optional<String> nodeQuery() {
-        return Optional.ofNullable(createConfig.nodeQuery());
+        return createConfig instanceof GraphCreateFromCypherConfig
+            ? Optional.ofNullable(((GraphCreateFromCypherConfig) createConfig).nodeQuery())
+            : Optional.empty();
     }
 
     @Override
     public Optional<String> relationshipQuery() {
-        return Optional.ofNullable(createConfig.relationshipQuery());
+        return createConfig instanceof GraphCreateFromCypherConfig
+            ? Optional.ofNullable(((GraphCreateFromCypherConfig) createConfig).relationshipQuery())
+            : Optional.empty();
     }
 
     /**

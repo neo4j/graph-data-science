@@ -87,8 +87,6 @@ class GraphDropProcTest extends BaseProcTest {
                             "properties", emptyMap()
                         )
                     ),
-                    "nodeQuery", null,
-                    "relationshipQuery", null,
                     "nodes", 2L,
                     "relationships", 1L,
                     "histogram", map(

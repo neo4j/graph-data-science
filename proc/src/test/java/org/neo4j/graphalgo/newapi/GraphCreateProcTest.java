@@ -58,8 +58,6 @@ import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
@@ -108,8 +106,6 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, nodeProjection,
                 RELATIONSHIP_PROJECTION_KEY, relProjection,
-                NODE_QUERY_KEY, null,
-                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -131,8 +127,6 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, emptyMap(),
                 RELATIONSHIP_PROJECTION_KEY, emptyMap(),
-                NODE_QUERY_KEY, nodeQuery,
-                RELATIONSHIP_QUERY_KEY, relationshipQuery,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -282,8 +276,6 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, desugarednodeProjection,
                 RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
-                NODE_QUERY_KEY, null,
-                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -320,8 +312,6 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, expectedNodeProjection,
                 RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
-                NODE_QUERY_KEY, null,
-                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -344,8 +334,6 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, emptyMap(),
                 RELATIONSHIP_PROJECTION_KEY, emptyMap(),
-                NODE_QUERY_KEY, ALL_NODES_QUERY,
-                RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -368,8 +356,6 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, desugaredRelProjection,
-                NODE_QUERY_KEY, null,
-                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -401,8 +387,6 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, expectedRelProjections,
-                NODE_QUERY_KEY, null,
-                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", expectedRels,
                 "createMillis", instanceOf(Long.class)
@@ -428,8 +412,6 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, expectedRelProjection,
-                NODE_QUERY_KEY, null,
-                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -450,8 +432,6 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, emptyMap(),
                 RELATIONSHIP_PROJECTION_KEY, emptyMap(),
-                NODE_QUERY_KEY, ALL_NODES_QUERY,
-                RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -480,8 +460,6 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, relProjection,
-                NODE_QUERY_KEY, null,
-                RELATIONSHIP_QUERY_KEY, null,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -506,8 +484,6 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, emptyMap(),
                 RELATIONSHIP_PROJECTION_KEY, emptyMap(),
-                NODE_QUERY_KEY, ALL_NODES_QUERY,
-                RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodes", nodeCount,
                 "relationships", relCount,
                 "createMillis", instanceOf(Long.class)

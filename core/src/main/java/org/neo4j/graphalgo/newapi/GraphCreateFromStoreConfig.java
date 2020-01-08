@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.newapi;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -51,18 +50,6 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     @Configuration.Parameter
     @ConvertWith("org.neo4j.graphalgo.AbstractRelationshipProjections#fromObject")
     RelationshipProjections relationshipProjection();
-
-    @Override
-    @Configuration.Ignore
-    @Nullable default String nodeQuery() {
-        return null;
-    }
-
-    @Override
-    @Configuration.Ignore
-    @Nullable default String relationshipQuery() {
-        return null;
-    }
 
     @Value.Check
     @Configuration.Ignore
