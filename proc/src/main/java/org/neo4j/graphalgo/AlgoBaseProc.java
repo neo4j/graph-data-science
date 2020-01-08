@@ -106,6 +106,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
             if (createConfig.nodeCount() >= 0 || createConfig.relationshipCount() >= 0) {
                 dimensions.nodeCount(createConfig.nodeCount());
+                dimensions.highestNeoId(createConfig.nodeCount());
                 dimensions.maxRelCount(createConfig.relationshipCount());
             }
 

@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -59,9 +60,35 @@ public interface MemoryEstimateTest<CONFIG extends AlgoBaseConfig, RESULT> exten
                 .forEach(estimateMethod -> {
                     Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     try {
-                        Stream<MemoryEstimateResult> result = (Stream)estimateMethod.invoke(proc, config, Collections.emptyMap());
+                        Stream<MemoryEstimateResult> result = (Stream) estimateMethod.invoke(proc, config, Collections.emptyMap());
                         result.forEach(row -> {
                             assertTrue(row.nodeCount > 0);
+                            assertTrue(row.bytesMin > 0);
+                            assertTrue(row.bytesMax >= row.bytesMin);
+                            assertNotNull(row.mapView);
+                            assertFalse(row.treeView.isEmpty());
+                        });
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        fail(e);
+                    }
+                });
+        });
+    }
+
+    @Test
+    default void testMemoryEstimateOnExplicitDimensions() {
+        applyOnProcedure(proc -> {
+            getProcedureMethods(proc)
+                .filter(procMethod -> getProcedureMethodName(procMethod).endsWith(".estimate"))
+                .forEach(estimateMethod -> {
+                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()
+                        .withNumber("nodeCount", 10000)
+                        .withNumber("relationshipCount", 10000)).toMap();
+                    try {
+                        Stream<MemoryEstimateResult> result = (Stream) estimateMethod.invoke(proc, config, Collections.emptyMap());
+                        result.forEach(row -> {
+                            assertEquals(10000, row.nodeCount);
+                            assertEquals(10000, row.relationshipCount);
                             assertTrue(row.bytesMin > 0);
                             assertTrue(row.bytesMax >= row.bytesMin);
                             assertNotNull(row.mapView);

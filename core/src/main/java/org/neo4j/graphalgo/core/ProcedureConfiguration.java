@@ -122,6 +122,7 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
             long nodeCount = get(NODECOUNT_KEY, 0L);
             long relCount = get(RELCOUNT_KEY, 0L);
             dimensions.nodeCount(nodeCount);
+            dimensions.highestNeoId(nodeCount);
             dimensions.maxRelCount(relCount);
             estimation = factory.memoryEstimation(setup, dimensions);
         } else {
