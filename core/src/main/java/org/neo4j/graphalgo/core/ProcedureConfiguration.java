@@ -40,6 +40,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -524,6 +525,12 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
         }
 
         return CypherMapWrapper.typedValue(key, Number.class, value).doubleValue();
+    }
+
+    @Override
+    public Collection<String> configKeys() {
+        // ProcedureConfig takes ownership of every key
+        return configurationMap.toMap().keySet();
     }
 
     public static ProcedureConfiguration create(Map<String, Object> config, String username) {

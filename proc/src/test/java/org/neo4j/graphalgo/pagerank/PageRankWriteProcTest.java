@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.pagerank;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
 import org.neo4j.graphalgo.WriteConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -43,12 +45,13 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
-    void testPageRankWriteBack(String graphSnippet, String testCaseName) {
+    void testPageRankWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
         String writeProperty = "myFancyScore";
-        String query = "CALL gds.pageRank.write(" +
-                       graphSnippet +
-                       "  writeProperty: $writeProp" +
-                       "}) YIELD writeMillis, writeProperty";
+        String query = queryBuilder
+            .writeMode()
+            .addPlaceholder("writeProperty", "writeProp")
+            .yields("writeMillis", "writeProperty");
+
         runQueryWithRowConsumer(query, MapUtil.map("writeProp", writeProperty),
             row -> {
                 assertEquals(writeProperty, row.getString("writeProperty"));
@@ -60,12 +63,13 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsWeight")
-    void testWeightedPageRankWriteBack(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.pageRank.write(" +
-                       graphSnippet +
-                       "        writeProperty: 'pagerank', weightProperty: 'weight'" +
-                       "    }" +
-                       ") YIELD writeMillis, writeProperty";
+    void testWeightedPageRankWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
+        String query = queryBuilder
+            .writeMode()
+            .addParameter("writeProperty", "pagerank")
+            .addParameter("weightProperty", "weight")
+            .yields("writeMillis", "writeProperty");
+
         runQueryWithRowConsumer(
             query,
             row -> {
@@ -78,12 +82,12 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
-    void testPageRankParallelWriteBack(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.pageRank.write(" +
-                       graphSnippet +
-                       "        batchSize: 3, writeProperty: 'pagerank', graph: 'myGraph1'" +
-                       "    }" +
-                       ") YIELD writeMillis, writeProperty";
+    void testPageRankParallelWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
+        String query = queryBuilder
+            .writeMode()
+            .addParameter("writeProperty", "pagerank")
+            .yields("writeMillis", "writeProperty");
+
         runQueryWithRowConsumer(
             query,
             row -> assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set")
@@ -93,54 +97,52 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
-    void testPageRankWithToleranceParam(String graphSnippet, String testCaseName) {
-        graphSnippet += " writeProperty: 'writeProp',";
-        String graphName = "myGraph1";
-        String query = "CALL gds.pageRank.write(" +
-                       graphSnippet +
-                       "      tolerance: 0.0001, batchSize: 2, graph: $graph" +
-                       "  }" +
-                       ") YIELD ranIterations";
-        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName),
+    void testPageRankWithToleranceParam(ModeBuildStage queryBuilder, String testCaseName) {
+        GdsCypher.ParametersBuildStage builder = queryBuilder
+            .writeMode()
+            .addParameter("writeProperty", "writeProp");
+        String query = builder
+            .addParameter("tolerance", 0.0001)
+            .yields("ranIterations");
+
+        runQueryWithRowConsumer(query,
             row -> assertEquals(20L, (long) row.getNumber("ranIterations"))
         );
 
-        query = "CALL gds.pageRank.write(" +
-                graphSnippet +
-                "        tolerance: 100.0, batchSize: 2, graph: $graph" +
-                "  }" +
-                ") YIELD ranIterations";
-        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName),
+        query = builder
+            .addParameter("tolerance", 100.0)
+            .yields("ranIterations");
+
+        runQueryWithRowConsumer(query,
             row -> assertEquals(1L, (long) row.getNumber("ranIterations"))
         );
 
-        query = "CALL gds.pageRank.write(" +
-                graphSnippet +
-                "        tolerance: 0.20010237991809848, batchSize: 2, graph: $graph" +
-                "  }" +
-                ") YIELD ranIterations";
-        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName),
+        query = builder
+            .addParameter("tolerance", 0.20010237991809848)
+            .yields("ranIterations");
+
+        runQueryWithRowConsumer(query,
             row -> assertEquals(4L, (long) row.getNumber("ranIterations"))
         );
 
-        query = "CALL gds.pageRank.write(" +
-                graphSnippet +
-                "        tolerance: 0.20010237991809843, batchSize: 2, graph: $graph" +
-                "  }" +
-                ") YIELD ranIterations";
-        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName),
+        query = builder
+            .addParameter("tolerance", 0.20010237991809843)
+            .yields("ranIterations");
+
+        runQueryWithRowConsumer(query,
             row -> assertEquals(5L, (long) row.getNumber("ranIterations"))
         );
     }
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
-    void testWriteYieldRanAndMaxIterationsAndDidConverge(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.pageRank.write(" +
-                       graphSnippet +
-                       "     writeProperty: 'writeProp', tolerance: 0.0001, batchSize: 2" +
-                       "  }" +
-                       ") YIELD ranIterations, didConverge, maxIterations";
+    void testWriteYieldRanAndMaxIterationsAndDidConverge(ModeBuildStage queryBuilder, String testCaseName) {
+        String query = queryBuilder
+            .writeMode()
+            .addParameter("writeProperty", "writeProp")
+            .addParameter("tolerance", 0.0001)
+            .yields("ranIterations", "didConverge", "maxIterations");
+
         runQueryWithRowConsumer(
             query,
             row -> {
@@ -154,12 +156,13 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
-    void testStatsYieldRanAndMaxIterationsAndDidConverge(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.pageRank.stats(" +
-                       graphSnippet +
-                       "     writeProperty: 'writeProp', tolerance: 0.0001, batchSize: 2" +
-                       "  }" +
-                       ") YIELD ranIterations, didConverge, maxIterations, dampingFactor";
+    void testStatsYieldRanAndMaxIterationsAndDidConverge(ModeBuildStage queryBuilder, String testCaseName) {
+        String query = queryBuilder
+            .writeMode()
+            .addParameter("writeProperty", "writeProp")
+            .addParameter("tolerance", 0.0001)
+            .yields("ranIterations", "didConverge", "maxIterations", "dampingFactor");
+
         runQueryWithRowConsumer(
             query,
             row -> {
@@ -169,7 +172,6 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
                 assertFalse(row.getBoolean("didConverge"));
             }
         );
-
     }
 
     @Override

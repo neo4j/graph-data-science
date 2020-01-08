@@ -157,7 +157,6 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             .explicitCreation(EXPLICIT_GRAPH_NAME)
             .algo("gds", "alpha", "eigenvector")
             .streamMode()
-            .addParameter("direction", "BOTH")
             .addParameter("normalization", normalizationType)
             .yields("nodeId", "score");
 
@@ -192,7 +191,6 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             )).build())
             .algo("gds", "alpha", "eigenvector")
             .streamMode()
-            .addParameter("direction", "BOTH")
             .addParameter("normalization", normalizationType)
             .addParameter("writeProperty", "eigen")
             .yields("nodeId", "score");
@@ -221,7 +219,6 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             .explicitCreation(EXPLICIT_GRAPH_NAME)
             .algo("gds", "alpha", "eigenvector")
             .writeMode()
-            .addParameter("direction", "BOTH")
             .addParameter("normalization", normalizationType)
             .addParameter("writeProperty", "eigen")
             .yields();
@@ -259,7 +256,6 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             )).build())
             .algo("gds", "alpha", "eigenvector")
             .writeMode()
-            .addParameter("direction", "BOTH")
             .addParameter("normalization", normalizationType)
             .addParameter("writeProperty", "eigen")
             .yields();
@@ -322,7 +318,6 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
     void testParallelWrite(String desc, GdsCypher.ModeBuildStage queryBuilder) {
         String eigenvectorWriteQuery = queryBuilder
             .writeMode()
-            .addParameter("batchSize", 3)
             .addParameter("concurrency", 2)
             .yields("writeMillis", "writeProperty", "iterations");
         runQueryWithRowConsumer(
@@ -338,7 +333,6 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         final Map<Long, Double> actual = new HashMap<>();
         String eigenvectorStreamQuery = queryBuilder
             .streamMode()
-            .addParameter("batchSize", 3)
             .addParameter("concurrency", 2)
             .yields("nodeId", "score");
         eigenvectorStreamQuery = eigenvectorStreamQuery +

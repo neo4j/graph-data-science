@@ -43,7 +43,7 @@ class PageRankDocTest extends BaseProcTest {
                              "CREATE (b:Page {name:'Site B'})" +
                              "CREATE (c:Page {name:'Site C'})" +
                              "CREATE (d:Page {name:'Site D'})" +
-                             
+
                              "CREATE (home)-[:LINKS {weight: 0.2}]->(about)" +
                              "CREATE (home)-[:LINKS {weight: 0.2}]->(links)" +
                              "CREATE (home)-[:LINKS {weight: 0.6}]->(product)" +
@@ -277,8 +277,7 @@ class PageRankDocTest extends BaseProcTest {
             "  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page)" +
             "                      RETURN id(p1) AS source, id(p2) AS target'," +
             "   maxIterations:20," +
-            "   dampingFactor:0.85," +
-            "   graph:'cypher'" +
+            "   dampingFactor:0.85" +
             "})" +
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).name AS name, score " +

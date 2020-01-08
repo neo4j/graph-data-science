@@ -191,4 +191,15 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
             is(String.format("No value specified for the mandatory configuration parameter `%s`", parameter))
         );
     }
+
+    @Override
+    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
+        if (!mapWrapper.containsKey("writeProperty")) {
+            mapWrapper = mapWrapper.withString("writeProperty", "foo");
+        }
+        if (!mapWrapper.containsKey("writeRelationshipType")) {
+            mapWrapper = mapWrapper.withString("writeRelationshipType", "bar");
+        }
+        return mapWrapper;
+    }
 }
