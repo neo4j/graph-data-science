@@ -348,17 +348,15 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY
         ))).toMap();
 
-        applyOnProcedure((proc) -> {
-            IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> proc.compute(
-                    config,
-                    Collections.emptyMap()
-                )
-            );
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> applyOnProcedure((proc) -> proc.compute(
+                config,
+                Collections.emptyMap()
+            ))
+        );
 
-            assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
-        });
+        assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
     }
 
     @Test
@@ -368,17 +366,15 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             RELATIONSHIP_QUERY_KEY, "MATCH (s)-->(t) SET s.foo=false RETURN id(s) AS source, id(t) as target"
         ))).toMap();
 
-        applyOnProcedure((proc) -> {
-            IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> proc.compute(
-                    config,
-                    Collections.emptyMap()
-                )
-            );
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> applyOnProcedure((proc) -> proc.compute(
+                config,
+                Collections.emptyMap()
+            ))
+        );
 
-            assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
-        });
+        assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
     }
 
     @Test
