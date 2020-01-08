@@ -27,25 +27,21 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 public class GraphListProc extends CatalogProc {
 
+    private static final String NO_VALUE = "__NO_VALUE";
+
     @Procedure(name = "gds.graph.list", mode = Mode.READ)
     @Description("Lists information about named graphs stored in the catalog.")
-    public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = "null") Object maybeGraphName) {
-        if (Objects.nonNull(maybeGraphName) && !(maybeGraphName instanceof String)) {
-            throw new IllegalArgumentException("`graphName` parameter must be a STRING");
-        }
-
+    public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = NO_VALUE) String graphName) {
         Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries = GraphCatalog
             .getLoadedGraphs(getUsername())
             .entrySet()
             .stream();
 
-        if (maybeGraphName != null) {
-            String graphName = (String) maybeGraphName;
+        if (graphName != null && !graphName.equals(NO_VALUE)) {
             validateGraphName(graphName);
 
             // we should only list the provided graph
