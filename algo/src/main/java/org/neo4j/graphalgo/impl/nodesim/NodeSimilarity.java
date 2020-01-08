@@ -37,10 +37,13 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResult> {
+
+    private static final long MAXIMUM_LOG_INTERVAL = (long) Math.pow(2, 13);
 
     private final Graph graph;
     private final NodeSimilarityBaseConfig config;
@@ -52,8 +55,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
 
     private HugeObjectArray<long[]> vectors;
     private long nodesToCompare;
-
-    private Stream<SimilarityResult> similarityStream;
 
     public NodeSimilarity(
         Graph graph,
@@ -98,10 +99,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     public Stream<SimilarityResult> computeToStream() {
+        progressLogger.log("NodeSimilarity#computeToStream");
 
         // Create a filter for which nodes to compare and calculate the neighborhood for each node
         prepare();
-
         assertRunning();
 
         // Compute similarities
@@ -121,10 +122,13 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     public SimilarityGraphResult computeToGraph() {
         Graph similarityGraph;
         if (config.hasTopK() && !config.hasTopN()) {
+            progressLogger.log("NodeSimilarity#computeToGraph");
+
             prepare();
+
             TopKMap topKMap = config.isParallel()
                 ? computeTopKMapParallel()
-                : computeTopkMap();
+                : computeTopKMap();
             similarityGraph = new TopKGraph(graph, topKMap);
         } else {
             Stream<SimilarityResult> similarities = computeToStream();
@@ -138,6 +142,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
             throw new IllegalArgumentException(
                 "Direction BOTH is not supported by the NodeSimilarity algorithm.");
         }
+
+        progressLogger.log("Start :: NodeSimilarity#prepare");
 
         vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
 
@@ -157,13 +163,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
             }
             return null;
         });
+        progressLogger.log("Finish :: NodeSimilarity#prepare");
     }
 
     private Stream<SimilarityResult> computeSimilarityResultStream() {
         return (config.hasTopK() && config.hasTopN())
-            ? computeTopN(computeTopkMap())
+            ? computeTopN(computeTopKMap())
             : (config.hasTopK())
-                ? computeTopkMap().stream()
+                ? computeTopKMap().stream()
                 : computeAll();
     }
 
@@ -176,7 +183,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private Stream<SimilarityResult> computeAll() {
-        return loggelableAndTerminatableNodeStream()
+        progressLogger.log("NodeSimilarity#computeAll");
+
+        return loggableAndTerminatableNodeStream()
             .boxed()
             .flatMap(node1 -> {
                 long[] vector1 = vectors.get(node1);
@@ -190,8 +199,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private Stream<SimilarityResult> computeAllParallel() {
+        progressLogger.log("NodeSimilarity#computeAllParallel");
+
         return ParallelUtil.parallelStream(
-            loggelableAndTerminatableNodeStream(), stream -> stream
+            loggableAndTerminatableNodeStream(), stream -> stream
                 .boxed()
                 .flatMap(node1 -> {
                     long[] vector1 = vectors.get(node1);
@@ -205,10 +216,12 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         );
     }
 
-    private TopKMap computeTopkMap() {
+    private TopKMap computeTopKMap() {
+        progressLogger.log("Start :: NodeSimilarity#computeTopKMap");
+
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator, tracker);
-        loggelableAndTerminatableNodeStream()
+        loggableAndTerminatableNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
                 nodeStream(node1 + 1)
@@ -220,14 +233,17 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                         }
                     });
             });
+        progressLogger.log("Finish :: NodeSimilarity#computeTopKMap");
         return topKMap;
     }
 
     private TopKMap computeTopKMapParallel() {
+        progressLogger.log("Start :: NodeSimilarity#computeTopKMapParallel");
+
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator, tracker);
         ParallelUtil.parallelStreamConsume(
-            loggelableAndTerminatableNodeStream(),
+            loggableAndTerminatableNodeStream(),
             stream -> stream
                 .forEach(node1 -> {
                     long[] vector1 = vectors.get(node1);
@@ -247,12 +263,16 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                         });
                 })
         );
+
+        progressLogger.log("Finish :: NodeSimilarity#computeTopKMapParallel");
         return topKMap;
     }
 
     private Stream<SimilarityResult> computeTopN() {
+        progressLogger.log("Start :: NodeSimilarity#computeTopN");
+
         TopNList topNList = new TopNList(config.normalizedN());
-        loggelableAndTerminatableNodeStream()
+        loggableAndTerminatableNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
                 nodeStream(node1 + 1)
@@ -263,29 +283,33 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                         }
                     });
             });
+
+        progressLogger.log("Finish :: NodeSimilarity#computeTopN");
         return topNList.stream();
     }
 
     private Stream<SimilarityResult> computeTopN(TopKMap topKMap) {
+        progressLogger.log("Start :: NodeSimilarity#computeTopN(TopKMap)");
+
         TopNList topNList = new TopNList(config.normalizedN());
         topKMap.forEach(topNList::add);
+        progressLogger.log("Finish :: NodeSimilarity#computeTopN(TopKMap)");
         return topNList.stream();
     }
 
     private LongStream log(LongStream stream) {
-        long logInterval = Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100));
-        return stream.peek(node -> {
-            if ((node & (logInterval - 1)) == 0) {
-                progressLogger.logProgress(node, nodesToCompare);
-            }
-        });
+        return peekLongStream(stream, (node) -> progressLogger.logProgress(node, nodesToCompare));
     }
 
     private LongStream assertRunning(LongStream stream) {
-        long checkInterval = Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100));
+        return peekLongStream(stream, (node) -> assertRunning());
+    }
+
+    private LongStream peekLongStream(LongStream stream, Consumer<Long> fn) {
+        long logInterval = Math.min(MAXIMUM_LOG_INTERVAL, Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100)));
         return stream.peek(node -> {
-            if ((node & (checkInterval - 1)) == 0) {
-                assertRunning();
+            if ((node & (logInterval - 1)) == 0) {
+                fn.accept(node);
             }
         });
     }
@@ -301,7 +325,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         return nodeStream(0);
     }
 
-    private LongStream loggelableAndTerminatableNodeStream() {
+    private LongStream loggableAndTerminatableNodeStream() {
         return log(assertRunning(nodeStream()));
     }
 
