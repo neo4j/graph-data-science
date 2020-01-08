@@ -19,12 +19,12 @@
  */
 package positive;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
+import java.util.Collection;
+import java.util.Collections;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ParametersConfig implements Parameters {
@@ -41,14 +41,8 @@ public final class ParametersConfig implements Parameters {
         this.parametersAreAddedFirst = parametersAreAddedFirst;
     }
 
-    public static Pair<Parameters, CypherMapWrapper> of(
-        int keyFromParameter,
-        int parametersAreAddedFirst,
-        @NotNull CypherMapWrapper config
-    ) {
-        Parameters instance = new ParametersConfig(keyFromParameter, parametersAreAddedFirst, config);
-        CypherMapWrapper newConfig = config.withoutAny("keyFromMap");
-        return Tuples.pair(instance, newConfig);
+    public static Collection<String> configKeys() {
+        return Collections.singleton("keyFromMap");
     }
 
     @Override

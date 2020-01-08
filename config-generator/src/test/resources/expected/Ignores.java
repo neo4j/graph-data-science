@@ -19,12 +19,12 @@
  */
 package positive;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
+import java.util.Collection;
+import java.util.Collections;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class MyConfig implements Ignores.MyConfig {
@@ -35,10 +35,8 @@ public final class MyConfig implements Ignores.MyConfig {
         this.notIgnored = config.requireLong("notIgnored");
     }
 
-    public static Pair<Ignores.MyConfig, CypherMapWrapper> of(@NotNull CypherMapWrapper config) {
-        Ignores.MyConfig instance = new MyConfig(config);
-        CypherMapWrapper newConfig = config.withoutAny("notIgnored");
-        return Tuples.pair(instance, newConfig);
+    public static Collection<String> configKeys() {
+        return Collections.singleton("notIgnored");
     }
 
     @Override

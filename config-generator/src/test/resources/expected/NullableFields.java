@@ -19,13 +19,13 @@
  */
 package positive;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
+import java.util.Arrays;
+import java.util.Collection;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class NullableFieldsConfig implements NullableFields {
@@ -48,14 +48,12 @@ public final class NullableFieldsConfig implements NullableFields {
         ));
     }
 
-    public static Pair<NullableFields, CypherMapWrapper> of(@NotNull CypherMapWrapper config) {
-        NullableFields instance = new NullableFieldsConfig(config);
-        CypherMapWrapper newConfig = config.withoutAny(
+    public static Collection<String> configKeys() {
+        return Arrays.asList(
             "nullableRequiredField",
             "nullableDefaultField",
             "conversionCanReturnNull"
         );
-        return Tuples.pair(instance, newConfig);
     }
 
     @Override

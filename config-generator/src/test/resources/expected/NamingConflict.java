@@ -19,12 +19,12 @@
  */
 package positive;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
+import java.util.Collection;
+import java.util.Collections;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class NamingConflictConfig implements NamingConflict {
@@ -41,10 +41,8 @@ public final class NamingConflictConfig implements NamingConflict {
         this.config_ = config_;
     }
 
-    public static Pair<NamingConflict, CypherMapWrapper> of(int config_, @NotNull CypherMapWrapper config__) {
-        NamingConflict instance = new NamingConflictConfig(config_, config__);
-        CypherMapWrapper newConfig = config__.withoutAny("config", "config");
-        return Tuples.pair(instance, newConfig);
+    public static Collection<String> configKeys() {
+        return Collections.singleton("config");
     }
 
     @Override

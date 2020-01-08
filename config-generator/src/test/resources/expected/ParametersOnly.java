@@ -20,6 +20,8 @@
 package positive;
 
 import javax.annotation.processing.Generated;
+import java.util.Collection;
+import java.util.Collections;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ParametersOnlyConfig implements ParametersOnly {
@@ -28,6 +30,10 @@ public final class ParametersOnlyConfig implements ParametersOnly {
 
     public ParametersOnlyConfig(int onlyAsParameter) {
         this.onlyAsParameter = onlyAsParameter;
+    }
+
+    public static Collection<String> configKeys() {
+        return Collections.emptyList();
     }
 
     @Override

@@ -19,12 +19,12 @@
  */
 package positive;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
+import java.util.Arrays;
+import java.util.Collection;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class MyConfig implements Inheritance.MyConfig {
@@ -49,16 +49,14 @@ public final class MyConfig implements Inheritance.MyConfig {
             .shortValue();
     }
 
-    public static Pair<Inheritance.MyConfig, CypherMapWrapper> of(@NotNull CypherMapWrapper config) {
-        Inheritance.MyConfig instance = new MyConfig(config);
-        CypherMapWrapper newConfig = config.withoutAny(
+    public static Collection<String> configKeys() {
+        return Arrays.asList(
             "baseValue",
             "overriddenValue",
             "overwrittenValue",
             "inheritedValue",
             "inheritedDefaultValue"
         );
-        return Tuples.pair(instance, newConfig);
     }
 
     @Override

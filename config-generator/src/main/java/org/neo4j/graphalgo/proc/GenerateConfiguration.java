@@ -30,8 +30,6 @@ import com.squareup.javapoet.NameAllocator;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
@@ -54,8 +52,11 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -73,8 +74,6 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 final class GenerateConfiguration {
 
     private static final String CONFIG_VAR = "config";
-    private static final String INSTANCE_VAR = "instance";
-    private static final String NEW_CONFIG_VAR = "newConfig";
     private static final AnnotationSpec NULLABLE = AnnotationSpec.builder(Nullable.class).build();
     private static final AnnotationSpec NOT_NULL = AnnotationSpec.builder(NotNull.class).build();
 
@@ -102,23 +101,11 @@ final class GenerateConfiguration {
     }
 
     private TypeSpec process(ConfigParser.Spec config, String packageName, String generatedClassName) {
-        TypeSpec.Builder builder = classBuilder(config, packageName, generatedClassName);
-
         FieldDefinitions fieldDefinitions = defineFields(config);
-        builder.addFields(fieldDefinitions.fields());
-
-        MethodSpec constructor = defineConstructor(config, fieldDefinitions.names());
-        builder.addMethod(constructor);
-
-        Optional<MethodSpec> factory = defineFactory(
-            config,
-            generatedClassName,
-            constructor,
-            fieldDefinitions.names()
-        );
-        factory.ifPresent(builder::addMethod);
-
-        return builder
+        return classBuilder(config, packageName, generatedClassName)
+            .addFields(fieldDefinitions.fields())
+            .addMethod(defineConstructor(config, fieldDefinitions.names()))
+            .addMethod(defineGetKeys(config))
             .addMethods(defineGetters(config, fieldDefinitions.names()))
             .build();
     }
@@ -199,56 +186,37 @@ final class GenerateConfiguration {
         return configMapConstructor.build();
     }
 
-    private Optional<MethodSpec> defineFactory(
-        ConfigParser.Spec config,
-        String generatedClassName,
-        MethodSpec constructor,
-        NameAllocator names
-    ) {
-        CodeBlock configKeyArgs = config
+    private MethodSpec defineGetKeys(ConfigParser.Spec config) {
+        Collection<String> configKeys = config
             .members()
             .stream()
             .filter(member -> !isAnnotationPresent(member.method(), Parameter.class))
-            .map(member -> CodeBlock.of("$S", member.lookupKey()))
-            .collect(CodeBlock.joining(", "));
+            .map(ConfigParser.Member::lookupKey)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        if (configKeyArgs.isEmpty()) {
-            // no args or only parameters
-            return Optional.empty();
-
+        CodeBlock.Builder code = CodeBlock.builder();
+        switch (configKeys.size()) {
+            case 0:
+                code.addStatement("return $T.emptyList()", Collections.class);
+                break;
+            case 1:
+                code.addStatement("return $T.singleton($S)", Collections.class, configKeys.iterator().next());
+                break;
+            default:
+                CodeBlock keys = configKeys
+                    .stream()
+                    .map(name -> CodeBlock.of("$S", name))
+                    .collect(CodeBlock.joining(", "));
+                code.addStatement("return $T.asList($L)", Arrays.class, keys);
+                break;
         }
 
-        CodeBlock constructorArgs = constructor.parameters
-            .stream()
-            .map(param -> CodeBlock.of("$N", param))
-            .collect(CodeBlock.joining(", "));
-
-        String instanceVarName = names.newName(INSTANCE_VAR, INSTANCE_VAR);
-        String newConfigVarName = names.newName(NEW_CONFIG_VAR, NEW_CONFIG_VAR);
-        TypeName interfaceType = TypeName.get(config.rootType());
-        TypeName returnType = ParameterizedTypeName.get(
-            ClassName.get(Pair.class),
-            interfaceType,
-            ClassName.get(CypherMapWrapper.class)
-        );
-
-        MethodSpec factory = MethodSpec
-            .methodBuilder("of")
+        return MethodSpec
+            .methodBuilder("configKeys")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-            .returns(returnType)
-            .addParameters(constructor.parameters)
-            .addStatement("$T $N = new $L($L)", interfaceType, instanceVarName, generatedClassName, constructorArgs)
-            .addStatement(
-                "$T $N = $N.withoutAny($L)",
-                CypherMapWrapper.class,
-                newConfigVarName,
-                names.get(CONFIG_VAR),
-                configKeyArgs
-            )
-            .addStatement("return $T.pair($N, $N)", Tuples.class, instanceVarName, newConfigVarName)
+            .returns(ParameterizedTypeName.get(Collection.class, String.class))
+            .addCode(code.build())
             .build();
-
-        return Optional.of(factory);
     }
 
     private void addConfigGetterToConstructor(

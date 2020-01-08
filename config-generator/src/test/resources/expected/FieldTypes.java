@@ -19,12 +19,12 @@
  */
 package positive;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -67,9 +67,8 @@ public final class FieldTypesConfig implements FieldTypes {
         this.aList = CypherMapWrapper.failOnNull("aList", config.requireChecked("aList", List.class));
     }
 
-    public static Pair<FieldTypes, CypherMapWrapper> of(@NotNull CypherMapWrapper config) {
-        FieldTypes instance = new FieldTypesConfig(config);
-        CypherMapWrapper newConfig = config.withoutAny(
+    public static Collection<String> configKeys() {
+        return Arrays.asList(
             "aBoolean",
             "aByte",
             "aShort",
@@ -82,7 +81,6 @@ public final class FieldTypesConfig implements FieldTypes {
             "aMap",
             "aList"
         );
-        return Tuples.pair(instance, newConfig);
     }
 
     @Override
