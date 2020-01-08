@@ -59,7 +59,7 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL gds.algo.nodeSimilarity.write(graphName: STRING, {
+CALL gds.nodeSimilarity.write(graphName: STRING, {
   writeRelationshipType: STRING,
   writeProperty: STRING
   // additional configuration
@@ -113,7 +113,7 @@ YIELD nodesCompared, relationships, writeRelationshipType, writeProperty
 .The following describes the API for running the algorithm and streaming results:
 [source, cypher]
 ----
-CALL gds.algo.nodeSimilarity.stream(graphName: STRING, {
+CALL gds.nodeSimilarity.stream(graphName: STRING, {
   // configuration
 })
 YIELD node1, node2, similarity
@@ -195,7 +195,7 @@ In the example graph, the Eve node will not be compared to other Person nodes.
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.algo.nodeSimilarity.stream({
+CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
   direction: 'OUTGOING'
@@ -237,7 +237,7 @@ The similarity score is written as a property on the relationship.
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.algo.nodeSimilarity.write({
+CALL gds.nodeSimilarity.write({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
   direction: 'OUTGOING',
@@ -293,7 +293,7 @@ If neither is specified, topK is used.
 .The following will load the graph, run the algorithm, and stream the top 1 result per node:
 [source, cypher]
 ----
-CALL gds.algo.nodeSimilarity.stream({
+CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
   direction: 'OUTGOING',
@@ -318,7 +318,7 @@ ORDER BY Person1
 .The following will load the graph, run the algorithm, and stream the bottom 1 result per node:
 [source, cypher]
 ----
-CALL gds.algo.nodeSimilarity.stream({
+CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
   direction: 'OUTGOING',
@@ -353,7 +353,7 @@ A value of 0 means no global limit is imposed and all results from topK or botto
 .The following will load the graph, run the algorithm, and stream the 3 highest out of the top 1 results per node:
 [source, cypher]
 ----
-CALL gds.algo.nodeSimilarity.stream({
+CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
   direction: 'OUTGOING',
@@ -385,7 +385,7 @@ This value can not be lower than 1.
 .The following will ignore nodes with less than 3 LIKES relationships:
 [source, cypher]
 ----
-CALL gds.algo.nodeSimilarity.stream({
+CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
   direction: 'OUTGOING',
@@ -416,7 +416,7 @@ Setting similarity cutoff to 0 may yield a very large result set, increased runt
 .The following will ignore node pairs with a similarty score less than 0.5:
 [source, cypher]
 ----
-CALL gds.algo.nodeSimilarity.stream({
+CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
   direction: 'OUTGOING',

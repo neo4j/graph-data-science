@@ -32,7 +32,7 @@ To make this process easier every algorithm supports the `.estimate` mode, which
 .Syntax
 [source, cypher]
 ----
-CALL gds.algo.<ALGO>.<MODE>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.<ALGO>.<MODE>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
 ----
 

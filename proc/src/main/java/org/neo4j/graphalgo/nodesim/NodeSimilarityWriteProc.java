@@ -47,7 +47,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilarityWriteConfig> {
 
-    @Procedure(name = "gds.algo.nodeSimilarity.write", mode = Mode.WRITE)
+    @Procedure(name = "gds.nodeSimilarity.write", mode = Mode.WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<NodeSimilarityWriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -60,7 +60,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
         return write(result, true);
     }
 
-    @Procedure(value = "gds.algo.nodeSimilarity.write.estimate", mode = READ)
+    @Procedure(value = "gds.nodeSimilarity.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -69,7 +69,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(name = "gds.algo.nodeSimilarity.stats", mode = Mode.WRITE)
+    @Procedure(name = "gds.nodeSimilarity.stats", mode = Mode.WRITE)
     @Description(STATS_DESCRIPTION)
     public Stream<NodeSimilarityWriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -82,7 +82,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
         return write(result, false);
     }
 
-    @Procedure(value = "gds.algo.nodeSimilarity.stats.estimate", mode = READ)
+    @Procedure(value = "gds.nodeSimilarity.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,

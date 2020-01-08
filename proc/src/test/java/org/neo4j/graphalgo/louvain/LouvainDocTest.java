@@ -71,7 +71,7 @@ class LouvainDocTest extends BaseProcTest {
     @Test
     void streamUnweighted() {
         String query =
-            "CALL gds.algo.louvain.stream({" +
+            "CALL gds.louvain.stream({" +
                 "nodeProjection: ['User']," +
                 "relationshipProjection: {" +
                 "    LINK: {" +
@@ -104,7 +104,7 @@ class LouvainDocTest extends BaseProcTest {
     @Test
     void writeUnweighted() {
         String query =
-            "CALL gds.algo.louvain.write({" +
+            "CALL gds.louvain.write({" +
             "   nodeProjection: ['User']," +
             "   relationshipProjection: {" +
             "       LINK: {" +
@@ -132,7 +132,7 @@ class LouvainDocTest extends BaseProcTest {
     @Test
     void streamWeighted() {
         String query =
-            "CALL gds.algo.louvain.stream({" +
+            "CALL gds.louvain.stream({" +
             "   nodeProjection: ['User']," +
             "   relationshipProjection: {" +
             "       LINK: {" +
@@ -168,7 +168,7 @@ class LouvainDocTest extends BaseProcTest {
     @Test
     void streamSeeded() {
         String query =
-            "CALL gds.algo.louvain.stream({" +
+            "CALL gds.louvain.stream({" +
             "   nodeProjection: {" +
             "       User: {" +
             "           labels: 'User'," +
@@ -254,7 +254,7 @@ class LouvainDocTest extends BaseProcTest {
         );
 
         String query =
-            "CALL gds.algo.louvain.stream({" +
+            "CALL gds.louvain.stream({" +
             "   nodeProjection: ['Node']," +
             "   relationshipProjection: {" +
             "       TYPE: {" +

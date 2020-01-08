@@ -302,7 +302,7 @@ class WccDocTest extends BaseProcTest {
 
     @Test
     void shouldProduceStreamOutputOnCypherProjection() {
-        String query = "CALL gds.algo.wcc.stream({" +
+        String query = "CALL gds.wcc.stream({" +
                        "   nodeQuery: 'MATCH (u:User) RETURN id(u) AS id', " +
                        "   relationshipQuery: 'MATCH (u1:User)-[:LINK]->(u2:User) RETURN id(u1) AS source, id(u2) AS target'" +
                        "}) " +

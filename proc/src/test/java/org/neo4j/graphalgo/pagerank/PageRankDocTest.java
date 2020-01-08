@@ -78,7 +78,7 @@ class PageRankDocTest extends BaseProcTest {
     @Test
     void unweighted() {
         String q1 =
-                "CALL gds.algo.pageRank.stream({ " +
+                "CALL gds.pageRank.stream({ " +
                 "   nodeProjection: 'Page', " +
                 "   relationshipProjection: 'LINKS', " +
                 "   maxIterations: 20, " +
@@ -105,7 +105,7 @@ class PageRankDocTest extends BaseProcTest {
         assertEquals(expectedString, db.execute(q1).resultAsString());
 
         String q2 =
-            "CALL gds.algo.pageRank.write({" +
+            "CALL gds.pageRank.write({" +
             "  nodeProjection: 'Page', " +
             "  relationshipProjection: 'LINKS'," +
             "  maxIterations: 20, " +
@@ -130,7 +130,7 @@ class PageRankDocTest extends BaseProcTest {
     @Test
     void weighted() {
         String q1 =
-            "CALL gds.algo.pageRank.stream({ " +
+            "CALL gds.pageRank.stream({ " +
             "  nodeProjection: 'Page', " +
             "  relationshipProjection: {" +
             "    LINKS: {" +
@@ -163,7 +163,7 @@ class PageRankDocTest extends BaseProcTest {
 
 
         String q2 =
-            "CALL gds.algo.pageRank.write({ " +
+            "CALL gds.pageRank.write({ " +
             "  nodeProjection: 'Page', " +
             "  relationshipProjection: {" +
             "    LINKS: {" +
@@ -191,7 +191,7 @@ class PageRankDocTest extends BaseProcTest {
     void personalized() {
         String q1 =
             "MATCH (siteA:Page {name: 'Site A'})" +
-            "CALL gds.algo.pageRank.stream({ " +
+            "CALL gds.pageRank.stream({ " +
             "  nodeProjection: 'Page', " +
             "  relationshipProjection: 'LINKS', " +
             "  maxIterations: 20, " +
@@ -220,7 +220,7 @@ class PageRankDocTest extends BaseProcTest {
 
         String q2 =
             "MATCH (siteA:Page {name: 'Site A'})" +
-            "CALL gds.algo.pageRank.write({ " +
+            "CALL gds.pageRank.write({ " +
             "   nodeProjection: 'Page', " +
             "   relationshipProjection: 'LINKS', " +
             "   maxIterations: 20, " +
@@ -248,7 +248,7 @@ class PageRankDocTest extends BaseProcTest {
         db.execute(loadGraph);
 
         String q1 =
-            "CALL gds.algo.pageRank.stream('myGraph')" +
+            "CALL gds.pageRank.stream('myGraph')" +
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC ";
@@ -272,7 +272,7 @@ class PageRankDocTest extends BaseProcTest {
         assertEquals(expectedString, namedQueryResult);
 
         String q2 =
-            "CALL gds.algo.pageRank.stream({" +
+            "CALL gds.pageRank.stream({" +
             "  nodeQuery: 'MATCH (p:Page) RETURN id(p) AS id'," +
             "  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page)" +
             "                      RETURN id(p1) AS source, id(p2) AS target'," +
@@ -290,7 +290,7 @@ class PageRankDocTest extends BaseProcTest {
     @Test
     void statsMode() {
         String q2 =
-            "CALL gds.algo.pageRank.stats({" +
+            "CALL gds.pageRank.stats({" +
             "  nodeProjection: 'Page', " +
             "  relationshipProjection: 'LINKS'," +
             "  maxIterations: 20, " +
@@ -313,7 +313,7 @@ class PageRankDocTest extends BaseProcTest {
     @Test
     void estimateMode() {
         String q2 =
-            "CALL gds.algo.pageRank.write.estimate({" +
+            "CALL gds.pageRank.write.estimate({" +
             "  nodeProjection: 'Page', " +
             "  relationshipProjection: 'LINKS'," +
             "  writeProperty: 'pagerank'," +

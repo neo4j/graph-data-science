@@ -45,7 +45,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testPageRankWriteBack(String graphSnippet, String testCaseName) {
         String writeProperty = "myFancyScore";
-        String query = "CALL gds.algo.pageRank.write(" +
+        String query = "CALL gds.pageRank.write(" +
                        graphSnippet +
                        "  writeProperty: $writeProp" +
                        "}) YIELD writeMillis, writeProperty";
@@ -61,7 +61,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsWeight")
     void testWeightedPageRankWriteBack(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.algo.pageRank.write(" +
+        String query = "CALL gds.pageRank.write(" +
                        graphSnippet +
                        "        writeProperty: 'pagerank', weightProperty: 'weight'" +
                        "    }" +
@@ -79,7 +79,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testPageRankParallelWriteBack(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.algo.pageRank.write(" +
+        String query = "CALL gds.pageRank.write(" +
                        graphSnippet +
                        "        batchSize: 3, writeProperty: 'pagerank', graph: 'myGraph1'" +
                        "    }" +
@@ -96,7 +96,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     void testPageRankWithToleranceParam(String graphSnippet, String testCaseName) {
         graphSnippet += " writeProperty: 'writeProp',";
         String graphName = "myGraph1";
-        String query = "CALL gds.algo.pageRank.write(" +
+        String query = "CALL gds.pageRank.write(" +
                        graphSnippet +
                        "      tolerance: 0.0001, batchSize: 2, graph: $graph" +
                        "  }" +
@@ -105,7 +105,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
             row -> assertEquals(20L, (long) row.getNumber("ranIterations"))
         );
 
-        query = "CALL gds.algo.pageRank.write(" +
+        query = "CALL gds.pageRank.write(" +
                 graphSnippet +
                 "        tolerance: 100.0, batchSize: 2, graph: $graph" +
                 "  }" +
@@ -114,7 +114,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
             row -> assertEquals(1L, (long) row.getNumber("ranIterations"))
         );
 
-        query = "CALL gds.algo.pageRank.write(" +
+        query = "CALL gds.pageRank.write(" +
                 graphSnippet +
                 "        tolerance: 0.20010237991809848, batchSize: 2, graph: $graph" +
                 "  }" +
@@ -123,7 +123,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
             row -> assertEquals(4L, (long) row.getNumber("ranIterations"))
         );
 
-        query = "CALL gds.algo.pageRank.write(" +
+        query = "CALL gds.pageRank.write(" +
                 graphSnippet +
                 "        tolerance: 0.20010237991809843, batchSize: 2, graph: $graph" +
                 "  }" +
@@ -136,7 +136,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testWriteYieldRanAndMaxIterationsAndDidConverge(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.algo.pageRank.write(" +
+        String query = "CALL gds.pageRank.write(" +
                        graphSnippet +
                        "     writeProperty: 'writeProp', tolerance: 0.0001, batchSize: 2" +
                        "  }" +
@@ -155,7 +155,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
     void testStatsYieldRanAndMaxIterationsAndDidConverge(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.algo.pageRank.stats(" +
+        String query = "CALL gds.pageRank.stats(" +
                        graphSnippet +
                        "     writeProperty: 'writeProp', tolerance: 0.0001, batchSize: 2" +
                        "  }" +

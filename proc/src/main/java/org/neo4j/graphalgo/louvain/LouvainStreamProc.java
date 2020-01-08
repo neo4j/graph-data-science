@@ -42,7 +42,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
 
     // TODO maps need to be comma-separated
-    @Procedure(value = "gds.algo.louvain.stream", mode = READ)
+    @Procedure(value = "gds.louvain.stream", mode = READ)
     @Description(LOUVAIN_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -55,7 +55,7 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
         return stream(computationResult);
     }
 
-    @Procedure(value = "gds.algo.louvain.stream.estimate", mode = READ)
+    @Procedure(value = "gds.louvain.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

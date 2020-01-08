@@ -328,7 +328,6 @@ public abstract class GdsCypher {
         StringJoiner procedureName = new StringJoiner(".");
         if (algoNamespace.isEmpty()) {
             procedureName.add("gds");
-            procedureName.add("algo");
         } else {
             algoNamespace.forEach(procedureName::add);
         }

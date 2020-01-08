@@ -43,7 +43,7 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL gds.algo.louvain.write(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.louvain.write(graphNameOrConfig: STRING|MAP, configuration: MAP})
 YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 ----
 
@@ -107,7 +107,7 @@ YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.algo.louvain.stream(label: STRING, relationship: STRING, {
+CALL gds.louvain.stream(label: STRING, relationship: STRING, {
  // configuration
 })
 YIELD nodeId, community, communities
@@ -184,7 +184,7 @@ In the following examples we will demonstrate using the Louvain algorithm on thi
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.algo.louvain.stream({
+CALL gds.louvain.stream({
     nodeProjection: ['User'],
     relationshipProjection: {
         LINK: {
@@ -224,7 +224,7 @@ For each node a property is written that holds the assigned community.
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.algo.louvain.write({
+CALL gds.louvain.write({
     nodeProjection: ['User'],
     relationshipProjection: {
         LINK: {
@@ -257,7 +257,7 @@ The Louvain algorithm can also run on weighted graphs, taking the given relation
 .The following will load the graph, run the algorithm on a weighted graph and stream results:
 [source, cypher]
 ----
-CALL gds.algo.louvain.stream({
+CALL gds.louvain.stream({
     nodeProjection: ['User'],
     relationshipProjection: {
         LINK: {
@@ -299,7 +299,7 @@ The algorithm will try to keep the seeded community IDs.
 .The following will load the seeded graph, run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.algo.louvain.stream({
+CALL gds.louvain.stream({
     nodeProjection: {
         User: {
             labels: 'User',
@@ -352,7 +352,7 @@ image::louvain-multilevel-graph.svg[align="center"]
 .The following will load the example graph, run the algorithm and stream results including the intermediate communities:
 [source, cypher]
 ----
-CALL gds.algo.louvain.stream({
+CALL gds.louvain.stream({
     nodeProjection: ['Node'],
     relationshipProjection: {
         TYPE: {

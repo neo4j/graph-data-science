@@ -47,7 +47,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
 
-    @Procedure(value = "gds.algo.louvain.write", mode = WRITE)
+    @Procedure(value = "gds.louvain.write", mode = WRITE)
     @Description(LOUVAIN_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -60,7 +60,7 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
         return write(computationResult, true);
     }
 
-    @Procedure(value = "gds.algo.louvain.stats", mode = READ)
+    @Procedure(value = "gds.louvain.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -73,7 +73,7 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
         return write(computationResult, false);
     }
 
-    @Procedure(value = "gds.algo.louvain.write.estimate", mode = READ)
+    @Procedure(value = "gds.louvain.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -82,7 +82,7 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.algo.louvain.stats.estimate", mode = READ)
+    @Procedure(value = "gds.louvain.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,

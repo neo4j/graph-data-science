@@ -52,37 +52,37 @@ class ListProcTest extends BaseProcTest {
         "algo.graph.load.memrec",
         "algo.graph.remove",
 
-        "gds.algo.labelPropagation.stats",
-        "gds.algo.labelPropagation.stats.estimate",
-        "gds.algo.labelPropagation.stream",
-        "gds.algo.labelPropagation.stream.estimate",
-        "gds.algo.labelPropagation.write",
-        "gds.algo.labelPropagation.write.estimate",
-
-        "gds.algo.louvain.stats",
-        "gds.algo.louvain.stats.estimate",
-        "gds.algo.louvain.stream",
-        "gds.algo.louvain.stream.estimate",
-        "gds.algo.louvain.write",
-        "gds.algo.louvain.write.estimate",
-
-        "gds.algo.pageRank.stats",
-        "gds.algo.pageRank.stats.estimate",
-        "gds.algo.pageRank.stream",
-        "gds.algo.pageRank.stream.estimate",
-        "gds.algo.pageRank.write",
-        "gds.algo.pageRank.write.estimate",
-
-        "gds.algo.wcc.stats",
-        "gds.algo.wcc.stats.estimate",
-        "gds.algo.wcc.stream",
-        "gds.algo.wcc.stream.estimate",
-        "gds.algo.wcc.write",
-        "gds.algo.wcc.write.estimate",
-
         "gds.beta.k1coloring.stream",
         "gds.beta.k1coloring.stream.estimate",
-        "gds.beta.k1coloring.write"
+        "gds.beta.k1coloring.write",
+
+        "gds.labelPropagation.stats",
+        "gds.labelPropagation.stats.estimate",
+        "gds.labelPropagation.stream",
+        "gds.labelPropagation.stream.estimate",
+        "gds.labelPropagation.write",
+        "gds.labelPropagation.write.estimate",
+
+        "gds.louvain.stats",
+        "gds.louvain.stats.estimate",
+        "gds.louvain.stream",
+        "gds.louvain.stream.estimate",
+        "gds.louvain.write",
+        "gds.louvain.write.estimate",
+
+        "gds.pageRank.stats",
+        "gds.pageRank.stats.estimate",
+        "gds.pageRank.stream",
+        "gds.pageRank.stream.estimate",
+        "gds.pageRank.write",
+        "gds.pageRank.write.estimate",
+
+        "gds.wcc.stats",
+        "gds.wcc.stats.estimate",
+        "gds.wcc.stream",
+        "gds.wcc.stream.estimate",
+        "gds.wcc.write",
+        "gds.wcc.write.estimate"
     );
 
     private static final List<String> FUNCTIONS = asList(
@@ -94,12 +94,12 @@ class ListProcTest extends BaseProcTest {
     );
 
     private static final List<String> PAGE_RANK = asList(
-        "gds.algo.pageRank.stats",
-        "gds.algo.pageRank.stats.estimate",
-        "gds.algo.pageRank.stream",
-        "gds.algo.pageRank.stream.estimate",
-        "gds.algo.pageRank.write",
-        "gds.algo.pageRank.write.estimate"
+        "gds.pageRank.stats",
+        "gds.pageRank.stats.estimate",
+        "gds.pageRank.stream",
+        "gds.pageRank.stream.estimate",
+        "gds.pageRank.write",
+        "gds.pageRank.write.estimate"
     );
 
     private static final List<String> ALL = Stream.concat(PROCEDURES.stream(), FUNCTIONS.stream()).collect(Collectors.toList());
@@ -141,7 +141,7 @@ class ListProcTest extends BaseProcTest {
     @Test
     void listFilteredResult() {
         assertEquals(PAGE_RANK, listProcs("pageRank"));
-        assertEquals(asList("gds.algo.pageRank.stream", "gds.algo.pageRank.stream.estimate"), listProcs("pageRank.stream"));
+        assertEquals(asList("gds.pageRank.stream", "gds.pageRank.stream.estimate"), listProcs("pageRank.stream"));
         assertEquals(emptyList(), listProcs("foo"));
     }
 

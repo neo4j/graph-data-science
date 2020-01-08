@@ -87,7 +87,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.write(%s)", expectedStringLiteral),
+            String.format("CALL gds.algoName.write(%s)", expectedStringLiteral),
             query
         );
     }
@@ -216,7 +216,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.write(%s)", expectedImplicitGraphCreateCall()),
+            String.format("CALL gds.algoName.write(%s)", expectedImplicitGraphCreateCall()),
             query
         );
     }
@@ -321,7 +321,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.%s.write(%s)", algoName, STAR_PROJECTION_CYPHER_SYNTAX),
+            String.format("CALL gds.%s.write(%s)", algoName, STAR_PROJECTION_CYPHER_SYNTAX),
             query
         );
     }
@@ -380,7 +380,7 @@ class GdsCypherTest {
 
         assertEquals(
             String.format(
-                "CALL gds.algo.algoName.%s(%s)",
+                "CALL gds.algoName.%s(%s)",
                 executionModeName(executionMode),
                 STAR_PROJECTION_CYPHER_SYNTAX
             ),
@@ -414,7 +414,7 @@ class GdsCypherTest {
 
         assertEquals(
             String.format(
-                "CALL gds.algo.algoName.%s(%s)",
+                "CALL gds.algoName.%s(%s)",
                 executionModeName(executionMode),
                 STAR_PROJECTION_CYPHER_SYNTAX
             ),
@@ -434,7 +434,7 @@ class GdsCypherTest {
 
         assertEquals(
             String.format(
-                "CALL gds.algo.algoName.%s.estimate(%s)",
+                "CALL gds.algoName.%s.estimate(%s)",
                 executionModeName(executionMode),
                 STAR_PROJECTION_CYPHER_SYNTAX
             ),
@@ -468,7 +468,7 @@ class GdsCypherTest {
 
         assertEquals(
             String.format(
-                "CALL gds.algo.algoName.%s.estimate(%s)",
+                "CALL gds.algoName.%s.estimate(%s)",
                 executionModeName(executionMode),
                 STAR_PROJECTION_CYPHER_SYNTAX
             ),
@@ -510,7 +510,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.write(\"\", {foo: %1$s, bar: %1$s, baz: %1$s})", expected),
+            String.format("CALL gds.algoName.write(\"\", {foo: %1$s, bar: %1$s, baz: %1$s})", expected),
             query
         );
     }
@@ -537,7 +537,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            "CALL gds.algo.algoName.write(\"\", {})",
+            "CALL gds.algoName.write(\"\", {})",
             query
         );
     }
@@ -569,7 +569,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.write(\"\", {foo: %s})", expected),
+            String.format("CALL gds.algoName.write(\"\", {foo: %s})", expected),
             query
         );
     }
@@ -614,7 +614,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL gds.algo.algoName.write(\"\", {foo: %s})", expected),
+            String.format("CALL gds.algoName.write(\"\", {foo: %s})", expected),
             query
         );
     }
@@ -642,7 +642,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            "CALL gds.algo.algoName.write(\"\")",
+            "CALL gds.algoName.write(\"\")",
             query
         );
     }
@@ -668,7 +668,7 @@ class GdsCypherTest {
 
         assertEquals(
             String.format(
-                "CALL gds.algo.algoName.write(\"\") YIELD %s",
+                "CALL gds.algoName.write(\"\") YIELD %s",
                 String.join(", ", yieldedFields)
             ),
             query

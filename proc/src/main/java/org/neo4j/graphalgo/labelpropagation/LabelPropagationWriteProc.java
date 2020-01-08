@@ -42,7 +42,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPropagationWriteConfig> {
 
-    @Procedure(value = "gds.algo.labelPropagation.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.labelPropagation.write", mode = Mode.WRITE)
     @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -55,7 +55,7 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
         return write(result, true);
     }
 
-    @Procedure(value = "gds.algo.labelPropagation.stats", mode = READ)
+    @Procedure(value = "gds.labelPropagation.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<LabelPropagationWriteProc.WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -68,7 +68,7 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
         return write(computationResult, false);
     }
 
-    @Procedure(value = "gds.algo.labelPropagation.write.estimate", mode = READ)
+    @Procedure(value = "gds.labelPropagation.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -77,7 +77,7 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.algo.labelPropagation.stats.estimate", mode = READ)
+    @Procedure(value = "gds.labelPropagation.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,

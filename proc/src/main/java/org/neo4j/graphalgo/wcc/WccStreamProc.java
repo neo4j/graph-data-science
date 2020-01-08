@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
 
-    @Procedure(value = "gds.algo.wcc.stream", mode = READ)
+    @Procedure(value = "gds.wcc.stream", mode = READ)
     @Description(WCC_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -54,7 +54,7 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
         return stream(computationResult);
     }
 
-    @Procedure(value = "gds.algo.wcc.stream.estimate", mode = READ)
+    @Procedure(value = "gds.wcc.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> streamEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

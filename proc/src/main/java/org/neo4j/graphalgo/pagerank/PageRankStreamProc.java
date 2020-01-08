@@ -37,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
 
-    @Procedure(value = "gds.algo.pageRank.stream", mode = READ)
+    @Procedure(value = "gds.pageRank.stream", mode = READ)
     @Description(PAGE_RANK_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -50,7 +50,7 @@ public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
         return stream(computationResult);
     }
 
-    @Procedure(value = "gds.algo.pageRank.stream.estimate", mode = READ)
+    @Procedure(value = "gds.pageRank.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

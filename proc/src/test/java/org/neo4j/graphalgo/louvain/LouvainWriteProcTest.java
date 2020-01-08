@@ -131,7 +131,7 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
         "writeProperty: '',",
     })
     void testWriteRequiresWritePropertyToBeSet(String writePropertyParameter) {
-        String query = "CALL gds.algo.louvain.write({" +
+        String query = "CALL gds.louvain.write({" +
                        writePropertyParameter +
                        "    nodeProjection: ['Node']," +
                        "    relationshipProjection: {" +

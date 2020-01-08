@@ -45,7 +45,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
 
-    @Procedure(value = "gds.algo.wcc.write", mode = WRITE)
+    @Procedure(value = "gds.wcc.write", mode = WRITE)
     @Description(WCC_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -58,7 +58,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
         return write(computationResult, true);
     }
 
-    @Procedure(value = "gds.algo.wcc.stats", mode = READ)
+    @Procedure(value = "gds.wcc.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -71,7 +71,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
         return write(computationResult, false);
     }
 
-    @Procedure(value = "gds.algo.wcc.write.estimate", mode = READ)
+    @Procedure(value = "gds.wcc.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> writeEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -80,7 +80,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.algo.wcc.stats.estimate", mode = READ)
+    @Procedure(value = "gds.wcc.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> statsEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

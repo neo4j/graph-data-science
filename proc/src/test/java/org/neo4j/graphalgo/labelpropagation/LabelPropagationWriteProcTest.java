@@ -110,7 +110,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#graphVariations")
     void respectsMaxIterations(String graphSnippet, String desc) {
-        String query = "CALL gds.algo.labelPropagation.write(" +
+        String query = "CALL gds.labelPropagation.write(" +
                        graphSnippet +
                        "    maxIterations: 5, " +
                        "    writeProperty: 'label'" +
@@ -149,7 +149,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
     @MethodSource("concurrenciesExplicitAndImplicitCreate")
     void shouldRunLabelPropagationNatural(int concurrency, String graphSnippet, String desc) {
         @Language("Cypher")
-        String query = "CALL gds.algo.labelPropagation.write(" +
+        String query = "CALL gds.labelPropagation.write(" +
                        graphSnippet +
                        "        concurrency: $concurrency, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $writeProperty" +
                        "    }" +
@@ -191,7 +191,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
 
         runQuery(createGraphQuery(Projection.UNDIRECTED, graphName));
         @Language("Cypher")
-        String query = "CALL gds.algo.labelPropagation.write(" +
+        String query = "CALL gds.labelPropagation.write(" +
                        "        $graph, {"+
                        "         writeProperty: $writeProperty" +
                        "    }" +
@@ -233,7 +233,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
 
         runQuery(createGraphQuery(Projection.REVERSE, graphName));
         @Language("Cypher")
-        String query = "CALL gds.algo.labelPropagation.write(" +
+        String query = "CALL gds.labelPropagation.write(" +
                        "        $graph, {" +
                        "         writeProperty: $writeProperty, direction: 'INCOMING'" +
                        "    }" +
@@ -273,7 +273,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
     @ParameterizedTest(name = "concurrency = {0}, {2}")
     @MethodSource("concurrenciesExplicitAndImplicitCreate")
     void shouldRunLabelPropagationWithIdenticalSeedAndWriteProperties(int concurrency, String graphSnippet, String desc) {
-        String query = "CALL gds.algo.labelPropagation.write(" +
+        String query = "CALL gds.labelPropagation.write(" +
                        graphSnippet +
                        "        concurrency: $concurrency, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $seedProperty" +
                        "    }" +
@@ -311,7 +311,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
     @ParameterizedTest(name = "concurrency = {0}, {2}")
     @MethodSource("concurrenciesExplicitAndImplicitCreate")
     void shouldRunLabelPropagationWithoutInitialSeed(int concurrency, String graphSnippet, String desc) {
-        String query = "CALL gds.algo.labelPropagation.write(" +
+        String query = "CALL gds.labelPropagation.write(" +
                         graphSnippet +
                        "        concurrency: $concurrency, weightProperty: $weightProperty, writeProperty: $writeProperty" +
                        "    }" +

@@ -40,7 +40,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
 
-    @Procedure(value = "gds.algo.pageRank.write", mode = WRITE)
+    @Procedure(value = "gds.pageRank.write", mode = WRITE)
     @Description(PAGE_RANK_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -53,7 +53,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
         return write(computationResult, true);
     }
 
-    @Procedure(value = "gds.algo.pageRank.stats", mode = READ)
+    @Procedure(value = "gds.pageRank.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -66,7 +66,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
         return write(computationResult, false);
     }
 
-    @Procedure(value = "gds.algo.pageRank.write.estimate", mode = READ)
+    @Procedure(value = "gds.pageRank.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -75,7 +75,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.algo.pageRank.stats.estimate", mode = READ)
+    @Procedure(value = "gds.pageRank.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,

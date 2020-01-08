@@ -46,7 +46,7 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL gds.algo.wcc.write(
+CALL gds.wcc.write(
   graphName: string,
   configuration: map
 )
@@ -115,7 +115,7 @@ YIELD
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.algo.wcc.stream(
+CALL gds.wcc.stream(
   graphName: string,
   configuration: map
 )
@@ -195,7 +195,7 @@ In the following examples we will demonstrate using the Weakly Connected Compone
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.algo.wcc.stream({
+CALL gds.wcc.stream({
   nodeProjection: ["User"],
   relationshipProjection: ["LINK"]
 })
@@ -220,7 +220,7 @@ To instead write the component ID to a node property in the Neo4j graph, use thi
 .The following will load the graph with weights, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.algo.wcc.write({
+CALL gds.wcc.write({
   nodeProjection: ["User"],
   relationshipProjection: ["LINK"],
   writeProperty: "componentId"
@@ -252,7 +252,7 @@ The default is zero, and can be configured to another value using the `defaultVa
 .The following will load the graph with weights, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.algo.wcc.stream({
+CALL gds.wcc.stream({
   nodeProjection: ["User"],
   relationshipProjection: ["LINK"],
   relationshipProperties: ["weight"],
@@ -279,7 +279,7 @@ RETURN algo.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
 .The following will load the graph with weights, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.algo.wcc.write({
+CALL gds.wcc.write({
   nodeProjection: ["User"],
   relationshipProjection: ["LINK"],
   writeProperty: "componentId",
@@ -326,7 +326,7 @@ We will use the weighted variant of WCC.
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.algo.wcc.write({
+CALL gds.wcc.write({
   nodeProjection: ["User"],
   relationshipProjection: ["LINK"],
   writeProperty: "componentId",
@@ -359,7 +359,7 @@ CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.algo.wcc.stream({
+CALL gds.wcc.stream({
   nodeProjection: ["User"],
   nodeProperties: ["componentId"],
   relationshipProjection: ["LINK"],
@@ -388,7 +388,7 @@ RETURN algo.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.algo.wcc.write({
+CALL gds.wcc.write({
   nodeProjection: ["User"],
   relationshipProjection: ["LINK"],
   seedProperty: "componentId",
@@ -425,7 +425,7 @@ See <<projected-graph-model, Projected Graph Model>> for more details.
 ----
 CALL gds.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;
 
-CALL gds.algo.wcc.stream('myGraph')
+CALL gds.wcc.stream('myGraph')
 YIELD nodeId, componentId
 RETURN algo.asNode(nodeId).name AS name, componentId
 ORDER BY componentId, Name;
@@ -448,7 +448,7 @@ As we can see, the results are identical to the results in the <<algorithms-wcc-
 .Using a Cypher projection:
 [source, cypher]
 ----
-CALL gds.algo.wcc.stream({
+CALL gds.wcc.stream({
     nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
     relationshipQuery: 'MATCH (u1:User)-[:LINK]->(u2:User) RETURN id(u1) AS source, id(u2) AS target'
 })
