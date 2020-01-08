@@ -23,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
-import java.util.Collection;
-import java.util.Collections;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ParametersConfig implements Parameters {
@@ -39,10 +37,6 @@ public final class ParametersConfig implements Parameters {
         this.keyFromParameter = keyFromParameter;
         this.keyFromMap = config.requireLong("keyFromMap");
         this.parametersAreAddedFirst = parametersAreAddedFirst;
-    }
-
-    public static Collection<String> configKeys() {
-        return Collections.singleton("keyFromMap");
     }
 
     @Override

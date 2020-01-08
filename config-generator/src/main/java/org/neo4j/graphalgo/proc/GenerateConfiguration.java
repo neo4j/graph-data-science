@@ -27,7 +27,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.NameAllocator;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
@@ -105,7 +104,6 @@ final class GenerateConfiguration {
         return classBuilder(config, packageName, generatedClassName)
             .addFields(fieldDefinitions.fields())
             .addMethod(defineConstructor(config, fieldDefinitions.names()))
-            .addMethod(defineGetKeys(config))
             .addMethods(defineGetters(config, fieldDefinitions.names()))
             .build();
     }
@@ -135,7 +133,7 @@ final class GenerateConfiguration {
     private FieldDefinitions defineFields(ConfigParser.Spec config) {
         NameAllocator names = new NameAllocator();
         ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
-        config.members().stream().map(member ->
+        config.members().stream().filter(member -> !member.collectsKeys()).map(member ->
             FieldSpec.builder(
                 member.typeSpecWithAnnotation(Nullable.class),
                 names.newName(member.methodName(), member),
@@ -184,39 +182,6 @@ final class GenerateConfiguration {
         }
 
         return configMapConstructor.build();
-    }
-
-    private MethodSpec defineGetKeys(ConfigParser.Spec config) {
-        Collection<String> configKeys = config
-            .members()
-            .stream()
-            .filter(member -> !isAnnotationPresent(member.method(), Parameter.class))
-            .map(ConfigParser.Member::lookupKey)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-
-        CodeBlock.Builder code = CodeBlock.builder();
-        switch (configKeys.size()) {
-            case 0:
-                code.addStatement("return $T.emptyList()", Collections.class);
-                break;
-            case 1:
-                code.addStatement("return $T.singleton($S)", Collections.class, configKeys.iterator().next());
-                break;
-            default:
-                CodeBlock keys = configKeys
-                    .stream()
-                    .map(name -> CodeBlock.of("$S", name))
-                    .collect(CodeBlock.joining(", "));
-                code.addStatement("return $T.asList($L)", Arrays.class, keys);
-                break;
-        }
-
-        return MethodSpec
-            .methodBuilder("configKeys")
-            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-            .returns(ParameterizedTypeName.get(Collection.class, String.class))
-            .addCode(code.build())
-            .build();
     }
 
     private void addConfigGetterToConstructor(
@@ -287,6 +252,10 @@ final class GenerateConfiguration {
     }
 
     private Optional<MemberDefinition> memberDefinition(NameAllocator names, ConfigParser.Member member) {
+        if (member.collectsKeys()) {
+            return Optional.empty();
+        }
+
         ExecutableElement method = member.method();
         TypeMirror targetType = method.getReturnType();
         ConvertWith convertWith = method.getAnnotation(ConvertWith.class);
@@ -519,13 +488,47 @@ final class GenerateConfiguration {
         return Optional.of(builder.build());
     }
 
+    private CodeBlock collectKeysCode(ConfigParser.Spec config) {
+        Collection<String> configKeys = config
+            .members()
+            .stream()
+            .filter(member -> !member.collectsKeys())
+            .filter(member -> !isAnnotationPresent(member.method(), Parameter.class))
+            .map(ConfigParser.Member::lookupKey)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        switch (configKeys.size()) {
+            case 0:
+                return CodeBlock.of("return $T.emptyList()", Collections.class);
+            case 1:
+                return CodeBlock.of("return $T.singleton($S)", Collections.class, configKeys.iterator().next());
+            default:
+                CodeBlock keys = configKeys
+                    .stream()
+                    .map(name -> CodeBlock.of("$S", name))
+                    .collect(CodeBlock.joining(", "));
+                return CodeBlock.of("return $T.asList($L)", Arrays.class, keys);
+        }
+    }
+
     private Iterable<MethodSpec> defineGetters(ConfigParser.Spec config, NameAllocator names) {
-        return config.members().stream().map(member -> MethodSpec
+        return config
+            .members()
+            .stream()
+            .map(member -> defineGetter(config, names, member))
+            .collect(Collectors.toList());
+    }
+
+    private MethodSpec defineGetter(ConfigParser.Spec config, NameAllocator names, ConfigParser.Member member) {
+        MethodSpec.Builder builder = MethodSpec
             .overriding(member.method())
-            .returns(member.typeSpecWithAnnotation(Nullable.class))
-            .addStatement("return this.$N", names.get(member))
-            .build()
-        ).collect(Collectors.toList());
+            .returns(member.typeSpecWithAnnotation(Nullable.class));
+        if (member.collectsKeys()) {
+            builder.addStatement(collectKeysCode(config));
+        } else {
+            builder.addStatement("return this.$N", names.get(member));
+        }
+        return builder.build();
     }
 
     private <T> Optional<T> error(CharSequence message, Element element) {

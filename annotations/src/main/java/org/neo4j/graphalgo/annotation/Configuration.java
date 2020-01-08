@@ -61,4 +61,10 @@ public @interface Configuration {
     @interface Parameter {
         boolean acceptNull() default false;
     }
+
+    @Documented
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.CLASS)
+    @interface CollectKeys {
+    }
 }

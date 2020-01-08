@@ -23,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -65,22 +63,6 @@ public final class FieldTypesConfig implements FieldTypes {
         this.aString = CypherMapWrapper.failOnNull("aString", config.requireString("aString"));
         this.aMap = CypherMapWrapper.failOnNull("aMap", config.requireChecked("aMap", Map.class));
         this.aList = CypherMapWrapper.failOnNull("aList", config.requireChecked("aList", List.class));
-    }
-
-    public static Collection<String> configKeys() {
-        return Arrays.asList(
-            "aBoolean",
-            "aByte",
-            "aShort",
-            "anInt",
-            "aLong",
-            "aFloat",
-            "aDouble",
-            "aNumber",
-            "aString",
-            "aMap",
-            "aList"
-        );
     }
 
     @Override

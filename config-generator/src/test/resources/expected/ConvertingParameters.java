@@ -23,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
-import java.util.Collection;
-import java.util.Collections;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ConvertingParametersConfig implements ConvertingParameters {
@@ -36,10 +34,6 @@ public final class ConvertingParametersConfig implements ConvertingParameters {
             "parametersAreSubjectToConversion",
             parametersAreSubjectToConversion
         ));
-    }
-
-    public static Collection<String> configKeys() {
-        return Collections.emptyList();
     }
 
     @Override

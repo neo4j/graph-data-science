@@ -23,34 +23,41 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
+import java.util.Arrays;
+import java.util.Collection;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
-public final class NamingConflictConfig implements NamingConflict {
+public final class CollectingKeysConfig implements CollectingKeys {
 
-    private final int config;
+    private final int foo;
 
-    private final int anotherConfig;
+    private final long bar;
 
-    private final int config_;
+    private final double baz;
 
-    public NamingConflictConfig(int config_, @NotNull CypherMapWrapper config__) {
-        this.config = config__.requireInt("config");
-        this.anotherConfig = config__.requireInt("config");
-        this.config_ = config_;
+    public CollectingKeysConfig(int foo, @NotNull CypherMapWrapper config) {
+        this.foo = foo;
+        this.bar = config.requireLong("bar");
+        this.baz = config.requireDouble("baz");
     }
 
     @Override
-    public int config() {
-        return this.config;
+    public int foo() {
+        return this.foo;
     }
 
     @Override
-    public int anotherConfig() {
-        return this.anotherConfig;
+    public long bar() {
+        return this.bar;
     }
 
     @Override
-    public int config_() {
-        return this.config_;
+    public double baz() {
+        return this.baz;
+    }
+
+    @Override
+    public Collection<String> configKeys() {
+        return Arrays.asList("bar", "baz");
     }
 }

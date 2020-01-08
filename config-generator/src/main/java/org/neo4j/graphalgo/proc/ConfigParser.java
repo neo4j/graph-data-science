@@ -23,6 +23,7 @@ import com.google.common.collect.Streams;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration.CollectKeys;
 import org.neo4j.graphalgo.annotation.Configuration.Ignore;
 import org.neo4j.graphalgo.annotation.Configuration.Key;
 import org.neo4j.graphalgo.annotation.Configuration.Parameter;
@@ -33,10 +34,14 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -54,9 +59,13 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 final class ConfigParser {
 
     private final Messager messager;
+    private final Elements elementUtils;
+    private final Types typeUtils;
 
-    ConfigParser(Messager messager) {
+    ConfigParser(Messager messager, Elements elementUtils, Types typeUtils) {
         this.messager = messager;
+        this.elementUtils = elementUtils;
+        this.typeUtils = typeUtils;
     }
 
     Spec process(TypeMirror configType) {
@@ -124,6 +133,22 @@ final class ConfigParser {
             .owner(root)
             .method(method);
 
+        if (isAnnotationPresent(method, CollectKeys.class)) {
+            TypeElement collectionType = elementUtils.getTypeElement(Collection.class.getTypeName());
+            TypeMirror stringType = elementUtils.getTypeElement(String.class.getTypeName()).asType();
+            DeclaredType collectionOfStringType = typeUtils.getDeclaredType(collectionType, stringType);
+
+            if (!typeUtils.isSameType(method.getReturnType(), collectionOfStringType)) {
+                messager.printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Method must return Collection<String>",
+                    method
+                );
+            }
+
+            memberBuilder.collectsKeys(true);
+        }
+
         Key key = method.getAnnotation(Key.class);
         if (key != null) {
             if (isAnnotationPresent(method, Parameter.class)) {
@@ -167,6 +192,11 @@ final class ConfigParser {
         @Value.Default
         public String lookupKey() {
             return methodName();
+        }
+
+        @Value.Default
+        public boolean collectsKeys() {
+            return false;
         }
 
         @Value.Derived

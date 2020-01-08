@@ -23,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
-import java.util.Arrays;
-import java.util.Collection;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ConversionsConfig implements Conversions.MyConversion {
@@ -45,10 +43,6 @@ public final class ConversionsConfig implements Conversions.MyConversion {
             "referenceTypeAsResult",
             Conversions.MyConversion.add42(config.requireString("referenceTypeAsResult"))
         );
-    }
-
-    public static Collection<String> configKeys() {
-        return Arrays.asList("directMethod", "inheritedMethod", "qualifiedMethod", "referenceTypeAsResult");
     }
 
     @Override

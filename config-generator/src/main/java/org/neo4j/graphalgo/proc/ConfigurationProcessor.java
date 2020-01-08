@@ -46,7 +46,11 @@ public final class ConfigurationProcessor extends BasicAnnotationProcessor {
 
     @Override
     protected Iterable<? extends ProcessingStep> initSteps() {
-        ConfigParser configParser = new ConfigParser(processingEnv.getMessager());
+        ConfigParser configParser = new ConfigParser(
+            processingEnv.getMessager(),
+            processingEnv.getElementUtils(),
+            processingEnv.getTypeUtils()
+        );
         GenerateConfiguration generateConfiguration = new GenerateConfiguration(
             processingEnv.getMessager(),
             processingEnv.getElementUtils(),

@@ -23,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
-import java.util.Arrays;
-import java.util.Collection;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class MyConfig implements Inheritance.MyConfig {
@@ -47,16 +45,6 @@ public final class MyConfig implements Inheritance.MyConfig {
         this.inheritedDefaultValue = config
             .getNumber("inheritedDefaultValue", Inheritance.MyConfig.super.inheritedDefaultValue())
             .shortValue();
-    }
-
-    public static Collection<String> configKeys() {
-        return Arrays.asList(
-            "baseValue",
-            "overriddenValue",
-            "overwrittenValue",
-            "inheritedValue",
-            "inheritedDefaultValue"
-        );
     }
 
     @Override

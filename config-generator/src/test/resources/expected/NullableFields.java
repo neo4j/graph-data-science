@@ -24,8 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
-import java.util.Arrays;
-import java.util.Collection;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class NullableFieldsConfig implements NullableFields {
@@ -46,14 +44,6 @@ public final class NullableFieldsConfig implements NullableFields {
             "conversionCanReturnNull",
             NullableFields.super.conversionCanReturnNull()
         ));
-    }
-
-    public static Collection<String> configKeys() {
-        return Arrays.asList(
-            "nullableRequiredField",
-            "nullableDefaultField",
-            "conversionCanReturnNull"
-        );
     }
 
     @Override

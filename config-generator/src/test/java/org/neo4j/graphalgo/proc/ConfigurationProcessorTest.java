@@ -62,7 +62,8 @@ class ConfigurationProcessorTest {
         "NullableFields",
         "NullableParameters",
         "Conversions",
-        "ConvertingParameters"
+        "ConvertingParameters",
+        "CollectingKeys"
     })
     void positiveTest(String className) {
         assertAbout(javaSource())

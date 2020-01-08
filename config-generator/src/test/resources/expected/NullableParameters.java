@@ -24,8 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
-import java.util.Collection;
-import java.util.Collections;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class NullableParametersConfig implements NullableParameters {
@@ -54,10 +52,6 @@ public final class NullableParametersConfig implements NullableParameters {
         );
         this.referenceTypesCanBeMarkedAsNullable = referenceTypesCanBeMarkedAsNullable;
         this.extraValue = config.requireInt("extraValue");
-    }
-
-    public static Collection<String> configKeys() {
-        return Collections.singleton("extraValue");
     }
 
     @Override

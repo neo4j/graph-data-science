@@ -19,19 +19,20 @@
  */
 package positive;
 
-import javax.annotation.processing.Generated;
+import org.neo4j.graphalgo.annotation.Configuration;
 
-@Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
-public final class ParametersOnlyConfig implements ParametersOnly {
+import java.util.Collection;
 
-    private final int onlyAsParameter;
+@Configuration("CollectingKeysConfig")
+public interface CollectingKeys {
 
-    public ParametersOnlyConfig(int onlyAsParameter) {
-        this.onlyAsParameter = onlyAsParameter;
-    }
+    @Configuration.Parameter
+    int foo();
 
-    @Override
-    public int onlyAsParameter() {
-        return this.onlyAsParameter;
-    }
+    long bar();
+
+    double baz();
+
+    @Configuration.CollectKeys
+    Collection<String> configKeys();
 }

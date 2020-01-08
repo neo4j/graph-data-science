@@ -23,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
-import java.util.Arrays;
-import java.util.Collection;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class DefaultValuesConfig implements DefaultValues {
@@ -39,10 +37,6 @@ public final class DefaultValuesConfig implements DefaultValues {
             "defaultString",
             config.getString("defaultString", DefaultValues.super.defaultString())
         );
-    }
-
-    public static Collection<String> configKeys() {
-        return Arrays.asList("defaultInt", "defaultString");
     }
 
     @Override
