@@ -31,7 +31,7 @@ import java.util.Map;
 
 public interface ModernSimilarityConfig extends AlgoBaseConfig, WriteConfig {
 
-    int TOP_K_DEFAULT = 0;
+    int TOP_K_DEFAULT = 3;
 
     int TOP_N_DEFAULT = 0;
 

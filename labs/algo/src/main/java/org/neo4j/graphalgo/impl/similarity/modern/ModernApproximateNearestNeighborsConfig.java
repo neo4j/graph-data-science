@@ -24,12 +24,34 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.newapi.IterationsConfig;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 @ValueClass
 @Configuration("ModernApproximateNearestNeighborsConfigImpl")
 public interface ModernApproximateNearestNeighborsConfig extends ModernSimilarityConfig, IterationsConfig {
 
     @Configuration.ConvertWith("similarityAlgorithm")
     SimilarityAlgorithm algorithm();
+
+    @Override
+    @Configuration.Ignore
+    default String graph() {
+        return "dense";
+    }
+
+    @Override
+    @Value.Default
+    default List<Map<String,Object>> data() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    @Value.Default
+    default int maxIterations() {
+        return 10;
+    }
 
     @Value.Default
     default double precision() {
