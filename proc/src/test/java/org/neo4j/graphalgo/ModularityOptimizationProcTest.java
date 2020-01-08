@@ -174,6 +174,7 @@ class ModularityOptimizationProcTest extends BaseProcTest {
         runQuery("MATCH (n) RETURN n.community as community", (row) -> {
             communities[i.getAndIncrement()] = row.getNumber("community").longValue();
         });
+        assertCommunities(communities, SEEDED_COMMUNITIES);
     }
 
     @Test
