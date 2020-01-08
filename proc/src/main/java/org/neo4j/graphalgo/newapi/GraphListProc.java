@@ -34,22 +34,22 @@ public class GraphListProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.list", mode = Mode.READ)
     @Description("Lists information about named graphs stored in the catalog.")
-    public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = "null") Object graphName) {
-        if (Objects.nonNull(graphName) && !(graphName instanceof String)) {
+    public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = "null") Object maybeGraphName) {
+        if (Objects.nonNull(maybeGraphName) && !(maybeGraphName instanceof String)) {
             throw new IllegalArgumentException("`graphName` parameter must be a STRING");
         }
-        String graphNames = (String) graphName;
 
         Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries = GraphCatalog
             .getLoadedGraphs(getUsername())
             .entrySet()
             .stream();
 
-        if (graphNames != null) {
-            validateGraphName(graphNames);
+        if (maybeGraphName != null) {
+            String graphName = (String) maybeGraphName;
+            validateGraphName(graphName);
 
             // we should only list the provided graph
-            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphNames));
+            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
         }
 
         return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram()));

@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -38,8 +37,8 @@ import java.util.stream.Collectors;
 @Configuration("GraphCreateFromStoreConfigImpl")
 public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
 
-    @NotNull String NODE_PROJECTION_KEY = "nodeProjection";
-    @NotNull String RELATIONSHIP_PROJECTION_KEY = "relationshipProjection";
+    String NODE_PROJECTION_KEY = "nodeProjection";
+    String RELATIONSHIP_PROJECTION_KEY = "relationshipProjection";
 
     @Override
     @Configuration.Parameter
@@ -138,13 +137,13 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             }
         });
 
-        GraphCreateFromStoreConfig GraphCreateFromStoreConfig = new GraphCreateFromStoreConfigImpl(
+        GraphCreateFromStoreConfig createConfig = new GraphCreateFromStoreConfigImpl(
             nodeProjections,
             relationshipProjections,
             IMPLICIT_GRAPH_NAME,
             username,
             config
         );
-        return GraphCreateFromStoreConfig.withNormalizedPropertyMappings();
+        return createConfig.withNormalizedPropertyMappings();
     }
 }

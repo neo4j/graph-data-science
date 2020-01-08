@@ -145,7 +145,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldProjectAllRelsWithSpecialStar() {
+    void shouldProjectAllRelationshipsWithSpecialStar() {
         String query = "CALL gds.graph.create('g', 'A', '*') YIELD relationships";
 
         runQuery("CREATE (:A)-[:R]->(:A), (:B:A)-[:T]->(:A:B), (cde:C:D:E)-[:SELF]->(cde)");
@@ -207,7 +207,7 @@ class GraphCreateProcTest extends BaseProcTest {
             "No value specified for the mandatory configuration parameter `nodeQuery`"
         );
         assertError(
-            "CALL gds.graph.create.cypher('name', 'A', null)",
+            "CALL gds.graph.create.cypher('name', 'MATCH (n) RETURN id(n) AS id', null)",
             "No value specified for the mandatory configuration parameter `relationshipQuery`"
         );
     }
@@ -300,7 +300,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "properties = {0}")
     @MethodSource(value = "nodeProperties")
-    void nodePropertiesInNodeProjection(Object properties, Map<String, Object> expectedProperties) {
+    void nodeProjectionWithProperties(Object properties, Map<String, Object> expectedProperties) {
         String name = "g";
         Map<String, Object> nodeProjection = map("B", map(LABEL_KEY, "A", PROPERTIES_KEY, properties));
         Map<String, Object> expectedNodeProjection = map("B", map(LABEL_KEY, "A", PROPERTIES_KEY, expectedProperties));
@@ -324,7 +324,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "properties = {0}")
     @MethodSource(value = "nodeProperties")
-    void nodePropertiesAndNodeQuery(Object nodeProperties, Map<String, Object> expectedProperties) {
+    void nodeQueryAndProperties(Object nodeProperties, Map<String, Object> expectedProperties) {
         String name = "g";
 
         assertCypherResult(
@@ -345,8 +345,8 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "{0}, relProjection = {1}")
-    @MethodSource("relProjectionVariants")
-    void testRelProjectionVariants(String descr, Object relProjection, Map<String, Object> desugaredRelProjection) {
+    @MethodSource("relationshipProjectionVariants")
+    void testRelationshipProjectionVariants(String descr, Object relProjection, Map<String, Object> desugaredRelProjection) {
         String name = "g";
 
         assertCypherResult(
@@ -364,8 +364,8 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "projection={0}")
-    @MethodSource("relProjectionTypes")
-    void relProjectionProjections(String projection) {
+    @MethodSource("relationshipProjectionTypes")
+    void relationshipProjectionProjections(String projection) {
         String name = "g";
         Map<String, Object> relProjection = map("type", "REL", PROJECTION_KEY, projection, PROPERTIES_KEY, emptyMap());
         Map<String, Object> expectedRelProjection = MapUtil.genericMap(
@@ -396,7 +396,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "properties = {0}")
     @MethodSource(value = "relationshipProperties")
-    void relPropertiesInRelationshipProjection(Object properties, Map<String, Object> expectedProperties) {
+    void relationshipProjectionWithProperties(Object properties, Map<String, Object> expectedProperties) {
         String name = "g";
         Map<String, Object> relProjection = map("B", map("type", "REL", PROPERTIES_KEY, properties));
         Map<String, Object> expectedRelProjection = map(
@@ -421,7 +421,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "properties = {0}")
     @MethodSource(value = "relationshipProperties")
-    void relPropertiesAndRelationshipQuery(Object relationshipProperties, Map<String, Object> expectedProperties) {
+    void relationshipQueryAndProperties(Object relationshipProperties, Map<String, Object> expectedProperties) {
         String name = "g";
 
         // TODO: check property values on graph
@@ -440,7 +440,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @MethodSource("relAggregationTypes")
+    @MethodSource("relationshipAggregationTypes")
     void relationshipProjectionPropertyAggregations(String aggregation) {
         String name = "g";
         Map<String, Object> properties = map(
@@ -468,7 +468,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @MethodSource("relAggregationTypes")
+    @MethodSource("relationshipAggregationTypes")
     void relationshipQueryPropertyAggregations(String aggregation) {
         String name = "g";
         Map<String, Object> relationshipProperties = map(
@@ -604,7 +604,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
-    static Stream<Arguments> relProjectionVariants() {
+    static Stream<Arguments> relationshipProjectionVariants() {
         return Stream.of(
             Arguments.of(
                 "default neo type",
@@ -660,7 +660,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
-    static Stream<String> relProjectionTypes() {
+    static Stream<String> relationshipProjectionTypes() {
         return Stream.of(
             "NATURAL",
             "REVERSE",
@@ -668,7 +668,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
-    static Stream<String> relAggregationTypes() {
+    static Stream<String> relationshipAggregationTypes() {
         return Stream.of(
             "MAX",
             "MIN",

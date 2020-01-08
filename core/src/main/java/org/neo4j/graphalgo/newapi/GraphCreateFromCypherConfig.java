@@ -36,13 +36,11 @@ import org.neo4j.graphalgo.core.utils.Pools;
 @Configuration("GraphCreateFromCypherConfigImpl")
 public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
-    @NotNull String NODE_QUERY_KEY = "nodeQuery";
-    @NotNull String RELATIONSHIP_QUERY_KEY = "relationshipQuery";
-    @NotNull String NODE_PROPERTIES_KEY = "nodeProperties";
-    @NotNull String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
-    @NotNull String BLANK_QUERY = "";
-    @NotNull String ALL_NODES_QUERY = "MATCH (n) RETURN id(n) AS id";
-    @NotNull String ALL_RELATIONSHIPS_QUERY = "MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target";
+    String NODE_QUERY_KEY = "nodeQuery";
+    String RELATIONSHIP_QUERY_KEY = "relationshipQuery";
+    String BLANK_QUERY = "";
+    String ALL_NODES_QUERY = "MATCH (n) RETURN id(n) AS id";
+    String ALL_RELATIONSHIPS_QUERY = "MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target";
 
     @Override
     @Configuration.Ignore
