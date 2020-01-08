@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -229,7 +230,9 @@ public final class CypherMapWrapper {
     }
 
     static <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
-        if (!expectedType.isInstance(value)) {
+        if (Objects.nonNull(value) && canHardCastToDouble(expectedType, value)) {
+            return expectedType.cast(((Number) value).doubleValue());
+        } else if (!expectedType.isInstance(value)) {
             String message = String.format(
                 "The value of `%s` must be of type `%s` but was `%s`.",
                 key,
@@ -239,6 +242,10 @@ public final class CypherMapWrapper {
             throw new IllegalArgumentException(message);
         }
         return expectedType.cast(value);
+    }
+
+    private static boolean canHardCastToDouble(Class<?> expectedType, Object value) {
+        return Double.class.isAssignableFrom(expectedType) && value instanceof Number;
     }
 
     private static IllegalArgumentException missingValueFor(String key) {
