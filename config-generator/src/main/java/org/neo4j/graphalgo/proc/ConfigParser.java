@@ -35,13 +35,13 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -148,6 +148,13 @@ final class ConfigParser {
 
             memberBuilder.collectsKeys(true);
         }
+        if (isAnnotationPresent(method, Value.Check.class)) {
+            if (method.getReturnType().getKind() == TypeKind.VOID) {
+                memberBuilder.validates(true);
+            } else {
+                memberBuilder.normalizes(true);
+            }
+        }
 
         Key key = method.getAnnotation(Key.class);
         if (key != null) {
@@ -199,6 +206,24 @@ final class ConfigParser {
             return false;
         }
 
+        @Value.Default
+        public boolean validates() {
+            return false;
+        }
+
+        @Value.Default
+        public boolean normalizes() {
+            return false;
+        }
+
+        final boolean isConfigValue() {
+            return !collectsKeys() && !validates() && !normalizes();
+        }
+
+        final boolean isMapParameter() {
+            return isConfigValue() && !isAnnotationPresent(method(), Parameter.class);
+        }
+
         @Value.Derived
         public String methodName() {
             return method().getSimpleName().toString();
@@ -233,6 +258,13 @@ final class ConfigParser {
             String trimmedKey = lookupKey().trim();
             if (trimmedKey.isEmpty()) {
                 throw new InvalidMemberException("The key must not be empty");
+            }
+            if (collectsKeys() && (validates() || normalizes())) {
+                throw new InvalidMemberException(String.format(
+                    "Cannot combine @%s with @%s",
+                    CollectKeys.class.getSimpleName(),
+                    Value.Check.class.getSimpleName()
+                ));
             }
             if (trimmedKey.equals(lookupKey())) {
                 return this;
