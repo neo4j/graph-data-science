@@ -19,6 +19,8 @@
  */
 package positive;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -43,6 +45,12 @@ public final class ConversionsConfig implements Conversions.MyConversion {
             "referenceTypeAsResult",
             Conversions.MyConversion.add42(config.requireString("referenceTypeAsResult"))
         );
+    }
+
+    public static Pair<Conversions.MyConversion, CypherMapWrapper> of(@NotNull CypherMapWrapper config) {
+        Conversions.MyConversion instance = new ConversionsConfig(config);
+        CypherMapWrapper newConfig = config.withoutAny("directMethod", "inheritedMethod", "qualifiedMethod", "referenceTypeAsResult");
+        return Tuples.pair(instance, newConfig);
     }
 
     @Override

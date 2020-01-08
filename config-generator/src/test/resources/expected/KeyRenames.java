@@ -19,6 +19,8 @@
  */
 package positive;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -34,6 +36,15 @@ public final class KeyRenamesConfig implements KeyRenames {
     public KeyRenamesConfig(@NotNull CypherMapWrapper config) {
         this.lookupUnderAnotherKey = config.requireInt("key could also be an invalid identifier");
         this.whitespaceWillBeTrimmed = config.requireInt("whitespace will be trimmed");
+    }
+
+    public static Pair<KeyRenames, CypherMapWrapper> of(@NotNull CypherMapWrapper config) {
+        KeyRenames instance = new KeyRenamesConfig(config);
+        CypherMapWrapper newConfig = config.withoutAny(
+            "key could also be an invalid identifier",
+            "whitespace will be trimmed"
+        );
+        return Tuples.pair(instance, newConfig);
     }
 
     @Override

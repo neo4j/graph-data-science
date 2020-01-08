@@ -27,8 +27,11 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.NameAllocator;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
@@ -62,6 +65,7 @@ import java.util.stream.Collectors;
 
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.getAnnotationMirror;
+import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isTypeOf;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -69,6 +73,8 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 final class GenerateConfiguration {
 
     private static final String CONFIG_VAR = "config";
+    private static final String INSTANCE_VAR = "instance";
+    private static final String NEW_CONFIG_VAR = "newConfig";
     private static final AnnotationSpec NULLABLE = AnnotationSpec.builder(Nullable.class).build();
     private static final AnnotationSpec NOT_NULL = AnnotationSpec.builder(NotNull.class).build();
 
@@ -96,10 +102,23 @@ final class GenerateConfiguration {
     }
 
     private TypeSpec process(ConfigParser.Spec config, String packageName, String generatedClassName) {
+        TypeSpec.Builder builder = classBuilder(config, packageName, generatedClassName);
+
         FieldDefinitions fieldDefinitions = defineFields(config);
-        return classBuilder(config, packageName, generatedClassName)
-            .addFields(fieldDefinitions.fields())
-            .addMethod(defineConstructor(config, fieldDefinitions.names()))
+        builder.addFields(fieldDefinitions.fields());
+
+        MethodSpec constructor = defineConstructor(config, fieldDefinitions.names());
+        builder.addMethod(constructor);
+
+        Optional<MethodSpec> factory = defineFactory(
+            config,
+            generatedClassName,
+            constructor,
+            fieldDefinitions.names()
+        );
+        factory.ifPresent(builder::addMethod);
+
+        return builder
             .addMethods(defineGetters(config, fieldDefinitions.names()))
             .build();
     }
@@ -178,6 +197,58 @@ final class GenerateConfiguration {
         }
 
         return configMapConstructor.build();
+    }
+
+    private Optional<MethodSpec> defineFactory(
+        ConfigParser.Spec config,
+        String generatedClassName,
+        MethodSpec constructor,
+        NameAllocator names
+    ) {
+        CodeBlock configKeyArgs = config
+            .members()
+            .stream()
+            .filter(member -> !isAnnotationPresent(member.method(), Parameter.class))
+            .map(member -> CodeBlock.of("$S", member.lookupKey()))
+            .collect(CodeBlock.joining(", "));
+
+        if (configKeyArgs.isEmpty()) {
+            // no args or only parameters
+            return Optional.empty();
+
+        }
+
+        CodeBlock constructorArgs = constructor.parameters
+            .stream()
+            .map(param -> CodeBlock.of("$N", param))
+            .collect(CodeBlock.joining(", "));
+
+        String instanceVarName = names.newName(INSTANCE_VAR, INSTANCE_VAR);
+        String newConfigVarName = names.newName(NEW_CONFIG_VAR, NEW_CONFIG_VAR);
+        TypeName interfaceType = TypeName.get(config.rootType());
+        TypeName returnType = ParameterizedTypeName.get(
+            ClassName.get(Pair.class),
+            interfaceType,
+            ClassName.get(CypherMapWrapper.class)
+        );
+
+        MethodSpec factory = MethodSpec
+            .methodBuilder("of")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .returns(returnType)
+            .addParameters(constructor.parameters)
+            .addStatement("$T $N = new $L($L)", interfaceType, instanceVarName, generatedClassName, constructorArgs)
+            .addStatement(
+                "$T $N = $N.withoutAny($L)",
+                CypherMapWrapper.class,
+                newConfigVarName,
+                names.get(CONFIG_VAR),
+                configKeyArgs
+            )
+            .addStatement("return $T.pair($N, $N)", Tuples.class, instanceVarName, newConfigVarName)
+            .build();
+
+        return Optional.of(factory);
     }
 
     private void addConfigGetterToConstructor(

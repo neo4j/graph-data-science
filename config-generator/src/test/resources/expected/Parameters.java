@@ -19,6 +19,8 @@
  */
 package positive;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -37,6 +39,16 @@ public final class ParametersConfig implements Parameters {
         this.keyFromParameter = keyFromParameter;
         this.keyFromMap = config.requireLong("keyFromMap");
         this.parametersAreAddedFirst = parametersAreAddedFirst;
+    }
+
+    public static Pair<Parameters, CypherMapWrapper> of(
+        int keyFromParameter,
+        int parametersAreAddedFirst,
+        @NotNull CypherMapWrapper config
+    ) {
+        Parameters instance = new ParametersConfig(keyFromParameter, parametersAreAddedFirst, config);
+        CypherMapWrapper newConfig = config.withoutAny("keyFromMap");
+        return Tuples.pair(instance, newConfig);
     }
 
     @Override

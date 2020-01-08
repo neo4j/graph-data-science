@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -297,6 +298,12 @@ public final class CypherMapWrapper {
         return new CypherMapWrapper(newMap);
     }
 
+    CypherMapWrapper withDouble(String key, Double value) {
+        HashMap<String, Object> newMap = new HashMap<>(config);
+        newMap.put(key, value);
+        return new CypherMapWrapper(newMap);
+    }
+
     public CypherMapWrapper withoutEntry(String key) {
         if (!containsKey(key)) {
             return this;
@@ -306,9 +313,9 @@ public final class CypherMapWrapper {
         return new CypherMapWrapper(newMap);
     }
 
-    CypherMapWrapper withDouble(String key, Double value) {
-        HashMap<String, Object> newMap = new HashMap<>(config);
-        newMap.put(key, value);
+    public CypherMapWrapper withoutAny(String... keys) {
+        Map<String, Object> newMap = new HashMap<>(config);
+        newMap.keySet().removeAll(Arrays.asList(keys));
         return new CypherMapWrapper(newMap);
     }
 }

@@ -19,6 +19,8 @@
  */
 package positive;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -52,6 +54,22 @@ public final class NullableParametersConfig implements NullableParameters {
         );
         this.referenceTypesCanBeMarkedAsNullable = referenceTypesCanBeMarkedAsNullable;
         this.extraValue = config.requireInt("extraValue");
+    }
+
+    public static Pair<NullableParameters, CypherMapWrapper> of(
+        @NotNull String referenceTypesDefaultToNotNull,
+        @NotNull String referenceTypesCanBeMarkedAsNotNull,
+        @Nullable String referenceTypesCanBeMarkedAsNullable,
+        @NotNull CypherMapWrapper config
+    ) {
+        NullableParameters instance = new NullableParametersConfig(
+            referenceTypesDefaultToNotNull,
+            referenceTypesCanBeMarkedAsNotNull,
+            referenceTypesCanBeMarkedAsNullable,
+            config
+        );
+        CypherMapWrapper newConfig = config.withoutAny("extraValue");
+        return Tuples.pair(instance, newConfig);
     }
 
     @Override

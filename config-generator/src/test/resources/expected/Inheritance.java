@@ -19,6 +19,8 @@
  */
 package positive;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -45,6 +47,18 @@ public final class MyConfig implements Inheritance.MyConfig {
         this.inheritedDefaultValue = config
             .getNumber("inheritedDefaultValue", Inheritance.MyConfig.super.inheritedDefaultValue())
             .shortValue();
+    }
+
+    public static Pair<Inheritance.MyConfig, CypherMapWrapper> of(@NotNull CypherMapWrapper config) {
+        Inheritance.MyConfig instance = new MyConfig(config);
+        CypherMapWrapper newConfig = config.withoutAny(
+            "baseValue",
+            "overriddenValue",
+            "overwrittenValue",
+            "inheritedValue",
+            "inheritedDefaultValue"
+        );
+        return Tuples.pair(instance, newConfig);
     }
 
     @Override

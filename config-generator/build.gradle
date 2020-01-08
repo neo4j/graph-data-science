@@ -15,6 +15,7 @@ dependencies {
     compile             group: 'com.google.auto',          name: 'auto-common',        version: ver.'auto-common'
     compile             group: 'com.squareup',             name: 'javapoet',           version: ver.'javapoet'
     compile             group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
+    compile             group: 'org.eclipse.collections',  name: 'eclipse-collections',version: ver.'eclipse-collections'
 
     def toolsJar = Jvm.current().getToolsJar()
     if (toolsJar != null) {

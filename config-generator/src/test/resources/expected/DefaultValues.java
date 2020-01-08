@@ -19,6 +19,8 @@
  */
 package positive;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -37,6 +39,12 @@ public final class DefaultValuesConfig implements DefaultValues {
             "defaultString",
             config.getString("defaultString", DefaultValues.super.defaultString())
         );
+    }
+
+    public static Pair<DefaultValues, CypherMapWrapper> of(@NotNull CypherMapWrapper config) {
+        DefaultValues instance = new DefaultValuesConfig(config);
+        CypherMapWrapper newConfig = config.withoutAny("defaultInt", "defaultString");
+        return Tuples.pair(instance, newConfig);
     }
 
     @Override
