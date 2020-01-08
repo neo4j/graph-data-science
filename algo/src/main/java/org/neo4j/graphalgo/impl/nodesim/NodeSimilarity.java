@@ -99,7 +99,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     public Stream<SimilarityResult> computeToStream() {
-        progressLogger.log("Enter :: NodeSimilarity#computeToStream");
+        progressLogger.log("NodeSimilarity#computeToStream");
 
         // Create a filter for which nodes to compare and calculate the neighborhood for each node
         prepare();
