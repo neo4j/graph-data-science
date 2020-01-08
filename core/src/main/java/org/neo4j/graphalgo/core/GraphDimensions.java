@@ -34,7 +34,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 public final class GraphDimensions {
 
     private long nodeCount;
-    private final long highestNeoId;
+    private long highestNeoId;
     private long maxRelCount;
     private final LongSet nodeLabelIds;
     private final ResolvedPropertyMappings nodeProperties;
@@ -69,6 +69,10 @@ public final class GraphDimensions {
 
     public long highestNeoId() {
         return highestNeoId;
+    }
+
+    public void highestNeoId(long highestNeoId) {
+        this.highestNeoId = highestNeoId;
     }
 
     public long maxRelCount() {
