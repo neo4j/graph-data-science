@@ -132,8 +132,10 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
 
     @AfterEach
     void clearCommunities() {
+        System.out.println(GraphCatalog.getLoadedGraphs(getUsername()).size());
         db.shutdown();
         GraphCatalog.removeAllLoadedGraphs();
+        System.out.println(GraphCatalog.getLoadedGraphs(getUsername()).size());
     }
 
     static Stream<Arguments> gdsGraphVariations() {

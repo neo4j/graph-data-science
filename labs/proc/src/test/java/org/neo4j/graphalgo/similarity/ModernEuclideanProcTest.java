@@ -141,10 +141,10 @@ class ModernEuclideanProcTest extends BaseProcTest {
     void euclideanSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
-        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 1), "missingValue", 0));
-        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 2), "missingValue", 0));
-        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 4), "missingValue", 0));
-        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 8), "missingValue", 0));
+        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 1, "topK", 0), "missingValue", 0));
+        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 2, "topK", 0), "missingValue", 0));
+        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0));
+        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 8, "topK", 0), "missingValue", 0));
         int count = 0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
@@ -180,7 +180,7 @@ class ModernEuclideanProcTest extends BaseProcTest {
 
     @Test
     void topNeuclideanStreamTest() {
-        Result results = runQuery(STATEMENT_STREAM, map("config", map("top", 2), "missingValue", 0));
+        Result results = runQuery(STATEMENT_STREAM, map("config", map("top", 2, "topK", 0), "missingValue", 0));
         assert02(results.next());
         assert13(results.next());
         assertFalse(results.hasNext());
@@ -201,7 +201,7 @@ class ModernEuclideanProcTest extends BaseProcTest {
         // c2 - d3: sqrt(16) = 4
         // System.out.println(runQuery(query).resultAsString());
 
-        Result results = runQuery(STATEMENT_STREAM, map("config",map("concurrency",1), "missingValue", 0));
+        Result results = runQuery(STATEMENT_STREAM, map("config", map("concurrency", 1, "topK", 0), "missingValue", 0));
         assertTrue(results.hasNext());
         assert01(results.next());
         assert02(results.next());
@@ -245,7 +245,7 @@ class ModernEuclideanProcTest extends BaseProcTest {
                        "RETURN id(p) AS item, id(i) AS category, coalesce(r.stars, 0) AS weight";
 
         Map<String, Object> params = map(
-            "config", map("concurrency", 1, "graph", "cypher", "skipValue", Double.NaN, "data", query)
+            "config", map("concurrency", 1, "graph", "cypher", "skipValue", Double.NaN, "data", query, "topK", 0)
         );
         Result results = runQuery(STATEMENT_CYPHER_STREAM, params);
         assertTrue(results.hasNext());
@@ -262,7 +262,7 @@ class ModernEuclideanProcTest extends BaseProcTest {
     void eucideanSkipStreamTest() {
         Result results = runQuery(
             STATEMENT_STREAM,
-            map("config", map("concurrency", 1, "skipValue", Double.NaN), "missingValue", Double.NaN)
+            map("config", map("concurrency", 1, "skipValue", Double.NaN, "topK", 0), "missingValue", Double.NaN)
         );
 
         assertTrue(results.hasNext());
@@ -379,7 +379,7 @@ class ModernEuclideanProcTest extends BaseProcTest {
 
     @Test
     void simpleEuclideanWriteTest() {
-        Map<String, Object> params = map("config", map("write", true, "similarityCutoff", 4.0, "concurrency", 1), "missingValue", 0);
+        Map<String, Object> params = map("config", map("write", true, "similarityCutoff", 4.0, "concurrency", 1, "topK", 0), "missingValue", 0);
 
         runQuery(STATEMENT, params);
 

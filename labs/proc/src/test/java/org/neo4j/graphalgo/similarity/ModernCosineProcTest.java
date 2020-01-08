@@ -129,10 +129,10 @@ class ModernCosineProcTest extends BaseProcTest {
     void cosineSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
-        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 1), "missingValue", 0));
-        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 2), "missingValue", 0));
-        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 4), "missingValue", 0));
-        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 8), "missingValue", 0));
+        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 1, "topK", 0), "missingValue", 0));
+        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 2, "topK", 0), "missingValue", 0));
+        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 4, "topK", 0), "missingValue", 0));
+        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 8, "topK", 0), "missingValue", 0));
         int count=0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
@@ -168,7 +168,7 @@ class ModernCosineProcTest extends BaseProcTest {
 
     @Test
     void topNcosineStreamTest() {
-        Result results = runQuery(STATEMENT_STREAM, map("config",map("top",2), "missingValue", 0));
+        Result results = runQuery(STATEMENT_STREAM, map("config", map("top", 2, "topK", 0), "missingValue", 0));
         assert01(results.next());
         assert02(results.next());
         assertFalse(results.hasNext());
@@ -176,7 +176,7 @@ class ModernCosineProcTest extends BaseProcTest {
 
     @Test
     void cosineStreamTest() {
-        Result results = runQuery(STATEMENT_STREAM, map("config",map("concurrency",1), "missingValue", 0));
+        Result results = runQuery(STATEMENT_STREAM, map("config", map("concurrency", 1, "topK", 0), "missingValue", 0));
         assertTrue(results.hasNext());
         assert01(results.next());
         assert02(results.next());
@@ -204,7 +204,7 @@ class ModernCosineProcTest extends BaseProcTest {
     @Test
     void cosineSkipStreamTest() {
         Result results = runQuery(STATEMENT_STREAM,
-            map("config", map("concurrency",1, "skipValue", Double.NaN), "missingValue", Double.NaN));
+            map("config", map("concurrency",1, "skipValue", Double.NaN, "topK", 0), "missingValue", Double.NaN));
 
         assertTrue(results.hasNext());
         assert01Skip(results.next());
@@ -218,7 +218,7 @@ class ModernCosineProcTest extends BaseProcTest {
         String query = "MATCH (p:Person)-[r:LIKES]->(i) RETURN id(p) AS item, id(i) AS category, r.stars AS weight";
         Result results = runQuery(
             STATEMENT_CYPHER_STREAM,
-            map("config", map("concurrency", 1, "graph", "cypher", "skipValue", 0.0, "data", query))
+            map("config", map("concurrency", 1, "graph", "cypher", "skipValue", 0.0, "data", query, "topK", 0))
         );
 
         assertTrue(results.hasNext());
@@ -305,7 +305,7 @@ class ModernCosineProcTest extends BaseProcTest {
 
     @Test
     void simpleCosineTest() {
-        Map<String, Object> params = map("config", map());
+        Map<String, Object> params = map("config", map("topK", 0));
 
         Map<String, Object> row = runQuery(STATEMENT,params).next();
         assertEquals((double) row.get("p25"), 0.0, 0.01);
@@ -321,7 +321,7 @@ class ModernCosineProcTest extends BaseProcTest {
     void simpleCosineFromEmbeddingTest() {
         runQuery(STORE_EMBEDDING_STATEMENT);
 
-        Map<String, Object> params = map("config", map());
+        Map<String, Object> params = map("config", map("topK", 0));
 
         Map<String, Object> row = runQuery(EMBEDDING_STATEMENT,params).next();
         assertEquals((double) row.get("p25"), 0.0, 0.01);
@@ -358,7 +358,7 @@ class ModernCosineProcTest extends BaseProcTest {
 
     @Test
     void simpleCosineWriteTest() {
-        Map<String, Object> params = map("config", map( "write",true, "similarityCutoff", 0.1));
+        Map<String, Object> params = map("config", map( "write",true, "similarityCutoff", 0.1, "topK", 0));
 
         runQuery(STATEMENT, params).close();
 

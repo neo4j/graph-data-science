@@ -116,10 +116,10 @@ class ModernOverlapProcTest extends BaseProcTest {
     void overlapSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
-        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 1)));
-        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 2)));
-        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 4)));
-        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 8)));
+        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 1, "topK", 0)));
+        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 2, "topK", 0)));
+        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 4, "topK", 0)));
+        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 8, "topK", 0)));
         int count = 0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
