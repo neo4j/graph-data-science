@@ -39,7 +39,7 @@ The corresponding k-Nearest Neighbors Graph can then be used as part of recommen
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/similarity-jaccard.cypher[tag=create-sample-graph-procedure]
+include::scripts/similarity-ann.cypher[tag=create-sample-graph-procedure]
 ----
 
 .The following will return a stream of nodes, along with up to the 3 most similar nodes to them based on Jaccard Similarity:
