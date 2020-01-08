@@ -79,8 +79,6 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.eigenvector.stream",
         "algo.kShortestPaths",
         "algo.kShortestPaths.stream",
-        "algo.labs.ml.ann",
-        "algo.labs.ml.ann.stream",
         "gds.alpha.ml.ann.write",
         "gds.alpha.ml.ann.stream",
         "algo.randomWalk.stream",
@@ -125,7 +123,6 @@ class ListProcTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             AllShortestPathsProc.class,
-            ApproxNearestNeighborsProc.class,
             ModernApproxNearestNeighborsProc.class,
             ArticleRankProc.class,
             BalancedTriadsProc.class,
