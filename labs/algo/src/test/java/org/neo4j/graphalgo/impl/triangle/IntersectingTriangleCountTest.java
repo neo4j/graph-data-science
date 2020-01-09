@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.core.loading.*;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.graphalgo.impl.similarity.modern.ANNUtils;
-import org.neo4j.graphalgo.impl.similarity.modern.HugeRelationshipsBuilder;
+import org.neo4j.graphalgo.impl.similarity.ANNUtils;
+import org.neo4j.graphalgo.impl.similarity.HugeRelationshipsBuilder;
 
 import java.util.Collections;
 import java.util.List;

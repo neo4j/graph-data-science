@@ -29,11 +29,11 @@ import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.shortestpath.DijkstraProc;
-import org.neo4j.graphalgo.similarity.ModernApproxNearestNeighborsProc;
-import org.neo4j.graphalgo.similarity.ModernCosineProc;
-import org.neo4j.graphalgo.similarity.ModernEuclideanProc;
-import org.neo4j.graphalgo.similarity.ModernOverlapProc;
-import org.neo4j.graphalgo.similarity.ModernPearsonProc;
+import org.neo4j.graphalgo.similarity.ApproxNearestNeighborsProc;
+import org.neo4j.graphalgo.similarity.CosineProc;
+import org.neo4j.graphalgo.similarity.EuclideanProc;
+import org.neo4j.graphalgo.similarity.OverlapProc;
+import org.neo4j.graphalgo.similarity.PearsonProc;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -123,7 +123,7 @@ class ListProcTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             AllShortestPathsProc.class,
-            ModernApproxNearestNeighborsProc.class,
+            ApproxNearestNeighborsProc.class,
             ArticleRankProc.class,
             BalancedTriadsProc.class,
             BetweennessCentralityProc.class,
@@ -135,10 +135,10 @@ class ListProcTest extends BaseProcTest {
             KShortestPathsProc.class,
             KSpanningTreeProc.class,
             ListProc.class,
-            ModernCosineProc.class,
-            ModernEuclideanProc.class,
-            ModernOverlapProc.class,
-            ModernPearsonProc.class,
+            CosineProc.class,
+            EuclideanProc.class,
+            OverlapProc.class,
+            PearsonProc.class,
             NodeWalkerProc.class,
             OneHotEncodingFunc.class,
             PrimProc.class,
