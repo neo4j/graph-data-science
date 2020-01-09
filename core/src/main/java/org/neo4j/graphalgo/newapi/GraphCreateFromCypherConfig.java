@@ -20,17 +20,14 @@
 
 package org.neo4j.graphalgo.newapi;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.utils.Pools;
 
 @ValueClass
 @Configuration("GraphCreateFromCypherConfigImpl")
@@ -38,7 +35,6 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     String NODE_QUERY_KEY = "nodeQuery";
     String RELATIONSHIP_QUERY_KEY = "relationshipQuery";
-    String BLANK_QUERY = "";
     String ALL_NODES_QUERY = "MATCH (n) RETURN id(n) AS id";
     String ALL_RELATIONSHIPS_QUERY = "MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target";
 
@@ -60,11 +56,9 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         return RelationshipProjections.of();
     }
 
-    @Configuration.Parameter
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String nodeQuery();
 
-    @Configuration.Parameter
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String relationshipQuery();
 
@@ -75,9 +69,13 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         String relationshipQuery,
         CypherMapWrapper config
     ) {
+        if (nodeQuery != null) {
+            config = config.withString(NODE_QUERY_KEY, nodeQuery);
+        }
+        if (relationshipQuery != null) {
+            config = config.withString(RELATIONSHIP_QUERY_KEY, relationshipQuery);
+        }
         return new GraphCreateFromCypherConfigImpl(
-            nodeQuery,
-            relationshipQuery,
             graphName,
             userName,
             config
@@ -96,27 +94,10 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     }
 
     static GraphCreateFromCypherConfig fromProcedureConfig(String username, CypherMapWrapper config) {
-        String nodeQuery = CypherMapWrapper.failOnBlank(NODE_QUERY_KEY, config.getString(NODE_QUERY_KEY, BLANK_QUERY));
-        String relationshipQuery = CypherMapWrapper.failOnBlank(RELATIONSHIP_QUERY_KEY, config.getString(RELATIONSHIP_QUERY_KEY, BLANK_QUERY));
-
-        PropertyMappings nodeProperties = (config.containsKey(NODE_PROPERTIES_KEY))
-            ? PropertyMappings.fromObject(config.get(NODE_PROPERTIES_KEY, null))
-            : PropertyMappings.of();
-
-        PropertyMappings relationshipProperties = (config.containsKey(RELATIONSHIP_PROPERTIES_KEY))
-            ? PropertyMappings.fromObject(config.get(RELATIONSHIP_PROPERTIES_KEY, null))
-            : PropertyMappings.of();
-
         return new GraphCreateFromCypherConfigImpl(
-            nodeQuery,
-            relationshipQuery,
             IMPLICIT_GRAPH_NAME,
-            nodeProperties,
-            relationshipProperties,
-            Pools.DEFAULT_CONCURRENCY,
-            -1,
-            -1,
-            username
+            username,
+            config
         );
     }
 }
