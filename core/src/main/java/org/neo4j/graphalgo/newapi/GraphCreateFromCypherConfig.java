@@ -36,6 +36,8 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 @ValueClass
 @Configuration("GraphCreateFromCypherConfigImpl")
@@ -110,6 +112,8 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         String relationshipQuery,
         CypherMapWrapper config
     ) {
+        assertNoProjections(config);
+
         if (nodeQuery != null) {
             config = config.withString(NODE_QUERY_KEY, nodeQuery);
         }
@@ -135,10 +139,20 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     }
 
     static GraphCreateFromCypherConfig fromProcedureConfig(String username, CypherMapWrapper config) {
+        assertNoProjections(config);
         return new GraphCreateFromCypherConfigImpl(
             IMPLICIT_GRAPH_NAME,
             username,
             config
         );
+    }
+
+    static void assertNoProjections(CypherMapWrapper config) {
+        if (config.containsKey(NODE_PROJECTION_KEY)) {
+            throw new IllegalArgumentException(String.format("Invalid key: %s", NODE_PROJECTION_KEY));
+        }
+        if (config.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
+            throw new IllegalArgumentException(String.format("Invalid key: %s", RELATIONSHIP_PROJECTION_KEY));
+        }
     }
 }
