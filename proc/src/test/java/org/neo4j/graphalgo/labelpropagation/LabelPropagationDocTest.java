@@ -71,7 +71,7 @@ class LabelPropagationDocTest extends BaseProcTest {
 
     @Test
     void unweighted() {
-        String q1 = "CALL gds.algo.labelPropagation.stream({" +
+        String q1 = "CALL gds.labelPropagation.stream({" +
                     "   nodeProjection: 'User'," +
                     "   relationshipProjection: 'FOLLOW'" +
                     "})" +
@@ -100,7 +100,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                          "+--------------------------------+\n" +
                          "1 row\n";
 
-        String q2 = "CALL gds.algo.labelPropagation.write({" +
+        String q2 = "CALL gds.labelPropagation.write({" +
                     "   nodeProjection: 'User'," +
                     "   relationshipProjection: 'FOLLOW'," +
                     "   writeProperty: 'community'" +
@@ -112,7 +112,7 @@ class LabelPropagationDocTest extends BaseProcTest {
 
     @Test
     void weighted() {
-        String q1 = "CALL gds.algo.labelPropagation.stream({" +
+        String q1 = "CALL gds.labelPropagation.stream({" +
                     "   nodeProjection: 'User'," +
                     "   relationshipProjection: 'FOLLOW'," +
                     "   relationshipProperties: 'weight'," +
@@ -136,7 +136,7 @@ class LabelPropagationDocTest extends BaseProcTest {
 
         assertEquals(expectedString, db.execute(q1).resultAsString());
 
-        String q2 = "CALL gds.algo.labelPropagation.write({" +
+        String q2 = "CALL gds.labelPropagation.write({" +
                     "   nodeProjection: 'User'," +
                     "   relationshipProjection: 'FOLLOW'," +
                     "   relationshipProperties: 'weight'," +
@@ -157,7 +157,7 @@ class LabelPropagationDocTest extends BaseProcTest {
 
     @Test
     void seeded(){
-        String q1 = "CALL gds.algo.labelPropagation.stream({" +
+        String q1 = "CALL gds.labelPropagation.stream({" +
                     "   nodeProjection: 'User'," +
                     "   relationshipProjection: 'FOLLOW'," +
                     "   nodeProperties: 'seed_label'," +
@@ -181,7 +181,7 @@ class LabelPropagationDocTest extends BaseProcTest {
 
         assertEquals(expectedString, db.execute(q1).resultAsString());
 
-        String q2 = "CALL gds.algo.labelPropagation.write({" +
+        String q2 = "CALL gds.labelPropagation.write({" +
                     "   nodeProjection: 'User'," +
                     "   relationshipProjection: 'FOLLOW'," +
                     "   nodeProperties: 'seed_label'," +
@@ -207,7 +207,7 @@ class LabelPropagationDocTest extends BaseProcTest {
         String loadGraph = "CALL  gds.graph.create('myGraph', 'User', 'FOLLOW')";
         db.execute(loadGraph);
 
-        String q1 = "CALL gds.algo.labelPropagation.stream('myGraph', {})" +
+        String q1 = "CALL gds.labelPropagation.stream('myGraph', {})" +
                     "YIELD nodeId, communityId AS Community " +
                     "RETURN algo.asNode(nodeId).name AS Name, Community " +
                     "ORDER BY Community, Name";
@@ -226,7 +226,7 @@ class LabelPropagationDocTest extends BaseProcTest {
 
         assertEquals(expectedString, db.execute(q1).resultAsString());
 
-        String q2 = "CALL gds.algo.labelPropagation.stream({" +
+        String q2 = "CALL gds.labelPropagation.stream({" +
                     "  nodeQuery: 'MATCH (p:User) RETURN id(p) AS id'," +
                     "  relationshipQuery: 'MATCH (p1:User)-[f:FOLLOW]->(p2:User)" +
                     "   RETURN id(p1) AS source, id(p2) AS target'," +
