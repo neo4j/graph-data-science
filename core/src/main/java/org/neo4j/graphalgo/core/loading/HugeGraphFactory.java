@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.ImmutableImportResult;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -148,7 +149,7 @@ public final class HugeGraphFactory extends GraphFactory {
     }
 
     @Override
-    public GraphsByRelationshipType importAllGraphs() {
+    public ImportResult build() {
         validateTokens();
 
         GraphDimensions dimensions = this.dimensions;
@@ -162,7 +163,18 @@ public final class HugeGraphFactory extends GraphFactory {
                 concurrency);
         progressLogger.logDone(tracker);
 
-        return GraphsByRelationshipType.of(graphs);
+        return ImmutableImportResult
+            .builder()
+            .dimensions(dimensions)
+            .graphs(GraphsByRelationshipType.of(graphs))
+            .build();
+    }
+
+    private void validateTokens() {
+        dimensions.checkValidNodePredicate(setup);
+        dimensions.checkValidRelationshipTypePredicate(setup);
+        dimensions.checkValidNodeProperties();
+        dimensions.checkValidRelationshipProperty();
     }
 
     private IdsAndProperties loadIdMap(AllocationTracker tracker, int concurrency) {

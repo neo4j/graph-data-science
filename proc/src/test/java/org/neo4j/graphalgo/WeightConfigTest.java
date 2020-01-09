@@ -241,7 +241,8 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
 
         GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig)
             .build(HugeGraphFactory.class)
-            .importAllGraphs();
+            .build()
+            .graphs();
 
         GraphCatalog.set(graphCreateConfig, graphsByRelationshipType);
         db.shutdown();

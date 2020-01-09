@@ -126,7 +126,7 @@ public final class GraphLoadProc extends BaseProc {
 
             GraphsByRelationshipType graph;
             if (!relationshipTypes.isEmpty() || propertyMappings.hasMappings()) {
-                graph = loader.build(graphImpl).importAllGraphs();
+                graph = loader.build(graphImpl).build().graphs();
             } else {
                 graph = GraphsByRelationshipType.of(loader.load(graphImpl));
             }

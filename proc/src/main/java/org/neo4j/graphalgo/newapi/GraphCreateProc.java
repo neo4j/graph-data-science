@@ -111,10 +111,7 @@ public class GraphCreateProc extends CatalogProc {
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             ModernGraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
             GraphFactory graphFactory = loader.build(factoryClazz);
-            GraphsByRelationshipType graphFromType =
-                !config.relationshipProjection().isEmpty()
-                    ? graphFactory.importAllGraphs()
-                    : GraphsByRelationshipType.of(graphFactory.build());
+            GraphsByRelationshipType graphFromType =  graphFactory.build().graphs();
 
             builder.withGraph(graphFromType);
             GraphCatalog.set(config, graphFromType);

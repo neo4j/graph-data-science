@@ -121,8 +121,11 @@ class GraphCatalogTest {
             .api(db)
             .username("")
             .log(new TestLog())
-            .createConfig(graphCreateConfig).build()
-            .build(HugeGraphFactory.class).importAllGraphs();
+            .createConfig(graphCreateConfig)
+            .build()
+            .build(HugeGraphFactory.class)
+            .build()
+            .graphs();
 
         GraphCatalog.set(graphCreateConfig, importedGraphs);
 

@@ -65,7 +65,7 @@ public interface SharedGraphLoader {
      * @return the freshly loaded graph
      */
     default Graph load(Class<? extends GraphFactory> factoryType) {
-        return build(factoryType).build();
+        return build(factoryType).build().graphs().getUnion();
     }
 
     GraphSetup toSetup();

@@ -64,21 +64,9 @@ public abstract class GraphFactory implements Assessable {
         progress = importProgress(progressLogger, dimensions, setup);
     }
 
-    public Graph build() {
-        validateTokens();
-        return importAllGraphs().getUnion();
-    }
-
-    public abstract GraphsByRelationshipType importAllGraphs();
+    public abstract ImportResult build();
 
     public abstract MemoryEstimation memoryEstimation(GraphSetup setup, GraphDimensions dimensions);
-
-    protected void validateTokens() {
-        dimensions.checkValidNodePredicate(setup);
-        dimensions.checkValidRelationshipTypePredicate(setup);
-        dimensions.checkValidNodeProperties();
-        dimensions.checkValidRelationshipProperty();
-    }
 
     public GraphDimensions dimensions() {
         return this.dimensions;
@@ -110,5 +98,11 @@ public abstract class GraphFactory implements Assessable {
 
     private static ProgressLogger progressLogger(Log log, long time) {
         return ProgressLogger.wrap(log, TASK_LOADING, time, TimeUnit.MILLISECONDS);
+    }
+
+    @ValueClass
+    public interface ImportResult {
+        GraphsByRelationshipType graphs();
+        GraphDimensions dimensions();
     }
 }

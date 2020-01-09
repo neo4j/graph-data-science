@@ -105,13 +105,13 @@ public final class TestGraphLoader {
 
     public <T extends GraphFactory> Graph buildGraph(Class<T> graphFactory) {
         try (Transaction ignored = db.beginTx()) {
-            return loader(graphFactory).build(graphFactory).build();
+            return loader(graphFactory).build(graphFactory).build().graphs().getUnion();
         }
     }
 
     public <T extends GraphFactory> GraphsByRelationshipType buildGraphs(Class<T> graphFactory) {
         try (Transaction ignored = db.beginTx()) {
-            return loader(graphFactory).build(graphFactory).importAllGraphs();
+            return loader(graphFactory).build(graphFactory).build().graphs();
         }
     }
 

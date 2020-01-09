@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.ImmutableImportResult;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
@@ -51,18 +52,15 @@ public final class GraphCatalog extends GraphFactory {
     }
 
     @Override
-    public Graph build() {
-        return importAllGraphs().getUnion();
-    }
-
-    @Override
-    public GraphsByRelationshipType importAllGraphs() {
-        return GraphsByRelationshipType.of(get(
+    public ImportResult build() {
+        GraphsByRelationshipType graphs = GraphsByRelationshipType.of(get(
             setup.username(),
             setup.name(),
             setup.relationshipType(),
             setup.relationshipPropertyMappings().head().map(PropertyMapping::propertyKey)
         ));
+
+        return ImmutableImportResult.builder().dimensions(dimensions).graphs(graphs).build();
     }
 
     @Override
