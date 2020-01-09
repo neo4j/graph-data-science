@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsReader;
 import org.neo4j.graphalgo.core.loading.ApproximatedImportProgress;
@@ -65,10 +66,8 @@ public abstract class GraphFactory implements Assessable {
 
     public Graph build() {
         validateTokens();
-        return importGraph();
+        return importAllGraphs().getUnion();
     }
-
-    protected abstract Graph importGraph();
 
     public abstract GraphsByRelationshipType importAllGraphs();
 

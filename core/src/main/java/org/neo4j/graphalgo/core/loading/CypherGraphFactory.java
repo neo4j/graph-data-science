@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
-import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -81,23 +80,6 @@ public class CypherGraphFactory extends GraphFactory {
     @Override
     public MemoryEstimation memoryEstimation(GraphSetup setup, GraphDimensions dimensions) {
         return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
-    }
-
-    @Override
-    public Graph importGraph() {
-        RelationshipTypeMappings relationshipTypeIds = dimensions.relationshipTypeMappings();
-        if (relationshipTypeIds.isMultipleTypes()) {
-            String message = String.format(
-                "It is not possible to use multiple relationship types in implicit graph loading. Please use `algo.graph.load()` for this. Found relationship types: %s",
-                relationshipTypeIds
-                    .stream()
-                    .map(RelationshipTypeMapping::typeName)
-                    .collect(Collectors.toList())
-            );
-            throw new IllegalArgumentException(message);
-        }
-
-        return importAllGraphs().getUnion();
     }
 
     @Override

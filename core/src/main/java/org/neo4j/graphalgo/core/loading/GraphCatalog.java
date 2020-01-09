@@ -51,24 +51,18 @@ public final class GraphCatalog extends GraphFactory {
     }
 
     @Override
-    protected Graph importGraph() {
-        assert setup.relationshipPropertyMappings().numberOfMappings() <= 1;
-        return get(
-            setup.username(),
-            setup.name(),
-            setup.relationshipType(),
-            setup.relationshipPropertyMappings().head().map(PropertyMapping::propertyKey)
-        );
+    public Graph build() {
+        return importAllGraphs().getUnion();
     }
 
     @Override
     public GraphsByRelationshipType importAllGraphs() {
-        return GraphsByRelationshipType.of(importGraph());
-    }
-
-    @Override
-    public Graph build() {
-        return importGraph();
+        return GraphsByRelationshipType.of(get(
+            setup.username(),
+            setup.name(),
+            setup.relationshipType(),
+            setup.relationshipPropertyMappings().head().map(PropertyMapping::propertyKey)
+        ));
     }
 
     @Override
