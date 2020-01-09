@@ -125,7 +125,7 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
             " RETURN algo.asNode(item1).name as from, algo.asNode(item2).name AS to, similarity" +
             " ORDER BY from";
 
-        runQuery(query, config).accept(row -> {
+        runQueryWithRowConsumer(query, config, row -> {
             String from = row.getString("from");
             String to = row.getString("to");
             Double expectedScore = expectedScores.get(Tuples.pair(from, to));
@@ -135,9 +135,8 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
             if (expectedScore == null) {
                 fail(String.format("Unexpected result pair: from = %s to = %s", from, to));
             } else {
-                assertEquals(expectedScore.doubleValue(), row.getNumber("similarity").doubleValue());
+                assertEquals(expectedScore, row.getNumber("similarity").doubleValue());
             }
-            return true;
         });
     }
 
@@ -173,9 +172,8 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
             " WITH config {.*, data: data} AS input" +
             " CALL gds.alpha.ml.ann.write(input)" +
             " YIELD nodes RETURN nodes";
-        runQuery(query, config).accept(row -> {
+        runQueryWithRowConsumer(query, config, row -> {
             assertEquals(5, row.getNumber("nodes").intValue());
-            return true;
         });
 
         String resultQuery =
@@ -183,7 +181,7 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
             " RETURN from.name as from, to.name AS to, r.score as similarity" +
             " ORDER BY from";
 
-        runQuery(resultQuery).accept(row -> {
+        runQueryWithRowConsumer(resultQuery, row -> {
             String from = row.getString("from");
             String to = row.getString("to");
             Double expectedScore = expectedScores.get(Tuples.pair(from, to));
@@ -195,7 +193,6 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
             } else {
                 assertEquals(expectedScore.doubleValue(), row.getNumber("similarity").doubleValue());
             }
-            return true;
         });
     }
 }

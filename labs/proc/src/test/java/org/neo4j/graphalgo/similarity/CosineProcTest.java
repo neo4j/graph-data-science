@@ -201,7 +201,7 @@ class CosineProcTest extends BaseProcTest {
     void topNcosineStreamTest() {
         runQuery(
             STATEMENT_STREAM,
-            map("config", map("top", 2), "missingValue", 0),
+            map("config", map("top", 2, "topK", 0), "missingValue", 0),
             results -> {
                 assert01(results.next());
                 assert02(results.next());
