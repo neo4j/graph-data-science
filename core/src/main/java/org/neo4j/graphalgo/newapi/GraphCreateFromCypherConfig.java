@@ -20,14 +20,22 @@
 
 package org.neo4j.graphalgo.newapi;
 
+import org.immutables.value.Value;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 
 @ValueClass
 @Configuration("GraphCreateFromCypherConfigImpl")
@@ -45,13 +53,13 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     }
 
     @Override
-    @Configuration.Ignore
+    @Value.Default
     default NodeProjections nodeProjection() {
         return NodeProjections.of();
     }
 
     @Override
-    @Configuration.Ignore
+    @Value.Default
     default RelationshipProjections relationshipProjection() {
         return RelationshipProjections.of();
     }
@@ -61,6 +69,39 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String relationshipQuery();
+
+    @Configuration.Ignore
+    default GraphCreateFromCypherConfig inferProjections(GraphDimensions dimensions) {
+        NodeProjections nodeProjections = NodeProjections.builder()
+            .putProjection(
+                PROJECT_ALL,
+                NodeProjection
+                    .builder()
+                    .label(PROJECT_ALL.name)
+                    .addPropertyMappings(PropertyMappings.of(dimensions.nodeProperties()))
+                    .build()
+            ).build();
+
+        PropertyMappings relationshipPropertyMappings = PropertyMappings.of(dimensions.relProperties());
+
+        RelationshipProjections.Builder relProjectionBuilder = RelationshipProjections.builder();
+        dimensions.relationshipTypeMappings().stream().forEach(typeMapping -> {
+            String relationshipType = typeMapping.typeName().isEmpty() ? PROJECT_ALL.name : typeMapping.typeName();
+            relProjectionBuilder.putProjection(
+                ElementIdentifier.of(relationshipType),
+                RelationshipProjection
+                    .builder()
+                    .type(relationshipType)
+                    .addPropertyMappings(relationshipPropertyMappings)
+                    .build()
+            );
+        });
+
+        return ((ImmutableGraphCreateFromCypherConfig) ImmutableGraphCreateFromCypherConfig
+            .copyOf(this))
+            .withNodeProjection(nodeProjections)
+            .withRelationshipProjection(relProjectionBuilder.build());
+    }
 
     static GraphCreateFromCypherConfig of(
         String userName,

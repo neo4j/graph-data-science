@@ -28,6 +28,7 @@ import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -202,6 +203,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
 
         ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
         this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
+
+        resultDimensions.relationshipTypeMappings(
+            RelationshipTypeMappings.of(relationshipCounters.keys().toArray(RelationshipTypeMapping.class))
+        );
+
         return Tuples.pair(resultDimensions, relationshipCounters);
     }
 

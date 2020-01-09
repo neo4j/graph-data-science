@@ -33,13 +33,14 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public final class GraphDimensions {
 
+    private final LongSet nodeLabelIds;
+    private final ResolvedPropertyMappings nodeProperties;
+    private final ResolvedPropertyMappings relProperties;
+
     private long nodeCount;
     private long highestNeoId;
     private long maxRelCount;
-    private final LongSet nodeLabelIds;
-    private final ResolvedPropertyMappings nodeProperties;
-    private final RelationshipTypeMappings relTypeMappings;
-    private final ResolvedPropertyMappings relProperties;
+    private RelationshipTypeMappings relTypeMappings;
 
     public GraphDimensions(
             long nodeCount,
@@ -81,6 +82,10 @@ public final class GraphDimensions {
 
     public void maxRelCount(long maxRelCount) {
         this.maxRelCount = maxRelCount;
+    }
+
+    public void relationshipTypeMappings(RelationshipTypeMappings relationshipTypeMappings) {
+        this.relTypeMappings = relationshipTypeMappings;
     }
 
     public LongSet nodeLabelIds() {

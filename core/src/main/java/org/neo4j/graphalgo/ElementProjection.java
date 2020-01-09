@@ -109,6 +109,10 @@ public abstract class ElementProjection {
             return (Self) this;
         }
 
+        default Self addPropertyMappings(PropertyMappings propertyMappings) {
+            return addAllProperties(propertyMappings.mappings());
+        }
+
         default void buildProperties() {
             inlineBuilder().build();
         }

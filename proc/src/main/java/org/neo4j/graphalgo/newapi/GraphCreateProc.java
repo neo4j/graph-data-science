@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -111,10 +112,20 @@ public class GraphCreateProc extends CatalogProc {
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             ModernGraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
             GraphFactory graphFactory = loader.build(factoryClazz);
-            GraphsByRelationshipType graphFromType =  graphFactory.build().graphs();
+            GraphFactory.ImportResult importResult = graphFactory.build();
 
-            builder.withGraph(graphFromType);
-            GraphCatalog.set(config, graphFromType);
+            GraphsByRelationshipType graphs =  importResult.graphs();
+            GraphDimensions dimensions = importResult.dimensions();
+            GraphCreateConfig catalogConfig = config instanceof GraphCreateFromCypherConfig
+                ? ((GraphCreateFromCypherConfig) config).inferProjections(dimensions)
+                : config;
+
+            builder
+                .withGraph(graphs)
+                .withNodeProjections(catalogConfig.nodeProjection())
+                .withRelationshipProjections(catalogConfig.relationshipProjection());
+
+            GraphCatalog.set(catalogConfig, graphs);
         }
 
         return builder.build();
@@ -147,8 +158,8 @@ public class GraphCreateProc extends CatalogProc {
 
         static final class Builder {
             private final String graphName;
-            private final NodeProjections nodeProjections;
-            private final RelationshipProjections relationshipProjections;
+            private NodeProjections nodeProjections;
+            private RelationshipProjections relationshipProjections;
             private long nodeCount;
             private long relationshipCount;
             private long createMillis;
@@ -159,13 +170,25 @@ public class GraphCreateProc extends CatalogProc {
                 this.relationshipProjections = config.relationshipProjection();
             }
 
-            void withGraph(GraphsByRelationshipType graph) {
+            Builder withGraph(GraphsByRelationshipType graph) {
                 relationshipCount = graph.relationshipCount();
                 nodeCount = graph.nodeCount();
+                return this;
             }
 
-            void withCreateMillis(long createMillis) {
+            Builder withCreateMillis(long createMillis) {
                 this.createMillis = createMillis;
+                return this;
+            }
+
+            Builder withNodeProjections(NodeProjections nodeProjections) {
+                this.nodeProjections = nodeProjections;
+                return this;
+            }
+
+            Builder withRelationshipProjections(RelationshipProjections relationshipProjections) {
+                this.relationshipProjections = relationshipProjections;
+                return this;
             }
 
             GraphCreateResult build() {

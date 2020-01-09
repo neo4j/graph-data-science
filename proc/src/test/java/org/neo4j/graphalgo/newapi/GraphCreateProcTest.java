@@ -117,18 +117,65 @@ class GraphCreateProcTest extends BaseProcTest {
     void createCypherGraph() {
         String name = "name";
 
-        String nodeQuery = "MATCH (n:A) RETURN id(n) AS id";
-        String relationshipQuery = "MATCH (a)-[r:REL]->(b) RETURN id(a) AS source, id(b) AS target";
+        Map<String, Object> nodeProjection = map(
+            "*", map(
+                LABEL_KEY, "*",
+                PROPERTIES_KEY, emptyMap()
+            )
+        );
+        Map<String, Object> relProjection = map(
+            "*", map(
+                TYPE_KEY, "*",
+                PROJECTION_KEY, Projection.NATURAL.name(),
+                AGGREGATION_KEY, DeduplicationStrategy.DEFAULT.name(),
+                PROPERTIES_KEY, emptyMap()
+            )
+        );
 
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
-            map("name", name, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
+            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, emptyMap(),
-                RELATIONSHIP_PROJECTION_KEY, emptyMap(),
+                NODE_PROJECTION_KEY, nodeProjection,
+                RELATIONSHIP_PROJECTION_KEY, relProjection,
                 "nodeCount", nodeCount,
                 "relationshipCount", relCount,
+                "createMillis", instanceOf(Long.class)
+            ))
+        );
+    }
+
+    @Test
+    void createCypherGraphWithRelationshipTypes() {
+        String name = "name";
+
+        String relationshipQuery = "MATCH (a)-[r:REL]->(b) RETURN id(a) AS source, id(b) AS target, type(r) AS type";
+
+        Map<String, Object> nodeProjection = map(
+            "*", map(
+                LABEL_KEY, "*",
+                PROPERTIES_KEY, emptyMap()
+            )
+        );
+        Map<String, Object> relProjection = map(
+            "REL", map(
+                TYPE_KEY, "REL",
+                PROJECTION_KEY, Projection.NATURAL.name(),
+                AGGREGATION_KEY, DeduplicationStrategy.DEFAULT.name(),
+                PROPERTIES_KEY, emptyMap()
+            )
+        );
+
+        assertCypherResult(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
+            singletonList(map(
+                "graphName", name,
+                NODE_PROJECTION_KEY, nodeProjection,
+                RELATIONSHIP_PROJECTION_KEY, relProjection,
+                "nodes", nodeCount,
+                "relationships", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -327,13 +374,15 @@ class GraphCreateProcTest extends BaseProcTest {
     void nodeQueryAndProperties(Object nodeProperties, Map<String, Object> expectedProperties) {
         String name = "g";
 
+        Map<String, Object> expectedNodeProjection = map("*", map(LABEL_KEY, "*", PROPERTIES_KEY, expectedProperties));
+
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { nodeProperties: $nodeProperties })",
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "nodeProperties", nodeProperties),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, emptyMap(),
-                RELATIONSHIP_PROJECTION_KEY, emptyMap(),
+                NODE_PROJECTION_KEY, expectedNodeProjection,
+                RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
                 "nodeCount", nodeCount,
                 "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -423,6 +472,15 @@ class GraphCreateProcTest extends BaseProcTest {
     @MethodSource(value = "relationshipProperties")
     void relationshipQueryAndProperties(Object relationshipProperties, Map<String, Object> expectedProperties) {
         String name = "g";
+        Map<String, Object> expectedRelProjection = map(
+            "*",
+            map(
+                "type", "*",
+                PROJECTION_KEY, "NATURAL",
+                AGGREGATION_KEY, "DEFAULT",
+                PROPERTIES_KEY, expectedProperties
+            )
+        );
 
         // TODO: check property values on graph
         assertCypherResult(
@@ -430,8 +488,8 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "relationshipProperties", relationshipProperties),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, emptyMap(),
-                RELATIONSHIP_PROJECTION_KEY, emptyMap(),
+                NODE_PROJECTION_KEY, isA(Map.class),
+                RELATIONSHIP_PROJECTION_KEY, expectedRelProjection,
                 "nodeCount", nodeCount,
                 "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
@@ -476,14 +534,19 @@ class GraphCreateProcTest extends BaseProcTest {
             map("property", "weight", AGGREGATION_KEY, aggregation, "defaultValue", Double.NaN)
         );
 
+        Map<String, Object> expectedRelProjections = map(
+            "*",
+            map("type", "*", PROJECTION_KEY, "NATURAL", AGGREGATION_KEY, "DEFAULT", PROPERTIES_KEY, relationshipProperties)
+        );
+
         // TODO: check property values on graph
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "relationshipProperties", relationshipProperties),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, emptyMap(),
-                RELATIONSHIP_PROJECTION_KEY, emptyMap(),
+                NODE_PROJECTION_KEY, isA(Map.class),
+                RELATIONSHIP_PROJECTION_KEY, expectedRelProjections,
                 "nodeCount", nodeCount,
                 "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)

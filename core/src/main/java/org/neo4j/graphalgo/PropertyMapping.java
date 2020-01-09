@@ -221,4 +221,13 @@ public abstract class PropertyMapping {
     ) {
         return ImmutablePropertyMapping.of(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
     }
+
+    public static PropertyMapping of(ResolvedPropertyMapping resolvedPropertyMapping) {
+        return of(
+            resolvedPropertyMapping.propertyKey(),
+            resolvedPropertyMapping.neoPropertyKey(),
+            resolvedPropertyMapping.defaultValue(),
+            resolvedPropertyMapping.deduplicationStrategy()
+        );
+    }
 }

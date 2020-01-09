@@ -76,6 +76,14 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         }
     }
 
+    public static PropertyMappings of(ResolvedPropertyMappings resolvedPropertyMappings) {
+        return of(resolvedPropertyMappings
+            .mappings()
+            .stream()
+            .map(PropertyMapping::of)
+            .toArray(PropertyMapping[]::new));
+    }
+
     public Stream<PropertyMapping> stream() {
         return mappings().stream();
     }

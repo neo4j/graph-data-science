@@ -115,8 +115,20 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list()", singletonList(
             map(
                 "graphName", name,
-                "nodeProjection", emptyMap(),
-                "relationshipProjection", emptyMap(),
+                "nodeProjection", map(
+                    "*", map(
+                        "label", "*",
+                        "properties", emptyMap()
+                    )
+                ),
+                "relationshipProjection", map(
+                    "*", map(
+                        "type", "*",
+                        "projection", "NATURAL",
+                        "aggregation", "DEFAULT",
+                        "properties", emptyMap()
+                    )
+                ),
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
                 "nodeCount", 2L,
