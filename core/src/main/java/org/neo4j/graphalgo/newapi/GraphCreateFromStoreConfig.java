@@ -42,17 +42,11 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
 
     @Override
     @ConvertWith("org.neo4j.graphalgo.AbstractNodeProjections#fromObject")
-    @Value.Default
-    default NodeProjections nodeProjection() {
-        return NodeProjections.empty();
-    }
+    NodeProjections nodeProjection();
 
     @Override
     @ConvertWith("org.neo4j.graphalgo.AbstractRelationshipProjections#fromObject")
-    @Value.Default
-    default RelationshipProjections relationshipProjection() {
-        return RelationshipProjections.empty();
-    }
+    RelationshipProjections relationshipProjection();
 
     @Value.Check
     @Configuration.Ignore
@@ -137,6 +131,13 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     }
 
     static GraphCreateFromStoreConfig fromProcedureConfig(String username, CypherMapWrapper config) {
+        if (!config.containsKey(NODE_PROJECTION_KEY)) {
+            config = config.withEntry(NODE_PROJECTION_KEY, NodeProjections.empty());
+        }
+        if (!config.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
+            config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.empty());
+        }
+
         GraphCreateFromStoreConfig createConfig = new GraphCreateFromStoreConfigImpl(
             IMPLICIT_GRAPH_NAME,
             username,
