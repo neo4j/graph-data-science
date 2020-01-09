@@ -43,7 +43,7 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL gds.louvain.write(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.louvain.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 ----
 
@@ -107,9 +107,7 @@ YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.louvain.stream(label: STRING, relationship: STRING, {
- // configuration
-})
+CALL gds.louvain.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD nodeId, community, communities
 ----
 
