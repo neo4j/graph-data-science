@@ -274,18 +274,18 @@ public final class CypherMapWrapper {
     }
 
     public CypherMapWrapper withString(String key, String value) {
-        HashMap<String, Object> newMap = new HashMap<>(config);
-        newMap.put(key, value);
-        return new CypherMapWrapper(newMap);
+        return withEntry(key, value);
     }
 
     public CypherMapWrapper withNumber(String key, Number value) {
-        HashMap<String, Object> newMap = new HashMap<>(config);
-        newMap.put(key, value);
-        return new CypherMapWrapper(newMap);
+        return withEntry(key, value);
     }
 
     public CypherMapWrapper withBoolean(String key, Boolean value) {
+        return withEntry(key, value);
+    }
+
+    public CypherMapWrapper withEntry(String key, Object value) {
         HashMap<String, Object> newMap = new HashMap<>(config);
         newMap.put(key, value);
         return new CypherMapWrapper(newMap);

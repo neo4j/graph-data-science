@@ -41,20 +41,35 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     String RELATIONSHIP_PROJECTION_KEY = "relationshipProjection";
 
     @Override
-    @Configuration.Parameter
     @ConvertWith("org.neo4j.graphalgo.AbstractNodeProjections#fromObject")
-    NodeProjections nodeProjection();
+    @Value.Default
+    default NodeProjections nodeProjection() {
+        return NodeProjections.empty();
+    }
 
     @Override
-    @Configuration.Parameter
     @ConvertWith("org.neo4j.graphalgo.AbstractRelationshipProjections#fromObject")
-    RelationshipProjections relationshipProjection();
+    @Value.Default
+    default RelationshipProjections relationshipProjection() {
+        return RelationshipProjections.empty();
+    }
 
     @Value.Check
     @Configuration.Ignore
     default GraphCreateFromStoreConfig withNormalizedPropertyMappings() {
         PropertyMappings nodeProperties = nodeProperties();
         PropertyMappings relationshipProperties = relationshipProperties();
+
+        if (!nodeProperties.hasMappings() && !relationshipProperties.hasMappings()) {
+            return this;
+        }
+
+        relationshipProjection().projections().values().forEach(relationshipProjection -> {
+            if (relationshipProjection.properties().mappings().size() > 1) {
+                throw new IllegalArgumentException(
+                    "Implicit graph loading does not allow loading multiple relationship properties per relationship type");
+            }
+        });
 
         verifyProperties(
             nodeProperties.stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet()),
@@ -68,17 +83,14 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             "relationship"
         );
 
-        if (nodeProperties.hasMappings() || relationshipProperties.hasMappings()) {
-            return ImmutableGraphCreateFromStoreConfig
-                .builder()
-                .from(this)
-                .nodeProjection(nodeProjection().addPropertyMappings(nodeProperties))
-                .nodeProperties(PropertyMappings.of())
-                .relationshipProjection(relationshipProjection().addPropertyMappings(relationshipProperties))
-                .relationshipProperties(PropertyMappings.of())
-                .build();
-        }
-        return this;
+        return ImmutableGraphCreateFromStoreConfig
+            .builder()
+            .from(this)
+            .nodeProjection(nodeProjection().addPropertyMappings(nodeProperties))
+            .nodeProperties(PropertyMappings.of())
+            .relationshipProjection(relationshipProjection().addPropertyMappings(relationshipProperties))
+            .relationshipProperties(PropertyMappings.of())
+            .build();
     }
 
     @Configuration.Ignore
@@ -109,9 +121,14 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         Object relationshipProjections,
         CypherMapWrapper config
     ) {
+        if (nodeProjections != null) {
+            config = config.withEntry(NODE_PROJECTION_KEY, nodeProjections);
+        }
+        if (relationshipProjections != null) {
+            config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, relationshipProjections);
+        }
+
         GraphCreateFromStoreConfig GraphCreateFromStoreConfig = new GraphCreateFromStoreConfigImpl(
-            nodeProjections,
-            relationshipProjections,
             graphName,
             userName,
             config
@@ -120,26 +137,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     }
 
     static GraphCreateFromStoreConfig fromProcedureConfig(String username, CypherMapWrapper config) {
-        NodeProjections nodeProjections = NodeProjections.fromObject(CypherMapWrapper.failOnNull(
-            NODE_PROJECTION_KEY,
-            config.get(NODE_PROJECTION_KEY, (Object) NodeProjections.empty())
-        ));
-
-        RelationshipProjections relationshipProjections = RelationshipProjections.fromObject(CypherMapWrapper.failOnNull(
-            RELATIONSHIP_PROJECTION_KEY,
-            config.get(RELATIONSHIP_PROJECTION_KEY, (Object) RelationshipProjections.empty())
-        ));
-
-        relationshipProjections.projections().values().forEach(relationshipProjection -> {
-            if (relationshipProjection.properties().mappings().size() > 1) {
-                throw new IllegalArgumentException(
-                    "Implicit graph loading does not allow loading multiple relationship properties per relationship type");
-            }
-        });
-
         GraphCreateFromStoreConfig createConfig = new GraphCreateFromStoreConfigImpl(
-            nodeProjections,
-            relationshipProjections,
             IMPLICIT_GRAPH_NAME,
             username,
             config
