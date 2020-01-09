@@ -141,7 +141,7 @@ YIELD node, score
 .The following will run the algorithm and returns the result in form of statistical and measurement values:
 [source, cypher]
 ----
-CALL gds.pageRank.stats(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.pageRank.stats(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD nodes, relationships, ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
 

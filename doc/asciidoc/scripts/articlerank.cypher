@@ -32,7 +32,12 @@ MERGE (paper6)-[:CITES]->(paper4)
 
 // tag::stream-sample-graph[]
 
-CALL algo.articleRank.stream('Paper', 'CITES', {iterations:20, dampingFactor:0.85})
+CALL gds.alpha.articleRank.stream({
+  nodeProjection: 'Paper',
+  relationshipProjection: 'CITES',
+  iterations: 20,
+  dampingFactor: 0.85
+})
 YIELD nodeId, score
 RETURN algo.asNode(nodeId).name AS page,score
 ORDER BY score DESC
@@ -41,26 +46,33 @@ ORDER BY score DESC
 
 // tag::write-sample-graph[]
 
-CALL algo.articleRank('Paper', 'CITES',
-  {iterations:20, dampingFactor:0.85, write: true,writeProperty:"pagerank"})
+CALL gds.alpha.articleRank.write({
+  nodeProjection: 'Paper',
+  relationshipProjection: 'CITES',
+  iterations:20, dampingFactor:0.85,
+  writeProperty: "pagerank"
+})
 YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
 
 // end::write-sample-graph[]
 
 // tag::cypher-loading[]
 
-CALL algo.articleRank(
-  'MATCH (p:Paper) RETURN id(p) as id',
-  'MATCH (p1:Paper)-[:CITES]->(p2:Paper) RETURN id(p1) as source, id(p2) as target',
-  {graph:'cypher', iterations:5, write: true}
-)
+CALL gds.alpha.articleRank.write({
+  nodeQuery: 'MATCH (p:Paper) RETURN id(p) as id',
+  relationshipQuery: 'MATCH (p1:Paper)-[:CITES]->(p2:Paper) RETURN id(p1) as source, id(p2) as target',
+  iterations: 5
+})
 
 // end::cypher-loading[]
 
 
 // tag::huge-projection[]
 
-CALL algo.articleRank('Paper','CITES', {graph:'huge'})
+CALL gds.alpha.articleRank.write({
+  nodeProjection: 'Paper',
+  relationshipProjection: 'CITES'
+})
 YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, writeProperty;
 
 // end::huge-projection[]
