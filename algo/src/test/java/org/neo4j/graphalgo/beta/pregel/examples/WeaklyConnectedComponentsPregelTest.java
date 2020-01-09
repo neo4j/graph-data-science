@@ -72,10 +72,7 @@ class WeaklyConnectedComponentsPregelTest extends AlgoTestBase {
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
-        QueryRunner.runInTransaction(db, () -> {
-            db.execute(TEST_GRAPH).close();
-        });
-//        runQuery(TEST_GRAPH);
+        runQuery(TEST_GRAPH);
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()

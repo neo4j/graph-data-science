@@ -48,12 +48,14 @@ public final class QueryRunner {
     }
 
     public static void runQuery(GraphDatabaseService db, String query, Map<String, Object> params, Consumer<Result> resultConsumer) {
-        resultConsumer.accept(db.execute(query, params));
+        try (Result result = db.execute(query, params)) {
+            resultConsumer.accept(result);
+        }
     }
 
     public static <T> T runQuery(GraphDatabaseService db, String query, Map<String, Object> params, Function<Result, T> resultFunction) {
-        try (Result execute = db.execute(query, params)) {
-            return resultFunction.apply(execute);
+        try (Result result = db.execute(query, params)) {
+            return resultFunction.apply(result);
         }
     }
 
