@@ -101,7 +101,7 @@ class BetweennessCentralityProcTest_282 extends BaseProcTest {
         final String evalQuery = "CALL algo.betweenness('Node', 'EDGE', {write:true, stats:true, writeProperty:'centrality'})\n" +
                 "YIELD nodes, minCentrality, maxCentrality, sumCentrality";
 
-        runQuery(evalQuery, row -> {
+        runQueryWithRowConsumer(evalQuery, row -> {
             final long nodes = row.getNumber("nodes").longValue();
             final double minCentrality = row.getNumber("minCentrality").doubleValue();
             final double maxCentrality = row.getNumber("maxCentrality").doubleValue();
@@ -115,7 +115,7 @@ class BetweennessCentralityProcTest_282 extends BaseProcTest {
 
         final String checkQuery = "MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as c";
         final double[] result = new double[EXPECTED.length];
-        runQuery(checkQuery, row -> {
+        runQueryWithRowConsumer(checkQuery, row -> {
             final int id = row.getNumber("id").intValue();
             final double c = row.getNumber("c").doubleValue();
             result[id] = c;
@@ -137,7 +137,7 @@ class BetweennessCentralityProcTest_282 extends BaseProcTest {
         final String evalQuery = "CALL algo.betweenness('Node', 'EDGE', {write:true, stats:true, writeProperty:'centrality', concurrency:4})\n" +
                 "YIELD nodes, minCentrality, maxCentrality, sumCentrality";
 
-        runQuery(evalQuery, row -> {
+        runQueryWithRowConsumer(evalQuery, row -> {
             final long nodes = row.getNumber("nodes").longValue();
             final double minCentrality = row.getNumber("minCentrality").doubleValue();
             final double maxCentrality = row.getNumber("maxCentrality").doubleValue();
@@ -151,7 +151,7 @@ class BetweennessCentralityProcTest_282 extends BaseProcTest {
 
         final String checkQuery = "MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as c";
         final double[] result = new double[EXPECTED.length];
-        runQuery(checkQuery, row -> {
+        runQueryWithRowConsumer(checkQuery, row -> {
             final int id = row.getNumber("id").intValue();
             final double c = row.getNumber("c").doubleValue();
             result[id] = c;

@@ -84,7 +84,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
                 "postProcessingMillis"
             );
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             assertEquals(3, row.getNumber("nodesCompared").longValue());
             assertEquals(6, row.getNumber("relationshipsWritten").longValue());
             assertEquals("SIMILAR", row.getString("writeRelationshipType"));

@@ -73,8 +73,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
                 "RETURN algo.linkprediction.commonNeighbors(p1, p2) AS score, " +
                 "       1.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node =  runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -87,8 +86,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
                         "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
                         "1.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node =  runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -100,8 +98,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
                         "RETURN algo.linkprediction.commonNeighbors(p1, p2) AS score, " +
                         "       2.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node =  runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -113,8 +110,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
                         "RETURN algo.linkprediction.commonNeighbors(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node =  runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -126,8 +122,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
                         "RETURN algo.linkprediction.commonNeighbors(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node =  runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -139,8 +134,7 @@ class CommonNeighborsProcTest extends BaseProcTest {
                         "RETURN algo.linkprediction.commonNeighbors(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node =  runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 }

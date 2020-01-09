@@ -45,7 +45,7 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest {
             .addParameter("writeProperty", "color")
             .yields("nodes", "colorCount", "didConverge", "ranIterations", "writeProperty");
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             assertEquals(4, row.getNumber("nodes").longValue());
             assertEquals(2, row.getNumber("colorCount").longValue());
             assertEquals("color", row.getString("writeProperty"));
@@ -54,7 +54,7 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest {
         });
 
         Map<Long, Long> coloringResult = new HashMap<>(4);
-        runQuery("MATCH (n) RETURN id(n) AS id, n.color AS color", row -> {
+        runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS id, n.color AS color", row -> {
             long nodeId = row.getNumber("id").longValue();
             long color = row.getNumber("color").longValue();
             coloringResult.put(nodeId, color);

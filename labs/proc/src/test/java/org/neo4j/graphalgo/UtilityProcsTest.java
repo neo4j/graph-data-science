@@ -72,7 +72,7 @@ class UtilityProcsTest extends BaseProcTest {
 
         List<Node> expectedNodes = getNodes("a", "b", "c");
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             Path path = (Path) row.get("path");
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
             assertEquals(expectedNodes, actualNodes);
@@ -86,7 +86,7 @@ class UtilityProcsTest extends BaseProcTest {
         List<Node> expectedNodes = getNodes("a", "b", "c");
         List<Double> expectedCosts = Arrays.asList(0.1, 0.2);
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             Path path = (Path) row.get("path");
 
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
@@ -111,7 +111,7 @@ class UtilityProcsTest extends BaseProcTest {
         List<Node> expectedNodes = getNodes("a", "b", "c");
         List<Double> expectedCosts = Arrays.asList(40.0, 30.0);
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             Path path = (Path) row.get("path");
 
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());

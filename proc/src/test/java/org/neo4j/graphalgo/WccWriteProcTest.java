@@ -84,7 +84,7 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
                 "componentDistribution"
             );
 
-        runQuery(
+        runQueryWithRowConsumer(
             query,
             row -> {
                 assertEquals(WRITE_PROPERTY, row.getString("writeProperty"));
@@ -129,7 +129,7 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields("componentCount");
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             assertEquals(3L, row.getNumber("componentCount"));
         });
     }
@@ -145,7 +145,7 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields("componentCount");
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             assertEquals(1L, row.getNumber("componentCount"));
         });
     }
@@ -200,18 +200,18 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
     }
 
     private void assertForSeedTests(String query, String writeProperty) {
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             assertEquals(3L, row.getNumber("componentCount"));
         });
 
-        runQuery(
+        runQueryWithRowConsumer(
             String.format("MATCH (n) RETURN n.%s AS %s", writeProperty, writeProperty),
             row -> {
                 assertTrue(row.getNumber(writeProperty).longValue() >= 42);
             }
         );
 
-        runQuery(
+        runQueryWithRowConsumer(
             String.format("MATCH (n) RETURN n.nodeId AS nodeId, n.%s AS %s", writeProperty, writeProperty),
             row -> {
                 final long nodeId = row.getNumber("nodeId").longValue();
@@ -237,11 +237,11 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
             .addParameter("consecutiveIds", true)
             .yields("componentCount");
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             assertEquals(3L, row.getNumber("componentCount"));
         });
 
-        runQuery(
+        runQueryWithRowConsumer(
             "MATCH (n) RETURN collect(distinct n." + WRITE_PROPERTY + ") AS components ",
             row -> assertThat((List<Long>) row.get("components"), containsInAnyOrder(0L, 1L, 2L))
         );

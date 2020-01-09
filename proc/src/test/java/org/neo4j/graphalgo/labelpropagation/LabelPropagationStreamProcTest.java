@@ -50,7 +50,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationBaseProcTest<LabelP
                        "}) YIELD nodeId, communityId";
 
         List<Long> actualCommunities = new ArrayList<>();
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             int id = row.getNumber("nodeId").intValue();
             long community = row.getNumber("communityId").longValue();
             actualCommunities.add(id, community);

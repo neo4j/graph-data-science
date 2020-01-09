@@ -23,9 +23,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphdb.Result;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -81,7 +83,7 @@ class YensKShortestPathsProcTest extends BaseProcTest {
                 "YIELD resultCount RETURN resultCount";
 
         // 9 possible paths without loop
-        runQuery(cypher, row -> assertEquals(9, row.getNumber("resultCount").intValue()));
+        runQueryWithRowConsumer(cypher, (Consumer<Result.ResultRow>) row -> assertEquals(9, row.getNumber("resultCount").intValue()));
 
         /*
          * 10 rels from source graph already in db
@@ -106,7 +108,7 @@ class YensKShortestPathsProcTest extends BaseProcTest {
                     "UNWIND relationships(p) AS pair\n" +
                     "return sum(pair.weight) AS distance", relationshipType);
 
-            runQuery(
+            runQueryWithRowConsumer(
                 shortestPathsQuery,
                 MapUtil.map("one", "a", "two", "f"),
                 row -> assertEquals(combinations.get(relationshipType), row.getNumber("distance").doubleValue(), 0.01)

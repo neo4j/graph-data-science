@@ -58,7 +58,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
                        "    }" +
                        ") YIELD nodeId, score";
 
-        runQuery(query,
+        runQueryWithRowConsumer(query,
             row -> {
                 final long nodeId = row.getNumber("nodeId").longValue();
                 actual.put(nodeId, (Double) row.get("score"));
@@ -76,7 +76,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
                        "        weightProperty: 'equalWeight'" +
                        "    }" +
                        ") YIELD nodeId, score";
-        runQuery(query,
+        runQueryWithRowConsumer(query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(expected, actual);
@@ -94,7 +94,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
                        ") YIELD nodeId, score";
 
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(query,
+        runQueryWithRowConsumer(query,
             row -> actual.put(row.getNumber("nodeId").longValue(), row.getNumber("score").doubleValue()));
 
         long distinctValues = actual.values().stream().distinct().count();
@@ -111,7 +111,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
                        ") YIELD nodeId, score";
 
         QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
-            runQuery(query, row -> {});
+            runQueryWithRowConsumer(query, row -> {});
         });
         Throwable rootCause = ExceptionUtil.rootCause(exception);
         assertTrue(
@@ -129,7 +129,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
                        ") YIELD nodeId, score";
 
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(query,
+        runQueryWithRowConsumer(query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(weightedExpected, actual);
@@ -145,7 +145,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
                        "    }" +
                        ") YIELD nodeId, score";
 
-        runQuery(query,
+        runQueryWithRowConsumer(query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(expected, actual);
@@ -161,7 +161,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
                        "    }" +
                        ") YIELD nodeId, score";
 
-        runQuery(query,
+        runQueryWithRowConsumer(query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(weightedExpected, actual);

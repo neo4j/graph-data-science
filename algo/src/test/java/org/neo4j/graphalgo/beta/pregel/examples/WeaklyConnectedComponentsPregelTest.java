@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
@@ -71,7 +72,10 @@ class WeaklyConnectedComponentsPregelTest extends AlgoTestBase {
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
-        runQuery(TEST_GRAPH);
+        QueryRunner.runInTransaction(db, () -> {
+            db.execute(TEST_GRAPH).close();
+        });
+//        runQuery(TEST_GRAPH);
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()

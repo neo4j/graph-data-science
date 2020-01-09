@@ -23,9 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -43,19 +41,19 @@ class YensKSharedPrefixMaxDepthProcTest extends BaseProcTest {
     void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher =
-                "CREATE (a:Node {name:'a'})\n" +
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE (d:Node {name:'d'})\n" +
-                "CREATE (e:Node {name:'e'})\n" +
-                "CREATE (f:Node {name:'f'})\n" +
-                "CREATE" +
-                " (a)-[:TYPE {cost:1.0}]->(b),\n" +
-                " (b)-[:TYPE {cost:1.0}]->(c),\n" +
-                " (c)-[:TYPE {cost:1.0}]->(d),\n" +
-                " (b)-[:TYPE {cost:1.0}]->(e),\n" +
-                " (e)-[:TYPE {cost:1.0}]->(f),\n" +
-                " (f)-[:TYPE {cost:1.0}]->(d)\n";
+            "CREATE (a:Node {name:'a'})\n" +
+            "CREATE (b:Node {name:'b'})\n" +
+            "CREATE (c:Node {name:'c'})\n" +
+            "CREATE (d:Node {name:'d'})\n" +
+            "CREATE (e:Node {name:'e'})\n" +
+            "CREATE (f:Node {name:'f'})\n" +
+            "CREATE" +
+            " (a)-[:TYPE {cost:1.0}]->(b),\n" +
+            " (b)-[:TYPE {cost:1.0}]->(c),\n" +
+            " (c)-[:TYPE {cost:1.0}]->(d),\n" +
+            " (b)-[:TYPE {cost:1.0}]->(e),\n" +
+            " (e)-[:TYPE {cost:1.0}]->(f),\n" +
+            " (f)-[:TYPE {cost:1.0}]->(d)\n";
         runQuery(cypher);
         registerProcedures(KShortestPathsProc.class);
     }
@@ -63,33 +61,36 @@ class YensKSharedPrefixMaxDepthProcTest extends BaseProcTest {
     @Test
     void testMaxDepthForKShortestPaths() {
         final String cypher =
-                "MATCH (from:Node{name:{from}}), (to:Node{name:{to}}) " +
-                "CALL algo.kShortestPaths.stream(from, to, 2, 'cost', {path:true, maxDepth: {maxDepth}}) YIELD path " +
-                "RETURN path";
+            "MATCH (from:Node{name:{from}}), (to:Node{name:{to}}) " +
+            "CALL algo.kShortestPaths.stream(from, to, 2, 'cost', {path:true, maxDepth: {maxDepth}}) YIELD path " +
+            "RETURN path";
 
         Map<String, Object> params = new HashMap<>();
         params.put("from", "d");
         params.put("to", "a");
         params.put("maxDepth", 5);
-        List<Object> paths = runQuery(cypher, params).stream().map(result -> result.get("path"))
-                .collect(Collectors.toList());
+        long pathsCount = runQuery(cypher, params, result -> {
+            return result.stream().map(row -> row.get("path")).count();
+        });
 
-        assertEquals(1, paths.size(), "Number of paths to maxDepth=5 should be 1");
+        assertEquals(1, pathsCount, "Number of paths to maxDepth=5 should be 1");
 
         // Other direction should work ok, right?
         params.put("from", "a");
         params.put("to", "d");
 
-        List<Object> pathsOtherDirection = runQuery(cypher, params).stream().map(result -> result.get("path"))
-                .collect(Collectors.toList());
+        long pathsOtherDirectionCount = runQuery(cypher, params, result -> {
+            return result.stream().map(row -> row.get("path")).count();
+        });
 
-        assertEquals(1, pathsOtherDirection.size(), "Number of paths to maxDepth=5 should be 1");
+        assertEquals(1, pathsOtherDirectionCount, "Number of paths to maxDepth=5 should be 1");
 
         params.put("maxDepth", 6);
 
-        List<Object> pathsDepth6 = runQuery(cypher, params).stream().map(result -> result.get("path"))
-                .collect(Collectors.toList());
+        long pathsDepth6Count = runQuery(cypher, params, result -> {
+            return result.stream().map(row -> row.get("path")).count();
+        });
 
-        assertEquals(2, pathsDepth6.size(), "Number of paths to maxDepth=6 should be 2");
+        assertEquals(2, pathsDepth6Count, "Number of paths to maxDepth=6 should be 2");
     }
 }

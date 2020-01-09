@@ -58,126 +58,126 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testStronglyConnectedComponentsStream() {
-        Result result = runQuery("CALL algo.scc.stream('', '',{graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
+        boolean hastNext = runQuery("CALL algo.scc.stream('', '',{graph:'" + graphImpl + "'})", Result::hasNext);
+        assertFalse(hastNext);
     }
 
     @Test
     void testStronglyConnectedComponents() {
-        runQuery("CALL algo.scc('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("setCount")));
+        runQueryWithRowConsumer("CALL algo.scc('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("setCount")));
     }
 
     @Test
     void testAllShortestPathsStream() {
-        Result result = runQuery("CALL algo.allShortestPaths.stream('',{graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
+        boolean hasNext = runQuery("CALL algo.allShortestPaths.stream('',{graph:'" + graphImpl + "'})", Result::hasNext);
+        assertFalse(hasNext);
     }
 
     @Test
     void testBetweennessCentralityStream() {
-        Result result = runQuery("CALL algo.betweenness.stream('', '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
+        boolean hasNext = runQuery("CALL algo.betweenness.stream('', '', {graph:'" + graphImpl + "'})", Result::hasNext);
+        assertFalse(hasNext);
     }
 
     @Test
     void testBetweennessCentrality() {
-        runQuery("CALL algo.betweenness('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodes")));
+        runQueryWithRowConsumer("CALL algo.betweenness('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodes")));
     }
 
     @Test
     void testSampledBetweennessCentralityStream() {
-        Result result = runQuery("CALL algo.betweenness.sampled.stream('', '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
+        boolean hasNext = runQuery("CALL algo.betweenness.sampled.stream('', '', {graph:'" + graphImpl + "'})", Result::hasNext);
+        assertFalse(hasNext);
     }
 
     @Test
     void testSampledBetweennessCentrality() {
-        runQuery("CALL algo.betweenness.sampled('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodes")));
+        runQueryWithRowConsumer("CALL algo.betweenness.sampled('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodes")));
     }
 
     @Test
     void testClosenessCentralityStream() {
-        Result result = runQuery("CALL algo.closeness.stream('', '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
+        boolean hasNext = runQuery("CALL algo.closeness.stream('', '', {graph:'" + graphImpl + "'})", Result::hasNext);
+        assertFalse(hasNext);
     }
 
     @Test
     void testClosenessCentrality() {
-        runQuery("CALL algo.closeness('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodes")));
+        runQueryWithRowConsumer("CALL algo.closeness('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodes")));
     }
 
     @Test
     void testTriangleCountStream() {
-        Result result = runQuery("CALL algo.triangleCount.stream('', '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
+        boolean hasNext = runQuery("CALL algo.triangleCount.stream('', '', {graph:'" + graphImpl + "'})", Result::hasNext);
+        assertFalse(hasNext);
     }
 
     @Test
     void testTriangleCount() {
-        runQuery("CALL algo.triangleCount('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
+        runQueryWithRowConsumer("CALL algo.triangleCount('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
     }
 
     @Test
     void testTriangleStream() {
-        Result result = runQuery("CALL algo.triangle.stream('', '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
+        boolean hasNext = runQuery("CALL algo.triangle.stream('', '', {graph:'" + graphImpl + "'})", Result::hasNext);
+        assertFalse(hasNext);
     }
 
     @Test
     void testKSpanningTreeKMax() {
-        runQuery("CALL algo.spanningTree.kmax('', '', '', 0, 3, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
+        runQueryWithRowConsumer("CALL algo.spanningTree.kmax('', '', '', 0, 3, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
     void testKSpanningTreeKMin() {
-        runQuery("CALL algo.spanningTree.kmin('', '', '', 0, 3, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
+        runQueryWithRowConsumer("CALL algo.spanningTree.kmin('', '', '', 0, 3, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
     void testSpanningTree() {
-        runQuery("CALL algo.spanningTree('', '', '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
+        runQueryWithRowConsumer("CALL algo.spanningTree('', '', '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
     void testSpanningTreeMinimum() {
-        runQuery("CALL algo.spanningTree.minimum('', '', '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
+        runQueryWithRowConsumer("CALL algo.spanningTree.minimum('', '', '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
     void testSpanningTreeMaximum() {
-        runQuery("CALL algo.spanningTree.maximum('', '', '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
+        runQueryWithRowConsumer("CALL algo.spanningTree.maximum('', '', '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
     void testShortestPathAStarStream() {
-        Result result = runQuery("CALL algo.shortestPath.astar.stream(null, null, '', '', '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
+        boolean hasNext = runQuery("CALL algo.shortestPath.astar.stream(null, null, '', '', '', {graph:'" + graphImpl + "'})", Result::hasNext);
+        assertFalse(hasNext);
     }
 
     @Test
     void testShortestPathsStream() {
-        Result result = runQuery("CALL algo.shortestPaths.stream(null, '', {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
+        boolean hasNext = runQuery("CALL algo.shortestPaths.stream(null, '', {graph:'" + graphImpl + "'})", Result::hasNext);
+        assertFalse(hasNext);
     }
 
     @Test
     void testShortestPaths() {
-        runQuery("CALL algo.shortestPaths(null, '', {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
+        runQueryWithRowConsumer("CALL algo.shortestPaths(null, '', {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
     }
 
     @Test
     void testKShortestPaths() {
-        runQuery("CALL algo.kShortestPaths(null, null, 3, '', {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("resultCount")));
+        runQueryWithRowConsumer("CALL algo.kShortestPaths(null, null, 3, '', {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("resultCount")));
     }
 
     @Test
     void testShortestPathsDeltaSteppingStream() {
-        Result result = runQuery("CALL algo.shortestPath.deltaStepping.stream(null, '', 0, {graph:'" + graphImpl + "'})");
-        assertFalse(result.hasNext());
+        boolean hasNext = runQuery("CALL algo.shortestPath.deltaStepping.stream(null, '', 0, {graph:'" + graphImpl + "'})", Result::hasNext);
+        assertFalse(hasNext);
     }
 
     @Test
     void testShortestPathsDeltaStepping() {
-        runQuery("CALL algo.shortestPath.deltaStepping(null, '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
+        runQueryWithRowConsumer("CALL algo.shortestPath.deltaStepping(null, '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
     }
 }

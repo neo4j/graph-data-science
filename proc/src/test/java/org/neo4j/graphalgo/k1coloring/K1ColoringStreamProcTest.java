@@ -47,7 +47,7 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest {
             .yields("nodeId", "color");
 
         Map<Long, Long> coloringResult = new HashMap<>(4);
-        runQuery(yields, (row) -> {
+        runQueryWithRowConsumer(yields, (row) -> {
             long nodeId = row.getNumber("nodeId").longValue();
             long color = row.getNumber("color").longValue();
             coloringResult.put(nodeId, color);
@@ -64,7 +64,7 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest {
             .estimationMode(GdsCypher.ExecutionModes.STREAM)
             .yields("requiredMemory", "treeView", "bytesMin", "bytesMax");
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             assertTrue(row.getNumber("bytesMin").longValue() > 0);
             assertTrue(row.getNumber("bytesMax").longValue() > 0);
 

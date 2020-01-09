@@ -78,7 +78,7 @@ class ModularityOptimizationProcTest extends BaseProcTest {
                        "    }" +
                        ")";
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             assertEquals(true, row.getBoolean("didConverge"));
             assertEquals(0.12244, row.getNumber("modularity").doubleValue(), 0.001);
             assertEquals(2, row.getNumber("communityCount").longValue());
@@ -97,7 +97,7 @@ class ModularityOptimizationProcTest extends BaseProcTest {
                        "    }" +
                        ")";
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             assertEquals(true, row.getBoolean("didConverge"));
             assertEquals(0.4985, row.getNumber("modularity").doubleValue(), 0.001);
             assertEquals(2, row.getNumber("communityCount").longValue());
@@ -116,7 +116,7 @@ class ModularityOptimizationProcTest extends BaseProcTest {
                        ") YIELD nodeId, community";
 
         long[] communities = new long[6];
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             communities[(int) nodeId] = row.getNumber("community").longValue();
         });
@@ -134,7 +134,7 @@ class ModularityOptimizationProcTest extends BaseProcTest {
                        ") YIELD nodeId, community";
 
         long[] communities = new long[6];
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             communities[(int) nodeId] = row.getNumber("community").longValue();
         });
@@ -151,7 +151,7 @@ class ModularityOptimizationProcTest extends BaseProcTest {
                        ") YIELD nodeId, community";
 
         long[] communities = new long[6];
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             communities[(int) nodeId] = row.getNumber("community").longValue();
         });
@@ -171,7 +171,7 @@ class ModularityOptimizationProcTest extends BaseProcTest {
 
         long[] communities = new long[6];
         MutableInt i = new MutableInt(0);
-        runQuery("MATCH (n) RETURN n.community as community", (row) -> {
+        runQueryWithRowConsumer("MATCH (n) RETURN n.community as community", (row) -> {
             communities[i.getAndIncrement()] = row.getNumber("community").longValue();
         });
         assertCommunities(communities, SEEDED_COMMUNITIES);
@@ -185,7 +185,7 @@ class ModularityOptimizationProcTest extends BaseProcTest {
                        "    }" +
                        ") YIELD didConverge, ranIterations";
 
-        runQuery(query, (row) -> {
+        runQueryWithRowConsumer(query, (row) -> {
             assertTrue(row.getBoolean("didConverge"));
             assertEquals(1, row.getNumber("ranIterations").longValue());
         });
@@ -199,7 +199,7 @@ class ModularityOptimizationProcTest extends BaseProcTest {
                        "    }" +
                        ") YIELD didConverge, ranIterations";
 
-        runQuery(query, (row) -> {
+        runQueryWithRowConsumer(query, (row) -> {
             assertFalse(row.getBoolean("didConverge"));
             assertEquals(1, row.getNumber("ranIterations").longValue());
         });
@@ -211,7 +211,7 @@ class ModularityOptimizationProcTest extends BaseProcTest {
                        "    null, null" +
                        ") YIELD requiredMemory, treeView, bytesMin, bytesMax";
 
-        runQuery(query, (row) -> {
+        runQueryWithRowConsumer(query, (row) -> {
             assertTrue(row.getNumber("bytesMin").longValue() > 0);
             assertTrue(row.getNumber("bytesMax").longValue() > 0);
         });
@@ -227,7 +227,7 @@ class ModularityOptimizationProcTest extends BaseProcTest {
             "f", 5
         );
         long[] actualCommunities = new long[6];
-        runQuery("MATCH (n) RETURN n.name as name, n.community as community", (row) -> {
+        runQueryWithRowConsumer("MATCH (n) RETURN n.name as name, n.community as community", (row) -> {
             long community = row.getNumber("community").longValue();
             String name = row.getString("name");
             actualCommunities[(int) nameMapping.get(name)] = community;

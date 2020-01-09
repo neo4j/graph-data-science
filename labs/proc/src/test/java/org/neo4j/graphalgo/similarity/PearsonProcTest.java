@@ -149,91 +149,98 @@ class PearsonProcTest extends BaseProcTest {
     void pearsonSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
+        try (
 
-        Result result1 = runQuery(
-            STATEMENT_STREAM,
-            map("config", map("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
-        );
-        Result result2 = runQuery(
-            STATEMENT_STREAM,
-            map("config", map("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
-        );
-        Result result4 = runQuery(
-            STATEMENT_STREAM,
-            map("config", map("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
-        );
-        Result result8 = runQuery(
-            STATEMENT_STREAM,
-            map("config", map("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
-        );
-        int count = 0;
-        while (result1.hasNext()) {
-            Map<String, Object> row1 = result1.next();
-            assertEquals(row1, result2.next(), row1.toString());
-            assertEquals(row1, result4.next(), row1.toString());
-            assertEquals(row1, result8.next(), row1.toString());
-            count++;
+            Result result1 = runQueryWithoutClosing(
+                STATEMENT_STREAM,
+                map("config", map("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
+            );
+            Result result2 = runQueryWithoutClosing(
+                STATEMENT_STREAM,
+                map("config", map("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
+            );
+            Result result4 = runQueryWithoutClosing(
+                STATEMENT_STREAM,
+                map("config", map("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
+            );
+            Result result8 = runQueryWithoutClosing(
+                STATEMENT_STREAM,
+                map("config", map("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
+            )
+        ) {
+            int count = 0;
+            while (result1.hasNext()) {
+                Map<String, Object> row1 = result1.next();
+                assertEquals(row1, result2.next(), row1.toString());
+                assertEquals(row1, result4.next(), row1.toString());
+                assertEquals(row1, result8.next(), row1.toString());
+                count++;
+            }
+            int people = size / 10;
+            assertEquals((people * people - people) / 2, count);
         }
-        int people = size / 10;
-        assertEquals((people * people - people) / 2, count);
     }
 
     @Test
     void pearsonSingleMultiThreadComparisionTopK() {
         int size = 333;
         buildRandomDB(size);
-
-        Result result1 = runQuery(
-            STATEMENT_STREAM,
-            map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0)
-        );
-        Result result2 = runQuery(
-            STATEMENT_STREAM,
-            map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0)
-        );
-        Result result4 = runQuery(
-            STATEMENT_STREAM,
-            map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0)
-        );
-        Result result8 = runQuery(
-            STATEMENT_STREAM,
-            map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0)
-        );
-        int count = 0;
-        while (result1.hasNext()) {
-            Map<String, Object> row1 = result1.next();
-            assertEquals(row1, result2.next(), row1.toString());
-            assertEquals(row1, result4.next(), row1.toString());
-            assertEquals(row1, result8.next(), row1.toString());
-            count++;
+        try (
+            Result result1 = runQueryWithoutClosing(
+                STATEMENT_STREAM,
+                map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0)
+            );
+            Result result2 = runQueryWithoutClosing(
+                STATEMENT_STREAM,
+                map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0)
+            );
+            Result result4 = runQueryWithoutClosing(
+                STATEMENT_STREAM,
+                map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0)
+            );
+            Result result8 = runQueryWithoutClosing(
+                STATEMENT_STREAM,
+                map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0)
+            )
+        ) {
+            int count = 0;
+            while (result1.hasNext()) {
+                Map<String, Object> row1 = result1.next();
+                assertEquals(row1, result2.next(), row1.toString());
+                assertEquals(row1, result4.next(), row1.toString());
+                assertEquals(row1, result8.next(), row1.toString());
+                count++;
+            }
+            int people = size / 10;
+            assertEquals(people, count);
         }
-        int people = size / 10;
-        assertEquals(people, count);
     }
 
     @Test
     void topNpearsonStreamTest() {
         Map<String, Object> params = map("config", map("top", 2, "topK", 0), "missingValue", 0);
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assert01(results.next());
-        assert23(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assert01(results.next());
+            assert23(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
     void pearsonStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "topK", 0), "missingValue", 0);
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertTrue(results.hasNext());
-        assert01(results.next());
-        assert02(results.next());
-        assert03(results.next());
-        assert12(results.next());
-        assert13(results.next());
-        assert23(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertTrue(results.hasNext());
+            assert01(results.next());
+            assert02(results.next());
+            assert03(results.next());
+            assert12(results.next());
+            assert13(results.next());
+            assert23(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
@@ -245,10 +252,11 @@ class PearsonProcTest extends BaseProcTest {
         );
         Map<String, Object> params = map("config", config, "missingValue", 0);
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertTrue(results.hasNext());
-        assert01(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertTrue(results.hasNext());
+            assert01(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
@@ -260,16 +268,16 @@ class PearsonProcTest extends BaseProcTest {
             Double.NaN
         );
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-
-        assertTrue(results.hasNext());
-        assert01Skip(results.next());
-        assert02Skip(results.next());
-        assert03Skip(results.next());
-        assert12Skip(results.next());
-        assert13Skip(results.next());
-        assert23Skip(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertTrue(results.hasNext());
+            assert01Skip(results.next());
+            assert02Skip(results.next());
+            assert03Skip(results.next());
+            assert12Skip(results.next());
+            assert13Skip(results.next());
+            assert23Skip(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
@@ -280,29 +288,30 @@ class PearsonProcTest extends BaseProcTest {
             map("concurrency", 1, "graph", "cypher", "skipValue", 0.0, "data", query, "topK", 0)
         );
 
-        Result results = runQuery(STATEMENT_CYPHER_STREAM, params);
-
-        assertTrue(results.hasNext());
-        assert01Skip(results.next());
-        assert02Skip(results.next());
-        assert03Skip(results.next());
-        assert12Skip(results.next());
-        assert13Skip(results.next());
-        assert23Skip(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_CYPHER_STREAM, params, results -> {
+            assertTrue(results.hasNext());
+            assert01Skip(results.next());
+            assert02Skip(results.next());
+            assert03Skip(results.next());
+            assert12Skip(results.next());
+            assert13Skip(results.next());
+            assert23Skip(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
     void topKPearsonStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "topK", 1), "missingValue", 0);
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertTrue(results.hasNext());
-        assert01(results.next());
-        assert01(flip(results.next()));
-        assert23(results.next());
-        assert23(flip(results.next()));
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertTrue(results.hasNext());
+            assert01(results.next());
+            assert01(flip(results.next()));
+            assert23(results.next());
+            assert23(flip(results.next()));
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
@@ -315,10 +324,11 @@ class PearsonProcTest extends BaseProcTest {
         );
         Map<String, Object> params = map("config", config, "missingValue", 0);
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertTrue(results.hasNext());
-        assert01(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertTrue(results.hasNext());
+            assert01(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     private Map<String, Object> flip(Map<String, Object> row) {
@@ -351,31 +361,33 @@ class PearsonProcTest extends BaseProcTest {
             0
         );
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertSameSource(results, 3, 0L);
-        assertSameSource(results, 3, 1L);
-        assertSameSource(results, 3, 2L);
-        assertSameSource(results, 3, 3L);
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertSameSource(results, 3, 0L);
+            assertSameSource(results, 3, 1L);
+            assertSameSource(results, 3, 2L);
+            assertSameSource(results, 3, 3L);
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
     void topK3PearsonStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3), "missingValue", 0);
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertSameSource(results, 3, 0L);
-        assertSameSource(results, 3, 1L);
-        assertSameSource(results, 3, 2L);
-        assertSameSource(results, 3, 3L);
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertSameSource(results, 3, 0L);
+            assertSameSource(results, 3, 1L);
+            assertSameSource(results, 3, 2L);
+            assertSameSource(results, 3, 3L);
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
     void simplePearsonTest() {
         Map<String, Object> params = map("config", map("topK", 0));
 
-        Map<String, Object> row = runQuery(STATEMENT, params).next();
+        Map<String, Object> row = runQuery(STATEMENT, params, Result::next);
         assertEquals(0.86, (double) row.get("p25"), 0.01);
         assertEquals(0.94, (double) row.get("p50"), 0.01);
         assertEquals(0.98, (double) row.get("p75"), 0.01);
@@ -390,7 +402,7 @@ class PearsonProcTest extends BaseProcTest {
         runQuery(STORE_EMBEDDING_STATEMENT);
 
         Map<String, Object> params = map("config", map("topK", 0));
-        Map<String, Object> row = runQuery(EMBEDDING_STATEMENT, params).next();
+        Map<String, Object> row = runQuery(EMBEDDING_STATEMENT, params, Result::next);
 
         assertEquals(0.86, (double) row.get("p25"), 0.01);
         assertEquals(0.94, (double) row.get("p50"), 0.01);
@@ -411,45 +423,45 @@ class PearsonProcTest extends BaseProcTest {
                                         "RETURN a.name AS node1, b.name AS node2, similar.score AS score " +
                                         "ORDER BY id(a), id(b)";
 
-        Result result = runQuery(checkSimilaritiesQuery);
+        runQuery(checkSimilaritiesQuery, result -> {
+            assertTrue(result.hasNext());
+            Map<String, Object> row = result.next();
+            assertEquals(row.get("node1"), "Alice");
+            assertEquals(row.get("node2"), "Bob");
+            assertEquals((double) row.get("score"), 1.0, 0.01);
 
-        assertTrue(result.hasNext());
-        Map<String, Object> row = result.next();
-        assertEquals(row.get("node1"), "Alice");
-        assertEquals(row.get("node2"), "Bob");
-        assertEquals((double) row.get("score"), 1.0, 0.01);
+            assertTrue(result.hasNext());
+            row = result.next();
+            assertEquals(row.get("node1"), "Alice");
+            assertEquals(row.get("node2"), "Charlie");
+            assertEquals((double) row.get("score"), 0.94, 0.01);
 
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Alice");
-        assertEquals(row.get("node2"), "Charlie");
-        assertEquals((double) row.get("score"), 0.94, 0.01);
+            assertTrue(result.hasNext());
+            row = result.next();
+            assertEquals(row.get("node1"), "Alice");
+            assertEquals(row.get("node2"), "Dana");
+            assertEquals((double) row.get("score"), 0.86, 0.01);
 
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Alice");
-        assertEquals(row.get("node2"), "Dana");
-        assertEquals((double) row.get("score"), 0.86, 0.01);
+            assertTrue(result.hasNext());
+            row = result.next();
+            assertEquals(row.get("node1"), "Bob");
+            assertEquals(row.get("node2"), "Charlie");
+            assertEquals((double) row.get("score"), 0.94, 0.01);
 
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Bob");
-        assertEquals(row.get("node2"), "Charlie");
-        assertEquals((double) row.get("score"), 0.94, 0.01);
+            assertTrue(result.hasNext());
+            row = result.next();
+            assertEquals(row.get("node1"), "Bob");
+            assertEquals(row.get("node2"), "Dana");
+            assertEquals((double) row.get("score"), 0.86, 0.01);
 
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Bob");
-        assertEquals(row.get("node2"), "Dana");
-        assertEquals((double) row.get("score"), 0.86, 0.01);
+            assertTrue(result.hasNext());
+            row = result.next();
+            assertEquals(row.get("node1"), "Charlie");
+            assertEquals(row.get("node2"), "Dana");
+            assertEquals((double) row.get("score"), 0.98, 0.01);
 
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Charlie");
-        assertEquals(row.get("node2"), "Dana");
-        assertEquals((double) row.get("score"), 0.98, 0.01);
-
-        assertFalse(result.hasNext());
+            assertFalse(result.hasNext());
+        });
     }
 
     @Test
@@ -459,8 +471,7 @@ class PearsonProcTest extends BaseProcTest {
             "similarityCutoff", 0.1
         ));
 
-        Result writeResult = runQuery(STATEMENT, params);
-        Map<String, Object> writeRow = writeResult.next();
+        Map<String, Object> writeRow = runQuery(STATEMENT, params, Result::next);
         assertEquals(-1L, (long) writeRow.get("computations"));
     }
 
@@ -472,8 +483,7 @@ class PearsonProcTest extends BaseProcTest {
             "similarityCutoff", 0.1
         ));
 
-        Result writeResult = runQuery(STATEMENT, params);
-        Map<String, Object> writeRow = writeResult.next();
+        Map<String, Object> writeRow = runQuery(STATEMENT, params, Result::next);
         assertEquals(6L, (long) writeRow.get("computations"));
     }
 

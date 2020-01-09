@@ -60,7 +60,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
     void testMax() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH n CALL algo.spanningTree.kmax(null, null, 'w', id(n), 2, {graph:'huge'}) " +
                 "YIELD loadMillis, computeMillis, writeMillis RETURN loadMillis, computeMillis, writeMillis";
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             assertTrue(row.getNumber("loadMillis").longValue() >= 0);
             assertTrue(row.getNumber("writeMillis").longValue() >= 0);
             assertTrue(row.getNumber("computeMillis").longValue() >= 0);
@@ -68,7 +68,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
         final HashMap<String, Integer> communities = new HashMap<>();
 
-        runQuery("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p", row -> {
+        runQueryWithRowConsumer("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p", row -> {
             final String name = row.getString("name");
             final int p = row.getNumber("p").intValue();
             communities.put(name, p);
@@ -83,7 +83,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
     void testMin() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH n CALL algo.spanningTree.kmin(null, null, 'w', id(n), 2, {graph:'huge'}) " +
                 "YIELD loadMillis, computeMillis, writeMillis RETURN loadMillis, computeMillis, writeMillis";
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             assertTrue(row.getNumber("loadMillis").longValue() >= 0);
             assertTrue(row.getNumber("writeMillis").longValue() >= 0);
             assertTrue(row.getNumber("computeMillis").longValue() >= 0);
@@ -91,7 +91,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
         final HashMap<String, Integer> communities = new HashMap<>();
 
-        runQuery("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p", row -> {
+        runQueryWithRowConsumer("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p", row -> {
             final String name = row.getString("name");
             final int p = row.getNumber("p").intValue();
             communities.put(name, p);

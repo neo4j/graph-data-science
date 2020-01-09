@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -94,7 +95,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                                 "+----------------------------------------+\n" +
                                 "10 rows\n";
 
-        assertEquals(expectedString, runQuery(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -115,7 +116,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                                 "+------------------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
-        assertEquals(expectedString, runQuery(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -140,7 +141,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                                 "+----------------------------------------+\n" +
                                 "3 rows\n";
 
-        assertEquals(expectedString, runQuery(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -165,7 +166,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                                 "+----------------------------------------+\n" +
                                 "4 rows\n";
 
-        assertEquals(expectedString, runQuery(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -191,7 +192,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                                 "4 rows\n";
 
 
-        assertEquals(expectedString, runQuery(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -214,7 +215,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                                 "+--------------------------------+\n" +
                                 "2 rows\n";
 
-        assertEquals(expectedString, runQuery(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -241,6 +242,6 @@ class NodeSimilarityDocTest extends BaseProcTest {
                                 "+----------------------------------------+\n" +
                                 "6 rows\n";
 
-        assertEquals(expectedString, runQuery(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 }

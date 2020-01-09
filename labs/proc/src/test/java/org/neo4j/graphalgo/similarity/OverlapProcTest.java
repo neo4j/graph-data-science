@@ -53,37 +53,37 @@ class OverlapProcTest extends BaseProcTest {
                                             " ,(c)-[:LIKES]->(i3)";
 
     private static final String STATEMENT_STREAM =
-            " MATCH (p:Person)-[:LIKES]->(i:Item)" +
-            " WITH {item: id(p), categories: collect(distinct id(i))} AS userData" +
-            " WITH collect(userData) AS data, $config AS config" +
-            " WITH config {.*, data: data} AS input" +
-            " CALL gds.alpha.similarity.overlap.stream(input)" +
-            " YIELD item1, item2, count1, count2, intersection, similarity" +
-            " RETURN item1, item2, count1, count2, intersection, similarity" +
-            " ORDER BY item1, item2";
+        " MATCH (p:Person)-[:LIKES]->(i:Item)" +
+        " WITH {item: id(p), categories: collect(distinct id(i))} AS userData" +
+        " WITH collect(userData) AS data, $config AS config" +
+        " WITH config {.*, data: data} AS input" +
+        " CALL gds.alpha.similarity.overlap.stream(input)" +
+        " YIELD item1, item2, count1, count2, intersection, similarity" +
+        " RETURN item1, item2, count1, count2, intersection, similarity" +
+        " ORDER BY item1, item2";
 
     private static final String STATEMENT =
-            " MATCH (p:Person)-[:LIKES]->(i:Item)" +
-            " WITH {item: id(p), categories: collect(distinct id(i))} AS userData" +
-            " WITH collect(userData) AS data, $config AS config" +
-            " WITH config {.*, data: data} AS input" +
-            " CALL gds.alpha.similarity.overlap.write(input)" +
-            " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations" +
-            " RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations";
+        " MATCH (p:Person)-[:LIKES]->(i:Item)" +
+        " WITH {item: id(p), categories: collect(distinct id(i))} AS userData" +
+        " WITH collect(userData) AS data, $config AS config" +
+        " WITH config {.*, data: data} AS input" +
+        " CALL gds.alpha.similarity.overlap.write(input)" +
+        " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations" +
+        " RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations";
 
     private static final String STORE_EMBEDDING_STATEMENT =
-            " MATCH (p:Person)-[:LIKES]->(i:Item)" +
-            " WITH p, collect(distinct id(i)) AS userData" +
-            " SET p.embedding = userData";
+        " MATCH (p:Person)-[:LIKES]->(i:Item)" +
+        " WITH p, collect(distinct id(i)) AS userData" +
+        " SET p.embedding = userData";
 
     private static final String EMBEDDING_STATEMENT =
-            " MATCH (p:Person)" +
-            " WITH {item: id(p), categories: p.embedding} AS userData " +
-            " WITH collect(userData) AS data, $config AS config" +
-            " WITH config {.*, data: data} AS input" +
-            " CALL gds.alpha.similarity.overlap.write(input)" +
-            " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs" +
-            " RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs";
+        " MATCH (p:Person)" +
+        " WITH {item: id(p), categories: p.embedding} AS userData " +
+        " WITH collect(userData) AS data, $config AS config" +
+        " WITH config {.*, data: data} AS input" +
+        " CALL gds.alpha.similarity.overlap.write(input)" +
+        " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs" +
+        " RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs";
 
 
     @BeforeEach
@@ -102,13 +102,13 @@ class OverlapProcTest extends BaseProcTest {
         runQuery("MATCH (n) DETACH DELETE n");
         runQuery("UNWIND range(1, $size / 10) AS _ CREATE (:Person), (:Item) ", singletonMap("size", size));
         String statement =
-                "MATCH (p:Person) " +
-                "WITH collect(p) AS people " +
-                "MATCH (i:Item) " +
-                "WITH people, collect(i) AS items " +
-                "UNWIND range(1,$size) AS _ " +
-                "WITH people[toInteger(rand()*size(people))] AS p, items[toInteger(rand()*size(items))] AS i " +
-                "MERGE (p)-[:LIKES]->(i) RETURN count(*) ";
+            "MATCH (p:Person) " +
+            "WITH collect(p) AS people " +
+            "MATCH (i:Item) " +
+            "WITH people, collect(i) AS items " +
+            "UNWIND range(1,$size) AS _ " +
+            "WITH people[toInteger(rand()*size(people))] AS p, items[toInteger(rand()*size(items))] AS i " +
+            "MERGE (p)-[:LIKES]->(i) RETURN count(*) ";
         runQuery(statement, singletonMap("size", size));
     }
 
@@ -116,61 +116,67 @@ class OverlapProcTest extends BaseProcTest {
     void overlapSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
-        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 1, "topK", 0)));
-        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 2, "topK", 0)));
-        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 4, "topK", 0)));
-        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 8, "topK", 0)));
-        int count = 0;
-        while (result1.hasNext()) {
-            Map<String, Object> row1 = result1.next();
-            assertEquals(row1, result2.next(), row1.toString());
-            assertEquals(row1, result4.next(), row1.toString());
-            assertEquals(row1, result8.next(), row1.toString());
-            count++;
+        try(
+            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 1, "topK", 0)));
+            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 2, "topK", 0)));
+            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 4, "topK", 0)));
+            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1 ,"concurrency", 8, "topK", 0)))
+        ) {
+            int count = 0;
+            while (result1.hasNext()) {
+                Map<String, Object> row1 = result1.next();
+                assertEquals(row1, result2.next(), row1.toString());
+                assertEquals(row1, result4.next(), row1.toString());
+                assertEquals(row1, result8.next(), row1.toString());
+                count++;
+            }
+            int people = size / 10;
+            assertEquals((people * people - people) / 2, count);
         }
-        int people = size / 10;
-        assertEquals((people * people - people) / 2, count);
     }
 
     @Test
     void overlapSingleMultiThreadComparisionTopK() {
         int size = 333;
         buildRandomDB(size);
-
-        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1,"topK", 1, "concurrency", 1)));
-        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1,"topK", 1, "concurrency", 2)));
-        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1,"topK", 1, "concurrency", 4)));
-        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1,"topK", 1, "concurrency", 8)));
-        int count = 0;
-        while (result1.hasNext()) {
-            Map<String, Object> row1 = result1.next();
-            assertEquals(row1, result2.next(), row1.toString());
-            assertEquals(row1, result4.next(), row1.toString());
-            assertEquals(row1, result8.next(), row1.toString());
-            count++;
+        try(
+            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1,"topK", 1, "concurrency", 1)));
+            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1,"topK", 1, "concurrency", 2)));
+            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1,"topK", 1, "concurrency", 4)));
+            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1,"topK", 1, "concurrency", 8)))
+        ) {
+            int count = 0;
+            while (result1.hasNext()) {
+                Map<String, Object> row1 = result1.next();
+                assertEquals(row1, result2.next(), row1.toString());
+                assertEquals(row1, result4.next(), row1.toString());
+                assertEquals(row1, result8.next(), row1.toString());
+                count++;
+            }
+            assertFalse(result2.hasNext());
+            assertFalse(result4.hasNext());
+            assertFalse(result8.hasNext());
         }
-        assertFalse(result2.hasNext());
-        assertFalse(result4.hasNext());
-        assertFalse(result8.hasNext());
     }
 
     @Test
     void topNoverlapStreamTest() {
-        Result results = runQuery(STATEMENT_STREAM, map("config",map("top",2)));
-        assert10(results.next());
-        assert20(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, map("config", map("top", 2)), results -> {
+            assert10(results.next());
+            assert20(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
     void overlapStreamTest() {
-        Result results = runQuery(STATEMENT_STREAM, map("config",map("concurrency",1)));
-
-        assertTrue(results.hasNext());
-        assert10(results.next());
-        assert20(results.next());
-        assert12(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, map("config", map("concurrency", 1)), results -> {
+            assertTrue(results.hasNext());
+            assert10(results.next());
+            assert20(results.next());
+            assert12(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
@@ -182,50 +188,52 @@ class OverlapProcTest extends BaseProcTest {
 //        );
 
         Map<String, Object> config = map(
-                "concurrency", 1,
-                "sourceIds", Collections.singletonList(1L)
+            "concurrency", 1,
+            "sourceIds", Collections.singletonList(1L)
         );
 
         Map<String, Object> params = map("config", config);
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-
-        assertTrue(results.hasNext());
-        assert10(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertTrue(results.hasNext());
+            assert10(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
     void topKoverlapStreamTest() {
-        Map<String, Object> params = map("config", map( "concurrency", 1,"topK", 1));
+        Map<String, Object> params = map("config", map("concurrency", 1, "topK", 1));
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertTrue(results.hasNext());
-        assert10(results.next());
-        assert20(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertTrue(results.hasNext());
+            assert10(results.next());
+            assert20(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
     void topKoverlapSourceTargetIdsStreamTest() {
         Map<String, Object> config = map(
-                "concurrency", 1,
-                "topK", 1,
-                "sourceIds", Collections.singletonList(1L)
+            "concurrency", 1,
+            "topK", 1,
+            "sourceIds", Collections.singletonList(1L)
 
         );
         Map<String, Object> params = map("config", config);
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertTrue(results.hasNext());
-        assert10(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertTrue(results.hasNext());
+            assert10(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     private void assertSameSource(Result results, int count, long source) {
         Map<String, Object> row;
         long target = 0;
-        for (int i = 0; i<count; i++) {
+        for (int i = 0; i < count; i++) {
             if (target == source) target++;
             assertTrue(results.hasNext());
             row = results.next();
@@ -240,29 +248,31 @@ class OverlapProcTest extends BaseProcTest {
     void topK4overlapStreamTest() {
         Map<String, Object> params = map("config", map("topK", 4, "concurrency", 4, "similarityCutoff", -0.1));
 
-        Result results = runQuery(STATEMENT_STREAM,params);
-        assertSameSource(results, 0, 0L);
-        assertSameSource(results, 1, 1L);
-        assertSameSource(results, 2, 2L);
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertSameSource(results, 0, 0L);
+            assertSameSource(results, 1, 1L);
+            assertSameSource(results, 2, 2L);
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
     void topK3overlapStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3));
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertSameSource(results, 0, 0L);
-        assertSameSource(results, 1, 1L);
-        assertSameSource(results, 2, 2L);
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertSameSource(results, 0, 0L);
+            assertSameSource(results, 1, 1L);
+            assertSameSource(results, 2, 2L);
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
     void simpleoverlapTest() {
         Map<String, Object> params = map("config", map("similarityCutoff", 0.0));
 
-        Map<String, Object> row = runQuery(STATEMENT,params).next();
+        Map<String, Object> row = runQuery(STATEMENT, params, Result::next);
         assertEquals((double) row.get("p25"), 1.0, 0.01);
         assertEquals((double) row.get("p50"), 1.0, 0.01);
         assertEquals((double) row.get("p75"), 1.0, 0.01);
@@ -277,7 +287,7 @@ class OverlapProcTest extends BaseProcTest {
 
         Map<String, Object> params = map("config", map("similarityCutoff", 0.0));
 
-        Map<String, Object> row = runQuery(EMBEDDING_STATEMENT,params).next();
+        Map<String, Object> row = runQuery(EMBEDDING_STATEMENT, params, Result::next);
         assertEquals((double) row.get("p25"), 1.0, 0.01);
         assertEquals((double) row.get("p50"), 1.0, 0.01);
         assertEquals((double) row.get("p75"), 1.0, 0.01);
@@ -295,51 +305,51 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void simpleoverlapWriteTest() {
-        Map<String, Object> params = map("config", map( "write", true, "similarityCutoff", 0.1));
+        Map<String, Object> params = map("config", map("write", true, "similarityCutoff", 0.1));
 
         runQuery(STATEMENT, params);
 
         String checkSimilaritiesQuery = "MATCH (a)-[similar:NARROWER_THAN]->(b)" +
-                "RETURN a.name AS node1, b.name as node2, similar.score AS score " +
-                "ORDER BY id(a), id(b)";
+                                        "RETURN a.name AS node1, b.name AS node2, similar.score AS score " +
+                                        "ORDER BY id(a), id(b)";
 
-        Result result = runQuery(checkSimilaritiesQuery);
+        runQuery(checkSimilaritiesQuery, result -> {
+            assertTrue(result.hasNext());
+            Map<String, Object> row = result.next();
+            assertEquals(row.get("node1"), "Bob");
+            assertEquals(row.get("node2"), "Alice");
+            assertEquals((double) row.get("score"), 1.0, 0.01);
 
-        assertTrue(result.hasNext());
-        Map<String, Object> row = result.next();
-        assertEquals(row.get("node1"), "Bob");
-        assertEquals(row.get("node2"), "Alice");
-        assertEquals((double) row.get("score"), 1.0, 0.01);
+            assertTrue(result.hasNext());
+            row = result.next();
+            assertEquals(row.get("node1"), "Charlie");
+            assertEquals(row.get("node2"), "Alice");
+            assertEquals((double) row.get("score"), 1.0, 0.01);
 
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Charlie");
-        assertEquals(row.get("node2"), "Alice");
-        assertEquals((double) row.get("score"), 1.0, 0.01);
-
-        assertFalse(result.hasNext());
+            assertFalse(result.hasNext());
+        });
     }
 
     @Test
     void dontComputeComputationsByDefault() {
         Map<String, Object> params = map("config", map(
-                "write", true,
-                "similarityCutoff", 0.1));
+            "write", true,
+            "similarityCutoff", 0.1
+        ));
 
-        Result writeResult = runQuery(STATEMENT, params);
-        Map<String, Object> writeRow = writeResult.next();
+        Map<String, Object> writeRow = runQuery(STATEMENT, params, Result::next);
         assertEquals(-1L, (long) writeRow.get("computations"));
     }
 
     @Test
     void numberOfComputations() {
         Map<String, Object> params = map("config", map(
-                "write", true,
-                "showComputations", true,
-                "similarityCutoff", 0.1));
+            "write", true,
+            "showComputations", true,
+            "similarityCutoff", 0.1
+        ));
 
-        Result writeResult = runQuery(STATEMENT, params);
-        Map<String, Object> writeRow = writeResult.next();
+        Map<String, Object> writeRow = runQuery(STATEMENT, params, Result::next);
         assertEquals(3L, (long) writeRow.get("computations"));
     }
 
@@ -362,7 +372,7 @@ class OverlapProcTest extends BaseProcTest {
         assertEquals(1L, row.get("count1"));
         assertEquals(3L, row.get("count2"));
         // assertEquals(1L, row.get("intersection"));
-        assertEquals(1D/1D, row.get("similarity"));
+        assertEquals(1D / 1D, row.get("similarity"));
     }
 
     private void assert10(Map<String, Object> row) {
@@ -371,6 +381,6 @@ class OverlapProcTest extends BaseProcTest {
         assertEquals(2L, row.get("count1"));
         assertEquals(3L, row.get("count2"));
         // assertEquals(2L, row.get("intersection"));
-        assertEquals(2D/2D, row.get("similarity"));
+        assertEquals(2D / 2D, row.get("similarity"));
     }
 }

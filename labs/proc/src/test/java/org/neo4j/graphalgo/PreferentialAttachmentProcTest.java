@@ -72,8 +72,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
                         "RETURN algo.linkprediction.preferentialAttachment(p1, p2) AS score, " +
                         "       16.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -86,8 +85,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
                 "RETURN algo.linkprediction.preferentialAttachment(p1, p2) AS score, " +
                 "       0.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -99,8 +97,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
                         "RETURN algo.linkprediction.preferentialAttachment(p1, p2) AS score, " +
                         "       1.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -112,8 +109,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
                         "RETURN algo.linkprediction.preferentialAttachment(p1, p2) AS score, " +
                         "       16.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -125,8 +121,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
                         "RETURN algo.linkprediction.preferentialAttachment(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score, " +
                         "      2.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -139,8 +134,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
                         "      {relationshipQuery: 'FOLLOWS', direction: 'OUTGOING'}) AS score, " +
                         "      1.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 }

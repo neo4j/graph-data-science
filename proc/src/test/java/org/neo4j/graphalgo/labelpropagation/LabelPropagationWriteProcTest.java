@@ -88,7 +88,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
                 "didConverge"
             );
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             long communityCount = row.getNumber("communityCount").longValue();
             long createMillis = row.getNumber("createMillis").longValue();
             long computeMillis = row.getNumber("computeMillis").longValue();
@@ -116,7 +116,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
                        "    writeProperty: 'label'" +
                        "  }" +
                        ")";
-        runQuery(
+        runQueryWithRowConsumer(
             query,
             row -> {
                 assertTrue(5 >= row.getNumber("ranIterations").intValue());
@@ -155,7 +155,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
                        "    }" +
                        ")";
 
-        runQuery(query, concurrencySeedWeightAndWriteParams(concurrency),
+        runQueryWithRowConsumer(query, concurrencySeedWeightAndWriteParams(concurrency),
             row -> {
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
                 checkMillisSet(row);
@@ -179,7 +179,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
         String check = "MATCH (n) " +
                        "WHERE n.id IN [0,1] " +
                        "RETURN n.community AS community";
-        runQuery(check, row -> {
+        runQueryWithRowConsumer(check, row -> {
             assertEquals(2, row.getNumber("community").intValue());
         });
     }
@@ -197,7 +197,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
                        "    }" +
                        ")";
 
-        runQuery(query, MapUtil.map("graph", graphName, "writeProperty", writeProperty),
+        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName, "writeProperty", writeProperty),
             row -> {
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
                 checkMillisSet(row);
@@ -220,7 +220,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
         );
         String check = String.format("MATCH (a {id: 0}), (b {id: 1}) " +
                        "RETURN a.%1$s AS a, b.%1$s AS b", writeProperty);
-        runQuery(check, row -> {
+        runQueryWithRowConsumer(check, row -> {
             assertEquals(2, row.getNumber("a").intValue());
             assertEquals(7, row.getNumber("b").intValue());
         });
@@ -239,7 +239,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
                        "    }" +
                        ")";
 
-        runQuery(query, MapUtil.map("graph", graphName, "writeProperty", writeProperty),
+        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName, "writeProperty", writeProperty),
             row -> {
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
                 checkMillisSet(row);
@@ -279,7 +279,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
                        "    }" +
                        ")";
 
-        runQuery(query, concurrencySeedWeightAndWriteParams(concurrency),
+        runQueryWithRowConsumer(query, concurrencySeedWeightAndWriteParams(concurrency),
             row -> {
                 assertEquals(2, row.getNumber("nodePropertiesWritten").intValue());
                 assertEquals("seed", row.getString("seedProperty"));
@@ -305,7 +305,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
         String check = "MATCH (n) " +
                        "WHERE n.id IN [0,1] " +
                        "RETURN n.seed AS community";
-        runQuery(check, row -> assertEquals(2, row.getNumber("community").intValue()));
+        runQueryWithRowConsumer(check, row -> assertEquals(2, row.getNumber("community").intValue()));
     }
 
     @ParameterizedTest(name = "concurrency = {0}, {2}")
@@ -317,18 +317,18 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
                        "    }" +
                        ")";
 
-        runQuery(query, concurrencySeedWeightAndWriteParams(concurrency),
+        runQueryWithRowConsumer(query, concurrencySeedWeightAndWriteParams(concurrency),
             row -> {
                 assertNull(row.getString("seedProperty"));
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
                 checkMillisSet(row);
             }
         );
-        runQuery(
+        runQueryWithRowConsumer(
             "MATCH (n) WHERE n.id = 0 RETURN n.community AS community",
             row -> assertEquals(6, row.getNumber("community").intValue())
         );
-        runQuery(
+        runQueryWithRowConsumer(
             "MATCH (n) WHERE n.id = 1 RETURN n.community AS community",
             row -> assertEquals(11, row.getNumber("community").intValue())
         );

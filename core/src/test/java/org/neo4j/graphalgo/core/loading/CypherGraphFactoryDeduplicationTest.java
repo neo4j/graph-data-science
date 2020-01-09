@@ -25,19 +25,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 class CypherGraphFactoryDeduplicationTest {
 
@@ -55,11 +58,11 @@ class CypherGraphFactoryDeduplicationTest {
     @BeforeEach
     void setUp() {
         db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, DB_CYPHER).accept(row -> {
+        Consumer<Result.ResultRow> rowConsumer = row -> {
             id1 = row.getNumber("id1").intValue();
             id2 = row.getNumber("id2").intValue();
-            return true;
-        });
+        };
+        QueryRunner.runQueryWithRowConsumer(db, DB_CYPHER, rowConsumer);
     }
 
     @AfterEach
@@ -109,8 +112,9 @@ class CypherGraphFactoryDeduplicationTest {
     @ParameterizedTest
     @CsvSource({"SUM, 14.0", "MAX, 10.0", "MIN, 4.0"})
     void testLoadCypherDuplicateRelationshipsWithWeightsAggregation(
-            DeduplicationStrategy deduplicationStrategy,
-            double expectedWeight) {
+        DeduplicationStrategy deduplicationStrategy,
+        double expectedWeight
+    ) {
         String nodes = "MATCH (n) RETURN id(n) AS id";
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 

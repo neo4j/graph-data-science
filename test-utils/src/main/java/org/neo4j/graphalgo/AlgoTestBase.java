@@ -19,29 +19,29 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collections;
 import java.util.function.Consumer;
 
 public class AlgoTestBase {
 
     public GraphDatabaseAPI db;
 
-    protected Result runQuery(String query) {
-        return runQuery(db, query);
+    protected void runQuery(String query) {
+        runQuery(db, query);
     }
 
     protected void runQuery(String query, Consumer<Result.ResultRow> check) {
         runQuery(db, query, check);
     }
 
-    protected Result runQuery(GraphDatabaseAPI db, String query) {
-        return QueryRunner.runQuery(db, query);
+    protected void runQuery(GraphDatabaseService databaseAPI, String query) {
+        QueryRunner.runInTransaction(databaseAPI, () -> databaseAPI.execute(query).close());
     }
 
-    protected void runQuery(GraphDatabaseAPI db, String query, Consumer<Result.ResultRow> check) {
-        QueryRunner.runQuery(db, query, check);
+    protected void runQuery(GraphDatabaseService db, String query, Consumer<Result.ResultRow> check) {
+        QueryRunner.runQueryWithRowConsumer(db, query, check);
     }
 }

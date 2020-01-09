@@ -93,7 +93,7 @@ final class ShortestPathDeltaSteppingUndirectedProcTest extends BaseProcTest {
                               "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "', direction: 'OUTGOING'}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
         });
@@ -111,7 +111,7 @@ final class ShortestPathDeltaSteppingUndirectedProcTest extends BaseProcTest {
                               "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "'}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
         });

@@ -102,7 +102,7 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
         final String cypher = "CALL algo.allShortestPaths.stream('', {graph:'" + graphName + "', direction: 'OUTGOING'}) " +
                               "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();
@@ -126,7 +126,7 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
         final String cypher = "CALL algo.allShortestPaths.stream('', {graph:'" + graphName + "', direction: 'INCOMING'}) " +
                               "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();
@@ -150,7 +150,7 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
         final String cypher = "CALL algo.allShortestPaths.stream('cost', {graph:'" + graphName + "', direction: 'OUTGOING'}) " +
                               "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();

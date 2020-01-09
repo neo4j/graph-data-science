@@ -47,17 +47,17 @@ public class PrimProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         String cypher = "CREATE(a:Node {start:true}) " +
-                "CREATE(b:Node) " +
-                "CREATE(c:Node) " +
-                "CREATE(d:Node) " +
-                "CREATE(e:Node) " +
-                "CREATE(z:Node) " +
-                "CREATE (a)-[:TYPE {cost:1.0}]->(b) " +
-                "CREATE (a)-[:TYPE {cost:2.0}]->(c) " +
-                "CREATE (b)-[:TYPE {cost:3.0}]->(c) " +
-                "CREATE (b)-[:TYPE {cost:4.0}]->(d) " +
-                "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
-                "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
+                        "CREATE(b:Node) " +
+                        "CREATE(c:Node) " +
+                        "CREATE(d:Node) " +
+                        "CREATE(e:Node) " +
+                        "CREATE(z:Node) " +
+                        "CREATE (a)-[:TYPE {cost:1.0}]->(b) " +
+                        "CREATE (a)-[:TYPE {cost:2.0}]->(c) " +
+                        "CREATE (b)-[:TYPE {cost:3.0}]->(c) " +
+                        "CREATE (b)-[:TYPE {cost:4.0}]->(d) " +
+                        "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
+                        "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
 
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(cypher);
@@ -65,49 +65,60 @@ public class PrimProcTest extends BaseProcTest {
     }
 
     @Test
-    public void testMinimum() {
+    void testMinimum() {
 
-        runQuery("MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree('Node', 'TYPE', 'cost', id(n), {graph:'huge', write:true, stats:true}) " +
-                "YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount " +
-                "RETURN loadMillis, computeMillis, writeMillis, effectiveNodeCount", res -> {
+        runQueryWithRowConsumer(
+            "MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree('Node', 'TYPE', 'cost', id(n), {graph:'huge', write:true, stats:true}) " +
+            "YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount " +
+            "RETURN loadMillis, computeMillis, writeMillis, effectiveNodeCount",
+            res -> {
 
-            System.out.println(res.get("loadMillis"));
-            System.out.println(res.get("computeMillis"));
-            System.out.println(res.get("writeMillis"));
-            System.out.println(res.get("effectiveNodeCount"));
+                System.out.println(res.get("loadMillis"));
+                System.out.println(res.get("computeMillis"));
+                System.out.println(res.get("writeMillis"));
+                System.out.println(res.get("effectiveNodeCount"));
 
-            assertNotEquals(-1L, res.getNumber("writeMillis").longValue());
-            assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
-        });
+                assertNotEquals(-1L, res.getNumber("writeMillis").longValue());
+                assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
+            }
+        );
 
-        final long relCount = runQuery("MATCH (a)-[:MST]->(b) RETURN id(a) as a, id(b) as b")
-                .stream()
-                .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
-                .count();
+        final long relCount = runQuery(
+            "MATCH (a)-[:MST]->(b) RETURN id(a) as a, id(b) as b",
+            result -> {
+                return result.stream()
+                    .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
+                    .count();
+            }
+        );
 
         assertEquals(relCount, 4);
     }
 
     @Test
-    public void testMaximum() {
+    void testMaximum() {
 
-        runQuery("MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree.maximum('Node', 'TYPE', 'cost', id(n), {writeProperty:'MAX', graph:'huge', write:true, stats:true}) " +
-                "YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount " +
-                "RETURN loadMillis, computeMillis, writeMillis, effectiveNodeCount", res -> {
+        runQueryWithRowConsumer(
+            "MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree.maximum('Node', 'TYPE', 'cost', id(n), {writeProperty:'MAX', graph:'huge', write:true, stats:true}) " +
+            "YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount " +
+            "RETURN loadMillis, computeMillis, writeMillis, effectiveNodeCount",
+            res -> {
 
-            System.out.println(res.get("loadMillis"));
-            System.out.println(res.get("computeMillis"));
-            System.out.println(res.get("writeMillis"));
-            System.out.println(res.get("effectiveNodeCount"));
+                System.out.println(res.get("loadMillis"));
+                System.out.println(res.get("computeMillis"));
+                System.out.println(res.get("writeMillis"));
+                System.out.println(res.get("effectiveNodeCount"));
 
-            assertNotEquals(-1L, res.getNumber("writeMillis").longValue());
-            assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
-        });
+                assertNotEquals(-1L, res.getNumber("writeMillis").longValue());
+                assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
+            }
+        );
 
-        final long relCount = runQuery("MATCH (a)-[:MAX]->(b) RETURN id(a) as a, id(b) as b")
-                .stream()
+        long relCount = runQuery( "MATCH (a)-[:MAX]->(b) RETURN id(a) as a, id(b) as b", result -> {
+            return result.stream()
                 .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
                 .count();
+        });
 
         assertEquals(relCount, 4);
     }

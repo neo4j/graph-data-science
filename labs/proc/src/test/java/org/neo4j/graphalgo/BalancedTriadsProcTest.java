@@ -70,11 +70,11 @@ class BalancedTriadsProcTest extends BaseProcTest {
 
     @Test
     void testHuge() {
-        runQuery("CALL algo.balancedTriads(" +
-                 "    'Node', 'TYPE', {" +
-                 "        weightProperty: 'w', graph: 'huge'" +
-                 "    }" +
-                 ") YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount",
+        runQueryWithRowConsumer("CALL algo.balancedTriads(" +
+                                "    'Node', 'TYPE', {" +
+                                "        weightProperty: 'w', graph: 'huge'" +
+                                "    }" +
+                                ") YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount",
                 row -> {
                     assertEquals(3L, row.getNumber("balancedTriadCount"));
                     assertEquals(3L, row.getNumber("unbalancedTriadCount"));
@@ -84,11 +84,11 @@ class BalancedTriadsProcTest extends BaseProcTest {
     @Test
     void testHugeStream() {
         final BalancedTriadsConsumer mock = mock(BalancedTriadsConsumer.class);
-        runQuery("CALL algo.balancedTriads.stream(" +
-                 "    'Node', 'TYPE', {" +
-                 "        weightProperty: 'w', graph: 'huge'" +
-                 "    }" +
-                 ") YIELD nodeId, balanced, unbalanced",
+        runQueryWithRowConsumer("CALL algo.balancedTriads.stream(" +
+                                "    'Node', 'TYPE', {" +
+                                "        weightProperty: 'w', graph: 'huge'" +
+                                "    }" +
+                                ") YIELD nodeId, balanced, unbalanced",
                 row -> {
                     final long nodeId = row.getNumber("nodeId").longValue();
                     final double balanced = row.getNumber("balanced").doubleValue();

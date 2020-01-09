@@ -96,7 +96,7 @@ class ShortestPathAStarProcTest extends BaseProcTest {
         );
         final List<String> actualNode = new ArrayList<>();
         final List<Double> actualDistance = new ArrayList<>();
-        runQuery(
+        runQueryWithRowConsumer(
             "MATCH (start:Node{name:'SINGAPORE'}), (end:Node{name:'CHIBA'}) " +
             "CALL algo.shortestPath.astar.stream(start, end, 'cost') " +
             "YIELD nodeId, cost RETURN nodeId, cost ", row -> {

@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -102,7 +103,7 @@ class ArticleRankProcTest extends BaseProcTest {
             "+---------------------------------+" + NL +
             "7 rows" + NL;
 
-        String actual = runQuery(query).resultAsString();
+        String actual = runQuery(query, Result::resultAsString);
         assertEquals(expected, actual);
     }
 
@@ -138,7 +139,7 @@ class ArticleRankProcTest extends BaseProcTest {
             "7 rows" + NL;
 
         runQuery(algoQuery);
-        String actual = runQuery(resultQuery).resultAsString();
+        String actual = runQuery(resultQuery, Result::resultAsString);
         assertEquals(expected, actual);
     }
 

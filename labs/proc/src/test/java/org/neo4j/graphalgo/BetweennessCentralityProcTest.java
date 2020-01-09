@@ -85,7 +85,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     @AllGraphNamesTest
     void testBetweennessStream(String graphName) {
         String query = "CALL algo.betweenness.stream('Node', 'TYPE', {graph: $graph}) YIELD nodeId, centrality";
-        runQuery(query, Collections.singletonMap("graph", graphName),
+        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
             row -> consumer.consume(
                 row.getNumber("nodeId").longValue(),
                 row.getNumber("centrality").doubleValue()
@@ -98,7 +98,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     @AllGraphNamesTest
     void testParallelBetweennessStream(String graphName) {
         String query = "CALL algo.betweenness.stream('Node', 'TYPE', {graph: $graph, concurrency: 4}) YIELD nodeId, centrality";
-        runQuery(query, Collections.singletonMap("graph", graphName),
+        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
             row -> consumer.consume(
                 row.getNumber("nodeId").intValue(),
                 row.getNumber("centrality").doubleValue()
@@ -113,7 +113,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     void testParallelBetweennessWrite(String graphName) {
         String query = "CALL algo.betweenness('','', {graph: $graph, concurrency:4, write:true, stats:true, writeProperty:'centrality'}) YIELD " +
                        "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQuery(query, Collections.singletonMap("graph", graphName),
+        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
             row -> {
                 assertEquals(85.0, (double) row.getNumber("sumCentrality"), 0.01);
                 assertEquals(25.0, (double) row.getNumber("maxCentrality"), 0.01);
@@ -129,7 +129,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     void testParallelBetweennessWriteWithDirection(String graphName) {
         String query = "CALL algo.betweenness('','', {graph: $graph, direction:'<>', concurrency:4, write:true, stats:true, writeProperty:'centrality'}) YIELD " +
                        "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQuery(query, Collections.singletonMap("graph", graphName),
+        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
             row -> {
                 assertEquals(35.0, (double) row.getNumber("sumCentrality"), 0.01);
                 assertEquals(30.0, (double) row.getNumber("maxCentrality"), 0.01);
@@ -145,7 +145,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     void testBetweennessWrite(String graphName) {
         String query = "CALL algo.betweenness('','', {graph: $graph, write:true, stats:true, writeProperty:'centrality'}) YIELD " +
                        "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQuery(query, Collections.singletonMap("graph", graphName),
+        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
             row -> {
                 assertEquals(85.0, (double) row.getNumber("sumCentrality"), 0.01);
                 assertEquals(25.0, (double) row.getNumber("maxCentrality"), 0.01);
@@ -161,7 +161,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     void testBetweennessWriteWithDirection(String graphName) {
         String query = "CALL algo.betweenness('','', {graph: $graph, direction:'both', write:true, stats:true, writeProperty:'centrality'}) " +
                        "YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQuery(query, Collections.singletonMap("graph", graphName),
+        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
             row -> {
                 assertEquals(35.0, (double) row.getNumber("sumCentrality"), 0.01);
                 assertEquals(30.0, (double) row.getNumber("maxCentrality"), 0.01);
@@ -178,7 +178,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
         String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', probability:1.0, write:true, " +
                        "stats:true, writeProperty:'centrality'}) YIELD " +
                        "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQuery(query, Collections.singletonMap("graph", graphName),
+        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
             row -> {
                 assertEquals(85.0, (double) row.getNumber("sumCentrality"), 0.1);
                 assertEquals(25.0, (double) row.getNumber("maxCentrality"), 0.1);
@@ -195,7 +195,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
         String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', write:true, stats:true, " +
                        "writeProperty:'centrality'}) YIELD " +
                        "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQuery(query, Collections.singletonMap("graph", graphName),
+        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
             row -> {
                 assertNotEquals(-1L, row.getNumber("writeMillis"));
                 assertNotEquals(-1L, row.getNumber("computeMillis"));
@@ -209,7 +209,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
         String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', probability:1.0, " +
                        "write:true, stats:true, writeProperty:'centrality'}) YIELD " +
                        "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQuery(query, Collections.singletonMap("graph", graphName),
+        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
             row -> {
                 assertNotEquals(-1L, row.getNumber("writeMillis"));
                 assertNotEquals(-1L, row.getNumber("computeMillis"));
@@ -222,7 +222,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     void testRABrandesStream(String graphName) {
         String query = "CALL algo.betweenness.sampled.stream('','', {graph: $graph, strategy:'random', probability:1.0, " +
                        "write:true, stats:true, writeProperty:'centrality'}) YIELD nodeId, centrality";
-        runQuery(query, Collections.singletonMap("graph", graphName),
+        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
             row -> {
                 consumer.consume(
                     row.getNumber("nodeId").intValue(),

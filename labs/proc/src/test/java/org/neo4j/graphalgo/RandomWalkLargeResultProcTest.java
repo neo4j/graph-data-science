@@ -26,6 +26,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.Iterators;
 
 import java.util.Collections;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -55,7 +56,10 @@ class RandomWalkLargeResultProcTest extends BaseProcTest {
 
     @Test
     void shouldHandleLargeResults() {
-        Result results = runQuery("CALL algo.randomWalk.stream(null, 100, 100000)");
-        assertEquals(100000,Iterators.count(results));
+        long resultsCount = runQuery(
+            "CALL algo.randomWalk.stream(null, 100, 100000)",
+            (Function<Result, Long>) Iterators::count
+        );
+        assertEquals(100000, resultsCount);
     }
 }

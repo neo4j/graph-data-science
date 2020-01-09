@@ -113,7 +113,7 @@ class StronglyConnectedComponentsTest extends BaseProcTest {
         setup(graphFactory);
         String cypher = "CALL algo.scc('', '', {write:true}) YIELD loadMillis, computeMillis, writeMillis";
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             long loadMillis = row.getNumber("loadMillis").longValue();
             long computeMillis = row.getNumber("computeMillis").longValue();
             long writeMillis = row.getNumber("writeMillis").longValue();
@@ -124,7 +124,7 @@ class StronglyConnectedComponentsTest extends BaseProcTest {
 
         String cypher2 = "MATCH (n) RETURN n.partition as c";
         final IntIntScatterMap testMap = new IntIntScatterMap();
-        runQuery(cypher2, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
+        runQueryWithRowConsumer(cypher2, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
 
         // 3 sets with 3 elements each
         assertEquals(3, testMap.size());
@@ -140,7 +140,7 @@ class StronglyConnectedComponentsTest extends BaseProcTest {
 
         String cypher = "CALL algo.scc.stream() YIELD nodeId, partition";
 
-        runQuery(cypher, row -> testMap.addTo(row.getNumber("partition").intValue(), 1));
+        runQueryWithRowConsumer(cypher, row -> testMap.addTo(row.getNumber("partition").intValue(), 1));
 
         // 3 sets with 3 elements each
         assertEquals(3, testMap.size());
@@ -176,7 +176,7 @@ class StronglyConnectedComponentsTest extends BaseProcTest {
 
     private long getMappedNodeId(String name) {
         final Node[] node = new Node[1];
-        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> {
+        runQueryWithRowConsumer("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> {
             node[0] = row.getNode("n");
         });
         return graph.toMappedNodeId(node[0].getId());

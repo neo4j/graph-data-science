@@ -64,13 +64,13 @@ class YensKShortestPathsRelationshipCostsProcTest extends BaseProcTest {
                 "CALL algo.kShortestPaths(c, a, 1, 'cost') " +
                 "YIELD resultCount RETURN resultCount";
 
-        runQuery(cypher, row -> assertEquals(1, row.getNumber("resultCount").intValue()));
+        runQueryWithRowConsumer(cypher, row -> assertEquals(1, row.getNumber("resultCount").intValue()));
 
         final String shortestPathsQuery = "MATCH p=(:Node {name: $one})-[r:PATH_0*]->(:Node {name: $two})\n" +
                 "UNWIND relationships(p) AS pair\n" +
                 "return sum(pair.weight) AS distance";
 
-        runQuery(
+        runQueryWithRowConsumer(
             shortestPathsQuery,
             MapUtil.map("one", "c", "two", "a"),
             row -> assertEquals(5.0, row.getNumber("distance").doubleValue(), 0.01)

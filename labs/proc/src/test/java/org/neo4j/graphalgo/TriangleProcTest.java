@@ -110,7 +110,7 @@ class TriangleProcTest extends BaseProcTest {
     void testTriangleCountWriteCypher() {
         final String cypher = "CALL algo.triangleCount('Node', '', {concurrency:4, write:true}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount";
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             final long loadMillis = row.getNumber("loadMillis").longValue();
             final long computeMillis = row.getNumber("computeMillis").longValue();
             final long writeMillis = row.getNumber("writeMillis").longValue();
@@ -124,7 +124,7 @@ class TriangleProcTest extends BaseProcTest {
         });
 
         final String request = "MATCH (n) WHERE exists(n.triangles) RETURN n.triangles as t";
-        runQuery(request, row -> {
+        runQueryWithRowConsumer(request, row -> {
             final int triangles = row.getNumber("t").intValue();
             assertEquals(1, triangles);
         });
@@ -134,7 +134,7 @@ class TriangleProcTest extends BaseProcTest {
     void testTriangleCountStream() {
         final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
         final String cypher = "CALL algo.triangleCount.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles";
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             final long nodeId = row.getNumber("nodeId").longValue();
             final long triangles = row.getNumber("triangles").longValue();
             mock.consume(nodeId, triangles);
@@ -147,7 +147,7 @@ class TriangleProcTest extends BaseProcTest {
         HashSet<Integer> sums = new HashSet<>();
         final TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
         final String cypher = "CALL algo.triangle.stream('Node', '', {concurrency:4}) YIELD nodeA, nodeB, nodeC";
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             final long nodeA = row.getNumber("nodeA").longValue();
             final long nodeB = row.getNumber("nodeB").longValue();
             final long nodeC = row.getNumber("nodeC").longValue();

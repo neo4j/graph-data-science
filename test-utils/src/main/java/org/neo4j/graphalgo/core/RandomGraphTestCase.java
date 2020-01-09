@@ -24,15 +24,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 @ExtendWith(RandomGraphTestCase.TestWatcherExtension.class)
 public abstract class RandomGraphTestCase {
@@ -91,9 +89,10 @@ public abstract class RandomGraphTestCase {
 
         final GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
         for (String cypher : cyphers) {
-            try (Transaction tx = db.beginTx()) {
-                runQuery(db, cypher);
-                tx.success();
+            try {
+                QueryRunner.runInTransaction(db, () -> {
+                    db.execute(cypher);
+                });
             } catch (Exception e) {
                 markFailure();
                 throw e;

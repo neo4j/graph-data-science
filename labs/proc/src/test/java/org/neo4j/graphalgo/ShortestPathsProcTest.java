@@ -106,7 +106,7 @@ final class ShortestPathsProcTest extends BaseProcTest {
                               "WITH n CALL algo.shortestPaths.stream(n, 'cost',{graph:'" + graphName + "'}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
@@ -130,7 +130,7 @@ final class ShortestPathsProcTest extends BaseProcTest {
                                    "WITH n CALL algo.shortestPaths(n, 'cost', {write:true, writeProperty:'sp',graph:'" + graphName + "'}) " +
                                    "YIELD nodeCount, loadMillis, evalMillis, writeMillis RETURN nodeCount, loadMillis, evalMillis, writeMillis";
 
-        runQuery(matchCypher, row -> {
+        runQueryWithRowConsumer(matchCypher, row -> {
             System.out.println("loadMillis = " + row.getNumber("loadMillis").longValue());
             System.out.println("evalMillis = " + row.getNumber("evalMillis").longValue());
             long writeMillis = row.getNumber("writeMillis").longValue();
@@ -143,7 +143,7 @@ final class ShortestPathsProcTest extends BaseProcTest {
 
         final String testCypher = "MATCH(n:Node) WHERE exists(n.sp) WITH n RETURN id(n) as id, n.sp as sp";
 
-        runQuery(testCypher, row -> {
+        runQueryWithRowConsumer(testCypher, row -> {
             double sp = row.getNumber("sp").doubleValue();
             consumer.accept(sp);
         });
@@ -161,7 +161,7 @@ final class ShortestPathsProcTest extends BaseProcTest {
                               "WITH n CALL algo.shortestPaths.stream(n, 'cost', {graph:'" + graphName + "'}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
             System.out.printf(

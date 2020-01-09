@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,7 +84,7 @@ class WccDocTest extends BaseProcTest {
                           "+-------------------------+\n" +
                           "6 rows\n";
 
-        assertEquals(expected, runQuery(query).resultAsString());
+        assertEquals(expected, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -103,7 +104,7 @@ class WccDocTest extends BaseProcTest {
                           "+--------------------------------------------------------+\n" +
                           "1 row\n";
 
-        assertEquals(expected, runQuery(query).resultAsString());
+        assertEquals(expected, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -133,7 +134,7 @@ class WccDocTest extends BaseProcTest {
                           "+-------------------------+\n" +
                           "6 rows\n";
 
-        assertEquals(expected, runQuery(query).resultAsString());
+        assertEquals(expected, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -156,7 +157,7 @@ class WccDocTest extends BaseProcTest {
                           "+--------------------------------------------------------+\n" +
                           "1 row\n";
 
-        assertEquals(expected, runQuery(query).resultAsString());
+        assertEquals(expected, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -179,7 +180,7 @@ class WccDocTest extends BaseProcTest {
                           "+--------------------------------------------------------+\n" +
                           "1 row\n";
 
-        assertEquals(expected, runQuery(initQuery).resultAsString());
+        assertEquals(expected, runQuery(initQuery, Result::resultAsString));
 
         // create new node and relationship
         String dataQuery = "MATCH (b:User {name: 'Bridget'}) " +
@@ -215,7 +216,7 @@ class WccDocTest extends BaseProcTest {
                    "+-------------------------+\n" +
                    "7 rows\n";
 
-        assertEquals(expected, runQuery(query).resultAsString());
+        assertEquals(expected, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -238,12 +239,12 @@ class WccDocTest extends BaseProcTest {
                           "+--------------------------------------------------------+\n" +
                           "1 row\n";
 
-        assertEquals(expected, runQuery(initQuery).resultAsString());
+        assertEquals(expected, runQuery(initQuery, Result::resultAsString));
 
         String dataQuery = "MATCH (b:User {name: 'Bridget'}) " +
                            "CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})";
 
-        System.out.println(runQuery(dataQuery).resultAsString());
+        System.out.println(runQuery(dataQuery, Result::resultAsString));
 
         // write with seeding
         String query = GdsCypher.call()
@@ -268,7 +269,7 @@ class WccDocTest extends BaseProcTest {
                    "+--------------------------------------------------------+\n" +
                    "1 row\n";
 
-        assertEquals(expected, runQuery(query).resultAsString());
+        assertEquals(expected, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -297,7 +298,7 @@ class WccDocTest extends BaseProcTest {
                           "+-------------------------+\n" +
                           "6 rows\n";
 
-        assertEquals(expected, runQuery(query).resultAsString());
+        assertEquals(expected, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -322,6 +323,6 @@ class WccDocTest extends BaseProcTest {
                           "+-------------------------+\n" +
                           "6 rows\n";
 
-        assertEquals(expected, runQuery(query).resultAsString());
+        assertEquals(expected, runQuery(query, Result::resultAsString));
     }
 }

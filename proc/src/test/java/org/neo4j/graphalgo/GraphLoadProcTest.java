@@ -41,6 +41,7 @@ import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -131,7 +132,7 @@ class GraphLoadProcTest extends BaseProcTest {
                                "    }" +
                                ")";
 
-        runQuery(query, MapUtil.map("graphType", graphType, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
+        runQueryWithRowConsumer(query, MapUtil.map("graphType", graphType, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
                 row -> {
                     assertEquals(12, row.getNumber("nodes").intValue());
                     assertEquals(10, row.getNumber("relationships").intValue());
@@ -191,7 +192,7 @@ class GraphLoadProcTest extends BaseProcTest {
         }
 
         try {
-            runQuery(query, MapUtil.map("graphType", graphType, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
+            runQueryWithRowConsumer(query, MapUtil.map("graphType", graphType, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
                     row -> {
                         assertEquals(12, row.getNumber("nodes").intValue());
                         assertEquals(10, row.getNumber("relationships").intValue());
@@ -242,7 +243,7 @@ class GraphLoadProcTest extends BaseProcTest {
             loadQuery = String.format(loadQueryTemplate, "Node", "", graphType);
         }
 
-        runQuery(testLocalDb, loadQuery, row -> {
+        runQueryWithRowConsumer(testLocalDb, loadQuery, row -> {
             Map<String, Object> nodeProperties = (Map<String, Object>) row.get("nodeProperties");
             assertEquals(2, nodeProperties.size());
 
@@ -283,7 +284,7 @@ class GraphLoadProcTest extends BaseProcTest {
                        "    }" +
                        ")";
 
-        runQuery(
+        runQueryWithRowConsumer(
             query,
             MapUtil.map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery, "graphType", graphType),
             row -> {
@@ -342,7 +343,7 @@ class GraphLoadProcTest extends BaseProcTest {
                            "    }" +
                            ")";
 
-        runQuery(testLocalDb, loadQuery, row -> {
+        runQueryWithRowConsumer(testLocalDb, loadQuery, row -> {
             Map<String, Object> relProperties = (Map<String, Object>) row.get("relationshipProperties");
             assertEquals(3, relProperties.size());
 
@@ -421,7 +422,7 @@ class GraphLoadProcTest extends BaseProcTest {
                        "        graph: $graph" +
                        "    }" +
                        ") YIELD bytesMin, bytesMax";
-        runQuery(query, singletonMap("graph", "huge"),
+        runQueryWithRowConsumer(query, singletonMap("graph", "huge"),
                 row -> {
                     assertEquals(303520, row.getNumber("bytesMin").longValue());
                     assertEquals(303520, row.getNumber("bytesMax").longValue());
@@ -437,7 +438,7 @@ class GraphLoadProcTest extends BaseProcTest {
                        "    }" +
                        ") YIELD bytesMin, bytesMax";
 
-        runQuery(query, singletonMap("graph", "huge"),
+        runQueryWithRowConsumer(query, singletonMap("graph", "huge"),
                 row -> {
                     assertEquals(573952, row.getNumber("bytesMin").longValue());
                     assertEquals(573952, row.getNumber("bytesMax").longValue());
@@ -463,7 +464,7 @@ class GraphLoadProcTest extends BaseProcTest {
                            "        writeProperty: 'writingOnLoadedGraph'" +
                            "    }" +
                            ") YIELD nodePropertiesWritten";
-        runQuery(algoQuery,
+        runQueryWithRowConsumer(algoQuery,
                 row -> assertEquals(12, row.getNumber("nodePropertiesWritten").intValue()));
     }
 
@@ -486,9 +487,9 @@ class GraphLoadProcTest extends BaseProcTest {
                            "        writeProperty: 'multiUseLoadedGraph'" +
                            "    }" +
                            ") YIELD nodePropertiesWritten";
-        runQuery(algoQuery,
+        runQueryWithRowConsumer(algoQuery,
                 row -> assertEquals(12, row.getNumber("nodePropertiesWritten").intValue()));
-        runQuery(algoQuery,
+        runQueryWithRowConsumer(algoQuery,
                 row -> assertEquals(12, row.getNumber("nodePropertiesWritten").intValue()));
     }
 
@@ -498,7 +499,7 @@ class GraphLoadProcTest extends BaseProcTest {
                        "    'foo', {}, 'X | Y'" +
                        ")";
 
-        runQuery(
+        runQueryWithRowConsumer(
                 query,
                 row -> {
                     assertEquals(12, row.getNumber("nodes").intValue());
@@ -512,13 +513,13 @@ class GraphLoadProcTest extends BaseProcTest {
                            "        relationshipProjection: $relType, writeProperty: 'componentId'" +
                            "    }" +
                            ")";
-        runQuery(algoQuery, singletonMap("relType", Arrays.asList("X", "Y")),
+        runQueryWithRowConsumer(algoQuery, singletonMap("relType", Arrays.asList("X", "Y")),
                 row -> assertEquals(4, row.getNumber("componentCount").intValue()));
 
-        runQuery(algoQuery, singletonMap("relType", Arrays.asList("X")),
+        runQueryWithRowConsumer(algoQuery, singletonMap("relType", Arrays.asList("X")),
                 row -> assertEquals(6, row.getNumber("componentCount").intValue()));
 
-        runQuery(algoQuery, singletonMap("relType", Arrays.asList("Y")),
+        runQueryWithRowConsumer(algoQuery, singletonMap("relType", Arrays.asList("Y")),
                 row -> assertEquals(10, row.getNumber("componentCount").intValue()));
     }
 
@@ -537,9 +538,13 @@ class GraphLoadProcTest extends BaseProcTest {
 
         Map<String, Object> params = singletonMap("graph", graph);
         // First load succeeds
-        assertFalse(runQuery(query, params).<Boolean>columnAs("loaded").next());
+        Boolean loaded = runQuery(query, params, result -> {
+            return result.<Boolean>columnAs("loaded").next();
+        });
+        assertFalse(loaded);
         // Second load throws exception
-        QueryExecutionException exGraphAlreadyLoaded = assertThrows(QueryExecutionException.class, () -> runQuery(query, params).next());
+        QueryExecutionException exGraphAlreadyLoaded = assertThrows(QueryExecutionException.class, () -> runQuery(query, params,
+            Result::next));
         Throwable rootCause = ExceptionUtil.rootCause(exGraphAlreadyLoaded);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
         assertThat(rootCause.getMessage(), equalTo("A graph with name 'foo' is already loaded."));
@@ -566,7 +571,7 @@ class GraphLoadProcTest extends BaseProcTest {
 
         runQuery(query, MapUtil.map("graph", graphImpl, "direction", loadDirection));
 
-        runQuery(
+        runQueryWithRowConsumer(
                 "CALL algo.graph.info('foo', $computeDegreeDistr)",
                 Collections.singletonMap("computeDegreeDistr", computeDegreeDistribution),
                 resultRow -> {
@@ -588,21 +593,21 @@ class GraphLoadProcTest extends BaseProcTest {
                 : String.format(queryTemplate, "null", "null");
         runQuery(query, singletonMap("graph", graph));
 
-        runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(10, row.getNumber("relationships").intValue());
             assertEquals(graph.equals("cypher") ? "huge" : graph, row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("exists"));
         });
-        runQuery("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(10, row.getNumber("relationships").intValue());
             assertEquals(graph.equals("cypher") ? "huge" : graph, row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("removed"));
         });
-        runQuery("CALL algo.graph.info($name)", singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer("CALL algo.graph.info($name)", singletonMap("name", "foo"), row -> {
             assertEquals("foo", row.getString("name"));
             assertFalse(row.getBoolean("exists"));
         });
@@ -617,21 +622,21 @@ class GraphLoadProcTest extends BaseProcTest {
                        ")";
         runQuery(query);
 
-        runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(8, row.getNumber("relationships").intValue());
             assertEquals("huge", row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("exists"));
         });
-        runQuery("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(8, row.getNumber("relationships").intValue());
             assertEquals("huge", row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("removed"));
         });
-        runQuery("CALL algo.graph.info($name)", singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer("CALL algo.graph.info($name)", singletonMap("name", "foo"), row -> {
             assertEquals("foo", row.getString("name"));
             assertFalse(row.getBoolean("exists"));
         });
@@ -639,7 +644,7 @@ class GraphLoadProcTest extends BaseProcTest {
 
     @Test
     void removeMissingGraphIsNoOp() {
-        runQuery("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
             assertEquals(0, row.getNumber("nodes").intValue());
             assertEquals(0, row.getNumber("relationships").intValue());
             assertNull(row.getString("type"));
@@ -662,7 +667,7 @@ class GraphLoadProcTest extends BaseProcTest {
                 : String.format(queryTemplate, "null", "null");
         runQuery(query, singletonMap("graph", graph));
 
-        runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(5, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0.8333333, row.getNumber("mean").doubleValue(), 1e-4);
@@ -674,7 +679,7 @@ class GraphLoadProcTest extends BaseProcTest {
             assertEquals(5, row.getNumber("p999").intValue());
         });
 
-        runQuery("CALL algo.graph.info($name, false)", singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer("CALL algo.graph.info($name, false)", singletonMap("name", "foo"), row -> {
             assertEquals(0, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0, row.getNumber("mean").intValue());
@@ -686,7 +691,7 @@ class GraphLoadProcTest extends BaseProcTest {
             assertEquals(0, row.getNumber("p999").intValue());
         });
 
-        runQuery("CALL algo.graph.info($name, {})", singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer("CALL algo.graph.info($name, {})", singletonMap("name", "foo"), row -> {
             assertEquals(0, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0, row.getNumber("mean").intValue());
@@ -698,7 +703,7 @@ class GraphLoadProcTest extends BaseProcTest {
             assertEquals(0, row.getNumber("p999").intValue());
         });
 
-        runQuery("CALL algo.graph.info($name, null)", singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer("CALL algo.graph.info($name, null)", singletonMap("name", "foo"), row -> {
             assertEquals(0, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0, row.getNumber("mean").intValue());
@@ -730,7 +735,7 @@ class GraphLoadProcTest extends BaseProcTest {
         String infoQuery = graph.equals("cypher")
                 ? "CALL algo.graph.info($name, {direction:'OUT'})"
                 : "CALL algo.graph.info($name, {direction:'IN'})";
-        runQuery(infoQuery, singletonMap("name", "foo"), row -> {
+        runQueryWithRowConsumer(infoQuery, singletonMap("name", "foo"), row -> {
             assertEquals(1, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0.8333333, row.getNumber("mean").doubleValue(), 1e-4);
@@ -761,7 +766,7 @@ class GraphLoadProcTest extends BaseProcTest {
                 MapUtil.map("name", "foo", "type", "huge", "direction", "OUTGOING")
         );
 
-        parameters.forEach((parameter) -> runQuery(loadQuery, parameter, resultRow -> {
+        parameters.forEach((parameter) -> runQueryWithRowConsumer(loadQuery, parameter, resultRow -> {
                     parameter.put("nodes", resultRow.getNumber("nodes"));
                     parameter.put("relationships", resultRow.getNumber("relationships"));
                 })
@@ -769,7 +774,7 @@ class GraphLoadProcTest extends BaseProcTest {
 
         List<Map<String, Object>> actual = new ArrayList<>();
 
-        runQuery("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction", resultRow -> {
+        runQueryWithRowConsumer("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction", resultRow -> {
             Map<String, Object> row = new HashMap<>();
             row.put("name", resultRow.getString("name"));
             row.put("type", resultRow.getString("type"));
@@ -795,8 +800,8 @@ class GraphLoadProcTest extends BaseProcTest {
 
         String listQuery = "CALL algo.graph.list() YIELD name, nodes, relationships, type, direction";
 
-        runQuery("alice", listQuery, resultRow -> Assertions.assertEquals("aliceGraph", resultRow.getString("name")));
-        runQuery("bob", listQuery, resultRow -> Assertions.assertEquals("bobGraph", resultRow.getString("name")));
+        runQueryWithRowConsumer("alice", listQuery, resultRow -> Assertions.assertEquals("aliceGraph", resultRow.getString("name")));
+        runQueryWithRowConsumer("bob", listQuery, resultRow -> Assertions.assertEquals("bobGraph", resultRow.getString("name")));
     }
 
     @ParameterizedTest
@@ -813,7 +818,7 @@ class GraphLoadProcTest extends BaseProcTest {
                 "    graph: 'cypher'" +
                 "  })",
                 nodeQuery, relQuery);
-        QueryExecutionException ex = assertThrows(QueryExecutionException.class, () -> runQuery(query).hasNext());
+        QueryExecutionException ex = assertThrows(QueryExecutionException.class, () -> runQuery(query, Result::hasNext));
         Throwable root = ExceptionUtil.rootCause(ex);
         assertTrue(root instanceof IllegalArgumentException);
         assertThat(root.getMessage(), containsString("Query must be read only. Query: "));

@@ -21,9 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.graphalgo.compat.MapUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -62,7 +60,7 @@ class StronglyConnectedComponentsProcTest extends BaseProcTest {
 
     @AllGraphNamesTest
     void testScc(String graphName) {
-        runQuery(
+        runQueryWithRowConsumer(
             "CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "'}) " +
             "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty",
             row -> {
@@ -79,7 +77,7 @@ class StronglyConnectedComponentsProcTest extends BaseProcTest {
 
     @AllGraphNamesTest
     void explicitWriteProperty(String graphName) {
-        runQuery(
+        runQueryWithRowConsumer(
             "CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "', writeProperty: 'scc'}) " +
             "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty",
             row -> {

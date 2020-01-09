@@ -136,25 +136,27 @@ class EuclideanProcTest extends BaseProcTest {
         // b - c: sqrt(26) = 5.1
     }
 
-
     @Test
     void euclideanSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
-        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 1, "topK", 0), "missingValue", 0));
-        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 2, "topK", 0), "missingValue", 0));
-        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0));
-        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 8, "topK", 0), "missingValue", 0));
-        int count = 0;
-        while (result1.hasNext()) {
-            Map<String, Object> row1 = result1.next();
-            assertEquals(row1, result2.next(), row1.toString());
-            assertEquals(row1, result4.next(), row1.toString());
-            assertEquals(row1, result8.next(), row1.toString());
-            count++;
+        try(
+            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 1, "topK", 0), "missingValue", 0));
+            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 2, "topK", 0), "missingValue", 0));
+            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0));
+            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 8, "topK", 0), "missingValue", 0))
+        ) {
+            int count = 0;
+            while (result1.hasNext()) {
+                Map<String, Object> row1 = result1.next();
+                assertEquals(row1, result2.next(), row1.toString());
+                assertEquals(row1, result4.next(), row1.toString());
+                assertEquals(row1, result8.next(), row1.toString());
+                count++;
+            }
+            int people = size / 10;
+            assertEquals((people * people - people) / 2, count);
         }
-        int people = size / 10;
-        assertEquals((people * people - people) / 2, count);
     }
 
     @Test
@@ -162,28 +164,34 @@ class EuclideanProcTest extends BaseProcTest {
         int size = 333;
         buildRandomDB(size);
 
-        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0));
-        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0));
-        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0));
-        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0));
-        int count = 0;
-        while (result1.hasNext()) {
-            Map<String, Object> row1 = result1.next();
-            assertEquals(row1, result2.next(), row1.toString());
-            assertEquals(row1, result4.next(), row1.toString());
-            assertEquals(row1, result8.next(), row1.toString());
-            count++;
+        try(
+            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0));
+            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0));
+            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0));
+            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0))
+        ) {
+            int count = 0;
+            while (result1.hasNext()) {
+                Map<String, Object> row1 = result1.next();
+                assertEquals(row1, result2.next(), row1.toString());
+                assertEquals(row1, result4.next(), row1.toString());
+                assertEquals(row1, result8.next(), row1.toString());
+                count++;
+            }
+            int people = size / 10;
+            assertEquals(people, count);
         }
-        int people = size / 10;
-        assertEquals(people, count);
     }
 
     @Test
     void topNeuclideanStreamTest() {
-        Result results = runQuery(STATEMENT_STREAM, map("config", map("top", 2, "topK", 0), "missingValue", 0));
-        assert02(results.next());
-        assert13(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, map("config", map("top", 2, "topK", 0), "missingValue", 0),
+            results -> {
+                assert02(results.next());
+                assert13(results.next());
+                assertFalse(results.hasNext());
+            }
+        );
     }
 
     @Test
@@ -201,15 +209,18 @@ class EuclideanProcTest extends BaseProcTest {
         // c2 - d3: sqrt(16) = 4
         // System.out.println(runQuery(query).resultAsString());
 
-        Result results = runQuery(STATEMENT_STREAM, map("config", map("concurrency", 1, "topK", 0), "missingValue", 0));
-        assertTrue(results.hasNext());
-        assert01(results.next());
-        assert02(results.next());
-        assert03(results.next());
-        assert12(results.next());
-        assert13(results.next());
-        assert23(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, map("config", map("concurrency", 1, "topK", 0), "missingValue", 0),
+            results -> {
+                assertTrue(results.hasNext());
+                assert01(results.next());
+                assert02(results.next());
+                assert03(results.next());
+                assert12(results.next());
+                assert13(results.next());
+                assert23(results.next());
+                assertFalse(results.hasNext());
+            }
+        );
     }
 
     @Test
@@ -219,10 +230,13 @@ class EuclideanProcTest extends BaseProcTest {
             "sourceIds", Collections.singletonList(0L),
             "targetIds", Collections.singletonList(1L)
         );
-        Result results = runQuery(STATEMENT_STREAM, map("config", config, "missingValue", 0));
-        assertTrue(results.hasNext());
-        assert01(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, map("config", config, "missingValue", 0),
+            results -> {
+                assertTrue(results.hasNext());
+                assert01(results.next());
+                assertFalse(results.hasNext());
+            }
+        );
     }
 
     @Test
@@ -247,42 +261,49 @@ class EuclideanProcTest extends BaseProcTest {
         Map<String, Object> params = map(
             "config", map("concurrency", 1, "graph", "cypher", "skipValue", Double.NaN, "data", query, "topK", 0)
         );
-        Result results = runQuery(STATEMENT_CYPHER_STREAM, params);
-        assertTrue(results.hasNext());
-        assert01(results.next());
-        assert02(results.next());
-        assert03(results.next());
-        assert12(results.next());
-        assert13(results.next());
-        assert23(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_CYPHER_STREAM, params,
+            results -> {
+                assertTrue(results.hasNext());
+                assert01(results.next());
+                assert02(results.next());
+                assert03(results.next());
+                assert12(results.next());
+                assert13(results.next());
+                assert23(results.next());
+                assertFalse(results.hasNext());
+            }
+        );
     }
 
     @Test
     void eucideanSkipStreamTest() {
-        Result results = runQuery(
+        runQuery(
             STATEMENT_STREAM,
-            map("config", map("concurrency", 1, "skipValue", Double.NaN, "topK", 0), "missingValue", Double.NaN)
+            map("config", map("concurrency", 1, "skipValue", Double.NaN, "topK", 0), "missingValue", Double.NaN),
+            results -> {
+                assertTrue(results.hasNext());
+                assert01Skip(results.next());
+                assert02Skip(results.next());
+                assert12Skip(results.next());
+                assertFalse(results.hasNext());
+            }
         );
-
-        assertTrue(results.hasNext());
-        assert01Skip(results.next());
-        assert02Skip(results.next());
-        assert12Skip(results.next());
-        assertFalse(results.hasNext());
     }
 
     @Test
     void topKEuclideanStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "topK", 1), "missingValue", 0);
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertTrue(results.hasNext());
-        assert02(results.next());
-        assert13(results.next());
-        assert02(flip(results.next()));
-        assert13(flip(results.next()));
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params,
+            results -> {
+                assertTrue(results.hasNext());
+                assert02(results.next());
+                assert13(results.next());
+                assert02(flip(results.next()));
+                assert13(flip(results.next()));
+                assertFalse(results.hasNext());
+            }
+        );
     }
 
     @Test
@@ -295,16 +316,18 @@ class EuclideanProcTest extends BaseProcTest {
         );
         Map<String, Object> params = map("config", config, "missingValue", 0);
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertTrue(results.hasNext());
-        assert02(results.next());
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertTrue(results.hasNext());
+            assert02(results.next());
+            assertFalse(results.hasNext());
+        });
     }
 
     private Map<String, Object> flip(Map<String, Object> row) {
         return map("similarity", row.get("similarity"), "intersection", row.get("intersection"),
             "item1", row.get("item2"), "count1", row.get("count2"),
-            "item2", row.get("item1"), "count2", row.get("count1"));
+            "item2", row.get("item1"), "count2", row.get("count1")
+        );
     }
 
     private void assertSameSource(Result results, int count, long source) {
@@ -322,13 +345,19 @@ class EuclideanProcTest extends BaseProcTest {
 
     @Test
     void topK4euclideanStreamTest() {
-        Map<String, Object> params = map("config", map("topK", 4, "concurrency", 4, "similarityCutoff", -0.1), "missingValue", 0);
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertSameSource(results, 3, 0L);
-        assertSameSource(results, 3, 1L);
-        assertSameSource(results, 3, 2L);
-        assertSameSource(results, 3, 3L);
-        assertFalse(results.hasNext());
+        Map<String, Object> params = map(
+            "config",
+            map("topK", 4, "concurrency", 4, "similarityCutoff", -0.1),
+            "missingValue",
+            0
+        );
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertSameSource(results, 3, 0L);
+            assertSameSource(results, 3, 1L);
+            assertSameSource(results, 3, 2L);
+            assertSameSource(results, 3, 3L);
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
@@ -341,19 +370,20 @@ class EuclideanProcTest extends BaseProcTest {
         // c2 - d3: sqrt(16) = 4
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3), "missingValue", 0);
 
-        Result results = runQuery(STATEMENT_STREAM, params);
-        assertSameSource(results, 3, 0L);
-        assertSameSource(results, 3, 1L);
-        assertSameSource(results, 3, 2L);
-        assertSameSource(results, 3, 3L);
-        assertFalse(results.hasNext());
+        runQuery(STATEMENT_STREAM, params, results -> {
+            assertSameSource(results, 3, 0L);
+            assertSameSource(results, 3, 1L);
+            assertSameSource(results, 3, 2L);
+            assertSameSource(results, 3, 3L);
+            assertFalse(results.hasNext());
+        });
     }
 
     @Test
     void simpleEuclideanTest() {
         Map<String, Object> params = map("config", map(), "missingValue", 0);
 
-        Map<String, Object> row = runQuery(STATEMENT, params).next();
+        Map<String, Object> row = runQuery(STATEMENT, params, Result::next);
         assertEquals((double) row.get("p25"), 3.16, 0.01);
         assertEquals((double) row.get("p50"), 4.00, 0.01);
         assertEquals((double) row.get("p75"), 5.10, 0.01);
@@ -368,7 +398,7 @@ class EuclideanProcTest extends BaseProcTest {
 
         Map<String, Object> params = map("config", map());
 
-        Map<String, Object> row = runQuery(EMBEDDING_STATEMENT, params).next();
+        Map<String, Object> row = runQuery(EMBEDDING_STATEMENT, params, Result::next);
         assertEquals((double) row.get("p25"), 3.16, 0.01);
         assertEquals((double) row.get("p50"), 4.00, 0.01);
         assertEquals((double) row.get("p75"), 5.10, 0.01);
@@ -379,7 +409,12 @@ class EuclideanProcTest extends BaseProcTest {
 
     @Test
     void simpleEuclideanWriteTest() {
-        Map<String, Object> params = map("config", map("write", true, "similarityCutoff", 4.0, "concurrency", 1, "topK", 0), "missingValue", 0);
+        Map<String, Object> params = map(
+            "config",
+            map("write", true, "similarityCutoff", 4.0, "concurrency", 1, "topK", 0),
+            "missingValue",
+            0
+        );
 
         runQuery(STATEMENT, params);
 
@@ -387,63 +422,63 @@ class EuclideanProcTest extends BaseProcTest {
                                         "RETURN a.name AS node1, b.name AS node2, similar.score AS score " +
                                         "ORDER BY id(a), id(b)";
 
-        Result result = runQuery(checkSimilaritiesQuery);
+        runQuery(checkSimilaritiesQuery, result -> {
+            // a0 - b1: sqrt(26) = 5.1
+            // a0 - c2: sqrt(6) = 2.5
+            // a0 - d3: sqrt(1+4+25) = 5.5
+            // b1 - c2: sqrt(26) = 5.1
+            // b1 - d3: sqrt(10) =  3.2
+            // c2 - d3: sqrt(16) = 4
 
-        // a0 - b1: sqrt(26) = 5.1
-        // a0 - c2: sqrt(6) = 2.5
-        // a0 - d3: sqrt(1+4+25) = 5.5
-        // b1 - c2: sqrt(26) = 5.1
-        // b1 - d3: sqrt(10) =  3.2
-        // c2 - d3: sqrt(16) = 4
+            assertTrue(result.hasNext());
+            Map<String, Object> row = result.next();
+            assertEquals(row.get("node1"), "Alice");
+            assertEquals(row.get("node2"), "Charlie");
+            assertEquals((double) row.get("score"), 2.45, 0.01);
 
-        assertTrue(result.hasNext());
-        Map<String, Object> row = result.next();
-        assertEquals(row.get("node1"), "Alice");
-        assertEquals(row.get("node2"), "Charlie");
-        assertEquals((double) row.get("score"), 2.45, 0.01);
+            assertTrue(result.hasNext());
+            row = result.next();
+            assertEquals(row.get("node1"), "Bob");
+            assertEquals(row.get("node2"), "Dana");
+            assertEquals((double) row.get("score"), 3.16, 0.01);
 
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Bob");
-        assertEquals(row.get("node2"), "Dana");
-        assertEquals((double) row.get("score"), 3.16, 0.01);
-
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Charlie");
-        assertEquals(row.get("node2"), "Alice");
-        assertEquals((double) row.get("score"), 2.45, 0.01);
+            assertTrue(result.hasNext());
+            row = result.next();
+            assertEquals(row.get("node1"), "Charlie");
+            assertEquals(row.get("node2"), "Alice");
+            assertEquals((double) row.get("score"), 2.45, 0.01);
 
 
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Charlie");
-        assertEquals(row.get("node2"), "Dana");
-        assertEquals((double) row.get("score"), 4.0, 0.01);
+            assertTrue(result.hasNext());
+            row = result.next();
+            assertEquals(row.get("node1"), "Charlie");
+            assertEquals(row.get("node2"), "Dana");
+            assertEquals((double) row.get("score"), 4.0, 0.01);
 
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Dana");
-        assertEquals(row.get("node2"), "Bob");
-        assertEquals((double) row.get("score"), 3.16, 0.01);
+            assertTrue(result.hasNext());
+            row = result.next();
+            assertEquals(row.get("node1"), "Dana");
+            assertEquals(row.get("node2"), "Bob");
+            assertEquals((double) row.get("score"), 3.16, 0.01);
 
-        assertTrue(result.hasNext());
-        row = result.next();
-        assertEquals(row.get("node1"), "Dana");
-        assertEquals(row.get("node2"), "Charlie");
-        assertEquals((double) row.get("score"), 4.0, 0.01);
+            assertTrue(result.hasNext());
+            row = result.next();
+            assertEquals(row.get("node1"), "Dana");
+            assertEquals(row.get("node2"), "Charlie");
+            assertEquals((double) row.get("score"), 4.0, 0.01);
 
-        assertFalse(result.hasNext());
+            assertFalse(result.hasNext());
+        });
     }
 
     @Test
     void dontComputeComputationsByDefault() {
         Map<String, Object> params = map("config", map(
             "write", true,
-            "similarityCutoff", 0.1));
+            "similarityCutoff", 0.1
+        ));
 
-        Result writeResult = runQuery(STATEMENT, params);
-        Map<String, Object> writeRow = writeResult.next();
+        Map<String, Object> writeRow = runQuery(STATEMENT, params, Result::next);
         assertEquals(-1L, (long) writeRow.get("computations"));
     }
 
@@ -452,10 +487,10 @@ class EuclideanProcTest extends BaseProcTest {
         Map<String, Object> params = map("config", map(
             "write", true,
             "showComputations", true,
-            "similarityCutoff", 0.1));
+            "similarityCutoff", 0.1
+        ));
 
-        Result writeResult = runQuery(STATEMENT, params);
-        Map<String, Object> writeRow = writeResult.next();
+        Map<String, Object> writeRow = runQuery(STATEMENT, params, Result::next);
         assertEquals(6L, (long) writeRow.get("computations"));
     }
 

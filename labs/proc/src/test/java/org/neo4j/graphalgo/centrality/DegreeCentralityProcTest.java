@@ -29,9 +29,11 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Result;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -105,7 +107,9 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .streamMode()
             .addParameter("direction", INCOMING)
             .yields("nodeId", "score");
-        runQuery(query, row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
+        runQueryWithRowConsumer(query,
+            (Consumer<Result.ResultRow>) row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(incomingExpected, actual);
     }
 
@@ -117,7 +121,9 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .addParameter("weightProperty", "foo")
             .addParameter("direction", INCOMING)
             .yields("nodeId", "score");
-        runQuery(query, row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
+        runQueryWithRowConsumer(query,
+            (Consumer<Result.ResultRow>) row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(incomingWeightedExpected, actual);
     }
 
@@ -127,7 +133,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .writeMode()
             .addParameter("direction", INCOMING)
             .yields("writeMillis", "write", "writeProperty");
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
                 assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(
@@ -145,7 +151,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .addParameter("direction", INCOMING)
             .addParameter("weightProperty", "foo")
             .yields("writeMillis", "write", "writeProperty");
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
                 assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(
@@ -164,7 +170,9 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .streamMode()
             .addParameter("direction", BOTH)
             .yields("nodeId", "score");
-        runQuery(query, row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
+        runQueryWithRowConsumer(query,
+            (Consumer<Result.ResultRow>) row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(bothExpected, actual);
     }
 
@@ -176,7 +184,9 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .addParameter("direction", BOTH)
             .addParameter("weightProperty", "foo")
             .yields("nodeId", "score");
-        runQuery(query, row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
+        runQueryWithRowConsumer(query,
+            (Consumer<Result.ResultRow>) row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(bothWeightedExpected, actual);
     }
 
@@ -186,7 +196,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .writeMode()
             .addParameter("direction", BOTH)
             .yields("writeMillis", "write", "writeProperty");
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
                 assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -202,7 +212,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .addParameter("direction", BOTH)
             .addParameter("weightProperty", "foo")
             .yields("writeMillis", "write", "writeProperty");
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
                 assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -218,7 +228,9 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .streamMode()
             .addParameter("direction", OUTGOING)
             .yields("nodeId", "score");
-        runQuery(query, row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
+        runQueryWithRowConsumer(query,
+            (Consumer<Result.ResultRow>) row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(outgoingExpected, actual);
     }
 
@@ -230,7 +242,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .addParameter("direction", OUTGOING)
             .addParameter("weightProperty", "foo")
             .yields("nodeId", "score");
-        runQuery(query, row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        runQueryWithRowConsumer(query, (Consumer<Result.ResultRow>) row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(outgoingWeightedExpected, actual);
     }
@@ -241,7 +253,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .writeMode()
             .addParameter("direction", OUTGOING)
             .yields("writeMillis", "write", "writeProperty");
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
                 assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -257,7 +269,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .addParameter("direction", OUTGOING)
             .addParameter("weightProperty", "foo")
             .yields("writeMillis", "write", "writeProperty");
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
                 assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");

@@ -75,7 +75,7 @@ class BFSDFSIntegrationTest extends BaseProcTest {
 
     private long id(String name) {
         final Node[] node = new Node[1];
-        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
+        runQueryWithRowConsumer("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
         return node[0].getId();
     }
 
@@ -96,7 +96,7 @@ class BFSDFSIntegrationTest extends BaseProcTest {
     @Test
     void testFindAnyOf() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '>', s, {targetNodes:[4,5]}) YIELD nodeIds RETURN nodeIds";
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertEquals(4, nodeIds.size());
         });
@@ -105,7 +105,7 @@ class BFSDFSIntegrationTest extends BaseProcTest {
     @Test
     void testMaxDepthOut() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '>', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"a", "b", "c", "d"}, nodeIds);
         });
@@ -114,7 +114,7 @@ class BFSDFSIntegrationTest extends BaseProcTest {
     @Test
     void testMaxDepthIn() {
         final String cypher = "MATCH (n:Node {name:'g'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '<', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"g", "e", "f", "d"}, nodeIds);
         });

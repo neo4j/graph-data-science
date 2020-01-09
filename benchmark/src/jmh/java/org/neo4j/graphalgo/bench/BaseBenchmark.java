@@ -20,7 +20,6 @@
 
 package org.neo4j.graphalgo.bench;
 
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -48,14 +47,17 @@ public class BaseBenchmark {
     }
 
     Result runQuery(String query) {
-        return QueryRunner.runQuery(db, query);
+        return runQuery(query, Collections.emptyMap());
     }
 
     void runQuery(String query, Consumer<Result.ResultRow> check) {
-        QueryRunner.runQuery(db, query, check);
+        runQuery(query).accept(row -> {
+            check.accept(row);
+            return true;
+        });
     }
 
     Result runQuery(String query, Map<String, Object> params) {
-        return QueryRunner.runQuery(db, query, params);
+        return db.execute(query, params);
     }
 }

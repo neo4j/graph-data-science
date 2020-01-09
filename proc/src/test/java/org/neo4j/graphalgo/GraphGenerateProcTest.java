@@ -76,7 +76,7 @@ class GraphGenerateProcTest extends BaseProcTest {
                        "    'foo', 10, 5 " +
                        ")";
 
-        runQuery(query,
+        runQueryWithRowConsumer(query,
                 row -> {
                     assertEquals(10, row.getNumber("nodes").intValue());
                     assertEquals(50, row.getNumber("relationships").intValue());

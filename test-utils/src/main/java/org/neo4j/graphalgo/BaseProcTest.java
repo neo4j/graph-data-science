@@ -25,6 +25,7 @@ import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -38,11 +39,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -85,68 +87,96 @@ public class BaseProcTest {
         return AuthSubject.ANONYMOUS.username();
     }
 
-    protected void runQuery(@Language("Cypher") String query, Consumer<Result.ResultRow> check) {
-        runQuery(query, emptyMap(), check);
+    protected void runQueryWithRowConsumer(@Language("Cypher") String query, Consumer<Result.ResultRow> check) {
+        runQueryWithRowConsumer(query, emptyMap(), check);
     }
 
-    protected void runQuery(GraphDatabaseAPI db, @Language("Cypher") String query, Consumer<Result.ResultRow> check) {
-        runQuery(db, query, emptyMap(), check);
+    protected void runQueryWithRowConsumer(@Language("Cypher") String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
+        runQueryWithRowConsumer(db, query, params, check);
     }
 
-    protected void runQuery(@Language("Cypher") String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
-        runQuery(db, query, params, check);
+    protected void runQueryWithRowConsumer(GraphDatabaseService localDb, @Language("Cypher") String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
+        QueryRunner.runQueryWithRowConsumer(localDb, query, params, check);
+    }
+    protected void runQueryWithRowConsumer(GraphDatabaseService localDb, @Language("Cypher") String query, Consumer<Result.ResultRow> check) {
+        runQueryWithRowConsumer(localDb, query, emptyMap(), check);
     }
 
-    protected void runQuery(
-        GraphDatabaseAPI db,
-        String query,
-        Map<String, Object> params,
-        Consumer<Result.ResultRow> check
-    ) {
-        QueryRunner.runQuery(db, query, params, check);
+    protected void runQuery(@Language("Cypher") String query, Map<String, Object> params, Consumer<Result> check) {
+        QueryRunner.runQuery(
+            db,
+            query,
+            params,
+            check
+        );
+    }
+    protected void runQuery(@Language("Cypher") String query, Consumer<Result> check) {
+        runQuery(
+            query,
+            emptyMap(),
+            check
+        );
     }
 
-    protected void runQuery(
+    protected void runQueryWithRowConsumer(
         String username,
         String query,
         Consumer<Result.ResultRow> check
     ) {
-        runQuery(db, username, query, emptyMap(), check);
+        runQueryWithRowConsumer(db, username, query, emptyMap(), check);
     }
 
-    protected Result runQuery(
+    protected void runQuery(
         String username,
         String query,
         Map<String, Object> params
     ) {
-        return QueryRunner.runQuery(db, username, query, params);
+        QueryRunner.runQuery(db, username, query, params);
     }
 
-    protected void runQuery(
+    protected void runQueryWithRowConsumer(
         GraphDatabaseAPI db,
         String username,
         String query,
         Map<String, Object> params,
         Consumer<Result.ResultRow> check
     ) {
-        QueryRunner.runQuery(db, username, query, params, check);
+        QueryRunner.runQueryWithRowConsumer(db, username, query, params, check);
     }
 
-    protected Result runQuery(String query) {
-        return runQuery(query, emptyMap());
+    protected void runQuery(String query) {
+        QueryRunner.runQuery(db, query);
     }
 
-    protected Result runQuery(String query, Map<String, Object> params) {
-        return QueryRunner.runQuery(db, query, params);
+    protected <T> T runQuery(String query, Function<Result, T> resultFunction) {
+        return runQuery(query, emptyMap(), resultFunction);
+    }
+
+    protected <T> T runQuery(String query, Map<String, Object> params, Function<Result, T> resultFunction) {
+        return QueryRunner.runQuery(db, query, params, resultFunction);
+    }
+
+    /*
+        This is to be used with caution;
+        Callers have to consume the Result and/or use try-catch resource block.
+     */
+    protected Result runQueryWithoutClosing(String query, Map<String, Object> params) {
+        return QueryRunner.runQueryWithoutClosing(db, query, params);
+    }
+
+    protected void runQuery(String query, Map<String, Object> params) {
+        QueryRunner.runQuery(db, query, params);
     }
 
     protected void assertEmptyResult(String query) {
         assertEmptyResult(query, emptyMap());
     }
 
-    protected void assertEmptyResult(String query, Map<String, Object> params) {
+    private void assertEmptyResult(String query, Map<String, Object> params) {
         List<Result.ResultRow> actual = new ArrayList<>();
-        runQuery(query, params, actual::add);
+        QueryRunner.runInTransaction(db, () -> {
+            db.execute(query, params).accept(actual::add);
+        });
         assertTrue(actual.isEmpty());
     }
 
@@ -214,14 +244,15 @@ public class BaseProcTest {
     ) {
         try (Transaction tx = db.beginTx()) {
             List<Map<String, Object>> actual = new ArrayList<>();
-            Result result = runQuery(query, queryParameters);
-            result.accept(row -> {
-                Map<String, Object> _row = new HashMap<>();
-                for (String column : result.columns()) {
-                    _row.put(column, row.get(column));
-                }
-                actual.add(_row);
-                return true;
+            runQuery(query, queryParameters, result -> {
+                result.accept(row -> {
+                    Map<String, Object> _row = new HashMap<>();
+                    for (String column : result.columns()) {
+                        _row.put(column, row.get(column));
+                    }
+                    actual.add(_row);
+                    return true;
+                });
             });
             String reason = format(
                 "Different amount of rows returned for actual result (%d) than expected (%d)",
@@ -289,7 +320,7 @@ public class BaseProcTest {
         Matcher<Throwable> matcher
     ) {
         try {
-            consume(runQuery(query, queryParameters));
+            runQuery(query, queryParameters, this::consume);
             fail(format("Expected an exception to be thrown by query:\n%s", query));
         } catch (Throwable e) {
             assertThat(e, matcher);

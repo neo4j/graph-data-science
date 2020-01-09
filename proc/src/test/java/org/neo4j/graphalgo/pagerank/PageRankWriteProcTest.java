@@ -49,7 +49,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
                        graphSnippet +
                        "  writeProperty: $writeProp" +
                        "}) YIELD writeMillis, writeProperty";
-        runQuery(query, MapUtil.map("writeProp", writeProperty),
+        runQueryWithRowConsumer(query, MapUtil.map("writeProp", writeProperty),
             row -> {
                 assertEquals(writeProperty, row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -66,7 +66,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
                        "        writeProperty: 'pagerank', weightProperty: 'weight'" +
                        "    }" +
                        ") YIELD writeMillis, writeProperty";
-        runQuery(
+        runQueryWithRowConsumer(
             query,
             row -> {
                 assertEquals("pagerank", row.getString("writeProperty"));
@@ -84,7 +84,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
                        "        batchSize: 3, writeProperty: 'pagerank', graph: 'myGraph1'" +
                        "    }" +
                        ") YIELD writeMillis, writeProperty";
-        runQuery(
+        runQueryWithRowConsumer(
             query,
             row -> assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set")
         );
@@ -101,7 +101,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
                        "      tolerance: 0.0001, batchSize: 2, graph: $graph" +
                        "  }" +
                        ") YIELD ranIterations";
-        runQuery(query, MapUtil.map("graph", graphName),
+        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName),
             row -> assertEquals(20L, (long) row.getNumber("ranIterations"))
         );
 
@@ -110,7 +110,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
                 "        tolerance: 100.0, batchSize: 2, graph: $graph" +
                 "  }" +
                 ") YIELD ranIterations";
-        runQuery(query, MapUtil.map("graph", graphName),
+        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName),
             row -> assertEquals(1L, (long) row.getNumber("ranIterations"))
         );
 
@@ -119,7 +119,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
                 "        tolerance: 0.20010237991809848, batchSize: 2, graph: $graph" +
                 "  }" +
                 ") YIELD ranIterations";
-        runQuery(query, MapUtil.map("graph", graphName),
+        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName),
             row -> assertEquals(4L, (long) row.getNumber("ranIterations"))
         );
 
@@ -128,7 +128,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
                 "        tolerance: 0.20010237991809843, batchSize: 2, graph: $graph" +
                 "  }" +
                 ") YIELD ranIterations";
-        runQuery(query, MapUtil.map("graph", graphName),
+        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName),
             row -> assertEquals(5L, (long) row.getNumber("ranIterations"))
         );
     }
@@ -141,7 +141,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
                        "     writeProperty: 'writeProp', tolerance: 0.0001, batchSize: 2" +
                        "  }" +
                        ") YIELD ranIterations, didConverge, maxIterations";
-        runQuery(
+        runQueryWithRowConsumer(
             query,
             row -> {
                 assertEquals(20, row.getNumber("ranIterations").longValue());
@@ -160,7 +160,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
                        "     writeProperty: 'writeProp', tolerance: 0.0001, batchSize: 2" +
                        "  }" +
                        ") YIELD ranIterations, didConverge, maxIterations, dampingFactor";
-        runQuery(
+        runQueryWithRowConsumer(
             query,
             row -> {
                 assertEquals(20, row.getNumber("ranIterations").longValue());

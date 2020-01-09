@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -137,7 +136,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
 
         Map<Long, Double> actual = new HashMap<>();
 
-        runQuery(
+        runQueryWithRowConsumer(
             query,
             map("startNodes", startNodes),
             row -> actual.put(
@@ -180,7 +179,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
 
         Map<Long, Double> actual = new HashMap<>();
 
-        runQuery(
+        runQueryWithRowConsumer(
             query,
             map("startNodes", startNodes),
             row -> actual.put(
@@ -231,7 +230,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
 
         Map<Long, Double> actual = new HashMap<>();
 
-        runQuery(
+        runQueryWithRowConsumer(
             query,
             map("startNodes", startNodes),
             row -> actual.put(

@@ -94,7 +94,7 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
         expectedCosts.put(2L, Arrays.asList(7.0D, 3.0, 4.0));
 
         // 9 possible paths without loop
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             long rowIndex = row.getNumber("index").longValue();
             assertEquals(expectedNodes.get(rowIndex), row.get("nodeIds"));
             assertEquals(expectedCosts.get(rowIndex), row.get("costs"));
@@ -119,7 +119,7 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
         expectedCosts.put(1L, Arrays.asList(5.0D));
         expectedCosts.put(2L, Arrays.asList(7.0D, 3.0, 4.0));
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             Path path = (Path) row.get("path");
 
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
@@ -150,7 +150,7 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
         expectedCosts.put(1L, Arrays.asList(5.0D));
         expectedCosts.put(2L, Arrays.asList(7.0D, 3.0, 4.0));
 
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             Path path = (Path) row.get("path");
 
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());

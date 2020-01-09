@@ -27,6 +27,7 @@ import org.mockito.AdditionalMatchers;
 import org.mockito.Matchers;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphdb.Result;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -67,9 +68,9 @@ class BetweennessCentralityProcTest_148 extends BaseProcTest {
 
     private String name(long id) {
         String[] name = {""};
-        runQuery(
+        runQueryWithRowConsumer(
             "MATCH (n) WHERE id(n) = " + id + " RETURN n.name as name",
-            row -> name[0] = row.getString("name")
+            (java.util.function.Consumer<Result.ResultRow>) row -> name[0] = row.getString("name")
         );
         if (name[0].isEmpty()) {
             throw new IllegalArgumentException("unknown id " + id);
@@ -82,7 +83,7 @@ class BetweennessCentralityProcTest_148 extends BaseProcTest {
 
         final Consumer mock = mock(Consumer.class);
         final String evalQuery = "CALL algo.betweenness.stream('User', 'FRIEND', {direction:'B'}) YIELD nodeId, centrality";
-        runQuery(evalQuery, row -> {
+        runQueryWithRowConsumer(evalQuery, row -> {
             final long nodeId = row.getNumber("nodeId").longValue();
             final double centrality = row.getNumber("centrality").doubleValue();
             mock.consume(name(nodeId), centrality);

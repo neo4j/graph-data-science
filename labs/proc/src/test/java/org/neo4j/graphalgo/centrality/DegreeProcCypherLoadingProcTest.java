@@ -117,7 +117,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "    direction: 'INCOMING'," +
                        "    duplicateRelationships: 'skip'" +
                        "}) YIELD nodeId, score";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
                 row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(incomingExpected, actual);
     }
@@ -137,7 +137,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "    weightProperty: 'foo'," +
                        "    duplicateRelationships: 'sum'" +
                        "}) YIELD nodeId, score";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
                 row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(incomingWeightedExpected, actual);
     }
@@ -154,7 +154,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "    direction: 'INCOMING'," +
                        "    duplicateRelationships: 'skip'" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
@@ -179,7 +179,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "    weightProperty: 'foo'," +
                        "    duplicateRelationships: 'sum'" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
@@ -203,7 +203,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "    direction: 'BOTH'," +
                        "    duplicateRelationships: 'skip'" +
                        "}) YIELD nodeId, score";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
                 row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(bothExpected, actual);
     }
@@ -223,7 +223,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "    weightProperty: 'foo'," +
                        "    duplicateRelationships: 'sum'" +
                        "}) YIELD nodeId, score";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
                 row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(bothWeightedExpected, actual);
     }
@@ -240,7 +240,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "    direction: 'BOTH'," +
                        "    duplicateRelationships: 'skip'" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
@@ -265,7 +265,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "    weightProperty: 'foo'," +
                        "    duplicateRelationships: 'sum'" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
@@ -289,7 +289,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "    direction: 'OUTGOING'," +
                        "    duplicateRelationships: 'skip'" +
                        "}) YIELD nodeId, score";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
                 row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(outgoingExpected, actual);
     }
@@ -309,7 +309,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                       "    weightProperty: 'foo'," +
                       "    duplicateRelationships: 'sum'" +
                       "}) YIELD nodeId, score";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
                 row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(outgoingWeightedExpected, actual);
     }
@@ -326,7 +326,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "    direction: 'OUTGOING'," +
                        "    duplicateRelationships: 'skip'" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
@@ -351,7 +351,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "    weightProperty: 'foo'," +
                        "    duplicateRelationships: 'sum'" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQuery(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));

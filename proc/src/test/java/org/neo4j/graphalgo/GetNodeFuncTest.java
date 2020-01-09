@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.kernel.impl.proc.Procedures;
 
@@ -51,10 +52,10 @@ class GetNodeFuncTest extends BaseProcTest {
     @Test
     void lookupNode() {
         String createNodeQuery = "CREATE (p:Person {name: 'Mark'}) RETURN p AS node";
-        Node savedNode = (Node) runQuery(createNodeQuery).next().get("node");
+        Node savedNode = (Node) runQuery(createNodeQuery, Result::next).get("node");
 
         Map<String, Object> params = MapUtil.map("nodeId", savedNode.getId());
-        Map<String, Object> row = runQuery("RETURN algo.asNode($nodeId) AS node", params).next();
+        Map<String, Object> row = runQuery("RETURN algo.asNode($nodeId) AS node", params, Result::next);
 
         Node node = (Node) row.get("node");
         assertEquals(savedNode, node);
@@ -63,7 +64,7 @@ class GetNodeFuncTest extends BaseProcTest {
     @Test
     void lookupNonExistentNode() {
         Map<String, Object> row = runQuery(
-                "RETURN algo.asNode(3) AS node").next();
+                "RETURN algo.asNode(3) AS node", Result::next);
 
         assertNull(row.get("node"));
     }
@@ -71,12 +72,12 @@ class GetNodeFuncTest extends BaseProcTest {
     @Test
     void lookupNodes() {
         String createNodeQuery = "CREATE (p1:Person {name: 'Mark'}) CREATE (p2:Person {name: 'Arya'}) RETURN p1, p2";
-        Map<String, Object> savedRow = runQuery(createNodeQuery).next();
+        Map<String, Object> savedRow = runQuery(createNodeQuery, Result::next);
         Node savedNode1 = (Node) savedRow.get("p1");
         Node savedNode2 = (Node) savedRow.get("p2");
 
         Map<String, Object> params = MapUtil.map("nodeIds", Arrays.asList(savedNode1.getId(), savedNode2.getId()));
-        Map<String, Object> row = runQuery("RETURN algo.asNodes($nodeIds) AS nodes", params).next();
+        Map<String, Object> row = runQuery("RETURN algo.asNodes($nodeIds) AS nodes", params, Result::next);
 
         List<Node> nodes = (List<Node>) row.get("nodes");
         assertEquals(Arrays.asList(savedNode1, savedNode2), nodes);
@@ -85,7 +86,7 @@ class GetNodeFuncTest extends BaseProcTest {
     @Test
     void lookupNonExistentNodes() {
         Map<String, Object> row = runQuery(
-                "RETURN algo.getNodesById([3,4,5]) AS nodes").next();
+                "RETURN algo.getNodesById([3,4,5]) AS nodes", Result::next);
 
         List<Node> nodes = (List<Node>) row.get("nodes");
         assertEquals(0, nodes.size());

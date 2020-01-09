@@ -52,7 +52,7 @@ class LouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
             .yields("nodeId", "communityId", "communityIds");
 
         List<Long> actualCommunities = new ArrayList<>();
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             int id = row.getNumber("nodeId").intValue();
             long community = row.getNumber("communityId").longValue();
             assertNull(row.get("communityIds"));
@@ -70,7 +70,7 @@ class LouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
             .addParameter("includeIntermediateCommunities", true)
             .yields("nodeId", "communityId", "communityIds");
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             Object maybeList = row.get("communityIds");
             assertTrue(maybeList instanceof List);
             List<Long> communities = (List<Long>) maybeList;

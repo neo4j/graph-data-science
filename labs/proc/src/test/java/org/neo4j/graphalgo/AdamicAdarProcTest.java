@@ -29,32 +29,32 @@ import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 class AdamicAdarProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
-            "CREATE (mark:Person {name: 'Mark'})\n" +
-            "CREATE (michael:Person {name: 'Michael'})\n" +
-            "CREATE (praveena:Person {name: 'Praveena'})\n" +
-            "CREATE (ryan:Person {name: 'Ryan'})\n" +
-            "CREATE (karin:Person {name: 'Karin'})\n" +
-            "CREATE (jennifer:Person {name: 'Jennifer'})\n" +
-            "CREATE (elaine:Person {name: 'Elaine'})\n" +
+        "CREATE (mark:Person {name: 'Mark'})\n" +
+        "CREATE (michael:Person {name: 'Michael'})\n" +
+        "CREATE (praveena:Person {name: 'Praveena'})\n" +
+        "CREATE (ryan:Person {name: 'Ryan'})\n" +
+        "CREATE (karin:Person {name: 'Karin'})\n" +
+        "CREATE (jennifer:Person {name: 'Jennifer'})\n" +
+        "CREATE (elaine:Person {name: 'Elaine'})\n" +
 
-            "MERGE (jennifer)-[:FRIENDS]-(ryan)\n" +
-            "MERGE (jennifer)-[:FRIENDS]-(karin)\n" +
-            "MERGE (elaine)-[:FRIENDS]-(ryan)\n" +
-            "MERGE (elaine)-[:FRIENDS]-(karin)\n" +
+        "MERGE (jennifer)-[:FRIENDS]-(ryan)\n" +
+        "MERGE (jennifer)-[:FRIENDS]-(karin)\n" +
+        "MERGE (elaine)-[:FRIENDS]-(ryan)\n" +
+        "MERGE (elaine)-[:FRIENDS]-(karin)\n" +
 
-            "MERGE (mark)-[:FRIENDS]-(michael)\n" +
-            "MERGE (mark)-[:WORKS_WITH]->(michael)\n" +
+        "MERGE (mark)-[:FRIENDS]-(michael)\n" +
+        "MERGE (mark)-[:WORKS_WITH]->(michael)\n" +
 
-            "MERGE (praveena)-[:FRIENDS]->(michael)";
+        "MERGE (praveena)-[:FRIENDS]->(michael)";
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*"));
+        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted,
+            "algo.*"));
         registerFunctions(LinkPredictionFunc.class);
         runQuery(DB_CYPHER);
     }
@@ -67,66 +67,61 @@ class AdamicAdarProcTest extends BaseProcTest {
     @Test
     void oneNodeInCommon() {
         String controlQuery =
-                "MATCH (p1:Person {name: 'Mark'})\n" +
-                "MATCH (p2:Person {name: 'Praveena'})\n" +
-                "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
-                "       1/log(3) AS cypherScore";
+            "MATCH (p1:Person {name: 'Mark'})\n" +
+            "MATCH (p2:Person {name: 'Praveena'})\n" +
+            "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
+            "       1/log(3) AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
     void oneNodeInCommonExplicit() {
         String controlQuery =
-                "MATCH (p1:Person {name: 'Mark'})\n" +
-                        "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN algo.linkprediction.adamicAdar(p1, p2, " +
-                        "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
-                        "1/log(2) AS cypherScore";
+            "MATCH (p1:Person {name: 'Mark'})\n" +
+            "MATCH (p2:Person {name: 'Praveena'})\n" +
+            "RETURN algo.linkprediction.adamicAdar(p1, p2, " +
+            "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
+            "1/log(2) AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
     void twoNodesInCommon() {
         String controlQuery =
-                "MATCH (p1:Person {name: 'Jennifer'})\n" +
-                        "MATCH (p2:Person {name: 'Elaine'})\n" +
-                        "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
-                        "       1/log(2) + 1/log(2) AS cypherScore";
+            "MATCH (p1:Person {name: 'Jennifer'})\n" +
+            "MATCH (p2:Person {name: 'Elaine'})\n" +
+            "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
+            "       1/log(2) + 1/log(2) AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
     void noNeighbors() {
         String controlQuery =
-                "MATCH (p1:Person {name: 'Jennifer'})\n" +
-                        "MATCH (p2:Person {name: 'Ryan'})\n" +
-                        "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
-                        "       0.0 AS cypherScore";
+            "MATCH (p1:Person {name: 'Jennifer'})\n" +
+            "MATCH (p2:Person {name: 'Ryan'})\n" +
+            "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
+            "       0.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
     void bothNodesTheSame() {
         String controlQuery =
-                "MATCH (p1:Person {name: 'Praveena'})\n" +
-                        "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
-                        "       0.0 AS cypherScore";
+            "MATCH (p1:Person {name: 'Praveena'})\n" +
+            "MATCH (p2:Person {name: 'Praveena'})\n" +
+            "RETURN algo.linkprediction.adamicAdar(p1, p2) AS score, " +
+            "       0.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 }

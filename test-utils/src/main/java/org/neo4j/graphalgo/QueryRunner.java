@@ -32,6 +32,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
@@ -40,46 +41,70 @@ public final class QueryRunner {
 
     private QueryRunner() {}
 
-    public static void runQuery(
-        GraphDatabaseAPI db,
+    public static void runQuery(GraphDatabaseAPI db, String username, String query, Map<String, Object> params) {
+        try (KernelTransaction.Revertable ignored = withUsername(db.beginTx(), username)) {
+            db.execute(query, params).close();
+        }
+    }
+
+    public static void runQuery(GraphDatabaseService db, String query, Map<String, Object> params, Consumer<Result> resultConsumer) {
+        resultConsumer.accept(db.execute(query, params));
+    }
+
+    public static <T> T runQuery(GraphDatabaseService db, String query, Map<String, Object> params, Function<Result, T> resultFunction) {
+        try (Result execute = db.execute(query, params)) {
+            return resultFunction.apply(execute);
+        }
+    }
+
+    public static void runQuery(GraphDatabaseService db, String query, Consumer<Result> resultConsumer) {
+        runQuery(db, query, Collections.emptyMap(), resultConsumer);
+    }
+
+    public static <T> T  runQuery(GraphDatabaseService db, String query, Function<Result, T> resultFunction) {
+        return runQuery(db, query, Collections.emptyMap(), resultFunction);
+    }
+
+    public static void runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
+        db.execute(query, params).close();
+    }
+
+    public static void runQuery(GraphDatabaseService db, String query) {
+        runQuery(db, query, Collections.emptyMap());
+    }
+
+    static Result runQueryWithoutClosing(GraphDatabaseService db, String query, Map<String, Object> params) {
+        return db.execute(query, params);
+    }
+
+    public static void runQueryWithRowConsumer(
+        GraphDatabaseService db,
         String username,
         String query,
         Map<String, Object> params,
         Consumer<Result.ResultRow> check
     ) {
         try (KernelTransaction.Revertable ignored = withUsername(db.beginTx(), username)) {
-            Result result = db.execute(query, params);
+            try(Result result = db.execute(query, params)) {
+                result.accept(row -> {
+                    check.accept(row);
+                    return true;
+                });
+            }
+        }
+    }
+
+    public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, Map<String, Object> params, Consumer<Result.ResultRow> rowConsumer) {
+        try(Result result = db.execute(query, params)) {
             result.accept(row -> {
-                check.accept(row);
+                rowConsumer.accept(row);
                 return true;
             });
         }
     }
 
-    public static Result runQuery(GraphDatabaseAPI db, String query) {
-        return runQuery(db, query, Collections.emptyMap());
-    }
-
-    public static Result runQuery(GraphDatabaseAPI db, String query, Map<String, Object> params) {
-        return db.execute(query, params);
-    }
-
-    public static void runQuery(GraphDatabaseAPI db, String query, Consumer<Result.ResultRow> check) {
-        runQuery(db, query, Collections.emptyMap(), check);
-    }
-
-    public static Result runQuery(GraphDatabaseAPI db, String username, String query, Map<String, Object> params) {
-        try (KernelTransaction.Revertable ignored = withUsername(db.beginTx(), username)) {
-            return db.execute(query, params);
-        }
-    }
-
-    public static void runQuery(GraphDatabaseAPI db, String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
-        runQuery(db, query, params).accept(row -> {
-                check.accept(row);
-                return true;
-            }
-        );
+    public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, Consumer<Result.ResultRow> rowConsumer) {
+        runQueryWithRowConsumer(db, query, Collections.emptyMap(), rowConsumer);
     }
 
     public static <T> T runInTransaction(GraphDatabaseService db, Supplier<T> supplier) {
@@ -103,6 +128,7 @@ public final class QueryRunner {
         SecurityContext securityContext = new SecurityContext(new CustomUserNameAuthSubject(username, subject), READ);
         return topLevelTransaction.overrideWith(securityContext);
     }
+
     private static class CustomUserNameAuthSubject implements AuthSubject {
 
         private final String username;
@@ -133,6 +159,7 @@ public final class QueryRunner {
         public boolean hasUsername(String username) {
             return this.username.equals(username);
         }
+
         @Override
         public String username() {
             return username;

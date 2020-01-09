@@ -79,7 +79,7 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
                 "communityDistribution"
             );
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             long communityCount = row.getNumber("communityCount").longValue();
             double modularity = row.getNumber("modularity").doubleValue();
             List<Double> modularities = (List<Double>) row.get("modularities");
@@ -112,11 +112,11 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
             .addParameter("includeIntermediateCommunities", true)
             .yields("includeIntermediateCommunities");
 
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             assertTrue(row.getBoolean("includeIntermediateCommunities"));
         });
 
-        runQuery(String.format("MATCH (n) RETURN n.%s as %s", writeProperty, writeProperty), row -> {
+        runQueryWithRowConsumer(String.format("MATCH (n) RETURN n.%s as %s", writeProperty, writeProperty), row -> {
             Object maybeList = row.get(writeProperty);
             assertTrue(maybeList instanceof long[]);
             long[] communities = (long[]) maybeList;
@@ -164,7 +164,7 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
             .addParameter("seedProperty", "seed")
             .yields("communityCount", "ranLevels");
 
-        runQuery(
+        runQueryWithRowConsumer(
             query,
             row -> {
                 assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
@@ -222,7 +222,7 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
 
     private void assertWriteResult(List<List<Long>> expectedCommunities, String writeProperty) {
         List<Long> actualCommunities = new ArrayList<>();
-        runQuery(String.format("MATCH (n) RETURN id(n) as id, n.%s as community", writeProperty), (row) -> {
+        runQueryWithRowConsumer(String.format("MATCH (n) RETURN id(n) as id, n.%s as community", writeProperty), (row) -> {
             long community = row.getNumber("community").longValue();
             int id = row.getNumber("id").intValue();
             actualCommunities.add(id, community);

@@ -126,7 +126,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
             .yields("node1", "node2", "similarity");
 
         Collection<String> result = new HashSet<>();
-        runQuery(localDb, query, row -> {
+        runQueryWithRowConsumer(localDb, query, row -> {
                 long node1 = row.getNumber("node1").longValue();
                 long node2 = row.getNumber("node2").longValue();
                 double similarity = row.getNumber("similarity").doubleValue();
@@ -149,7 +149,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
             .yields("node1", "node2", "similarity");
 
         Collection<String> result = new HashSet<>();
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             long node1 = row.getNumber("node1").longValue();
             long node2 = row.getNumber("node2").longValue();
             double similarity = row.getNumber("similarity").doubleValue();
@@ -177,7 +177,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
             .yields("node1", "node2", "similarity");
 
         Collection<String> result = new HashSet<>();
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             long node1 = row.getNumber("node1").longValue();
             long node2 = row.getNumber("node2").longValue();
             double similarity = row.getNumber("similarity").doubleValue();
@@ -218,7 +218,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
             .yields("node1", "node2", "similarity");
 
         Collection<String> result = new HashSet<>();
-        runQuery(query, row -> {
+        runQueryWithRowConsumer(query, row -> {
             long node1 = row.getNumber("node1").longValue();
             long node2 = row.getNumber("node2").longValue();
             double similarity = row.getNumber("similarity").doubleValue();

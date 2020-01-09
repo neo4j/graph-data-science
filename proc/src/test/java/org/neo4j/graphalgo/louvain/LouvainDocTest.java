@@ -22,11 +22,12 @@ package org.neo4j.graphalgo.louvain;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -96,7 +97,7 @@ class LouvainDocTest extends BaseProcTest {
             "+----------------------------------------+\n" +
             "6 rows\n";
 
-        String actual = runQuery(query).resultAsString();
+        String actual = runQuery(query, Result::resultAsString);
 
         assertEquals(expected, actual);
     }
@@ -124,7 +125,7 @@ class LouvainDocTest extends BaseProcTest {
             "+------------------------------------------------------------+\n" +
             "1 row\n";
 
-        String actual = runQuery(query).resultAsString();
+        String actual = runQuery(query, Result::resultAsString);
 
         assertEquals(expected, actual);
     }
@@ -160,7 +161,7 @@ class LouvainDocTest extends BaseProcTest {
             "+----------------------------------------+\n" +
             "6 rows\n";
 
-        String actual = runQuery(query).resultAsString();
+        String actual = runQuery(query, Result::resultAsString);
 
         assertEquals(expected, actual);
     }
@@ -200,7 +201,7 @@ class LouvainDocTest extends BaseProcTest {
             "+----------------------------------------+\n" +
             "6 rows\n";
 
-        String actual = runQuery(query).resultAsString();
+        String actual = runQuery(query, Result::resultAsString);
 
         assertEquals(expected, actual);
     }
@@ -289,7 +290,7 @@ class LouvainDocTest extends BaseProcTest {
             "+-----------------------------------+\n" +
             "15 rows\n";
 
-        String actual = runQuery(query).resultAsString();
+        String actual = runQuery(query, Result::resultAsString);
 
         assertEquals(expected, actual);
     }

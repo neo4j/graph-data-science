@@ -89,7 +89,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
     @Test
     void testClosenessStream() throws Exception {
-        runQuery("CALL algo.closeness.stream('Node', 'TYPE') YIELD nodeId, centrality", row -> {
+        runQueryWithRowConsumer("CALL algo.closeness.stream('Node', 'TYPE') YIELD nodeId, centrality", row -> {
             consumer.accept(
                 row.getNumber("nodeId").longValue(),
                 row.getNumber("centrality").doubleValue()
@@ -101,14 +101,14 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
     @Test
     void testClosenessWrite() throws Exception {
-        runQuery("CALL algo.closeness('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-                 "nodes, loadMillis, computeMillis, writeMillis", row -> {
+        runQueryWithRowConsumer("CALL algo.closeness('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
+                                "nodes, loadMillis, computeMillis, writeMillis", row -> {
             assertNotEquals(-1L, row.getNumber("writeMillis"));
             assertNotEquals(-1L, row.getNumber("computeMillis"));
             assertNotEquals(-1L, row.getNumber("nodes"));
         });
 
-        runQuery("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality", row -> {
+        runQueryWithRowConsumer("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality", row -> {
             System.out.println(
                 row.getNumber("id").longValue() + " " +
                 row.getNumber("centrality").doubleValue());

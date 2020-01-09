@@ -84,7 +84,7 @@ class ClusteringCoefficientProcTest extends BaseProcTest {
     @Test
     void testTriangleCountWriteCypher() {
         final String cypher = "CALL algo.triangleCount('Node', '', {concurrency:4, write:true, clusterCoefficientProperty:'c'})";
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             final long loadMillis = row.getNumber("loadMillis").longValue();
             final long computeMillis = row.getNumber("computeMillis").longValue();
             final long writeMillis = row.getNumber("writeMillis").longValue();
@@ -104,7 +104,7 @@ class ClusteringCoefficientProcTest extends BaseProcTest {
         });
 
         final String request = "MATCH (n) WHERE exists(n.clusteringCoefficient) RETURN n.clusteringCoefficient as c";
-        runQuery(request, row -> {
+        runQueryWithRowConsumer(request, row -> {
             final double triangles = row.getNumber("c").doubleValue();
             System.out.println("triangles = " + triangles);
         });
@@ -114,7 +114,7 @@ class ClusteringCoefficientProcTest extends BaseProcTest {
     void testTriangleCountStream() {
         final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
         final String cypher = "CALL algo.triangleCount.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles, coefficient";
-        runQuery(cypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             final long nodeId = row.getNumber("nodeId").longValue();
             final long triangles = row.getNumber("triangles").longValue();
             final double coefficient = row.getNumber("coefficient").doubleValue();
