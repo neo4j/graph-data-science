@@ -40,6 +40,16 @@ public abstract class SimilarityAlgorithm<ME extends SimilarityAlgorithm<ME, INP
         this.api = api;
     }
 
+    abstract INPUT[] prepareInputs(Object rawData, SimilarityConfig config);
+
+    abstract SimilarityComputer<INPUT> similarityComputer(
+        Double skipValue,
+        int[] sourceIndexIds,
+        int[] targetIndexIds
+    );
+
+    abstract Supplier<RleDecoder> inputDecoderFactory(INPUT[] inputs);
+
     @Override
     public SimilarityAlgorithmResult compute() {
         ImmutableSimilarityAlgorithmResult.Builder builder = ImmutableSimilarityAlgorithmResult.builder();
@@ -91,19 +101,9 @@ public abstract class SimilarityAlgorithm<ME extends SimilarityAlgorithm<ME, INP
     @Override
     public void release() {}
 
-    abstract INPUT[] prepareInputs(Object rawData, SimilarityConfig config);
-
-    abstract SimilarityComputer<INPUT> similarityComputer(
-        Double skipValue,
-        int[] sourceIndexIds,
-        int[] targetIndexIds
-    );
-
     SimilarityResult modifyResult(SimilarityResult result) {
         return result;
     }
-
-    abstract Supplier<RleDecoder> inputDecoderFactory(INPUT[] inputs);
 
     Stream<SimilarityResult> generateWeightedStream(
         INPUT[] inputs,

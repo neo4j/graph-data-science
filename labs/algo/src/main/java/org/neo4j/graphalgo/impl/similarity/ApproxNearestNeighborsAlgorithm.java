@@ -228,7 +228,9 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         double sampleSize,
         INPUT[] inputs,
         SimilarityComputer<INPUT> similarityComputer,
-        HugeGraph oldHugeGraph, Supplier<RleDecoder> rleDecoderFactory, HugeGraph newHugeGraph
+        HugeGraph oldHugeGraph,
+        Supplier<RleDecoder> rleDecoderFactory,
+        HugeGraph newHugeGraph
     ) {
         nodeQueue.set(0);
         Collection<NeighborhoodTask> computeTasks = new ArrayList<>();
@@ -271,10 +273,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         return new IdsAndProperties(idMap, Collections.emptyMap());
     }
 
-    private int mergeConsumers(
-        Iterable<NeighborhoodTask> neighborhoodTasks,
-        AnnTopKConsumer[] topKConsumers
-    ) {
+    private int mergeConsumers(Iterable<NeighborhoodTask> neighborhoodTasks, AnnTopKConsumer[] topKConsumers) {
         int changes = 0;
         for (NeighborhoodTask task : neighborhoodTasks) {
             changes += task.mergeInto(topKConsumers);
@@ -286,10 +285,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         return changes == 0 || changes < inputSize * Math.abs(topK) * config.precision();
     }
 
-    private LongHashSet findNeighbors(
-        long nodeId,
-        RelationshipIterator graph, Direction direction
-    ) {
+    private LongHashSet findNeighbors(long nodeId, RelationshipIterator graph, Direction direction) {
         LongHashSet neighbors = new LongHashSet();
         graph.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
             neighbors.add(targetNodeId);
@@ -313,7 +309,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         ) {
             this.inputs = inputs;
             this.topKConsumers = topKConsumers;
-            rleDecoder = rleDecoderFactory.get();
+            this.rleDecoder = rleDecoderFactory.get();
             this.similarityComputer = similarityComputer;
         }
 

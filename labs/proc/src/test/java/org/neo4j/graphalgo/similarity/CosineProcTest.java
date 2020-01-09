@@ -129,10 +129,22 @@ class CosineProcTest extends BaseProcTest {
     void cosineSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
-        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 1, "topK", 0), "missingValue", 0));
-        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 2, "topK", 0), "missingValue", 0));
-        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 4, "topK", 0), "missingValue", 0));
-        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 8, "topK", 0), "missingValue", 0));
+        Result result1 = runQuery(
+            STATEMENT_STREAM,
+            map("config", map("similarityCutoff", -0.1, "concurrency", 1, "topK", 0), "missingValue", 0)
+        );
+        Result result2 = runQuery(
+            STATEMENT_STREAM,
+            map("config", map("similarityCutoff", -0.1, "concurrency", 2, "topK", 0), "missingValue", 0)
+        );
+        Result result4 = runQuery(
+            STATEMENT_STREAM,
+            map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0)
+        );
+        Result result8 = runQuery(
+            STATEMENT_STREAM,
+            map("config", map("similarityCutoff", -0.1, "concurrency", 8, "topK", 0), "missingValue", 0)
+        );
         int count=0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
@@ -150,10 +162,22 @@ class CosineProcTest extends BaseProcTest {
         int size = 333;
         buildRandomDB(size);
 
-        Result result1 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 1), "missingValue", 0));
-        Result result2 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 2), "missingValue", 0));
-        Result result4 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 4), "missingValue", 0));
-        Result result8 = runQuery(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 8), "missingValue", 0));
+        Result result1 = runQuery(
+            STATEMENT_STREAM,
+            map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0)
+        );
+        Result result2 = runQuery(
+            STATEMENT_STREAM,
+            map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0)
+        );
+        Result result4 = runQuery(
+            STATEMENT_STREAM,
+            map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0)
+        );
+        Result result8 = runQuery(
+            STATEMENT_STREAM,
+            map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0)
+        );
         int count=0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
