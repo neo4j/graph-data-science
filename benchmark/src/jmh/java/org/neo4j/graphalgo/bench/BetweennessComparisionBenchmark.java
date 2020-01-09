@@ -110,23 +110,25 @@ public class BetweennessComparisionBenchmark extends BaseBenchmark {
 
     @Benchmark
     public Object _01_benchmark_sequential() {
-        return runQuery("CALL algo.betweenness('','', {write:false}) YIELD computeMillis")
-                .stream()
-                .count();
+        return runQuery(
+            "CALL algo.betweenness('','', {write:false}) YIELD computeMillis",
+            r -> r.stream().count()
+        );
     }
 
     @Benchmark
     public Object _04_benchmark_parallel8() {
-        return runQuery("CALL algo.betweenness('','', {write:false, concurrency:8}) YIELD computeMillis")
-                .stream()
-                .count();
+        return runQuery(
+            "CALL algo.betweenness('','', {write:false, concurrency:8}) YIELD computeMillis",
+            r -> r.stream().count()
+        );
     }
 
     @Benchmark
     public Object _05_benchmark_sucessorBrandes() {
-        return runQuery("CALL algo.betweenness.exp1('','', {write:false, concurrency:8}) YIELD computeMillis")
-                .stream()
-                .count();
-    }
+        return runQuery(
+            "CALL algo.betweenness.exp1('','', {write:false, concurrency:8}) YIELD computeMillis",
+            r -> r.stream().count()
+        ); }
 
 }

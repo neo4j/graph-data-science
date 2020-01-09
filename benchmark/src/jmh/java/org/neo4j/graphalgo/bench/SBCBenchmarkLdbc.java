@@ -37,6 +37,7 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Timeout;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.concurrent.TimeUnit;
 
@@ -79,18 +80,23 @@ public class SBCBenchmarkLdbc extends BaseBenchmark {
     }
 
     @Benchmark
-    public void _01_sbcParallel() {
+    public void _01_sbcParallel(Blackhole blackhole) {
         runQuery(
             "CALL algo.betweenness.sampled(null, null, {strategy:'random', probability:0.001, maxDepth:5, concurrency:" + threads + "}) "
             + "YIELD loadMillis, computeMillis, writeMillis",
-            row -> {
-                long load = row.getNumber("loadMillis").longValue();
-                long compute = row.getNumber("computeMillis").longValue();
-                long write = row.getNumber("writeMillis").longValue();
+            result -> {
+                result.accept(row -> {
+                    long load = row.getNumber("loadMillis").longValue();
+                    long compute = row.getNumber("computeMillis").longValue();
+                    long write = row.getNumber("writeMillis").longValue();
 
-                System.out.println("load = " + load);
-                System.out.println("compute = " + compute);
-                System.out.println("write = " + write);
+                    System.out.println("load = " + load);
+                    System.out.println("compute = " + compute);
+                    System.out.println("write = " + write);
+                    return true;
+                });
+                blackhole.consume(result);
+                return null;
             }
         );
     }

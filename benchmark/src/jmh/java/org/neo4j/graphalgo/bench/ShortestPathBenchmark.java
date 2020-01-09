@@ -122,10 +122,12 @@ public class ShortestPathBenchmark extends BaseBenchmark {
 
     @Benchmark
     public Object _01_benchmark() {
-        return runQuery("MATCH (n {id:$head}) WITH n CALL algo.deltaStepping.stream(n, 'cost', $delta" +
-                ", {concurrency:$concurrency})" +
-                " YIELD nodeId, distance RETURN nodeId, distance", params)
-                .stream()
-                .count();
+        return runQuery(
+            "MATCH (n {id:$head}) WITH n CALL algo.deltaStepping.stream(n, 'cost', $delta" +
+            ", {concurrency:$concurrency})" +
+            " YIELD nodeId, distance RETURN nodeId, distance",
+            params,
+            r -> r.stream().count()
+        );
     }
 }

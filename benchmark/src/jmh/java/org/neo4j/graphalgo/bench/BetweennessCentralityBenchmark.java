@@ -120,10 +120,12 @@ public class BetweennessCentralityBenchmark extends BaseBenchmark {
     @Benchmark
     public Object _01_benchmark() {
 
-        return runQuery("CALL algo.betweenness('','', {concurrency: $concurrency, write:false, stats:false}) YIELD " +
-                "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis", params)
-                .stream()
-                .count();
+        return runQuery(
+            "CALL algo.betweenness('','', {concurrency: $concurrency, write:false, stats:false}) YIELD " +
+            "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis",
+            params,
+            r -> r.stream().count()
+        );
     }
 
 }

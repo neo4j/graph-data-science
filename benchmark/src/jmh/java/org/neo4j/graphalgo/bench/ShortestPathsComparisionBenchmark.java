@@ -111,19 +111,23 @@ public class ShortestPathsComparisionBenchmark extends BaseBenchmark {
 
     @Benchmark
     public Object _01_benchmark_deltaStepping() {
-        return runQuery("MATCH (n {id:$head}) WITH n CALL algo.deltaStepping.stream(n, 'cost', $delta" +
-                ", {concurrency:1})" +
-                " YIELD nodeId, distance RETURN nodeId, distance", params)
-                .stream()
-                .count();
+        return runQuery(
+            "MATCH (n {id:$head}) WITH n CALL algo.deltaStepping.stream(n, 'cost', $delta" +
+            ", {concurrency:1})" +
+            " YIELD nodeId, distance RETURN nodeId, distance",
+            params,
+            r -> r.stream().count()
+        );
     }
 
     @Benchmark
     public Object _02_benchmark_singleDijkstra() {
-        return runQuery("MATCH (n {id:$head}) WITH n CALL algo.shortestPaths.stream(n, 'cost')" +
-                " YIELD nodeId, distance RETURN nodeId, distance", params)
-                .stream()
-                .count();
+        return runQuery(
+            "MATCH (n {id:$head}) WITH n CALL algo.shortestPaths.stream(n, 'cost')" +
+            " YIELD nodeId, distance RETURN nodeId, distance",
+            params,
+            r -> r.stream().count()
+        );
     }
 
 }
