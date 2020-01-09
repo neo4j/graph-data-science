@@ -128,8 +128,7 @@ include::scripts/articlerank.cypher[tag=cypher-loading]
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.articleRank(label:String, relationship:String,
-    {iterations:20, dampingFactor:0.85, write: true, writeProperty:'pagerank', concurrency:4})
+CALL gds.alpha.articleRank.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
 ----
 
@@ -167,8 +166,7 @@ YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, 
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.articleRank.stream(label:String, relationship:String,
-    {iterations:20, dampingFactor:0.85, concurrency:4})
+CALL gds.alpha.articleRank.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD node, score
 ----
 
