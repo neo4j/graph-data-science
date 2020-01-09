@@ -29,6 +29,8 @@ import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
+import org.neo4j.graphalgo.impl.similarity.modern.HugeRelationshipsBuilder;
+import org.neo4j.graphalgo.impl.similarity.modern.NewOldGraph;
 import org.roaringbitmap.RoaringBitmap;
 
 import java.util.Collections;
@@ -36,8 +38,8 @@ import java.util.Collections;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.ArrayMatching.arrayContainingInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.impl.nn.ANNUtils.hugeGraph;
-import static org.neo4j.graphalgo.impl.nn.ANNUtils.initializeRoaringBitmaps;
+import static org.neo4j.graphalgo.impl.similarity.modern.ANNUtils.hugeGraph;
+import static org.neo4j.graphalgo.impl.similarity.modern.ANNUtils.initializeRoaringBitmaps;
 
 class NewOldGraphTest {
 

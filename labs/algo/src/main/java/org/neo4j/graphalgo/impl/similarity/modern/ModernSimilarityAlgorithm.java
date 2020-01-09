@@ -121,16 +121,18 @@ public abstract class ModernSimilarityAlgorithm<ME extends ModernSimilarityAlgor
         SimilarityComputer<INPUT> computer
     ) {
         Supplier<RleDecoder> decoderFactory = inputDecoderFactory(inputs);
-        return topN(similarityStream(
-            inputs,
-            sourceIndexIds,
-            targetIndexIds,
-            computer,
-            decoderFactory,
-            similarityCutoff,
-            topK
-        ), topN)
-            .map(this::modifyResult);
+        return topN(
+            similarityStream(
+                inputs,
+                sourceIndexIds,
+                targetIndexIds,
+                computer,
+                decoderFactory,
+                similarityCutoff,
+                topK
+            ),
+            topN
+        ).map(this::modifyResult);
     }
 
     protected Supplier<RleDecoder> createDecoderFactory(int size) {

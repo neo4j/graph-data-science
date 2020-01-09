@@ -84,7 +84,12 @@ public class ModernApproxNearestNeighborsProc extends ModernSimilarityProc<Moder
     ModernApproxNearestNeighborsAlgorithm<SimilarityInput> newAlgo(ModernApproximateNearestNeighborsConfig config) {
         ModernSimilarityAlgorithm<?, SimilarityInput> similarity =
             (ModernSimilarityAlgorithm<?, SimilarityInput>) similarityAlgorithm(config);
-        return new ModernApproxNearestNeighborsAlgorithm<>(config, similarity, api, log);
+        return new ModernApproxNearestNeighborsAlgorithm<>(
+            config,
+            similarity,
+            api,
+            log
+        );
     }
 
     ModernSimilarityAlgorithm<?, ? extends SimilarityInput> similarityAlgorithm(ModernApproximateNearestNeighborsConfig config) {

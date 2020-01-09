@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.nn;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.impl.similarity.modern.ANNUtils;
 
 import java.util.Random;
 import java.util.Set;
