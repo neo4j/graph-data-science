@@ -113,6 +113,19 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTes
         });
     }
 
+    @Test
+    void testIntegerThreshold() {
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+            "threshold", 3,
+            "weightProperty", "threshold"
+        )));
+
+        applyOnProcedure(proc -> {
+            CONFIG wccConfig = proc.newConfig(Optional.of("myGraph"), config);
+            assertEquals(3, wccConfig.threshold());
+        });
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testConsecutiveIds(boolean consecutiveIds) {

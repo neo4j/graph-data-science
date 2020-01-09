@@ -229,7 +229,9 @@ public final class CypherMapWrapper {
     }
 
     static <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
-        if (!expectedType.isInstance(value)) {
+        if (canHardCastToDouble(expectedType, value)) {
+            return expectedType.cast(((Number) value).doubleValue());
+        } else if (!expectedType.isInstance(value)) {
             String message = String.format(
                 "The value of `%s` must be of type `%s` but was `%s`.",
                 key,
@@ -239,6 +241,10 @@ public final class CypherMapWrapper {
             throw new IllegalArgumentException(message);
         }
         return expectedType.cast(value);
+    }
+
+    private static boolean canHardCastToDouble(Class<?> expectedType, @Nullable Object value) {
+        return Double.class.isAssignableFrom(expectedType) && Number.class.isInstance(value);
     }
 
     private static IllegalArgumentException missingValueFor(String key) {
