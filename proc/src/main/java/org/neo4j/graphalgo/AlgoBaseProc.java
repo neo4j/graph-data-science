@@ -80,7 +80,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             config = config.withoutAny(createConfig.configKeys());
         }
         CONFIG algoConfig = newConfig(getUsername(), graphName, maybeImplicitCreate, config);
-        validateEmptyConfig(config, algoConfig);
+        validateConfig(config, algoConfig);
         return algoConfig;
     }
 

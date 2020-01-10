@@ -84,7 +84,7 @@ public abstract class BaseProc {
         }
     }
 
-    protected void validateEmptyConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
+    protected void validateConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
         cypherConfig.withoutAny(config.configKeys()).requireEmpty();
     }
 
