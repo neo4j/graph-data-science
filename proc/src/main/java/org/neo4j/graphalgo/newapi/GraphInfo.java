@@ -28,7 +28,6 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
 
@@ -40,8 +39,8 @@ public class GraphInfo {
     public final Map<String, Object> relationshipProjection;
     public final String nodeQuery;
     public final String relationshipQuery;
-    public final long nodes;
-    public final long relationships;
+    public final long nodeCount;
+    public final long relationshipCount;
     public final Map<String, Object> histogram;
 
     GraphInfo(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
@@ -54,8 +53,8 @@ public class GraphInfo {
         this.relationshipQuery = config instanceof GraphCreateFromCypherConfig
             ? ((GraphCreateFromCypherConfig) config).relationshipQuery()
             : null;
-        this.nodes = graph.nodeCount();
-        this.relationships = graph.relationshipCount();
+        this.nodeCount = graph.nodeCount();
+        this.relationshipCount = graph.relationshipCount();
         this.histogram = computeHistogram ? computeHistogram(graph) : emptyMap();
     }
 

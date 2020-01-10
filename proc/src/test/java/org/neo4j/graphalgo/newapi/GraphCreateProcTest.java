@@ -106,8 +106,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, nodeProjection,
                 RELATIONSHIP_PROJECTION_KEY, relProjection,
-                "nodes", nodeCount,
-                "relationships", relCount,
+                "nodeCount", nodeCount,
+                "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -127,8 +127,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, emptyMap(),
                 RELATIONSHIP_PROJECTION_KEY, emptyMap(),
-                "nodes", nodeCount,
-                "relationships", relCount,
+                "nodeCount", nodeCount,
+                "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -136,21 +136,21 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void shouldProjectAllNodesWithSpecialStar() {
-        String query = "CALL gds.graph.create('g', '*', 'REL') YIELD nodes";
+        String query = "CALL gds.graph.create('g', '*', 'REL') YIELD nodeCount";
 
         runQuery("CREATE (), (:B), (:C:D:E)");
         assertCypherResult(query, singletonList(
-            map("nodes", nodeCount + 3)
+            map("nodeCount", nodeCount + 3)
         ));
     }
 
     @Test
     void shouldProjectAllRelationshipsWithSpecialStar() {
-        String query = "CALL gds.graph.create('g', 'A', '*') YIELD relationships";
+        String query = "CALL gds.graph.create('g', 'A', '*') YIELD relationshipCount";
 
         runQuery("CREATE (:A)-[:R]->(:A), (:B:A)-[:T]->(:A:B), (cde:C:D:E)-[:SELF]->(cde)");
         assertCypherResult(query, singletonList(
-            map("relationships", relCount + 2)
+            map("relationshipCount", relCount + 2)
         ));
     }
 
@@ -276,8 +276,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, desugarednodeProjection,
                 RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
-                "nodes", nodeCount,
-                "relationships", relCount,
+                "nodeCount", nodeCount,
+                "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -312,8 +312,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, expectedNodeProjection,
                 RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
-                "nodes", nodeCount,
-                "relationships", relCount,
+                "nodeCount", nodeCount,
+                "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -334,8 +334,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, emptyMap(),
                 RELATIONSHIP_PROJECTION_KEY, emptyMap(),
-                "nodes", nodeCount,
-                "relationships", relCount,
+                "nodeCount", nodeCount,
+                "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -356,8 +356,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, desugaredRelProjection,
-                "nodes", nodeCount,
-                "relationships", relCount,
+                "nodeCount", nodeCount,
+                "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -387,8 +387,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, expectedRelProjections,
-                "nodes", nodeCount,
-                "relationships", expectedRels,
+                "nodeCount", nodeCount,
+                "relationshipCount", expectedRels,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -412,8 +412,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, expectedRelProjection,
-                "nodes", nodeCount,
-                "relationships", relCount,
+                "nodeCount", nodeCount,
+                "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -432,8 +432,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, emptyMap(),
                 RELATIONSHIP_PROJECTION_KEY, emptyMap(),
-                "nodes", nodeCount,
-                "relationships", relCount,
+                "nodeCount", nodeCount,
+                "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -460,8 +460,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, relProjection,
-                "nodes", nodeCount,
-                "relationships", relCount,
+                "nodeCount", nodeCount,
+                "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -484,8 +484,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, emptyMap(),
                 RELATIONSHIP_PROJECTION_KEY, emptyMap(),
-                "nodes", nodeCount,
-                "relationships", relCount,
+                "nodeCount", nodeCount,
+                "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );

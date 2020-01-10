@@ -89,8 +89,8 @@ class GraphDropProcTest extends BaseProcTest {
                     ),
                     "nodeQuery", null,
                     "relationshipQuery", null,
-                    "nodes", 2L,
-                    "relationships", 1L,
+                    "nodeCount", 2L,
+                    "relationshipCount", 1L,
                     "histogram", map(
                         "min", 0L,
                         "mean", 0.5D,
@@ -130,7 +130,7 @@ class GraphDropProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.drop($graphName) " +
-            "YIELD graphName, nodeProjection, relationshipProjection, nodes, relationships",
+            "YIELD graphName, nodeProjection, relationshipProjection, nodeCount, relationshipCount",
             map("graphName", GRAPH_NAME),
             singletonList(
                 map(
@@ -148,8 +148,8 @@ class GraphDropProcTest extends BaseProcTest {
                             "aggregation", "DEFAULT",
                             "properties", emptyMap()
                         )),
-                    "nodes", 2L,
-                    "relationships", 1L
+                    "nodeCount", 2L,
+                    "relationshipCount", 1L
                 )
             )
         );
