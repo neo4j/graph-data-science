@@ -41,44 +41,6 @@ public final class QueryRunner {
 
     private QueryRunner() {}
 
-    public static void runQuery(GraphDatabaseAPI db, String username, String query, Map<String, Object> params) {
-        try (KernelTransaction.Revertable ignored = withUsername(db.beginTx(), username)) {
-            db.execute(query, params).close();
-        }
-    }
-
-    public static void runQuery(GraphDatabaseService db, String query, Map<String, Object> params, Consumer<Result> resultConsumer) {
-        try (Result result = db.execute(query, params)) {
-            resultConsumer.accept(result);
-        }
-    }
-
-    public static <T> T runQuery(GraphDatabaseService db, String query, Map<String, Object> params, Function<Result, T> resultFunction) {
-        try (Result result = db.execute(query, params)) {
-            return resultFunction.apply(result);
-        }
-    }
-
-    public static void runQuery(GraphDatabaseService db, String query, Consumer<Result> resultConsumer) {
-        runQuery(db, query, Collections.emptyMap(), resultConsumer);
-    }
-
-    public static <T> T  runQuery(GraphDatabaseService db, String query, Function<Result, T> resultFunction) {
-        return runQuery(db, query, Collections.emptyMap(), resultFunction);
-    }
-
-    public static void runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
-        db.execute(query, params).close();
-    }
-
-    public static void runQuery(GraphDatabaseService db, String query) {
-        runQuery(db, query, Collections.emptyMap());
-    }
-
-    static Result runQueryWithoutClosing(GraphDatabaseService db, String query, Map<String, Object> params) {
-        return db.execute(query, params);
-    }
-
     public static void runQueryWithRowConsumer(
         GraphDatabaseService db,
         String username,
@@ -107,6 +69,44 @@ public final class QueryRunner {
 
     public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, Consumer<Result.ResultRow> rowConsumer) {
         runQueryWithRowConsumer(db, query, Collections.emptyMap(), rowConsumer);
+    }
+
+    public static void runQuery(GraphDatabaseService db, String query) {
+        runQuery(db, query, Collections.emptyMap());
+    }
+
+    public static void runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
+        db.execute(query, params).close();
+    }
+
+    public static void runQuery(GraphDatabaseAPI db, String username, String query, Map<String, Object> params) {
+        try (KernelTransaction.Revertable ignored = withUsername(db.beginTx(), username)) {
+            db.execute(query, params).close();
+        }
+    }
+
+    public static <T> T  runQuery(GraphDatabaseService db, String query, Function<Result, T> resultFunction) {
+        return runQuery(db, query, Collections.emptyMap(), resultFunction);
+    }
+
+    public static <T> T runQuery(GraphDatabaseService db, String query, Map<String, Object> params, Function<Result, T> resultFunction) {
+        try (Result result = db.execute(query, params)) {
+            return resultFunction.apply(result);
+        }
+    }
+
+    public static void runQueryWithResultConsumer(GraphDatabaseService db, String query, Map<String, Object> params, Consumer<Result> resultConsumer) {
+        try (Result result = db.execute(query, params)) {
+            resultConsumer.accept(result);
+        }
+    }
+
+    /**
+     * This is to be used with caution;
+     * Callers have to consume the Result and/or use try-catch resource block.
+     */
+    static Result runQueryWithoutClosing(GraphDatabaseService db, String query, Map<String, Object> params) {
+        return db.execute(query, params);
     }
 
     public static <T> T runInTransaction(GraphDatabaseService db, Supplier<T> supplier) {

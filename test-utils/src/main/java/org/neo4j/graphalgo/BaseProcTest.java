@@ -115,36 +115,12 @@ public class BaseProcTest {
         runQueryWithRowConsumer(localDb, query, emptyMap(), check);
     }
 
-    protected void runQuery(@Language("Cypher") String query, Map<String, Object> params, Consumer<Result> check) {
-        QueryRunner.runQuery(
-            db,
-            query,
-            params,
-            check
-        );
-    }
-    protected void runQuery(@Language("Cypher") String query, Consumer<Result> check) {
-        runQuery(
-            query,
-            emptyMap(),
-            check
-        );
-    }
-
     protected void runQueryWithRowConsumer(
         String username,
         String query,
         Consumer<Result.ResultRow> check
     ) {
         runQueryWithRowConsumer(db, username, query, emptyMap(), check);
-    }
-
-    protected void runQuery(
-        String username,
-        String query,
-        Map<String, Object> params
-    ) {
-        QueryRunner.runQuery(db, username, query, params);
     }
 
     protected void runQueryWithRowConsumer(
@@ -157,8 +133,20 @@ public class BaseProcTest {
         QueryRunner.runQueryWithRowConsumer(db, username, query, params, check);
     }
 
+    protected void runQuery(
+        String username,
+        String query,
+        Map<String, Object> params
+    ) {
+        QueryRunner.runQuery(db, username, query, params);
+    }
+
     protected void runQuery(String query) {
         QueryRunner.runQuery(db, query);
+    }
+
+    protected void runQuery(String query, Map<String, Object> params) {
+        QueryRunner.runQuery(db, query, params);
     }
 
     protected <T> T runQuery(String query, Function<Result, T> resultFunction) {
@@ -169,16 +157,28 @@ public class BaseProcTest {
         return QueryRunner.runQuery(db, query, params, resultFunction);
     }
 
-    /*
-        This is to be used with caution;
-        Callers have to consume the Result and/or use try-catch resource block.
+    protected void runQueryWithResultConsumer(@Language("Cypher") String query, Map<String, Object> params, Consumer<Result> check) {
+        QueryRunner.runQueryWithResultConsumer(
+            db,
+            query,
+            params,
+            check
+        );
+    }
+    protected void runQueryWithResultConsumer(@Language("Cypher") String query, Consumer<Result> check) {
+        runQueryWithResultConsumer(
+            query,
+            emptyMap(),
+            check
+        );
+    }
+
+    /**
+     * This is to be used with caution;
+     * Callers have to consume the Result and/or use try-catch resource block.
      */
     protected Result runQueryWithoutClosing(String query, Map<String, Object> params) {
         return QueryRunner.runQueryWithoutClosing(db, query, params);
-    }
-
-    protected void runQuery(String query, Map<String, Object> params) {
-        QueryRunner.runQuery(db, query, params);
     }
 
     protected void assertEmptyResult(String query) {
@@ -257,7 +257,7 @@ public class BaseProcTest {
     ) {
         try (Transaction tx = db.beginTx()) {
             List<Map<String, Object>> actual = new ArrayList<>();
-            runQuery(query, queryParameters, result -> {
+            runQueryWithResultConsumer(query, queryParameters, result -> {
                 result.accept(row -> {
                     Map<String, Object> _row = new HashMap<>();
                     for (String column : result.columns()) {
@@ -333,7 +333,7 @@ public class BaseProcTest {
         Matcher<Throwable> matcher
     ) {
         try {
-            runQuery(query, queryParameters, this::consume);
+            runQueryWithResultConsumer(query, queryParameters, this::consume);
             fail(format("Expected an exception to be thrown by query:\n%s", query));
         } catch (Throwable e) {
             assertThat(e, matcher);

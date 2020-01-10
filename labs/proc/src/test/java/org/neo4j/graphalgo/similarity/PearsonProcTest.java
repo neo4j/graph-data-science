@@ -220,7 +220,7 @@ class PearsonProcTest extends BaseProcTest {
     void topNpearsonStreamTest() {
         Map<String, Object> params = map("config", map("top", 2, "topK", 0), "missingValue", 0);
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assert01(results.next());
             assert23(results.next());
             assertFalse(results.hasNext());
@@ -231,7 +231,7 @@ class PearsonProcTest extends BaseProcTest {
     void pearsonStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "topK", 0), "missingValue", 0);
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert01(results.next());
             assert02(results.next());
@@ -252,7 +252,7 @@ class PearsonProcTest extends BaseProcTest {
         );
         Map<String, Object> params = map("config", config, "missingValue", 0);
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert01(results.next());
             assertFalse(results.hasNext());
@@ -268,7 +268,7 @@ class PearsonProcTest extends BaseProcTest {
             Double.NaN
         );
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert01Skip(results.next());
             assert02Skip(results.next());
@@ -288,7 +288,7 @@ class PearsonProcTest extends BaseProcTest {
             map("concurrency", 1, "graph", "cypher", "skipValue", 0.0, "data", query, "topK", 0)
         );
 
-        runQuery(STATEMENT_CYPHER_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_CYPHER_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert01Skip(results.next());
             assert02Skip(results.next());
@@ -304,7 +304,7 @@ class PearsonProcTest extends BaseProcTest {
     void topKPearsonStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "topK", 1), "missingValue", 0);
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert01(results.next());
             assert01(flip(results.next()));
@@ -324,7 +324,7 @@ class PearsonProcTest extends BaseProcTest {
         );
         Map<String, Object> params = map("config", config, "missingValue", 0);
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert01(results.next());
             assertFalse(results.hasNext());
@@ -361,7 +361,7 @@ class PearsonProcTest extends BaseProcTest {
             0
         );
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertSameSource(results, 3, 0L);
             assertSameSource(results, 3, 1L);
             assertSameSource(results, 3, 2L);
@@ -374,7 +374,7 @@ class PearsonProcTest extends BaseProcTest {
     void topK3PearsonStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3), "missingValue", 0);
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertSameSource(results, 3, 0L);
             assertSameSource(results, 3, 1L);
             assertSameSource(results, 3, 2L);
@@ -423,7 +423,7 @@ class PearsonProcTest extends BaseProcTest {
                                         "RETURN a.name AS node1, b.name AS node2, similar.score AS score " +
                                         "ORDER BY id(a), id(b)";
 
-        runQuery(checkSimilaritiesQuery, result -> {
+        runQueryWithResultConsumer(checkSimilaritiesQuery, result -> {
             assertTrue(result.hasNext());
             Map<String, Object> row = result.next();
             assertEquals(row.get("node1"), "Alice");

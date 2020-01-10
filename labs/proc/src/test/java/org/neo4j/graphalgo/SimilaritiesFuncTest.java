@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphdb.Result;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -81,12 +80,12 @@ public class SimilaritiesFuncTest extends BaseProcTest {
 
         AtomicReference<String> bobSimilarity = new AtomicReference<>();
         AtomicReference<String> jimSimilarity = new AtomicReference<>();
-        runQuery(controlQuery, result -> {
+        runQueryWithResultConsumer(controlQuery, result -> {
             bobSimilarity.set((String) result.next().get("cosineSim"));
             jimSimilarity.set((String) result.next().get("cosineSim"));
         });
 
-        runQuery(
+        runQueryWithResultConsumer(
             "MATCH (p1:Employee)-[x:HAS_SKILL]->(sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
             "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) AS v1, COLLECT(coalesce(y.proficiency, 0.0d)) AS v2\n" +
             "WITH p1.name AS name, algo.similarity.cosine(v1, v2) AS cosineSim ORDER BY name ASC\n" +
@@ -116,12 +115,12 @@ public class SimilaritiesFuncTest extends BaseProcTest {
             "RETURN name, toString(toInteger(cosineSim)/10000.0) AS cosineSim";
         AtomicReference<String> bobSimilarity = new AtomicReference<>();
         AtomicReference<String> jimSimilarity = new AtomicReference<>();
-        runQuery(controlQuery, result -> {
+        runQueryWithResultConsumer(controlQuery, result -> {
             bobSimilarity.set((String) result.next().get("cosineSim"));
             jimSimilarity.set((String) result.next().get("cosineSim"));
         });
 
-        runQuery(
+        runQueryWithResultConsumer(
             "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
@@ -152,12 +151,12 @@ public class SimilaritiesFuncTest extends BaseProcTest {
 
         AtomicReference<String> bobSimilarity = new AtomicReference<>();
         AtomicReference<String> jimSimilarity = new AtomicReference<>();
-        runQuery(controlQuery, result -> {
+        runQueryWithResultConsumer(controlQuery, result -> {
             bobSimilarity.set((String) result.next().get("pearsonSim"));
             jimSimilarity.set((String) result.next().get("pearsonSim"));
         });
 
-        runQuery(
+        runQueryWithResultConsumer(
             "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
@@ -181,12 +180,12 @@ public class SimilaritiesFuncTest extends BaseProcTest {
             "RETURN p1.name, toString(toInteger(euclidDist*10000)/10000.0) AS euclidDist";
         AtomicReference<String> bobDist = new AtomicReference<>();
         AtomicReference<String> jimDist = new AtomicReference<>();
-        runQuery(controlQuery, result -> {
+        runQueryWithResultConsumer(controlQuery, result -> {
             bobDist.set((String) result.next().get("euclidDist"));
             jimDist.set((String) result.next().get("euclidDist"));
         });
 
-        runQuery(
+        runQueryWithResultConsumer(
             "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
@@ -210,12 +209,12 @@ public class SimilaritiesFuncTest extends BaseProcTest {
 
         AtomicReference<String> bobSim = new AtomicReference<>();
         AtomicReference<String> jimSim = new AtomicReference<>();
-        runQuery(controlQuery, result -> {
+        runQueryWithResultConsumer(controlQuery, result -> {
             bobSim.set((String) result.next().get("jaccardSim"));
             jimSim.set((String) result.next().get("jaccardSim"));
         });
 
-        runQuery(
+        runQueryWithResultConsumer(
             "MATCH (p1:Employee),(p2:Employee) WHERE p1 <> p2\n" +
             "WITH p1, [(p1)-[:HAS_SKILL]->(sk) | id(sk)] AS v1, p2, [(p2)-[:HAS_SKILL]->(sk) | id(sk)] AS v2\n" +
             "WITH p1.name AS name1, p2.name AS name2, algo.similarity.jaccard(v1, v2) AS jaccardSim ORDER BY name1,name2\n" +
@@ -237,12 +236,12 @@ public class SimilaritiesFuncTest extends BaseProcTest {
 
         AtomicReference<String> bobSim = new AtomicReference<>();
         AtomicReference<String> jimSim = new AtomicReference<>();
-        runQuery(controlQuery, result -> {
+        runQueryWithResultConsumer(controlQuery, result -> {
             bobSim.set((String) result.next().get("overlapSim"));
             jimSim.set((String) result.next().get("overlapSim"));
         });
 
-        runQuery(
+        runQueryWithResultConsumer(
             "MATCH (p1:Employee),(p2:Employee) WHERE p1 <> p2\n" +
             "WITH p1, [(p1)-[:HAS_SKILL]->(sk) | id(sk)] as v1, p2, [(p2)-[:HAS_SKILL]->(sk) | id(sk)] as v2\n" +
             "WITH p1.name as name1, p2.name as name2, algo.similarity.overlap(v1, v2) as overlapSim ORDER BY name1,name2\n" +
@@ -266,12 +265,12 @@ public class SimilaritiesFuncTest extends BaseProcTest {
 
         AtomicReference<String> bobSim = new AtomicReference<>();
         AtomicReference<String> jimSim = new AtomicReference<>();
-        runQuery(controlQuery, result -> {
+        runQueryWithResultConsumer(controlQuery, result -> {
             bobSim.set((String) result.next().get("euclidSim"));
             jimSim.set((String) result.next().get("euclidSim"));
         });
 
-        runQuery(
+        runQueryWithResultConsumer(
             "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +

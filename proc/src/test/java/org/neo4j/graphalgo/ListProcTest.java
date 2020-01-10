@@ -158,20 +158,20 @@ class ListProcTest extends BaseProcTest {
         String query = "CALL gds.list()";
         assertEquals(
             ALL,
-            runQuery(query, result -> {
-                return result.<String>columnAs("name")
-                    .stream()
-                    .collect(Collectors.toList());
-            }));
+            runQuery(query, result -> result
+                .<String>columnAs("name")
+                .stream()
+                .collect(Collectors.toList())));
     }
 
     private List<String> listProcs(Object name) {
         String query = "CALL gds.list($name)";
-        return runQuery(query, MapUtil.map("name", name), result -> {
-            return result.<String>columnAs("name")
+        return runQuery(
+            query,
+            MapUtil.map("name", name),
+            result -> result.<String>columnAs("name")
                 .stream()
-                .collect(Collectors.toList());
-        });
-
+                .collect(Collectors.toList())
+        );
     }
 }

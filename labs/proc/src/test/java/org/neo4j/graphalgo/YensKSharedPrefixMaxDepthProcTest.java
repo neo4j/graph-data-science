@@ -69,9 +69,7 @@ class YensKSharedPrefixMaxDepthProcTest extends BaseProcTest {
         params.put("from", "d");
         params.put("to", "a");
         params.put("maxDepth", 5);
-        long pathsCount = runQuery(cypher, params, result -> {
-            return result.stream().map(row -> row.get("path")).count();
-        });
+        long pathsCount = runQuery(cypher, params, result -> result.stream().map(row -> row.get("path")).count());
 
         assertEquals(1, pathsCount, "Number of paths to maxDepth=5 should be 1");
 
@@ -79,17 +77,13 @@ class YensKSharedPrefixMaxDepthProcTest extends BaseProcTest {
         params.put("from", "a");
         params.put("to", "d");
 
-        long pathsOtherDirectionCount = runQuery(cypher, params, result -> {
-            return result.stream().map(row -> row.get("path")).count();
-        });
+        long pathsOtherDirectionCount = runQuery(cypher, params, result -> result.stream().map(row -> row.get("path")).count());
 
         assertEquals(1, pathsOtherDirectionCount, "Number of paths to maxDepth=5 should be 1");
 
         params.put("maxDepth", 6);
 
-        long pathsDepth6Count = runQuery(cypher, params, result -> {
-            return result.stream().map(row -> row.get("path")).count();
-        });
+        long pathsDepth6Count = runQuery(cypher, params, result -> result.stream().map(row -> row.get("path")).count());
 
         assertEquals(2, pathsDepth6Count, "Number of paths to maxDepth=6 should be 2");
     }

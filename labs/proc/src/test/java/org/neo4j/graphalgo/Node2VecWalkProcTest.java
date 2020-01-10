@@ -34,7 +34,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -80,9 +79,7 @@ class Node2VecWalkProcTest extends BaseProcTest {
     void shouldHaveGivenStartNodeRandom() {
         try (ResourceIterator<List<Long>> result = runQuery(
             "CALL algo.randomWalk.stream(1, 1, 1)",
-            r -> {
-                return r.columnAs("nodeIds");
-            }
+            r -> r.columnAs("nodeIds")
         )) {
             List<Long> path = result.next();
             assertEquals(1L, path.get(0).longValue());
@@ -98,10 +95,7 @@ class Node2VecWalkProcTest extends BaseProcTest {
 
     @Test
     void shouldHandleLargeResults() {
-        long results = runQuery(
-            "CALL algo.randomWalk.stream(null, 100, 100000)",
-            (Function<Result, Long>) Iterators::count
-        );
+        long results = runQuery("CALL algo.randomWalk.stream(null, 100, 100000)", Iterators::count);
         assertEquals(100000, results);
     }
 
@@ -109,9 +103,7 @@ class Node2VecWalkProcTest extends BaseProcTest {
     void shouldHaveSameTypesForStartNodesRandom() {
         // TODO: make this test predictable (i.e. set random seed)
         runInTransaction(db, () -> {
-            ResourceIterator<Path> results = runQuery("CALL algo.randomWalk.stream('Fred', 2, 5,{path:true})", r -> {
-                return r.columnAs("path");
-            });
+            ResourceIterator<Path> results = runQuery("CALL algo.randomWalk.stream('Fred', 2, 5,{path:true})", r -> r.columnAs("path"));
             int count = 0;
             while (results.hasNext()) {
                 Path path = results.next();
@@ -128,9 +120,7 @@ class Node2VecWalkProcTest extends BaseProcTest {
     @Test
     @Timeout(200)
     void shouldHaveStartedFromEveryNodeRandom() {
-        ResourceIterator<List<Long>> results = runQuery("CALL algo.randomWalk.stream(null,1,100)", r -> {
-            return r.columnAs("nodeIds");
-        });
+        ResourceIterator<List<Long>> results = runQuery("CALL algo.randomWalk.stream(null,1,100)", r -> r.columnAs("nodeIds"));
 
         Set<Long> nodeIds = new HashSet<>();
         while (results.hasNext()) {
@@ -156,9 +146,7 @@ class Node2VecWalkProcTest extends BaseProcTest {
     void shouldHaveGivenStartNode() {
         List<Long> result = runQuery(
             "CALL algo.randomWalk.stream(1, 1, 1, {mode:'node2vec', return: 1, inOut:1})",
-            r -> {
-                return r.<List<Long>>columnAs("nodeIds").next();
-            }
+            r -> r.<List<Long>>columnAs("nodeIds").next()
         );
         assertThat(1L, equalTo(result.get(0)));
     }
@@ -167,11 +155,9 @@ class Node2VecWalkProcTest extends BaseProcTest {
     @Timeout(100)
     void shouldHaveResultsN2V() {
         ResourceIterator<List<Long>> results = runQuery(
-            "CALL algo.randomWalk.stream(null, 1, 5, {mode:'node2vec', return: 1, inOut:1})", r -> {
-                return r.columnAs("nodeIds");
-            });
-
-
+            "CALL algo.randomWalk.stream(null, 1, 5, {mode:'node2vec', return: 1, inOut:1})",
+            r -> r.columnAs("nodeIds")
+        );
 
         assertTrue(results.hasNext());
     }
@@ -179,9 +165,9 @@ class Node2VecWalkProcTest extends BaseProcTest {
     @Test
     void shouldHaveStartedFromEveryNodeN2V() {
         ResourceIterator<List<Long>> results = runQuery(
-            "CALL algo.randomWalk.stream(null, 1, 100, {mode:'node2vec', return: 1, inOut:1})", r -> {
-                return r.columnAs("nodeIds");
-            });
+            "CALL algo.randomWalk.stream(null, 1, 100, {mode:'node2vec', return: 1, inOut:1})",
+            r -> r.columnAs("nodeIds")
+        );
 
         Set<Long> nodeIds = new HashSet<>();
         while (results.hasNext()) {
@@ -194,9 +180,9 @@ class Node2VecWalkProcTest extends BaseProcTest {
     @Test
     void shouldNotFailN2V() {
         ResourceIterator<List<Long>> results = runQuery(
-            "CALL algo.randomWalk.stream(2, 7, 2, {mode:'node2vec', return: 1, inOut:1})", r -> {
-                return r.columnAs("nodeIds");
-            });
+            "CALL algo.randomWalk.stream(2, 7, 2, {mode:'node2vec', return: 1, inOut:1})",
+            r -> r.columnAs("nodeIds")
+        );
 
         results.next();
         results.next();

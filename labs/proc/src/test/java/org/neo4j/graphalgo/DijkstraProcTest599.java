@@ -77,12 +77,12 @@ class DijkstraProcTest599 extends BaseProcTest {
             "YIELD nodeCount, totalCost, loadMillis, evalMillis, writeMillis\n" +
             "RETURN totalCost\n";
 
-        double totalCost = runQuery(totalCostCommand, result -> {
-            return result.<Double>columnAs("totalCost")
-                .stream()
-                .findFirst()
-                .orElse(Double.NaN);
-        });
+        double totalCost = runQuery(totalCostCommand, result -> result
+            .<Double>columnAs("totalCost")
+            .stream()
+            .findFirst()
+            .orElse(Double.NaN)
+        );
 
         assertEquals(4.0, totalCost, 1e-4);
 
@@ -103,7 +103,7 @@ class DijkstraProcTest599 extends BaseProcTest {
         );
         Iterator<Matcher<Number>> expected = expectedList.iterator();
 
-        runQuery(pathCommand, pathResult -> {
+        runQueryWithResultConsumer(pathCommand, pathResult -> {
             pathResult.forEachRemaining(res -> {
                 assertThat((Number) res.get("id"), expected.next());
                 assertThat((Number) res.get("weight"), expected.next());

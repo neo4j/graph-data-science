@@ -186,20 +186,20 @@ class ListProcTest extends BaseProcTest {
         String query = "CALL gds.list()";
         assertEquals(
             ALL,
-            runQuery(query, result -> {
-                return result.<String > columnAs("name")
-                    .stream()
-                    .collect(Collectors.toSet());
-            })
+            runQuery(query, result -> result
+                .<String>columnAs("name")
+                .stream()
+                .collect(Collectors.toSet())
+            )
         );
     }
 
     private Set<String> listProcs(@Nullable Object name) {
         String query = "CALL gds.list($name)";
-        return runQuery(query, MapUtil.map("name", name), result -> {
-            return result.<String > columnAs("name")
-                .stream()
-                .collect(Collectors.toSet());
-        });
+        return runQuery(query, MapUtil.map("name", name), result -> result
+            .<String > columnAs("name")
+            .stream()
+            .collect(Collectors.toSet())
+        );
     }
 }

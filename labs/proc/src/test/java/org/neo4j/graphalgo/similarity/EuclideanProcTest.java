@@ -185,7 +185,7 @@ class EuclideanProcTest extends BaseProcTest {
 
     @Test
     void topNeuclideanStreamTest() {
-        runQuery(STATEMENT_STREAM, map("config", map("top", 2, "topK", 0), "missingValue", 0),
+        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", map("top", 2, "topK", 0), "missingValue", 0),
             results -> {
                 assert02(results.next());
                 assert13(results.next());
@@ -209,7 +209,7 @@ class EuclideanProcTest extends BaseProcTest {
         // c2 - d3: sqrt(16) = 4
         // System.out.println(runQuery(query).resultAsString());
 
-        runQuery(STATEMENT_STREAM, map("config", map("concurrency", 1, "topK", 0), "missingValue", 0),
+        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", map("concurrency", 1, "topK", 0), "missingValue", 0),
             results -> {
                 assertTrue(results.hasNext());
                 assert01(results.next());
@@ -230,7 +230,7 @@ class EuclideanProcTest extends BaseProcTest {
             "sourceIds", Collections.singletonList(0L),
             "targetIds", Collections.singletonList(1L)
         );
-        runQuery(STATEMENT_STREAM, map("config", config, "missingValue", 0),
+        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", config, "missingValue", 0),
             results -> {
                 assertTrue(results.hasNext());
                 assert01(results.next());
@@ -261,7 +261,7 @@ class EuclideanProcTest extends BaseProcTest {
         Map<String, Object> params = map(
             "config", map("concurrency", 1, "graph", "cypher", "skipValue", Double.NaN, "data", query, "topK", 0)
         );
-        runQuery(STATEMENT_CYPHER_STREAM, params,
+        runQueryWithResultConsumer(STATEMENT_CYPHER_STREAM, params,
             results -> {
                 assertTrue(results.hasNext());
                 assert01(results.next());
@@ -277,7 +277,7 @@ class EuclideanProcTest extends BaseProcTest {
 
     @Test
     void eucideanSkipStreamTest() {
-        runQuery(
+        runQueryWithResultConsumer(
             STATEMENT_STREAM,
             map("config", map("concurrency", 1, "skipValue", Double.NaN, "topK", 0), "missingValue", Double.NaN),
             results -> {
@@ -294,7 +294,7 @@ class EuclideanProcTest extends BaseProcTest {
     void topKEuclideanStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "topK", 1), "missingValue", 0);
 
-        runQuery(STATEMENT_STREAM, params,
+        runQueryWithResultConsumer(STATEMENT_STREAM, params,
             results -> {
                 assertTrue(results.hasNext());
                 assert02(results.next());
@@ -316,7 +316,7 @@ class EuclideanProcTest extends BaseProcTest {
         );
         Map<String, Object> params = map("config", config, "missingValue", 0);
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert02(results.next());
             assertFalse(results.hasNext());
@@ -351,7 +351,7 @@ class EuclideanProcTest extends BaseProcTest {
             "missingValue",
             0
         );
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertSameSource(results, 3, 0L);
             assertSameSource(results, 3, 1L);
             assertSameSource(results, 3, 2L);
@@ -370,7 +370,7 @@ class EuclideanProcTest extends BaseProcTest {
         // c2 - d3: sqrt(16) = 4
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3), "missingValue", 0);
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertSameSource(results, 3, 0L);
             assertSameSource(results, 3, 1L);
             assertSameSource(results, 3, 2L);
@@ -422,7 +422,7 @@ class EuclideanProcTest extends BaseProcTest {
                                         "RETURN a.name AS node1, b.name AS node2, similar.score AS score " +
                                         "ORDER BY id(a), id(b)";
 
-        runQuery(checkSimilaritiesQuery, result -> {
+        runQueryWithResultConsumer(checkSimilaritiesQuery, result -> {
             // a0 - b1: sqrt(26) = 5.1
             // a0 - c2: sqrt(6) = 2.5
             // a0 - d3: sqrt(1+4+25) = 5.5

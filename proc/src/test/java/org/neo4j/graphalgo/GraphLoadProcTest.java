@@ -538,9 +538,7 @@ class GraphLoadProcTest extends BaseProcTest {
 
         Map<String, Object> params = singletonMap("graph", graph);
         // First load succeeds
-        Boolean loaded = runQuery(query, params, result -> {
-            return result.<Boolean>columnAs("loaded").next();
-        });
+        Boolean loaded = runQuery(query, params, result -> result.<Boolean>columnAs("loaded").next());
         assertFalse(loaded);
         // Second load throws exception
         QueryExecutionException exGraphAlreadyLoaded = assertThrows(

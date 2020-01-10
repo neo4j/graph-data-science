@@ -85,11 +85,9 @@ public class PrimProcTest extends BaseProcTest {
 
         final long relCount = runQuery(
             "MATCH (a)-[:MST]->(b) RETURN id(a) as a, id(b) as b",
-            result -> {
-                return result.stream()
-                    .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
-                    .count();
-            }
+            result -> result.stream()
+                .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
+                .count()
         );
 
         assertEquals(relCount, 4);
@@ -114,11 +112,12 @@ public class PrimProcTest extends BaseProcTest {
             }
         );
 
-        long relCount = runQuery( "MATCH (a)-[:MAX]->(b) RETURN id(a) as a, id(b) as b", result -> {
-            return result.stream()
+        long relCount = runQuery(
+            "MATCH (a)-[:MAX]->(b) RETURN id(a) as a, id(b) as b",
+            result -> result.stream()
                 .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
-                .count();
-        });
+                .count()
+        );
 
         assertEquals(relCount, 4);
     }

@@ -148,7 +148,7 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTes
 
         applyOnProcedure(proc -> {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> { proc.newConfig(Optional.empty(), config); }
+                () -> proc.newConfig(Optional.empty(), config)
             );
 
             assertTrue(exception
@@ -166,7 +166,7 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTes
 
         applyOnProcedure(proc -> {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> { proc.newConfig(Optional.empty(), config); }
+                () -> proc.newConfig(Optional.empty(), config)
             );
 
             assertTrue(exception

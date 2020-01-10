@@ -161,7 +161,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void topNoverlapStreamTest() {
-        runQuery(STATEMENT_STREAM, map("config", map("top", 2)), results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", map("top", 2)), results -> {
             assert10(results.next());
             assert20(results.next());
             assertFalse(results.hasNext());
@@ -170,7 +170,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void overlapStreamTest() {
-        runQuery(STATEMENT_STREAM, map("config", map("concurrency", 1)), results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", map("concurrency", 1)), results -> {
             assertTrue(results.hasNext());
             assert10(results.next());
             assert20(results.next());
@@ -194,7 +194,7 @@ class OverlapProcTest extends BaseProcTest {
 
         Map<String, Object> params = map("config", config);
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert10(results.next());
             assertFalse(results.hasNext());
@@ -205,7 +205,7 @@ class OverlapProcTest extends BaseProcTest {
     void topKoverlapStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "topK", 1));
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert10(results.next());
             assert20(results.next());
@@ -223,7 +223,7 @@ class OverlapProcTest extends BaseProcTest {
         );
         Map<String, Object> params = map("config", config);
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert10(results.next());
             assertFalse(results.hasNext());
@@ -248,7 +248,7 @@ class OverlapProcTest extends BaseProcTest {
     void topK4overlapStreamTest() {
         Map<String, Object> params = map("config", map("topK", 4, "concurrency", 4, "similarityCutoff", -0.1));
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertSameSource(results, 0, 0L);
             assertSameSource(results, 1, 1L);
             assertSameSource(results, 2, 2L);
@@ -260,7 +260,7 @@ class OverlapProcTest extends BaseProcTest {
     void topK3overlapStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3));
 
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertSameSource(results, 0, 0L);
             assertSameSource(results, 1, 1L);
             assertSameSource(results, 2, 2L);
@@ -313,7 +313,7 @@ class OverlapProcTest extends BaseProcTest {
                                         "RETURN a.name AS node1, b.name AS node2, similar.score AS score " +
                                         "ORDER BY id(a), id(b)";
 
-        runQuery(checkSimilaritiesQuery, result -> {
+        runQueryWithResultConsumer(checkSimilaritiesQuery, result -> {
             assertTrue(result.hasNext());
             Map<String, Object> row = result.next();
             assertEquals(row.get("node1"), "Bob");

@@ -199,7 +199,7 @@ class CosineProcTest extends BaseProcTest {
 
     @Test
     void topNcosineStreamTest() {
-        runQuery(
+        runQueryWithResultConsumer(
             STATEMENT_STREAM,
             map("config", map("top", 2, "topK", 0), "missingValue", 0),
             results -> {
@@ -212,7 +212,7 @@ class CosineProcTest extends BaseProcTest {
 
     @Test
     void cosineStreamTest() {
-        runQuery(STATEMENT_STREAM, map("config", map("concurrency", 1, "topK", 0), "missingValue", 0),
+        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", map("concurrency", 1, "topK", 0), "missingValue", 0),
             results -> {
                 assertTrue(results.hasNext());
                 assert01(results.next());
@@ -233,7 +233,7 @@ class CosineProcTest extends BaseProcTest {
             "sourceIds", Collections.singletonList(0L),
             "targetIds", Collections.singletonList(1L)
         );
-        runQuery(STATEMENT_STREAM, map("config", config, "missingValue", 0),
+        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", config, "missingValue", 0),
             results -> {
                 assertTrue(results.hasNext());
                 assert01(results.next());
@@ -245,7 +245,7 @@ class CosineProcTest extends BaseProcTest {
 
     @Test
     void cosineSkipStreamTest() {
-        runQuery(
+        runQueryWithResultConsumer(
             STATEMENT_STREAM,
             map("config", map("concurrency", 1, "skipValue", Double.NaN, "topK", 0), "missingValue", Double.NaN),
             results -> {
@@ -261,7 +261,7 @@ class CosineProcTest extends BaseProcTest {
     @Test
     void cosineCypherLoadingStreamTest() {
         String query = "MATCH (p:Person)-[r:LIKES]->(i) RETURN id(p) AS item, id(i) AS category, r.stars AS weight";
-        runQuery(
+        runQueryWithResultConsumer(
             STATEMENT_CYPHER_STREAM,
             map("config", map("concurrency", 1, "graph", "cypher", "skipValue", 0.0, "data", query, "topK", 0)),
             results -> {
@@ -278,7 +278,7 @@ class CosineProcTest extends BaseProcTest {
     void topKCosineStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "topK", 1), "missingValue", 0);
         System.out.println(runQuery(STATEMENT_STREAM, params, Result::resultAsString));
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert02(results.next());
             assert01(flip(results.next()));
@@ -298,7 +298,7 @@ class CosineProcTest extends BaseProcTest {
         );
         Map<String, Object> params = map("config", config, "missingValue", 0);
         System.out.println(runQuery(STATEMENT_STREAM, params, Result::resultAsString));
-        runQuery(STATEMENT_STREAM, params, results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert02(results.next());
             assertFalse(results.hasNext());
@@ -335,7 +335,7 @@ class CosineProcTest extends BaseProcTest {
             0
         );
 
-        runQuery(STATEMENT_STREAM, params,
+        runQueryWithResultConsumer(STATEMENT_STREAM, params,
             results -> {
                 assertSameSource(results, 3, 0L);
                 assertSameSource(results, 3, 1L);
@@ -352,7 +352,7 @@ class CosineProcTest extends BaseProcTest {
 
         System.out.println(runQuery(STATEMENT_STREAM, params, Result::resultAsString));
 
-        runQuery(STATEMENT_STREAM, params,
+        runQueryWithResultConsumer(STATEMENT_STREAM, params,
             results -> {
                 assertSameSource(results, 3, 0L);
                 assertSameSource(results, 3, 1L);
@@ -427,7 +427,7 @@ class CosineProcTest extends BaseProcTest {
                                         "ORDER BY id(a), id(b)";
 
         System.out.println(runQuery(checkSimilaritiesQuery, Result::resultAsString));
-        runQuery(checkSimilaritiesQuery, result -> {
+        runQueryWithResultConsumer(checkSimilaritiesQuery, result -> {
             assertTrue(result.hasNext());
             Map<String, Object> row = result.next();
             assertEquals(row.get("node1"), "Alice");

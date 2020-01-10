@@ -22,11 +22,9 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.Iterators;
 
 import java.util.Collections;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -56,10 +54,7 @@ class RandomWalkLargeResultProcTest extends BaseProcTest {
 
     @Test
     void shouldHandleLargeResults() {
-        long resultsCount = runQuery(
-            "CALL algo.randomWalk.stream(null, 100, 100000)",
-            (Function<Result, Long>) Iterators::count
-        );
+        long resultsCount = runQuery("CALL algo.randomWalk.stream(null, 100, 100000)", Iterators::count);
         assertEquals(100000, resultsCount);
     }
 }
