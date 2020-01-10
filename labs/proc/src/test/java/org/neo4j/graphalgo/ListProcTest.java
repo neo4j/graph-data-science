@@ -23,8 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
 import org.neo4j.graphalgo.centrality.ArticleRankProc;
+import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.similarity.CosineProc;
 import org.neo4j.graphalgo.similarity.EuclideanProc;
 import org.neo4j.graphalgo.similarity.OverlapProc;
 import org.neo4j.graphalgo.similarity.PearsonProc;
+import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 
 import java.util.Collection;
 import java.util.HashSet;
