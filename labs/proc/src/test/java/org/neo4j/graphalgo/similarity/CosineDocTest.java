@@ -149,7 +149,7 @@ class CosineDocTest extends BaseProcTest {
                        " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
                        " WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData" +
                        " WITH collect(userData) AS data" +
-                       " CALL gds.alpha.similarity.cosine.stream({data: data})" +
+                       " CALL gds.alpha.similarity.cosine.stream({data: data, topK: 0})" +
                        " YIELD item1, item2, count1, count2, similarity" +
                        " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
                        "    ORDER BY similarity DESC";
@@ -183,7 +183,8 @@ class CosineDocTest extends BaseProcTest {
                        " WITH collect(userData) AS data" +
                        " CALL gds.alpha.similarity.cosine.stream({" +
                        "    data: data," +
-                       "    similarityCutoff: 0.0" +
+                       "    similarityCutoff: 0.0," +
+                       "    topK: 0" +
                        " })" +
                        " YIELD item1, item2, count1, count2, similarity" +
                        " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +

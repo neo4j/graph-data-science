@@ -487,7 +487,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | Name                    | Type           | Default                | Optional | Description
 | `data`                  | list or string | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
 | `top`                   | int            | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
-| `topK`                  | int            | 0                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| `topK`                  | int            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | `similarityCutoff`      | int            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | `degreeCutoff`          | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
 | `skipValue`             | double         | algo.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
@@ -548,7 +548,7 @@ YIELD item1, item2, count1, count2, intersection, similarity
 | Name               | Type           | Default                | Optional | Description
 | `data`             | list or string | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
 | `top`              | int            | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
-| `topK`             | int            | 0                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| `topK`             | int            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | `similarityCutoff` | int            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | `degreeCutoff`     | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
 | `skipValue`        | double         | null                   | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
