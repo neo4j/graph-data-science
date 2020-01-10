@@ -99,10 +99,12 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
             );
         });
 
-        return ((ImmutableGraphCreateFromCypherConfig) ImmutableGraphCreateFromCypherConfig
-            .copyOf(this))
-            .withNodeProjection(nodeProjections)
-            .withRelationshipProjection(relProjectionBuilder.build());
+        return ImmutableGraphCreateFromCypherConfig
+            .builder()
+            .from(this)
+            .nodeProjection(nodeProjections)
+            .relationshipProjection(relProjectionBuilder.build())
+            .build();
     }
 
     static GraphCreateFromCypherConfig of(
