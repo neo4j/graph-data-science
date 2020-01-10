@@ -61,7 +61,7 @@ public class GraphCreateProc extends CatalogProc {
             relationshipProjection,
             cypherConfig
         );
-        cypherConfig.withoutAny(config.configKeys()).requireEmpty();
+        validateEmptyConfig(cypherConfig, config);
 
         // computation
         GraphCreateResult result = runWithExceptionLogging(
@@ -91,7 +91,7 @@ public class GraphCreateProc extends CatalogProc {
             relationshipQuery,
             cypherConfig
         );
-        cypherConfig.withoutAny(config.configKeys()).requireEmpty();
+        validateEmptyConfig(cypherConfig, config);
 
         // computation
         GraphCreateResult result = runWithExceptionLogging(

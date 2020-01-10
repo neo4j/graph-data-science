@@ -19,10 +19,12 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.newapi.BaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -80,6 +82,10 @@ public abstract class BaseProc {
             log.warn(message, e);
             throw e;
         }
+    }
+
+    protected void validateEmptyConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
+        cypherConfig.withoutAny(config.configKeys()).requireEmpty();
     }
 
     static final class OutputFieldParser {

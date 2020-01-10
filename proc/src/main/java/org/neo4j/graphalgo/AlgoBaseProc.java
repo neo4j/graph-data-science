@@ -48,7 +48,6 @@ import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.helpers.collection.Pair;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -81,7 +80,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             config = config.withoutAny(createConfig.configKeys());
         }
         CONFIG algoConfig = newConfig(getUsername(), graphName, maybeImplicitCreate, config);
-        config.withoutAny(algoConfig.configKeys()).requireEmpty();
+        validateEmptyConfig(config, algoConfig);
         return algoConfig;
     }
 
