@@ -63,7 +63,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
                               ", (nCharles)-[:FOLLOWS {score: 2}]->(nDoug)\n" +
                               ", (nMichael)-[:FOLLOWS {score: 1.5}]->(nDoug)";
 
-        registerProcedures(DegreeCentralityProc.class, GraphLoadProc.class);
+        registerProcedures(DegreeCentralityProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(cypherUnweighted);
     }
@@ -76,7 +76,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("streamUnweightedTuples")
-    void testUnweightedStreaming(String projection, String expected) {
+    void testUnweightedStreaming(String projection, String oldDirection, String expected) {
         String query =
             "CALL gds.alpha.degree.stream({" +
             "   nodeProjection: 'User', " +
@@ -85,7 +85,8 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "           type: 'FOLLOWS'," +
             "           projection: '" + projection + "'" +
             "       }" +
-            "   }" +
+            "   }," +
+            "   direction: '" + oldDirection + "' " +
             "})" +
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).id AS name, score AS followers " +
@@ -97,7 +98,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("streamWeightedTuples")
-    void testWeightedStreaming(String projection, String expected) {
+    void testWeightedStreaming(String projection, String oldDirection, String expected) {
         String query =
             "CALL gds.alpha.degree.stream({" +
             "   nodeProjection: 'User', " +
@@ -105,14 +106,11 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "       FOLLOWS: {" +
             "           type: 'FOLLOWS'," +
             "           projection: '" + projection + "'," +
-            "           properties: {" +
-            "               score: {" +
-            "                   property: 'score'" +
-            "               }" +
-            "           }" +
+            "           properties: 'score'" +
             "       }" +
             "   }," +
-            "   weightProperty: 'score'" +
+            "   weightProperty: 'score'," +
+            "   direction: '" + oldDirection + "' " +
             "})" +
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).id AS name, score AS weightedFollowers " +
@@ -122,10 +120,9 @@ public class DegreeCentralityDocTest extends BaseProcTest {
         assertEquals(expected, actual);
     }
 
-    @Disabled("Fails with NPE when loading with 'reverse'")
     @ParameterizedTest(name = "{0}")
-    @MethodSource("writeUnweightedTuples")
-    void testUnweightedWriting(String projection, String expected) {
+    @MethodSource("writeTuples")
+    void testUnweightedWriting(String projection, String oldDirection, String expected) {
         String query =
             "CALL gds.alpha.degree.write({" +
             "   nodeProjection: 'User', " +
@@ -135,7 +132,8 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "           projection: '" + projection + "'" +
             "       }" +
             "   }," +
-            "   writeProperty: 'following'" +
+            "   writeProperty: 'following'," +
+            "   direction: '" + oldDirection + "' " +
             "})" +
             "YIELD nodes, writeProperty";
 
@@ -146,7 +144,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("writeTuples")
-    void testWeightedWriting(String projection, String expected) {
+    void testWeightedWriting(String projection, String oldDirection, String expected) {
         String query =
             "CALL gds.alpha.degree.write({" +
             "   nodeProjection: 'User', " +
@@ -154,15 +152,12 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "       FOLLOWS: {" +
             "           type: 'FOLLOWS'," +
             "           projection: '" + projection + "'," +
-            "           properties: {" +
-            "               score: {" +
-            "                   property: 'score'" +
-            "               }" +
-            "           }" +
+            "           properties: 'score'" +
             "       }" +
             "   }," +
             "   weightProperty: 'score'," +
-            "   writeProperty: 'following'" +
+            "   writeProperty: 'following'," +
+            "   direction: '" + oldDirection + "' " +
             "})" +
             "YIELD nodes, writeProperty";
         String actual = runQuery(query).resultAsString();
@@ -171,7 +166,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
     }
 
     static Stream<Arguments> streamUnweightedTuples() {
-        String result = "+-----------------------+\n" +
+        String naturalResult = "+-----------------------+\n" +
                         "| name      | followers |\n" +
                         "+-----------------------+\n" +
                         "| \"Alice\"   | 3.0       |\n" +
@@ -182,14 +177,26 @@ public class DegreeCentralityDocTest extends BaseProcTest {
                         "| \"Doug\"    | 0.0       |\n" +
                         "+-----------------------+\n" +
                         "6 rows\n";
+
+        String reverseResult = "+-----------------------+\n" +
+                               "| name      | followers |\n" +
+                               "+-----------------------+\n" +
+                               "| \"Doug\"    | 5.0       |\n" +
+                               "| \"Bridget\" | 1.0       |\n" +
+                               "| \"Charles\" | 1.0       |\n" +
+                               "| \"Michael\" | 1.0       |\n" +
+                               "| \"Alice\"   | 0.0       |\n" +
+                               "| \"Mark\"    | 0.0       |\n" +
+                               "+-----------------------+\n" +
+                               "6 rows\n";
         return Stream.of(
-            arguments("natural", result)
-            // TODO: reverse direction
+            arguments("NATURAL", "OUTGOING", naturalResult),
+            arguments("REVERSE", "INCOMING", reverseResult)
         );
     }
 
     static Stream<Arguments> streamWeightedTuples() {
-        String result = "+-------------------------------+\n" +
+        String naturalResult = "+-------------------------------+\n" +
                         "| name      | weightedFollowers |\n" +
                         "+-------------------------------+\n" +
                         "| \"Alice\"   | 8.0               |\n" +
@@ -200,22 +207,33 @@ public class DegreeCentralityDocTest extends BaseProcTest {
                         "| \"Doug\"    | 0.0               |\n" +
                         "+-------------------------------+\n" +
                         "6 rows\n";
+        String reverseResult = "+-------------------------------+\n" +
+                               "| name      | weightedFollowers |\n" +
+                               "+-------------------------------+\n" +
+                               "| \"Doug\"    | 7.5               |\n" +
+                               "| \"Charles\" | 5.0               |\n" +
+                               "| \"Michael\" | 4.5               |\n" +
+                               "| \"Bridget\" | 2.0               |\n" +
+                               "| \"Alice\"   | 0.0               |\n" +
+                               "| \"Mark\"    | 0.0               |\n" +
+                               "+-------------------------------+\n" +
+                               "6 rows\n";
         return Stream.of(
-            arguments("natural", result)
-            // TODO: reverse direction
+            arguments("NATURAL", "OUTGOING", naturalResult),
+            arguments("REVERSE", "INCOMING", reverseResult)
         );
     }
 
     static Stream<Arguments> writeTuples() {
-        String result = "+-----------------------+\n" +
+        String naturalResult = "+-----------------------+\n" +
                         "| nodes | writeProperty |\n" +
                         "+-----------------------+\n" +
                         "| 6     | \"following\"   |\n" +
                         "+-----------------------+\n" +
                         "1 row\n";
         return Stream.of(
-            arguments("natural", result)
-            // TODO: reverse direction
+            arguments("NATURAL", "OUTGOING", naturalResult),
+            arguments("REVERSE", "INCOMING", naturalResult)
         );
     }
 
