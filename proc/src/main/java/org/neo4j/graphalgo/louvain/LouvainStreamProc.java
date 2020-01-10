@@ -41,7 +41,6 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
 
-    // TODO maps need to be comma-separated
     @Procedure(value = "gds.louvain.stream", mode = READ)
     @Description(LOUVAIN_DESCRIPTION)
     public Stream<StreamResult> stream(
@@ -52,7 +51,21 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
             graphNameOrConfig,
             configuration
         );
-        return stream(computationResult);
+
+        if (computationResult.isGraphEmpty() || computationResult.result() == null) {
+            return Stream.empty();
+        }
+
+        Graph graph = computationResult.graph();
+        Louvain louvain = computationResult.result();
+        boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
+
+        return LongStream.range(0, graph.nodeCount())
+            .mapToObj(nodeId -> {
+                long neoNodeId = graph.toOriginalNodeId(nodeId);
+                long[] communities = includeIntermediateCommunities ? louvain.getCommunities(nodeId) : null;
+                return new StreamResult(neoNodeId, communities, louvain.getCommunity(nodeId));
+            });
     }
 
     @Procedure(value = "gds.louvain.stream.estimate", mode = READ)
@@ -62,20 +75,6 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    // TODO: inline
-    private Stream<StreamResult> stream(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
-        Graph graph = computationResult.graph();
-        // TODO: check louvain != null
-        Louvain louvain = computationResult.result();
-        boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
-        return LongStream.range(0, graph.nodeCount())
-            .mapToObj(nodeId -> {
-                long neoNodeId = graph.toOriginalNodeId(nodeId);
-                long[] communities = includeIntermediateCommunities ? louvain.getCommunities(nodeId) : null;
-                return new StreamResult(neoNodeId, communities, louvain.getCommunity(nodeId));
-            });
     }
 
     @Override

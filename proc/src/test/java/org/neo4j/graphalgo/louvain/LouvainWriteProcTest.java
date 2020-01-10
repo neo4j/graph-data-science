@@ -71,6 +71,7 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
                 "modularity",
                 "modularities",
                 "ranLevels",
+                "tolerance",
                 "includeIntermediateCommunities",
                 "createMillis",
                 "computeMillis",
@@ -84,6 +85,7 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
             double modularity = row.getNumber("modularity").doubleValue();
             List<Double> modularities = (List<Double>) row.get("modularities");
             long levels = row.getNumber("ranLevels").longValue();
+            double tolerance = row.getNumber("tolerance").doubleValue();
             boolean includeIntermediate = row.getBoolean("includeIntermediateCommunities");
             long createMillis = row.getNumber("createMillis").longValue();
             long computeMillis = row.getNumber("computeMillis").longValue();
@@ -92,6 +94,7 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
             assertEquals(3, communityCount, "wrong community count");
             assertEquals(2, modularities.size(), "invalud modularities");
             assertEquals(2, levels, "invalid level count");
+            assertEquals(0.0001, tolerance, "invalid tolerance value");
             assertFalse(includeIntermediate, "invalid level count");
             assertTrue(modularity > 0, "wrong modularity value");
             assertTrue(createMillis >= 0, "invalid loadTime");

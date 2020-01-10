@@ -164,7 +164,6 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
 
     public static final class WriteResult {
 
-        // TODO: add tolerance
         public String writeProperty;
         public String seedProperty;
         public String weightProperty;
@@ -176,6 +175,7 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
         public long postProcessingMillis;
         public long maxIterations;
         public long maxLevels;
+        public double tolerance;
         public long ranLevels;
         public long communityCount;
         public boolean includeIntermediateCommunities;
@@ -203,6 +203,7 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
             this.weightProperty = config.weightProperty();
             this.maxIterations = config.maxIterations();
             this.maxLevels = config.maxLevels();
+            this.tolerance = config.tolerance();
             this.includeIntermediateCommunities = config.includeIntermediateCommunities();
 
             this.nodePropertiesWritten = nodePropertiesWritten;
