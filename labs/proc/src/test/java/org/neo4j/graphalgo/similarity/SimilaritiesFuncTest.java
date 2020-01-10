@@ -17,11 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.similarity;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphdb.Result;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,23 +33,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SimilaritiesFuncTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
-        "CREATE (java:Skill{name:'Java'})\n" +
-        "CREATE (neo4j:Skill{name:'Neo4j'})\n" +
-        "CREATE (nodejs:Skill{name:'NodeJS'})\n" +
-        "CREATE (scala:Skill{name:'Scala'})\n" +
-        "CREATE (jim:Employee{name:'Jim'})\n" +
-        "CREATE (bob:Employee{name:'Bob'})\n" +
-        "CREATE (role:Role {name:'Role 1-Analytics Manager'})\n" +
-        "\n" +
-        "CREATE (role)-[:REQUIRES_SKILL{proficiency:8.54}]->(java)\n" +
-        "CREATE (role)-[:REQUIRES_SKILL{proficiency:4.3}]->(scala)\n" +
-        "CREATE (role)-[:REQUIRES_SKILL{proficiency:9.75}]->(neo4j)\n" +
-        "\n" +
-        "CREATE (bob)-[:HAS_SKILL{proficiency:10}]->(java)\n" +
-        "CREATE (bob)-[:HAS_SKILL{proficiency:7.5}]->(neo4j)\n" +
-        "CREATE (bob)-[:HAS_SKILL]->(scala)\n" +
-        "CREATE (jim)-[:HAS_SKILL{proficiency:8.25}]->(java)\n" +
-        "CREATE (jim)-[:HAS_SKILL{proficiency:7.1}]->(scala)";
+            "CREATE (java:Skill{name:'Java'})\n" +
+            "CREATE (neo4j:Skill{name:'Neo4j'})\n" +
+            "CREATE (nodejs:Skill{name:'NodeJS'})\n" +
+            "CREATE (scala:Skill{name:'Scala'})\n" +
+            "CREATE (jim:Employee{name:'Jim'})\n" +
+            "CREATE (bob:Employee{name:'Bob'})\n" +
+            "CREATE (role:Role {name:'Role 1-Analytics Manager'})\n" +
+            "\n" +
+            "CREATE (role)-[:REQUIRES_SKILL{proficiency:8.54}]->(java)\n" +
+            "CREATE (role)-[:REQUIRES_SKILL{proficiency:4.3}]->(scala)\n" +
+            "CREATE (role)-[:REQUIRES_SKILL{proficiency:9.75}]->(neo4j)\n" +
+            "\n" +
+            "CREATE (bob)-[:HAS_SKILL{proficiency:10}]->(java)\n" +
+            "CREATE (bob)-[:HAS_SKILL{proficiency:7.5}]->(neo4j)\n" +
+            "CREATE (bob)-[:HAS_SKILL]->(scala)\n" +
+            "CREATE (jim)-[:HAS_SKILL{proficiency:8.25}]->(java)\n" +
+            "CREATE (jim)-[:HAS_SKILL{proficiency:7.1}]->(scala)";
 
     // cosine similarity taken from here: https://neo4j.com/graphgist/a7c915c8-a3d6-43b9-8127-1836fecc6e2f
     // euclid distance taken from here: https://neo4j.com/blog/real-time-recommendation-engine-data-science/
@@ -88,15 +91,13 @@ public class SimilaritiesFuncTest extends BaseProcTest {
         runQueryWithResultConsumer(
             "MATCH (p1:Employee)-[x:HAS_SKILL]->(sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
             "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) AS v1, COLLECT(coalesce(y.proficiency, 0.0d)) AS v2\n" +
-            "WITH p1.name AS name, algo.similarity.cosine(v1, v2) AS cosineSim ORDER BY name ASC\n" +
+            "WITH p1.name AS name, gds.alpha.similarity.cosine(v1, v2) AS cosineSim ORDER BY name ASC\n" +
             "RETURN name, toString(toInteger(cosineSim*10000)/10000.0) AS cosineSim",
             result -> {
-
                 assertEquals(bobSimilarity.get(), result.next().get("cosineSim"));
                 assertEquals(jimSimilarity.get(), result.next().get("cosineSim"));
             }
         );
-
     }
 
     @Test
@@ -125,7 +126,7 @@ public class SimilaritiesFuncTest extends BaseProcTest {
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
             "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) AS v1, COLLECT(coalesce(y.proficiency, 0.0d)) AS v2\n" +
-            "WITH p1.name AS name, algo.similarity.cosine(v1, v2) AS cosineSim ORDER BY name ASC\n" +
+            "WITH p1.name AS name, gds.alpha.similarity.cosine(v1, v2) AS cosineSim ORDER BY name ASC\n" +
             "RETURN name, toString(toInteger(cosineSim*10000)/10000.0) AS cosineSim", result -> {
 
                 assertEquals(bobSimilarity.get(), result.next().get("cosineSim"));
@@ -161,7 +162,7 @@ public class SimilaritiesFuncTest extends BaseProcTest {
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
             "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) AS v1, COLLECT(coalesce(y.proficiency, 0.0d)) AS v2\n" +
-            "WITH p1.name AS name, algo.similarity.pearson(v1, v2) AS pearsonSim ORDER BY name ASC\n" +
+            "WITH p1.name AS name, gds.alpha.similarity.pearson(v1, v2) AS pearsonSim ORDER BY name ASC\n" +
             "RETURN name, toString(toInteger(pearsonSim*10000)/10000.0) AS pearsonSim", result -> {
 
                 assertEquals(bobSimilarity.get(), result.next().get("pearsonSim"));
@@ -190,7 +191,7 @@ public class SimilaritiesFuncTest extends BaseProcTest {
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
             "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) AS v1, COLLECT(coalesce(y.proficiency, 0.0d)) AS v2\n" +
-            "WITH p1.name AS name, algo.similarity.euclideanDistance(v1, v2) AS euclidDist ORDER BY name ASC\n" +
+            "WITH p1.name AS name, gds.alpha.similarity.euclideanDistance(v1, v2) AS euclidDist ORDER BY name ASC\n" +
             "RETURN name, toString(toInteger(euclidDist*10000)/10000.0) AS euclidDist", result -> {
 
                 assertEquals(bobDist.get(), result.next().get("euclidDist"));
@@ -217,7 +218,7 @@ public class SimilaritiesFuncTest extends BaseProcTest {
         runQueryWithResultConsumer(
             "MATCH (p1:Employee),(p2:Employee) WHERE p1 <> p2\n" +
             "WITH p1, [(p1)-[:HAS_SKILL]->(sk) | id(sk)] AS v1, p2, [(p2)-[:HAS_SKILL]->(sk) | id(sk)] AS v2\n" +
-            "WITH p1.name AS name1, p2.name AS name2, algo.similarity.jaccard(v1, v2) AS jaccardSim ORDER BY name1,name2\n" +
+            "WITH p1.name AS name1, p2.name AS name2, gds.alpha.similarity.jaccard(v1, v2) AS jaccardSim ORDER BY name1,name2\n" +
             "RETURN name1, name2, toString(toInteger(jaccardSim*10000)/10000.0) AS jaccardSim", result -> {
 
                 assertEquals(jimSim.get(), result.next().get("jaccardSim"));
@@ -244,7 +245,7 @@ public class SimilaritiesFuncTest extends BaseProcTest {
         runQueryWithResultConsumer(
             "MATCH (p1:Employee),(p2:Employee) WHERE p1 <> p2\n" +
             "WITH p1, [(p1)-[:HAS_SKILL]->(sk) | id(sk)] as v1, p2, [(p2)-[:HAS_SKILL]->(sk) | id(sk)] as v2\n" +
-            "WITH p1.name as name1, p2.name as name2, algo.similarity.overlap(v1, v2) as overlapSim ORDER BY name1,name2\n" +
+            "WITH p1.name as name1, p2.name as name2, gds.alpha.similarity.overlap(v1, v2) as overlapSim ORDER BY name1,name2\n" +
             "RETURN name1, name2, toString(toInteger(overlapSim*10000)/10000.0) as overlapSim", result -> {
                 assertEquals(jimSim.get(), result.next().get("overlapSim"));
                 assertEquals(bobSim.get(), result.next().get("overlapSim"));
@@ -275,7 +276,7 @@ public class SimilaritiesFuncTest extends BaseProcTest {
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
             "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) as v1, COLLECT(coalesce(y.proficiency, 0.0d)) as v2\n" +
-            "WITH p1.name as name, algo.similarity.euclidean(v1, v2) as euclidSim ORDER BY name ASC\n" +
+            "WITH p1.name as name, gds.alpha.similarity.euclidean(v1, v2) as euclidSim ORDER BY name ASC\n" +
             "RETURN name, toString(toInteger(euclidSim*10000)/10000.0) as euclidSim", result -> {
                 assertEquals(bobSim.get(), result.next().get("euclidSim"));
                 assertEquals(jimSim.get(), result.next().get("euclidSim"));

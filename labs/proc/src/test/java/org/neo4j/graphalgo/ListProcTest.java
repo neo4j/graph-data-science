@@ -23,8 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
 import org.neo4j.graphalgo.centrality.ArticleRankProc;
+import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.similarity.CosineProc;
 import org.neo4j.graphalgo.similarity.EuclideanProc;
 import org.neo4j.graphalgo.similarity.OverlapProc;
 import org.neo4j.graphalgo.similarity.PearsonProc;
+import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -100,12 +101,18 @@ class ListProcTest extends BaseProcTest {
     ));
 
     private static final Collection<String> FUNCTIONS = new HashSet<>(asList(
-        "algo.linkprediction.adamicAdar",
-        "algo.linkprediction.resourceAllocation",
-        "algo.linkprediction.commonNeighbors",
-        "algo.linkprediction.preferentialAttachment",
-        "algo.linkprediction.totalNeighbors",
-        "algo.linkprediction.sameCommunity"
+        "gds.alpha.linkprediction.adamicAdar",
+        "gds.alpha.linkprediction.resourceAllocation",
+        "gds.alpha.linkprediction.commonNeighbors",
+        "gds.alpha.linkprediction.preferentialAttachment",
+        "gds.alpha.linkprediction.totalNeighbors",
+        "gds.alpha.linkprediction.sameCommunity",
+        "gds.alpha.similarity.cosine",
+        "gds.alpha.similarity.euclidean",
+        "gds.alpha.similarity.euclideanDistance",
+        "gds.alpha.similarity.jaccard",
+        "gds.alpha.similarity.overlap",
+        "gds.alpha.similarity.pearson"
     ));
 
     private static final Set<String> SPANNING_TREE = new HashSet<>(asList(
@@ -153,7 +160,8 @@ class ListProcTest extends BaseProcTest {
             UtilityProc.class
         );
         registerFunctions(
-            LinkPredictionFunc.class
+            LinkPredictionFunc.class,
+            SimilaritiesFunc.class
         );
     }
 
@@ -178,6 +186,10 @@ class ListProcTest extends BaseProcTest {
     void listFunctions() {
         Set<String> actual = listProcs("adamicAdar");
         actual.addAll(listProcs("linkprediction"));
+        Set<String> similarity = listProcs("similarity");
+        actual.addAll(similarity.stream()
+            .filter(name -> !name.matches(".*(stream|write|stats)$")).collect(
+            Collectors.toList()));
         assertEquals(FUNCTIONS, actual);
     }
 

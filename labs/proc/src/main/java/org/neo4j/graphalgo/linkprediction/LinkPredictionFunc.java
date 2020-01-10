@@ -33,8 +33,8 @@ import java.util.Set;
 
 public class LinkPredictionFunc extends LabsProc {
 
-    @UserFunction("algo.linkprediction.adamicAdar")
-    @Description("algo.linkprediction.adamicAdar(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
+    @UserFunction("gds.alpha.linkprediction.adamicAdar")
+    @Description("gds.alpha.linkprediction.adamicAdar(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
             "given two nodes, calculate Adamic Adar similarity")
     public double adamicAdarSimilarity(@Name("node1") Node node1, @Name("node2") Node node2,
                                        @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -52,8 +52,8 @@ public class LinkPredictionFunc extends LabsProc {
         return neighbors.stream().mapToDouble(nb -> 1.0 / Math.log(degree(nb, relationshipType, direction))).sum();
     }
 
-    @UserFunction("algo.linkprediction.resourceAllocation")
-    @Description("algo.linkprediction.resourceAllocation(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
+    @UserFunction("gds.alpha.linkprediction.resourceAllocation")
+    @Description("gds.alpha.linkprediction.resourceAllocation(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
             "given two nodes, calculate Resource Allocation similarity")
     public double resourceAllocationSimilarity(@Name("node1") Node node1, @Name("node2") Node node2,
                                                @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -71,8 +71,8 @@ public class LinkPredictionFunc extends LabsProc {
         return neighbors.stream().mapToDouble(nb -> 1.0 / degree(nb, relationshipType, direction)).sum();
     }
 
-    @UserFunction("algo.linkprediction.commonNeighbors")
-    @Description("algo.linkprediction.commonNeighbors(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
+    @UserFunction("gds.alpha.linkprediction.commonNeighbors")
+    @Description("gds.alpha.linkprediction.commonNeighbors(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
             "given two nodes, returns the number of common neighbors")
     public double commonNeighbors(@Name("node1") Node node1, @Name("node2") Node node2,
                                                @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -88,8 +88,8 @@ public class LinkPredictionFunc extends LabsProc {
         return neighbors.size();
     }
 
-    @UserFunction("algo.linkprediction.preferentialAttachment")
-    @Description("algo.linkprediction.preferentialAttachment(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
+    @UserFunction("gds.alpha.linkprediction.preferentialAttachment")
+    @Description("gds.alpha.linkprediction.preferentialAttachment(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
             "given two nodes, calculate Preferential Attachment")
     public double preferentialAttachment(@Name("node1") Node node1, @Name("node2") Node node2,
                                        @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -104,8 +104,8 @@ public class LinkPredictionFunc extends LabsProc {
         return degree(node1, relationshipType, direction) * degree(node2, relationshipType, direction);
     }
 
-    @UserFunction("algo.linkprediction.totalNeighbors")
-    @Description("algo.linkprediction.totalNeighbors(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
+    @UserFunction("gds.alpha.linkprediction.totalNeighbors")
+    @Description("gds.alpha.linkprediction.totalNeighbors(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
             "given two nodes, calculate Total Neighbors")
     public double totalNeighbors(@Name("node1") Node node1, @Name("node2") Node node2,
                                          @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -117,8 +117,8 @@ public class LinkPredictionFunc extends LabsProc {
         return neighborsFinder.findNeighbors(node1, node2, relationshipType, direction).size();
     }
 
-    @UserFunction("algo.linkprediction.sameCommunity")
-    @Description("algo.linkprediction.sameCommunity(node1:Node, node2:Node, communityProperty: String) " +
+    @UserFunction("gds.alpha.linkprediction.sameCommunity")
+    @Description("gds.alpha.linkprediction.sameCommunity(node1:Node, node2:Node, communityProperty: String) " +
             "given two nodes, indicates if they have the same community")
     public double sameCommunity(@Name("node1") Node node1, @Name("node2") Node node2,
                                  @Name(value = "communityProperty", defaultValue = "community") String communityProperty) {

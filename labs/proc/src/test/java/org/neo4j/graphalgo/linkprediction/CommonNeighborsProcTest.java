@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.linkprediction;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
@@ -30,7 +31,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
+class CommonNeighborsProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE (mark:Person {name: 'Mark'})\n" +
@@ -40,20 +41,22 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
             "CREATE (karin:Person {name: 'Karin'})\n" +
             "CREATE (jennifer:Person {name: 'Jennifer'})\n" +
             "CREATE (elaine:Person {name: 'Elaine'})\n" +
+            "CREATE (will:Person {name: 'Will'})\n" +
 
             "MERGE (jennifer)-[:FRIENDS]-(ryan)\n" +
             "MERGE (jennifer)-[:FRIENDS]-(karin)\n" +
             "MERGE (elaine)-[:FRIENDS]-(ryan)\n" +
             "MERGE (elaine)-[:FRIENDS]-(karin)\n" +
+            "MERGE (elaine)-[:FRIENDS]-(jennifer)\n" +
 
             "MERGE (mark)-[:FRIENDS]-(michael)\n" +
-            "MERGE (mark)-[:WORKS_WITH]->(michael)\n" +
+            "MERGE (mark)-[:WORKS_WITH]-(michael)\n" +
 
-            "MERGE (praveena)-[:FRIENDS]->(michael)";
+            "MERGE (praveena)-[:FRIENDS]-(michael)";
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
+        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*"));
         registerFunctions(LinkPredictionFunc.class);
         runQuery(DB_CYPHER);
     }
@@ -68,8 +71,8 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                 "MATCH (p2:Person {name: 'Praveena'})\n" +
-                "RETURN algo.linkprediction.resourceAllocation(p1, p2) AS score, " +
-                "       1/3.0 AS cypherScore";
+                "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score, " +
+                "       1.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
@@ -80,9 +83,9 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                         "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN algo.linkprediction.resourceAllocation(p1, p2, " +
+                        "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2, " +
                         "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
-                        "1/2.0 AS cypherScore";
+                        "1.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
@@ -93,8 +96,8 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                         "MATCH (p2:Person {name: 'Elaine'})\n" +
-                        "RETURN algo.linkprediction.resourceAllocation(p1, p2) AS score, " +
-                        "       1/2.0 + 1/2.0 AS cypherScore";
+                        "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score, " +
+                        "       2.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
@@ -103,9 +106,21 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
     @Test
     void noNeighbors() {
         String controlQuery =
-                "MATCH (p1:Person {name: 'Jennifer'})\n" +
+                "MATCH (p1:Person {name: 'Will'})\n" +
                         "MATCH (p2:Person {name: 'Ryan'})\n" +
-                        "RETURN algo.linkprediction.resourceAllocation(p1, p2) AS score, " +
+                        "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score, " +
+                        "       0.0 AS cypherScore";
+
+        Map<String, Object> node =  runQuery(controlQuery, Result::next);
+        assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
+    }
+
+    @Test
+    void excludeDirectRelationshipsBetweenNodes() {
+        String controlQuery =
+                "MATCH (p1:Person {name: 'Praveena'})\n" +
+                        "MATCH (p2:Person {name: 'Michael'})\n" +
+                        "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
@@ -117,11 +132,10 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN algo.linkprediction.resourceAllocation(p1, p2) AS score, " +
+                        "RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
         Map<String, Object> node =  runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
-
 }

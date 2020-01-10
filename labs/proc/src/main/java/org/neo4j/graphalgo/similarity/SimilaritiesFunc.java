@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.similarity;
 
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
@@ -39,8 +39,8 @@ import static org.neo4j.graphalgo.impl.similarity.SimilarityVectorAggregator.WEI
 
 public class SimilaritiesFunc {
 
-    @UserFunction("algo.similarity.jaccard")
-    @Description("algo.similarity.jaccard([vector1], [vector2]) " +
+    @UserFunction("gds.alpha.similarity.jaccard")
+    @Description("gds.alpha.similarity.jaccard([vector1], [vector2]) " +
             "given two collection vectors, calculate jaccard similarity")
     public double jaccardSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
         if (vector1 == null || vector2 == null) return 0;
@@ -53,8 +53,8 @@ public class SimilaritiesFunc {
         return denominator == 0 ? 0 : (double) intersection / denominator;
     }
 
-    @UserFunction("algo.similarity.cosine")
-    @Description("algo.similarity.cosine([vector1], [vector2]) " +
+    @UserFunction("gds.alpha.similarity.cosine")
+    @Description("gds.alpha.similarity.cosine([vector1], [vector2]) " +
             "given two collection vectors, calculate cosine similarity")
     public double cosineSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
         if (vector1.size() != vector2.size() || vector1.size() == 0) {
@@ -73,14 +73,14 @@ public class SimilaritiesFunc {
         return Math.sqrt(Intersections.cosineSquare(weights1, weights2, len));
     }
 
-    @UserAggregationFunction("algo.similarity.asVector")
-    @Description("algo.similarity.asVector - builds a vector of maps containing items and weights")
+    @UserAggregationFunction("gds.alpha.similarity.asVector")
+    @Description("gds.alpha.similarity.asVector - builds a vector of maps containing items and weights")
     public SimilarityVectorAggregator asVector() {
         return new SimilarityVectorAggregator();
     }
 
-    @UserFunction("algo.similarity.pearson")
-    @Description("algo.similarity.pearson([vector1], [vector2]) " +
+    @UserFunction("gds.alpha.similarity.pearson")
+    @Description("gds.alpha.similarity.pearson([vector1], [vector2]) " +
             "given two collection vectors, calculate pearson similarity")
     public double pearsonSimilarity(@Name("vector1") Object rawVector1, @Name("vector2") Object rawVector2, @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
         String listType = config.getOrDefault("vectorType", "numbers").toString();
@@ -137,8 +137,8 @@ public class SimilaritiesFunc {
         }
     }
 
-    @UserFunction("algo.similarity.euclideanDistance")
-    @Description("algo.similarity.euclideanDistance([vector1], [vector2]) " +
+    @UserFunction("gds.alpha.similarity.euclideanDistance")
+    @Description("gds.alpha.similarity.euclideanDistance([vector1], [vector2]) " +
             "given two collection vectors, calculate the euclidean distance (square root of the sum of the squared differences)")
     public double euclideanDistance(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
         if (vector1.size() != vector2.size() || vector1.size() == 0) {
@@ -157,15 +157,15 @@ public class SimilaritiesFunc {
         return Math.sqrt(Intersections.sumSquareDelta(weights1, weights2, len));
     }
 
-    @UserFunction("algo.similarity.euclidean")
-    @Description("algo.similarity.euclidean([vector1], [vector2]) " +
+    @UserFunction("gds.alpha.similarity.euclidean")
+    @Description("gds.alpha.similarity.euclidean([vector1], [vector2]) " +
             "given two collection vectors, calculate similarity based on euclidean distance")
     public double euclideanSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
         return 1.0D / (1 + euclideanDistance(vector1, vector2));
     }
 
-    @UserFunction("algo.similarity.overlap")
-    @Description("algo.similarity.overlap([vector1], [vector2]) " +
+    @UserFunction("gds.alpha.similarity.overlap")
+    @Description("gds.alpha.similarity.overlap([vector1], [vector2]) " +
             "given two collection vectors, calculate overlap similarity")
     public double overlapSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
         if (vector1 == null || vector2 == null) return 0;
