@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.shortestpath.KShortestPathsProc;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
@@ -77,11 +78,21 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
 
     @Test
     void shouldReturnNodesAndCosts() {
-        final String cypher =
-                "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) " +
-                "CALL algo.kShortestPaths.stream(a, d, 42, 'cost') " +
-                "YIELD index, sourceNodeId, targetNodeId, nodeIds, costs\n" +
-                "RETURN *";
+        String algoCall = GdsCypher.call()
+            .withRelationshipProperty("cost")
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds.alpha.kShortestPaths")
+            .streamMode()
+            .addVariable("startNode", "a")
+            .addVariable("endNode", "d")
+            .addParameter("k", 42)
+            .addParameter("weightProperty", "cost")
+            .yields("index", "sourceNodeId", "targetNodeId", "nodeIds", "costs");
+
+        String cypher = String.format(
+            "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) %s RETURN *",
+            algoCall
+        );
 
         Map<Long, List<Long>> expectedNodes = new HashMap<>();
         expectedNodes.put(0L, getNodeIds("a", "b", "d"));
@@ -103,11 +114,22 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
 
     @Test
     void shouldReturnPaths() {
-        final String cypher =
-                "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) " +
-                        "CALL algo.kShortestPaths.stream(a, d, 42, 'cost', {path: true}) " +
-                        "YIELD index, sourceNodeId, targetNodeId, nodeIds, costs, path\n" +
-                        "RETURN *";
+        String algoCall = GdsCypher.call()
+            .withRelationshipProperty("cost")
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds.alpha.kShortestPaths")
+            .streamMode()
+            .addVariable("startNode", "a")
+            .addVariable("endNode", "d")
+            .addParameter("k", 42)
+            .addParameter("weightProperty", "cost")
+            .addParameter("path", true)
+            .yields("index", "sourceNodeId", "targetNodeId", "nodeIds", "costs", "path");
+
+        String cypher = String.format(
+            "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) %s RETURN *",
+            algoCall
+        );
 
         Map<Long, List<Node>> expectedNodes = new HashMap<>();
         expectedNodes.put(0L, getNodes("a", "b", "d"));
@@ -134,11 +156,20 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
 
     @Test
     void shouldNotStoreWeightsOnVirtualPathIfIgnoringProperty() {
-        final String cypher =
-                "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) " +
-                        "CALL algo.kShortestPaths.stream(a, d, 42, null, {path: true}) " +
-                        "YIELD index, sourceNodeId, targetNodeId, nodeIds, costs, path\n" +
-                        "RETURN *";
+        String algoCall = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds.alpha.kShortestPaths")
+            .streamMode()
+            .addVariable("startNode", "a")
+            .addVariable("endNode", "d")
+            .addParameter("k", 42)
+            .addParameter("path", true)
+            .yields("index", "sourceNodeId", "targetNodeId", "nodeIds", "costs", "path");
+
+        String cypher = String.format(
+            "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) %s RETURN *",
+            algoCall
+        );
 
         Map<Long, List<Node>> expectedNodes = new HashMap<>();
         expectedNodes.put(0L, getNodes("a", "d"));

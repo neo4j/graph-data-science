@@ -21,6 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.shortestpath.KShortestPathsProc;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,10 +61,23 @@ class YensKSharedPrefixMaxDepthProcTest extends BaseProcTest {
 
     @Test
     void testMaxDepthForKShortestPaths() {
-        final String cypher =
-            "MATCH (from:Node{name:{from}}), (to:Node{name:{to}}) " +
-            "CALL algo.kShortestPaths.stream(from, to, 2, 'cost', {path:true, maxDepth: {maxDepth}}) YIELD path " +
-            "RETURN path";
+        String algoCall = GdsCypher.call()
+            .withRelationshipProperty("cost")
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds.alpha.kShortestPaths")
+            .streamMode()
+            .addVariable("startNode", "from")
+            .addVariable("endNode", "to")
+            .addParameter("k", 2)
+            .addParameter("weightProperty", "cost")
+            .addParameter("path", true)
+            .addPlaceholder("maxDepth", "maxDepth")
+            .yields("path");
+
+        final String cypher = String.format(
+            "MATCH (from:Node{name:{from}}), (to:Node{name:{to}}) %s RETURN path",
+            algoCall
+        );
 
         Map<String, Object> params = new HashMap<>();
         params.put("from", "d");

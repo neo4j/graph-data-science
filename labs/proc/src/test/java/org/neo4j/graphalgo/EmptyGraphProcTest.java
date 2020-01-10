@@ -41,7 +41,6 @@ class EmptyGraphProcTest extends BaseProcTest {
             AllShortestPathsProc.class,
             BetweennessCentralityProc.class,
             ClosenessCentralityProc.class,
-            KShortestPathsProc.class,
             KSpanningTreeProc.class,
             PrimProc.class,
             SampledBetweennessCentralityProc.class,
@@ -213,11 +212,6 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testShortestPaths() {
         runQueryWithRowConsumer("CALL algo.shortestPaths(null, '', {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
-    }
-
-    @Test
-    void testKShortestPaths() {
-        runQueryWithRowConsumer("CALL algo.kShortestPaths(null, null, 3, '', {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("resultCount")));
     }
 
     @Test

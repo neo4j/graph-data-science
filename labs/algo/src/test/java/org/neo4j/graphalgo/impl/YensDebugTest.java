@@ -27,11 +27,10 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.impl.yens.WeightedPath;
-import org.neo4j.graphalgo.impl.yens.YensKShortestPaths;
+import org.neo4j.graphalgo.impl.shortestpaths.WeightedPath;
+import org.neo4j.graphalgo.impl.shortestpaths.YensKShortestPaths;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
 import java.util.function.DoubleConsumer;
@@ -84,11 +83,14 @@ public class YensDebugTest extends AlgoTestBase {
 
     @Test
     void test() {
-        YensKShortestPaths yens = new YensKShortestPaths(graph).compute(
-                getNode("a").getId(),
-                getNode("g").getId(),
-                Direction.BOTH,
-                5, 4);
+        YensKShortestPaths yens = new YensKShortestPaths(
+            graph,
+            getNode("a").getId(),
+            getNode("g").getId(),
+            Direction.BOTH,
+            5,
+            4
+        ).compute();
         List<WeightedPath> paths = yens.getPaths();
         DoubleConsumer mock = mock(DoubleConsumer.class);
         for (int i = 0; i < paths.size(); i++) {

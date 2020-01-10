@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.shortestpath.KShortestPathsProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -59,16 +60,28 @@ class YensKShortestPathsRelationshipCostsProcTest extends BaseProcTest {
 
     @Test
     void test() {
-        String cypher =
-                "MATCH (c:Node{name:'c'}), (a:Node{name:'a'}) " +
-                "CALL algo.kShortestPaths(c, a, 1, 'cost') " +
-                "YIELD resultCount RETURN resultCount";
+        String algoCall = GdsCypher.call()
+            .withRelationshipProperty("cost")
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds.alpha.kShortestPaths")
+            .writeMode()
+            .addVariable("startNode", "c")
+            .addVariable("endNode", "a")
+            .addParameter("k", 1)
+            .addParameter("weightProperty", "cost")
+            .yields("resultCount");
+
+        String cypher = String.format(
+            "MATCH (c:Node{name:'c'}), (a:Node{name:'a'}) %s RETURN resultCount",
+            algoCall
+        );
 
         runQueryWithRowConsumer(cypher, row -> assertEquals(1, row.getNumber("resultCount").intValue()));
 
-        final String shortestPathsQuery = "MATCH p=(:Node {name: $one})-[r:PATH_0*]->(:Node {name: $two})\n" +
-                "UNWIND relationships(p) AS pair\n" +
-                "return sum(pair.weight) AS distance";
+        String shortestPathsQuery =
+            "MATCH p=(:Node {name: $one})-[r:PATH_0*]->(:Node {name: $two}) " +
+            "UNWIND relationships(p) AS pair " +
+            "RETURN sum(pair.weight) AS distance";
 
         runQueryWithRowConsumer(
             shortestPathsQuery,

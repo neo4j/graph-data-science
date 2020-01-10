@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.shortestpath.KShortestPathsProc;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -75,10 +75,18 @@ class YensKShortestPathsProcTest extends BaseProcTest {
 
     @Test
     void test() {
-        final String cypher =
-                "MATCH (a:Node{name:'a'}), (f:Node{name:'f'}) " +
-                "CALL algo.kShortestPaths(a, f, 42, 'cost') " +
-                "YIELD resultCount RETURN resultCount";
+        String algoCall = GdsCypher.call()
+            .withRelationshipProperty("cost")
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds.alpha.kShortestPaths")
+            .writeMode()
+            .addVariable("startNode", "a")
+            .addVariable("endNode", "f")
+            .addParameter("k", 42)
+            .addParameter("weightProperty", "cost")
+            .yields("resultCount");
+
+        String cypher = String.format("MATCH (a:Node{name:'a'}), (f:Node{name:'f'}) %s RETURN resultCount", algoCall);
 
         // 9 possible paths without loop
         runQueryWithRowConsumer(cypher, row -> assertEquals(9, row.getNumber("resultCount").intValue()));
@@ -101,14 +109,18 @@ class YensKShortestPathsProcTest extends BaseProcTest {
         combinations.put("PATH_7", 8.0);
         combinations.put("PATH_8", 8.0);
 
+        String shortestPathQueryTemplate =
+            "MATCH p=(:Node {name: 'a'})-[r:%s*]->(:Node {name: 'f'}) " +
+            "UNWIND relationships(p) AS pair " +
+            "return sum(pair.weight) AS distance";
         for (String relationshipType : combinations.keySet()) {
-            final String shortestPathsQuery = String.format("MATCH p=(:Node {name: $one})-[r:%s*]->(:Node {name: $two})\n" +
-                    "UNWIND relationships(p) AS pair\n" +
-                    "return sum(pair.weight) AS distance", relationshipType);
+            String shortestPathsQuery = String.format(
+                shortestPathQueryTemplate,
+                relationshipType
+            );
 
             runQueryWithRowConsumer(
                 shortestPathsQuery,
-                MapUtil.map("one", "a", "two", "f"),
                 row -> assertEquals(combinations.get(relationshipType), row.getNumber("distance").doubleValue(), 0.01)
             );
         }

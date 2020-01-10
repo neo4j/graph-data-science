@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.yens;
+package org.neo4j.graphalgo.impl.shortestpaths;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntDoubleMap;
@@ -39,7 +39,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 /**
  * specialized dijkstra impl. for YensKShortestPath
  */
-public class Dijkstra {
+public class YensKShortestPathsDijkstra {
 
     // initial weighted path capacity
     public static final int INITIAL_CAPACITY = 64;
@@ -62,7 +62,7 @@ public class Dijkstra {
     // iteration depth
     private int[] depth;
 
-    public Dijkstra(Graph graph) {
+    public YensKShortestPathsDijkstra(Graph graph) {
         this.graph = graph;
         nodeCount = Math.toIntExact(graph.nodeCount());
         costs = new IntDoubleScatterMap(nodeCount);
@@ -81,7 +81,7 @@ public class Dijkstra {
      * @param terminationFlag the flag
      * @return this
      */
-    public Dijkstra withTerminationFlag(TerminationFlag terminationFlag) {
+    public YensKShortestPathsDijkstra withTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
         return this;
     }
@@ -92,7 +92,7 @@ public class Dijkstra {
      * @param filter filter
      * @return this
      */
-    public Dijkstra withFilter(RelationshipConsumer filter) {
+    public YensKShortestPathsDijkstra withFilter(RelationshipConsumer filter) {
         this.filter = filter;
         return this;
     }
@@ -103,7 +103,7 @@ public class Dijkstra {
      * @param direction the direction
      * @return this
      */
-    public Dijkstra withDirection(Direction direction) {
+    public YensKShortestPathsDijkstra withDirection(Direction direction) {
         this.direction = direction;
         return this;
     }

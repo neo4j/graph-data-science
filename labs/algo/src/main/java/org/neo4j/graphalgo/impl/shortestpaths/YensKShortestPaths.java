@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.yens;
+package org.neo4j.graphalgo.impl.shortestpaths;
 
 import com.carrotsearch.hppc.IntScatterSet;
 import com.carrotsearch.hppc.LongScatterSet;
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
@@ -44,19 +44,38 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  * outgoing relationships only. Direction.BOTH leads to incorrect results and is
  * therefore not supported.
  */
-public class YensKShortestPaths extends LegacyAlgorithm<YensKShortestPaths> {
+public class YensKShortestPaths extends Algorithm<YensKShortestPaths, YensKShortestPaths> {
 
-    private Dijkstra dijkstra;
+    private YensKShortestPathsDijkstra dijkstra;
+    private final long startNode;
+    private final long goalNode;
+    private final Direction direction;
+    private final int k;
+    private final int maxDepth;
     private Graph graph;
     private List<WeightedPath> shortestPaths;
     private PriorityQueue<WeightedPath> candidates;
 
-    public YensKShortestPaths(Graph graph) {
+    public YensKShortestPaths(
+        Graph graph,
+        long startNode,
+        long goalNode,
+        Direction direction,
+        int k,
+        int maxDepth
+    ) {
         this.graph = graph;
-        dijkstra = new Dijkstra(graph);
+        dijkstra = new YensKShortestPathsDijkstra(graph);
+        this.startNode = startNode;
+        this.goalNode = goalNode;
+        this.direction = direction;
+        this.k = k;
+        this.maxDepth = maxDepth;
         shortestPaths = new ArrayList<>();
         candidates = new PriorityQueue<>(WeightedPath.comparator());
     }
+
+
 
     /**
      * retrieve the list of shortest paths
@@ -71,7 +90,8 @@ public class YensKShortestPaths extends LegacyAlgorithm<YensKShortestPaths> {
      * while using only supplied traversal direction
      * @return itself
      */
-    public YensKShortestPaths compute(long startNode, long goalNode, Direction direction, int k, int maxDepth) {
+    @Override
+    public YensKShortestPaths compute() {
         yens(k,
                 graph.toMappedNodeId(startNode),
                 graph.toMappedNodeId(goalNode),
@@ -175,7 +195,6 @@ public class YensKShortestPaths extends LegacyAlgorithm<YensKShortestPaths> {
     public void release() {
         graph = null;
         dijkstra = null;
-        shortestPaths = null;
         candidates = null;
     }
 }

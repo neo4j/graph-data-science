@@ -17,17 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.yens;
+package org.neo4j.graphalgo.impl.shortestpaths;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipProperties;
-import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.utils.StatementApi;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Values;
 
@@ -66,6 +65,7 @@ public class WeightedPathExporter extends StatementApi {
      * @param paths
      */
     public void export(List<WeightedPath> paths) {
+        paths.sort(WeightedPath.comparator());
         if (ParallelUtil.canRunInParallel(executorService)) {
             writeParallel(paths);
         } else {
@@ -73,31 +73,29 @@ public class WeightedPathExporter extends StatementApi {
         }
     }
 
-    private void export(String relationshipType, String propertyName, WeightedPath path) {
+    private void export(String relationshipTypeName, String propertyName, WeightedPath path) {
         applyInTransaction(statement -> {
-            final int relId = statement.tokenWrite().relationshipTypeGetOrCreateForName(relationshipType);
-            if (relId == -1) {
-                throw new IllegalStateException("no write property id is set");
-            }
-            path.forEachEdge((s, t) -> {
-                try {
-                    long relationshipId = statement.dataWrite().relationshipCreate(
-                            idMapping.toOriginalNodeId(s),
-                            relId,
-                            idMapping.toOriginalNodeId(t)
+            int relationshipType = statement.tokenWrite().relationshipTypeGetOrCreateForName(relationshipTypeName);
+            int relationshipProperty = getOrCreatePropertyId(propertyName);
+            Write write = statement.dataWrite();
+            path.forEachEdge((source, target) -> {
+                double property = relationshipProperties.relationshipProperty(source, target, 1.0D);
+                if (!Double.isNaN(property)) {
+                    long relationshipId = write.relationshipCreate(
+                        idMapping.toOriginalNodeId(source),
+                        relationshipType,
+                        idMapping.toOriginalNodeId(target)
                     );
 
-                    statement.dataWrite().relationshipSetProperty(
-                            relationshipId,
-                            getOrCreatePropertyId(propertyName),
-                            Values.doubleValue(relationshipProperties.relationshipProperty(s, t, 1.0D)));
-                } catch (KernelException e) {
-                    ExceptionUtil.throwKernelException(e);
+                    write.relationshipSetProperty(
+                        relationshipId,
+                        relationshipProperty,
+                        Values.doubleValue(property)
+                    );
                 }
             });
             return null;
         });
-
     }
 
     private int getOrCreatePropertyId(String propertyName) {
@@ -107,18 +105,18 @@ public class WeightedPathExporter extends StatementApi {
     }
 
     private void writeSequential(List<WeightedPath> paths) {
-        final Pointer.IntPointer counter = Pointer.wrap(0);
-        paths.stream()
-                .sorted(WeightedPath.comparator())
-                .forEach(path ->
-                        export(String.format("%s%d", relPrefix, counter.v++), propertyName, path));
+        int counter = 0;
+        for (WeightedPath path : paths) {
+            export(relPrefix + counter++, propertyName, path);
+        }
     }
 
     private void writeParallel(List<WeightedPath> paths) {
         final Pointer.IntPointer counter = Pointer.wrap(0);
 
-        Stream<Pair<WeightedPath, String>> pathsAndRelTypes = paths.stream().sorted(WeightedPath.comparator())
-                .map(path -> Tuples.pair(path, String.format("%s%d", relPrefix, counter.v++)));
+        Stream<Pair<WeightedPath, String>> pathsAndRelTypes = paths
+            .stream()
+            .map(path -> Tuples.pair(path, String.format("%s%d", relPrefix, counter.v++)));
 
         final List<Runnable> tasks = pathsAndRelTypes
                 .map(pair -> (Runnable) () ->  export(pair.getTwo(), propertyName, pair.getOne()))

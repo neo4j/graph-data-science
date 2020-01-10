@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.RawValues;
-import org.neo4j.graphalgo.impl.yens.Dijkstra;
-import org.neo4j.graphalgo.impl.yens.WeightedPath;
+import org.neo4j.graphalgo.impl.shortestpaths.YensKShortestPathsDijkstra;
+import org.neo4j.graphalgo.impl.shortestpaths.WeightedPath;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -56,7 +56,7 @@ class DijkstraTest extends AlgoTestBase {
 
     private static Graph graph;
     private static LongArrayList edgeBlackList;
-    private static Dijkstra dijkstra;
+    private static YensKShortestPathsDijkstra dijkstra;
 
     @BeforeEach
     void setupGraph() throws KernelException {
@@ -90,7 +90,7 @@ class DijkstraTest extends AlgoTestBase {
 
         edgeBlackList = new LongArrayList();
 
-        dijkstra = new Dijkstra(graph)
+        dijkstra = new YensKShortestPathsDijkstra(graph)
                 .withDirection(Direction.OUTGOING)
                 .withFilter(longToIntConsumer((s, t) -> !edgeBlackList.contains(RawValues.combineIntInt(s, t))));
     }

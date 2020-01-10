@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.yens;
+package org.neo4j.graphalgo.impl.shortestpaths;
 
 import org.apache.lucene.util.ArrayUtil;
 import org.neo4j.graphalgo.api.RelationshipProperties;
@@ -33,8 +33,8 @@ import java.util.function.IntPredicate;
  */
 public class WeightedPath {
 
-    public interface EdgeConsumer {
-        void accept(int sourceNode, int targetNode);
+    public interface EdgeConsumer<E extends Exception> {
+        void accept(int sourceNode, int targetNode) throws E;
     }
 
     private int[] nodes;
@@ -95,7 +95,7 @@ public class WeightedPath {
         }
     }
 
-    public void forEachEdge(EdgeConsumer consumer) {
+    public <E extends Exception> void forEachEdge(EdgeConsumer<E> consumer) throws E {
         for (int i = 0; i < offset - 1; i++) {
             consumer.accept(nodes[i], nodes[i + 1]);
         }

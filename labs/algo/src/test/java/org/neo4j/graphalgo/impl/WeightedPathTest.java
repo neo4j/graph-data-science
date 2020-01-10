@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.impl.yens.WeightedPath;
+import org.neo4j.graphalgo.impl.shortestpaths.WeightedPath;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;

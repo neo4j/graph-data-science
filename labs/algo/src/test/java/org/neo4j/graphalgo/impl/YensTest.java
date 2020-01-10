@@ -31,9 +31,9 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.RawValues;
-import org.neo4j.graphalgo.impl.yens.Dijkstra;
-import org.neo4j.graphalgo.impl.yens.WeightedPath;
-import org.neo4j.graphalgo.impl.yens.YensKShortestPaths;
+import org.neo4j.graphalgo.impl.shortestpaths.YensKShortestPathsDijkstra;
+import org.neo4j.graphalgo.impl.shortestpaths.WeightedPath;
+import org.neo4j.graphalgo.impl.shortestpaths.YensKShortestPaths;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 
@@ -100,9 +100,16 @@ class YensTest extends AlgoTestBase {
 
     @Test
     void test() {
-        YensKShortestPaths yens = new YensKShortestPaths(graph)
-                .withProgressLogger(TestProgressLogger.INSTANCE)
-                .compute(id("a"), id("f"), Direction.OUTGOING, 42, 10);
+        YensKShortestPaths yens = new YensKShortestPaths(
+            graph,
+            id("a"),
+            id("f"),
+            Direction.OUTGOING,
+            42,
+            10
+        )
+            .withProgressLogger(TestProgressLogger.INSTANCE)
+            .compute();
         List<WeightedPath> paths = yens.getPaths();
         DoubleConsumer mock = mock(DoubleConsumer.class);
         for (int i = 0; i < paths.size(); i++) {
@@ -123,7 +130,7 @@ class YensTest extends AlgoTestBase {
                 id("e"), id("f"),
                 id("d"), id("f"),
                 id("a"), id("b"));
-        final Optional<WeightedPath> path = new Dijkstra(graph)
+        final Optional<WeightedPath> path = new YensKShortestPathsDijkstra(graph)
                 .withDirection(Direction.OUTGOING)
                 .withFilter(filter04325)
                 .compute(id("a"), id("f"));
@@ -142,7 +149,7 @@ class YensTest extends AlgoTestBase {
                 id("b"), id("f"),
                 id("c"), id("f"),
                 id("a"), id("e"));
-        final Optional<WeightedPath> path = new Dijkstra(graph)
+        final Optional<WeightedPath> path = new YensKShortestPathsDijkstra(graph)
                 .withDirection(Direction.OUTGOING)
                 .withFilter(filter01235)
                 .compute(id("a"), id("f"));
