@@ -17,34 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.newapi;
+package positive;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.Collection;
-import java.util.Collections;
 
-public interface BaseConfig {
+@Configuration("CollectingKeysConfig")
+public interface CollectingKeys {
+
     @Configuration.Parameter
-    @Value.Default
-    default String username() {
-        return AuthSubject.ANONYMOUS.username();
-    };
+    int foo();
 
-    @Configuration.Ignore
-    default Class<? extends GraphFactory> getGraphImpl() {
-        return HugeGraphFactory.class;
-    };
+    long bar();
+
+    double baz();
 
     @Configuration.CollectKeys
-    @Value.Auxiliary
-    @Value.Default
-    @Value.Parameter(false)
-    default Collection<String> configKeys() {
-        return Collections.emptyList();
-    };
+    Collection<String> configKeys();
 }

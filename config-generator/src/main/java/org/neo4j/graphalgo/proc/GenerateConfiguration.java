@@ -51,8 +51,11 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -62,6 +65,7 @@ import java.util.stream.Collectors;
 
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.getAnnotationMirror;
+import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isTypeOf;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -129,7 +133,7 @@ final class GenerateConfiguration {
     private FieldDefinitions defineFields(ConfigParser.Spec config) {
         NameAllocator names = new NameAllocator();
         ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
-        config.members().stream().map(member ->
+        config.members().stream().filter(member -> !member.collectsKeys()).map(member ->
             FieldSpec.builder(
                 member.typeSpecWithAnnotation(Nullable.class),
                 names.newName(member.methodName(), member),
@@ -248,6 +252,10 @@ final class GenerateConfiguration {
     }
 
     private Optional<MemberDefinition> memberDefinition(NameAllocator names, ConfigParser.Member member) {
+        if (member.collectsKeys()) {
+            return Optional.empty();
+        }
+
         ExecutableElement method = member.method();
         TypeMirror targetType = method.getReturnType();
         ConvertWith convertWith = method.getAnnotation(ConvertWith.class);
@@ -480,13 +488,47 @@ final class GenerateConfiguration {
         return Optional.of(builder.build());
     }
 
+    private CodeBlock collectKeysCode(ConfigParser.Spec config) {
+        Collection<String> configKeys = config
+            .members()
+            .stream()
+            .filter(member -> !member.collectsKeys())
+            .filter(member -> !isAnnotationPresent(member.method(), Parameter.class))
+            .map(ConfigParser.Member::lookupKey)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        switch (configKeys.size()) {
+            case 0:
+                return CodeBlock.of("return $T.emptyList()", Collections.class);
+            case 1:
+                return CodeBlock.of("return $T.singleton($S)", Collections.class, configKeys.iterator().next());
+            default:
+                CodeBlock keys = configKeys
+                    .stream()
+                    .map(name -> CodeBlock.of("$S", name))
+                    .collect(CodeBlock.joining(", "));
+                return CodeBlock.of("return $T.asList($L)", Arrays.class, keys);
+        }
+    }
+
     private Iterable<MethodSpec> defineGetters(ConfigParser.Spec config, NameAllocator names) {
-        return config.members().stream().map(member -> MethodSpec
+        return config
+            .members()
+            .stream()
+            .map(member -> defineGetter(config, names, member))
+            .collect(Collectors.toList());
+    }
+
+    private MethodSpec defineGetter(ConfigParser.Spec config, NameAllocator names, ConfigParser.Member member) {
+        MethodSpec.Builder builder = MethodSpec
             .overriding(member.method())
-            .returns(member.typeSpecWithAnnotation(Nullable.class))
-            .addStatement("return this.$N", names.get(member))
-            .build()
-        ).collect(Collectors.toList());
+            .returns(member.typeSpecWithAnnotation(Nullable.class));
+        if (member.collectsKeys()) {
+            builder.addStatement(collectKeysCode(config));
+        } else {
+            builder.addStatement("return this.$N", names.get(member));
+        }
+        return builder.build();
     }
 
     private <T> Optional<T> error(CharSequence message, Element element) {

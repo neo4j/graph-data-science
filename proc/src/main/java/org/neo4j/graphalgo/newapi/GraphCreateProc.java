@@ -53,13 +53,16 @@ public class GraphCreateProc extends CatalogProc {
         validateGraphName(getUsername(), graphName);
 
         // input
+        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateConfig config = GraphCreateFromStoreConfig.of(
             getUsername(),
             graphName,
             nodeProjection,
             relationshipProjection,
-            CypherMapWrapper.create(configuration)
+            cypherConfig
         );
+        validateConfig(cypherConfig, config);
+
         // computation
         GraphCreateResult result = runWithExceptionLogging(
             "Graph creation failed",
@@ -80,13 +83,15 @@ public class GraphCreateProc extends CatalogProc {
         validateGraphName(getUsername(), graphName);
 
         // input
+        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateFromCypherConfig config = GraphCreateFromCypherConfig.of(
             getUsername(),
             graphName,
             nodeQuery,
             relationshipQuery,
-            CypherMapWrapper.create(configuration)
+            cypherConfig
         );
+        validateConfig(cypherConfig, config);
 
         // computation
         GraphCreateResult result = runWithExceptionLogging(

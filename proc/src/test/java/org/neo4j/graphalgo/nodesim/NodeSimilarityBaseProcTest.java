@@ -193,17 +193,6 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
         fail("Result is neither a stream result or a graph result. Congratulations, this should never happen.");
     }
 
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            mapWrapper = mapWrapper.withString("writeProperty", "foo");
-        }
-        if (!mapWrapper.containsKey("writeRelationshipType")) {
-            mapWrapper = mapWrapper.withString("writeRelationshipType", "bar");
-        }
-        return mapWrapper;
-    }
-
     @ParameterizedTest(name = "parameter: {0}, value: {1}")
     @CsvSource(value = {"topN, -2", "bottomN, -2", "topK, -2", "bottomK, -2", "topK, 0", "bottomK, 0"})
     void shouldThrowForInvalidTopsAndBottoms(String parameter, long value) {

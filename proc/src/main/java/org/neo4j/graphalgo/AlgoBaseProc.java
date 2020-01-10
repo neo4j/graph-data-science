@@ -75,9 +75,13 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
         if (!graphName.isPresent()) {
             // we should do implicit loading
-            maybeImplicitCreate = Optional.of(GraphCreateConfig.createImplicit(getUsername(), config));
+            GraphCreateConfig createConfig = GraphCreateConfig.createImplicit(getUsername(), config);
+            maybeImplicitCreate = Optional.of(createConfig);
+            config = config.withoutAny(createConfig.configKeys());
         }
-        return newConfig(getUsername(), graphName, maybeImplicitCreate, config);
+        CONFIG algoConfig = newConfig(getUsername(), graphName, maybeImplicitCreate, config);
+        validateConfig(config, algoConfig);
+        return algoConfig;
     }
 
     // TODO make AlgorithmFactory have a constructor that accepts CONFIG

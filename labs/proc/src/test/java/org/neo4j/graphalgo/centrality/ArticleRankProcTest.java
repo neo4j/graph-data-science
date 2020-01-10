@@ -82,7 +82,7 @@ class ArticleRankProcTest extends BaseProcTest {
             .withRelationshipType("CITES")
             .algo("gds.alpha.articleRank")
             .streamMode()
-            .addParameter("iterations", 20)
+            .addParameter("maxIterations", 20)
             .addParameter("dampingFactor", 0.85)
             .addParameter("concurrency", 1)
             .yields("nodeId", "score")
@@ -114,7 +114,7 @@ class ArticleRankProcTest extends BaseProcTest {
             .withRelationshipType("CITES")
             .algo("gds.alpha.articleRank")
             .writeMode()
-            .addParameter("iterations", 20)
+            .addParameter("maxIterations", 20)
             .addParameter("dampingFactor", 0.85)
             .addParameter("concurrency", 1)
             .yields();

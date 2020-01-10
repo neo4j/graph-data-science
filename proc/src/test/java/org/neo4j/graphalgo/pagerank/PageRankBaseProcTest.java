@@ -25,9 +25,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
-import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.GraphLoadProc;
+import org.neo4j.graphalgo.ImmutablePropertyMapping;
+import org.neo4j.graphalgo.MemoryEstimateTest;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.WeightConfigTest;
@@ -56,8 +60,7 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
     IterationsConfigTest<CONFIG, PageRank>,
     WeightConfigTest<CONFIG, PageRank>,
     ToleranceConfigTest<CONFIG, PageRank>,
-    MemoryEstimateTest<CONFIG, PageRank>
-{
+    MemoryEstimateTest<CONFIG, PageRank> {
 
     static Map<Long, Double> expected = new HashMap<>();
     static Map<Long, Double> weightedExpected = new HashMap<>();
@@ -118,7 +121,12 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
             ", (u)-[:TYPE3 {weight: 1.0}]->(w)" +
             ", (v)-[:TYPE3 {weight: 1.0}]->(w)";
 
-        registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphLoadProc.class, GraphCreateProc.class);
+        registerProcedures(
+            PageRankStreamProc.class,
+            PageRankWriteProc.class,
+            GraphLoadProc.class,
+            GraphCreateProc.class
+        );
         runQuery(cypher);
 
         runQuery("CALL gds.graph.create(" +
@@ -178,64 +186,83 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
 
     static Stream<Arguments> graphVariations() {
         return Stream.of(
-            arguments("'graphLabel1', {", "explicit graph"),
             arguments(
-                "{" +
-                "  nodeProjection: 'Label1'," +
-                "  relationshipProjection: ['TYPE1'],",
-                "  implicit graph"
+                GdsCypher.call().explicitCreation("graphLabel1").algo("pageRank"),
+                "explicit graph"
+            ),
+            arguments(
+                GdsCypher.call()
+                    .withNodeLabel("Label1")
+                    .withRelationshipType("TYPE1")
+                    .algo("pageRank"),
+                "implicit graph"
             )
         );
     }
 
     static Stream<Arguments> graphVariationsWeight() {
         return Stream.of(
-            arguments("'graphLabel1', {", "explicit graph"),
             arguments(
-                "{" +
-                "  nodeProjection: 'Label1'," +
-                "  relationshipProjection: {" +
-                "      TYPE1: {" +
-                "          type: 'TYPE1'," +
-                "          properties: ['weight']" +
-                "      } " +
-                "},",
-                "  implicit graph"
+                GdsCypher.call().explicitCreation("graphLabel1").algo("pageRank"),
+                "explicit graph"
+            ),
+            arguments(
+                GdsCypher.call()
+                    .withNodeLabel("Label1")
+                    .withRelationshipType(
+                        "TYPE1",
+                        RelationshipProjection.builder()
+                            .type("TYPE1")
+                            .addProperty(ImmutablePropertyMapping.builder().propertyKey("weight").build())
+                            .build()
+                    )
+                    .algo("pageRank"),
+                "implicit graph"
             )
         );
     }
 
     static Stream<Arguments> graphVariationsEqualWeight() {
         return Stream.of(
-            arguments("'graphLabel1', {", "explicit graph"),
             arguments(
-                "{" +
-                "  nodeProjection: 'Label1'," +
-                "  relationshipProjection: {" +
-                "      TYPE1: {" +
-                "          type: 'TYPE1'," +
-                "          properties: ['equalWeight']" +
-                "      } " +
-                "},",
-                "  implicit graph"
+                GdsCypher.call().explicitCreation("graphLabel1").algo("pageRank"),
+                "explicit graph"
+            ),
+            arguments(
+                GdsCypher.call()
+                    .withNodeLabel("Label1")
+                    .withRelationshipType(
+                        "TYPE1",
+                        RelationshipProjection.builder()
+                            .type("TYPE1")
+                            .addProperty(ImmutablePropertyMapping.builder().propertyKey("equalWeight").build())
+                            .build()
+                    )
+                    .algo("pageRank"),
+                "implicit graph"
             )
         );
     }
 
     static Stream<Arguments> graphVariationsLabel3() {
         return Stream.of(
-            arguments("'graphLabel3', {", "explicit graph"),
             arguments(
-                "{" +
-                "  nodeProjection: 'Label3'," +
-                "  relationshipProjection: {" +
-                "      TYPE3: {" +
-                "          type: 'TYPE3'," +
-                "          properties: ['equalWeight'], " +
-                "          projection: 'UNDIRECTED'" +
-                "      } " +
-                "  },",
-                "  implicit graph"
+                GdsCypher.call().explicitCreation("graphLabel3").algo("pageRank"),
+                "explicit graph"
+            ),
+            arguments(
+                GdsCypher.call()
+                    .withNodeLabel("Label3")
+                    .withRelationshipType(
+                        "TYPE3",
+                        RelationshipProjection.builder()
+                            .type("TYPE3")
+                            .projection(Projection.UNDIRECTED)
+                            .addProperty(ImmutablePropertyMapping.builder().propertyKey("equalWeight").build())
+                            .build()
+                    )
+                    .algo("pageRank"),
+                "implicit graph"
             )
         );
     }

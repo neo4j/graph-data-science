@@ -229,8 +229,7 @@ class LabelPropagationDocTest extends BaseProcTest {
         String q2 = "CALL gds.labelPropagation.stream({" +
                     "  nodeQuery: 'MATCH (p:User) RETURN id(p) AS id'," +
                     "  relationshipQuery: 'MATCH (p1:User)-[f:FOLLOW]->(p2:User)" +
-                    "   RETURN id(p1) AS source, id(p2) AS target'," +
-                    "  graph: 'cypher'" +
+                    "   RETURN id(p1) AS source, id(p2) AS target'" +
                     "})" +
                     "YIELD nodeId, communityId AS Community " +
                     "RETURN algo.asNode(nodeId).name AS Name, Community " +
