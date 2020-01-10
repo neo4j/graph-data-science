@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.betweenness;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,13 +27,12 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.impl.betweenness.MaxDepthBetweennessCentrality;
 
 /**
  *  (A)-->(B)-->(C)-->(D)-->(E)
  *  0.0   3.0   4.0   3.0   0.0
  */
-class BetweennessCentralityTest extends AlgoTestBase {
+class MaxDepthBetweennessCentralityTest extends AlgoTestBase {
 
     private Graph graph;
 

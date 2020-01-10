@@ -48,7 +48,7 @@ import java.util.stream.Stream;
 /**
  * Randomized Approximate Brandes. See https://arxiv.org/pdf/1702.06087.pdf.
  *
- * The implementation follows the same approach as {@link ParallelBetweennessCentrality}
+ * The implementation follows the same approach as {@link BetweennessCentrality}
  * with an additional node filter to select interesting nodes. the result is multiplied
  * with a factor which is based on the probability of which the filter accepts nodes.
  *

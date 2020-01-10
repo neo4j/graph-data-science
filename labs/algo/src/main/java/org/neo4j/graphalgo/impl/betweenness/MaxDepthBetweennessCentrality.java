@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 /**
  * Implements Brandes Betweenness Centrality with
  * additional restriction on the maximum allowed
- * depth. Implementation behaves like {@link ParallelBetweennessCentrality}
+ * depth. Implementation behaves like {@link BetweennessCentrality}
  * with another depth queue which is handled
  * like the node-queue. It contains the number of steps
  * the process took to reach the node. if it exceeds

@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
-import org.neo4j.graphalgo.impl.betweenness.ParallelBetweennessCentrality;
 import org.neo4j.graphalgo.impl.betweenness.RABrandesBetweennessCentrality;
 import org.neo4j.graphalgo.impl.betweenness.RandomDegreeSelectionStrategy;
 import org.neo4j.graphalgo.impl.betweenness.RandomSelectionStrategy;
@@ -87,7 +86,7 @@ public class BetweennessCentralityProc extends LabsProc {
         final RABrandesBetweennessCentrality algo =
                 new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, configuration.concurrency(), strategy(configuration, graph))
                         .withTerminationFlag(TerminationFlag.wrap(transaction))
-                        .withProgressLogger(ProgressLogger.wrap(log, "Randomized Approximate Brandes: BetweennessCentrality(parallel)"))
+                        .withProgressLogger(ProgressLogger.wrap(log, "Randomized Approximate Brandes: BetweennessCentrality"))
                         .withDirection(configuration.getDirection(Direction.OUTGOING))
                         .withMaxDepth(configuration.getNumber("maxDepth", Integer.MAX_VALUE).intValue());
         algo.compute();
@@ -122,22 +121,14 @@ public class BetweennessCentralityProc extends LabsProc {
         }
 
         final int concurrency = configuration.concurrency();
-        if (concurrency > 1) {
-            final ParallelBetweennessCentrality algo =
-                    new ParallelBetweennessCentrality(graph, Pools.DEFAULT, concurrency)
-                            .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality"))
-                            .withTerminationFlag(TerminationFlag.wrap(transaction))
-                            .withDirection(configuration.getDirection(DEFAULT_DIRECTION));
-            algo.compute();
-            graph.release();
-            return algo.resultStream();
-        }
-
-        final BetweennessCentrality compute = new BetweennessCentrality(graph)
-            .withDirection(configuration.getDirection(DEFAULT_DIRECTION));
-        compute.compute();
+        final BetweennessCentrality algo =
+            new BetweennessCentrality(graph, Pools.DEFAULT, concurrency)
+                .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality"))
+                .withTerminationFlag(TerminationFlag.wrap(transaction))
+                .withDirection(configuration.getDirection(DEFAULT_DIRECTION));
+        algo.compute();
         graph.release();
-        return compute.resultStream();
+        return algo.resultStream();
     }
 
     @Procedure(value = "algo.betweenness", mode = Mode.WRITE)
@@ -149,12 +140,7 @@ public class BetweennessCentralityProc extends LabsProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-
-        if (configuration.concurrency() > 1) {
-            return computeBetweennessParallel(label, relationship, configuration);
-        } else {
-            return computeBetweenness(label, relationship, configuration);
-        }
+        return computeBetweenness(label, relationship, configuration);
     }
 
 
@@ -194,7 +180,7 @@ public class BetweennessCentralityProc extends LabsProc {
         final RABrandesBetweennessCentrality.SelectionStrategy strategy = strategy(configuration, graph);
         final RABrandesBetweennessCentrality bc =
                 new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, configuration.concurrency(), strategy)
-                        .withProgressLogger(ProgressLogger.wrap(log, "Randomized Approximate Brandes: BetweennessCentrality(parallel)"))
+                        .withProgressLogger(ProgressLogger.wrap(log, "Randomized Approximate Brandes: BetweennessCentrality"))
                         .withTerminationFlag(terminationFlag)
                         .withDirection(configuration.getDirection(Direction.OUTGOING))
                         .withMaxDepth(configuration.getNumber("maxDepth", Integer.MAX_VALUE).intValue());
@@ -236,63 +222,6 @@ public class BetweennessCentralityProc extends LabsProc {
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = new GraphLoader(api, Pools.DEFAULT)
                     .init(log, label, relationship, configuration)
-                    .withDirection(configuration.getDirection(Direction.OUTGOING))
-                    .load(configuration.getGraphImpl());
-        }
-
-        builder.withNodeCount(graph.nodeCount());
-
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.of(builder.build());
-        }
-
-        final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        final BetweennessCentrality bc = new BetweennessCentrality(graph)
-                .withTerminationFlag(terminationFlag)
-                .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality(sequential)"))
-                .withDirection(configuration.getDirection(Direction.OUTGOING));
-
-        builder.timeCompute(() -> {
-            bc.compute();
-            if (configuration.isStatsFlag()) {
-                computeStats(builder, bc.getCentrality());
-            }
-        });
-
-        final double[] centrality = bc.getCentrality();
-        bc.release();
-        graph.release();
-
-        if (configuration.isWriteFlag()) {
-            final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
-            builder.timeWrite(() -> NodePropertyExporter.of(api, graph, bc.terminationFlag)
-                    .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                    .build()
-                    .write(
-                            writeProperty,
-                            centrality,
-                            Translators.DOUBLE_ARRAY_TRANSLATOR
-                    )
-            );
-        }
-
-        return Stream.of(builder.build());
-    }
-
-    public Stream<BetweennessCentralityProcResult> computeBetweennessParallel(
-            String label,
-            String relationship,
-            ProcedureConfiguration configuration) {
-
-        final BetweennessCentralityProcResult.Builder builder =
-                BetweennessCentralityProcResult.builder();
-
-        Graph graph;
-        try (ProgressTimer timer = builder.timeLoad()) {
-            graph = new GraphLoader(api, Pools.DEFAULT)
-                    .init(log, label, relationship, configuration)
                     .withOptionalLabel(label)
                     .withOptionalRelationshipType(relationship)
                     .withDirection(configuration.getDirection(Direction.OUTGOING))
@@ -307,9 +236,9 @@ public class BetweennessCentralityProc extends LabsProc {
         }
 
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        final ParallelBetweennessCentrality bc =
-                new ParallelBetweennessCentrality(graph, Pools.DEFAULT, configuration.concurrency())
-                        .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality(parallel)"))
+        final BetweennessCentrality bc =
+                new BetweennessCentrality(graph, Pools.DEFAULT, configuration.concurrency())
+                        .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality"))
                         .withTerminationFlag(terminationFlag)
                         .withDirection(configuration.getDirection(Direction.OUTGOING));
 
@@ -335,25 +264,6 @@ public class BetweennessCentralityProc extends LabsProc {
         bc.release();
 
         return Stream.of(builder.build());
-    }
-
-    private void computeStats(BetweennessCentralityProcResult.Builder builder, double[] centrality) {
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
-        double sum = 0.0;
-        for (int i = centrality.length - 1; i >= 0; i--) {
-            final double c = centrality[i];
-            if (c < min) {
-                min = c;
-            }
-            if (c > max) {
-                max = c;
-            }
-            sum += c;
-        }
-        builder.withCentralityMax(max)
-                .withCentralityMin(min)
-                .withCentralitySum(sum);
     }
 
     private void computeStats(BetweennessCentralityProcResult.Builder builder, AtomicDoubleArray centrality) {

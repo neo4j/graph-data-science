@@ -94,22 +94,10 @@ class BetweennessCentralityTest2 extends AlgoTestBase {
     }
 
     @AllGraphTypesWithoutCypherTest
-    void testBC(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
-
-        BetweennessCentrality algo = new BetweennessCentrality(graph);
-        algo.compute();
-        algo.resultStream()
-            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
-
-        verifyMock(testConsumer);
-    }
-
-    @AllGraphTypesWithoutCypherTest
     void testPBC(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
 
-        ParallelBetweennessCentrality algo = new ParallelBetweennessCentrality(
+        BetweennessCentrality algo = new BetweennessCentrality(
             graph,
             Pools.DEFAULT,
             4
