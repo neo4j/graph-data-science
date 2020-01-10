@@ -73,22 +73,15 @@ public class RABrandesBetweennessCentrality extends LegacyAlgorithm<RABrandesBet
         int size();
     }
 
-    // the graph
     private Graph graph;
-    // AI counts up for every node until nodeCount is reached
     private volatile AtomicInteger nodeQueue = new AtomicInteger();
-    // atomic double array which supports only atomic-add
     private AtomicDoubleArray centrality;
-    // the node count
     private final int nodeCount;
     private final int expectedNodeCount;
-    // global executor service
     private final ExecutorService executorService;
-    // number of threads to spawn
     private final int concurrency;
     private SelectionStrategy selectionStrategy;
     private Direction direction = Direction.OUTGOING;
-    // used to
     private double divisor = 1.0;
 
     private int maxDepth = Integer.MAX_VALUE;
@@ -138,7 +131,7 @@ public class RABrandesBetweennessCentrality extends LegacyAlgorithm<RABrandesBet
     @Override
     public Void compute() {
         nodeQueue.set(0);
-        final ArrayList<Future<?>> futures = new ArrayList<>();
+        ArrayList<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {
             futures.add(executorService.submit(new BCTask()));
         }
@@ -161,11 +154,12 @@ public class RABrandesBetweennessCentrality extends LegacyAlgorithm<RABrandesBet
      * @return stream if Results
      */
     public Stream<BetweennessCentrality.Result> resultStream() {
-        return IntStream.range(0, nodeCount)
-                .mapToObj(nodeId ->
-                        new BetweennessCentrality.Result(
-                                graph.toOriginalNodeId(nodeId),
-                                centrality.get(nodeId)));
+        return IntStream
+            .range(0, nodeCount)
+            .mapToObj(nodeId -> new BetweennessCentrality.Result(
+                graph.toOriginalNodeId(nodeId),
+                centrality.get(nodeId)
+            ));
     }
 
     @Override
@@ -218,10 +212,10 @@ public class RABrandesBetweennessCentrality extends LegacyAlgorithm<RABrandesBet
 
         @Override
         public void run() {
-            final double f = (nodeCount * divisor) / selectionStrategy.size();
+            double f = (nodeCount * divisor) / selectionStrategy.size();
             for (;;) {
                 // take start node from the queue
-                final int startNodeId = nodeQueue.getAndIncrement();
+                int startNodeId = nodeQueue.getAndIncrement();
                 if (startNodeId >= nodeCount || !running()) {
                     return;
                 }
@@ -270,7 +264,7 @@ public class RABrandesBetweennessCentrality extends LegacyAlgorithm<RABrandesBet
 
                 while (!pivots.isEmpty()) {
                     int node = pivots.pop();
-                    final IntArrayList intCursors = paths.get(node);
+                    IntArrayList intCursors = paths.get(node);
                     if (null != intCursors) {
                         intCursors.forEach((Consumer<? super IntCursor>) c -> {
                             delta.addTo(c.value,

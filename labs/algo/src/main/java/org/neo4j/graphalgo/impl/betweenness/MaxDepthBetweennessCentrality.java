@@ -58,21 +58,22 @@ public class MaxDepthBetweennessCentrality extends LegacyAlgorithm<MaxDepthBetwe
 
     public MaxDepthBetweennessCentrality(Graph graph, int maxDepth) {
         this.graph = graph;
-        nodeCount = Math.toIntExact(graph.nodeCount());
+        this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.maxDepth = maxDepth;
         this.centrality = new double[nodeCount];
         this.stack = new IntStack();
         this.depth = new IntArrayDeque();
         this.sigma = new int[nodeCount];
         this.distance = new int[nodeCount];
-        queue = new IntArrayDeque();
-        paths = new Path[nodeCount];
-        delta = new double[nodeCount];
+        this.queue = new IntArrayDeque();
+        this.paths = new Path[nodeCount];
+        this.delta = new double[nodeCount];
     }
 
     /**
      * set traversal direction. If the graph is loaded as undirected
      * OUTGOING must be used.
+     *
      * @param direction
      * @return
      */
@@ -96,6 +97,7 @@ public class MaxDepthBetweennessCentrality extends LegacyAlgorithm<MaxDepthBetwe
 
     /**
      * return (inner)nodeId to bc value mapping
+     *
      * @return
      */
     public double[] getCentrality() {
@@ -103,29 +105,14 @@ public class MaxDepthBetweennessCentrality extends LegacyAlgorithm<MaxDepthBetwe
     }
 
     /**
-     * iterate over each result until every node has
-     * been visited or the consumer returns false
-     *
-     * @param consumer the result consumer
-     */
-    public void forEach(ResultConsumer consumer) {
-        for (int i = nodeCount - 1; i >= 0; i--) {
-            if (!consumer.consume(graph.toOriginalNodeId(i), centrality[i])) {
-                return;
-            }
-        }
-    }
-
-    /**
      * result stream of pairs of original node-id to bc-value
+     *
      * @return
      */
     public Stream<Result> resultStream() {
-        return IntStream.range(0, nodeCount)
-                .mapToObj(nodeId ->
-                        new Result(
-                                graph.toOriginalNodeId(nodeId),
-                                centrality[nodeId]));
+        return IntStream
+            .range(0, nodeCount)
+            .mapToObj(nodeId -> new Result(graph.toOriginalNodeId(nodeId), centrality[nodeId]));
     }
 
     /**
@@ -175,7 +162,7 @@ public class MaxDepthBetweennessCentrality extends LegacyAlgorithm<MaxDepthBetwe
             });
         }
         while (!stack.isEmpty() && running()) {
-            final int node = stack.pop();
+            int node = stack.pop();
             if (null == paths[node]) {
                 continue;
             }
@@ -231,20 +218,6 @@ public class MaxDepthBetweennessCentrality extends LegacyAlgorithm<MaxDepthBetwe
     }
 
     /**
-     * Consumer interface
-     */
-    public interface ResultConsumer {
-        /**
-         * consume nodeId and centrality value as long as the consumer returns true
-         *
-         * @param originalNodeId the neo4j node id
-         * @param value          centrality value
-         * @return a bool indicating if the loop should continue(true) or stop(false)
-         */
-        boolean consume(long originalNodeId, double value);
-    }
-
-    /**
      * Result class used for streaming
      */
     public static final class Result {
@@ -260,9 +233,9 @@ public class MaxDepthBetweennessCentrality extends LegacyAlgorithm<MaxDepthBetwe
         @Override
         public String toString() {
             return "Result{" +
-                    "nodeId=" + nodeId +
-                    ", centrality=" + centrality +
-                    '}';
+                   "nodeId=" + nodeId +
+                   ", centrality=" + centrality +
+                   '}';
         }
     }
 }

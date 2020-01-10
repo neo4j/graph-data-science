@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Note: Experimental
- * @author mknblch
  */
 public class RandomDegreeSelectionStrategy implements RABrandesBetweennessCentrality.SelectionStrategy {
 
@@ -45,10 +44,10 @@ public class RandomDegreeSelectionStrategy implements RABrandesBetweennessCentra
         this.degrees = graph;
         this.direction = direction;
         bitSet = new SimpleBitSet(Math.toIntExact(graph.nodeCount()));
-        final SecureRandom random = new SecureRandom();
-        final AtomicInteger mx = new AtomicInteger(0);
+        SecureRandom random = new SecureRandom();
+        AtomicInteger mx = new AtomicInteger(0);
         ParallelUtil.iterateParallel(pool, Math.toIntExact(graph.nodeCount()), concurrency, node -> {
-            final int degree = degrees.degree(node, direction);
+            int degree = degrees.degree(node, direction);
             int current;
             do {
                 current = mx.get();

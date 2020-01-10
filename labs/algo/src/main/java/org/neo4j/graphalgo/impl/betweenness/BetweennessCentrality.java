@@ -48,35 +48,24 @@ import java.util.stream.Stream;
  * Note:
  * The algo can be adapted to use the MSBFS but at the time of development some must have
  * features in the MSBFS were missing (like manually canceling evaluation if some conditions have been met).
- *
- *
- * @author mknblch
  */
 public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality> {
 
-    // the graph
     private Graph graph;
-    // AI counts up for every node until nodeCount is reached
     private volatile AtomicInteger nodeQueue = new AtomicInteger();
-    // atomic double array which supports only atomic-add
     private AtomicDoubleArray centrality;
-    // the node count
     private final int nodeCount;
-    // global executor service
     private final ExecutorService executorService;
-    // number of threads to spawn
     private final int concurrency;
-    // traversal direction
     private Direction direction = Direction.OUTGOING;
-    // divisor to adapt result to direction
     private double divisor = 1.0;
 
     /**
      * constructs a parallel centrality solver
      *
-     * @param graph the graph iface
+     * @param graph           the graph iface
      * @param executorService the executor service
-     * @param concurrency desired number of threads to spawn
+     * @param concurrency     desired number of threads to spawn
      */
     public BetweennessCentrality(Graph graph, ExecutorService executorService, int concurrency) {
         this.graph = graph;
@@ -107,7 +96,7 @@ public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality
     @Override
     public Void compute() {
         nodeQueue.set(0); //
-        final ArrayList<Future<?>> futures = new ArrayList<>();
+        ArrayList<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {
             futures.add(executorService.submit(new BCTask()));
         }
@@ -130,12 +119,9 @@ public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality
      * @return stream if Results
      */
     public Stream<Result> resultStream() {
-        return IntStream.range(0, nodeCount)
-            .mapToObj(nodeId ->
-                new Result(
-                    graph.toOriginalNodeId(nodeId),
-                    centrality.get(nodeId)
-                ));
+        return IntStream
+            .range(0, nodeCount)
+            .mapToObj(nodeId -> new Result(graph.toOriginalNodeId(nodeId), centrality.get(nodeId)));
     }
 
     /**
@@ -158,7 +144,7 @@ public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality
     /**
      * a BCTask takes one element from the nodeQueue and calculates it's centrality
      */
-    private class BCTask implements Runnable {
+    class BCTask implements Runnable {
 
         private final RelationshipIterator localRelationshipIterator;
         // path map
@@ -184,10 +170,9 @@ public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality
 
         @Override
         public void run() {
-            for (;;) {
+            for (; ; ) {
                 reset();
-                // take a node and calculate bc
-                final int startNodeId = nodeQueue.getAndIncrement();
+                int startNodeId = nodeQueue.getAndIncrement();
                 if (startNodeId >= nodeCount || !running()) {
                     return;
                 }
