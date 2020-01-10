@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -97,13 +98,24 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testClosenessCentralityStream() {
-        boolean hasNext = runQuery("CALL algo.closeness.stream('', '', {graph:'" + graphImpl + "'})", Result::hasNext);
-        assertFalse(hasNext);
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.closeness")
+            .streamMode()
+            .yields();
+        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
     }
 
     @Test
-    void testClosenessCentrality() {
-        runQueryWithRowConsumer("CALL algo.closeness('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodes")));
+    void testClosenessCentralityWrite() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.closeness")
+            .writeMode()
+            .yields();
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
     }
 
     @Test

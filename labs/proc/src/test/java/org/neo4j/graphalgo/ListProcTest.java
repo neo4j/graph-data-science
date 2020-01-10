@@ -24,6 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.ArticleRankProc;
+import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -61,8 +62,8 @@ class ListProcTest extends BaseProcTest {
         "algo.betweenness.sampled.stream",
         "algo.betweenness.stream",
         "algo.bfs.stream",
-        "algo.closeness",
-        "algo.closeness.stream",
+        "gds.alpha.closeness.write",
+        "gds.alpha.closeness.stream",
         "gds.alpha.degree.write",
         "gds.alpha.degree.stream",
         "gds.alpha.shortestPath.write",

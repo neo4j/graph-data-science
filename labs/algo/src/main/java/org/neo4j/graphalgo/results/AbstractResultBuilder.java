@@ -103,5 +103,15 @@ public abstract class AbstractResultBuilder<R> {
         return this;
     }
 
+    public AbstractResultBuilder<R> withComputeMillis(long computeMillis) {
+        this.computeMillis = computeMillis;
+        return this;
+    }
+
+    public AbstractResultBuilder<R> withLoadMillis(long loadMillis) {
+        this.loadMillis = loadMillis;
+        return this;
+    }
+
     public abstract R build();
 }

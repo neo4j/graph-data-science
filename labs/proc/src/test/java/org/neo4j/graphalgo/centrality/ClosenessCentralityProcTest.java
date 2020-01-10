@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +26,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
@@ -88,8 +91,11 @@ class ClosenessCentralityProcTest extends BaseProcTest {
     }
 
     @Test
-    void testClosenessStream() throws Exception {
-        runQueryWithRowConsumer("CALL algo.closeness.stream('Node', 'TYPE') YIELD nodeId, centrality", row -> {
+    void testClosenessStream() {
+        String query = gdsCypher()
+            .streamMode()
+            .yields("nodeId", "centrality");
+        runQueryWithRowConsumer(query, row -> {
             consumer.accept(
                 row.getNumber("nodeId").longValue(),
                 row.getNumber("centrality").doubleValue()
@@ -100,19 +106,19 @@ class ClosenessCentralityProcTest extends BaseProcTest {
     }
 
     @Test
-    void testClosenessWrite() throws Exception {
-        runQueryWithRowConsumer(
-            "CALL algo.closeness('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-            "nodes, loadMillis, computeMillis, writeMillis", row -> {
-                assertNotEquals(-1L, row.getNumber("writeMillis"));
-                assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("nodes"));
-            });
+    void testClosenessWrite() {
+        String query = gdsCypher()
+            .writeMode()
+            .yields("nodes", "loadMillis", "computeMillis", "writeMillis");
 
-        runQueryWithRowConsumer("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality", row -> {
-            System.out.println(
-                row.getNumber("id").longValue() + " " +
-                row.getNumber("centrality").doubleValue());
+        runQueryWithRowConsumer(query, row -> {
+            assertNotEquals(-1L, row.getNumber("writeMillis"));
+            assertNotEquals(-1L, row.getNumber("loadMillis"));
+            assertNotEquals(-1L, row.getNumber("computeMillis"));
+            assertNotEquals(-1L, row.getNumber("nodes"));
+        });
+
+        runQueryWithRowConsumer("MATCH (n) WHERE exists(n.centrality) RETURN id(n) AS id, n.centrality AS centrality", row -> {
             consumer.accept(
                 row.getNumber("id").longValue(),
                 row.getNumber("centrality").doubleValue()
@@ -120,6 +126,13 @@ class ClosenessCentralityProcTest extends BaseProcTest {
         });
 
         verifyMock();
+    }
+
+    private GdsCypher.ModeBuildStage gdsCypher() {
+        return GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.closeness");
     }
 
     private void verifyMock() {

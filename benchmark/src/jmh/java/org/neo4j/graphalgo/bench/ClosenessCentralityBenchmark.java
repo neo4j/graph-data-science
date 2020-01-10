@@ -18,8 +18,8 @@
  */
 package org.neo4j.graphalgo.bench;
 
-import org.neo4j.graphalgo.ClosenessCentralityProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.Pools;

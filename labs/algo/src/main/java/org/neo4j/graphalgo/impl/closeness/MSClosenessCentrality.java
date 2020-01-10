@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.closeness;
 
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -45,7 +45,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public class MSClosenessCentrality extends LegacyAlgorithm<MSClosenessCentrality> {
+public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSClosenessCentrality> {
 
     private Graph graph;
     private PagedAtomicIntegerArray farness;
@@ -130,13 +130,10 @@ public class MSClosenessCentrality extends LegacyAlgorithm<MSClosenessCentrality
     }
 
     @Override
-    public void release() {
-        graph = null;
-        farness = null;
-    }
+    public void release() {}
 
     @Override
-    public Void compute() {
+    public MSClosenessCentrality compute() {
         compute(Direction.OUTGOING);
         return null;
     }
