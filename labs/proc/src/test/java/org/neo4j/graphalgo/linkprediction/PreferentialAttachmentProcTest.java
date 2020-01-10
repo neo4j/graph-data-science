@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.linkprediction;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
@@ -54,7 +55,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
+        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*"));
         registerFunctions(LinkPredictionFunc.class);
         runQuery(DB_CYPHER);
     }
@@ -69,7 +70,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                         "MATCH (p2:Person {name: 'Jennifer'})\n" +
-                        "RETURN algo.linkprediction.preferentialAttachment(p1, p2) AS score, " +
+                        "RETURN gds.alpha.linkprediction.preferentialAttachment(p1, p2) AS score, " +
                         "       16.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -82,7 +83,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                 "MATCH (p2:Person {name: 'Arya'})\n" +
-                "RETURN algo.linkprediction.preferentialAttachment(p1, p2) AS score, " +
+                "RETURN gds.alpha.linkprediction.preferentialAttachment(p1, p2) AS score, " +
                 "       0.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -94,7 +95,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Karin'})\n" +
                         "MATCH (p2:Person {name: 'Elaine'})\n" +
-                        "RETURN algo.linkprediction.preferentialAttachment(p1, p2) AS score, " +
+                        "RETURN gds.alpha.linkprediction.preferentialAttachment(p1, p2) AS score, " +
                         "       1.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -106,7 +107,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Jennifer'})\n" +
-                        "RETURN algo.linkprediction.preferentialAttachment(p1, p2) AS score, " +
+                        "RETURN gds.alpha.linkprediction.preferentialAttachment(p1, p2) AS score, " +
                         "       16.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -118,7 +119,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Jennifer'})\n" +
-                        "RETURN algo.linkprediction.preferentialAttachment(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score, " +
+                        "RETURN gds.alpha.linkprediction.preferentialAttachment(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score, " +
                         "      2.0 AS cypherScore";
 
         Map<String, Object> node = runQuery(controlQuery, Result::next);
@@ -130,7 +131,7 @@ class PreferentialAttachmentProcTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Jennifer'})\n" +
-                        "RETURN algo.linkprediction.preferentialAttachment(p1, p2, " +
+                        "RETURN gds.alpha.linkprediction.preferentialAttachment(p1, p2, " +
                         "      {relationshipQuery: 'FOLLOWS', direction: 'OUTGOING'}) AS score, " +
                         "      1.0 AS cypherScore";
 

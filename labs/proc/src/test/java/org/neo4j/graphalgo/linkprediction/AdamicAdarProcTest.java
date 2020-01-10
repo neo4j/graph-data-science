@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.linkprediction;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
@@ -30,7 +31,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
+class AdamicAdarProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE (mark:Person {name: 'Mark'})\n" +
@@ -53,7 +54,7 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
+        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted,"gds.*"));
         registerFunctions(LinkPredictionFunc.class);
         runQuery(DB_CYPHER);
     }
@@ -68,10 +69,11 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                 "MATCH (p2:Person {name: 'Praveena'})\n" +
-                "RETURN algo.linkprediction.resourceAllocation(p1, p2) AS score, " +
-                "       1/3.0 AS cypherScore";
+                "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
+                "       1/log(3) AS cypherScore";
 
-        Map<String, Object> node =  runQuery(controlQuery, Result::next);
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -80,11 +82,12 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                         "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN algo.linkprediction.resourceAllocation(p1, p2, " +
+                        "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2, " +
                         "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
-                        "1/2.0 AS cypherScore";
+                        "1/log(2) AS cypherScore";
 
-        Map<String, Object> node =  runQuery(controlQuery, Result::next);
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -93,10 +96,11 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                         "MATCH (p2:Person {name: 'Elaine'})\n" +
-                        "RETURN algo.linkprediction.resourceAllocation(p1, p2) AS score, " +
-                        "       1/2.0 + 1/2.0 AS cypherScore";
+                        "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
+                        "       1/log(2) + 1/log(2) AS cypherScore";
 
-        Map<String, Object> node =  runQuery(controlQuery, Result::next);
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -105,10 +109,11 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                         "MATCH (p2:Person {name: 'Ryan'})\n" +
-                        "RETURN algo.linkprediction.resourceAllocation(p1, p2) AS score, " +
+                        "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
-        Map<String, Object> node =  runQuery(controlQuery, Result::next);
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
@@ -117,11 +122,11 @@ class ResourceAllocationSimilarityFuncTest extends BaseProcTest {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN algo.linkprediction.resourceAllocation(p1, p2) AS score, " +
+                        "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
                         "       0.0 AS cypherScore";
 
-        Map<String, Object> node =  runQuery(controlQuery, Result::next);
+        Result result = runQuery(controlQuery);
+        Map<String, Object> node = result.next();
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
-
 }

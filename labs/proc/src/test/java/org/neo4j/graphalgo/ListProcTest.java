@@ -101,12 +101,12 @@ class ListProcTest extends BaseProcTest {
     ));
 
     private static final Collection<String> FUNCTIONS = new HashSet<>(asList(
-        "algo.linkprediction.adamicAdar",
-        "algo.linkprediction.resourceAllocation",
-        "algo.linkprediction.commonNeighbors",
-        "algo.linkprediction.preferentialAttachment",
-        "algo.linkprediction.totalNeighbors",
-        "algo.linkprediction.sameCommunity",
+        "gds.alpha.linkprediction.adamicAdar",
+        "gds.alpha.linkprediction.resourceAllocation",
+        "gds.alpha.linkprediction.commonNeighbors",
+        "gds.alpha.linkprediction.preferentialAttachment",
+        "gds.alpha.linkprediction.totalNeighbors",
+        "gds.alpha.linkprediction.sameCommunity",
         "gds.alpha.similarity.cosine",
         "gds.alpha.similarity.euclidean",
         "gds.alpha.similarity.euclideanDistance",
