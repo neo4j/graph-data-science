@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.newapi;
 
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;

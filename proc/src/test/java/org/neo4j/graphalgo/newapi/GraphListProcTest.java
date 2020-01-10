@@ -88,8 +88,8 @@ class GraphListProcTest extends BaseProcTest {
                 ),
                 "nodeQuery", null,
                 "relationshipQuery", null,
-                "nodes", 2L,
-                "relationships", 1L,
+                "nodeCount", 2L,
+                "relationshipCount", 1L,
                 "histogram", map(
                     "min", 0L,
                     "mean", 0.5D,
@@ -119,8 +119,8 @@ class GraphListProcTest extends BaseProcTest {
                 "relationshipProjection", emptyMap(),
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
-                "nodes", 2L,
-                "relationships", 1L,
+                "nodeCount", 2L,
+                "relationshipCount", 1L,
                 "histogram", map(
                     "min", 0L,
                     "mean", 0.5D,
@@ -141,7 +141,7 @@ class GraphListProcTest extends BaseProcTest {
         String name = "name";
         runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
 
-        assertCypherResult("CALL gds.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodes, relationships", singletonList(
+        assertCypherResult("CALL gds.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodeCount, relationshipCount", singletonList(
             map(
                 "graphName", name,
                 "nodeProjection", map(
@@ -157,8 +157,8 @@ class GraphListProcTest extends BaseProcTest {
                         "aggregation", "DEFAULT",
                         "properties", emptyMap()
                     )),
-                "nodes", 2L,
-                "relationships", 1L
+                "nodeCount", 2L,
+                "relationshipCount", 1L
             )
         ));
     }
