@@ -134,8 +134,7 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
 
     @Override
     public MSClosenessCentrality compute() {
-        compute(Direction.OUTGOING);
-        return null;
+        return compute(Direction.OUTGOING);
     }
 
     public final double[] exportToArray() {
