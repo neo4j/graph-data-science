@@ -67,66 +67,61 @@ class AdamicAdarProcTest extends BaseProcTest {
     @Test
     void oneNodeInCommon() {
         String controlQuery =
-                "MATCH (p1:Person {name: 'Mark'})\n" +
-                "MATCH (p2:Person {name: 'Praveena'})\n" +
-                "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
-                "       1/log(3) AS cypherScore";
+            "MATCH (p1:Person {name: 'Mark'})\n" +
+            "MATCH (p2:Person {name: 'Praveena'})\n" +
+            "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
+            "       1/log(3) AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
     void oneNodeInCommonExplicit() {
         String controlQuery =
-                "MATCH (p1:Person {name: 'Mark'})\n" +
-                        "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2, " +
-                        "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
-                        "1/log(2) AS cypherScore";
+            "MATCH (p1:Person {name: 'Mark'})\n" +
+            "MATCH (p2:Person {name: 'Praveena'})\n" +
+            "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2, " +
+            "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
+            "1/log(2) AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
     void twoNodesInCommon() {
         String controlQuery =
-                "MATCH (p1:Person {name: 'Jennifer'})\n" +
-                        "MATCH (p2:Person {name: 'Elaine'})\n" +
-                        "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
-                        "       1/log(2) + 1/log(2) AS cypherScore";
+            "MATCH (p1:Person {name: 'Jennifer'})\n" +
+            "MATCH (p2:Person {name: 'Elaine'})\n" +
+            "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
+            "       1/log(2) + 1/log(2) AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
     void noNeighbors() {
         String controlQuery =
-                "MATCH (p1:Person {name: 'Jennifer'})\n" +
-                        "MATCH (p2:Person {name: 'Ryan'})\n" +
-                        "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
-                        "       0.0 AS cypherScore";
+            "MATCH (p1:Person {name: 'Jennifer'})\n" +
+            "MATCH (p2:Person {name: 'Ryan'})\n" +
+            "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
+            "       0.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 
     @Test
     void bothNodesTheSame() {
         String controlQuery =
-                "MATCH (p1:Person {name: 'Praveena'})\n" +
-                        "MATCH (p2:Person {name: 'Praveena'})\n" +
-                        "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
-                        "       0.0 AS cypherScore";
+            "MATCH (p1:Person {name: 'Praveena'})\n" +
+            "MATCH (p2:Person {name: 'Praveena'})\n" +
+            "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
+            "       0.0 AS cypherScore";
 
-        Result result = runQuery(controlQuery);
-        Map<String, Object> node = result.next();
+        Map<String, Object> node = runQuery(controlQuery, Result::next);
         assertEquals((Double) node.get("cypherScore"), (double) node.get("score"), 0.01);
     }
 }
