@@ -100,6 +100,7 @@ CALL gds.alpha.degree.stream({
 })
 YIELD nodeId, score
 RETURN algo.asNode(nodeId).id AS name, score AS weightedFollowers
+ORDER BY weightedFollowers DESC
 // end::stream-sample-weighted-graph-followers[]
 
 // tag::write-sample-weighted-graph-followers[]
