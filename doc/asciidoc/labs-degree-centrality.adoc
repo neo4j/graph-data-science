@@ -213,8 +213,7 @@ include::scripts/degree-centrality.cypher[tag=cypher-loading-following]
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.degree(label:String, relationship:String,
-    {write: true, writeProperty:'degree', concurrency:4})
+CALL gds.alpha.degree.write(graphName: STRING, configuration: MAP)
 YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 ----
 
@@ -251,8 +250,7 @@ YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.degree.stream(label:String, relationship:String,
-    {concurrency:4})
+CALL algo.degree.stream(graphName: STRING, configuration: MAP)
 YIELD node, score
 ----
 

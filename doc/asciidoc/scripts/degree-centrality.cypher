@@ -39,63 +39,115 @@ MERGE (nMichael)-[:FOLLOWS {score: 1.5}]->(nDoug)
 // end::create-sample-weighted-graph[]
 
 // tag::stream-sample-graph-followers[]
-CALL algo.degree.stream("User", "FOLLOWS", {direction: "incoming"})
+CALL gds.alpha.degree.stream({
+  nodeProjection: 'User',
+  relationshipProjection: {
+    FOLLOWS: {
+      type: 'FOLLOWS',
+      projection: 'REVERSE'
+    }
+  },
+  direction: 'INCOMING'
+})
 YIELD nodeId, score
 RETURN algo.asNode(nodeId).id AS name, score AS followers
 ORDER BY followers DESC
 // end::stream-sample-graph-followers[]
 
 // tag::write-sample-graph-followers[]
-CALL algo.degree("User", "FOLLOWS", {direction: "incoming", writeProperty: "followers"})
+CALL gds.alpha.degree.write({
+  nodeProjection: 'User',
+  relationshipProjection: {
+    FOLLOWS: {
+      type: 'FOLLOWS',
+      projection: 'REVERSE'
+    }
+  },
+  writeProperty: 'followers',
+  direction: 'INCOMING'
+})
 // end::write-sample-graph-followers[]
 
 // tag::stream-sample-graph-following[]
-CALL algo.degree.stream("User", "FOLLOWS", {direction: "outgoing"})
+CALL gds.alpha.degree.stream({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOWS'
+})
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).id AS name, score AS following
-ORDER BY following DESC
+RETURN algo.asNode(nodeId).id AS name, score AS followers
+ORDER BY followers DESC
 // end::stream-sample-graph-following[]
 
 // tag::write-sample-graph-following[]
-CALL algo.degree("User", "FOLLOWS", {direction: "outgoing", writeProperty: "following"})
+CALL gds.alpha.degree.write({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOWS',
+  writeProperty: 'followers'
+})
 // end::write-sample-graph-following[]
 
 
 
 // tag::stream-sample-weighted-graph-followers[]
-CALL algo.degree.stream("User", "FOLLOWS", {direction: "incoming", weightProperty: "score"})
+CALL gds.alpha.degree.stream({
+   nodeProjection: 'User',
+   relationshipProjection: {
+       FOLLOWS: {
+           type: 'FOLLOWS',
+           projection: 'REVERSE',
+           properties: 'score'
+       }
+   },
+   weightProperty: 'score',
+  direction: 'INCOMING'
+})
 YIELD nodeId, score
 RETURN algo.asNode(nodeId).id AS name, score AS weightedFollowers
-ORDER BY followers DESC
+ORDER BY weightedFollowers DESC
 // end::stream-sample-weighted-graph-followers[]
 
 // tag::write-sample-weighted-graph-followers[]
-CALL algo.degree("User", "FOLLOWS",
-  {direction: "incoming", writeProperty: "weightedFollowers", weightProperty: "score"})
+CALL gds.alpha.degree.write({
+   nodeProjection: 'User', 
+   relationshipProjection: {
+       FOLLOWS: {
+           type: 'FOLLOWS',
+           projection: 'REVERSE',
+           properties: 'score'
+       }
+   },
+   weightProperty: 'score',
+   writeProperty: 'weightedFollowers',
+   direction: 'INCOMING'
+})
+YIELD nodes, writeProperty
 // end::write-sample-weighted-graph-followers[]
 
 // tag::huge-projection[]
 
-CALL algo.degree('User','FOLLOWS', {graph:'huge'});
+CALL gds.alpha.degree.stream({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOWS'
+});
 
 // end::huge-projection[]
 
 // tag::cypher-loading[]
 
-CALL algo.degree(
-  'MATCH (u:User) RETURN id(u) as id',
-  'MATCH (u1:User)<-[:FOLLOWS]-(u2:User) RETURN id(u1) as source, id(u2) as target',
-  {graph:'cypher', write: true, writeProperty: "followers"}
-)
+CALL gds.alpha.degree.write({
+  nodeQuery: 'MATCH (u:User) RETURN id(u) as id',
+  relationshipQuery: 'MATCH (u1:User)<-[:FOLLOWS]-(u2:User) RETURN id(u1) as source, id(u2) as target',
+  writeProperty: 'followers'
+})
 
 // end::cypher-loading[]
 
 // tag::cypher-loading-following[]
 
-CALL algo.degree(
-  'MATCH (u:User) RETURN id(u) as id',
-  'MATCH (u1:User)-[:FOLLOWS]->(u2:User) RETURN id(u1) as source, id(u2) as target',
-  {graph:'cypher', write: true, writeProperty: "following"}
-)
+CALL gds.alpha.degree.write({
+  nodeQuery: 'MATCH (u:User) RETURN id(u) as id',
+  relationshipQuery: 'MATCH (u1:User)-[:FOLLOWS]->(u2:User) RETURN id(u1) as source, id(u2) as target',
+  writeProperty: 'followers'
+})
 
 // end::cypher-loading-following[]
