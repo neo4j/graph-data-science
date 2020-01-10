@@ -393,6 +393,41 @@ class GraphCreateProcTest extends BaseProcTest {
         assertThat(graphs.get(0).availableNodeProperties(), contains(expectedProperties.keySet().toArray()));
     }
 
+    @Test
+    void nodeQueryAndQueryProperties() {
+        String name = "g";
+        Map<String, Object> expectedNodeProjection = map(
+            "*",
+            map(
+                LABEL_KEY, "*",
+                PROPERTIES_KEY, map(
+                    "age",
+                    map(
+                        "property",
+                        "age",
+                        "defaultValue",
+                        Double.NaN
+                    )
+                )
+            )
+        );
+
+        String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.age AS age";
+
+        assertCypherResult(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            map("name", name, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
+            singletonList(map(
+                "graphName", name,
+                NODE_PROJECTION_KEY, expectedNodeProjection,
+                RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
+                "nodes", nodeCount,
+                "relationships", relCount,
+                "createMillis", instanceOf(Long.class)
+            ))
+        );
+    }
+
     @ParameterizedTest(name = "{0}, relProjection = {1}")
     @MethodSource("relationshipProjectionVariants")
     void testRelationshipProjectionVariants(String descr, Object relProjection, Map<String, Object> desugaredRelProjection) {

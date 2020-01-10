@@ -20,11 +20,15 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.LongHashSet;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphdb.Result;
@@ -36,13 +40,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
+class CypherNodeLoader extends CypherRecordLoader<Pair<GraphDimensions, IdsAndProperties>> {
 
     private static final int CYPHER_RESULT_PROPERTY_KEY = -2;
 
     private final long nodeCount;
     private final boolean hasExplicitPropertyMappings;
+    private final GraphDimensions outerDimensions;
 
     private HugeLongArrayBuilder builder;
     private NodeImporter importer;
@@ -50,9 +56,17 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
     private long maxNodeId;
     private boolean initializedFromResult;
 
-    CypherNodeLoader(String nodeQuery, long nodeCount, GraphDatabaseAPI api, GraphSetup setup) {
+
+    CypherNodeLoader(
+        String nodeQuery,
+        long nodeCount,
+        GraphDatabaseAPI api,
+        GraphSetup setup,
+        GraphDimensions outerDimensions
+    ) {
         super(nodeQuery, nodeCount, api, setup);
         this.nodeCount = nodeCount;
+        this.outerDimensions = outerDimensions;
         this.maxNodeId = 0L;
         this.hasExplicitPropertyMappings = setup.nodePropertyMappings().hasMappings();
 
@@ -104,11 +118,27 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
     }
 
     @Override
-    IdsAndProperties result() {
+    Pair<GraphDimensions, IdsAndProperties> result() {
         IdMap idMap = IdMapBuilder.build(builder, maxNodeId, setup.concurrency(), setup.tracker());
         Map<String, NodeProperties> nodeProperties = nodePropertyBuilders.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().propertyKey(), e -> e.getValue().build()));
-        return new IdsAndProperties(idMap, nodeProperties);
+            .collect(Collectors.toMap(e -> e.getKey().propertyKey(), e -> e.getValue().build()));
+
+        ResolvedPropertyMappings nodePropertyMappings = ResolvedPropertyMappings.of(
+            nodePropertyBuilders
+                .keySet()
+                .stream()
+                .map(x -> x.resolveWith(NO_SUCH_PROPERTY_KEY))
+                .collect(Collectors.toList())
+        );
+
+        GraphDimensions resultDimensions = new GraphDimensions.Builder(outerDimensions)
+            .setNodeProperties(nodePropertyMappings)
+            .build();
+
+        return Tuples.pair(
+            resultDimensions,
+            new IdsAndProperties(idMap, nodeProperties)
+        );
     }
 
     @Override

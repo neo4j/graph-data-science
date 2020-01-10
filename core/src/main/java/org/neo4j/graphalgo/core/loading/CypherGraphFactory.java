@@ -85,8 +85,20 @@ public class CypherGraphFactory extends GraphFactory {
         // Temporarily override the security context to enforce read-only access during load
         try (Revertable ignored = setReadOnlySecurityContext()) {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), api, setup).load();
-            IdsAndProperties nodes = new CypherNodeLoader(nodeQuery(), nodeCount.rows(), api, setup).load();
-            ImportResult importResult = loadRelationships(relationshipQuery(), nodes);
+
+            Pair<GraphDimensions, IdsAndProperties> loadResult = new CypherNodeLoader(
+                nodeQuery(),
+                nodeCount.rows(),
+                api,
+                setup,
+                dimensions
+            ).load();
+
+            ImportResult importResult = loadRelationships(
+                relationshipQuery(),
+                loadResult.getTwo(),
+                loadResult.getOne()
+            );
             progressLogger.logDone(setup.tracker());
 
             return importResult;
@@ -101,13 +113,17 @@ public class CypherGraphFactory extends GraphFactory {
         return setup.relationshipQuery().orElseThrow(() -> new IllegalArgumentException("Missing relationship query"));
     }
 
-    private ImportResult loadRelationships(String relationshipQuery, IdsAndProperties idsAndProperties) {
+    private ImportResult loadRelationships(
+        String relationshipQuery,
+        IdsAndProperties idsAndProperties,
+        GraphDimensions nodeLoadDimensions
+    ) {
         CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
             relationshipQuery,
             idsAndProperties.idMap(),
             api,
             setup,
-            dimensions
+            nodeLoadDimensions
         );
 
         Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>> result = relationshipLoader.load();
