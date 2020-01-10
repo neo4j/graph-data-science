@@ -25,22 +25,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 
 class CypherGraphFactoryDeduplicationTest {
 
@@ -58,11 +55,10 @@ class CypherGraphFactoryDeduplicationTest {
     @BeforeEach
     void setUp() {
         db = TestDatabaseCreator.createTestDatabase();
-        Consumer<Result.ResultRow> rowConsumer = row -> {
+        runQueryWithRowConsumer(db, DB_CYPHER, row -> {
             id1 = row.getNumber("id1").intValue();
             id2 = row.getNumber("id2").intValue();
-        };
-        QueryRunner.runQueryWithRowConsumer(db, DB_CYPHER, rowConsumer);
+        });
     }
 
     @AfterEach

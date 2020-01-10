@@ -53,8 +53,8 @@ class AdamicAdarProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted,
-            "algo.*"));
+        db = TestDatabaseCreator.createTestDatabase(builder ->
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
         registerFunctions(LinkPredictionFunc.class);
         runQuery(DB_CYPHER);
     }

@@ -36,13 +36,11 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -170,7 +168,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             " RETURN nodeId, score" +
             " ORDER BY score DESC" +
             " LIMIT 10",
-            (Consumer<Result.ResultRow>) row -> actual.put(
+            row -> actual.put(
                 (Long) row.get("nodeId"),
                 (Double) row.get("score")
             )
@@ -206,7 +204,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             " RETURN nodeId, score" +
             " ORDER BY score DESC" +
             " LIMIT 10",
-            (Consumer<Result.ResultRow>) row -> actual.put(
+            row -> actual.put(
                 (Long) row.get("nodeId"),
                 (Double) row.get("score")
             )
@@ -235,7 +233,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             "RETURN id(c) AS nodeId, c.eigen AS score " +
             "ORDER BY score DESC " +
             "LIMIT 10",
-            (Consumer<Result.ResultRow>) row -> actual.put(
+            row -> actual.put(
                 (Long) row.get("nodeId"),
                 (Double) row.get("score")
             )
@@ -273,7 +271,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             "RETURN id(c) AS nodeId, c.eigen AS score " +
             "ORDER BY score DESC " +
             "LIMIT 10",
-            (Consumer<Result.ResultRow>) row -> actual.put(
+            row -> actual.put(
                 (Long) row.get("nodeId"),
                 (Double) row.get("score")
             )
@@ -295,7 +293,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer(
             eigenvectorStreamQuery,
-            (Consumer<Result.ResultRow>) row -> actual.put(
+            row -> actual.put(
                 (Long) row.get("nodeId"),
                 (Double) row.get("score")
             )
@@ -329,7 +327,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             .yields("writeMillis", "writeProperty", "iterations");
         runQueryWithRowConsumer(
             eigenvectorWriteQuery,
-            (Consumer<Result.ResultRow>) row -> assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set")
+            row -> assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set")
         );
         assertResult("eigenvector", noNormExpected);
     }

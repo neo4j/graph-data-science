@@ -101,12 +101,13 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
     @Test
     void testClosenessWrite() throws Exception {
-        runQueryWithRowConsumer("CALL algo.closeness('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-                                "nodes, loadMillis, computeMillis, writeMillis", row -> {
-            assertNotEquals(-1L, row.getNumber("writeMillis"));
-            assertNotEquals(-1L, row.getNumber("computeMillis"));
-            assertNotEquals(-1L, row.getNumber("nodes"));
-        });
+        runQueryWithRowConsumer(
+            "CALL algo.closeness('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
+            "nodes, loadMillis, computeMillis, writeMillis", row -> {
+                assertNotEquals(-1L, row.getNumber("writeMillis"));
+                assertNotEquals(-1L, row.getNumber("computeMillis"));
+                assertNotEquals(-1L, row.getNumber("nodes"));
+            });
 
         runQueryWithRowConsumer("MATCH (n) WHERE exists(n.centrality) RETURN id(n) as id, n.centrality as centrality", row -> {
             System.out.println(

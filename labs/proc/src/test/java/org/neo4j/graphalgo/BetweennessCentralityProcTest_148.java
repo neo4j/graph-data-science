@@ -70,7 +70,7 @@ class BetweennessCentralityProcTest_148 extends BaseProcTest {
         String[] name = {""};
         runQueryWithRowConsumer(
             "MATCH (n) WHERE id(n) = " + id + " RETURN n.name as name",
-            (java.util.function.Consumer<Result.ResultRow>) row -> name[0] = row.getString("name")
+            row -> name[0] = row.getString("name")
         );
         if (name[0].isEmpty()) {
             throw new IllegalArgumentException("unknown id " + id);

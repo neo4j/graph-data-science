@@ -108,7 +108,6 @@ class DijkstraProcTest599 extends BaseProcTest {
                 assertThat((Number) res.get("id"), expected.next());
                 assertThat((Number) res.get("weight"), expected.next());
             });
-            pathResult.close();
         });
     }
 }

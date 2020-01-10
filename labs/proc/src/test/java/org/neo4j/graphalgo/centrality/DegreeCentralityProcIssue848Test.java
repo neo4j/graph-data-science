@@ -24,11 +24,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphdb.Result;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 class DegreeCentralityProcIssue848Test extends BaseProcTest {
 
@@ -53,9 +51,10 @@ class DegreeCentralityProcIssue848Test extends BaseProcTest {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.alpha.degree.stream({nodeProjection: 'Node', relationshipProjection: '', direction: 'OUTGOING'}) " +
                        "YIELD nodeId, score";
-        runQueryWithRowConsumer(query, (Consumer<Result.ResultRow>) row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
+        runQueryWithRowConsumer(query, row -> actual.put(
+            (Long)row.get("nodeId"),
+            (Double) row.get("score")
+        ));
 
         Map<Long, Double> expected = new HashMap<>();
         for (long i = 0; i < 10001; i++) {

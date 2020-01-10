@@ -23,11 +23,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphdb.Result;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -83,7 +81,7 @@ class YensKShortestPathsProcTest extends BaseProcTest {
                 "YIELD resultCount RETURN resultCount";
 
         // 9 possible paths without loop
-        runQueryWithRowConsumer(cypher, (Consumer<Result.ResultRow>) row -> assertEquals(9, row.getNumber("resultCount").intValue()));
+        runQueryWithRowConsumer(cypher, row -> assertEquals(9, row.getNumber("resultCount").intValue()));
 
         /*
          * 10 rels from source graph already in db
