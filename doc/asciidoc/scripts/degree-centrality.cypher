@@ -55,8 +55,8 @@ ORDER BY followers DESC
 
 // tag::write-sample-graph-followers[]
 CALL gds.alpha.degree.write({
-  nodeProperty: 'User',
-  relationshipProperty: {
+  nodeProjection: 'User',
+  relationshipProjection: {
     FOLLOWS: {
       type: 'FOLLOWS',
       projection: 'REVERSE'
@@ -78,8 +78,8 @@ ORDER BY followers DESC
 
 // tag::write-sample-graph-following[]
 CALL gds.alpha.degree.write({
-  nodeProperty: 'User',
-  relationshipProperty: 'FOLLOWS',
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOWS',
   writeProperty: 'followers'
 })
 // end::write-sample-graph-following[]
@@ -93,11 +93,7 @@ CALL gds.alpha.degree.stream({
        FOLLOWS: {
            type: 'FOLLOWS',
            projection: 'REVERSE',
-           properties: {
-               score: {
-                   property: 'score'
-               }
-           }
+           properties: 'score'
        }
    },
    weightProperty: 'score'
@@ -129,7 +125,7 @@ YIELD nodes, writeProperty
 // tag::huge-projection[]
 
 CALL gds.alpha.degree.stream({
-  nodeProjections: 'User',
+  nodeProjection: 'User',
   relationshipProjection: 'FOLLOWS'
 });
 
