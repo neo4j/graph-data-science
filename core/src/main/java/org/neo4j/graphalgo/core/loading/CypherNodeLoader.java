@@ -20,11 +20,11 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.LongHashSet;
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
@@ -42,7 +42,8 @@ import java.util.stream.Collectors;
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-class CypherNodeLoader extends CypherRecordLoader<Pair<GraphDimensions, IdsAndProperties>> {
+@Value.Enclosing
+class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     private static final int CYPHER_RESULT_PROPERTY_KEY = -2;
 
@@ -55,7 +56,6 @@ class CypherNodeLoader extends CypherRecordLoader<Pair<GraphDimensions, IdsAndPr
     private Map<PropertyMapping, NodePropertiesBuilder> nodePropertyBuilders;
     private long maxNodeId;
     private boolean initializedFromResult;
-
 
     CypherNodeLoader(
         String nodeQuery,
@@ -118,7 +118,7 @@ class CypherNodeLoader extends CypherRecordLoader<Pair<GraphDimensions, IdsAndPr
     }
 
     @Override
-    Pair<GraphDimensions, IdsAndProperties> result() {
+    LoadResult result() {
         IdMap idMap = IdMapBuilder.build(builder, maxNodeId, setup.concurrency(), setup.tracker());
         Map<String, NodeProperties> nodeProperties = nodePropertyBuilders.entrySet().stream()
             .collect(Collectors.toMap(e -> e.getKey().propertyKey(), e -> e.getValue().build()));
@@ -135,10 +135,10 @@ class CypherNodeLoader extends CypherRecordLoader<Pair<GraphDimensions, IdsAndPr
             .setNodeProperties(nodePropertyMappings)
             .build();
 
-        return Tuples.pair(
-            resultDimensions,
-            new IdsAndProperties(idMap, nodeProperties)
-        );
+        return ImmutableCypherNodeLoader.LoadResult.builder()
+            .dimensions(resultDimensions)
+            .idsAndProperties(new IdsAndProperties(idMap, nodeProperties))
+            .build();
     }
 
     @Override
@@ -157,5 +157,12 @@ class CypherNodeLoader extends CypherRecordLoader<Pair<GraphDimensions, IdsAndPr
                 propertyMapping.propertyKey()
             )
         ));
+    }
+
+    @ValueClass
+    interface LoadResult {
+        GraphDimensions dimensions();
+
+        IdsAndProperties idsAndProperties();
     }
 }

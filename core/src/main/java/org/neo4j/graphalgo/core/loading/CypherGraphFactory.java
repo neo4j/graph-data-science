@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.ImmutableImportResult;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -86,7 +85,7 @@ public class CypherGraphFactory extends GraphFactory {
         try (Revertable ignored = setReadOnlySecurityContext()) {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), api, setup).load();
 
-            Pair<GraphDimensions, IdsAndProperties> loadResult = new CypherNodeLoader(
+            CypherNodeLoader.LoadResult loadResult = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
                 api,
@@ -96,8 +95,8 @@ public class CypherGraphFactory extends GraphFactory {
 
             ImportResult importResult = loadRelationships(
                 relationshipQuery(),
-                loadResult.getTwo(),
-                loadResult.getOne()
+                loadResult.idsAndProperties(),
+                loadResult.dimensions()
             );
             progressLogger.logDone(setup.tracker());
 
@@ -126,10 +125,10 @@ public class CypherGraphFactory extends GraphFactory {
             nodeLoadDimensions
         );
 
-        Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>> result = relationshipLoader.load();
+        CypherRelationshipLoader.LoadResult result = relationshipLoader.load();
 
-        GraphDimensions resultDimensions = result.getOne();
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = result.getTwo();
+        GraphDimensions resultDimensions = result.dimensions();
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = result.relationshipCounts();
 
         Map<String, Map<String, Graph>> graphs = relationshipLoader
             .allBuilders()
@@ -191,11 +190,7 @@ public class CypherGraphFactory extends GraphFactory {
                 }
             ));
 
-        return ImmutableImportResult
-            .builder()
-            .dimensions(resultDimensions)
-            .graphs(GraphsByRelationshipType.of(graphs))
-            .build();
+        return ImportResult.of(resultDimensions, GraphsByRelationshipType.of(graphs));
     }
 
     private HugeGraph create(

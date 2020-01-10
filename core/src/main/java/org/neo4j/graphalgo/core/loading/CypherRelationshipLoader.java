@@ -22,15 +22,15 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
-import org.eclipse.collections.impl.tuple.Tuples;
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -51,7 +51,8 @@ import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.NONE;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>>> {
+@Value.Enclosing
+class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoader.LoadResult> {
 
     private final IdMap idMap;
     private final Context loaderContext;
@@ -192,7 +193,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
     void updateCounts(BatchLoadResult result) { }
 
     @Override
-    Pair<GraphDimensions, ObjectLongMap<RelationshipTypeMapping>> result() {
+    LoadResult result() {
         List<Runnable> flushTasks = loaderContext.importerBuildersByType
             .values()
             .stream()
@@ -208,7 +209,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
             RelationshipTypeMappings.of(relationshipCounters.keys().toArray(RelationshipTypeMapping.class))
         );
 
-        return Tuples.pair(resultDimensions, relationshipCounters);
+        return ImmutableCypherRelationshipLoader.LoadResult.builder()
+            .dimensions(resultDimensions)
+            .relationshipCounts(relationshipCounters)
+            .build();
     }
 
     @Override
@@ -312,5 +316,12 @@ class CypherRelationshipLoader extends CypherRecordLoader<Pair<GraphDimensions, 
 
             return new SingleTypeRelationshipImporter.Builder(mapping, relationshipImporter, relationshipCounter);
         }
+    }
+
+    @ValueClass
+    interface LoadResult {
+        GraphDimensions dimensions();
+
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounts();
     }
 }

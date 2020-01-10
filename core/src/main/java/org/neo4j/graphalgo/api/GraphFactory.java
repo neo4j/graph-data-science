@@ -102,7 +102,15 @@ public abstract class GraphFactory implements Assessable {
 
     @ValueClass
     public interface ImportResult {
-        GraphsByRelationshipType graphs();
         GraphDimensions dimensions();
+
+        GraphsByRelationshipType graphs();
+
+        static ImportResult of(GraphDimensions dimensions, GraphsByRelationshipType graphs) {
+            return ImmutableImportResult.builder()
+                .dimensions(dimensions)
+                .graphs(graphs)
+                .build();
+        }
     }
 }
