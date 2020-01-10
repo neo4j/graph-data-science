@@ -106,7 +106,13 @@ class ListProcTest extends BaseProcTest {
         "algo.linkprediction.commonNeighbors",
         "algo.linkprediction.preferentialAttachment",
         "algo.linkprediction.totalNeighbors",
-        "algo.linkprediction.sameCommunity"
+        "algo.linkprediction.sameCommunity",
+        "gds.alpha.similarity.cosine",
+        "gds.alpha.similarity.euclidean",
+        "gds.alpha.similarity.euclideanDistance",
+        "gds.alpha.similarity.jaccard",
+        "gds.alpha.similarity.overlap",
+        "gds.alpha.similarity.pearson"
     ));
 
     private static final Set<String> SPANNING_TREE = new HashSet<>(asList(
@@ -154,7 +160,8 @@ class ListProcTest extends BaseProcTest {
             UtilityProc.class
         );
         registerFunctions(
-            LinkPredictionFunc.class
+            LinkPredictionFunc.class,
+            SimilaritiesFunc.class
         );
     }
 
@@ -179,6 +186,10 @@ class ListProcTest extends BaseProcTest {
     void listFunctions() {
         Set<String> actual = listProcs("adamicAdar");
         actual.addAll(listProcs("linkprediction"));
+        Set<String> similarity = listProcs("similarity");
+        actual.addAll(similarity.stream()
+            .filter(name -> !name.matches(".*(stream|write|stats)$")).collect(
+            Collectors.toList()));
         assertEquals(FUNCTIONS, actual);
     }
 
