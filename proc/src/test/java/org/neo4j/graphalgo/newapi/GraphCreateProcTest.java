@@ -497,6 +497,44 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
+    @Test
+    void relationshipQueryAndQueryProperties() {
+        String name = "g";
+        Map<String, Object> expectedRelProjection = map(
+            "*",
+            map(
+                "type", "*",
+                PROJECTION_KEY, "NATURAL",
+                AGGREGATION_KEY, "DEFAULT",
+                PROPERTIES_KEY, map(
+                    "weight",
+                    map("property",
+                        "weight",
+                        "defaultValue",
+                        Double.NaN,
+                        AGGREGATION_KEY,
+                        "NONE"
+                    )
+                )
+            )
+        );
+
+        String relationshipQuery = "MATCH (s)-[r]->(t) RETURN id(s) AS source, id(t) AS target, r.weight AS weight";
+
+        assertCypherResult(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
+            singletonList(map(
+                "graphName", name,
+                NODE_PROJECTION_KEY, isA(Map.class),
+                RELATIONSHIP_PROJECTION_KEY, expectedRelProjection,
+                "nodes", nodeCount,
+                "relationships", relCount,
+                "createMillis", instanceOf(Long.class)
+            ))
+        );
+    }
+
     @ParameterizedTest(name = "aggregation={0}")
     @MethodSource("relationshipAggregationTypes")
     void relationshipProjectionPropertyAggregations(String aggregation) {
