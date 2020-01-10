@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -37,11 +36,12 @@ public class AlgoTestBase {
         runQuery(db, query, check);
     }
 
-    protected void runQuery(GraphDatabaseService databaseAPI, String query) {
-        QueryRunner.runInTransaction(databaseAPI, () -> databaseAPI.execute(query).close());
+    protected void runQuery(GraphDatabaseAPI passedInDb, String query) {
+        QueryRunner.runInTransaction(passedInDb, () -> passedInDb
+            .execute(query).close());
     }
 
-    protected void runQuery(GraphDatabaseService db, String query, Consumer<Result.ResultRow> check) {
-        QueryRunner.runQueryWithRowConsumer(db, query, check);
+    protected void runQuery(GraphDatabaseAPI passedInDatabase, String query, Consumer<Result.ResultRow> check) {
+        QueryRunner.runQueryWithRowConsumer(passedInDatabase, query, check);
     }
 }

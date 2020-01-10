@@ -543,8 +543,10 @@ class GraphLoadProcTest extends BaseProcTest {
         });
         assertFalse(loaded);
         // Second load throws exception
-        QueryExecutionException exGraphAlreadyLoaded = assertThrows(QueryExecutionException.class, () -> runQuery(query, params,
-            Result::next));
+        QueryExecutionException exGraphAlreadyLoaded = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(query, params, Result::next)
+        );
         Throwable rootCause = ExceptionUtil.rootCause(exGraphAlreadyLoaded);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
         assertThat(rootCause.getMessage(), equalTo("A graph with name 'foo' is already loaded."));

@@ -25,7 +25,6 @@ import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -43,8 +42,8 @@ import java.util.function.Function;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -91,14 +90,28 @@ public class BaseProcTest {
         runQueryWithRowConsumer(query, emptyMap(), check);
     }
 
-    protected void runQueryWithRowConsumer(@Language("Cypher") String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
+    protected void runQueryWithRowConsumer(
+        @Language("Cypher") String query,
+        Map<String, Object> params,
+        Consumer<Result.ResultRow> check
+    ) {
         runQueryWithRowConsumer(db, query, params, check);
     }
 
-    protected void runQueryWithRowConsumer(GraphDatabaseService localDb, @Language("Cypher") String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
+    protected void runQueryWithRowConsumer(
+        GraphDatabaseAPI localDb,
+        @Language("Cypher") String query,
+        Map<String, Object> params,
+        Consumer<Result.ResultRow> check
+    ) {
         QueryRunner.runQueryWithRowConsumer(localDb, query, params, check);
     }
-    protected void runQueryWithRowConsumer(GraphDatabaseService localDb, @Language("Cypher") String query, Consumer<Result.ResultRow> check) {
+
+    protected void runQueryWithRowConsumer(
+        GraphDatabaseAPI localDb,
+        @Language("Cypher") String query,
+        Consumer<Result.ResultRow> check
+    ) {
         runQueryWithRowConsumer(localDb, query, emptyMap(), check);
     }
 
