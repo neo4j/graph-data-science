@@ -46,7 +46,8 @@ CALL gds.alpha.degree.stream({
       type: 'FOLLOWS',
       projection: 'REVERSE'
     }
-  }
+  },
+  direction: 'INCOMING'
 })
 YIELD nodeId, score
 RETURN algo.asNode(nodeId).id AS name, score AS followers
@@ -62,7 +63,8 @@ CALL gds.alpha.degree.write({
       projection: 'REVERSE'
     }
   },
-  writeProperty: 'followers'
+  writeProperty: 'followers',
+  direction: 'INCOMING'
 })
 // end::write-sample-graph-followers[]
 
@@ -96,7 +98,8 @@ CALL gds.alpha.degree.stream({
            properties: 'score'
        }
    },
-   weightProperty: 'score'
+   weightProperty: 'score',
+  direction: 'INCOMING'
 })
 YIELD nodeId, score
 RETURN algo.asNode(nodeId).id AS name, score AS weightedFollowers
@@ -110,15 +113,12 @@ CALL gds.alpha.degree.write({
        FOLLOWS: {
            type: 'FOLLOWS',
            projection: 'REVERSE',
-           properties: {
-               score: {
-                   property: 'score'
-               }
-           }
+           properties: 'score'
        }
    },
    weightProperty: 'score',
-   writeProperty: 'weightedFollowers'
+   writeProperty: 'weightedFollowers',
+   direction: 'INCOMING'
 })
 YIELD nodes, writeProperty
 // end::write-sample-weighted-graph-followers[]
