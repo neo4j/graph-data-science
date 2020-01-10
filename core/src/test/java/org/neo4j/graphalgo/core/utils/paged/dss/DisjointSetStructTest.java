@@ -26,6 +26,7 @@ import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
@@ -151,7 +152,7 @@ public abstract class DisjointSetStructTest {
             long nodeCount,
             int concurrency,
             MemoryRange memoryRange) {
-        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
         assertEquals(memoryRange.min, memoryEstimation.estimate(dimensions, concurrency).memoryUsage().min);
     }
 

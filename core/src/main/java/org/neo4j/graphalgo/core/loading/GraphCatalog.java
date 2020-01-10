@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -74,10 +75,14 @@ public final class GraphCatalog extends GraphFactory {
             setup.relationshipType(),
             setup.relationshipPropertyMappings().head().map(PropertyMapping::propertyKey)
         );
-        dimensions.nodeCount(graph.nodeCount());
-        dimensions.maxRelCount(graph.relationshipCount());
 
-        return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
+        GraphDimensions estimateDimensions = ImmutableGraphDimensions.builder()
+            .from(dimensions)
+            .nodeCount(graph.nodeCount())
+            .maxRelCount(graph.relationshipCount())
+            .build();
+
+        return HugeGraphFactory.getMemoryEstimation(setup, estimateDimensions);
     }
 
     public static void set(GraphCreateConfig config, GraphsByRelationshipType graph) {

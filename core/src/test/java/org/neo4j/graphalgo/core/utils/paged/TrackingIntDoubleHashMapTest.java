@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
@@ -30,7 +31,7 @@ class TrackingIntDoubleHashMapTest {
 
     @Test
     void shouldComputeMemoryEstimationForSinglePage() {
-        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
         MemoryRange memoryRange = TrackingIntDoubleHashMap
                 .memoryEstimation()
                 .estimate(dimensions, 1)
@@ -53,7 +54,7 @@ class TrackingIntDoubleHashMapTest {
 
     @Test
     void shouldComputeMemoryEstimationForMultiplePages() {
-        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000).build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000).build();
         MemoryRange memoryRange = TrackingIntDoubleHashMap
                 .memoryEstimation()
                 .estimate(dimensions, 1)

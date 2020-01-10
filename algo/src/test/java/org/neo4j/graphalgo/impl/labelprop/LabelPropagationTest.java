@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -236,8 +237,8 @@ final class LabelPropagationTest extends AlgoTestBase {
     void shouldBoundMemEstimationToMaxSupportedDegree() {
         LabelPropagationFactory<LabelPropagationStreamConfig> labelPropagation = new LabelPropagationFactory<>(
             defaultConfig());
-        GraphDimensions largeDimensions = new GraphDimensions.Builder()
-            .setNodeCount((long) Integer.MAX_VALUE + (long) Integer.MAX_VALUE)
+        GraphDimensions largeDimensions = ImmutableGraphDimensions.builder()
+            .nodeCount((long) Integer.MAX_VALUE + (long) Integer.MAX_VALUE)
             .build();
 
         // test for no failure and no overflow
@@ -248,7 +249,7 @@ final class LabelPropagationTest extends AlgoTestBase {
     }
 
     private void assertMemoryEstimation(long nodeCount, int concurrency) {
-        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
 
         LabelPropagationFactory<LabelPropagationBaseConfig> labelPropagation = new LabelPropagationFactory<>(defaultConfig());
 

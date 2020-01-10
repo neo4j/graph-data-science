@@ -121,10 +121,15 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
             GraphDimensions dimensions = factory.dimensions();
             long nodeCount = get(NODECOUNT_KEY, 0L);
             long relCount = get(RELCOUNT_KEY, 0L);
-            dimensions.nodeCount(nodeCount);
-            dimensions.highestNeoId(nodeCount);
-            dimensions.maxRelCount(relCount);
-            estimation = factory.memoryEstimation(setup, dimensions);
+
+            GraphDimensions estimateDimensions = ImmutableGraphDimensions.builder()
+                .from(dimensions)
+                .nodeCount(nodeCount)
+                .highestNeoId(nodeCount)
+                .maxRelCount(relCount)
+                .build();
+
+            estimation = factory.memoryEstimation(setup, estimateDimensions);
         } else {
             estimation = factory.memoryEstimation();
         }

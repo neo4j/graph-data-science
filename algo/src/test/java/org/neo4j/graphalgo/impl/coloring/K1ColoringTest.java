@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -39,7 +40,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -51,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
-import static org.neo4j.graphalgo.core.utils.ParallelUtil.canRunInParallel;
 
 class K1ColoringTest extends AlgoTestBase {
 
@@ -207,7 +206,7 @@ class K1ColoringTest extends AlgoTestBase {
     }
 
     private void assertMemoryEstimation(long nodeCount, int concurrency, long expected) {
-        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
         final MemoryRange actual = new K1ColoringFactory()
             .memoryEstimation(ProcedureConfiguration.empty())
             .estimate(dimensions, concurrency)

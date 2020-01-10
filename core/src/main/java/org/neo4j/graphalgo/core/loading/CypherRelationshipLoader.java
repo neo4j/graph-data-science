@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Result;
@@ -88,7 +89,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         this.loaderContext = new Context();
         this.relationshipCounters = new HashMap<>();
 
-        this.hasExplicitPropertyMappings = dimensions.relProperties().hasMappings();
+        this.hasExplicitPropertyMappings = dimensions.relationshipProperties().hasMappings();
 
         this.globalDeduplicationStrategy = setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
             ? NONE
@@ -101,23 +102,24 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     private GraphDimensions initFromDimension(GraphDimensions dimensions) {
         MutableInt propertyKeyId = new MutableInt(0);
 
-        int numberOfMappings = dimensions.relProperties().numberOfMappings();
+        int numberOfMappings = dimensions.relationshipProperties().numberOfMappings();
         propertyKeyIdsByName = new ObjectIntHashMap<>(numberOfMappings);
         dimensions
-            .relProperties()
+            .relationshipProperties()
             .stream()
             .forEach(mapping -> propertyKeyIdsByName.put(mapping.neoPropertyKey(), propertyKeyId.getAndIncrement()));
         propertyDefaultValueByName = new ObjectDoubleHashMap<>(numberOfMappings);
         dimensions
-            .relProperties()
+            .relationshipProperties()
             .stream()
             .forEach(mapping -> propertyDefaultValueByName.put(mapping.neoPropertyKey(), mapping.defaultValue()));
 
         // We can not rely on what the token store gives us.
         // We need to resolve the given property mappings
         // using our newly created property key identifiers.
-        GraphDimensions newDimensions = new GraphDimensions.Builder(dimensions)
-            .setRelationshipProperties(ResolvedPropertyMappings.of(dimensions.relProperties().stream()
+        GraphDimensions newDimensions = ImmutableGraphDimensions.builder()
+            .from(dimensions)
+            .relationshipProperties(ResolvedPropertyMappings.of(dimensions.relationshipProperties().stream()
                 .map(mapping -> PropertyMapping.of(
                     mapping.propertyKey(),
                     mapping.neoPropertyKey(),
@@ -128,9 +130,9 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .collect(Collectors.toList())))
             .build();
 
-        importWeights = newDimensions.relProperties().atLeastOneExists();
-        propertyKeyIds = newDimensions.relProperties().allPropertyKeyIds();
-        propertyDefaultValues = newDimensions.relProperties().allDefaultWeights();
+        importWeights = newDimensions.relationshipProperties().atLeastOneExists();
+        propertyKeyIds = newDimensions.relationshipProperties().allPropertyKeyIds();
+        propertyDefaultValues = newDimensions.relationshipProperties().allDefaultWeights();
         deduplicationStrategies = getDeduplicationStrategies(newDimensions);
 
         return newDimensions;
@@ -160,8 +162,9 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .map(mapping -> mapping.resolveWith(NO_SUCH_PROPERTY_KEY))
                 .collect(Collectors.toList());
 
-            GraphDimensions innerDimensions = new GraphDimensions.Builder(outerDimensions)
-                .setRelationshipProperties(ResolvedPropertyMappings.of(propertyMappings))
+            GraphDimensions innerDimensions = ImmutableGraphDimensions.builder()
+                .from(outerDimensions)
+                .relationshipProperties(ResolvedPropertyMappings.of(propertyMappings))
                 .build();
 
             resultDimensions = initFromDimension(innerDimensions);
@@ -205,9 +208,9 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
         this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
 
-        resultDimensions.relationshipTypeMappings(
-            RelationshipTypeMappings.of(relationshipCounters.keys().toArray(RelationshipTypeMapping.class))
-        );
+        resultDimensions = ImmutableGraphDimensions.builder().from(resultDimensions)
+            .relationshipTypeMappings(RelationshipTypeMappings.of(relationshipCounters.keys().toArray(RelationshipTypeMapping.class)))
+            .build();
 
         return ImmutableCypherRelationshipLoader.LoadResult.builder()
             .dimensions(resultDimensions)
@@ -226,7 +229,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     private DeduplicationStrategy[] getDeduplicationStrategies(GraphDimensions dimensions) {
         DeduplicationStrategy[] deduplicationStrategies = dimensions
-            .relProperties()
+            .relationshipProperties()
             .stream()
             .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
                 ? NONE

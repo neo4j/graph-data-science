@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -274,7 +275,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
     void testMemoryEstimation(int concurrency, long min, long max) {
-        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000L).build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000L).build();
 
         MemoryTree memoryTree = new ModularityOptimizationFactory()
             .memoryEstimation(ProcedureConfiguration.empty())

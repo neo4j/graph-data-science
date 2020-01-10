@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
@@ -31,23 +31,23 @@ class IdMapTest {
 
     @Test
     void shouldComputeMemoryEstimation() {
-        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(0).setHighestNeoId(0).build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(0).highestNeoId(0).build();
         MemoryTree memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(32L + 40L + 40L), memRec.memoryUsage());
 
-        dimensions = new GraphDimensions.Builder().setNodeCount(100L).setHighestNeoId(100L).build();
+        dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestNeoId(100L).build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(32L + 840L + 32832L), memRec.memoryUsage());
 
-        dimensions = new GraphDimensions.Builder().setNodeCount(1L).setHighestNeoId(100_000_000_000L).build();
+        dimensions = ImmutableGraphDimensions.builder().nodeCount(1L).highestNeoId(100_000_000_000L).build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(32L + 48L + 97_689_080L), memRec.memoryUsage());
 
-        dimensions = new GraphDimensions.Builder().setNodeCount(10_000_000L).setHighestNeoId(100_000_000_000L).build();
+        dimensions = ImmutableGraphDimensions.builder().nodeCount(10_000_000L).highestNeoId(100_000_000_000L).build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(32L + 80_000_040L + 177_714_824L, 32L + 80_000_040L + 327_937_656_296L), memRec.memoryUsage());
 
-        dimensions = new GraphDimensions.Builder().setNodeCount(100_000_000L).setHighestNeoId(100_000_000_000L).build();
+        dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000_000L).highestNeoId(100_000_000_000L).build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(32L + 800_000_040L + 898_077_656L, 32L + 800_000_040L + 800_488_297_688L), memRec.memoryUsage());
     }

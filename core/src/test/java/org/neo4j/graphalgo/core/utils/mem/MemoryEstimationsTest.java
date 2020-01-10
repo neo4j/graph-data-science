@@ -21,12 +21,13 @@ package org.neo4j.graphalgo.core.utils.mem;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MemoryEstimationsTest {
-    private final static GraphDimensions DIMENSIONS_100_NODES = new GraphDimensions.Builder().setNodeCount(100).build();
+    private static final GraphDimensions DIMENSIONS_100_NODES = ImmutableGraphDimensions.builder().nodeCount(100).build();
 
     @Test
     void testEmptyBuilder() {

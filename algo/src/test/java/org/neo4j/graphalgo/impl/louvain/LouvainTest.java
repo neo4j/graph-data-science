@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -298,9 +299,9 @@ class LouvainTest extends AlgoTestBase {
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
     void testMemoryEstimation(int concurrency, int levels, long min, long max) {
-        GraphDimensions dimensions = new GraphDimensions.Builder()
-            .setNodeCount(100_000L)
-            .setMaxRelCount(500_000L)
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(100_000L)
+            .maxRelCount(500_000L)
             .build();
 
         LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()

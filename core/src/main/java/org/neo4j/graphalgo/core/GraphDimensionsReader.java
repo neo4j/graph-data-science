@@ -94,15 +94,14 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 ))
             ).sum();
 
-
-        return new GraphDimensions.Builder()
-                .setNodeCount(nodeCount)
-                .setHighestNeoId(allNodesCount)
-                .setMaxRelCount(maxRelCount)
-                .setNodeLabelIds(nodeLabelIds.longSet())
-                .setNodeProperties(nodeProperties)
-                .setRelationshipTypeMappings(relationshipTypeMappings)
-                .setRelationshipProperties(relProperties)
+        return ImmutableGraphDimensions.builder()
+                .nodeCount(nodeCount)
+                .highestNeoId(allNodesCount)
+                .maxRelCount(maxRelCount)
+                .nodeLabelIds(nodeLabelIds.longSet())
+                .nodeProperties(nodeProperties)
+                .relationshipTypeMappings(relationshipTypeMappings)
+                .relationshipProperties(relProperties)
                 .build();
     }
 

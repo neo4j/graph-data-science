@@ -81,7 +81,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
 
-        boolean importWeights = dimensions.relProperties().atLeastOneExists();
+        boolean importWeights = dimensions.relationshipProperties().atLeastOneExists();
 
         List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
                 .entrySet()
@@ -112,8 +112,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         RelationshipsBuilder outRelationshipsBuilder = entry.getValue().getOne();
         RelationshipsBuilder inRelationshipsBuilder = entry.getValue().getTwo();
 
-        int[] weightProperties = dimensions.relProperties().allPropertyKeyIds();
-        double[] defaultWeights = dimensions.relProperties().allDefaultWeights();
+        int[] weightProperties = dimensions.relationshipProperties().allPropertyKeyIds();
+        double[] defaultWeights = dimensions.relationshipProperties().allDefaultWeights();
 
         LongAdder relationshipCounter = new LongAdder();
         AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(

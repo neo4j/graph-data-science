@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphdb.Result;
@@ -131,8 +132,9 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
                 .collect(Collectors.toList())
         );
 
-        GraphDimensions resultDimensions = new GraphDimensions.Builder(outerDimensions)
-            .setNodeProperties(nodePropertyMappings)
+        GraphDimensions resultDimensions = ImmutableGraphDimensions.builder()
+            .from(outerDimensions)
+            .nodeProperties(nodePropertyMappings)
             .build();
 
         return ImmutableCypherNodeLoader.LoadResult.builder()

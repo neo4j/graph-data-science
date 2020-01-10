@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -720,9 +721,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
     @ParameterizedTest(name = "topK = {0}")
     @ValueSource(ints = {TOP_K_DEFAULT, 100})
     void shouldComputeMemrec(int topK) {
-        GraphDimensions dimensions = new GraphDimensions.Builder()
-            .setNodeCount(1_000_000)
-            .setMaxRelCount(5_000_000)
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(1_000_000)
+            .maxRelCount(5_000_000)
             .build();
 
         NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig
@@ -769,9 +770,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
     @ParameterizedTest(name = "topK = {0}")
     @ValueSource(ints = {TOP_K_DEFAULT, 100})
     void shouldComputeMemrecWithTop(int topK) {
-        GraphDimensions dimensions = new GraphDimensions.Builder()
-            .setNodeCount(1_000_000)
-            .setMaxRelCount(5_000_000)
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(1_000_000)
+            .maxRelCount(5_000_000)
             .build();
 
         NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig

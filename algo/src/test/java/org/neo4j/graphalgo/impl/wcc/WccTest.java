@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -135,7 +136,7 @@ class WccTest extends AlgoTestBase {
 
     @Test
     void memRecParallel() {
-        GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
+        GraphDimensions dimensions0 = ImmutableGraphDimensions.builder().nodeCount(0).build();
 
         assertEquals(
             MemoryRange.of(128),
@@ -162,7 +163,7 @@ class WccTest extends AlgoTestBase {
             Wcc.memoryEstimation(true).estimate(dimensions0, 64).memoryUsage()
         );
 
-        GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
+        GraphDimensions dimensions100 = ImmutableGraphDimensions.builder().nodeCount(100).build();
         assertEquals(
             MemoryRange.of(928),
             Wcc.memoryEstimation(false).estimate(dimensions100, 1).memoryUsage()
@@ -188,7 +189,7 @@ class WccTest extends AlgoTestBase {
             Wcc.memoryEstimation(true).estimate(dimensions100, 64).memoryUsage()
         );
 
-        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
+        GraphDimensions dimensions100B = ImmutableGraphDimensions.builder().nodeCount(100_000_000_000L).build();
         assertEquals(
             MemoryRange.of(800_122_070_456L),
             Wcc.memoryEstimation(false).estimate(dimensions100B, 1).memoryUsage()

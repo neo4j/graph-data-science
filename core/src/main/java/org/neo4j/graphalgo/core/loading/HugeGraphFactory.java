@@ -46,6 +46,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
+
 public final class HugeGraphFactory extends GraphFactory {
 
     // TODO: make this configurable from somewhere
@@ -89,7 +91,7 @@ public final class HugeGraphFactory extends GraphFactory {
         }
 
         // Relationship properties
-        for (ResolvedPropertyMapping mapping : dimensions.relProperties()) {
+        for (ResolvedPropertyMapping mapping : dimensions.relationshipProperties()) {
             if (mapping.exists()) {
                 // Adjacency lists and Adjacency offsets
                 MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(loadAsUndirected);
@@ -149,7 +151,7 @@ public final class HugeGraphFactory extends GraphFactory {
 
     @Override
     public ImportResult build() {
-        validateTokens();
+        validate(dimensions, setup);
 
         GraphDimensions dimensions = this.dimensions;
         int concurrency = setup.concurrency();
@@ -163,13 +165,6 @@ public final class HugeGraphFactory extends GraphFactory {
         progressLogger.logDone(tracker);
 
         return ImportResult.of(dimensions, GraphsByRelationshipType.of(graphs));
-    }
-
-    private void validateTokens() {
-        dimensions.checkValidNodePredicate(setup);
-        dimensions.checkValidRelationshipTypePredicate(setup);
-        dimensions.checkValidNodeProperties();
-        dimensions.checkValidRelationshipProperty();
     }
 
     private IdsAndProperties loadIdMap(AllocationTracker tracker, int concurrency) {
@@ -231,7 +226,7 @@ public final class HugeGraphFactory extends GraphFactory {
 
                     long relationshipCount = relationshipCounts.getOrDefault(entry.getKey(), 0L);
 
-                    if (!dimensions.relProperties().hasMappings()) {
+                    if (!dimensions.relationshipProperties().hasMappings()) {
                         HugeGraph graph = HugeGraph.create(
                                 tracker,
                                 idsAndProperties.hugeIdMap,
@@ -245,7 +240,7 @@ public final class HugeGraphFactory extends GraphFactory {
                         );
                         return Collections.singletonMap(ANY_REL_TYPE, graph);
                     } else {
-                        return dimensions.relProperties().enumerate().map(propertyEntry -> {
+                        return dimensions.relationshipProperties().enumerate().map(propertyEntry -> {
                             int weightIndex = propertyEntry.getOne();
                             ResolvedPropertyMapping property = propertyEntry.getTwo();
                             HugeGraph graph = create(
@@ -274,7 +269,7 @@ public final class HugeGraphFactory extends GraphFactory {
         RelationshipsBuilder incomingRelationshipsBuilder = null;
 
         DeduplicationStrategy[] deduplicationStrategies = dimensions
-                .relProperties()
+                .relationshipProperties()
                 .stream()
                 .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
                         ? DeduplicationStrategy.SINGLE

@@ -84,7 +84,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
                     .build()
             ).build();
 
-        PropertyMappings relationshipPropertyMappings = PropertyMappings.of(dimensions.relProperties());
+        PropertyMappings relationshipPropertyMappings = PropertyMappings.of(dimensions.relationshipProperties());
 
         RelationshipProjections.Builder relProjectionBuilder = RelationshipProjections.builder();
         dimensions.relationshipTypeMappings().stream().forEach(typeMapping -> {

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
@@ -36,10 +37,10 @@ class AdjacencyListTest {
 
     @Test
     void shouldComputeCompressedMemoryEstimationForSinglePage() {
-        GraphDimensions dimensions = new GraphDimensions.Builder()
-                .setNodeCount(100)
-                .setMaxRelCount(100)
-                .build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(100)
+            .maxRelCount(100)
+            .build();
 
         MemoryTree memRec = AdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
@@ -60,10 +61,10 @@ class AdjacencyListTest {
 
     @Test
     void shouldComputeUncompressedMemoryEstimationForSinglePage() {
-        GraphDimensions dimensions = new GraphDimensions.Builder()
-                .setNodeCount(100)
-                .setMaxRelCount(100)
-                .build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(100)
+            .maxRelCount(100)
+            .build();
 
         MemoryTree memRec = AdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
 
@@ -81,10 +82,10 @@ class AdjacencyListTest {
 
     @Test
     void shouldComputeCompressedMemoryEstimationForMultiplePage() {
-        GraphDimensions dimensions = new GraphDimensions.Builder()
-                .setNodeCount(100_000_000L)
-                .setMaxRelCount(100_000_000_000L)
-                .build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(100_000_000L)
+            .maxRelCount(100_000_000_000L)
+            .build();
 
         MemoryTree memRec = AdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
@@ -105,10 +106,10 @@ class AdjacencyListTest {
 
     @Test
     void shouldComputeUncompressedMemoryEstimationForMultiplePage() {
-        GraphDimensions dimensions = new GraphDimensions.Builder()
-                .setNodeCount(100_000_000L)
-                .setMaxRelCount(100_000_000_000L)
-                .build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(100_000_000L)
+            .maxRelCount(100_000_000_000L)
+            .build();
 
         MemoryTree memRec = AdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
 

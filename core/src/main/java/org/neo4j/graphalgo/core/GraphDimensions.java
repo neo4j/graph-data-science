@@ -20,206 +20,40 @@
 package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongSet;
-import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
-import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
-import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.annotation.ValueClass;
 
-import static java.util.stream.Collectors.joining;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
+@ValueClass
+public interface GraphDimensions {
 
-public final class GraphDimensions {
+    long nodeCount();
 
-    private final LongSet nodeLabelIds;
-    private final ResolvedPropertyMappings nodeProperties;
-    private final ResolvedPropertyMappings relProperties;
-
-    private long nodeCount;
-    private long highestNeoId;
-    private long maxRelCount;
-    private RelationshipTypeMappings relTypeMappings;
-
-    public GraphDimensions(
-            long nodeCount,
-            long highestNeoId,
-            long maxRelCount,
-            LongSet nodeLabelIds,
-            ResolvedPropertyMappings nodeProperties,
-            RelationshipTypeMappings relTypeMappings,
-            ResolvedPropertyMappings relProperties
-    ) {
-        this.nodeCount = nodeCount;
-        this.highestNeoId = highestNeoId;
-        this.maxRelCount = maxRelCount;
-        this.nodeLabelIds = nodeLabelIds;
-        this.nodeProperties = nodeProperties;
-        this.relTypeMappings = relTypeMappings;
-        this.relProperties = relProperties;
+    @Value.Default
+    default long highestNeoId() {
+        return nodeCount();
     }
 
-    public long nodeCount() {
-        return nodeCount;
+    @Value.Default
+    default long maxRelCount() {
+        return 0L;
+    };
+
+    @Nullable
+    LongSet nodeLabelIds();
+
+    @Value.Default
+    default ResolvedPropertyMappings nodeProperties() {
+        return ResolvedPropertyMappings.empty();
+    };
+
+    @Value.Default
+    default ResolvedPropertyMappings relationshipProperties() {
+        return ResolvedPropertyMappings.empty();
     }
 
-    public void nodeCount(long nodeCount) {
-        this.nodeCount = nodeCount;
-    }
-
-    public long highestNeoId() {
-        return highestNeoId;
-    }
-
-    public void highestNeoId(long highestNeoId) {
-        this.highestNeoId = highestNeoId;
-    }
-
-    public long maxRelCount() {
-        return maxRelCount;
-    }
-
-    public void maxRelCount(long maxRelCount) {
-        this.maxRelCount = maxRelCount;
-    }
-
-    public void relationshipTypeMappings(RelationshipTypeMappings relationshipTypeMappings) {
-        this.relTypeMappings = relationshipTypeMappings;
-    }
-
-    public LongSet nodeLabelIds() {
-        return nodeLabelIds;
-    }
-
-    public ResolvedPropertyMappings nodeProperties() {
-        return nodeProperties;
-    }
-
-    public RelationshipTypeMappings relationshipTypeMappings() {
-        return relTypeMappings;
-    }
-
-    public ResolvedPropertyMappings relProperties() {
-        return relProperties;
-    }
-
-    public void checkValidNodePredicate(GraphSetup setup) {
-        if (isNotEmpty(setup.nodeLabel()) && nodeLabelIds().contains(NO_SUCH_LABEL)) {
-            throw new IllegalArgumentException(String.format("Invalid node projection, one or more labels not found: '%s'", setup.nodeLabel()));
-        }
-    }
-
-    public void checkValidRelationshipTypePredicate(GraphSetup setup) {
-        if (isNotEmpty(setup.relationshipType())) {
-            String missingTypes = relTypeMappings
-                    .stream()
-                    .filter(m -> !m.doesExist())
-                    .map(RelationshipTypeMapping::typeName)
-                    .collect(joining("', '"));
-            if (!missingTypes.isEmpty()) {
-                throw new IllegalArgumentException(String.format(
-                        "Invalid relationship projection, one or more relationship types not found: '%s'",
-                        missingTypes));
-            }
-        }
-    }
-
-    public void checkValidNodeProperties() {
-        checkValidProperties("Node", nodeProperties);
-    }
-
-    public void checkValidRelationshipProperty() {
-        checkValidProperties("Relationship", relProperties);
-    }
-
-    private void checkValidProperties(String recordType, ResolvedPropertyMappings mappings) {
-        String missingProperties = mappings
-                .stream()
-                .filter(mapping -> {
-                    int id = mapping.propertyKeyId();
-                    String propertyKey = mapping.neoPropertyKey();
-                    return isNotEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
-                })
-                .map(ResolvedPropertyMapping::neoPropertyKey)
-                .collect(joining("', '"));
-        if (!missingProperties.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
-                    "%s properties not found: '%s'",
-                    recordType,
-                    missingProperties));
-        }
-    }
-
-    public static class Builder {
-        private long nodeCount;
-        private long highestNeoId;
-        private long maxRelCount;
-        private LongSet nodeLabelIds;
-        private ResolvedPropertyMappings nodeProperties;
-        private RelationshipTypeMappings relationshipTypeMappings;
-        private ResolvedPropertyMappings relProperties;
-
-        public Builder() {
-            this.highestNeoId = -1;
-        }
-
-        public Builder(GraphDimensions other) {
-            nodeCount = other.nodeCount;
-            highestNeoId = other.highestNeoId;
-            maxRelCount = other.maxRelCount;
-            nodeLabelIds = other.nodeLabelIds;
-            nodeProperties = other.nodeProperties;
-            relationshipTypeMappings = other.relTypeMappings;
-            relProperties = other.relProperties;
-        }
-
-        public Builder setNodeCount(long nodeCount) {
-            this.nodeCount = nodeCount;
-            return this;
-        }
-
-        public Builder setHighestNeoId(long highestNeoId) {
-            this.highestNeoId = highestNeoId;
-            return this;
-        }
-
-        public Builder setMaxRelCount(long maxRelCount) {
-            this.maxRelCount = maxRelCount;
-            return this;
-        }
-
-        public Builder setNodeLabelIds(LongSet nodeLabelIds) {
-            this.nodeLabelIds = nodeLabelIds;
-            return this;
-        }
-
-        public Builder setNodeProperties(ResolvedPropertyMappings nodeProperties) {
-            this.nodeProperties = nodeProperties;
-            return this;
-        }
-
-        public Builder setRelationshipTypeMappings(RelationshipTypeMappings relationshipTypeMappings) {
-            this.relationshipTypeMappings = relationshipTypeMappings;
-            return this;
-        }
-
-        public Builder setRelationshipProperties(ResolvedPropertyMappings relProperties) {
-            this.relProperties = relProperties;
-            return this;
-        }
-
-        public GraphDimensions build() {
-            return new GraphDimensions(
-                    nodeCount,
-                    highestNeoId == -1 ? nodeCount : highestNeoId,
-                    maxRelCount,
-                    nodeLabelIds,
-                    nodeProperties == null ? ResolvedPropertyMappings.empty() : nodeProperties,
-                    relationshipTypeMappings,
-                    relProperties == null ? ResolvedPropertyMappings.empty() : relProperties
-                );
-        }
-
-    }
+    @Nullable
+    RelationshipTypeMappings relationshipTypeMappings();
 }

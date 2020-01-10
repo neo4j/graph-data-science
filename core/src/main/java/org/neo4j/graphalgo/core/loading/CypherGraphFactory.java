@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -68,10 +69,15 @@ public class CypherGraphFactory extends GraphFactory {
 
     public final MemoryEstimation memoryEstimation() {
         BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), api, setup).load();
-        dimensions.nodeCount(nodeCount.rows());
         BatchLoadResult relCount = new CountingCypherRecordLoader(relationshipQuery(), api, setup).load();
-        dimensions.maxRelCount(relCount.rows());
-        return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
+
+        GraphDimensions estimateDimensions = ImmutableGraphDimensions.builder()
+            .from(dimensions)
+            .nodeCount(nodeCount.rows())
+            .maxRelCount(relCount.rows())
+            .build();
+
+        return HugeGraphFactory.getMemoryEstimation(setup, estimateDimensions);
     }
 
     @Override
@@ -155,7 +161,7 @@ public class CypherGraphFactory extends GraphFactory {
 
                     long relationshipCount = relationshipCounts.getOrDefault(relationshipTypeMapping, 0L);
 
-                    if (!resultDimensions.relProperties().hasMappings()) {
+                    if (!resultDimensions.relationshipProperties().hasMappings()) {
                         HugeGraph graph = HugeGraph.create(
                             setup.tracker(),
                             idsAndProperties.hugeIdMap,
@@ -169,7 +175,7 @@ public class CypherGraphFactory extends GraphFactory {
                         );
                         return Collections.singletonMap(ANY_REL_TYPE, graph);
                     } else {
-                        return resultDimensions.relProperties().enumerate().map(propertyEntry -> {
+                        return resultDimensions.relationshipProperties().enumerate().map(propertyEntry -> {
                             int propertyKeyId = propertyEntry.getOne();
                             ResolvedPropertyMapping propertyMapping = propertyEntry.getTwo();
                             HugeGraph graph = create(

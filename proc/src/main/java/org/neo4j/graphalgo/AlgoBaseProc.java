@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -96,21 +97,24 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
     protected MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
-        GraphDimensions dimensions;
+        GraphDimensions estimateDimensions;
 
         if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             ModernGraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
             GraphFactory graphFactory = loader.build(config.getGraphImpl());
-            dimensions = graphFactory.dimensions();
+            estimateDimensions = graphFactory.dimensions();
 
             if (createConfig.nodeCount() >= 0 || createConfig.relationshipCount() >= 0) {
-                dimensions.nodeCount(createConfig.nodeCount());
-                dimensions.highestNeoId(createConfig.nodeCount());
-                dimensions.maxRelCount(createConfig.relationshipCount());
+                estimateDimensions = ImmutableGraphDimensions.builder()
+                    .from(estimateDimensions)
+                    .nodeCount(createConfig.nodeCount())
+                    .highestNeoId(createConfig.nodeCount())
+                    .maxRelCount(createConfig.relationshipCount())
+                    .build();
             }
 
-            estimationBuilder.add("graph", graphFactory.memoryEstimation(graphFactory.setup(), dimensions));
+            estimationBuilder.add("graph", graphFactory.memoryEstimation(graphFactory.setup(), estimateDimensions));
         } else {
             String graphName = config.graphName().get();
 
@@ -125,13 +129,13 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
             ModernGraphLoader loader = newLoader(graphCreateConfig, AllocationTracker.EMPTY);
             GraphFactory graphFactory = loader.build(config.getGraphImpl());
-            dimensions = graphFactory.dimensions();
+            estimateDimensions = graphFactory.dimensions();
         }
 
         estimationBuilder.add("algorithm", algorithmFactory(config).memoryEstimation(config));
 
-        MemoryTree memoryTree = estimationBuilder.build().estimate(dimensions, config.concurrency());
-        return new MemoryTreeWithDimensions(memoryTree, dimensions);
+        MemoryTree memoryTree = estimationBuilder.build().estimate(estimateDimensions, config.concurrency());
+        return new MemoryTreeWithDimensions(memoryTree, estimateDimensions);
     }
 
     protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
