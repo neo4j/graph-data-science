@@ -22,15 +22,14 @@ package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
-import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -91,7 +90,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).id AS name, score AS followers " +
             "ORDER BY followers DESC";
-        String actual = runQuery(query).resultAsString();
+        String actual = runQuery(query, Result::resultAsString);
 
         assertEquals(expected, actual);
     }
@@ -115,7 +114,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "YIELD nodeId, score " +
             "RETURN algo.asNode(nodeId).id AS name, score AS weightedFollowers " +
             "ORDER BY weightedFollowers DESC";
-        String actual = runQuery(query).resultAsString();
+        String actual = runQuery(query, Result::resultAsString);
 
         assertEquals(expected, actual);
     }
@@ -137,7 +136,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "})" +
             "YIELD nodes, writeProperty";
 
-        String actual = runQuery(query).resultAsString();
+        String actual = runQuery(query, Result::resultAsString);
 
         assertEquals(expected, actual);
     }
@@ -160,7 +159,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "   direction: '" + oldDirection + "' " +
             "})" +
             "YIELD nodes, writeProperty";
-        String actual = runQuery(query).resultAsString();
+        String actual = runQuery(query, Result::resultAsString);
 
         assertEquals(expected, actual);
     }
