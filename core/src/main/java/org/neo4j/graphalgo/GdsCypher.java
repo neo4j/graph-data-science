@@ -62,6 +62,16 @@ public abstract class GdsCypher {
     @SuppressWarnings("unused")
     public interface ImplicitCreationInlineBuilder {
 
+        default QueryBuilder loadEverything() {
+            return loadEverything(Projection.NATURAL);
+        }
+
+        default QueryBuilder loadEverything(Projection projection) {
+            return this
+                .withNodeLabel("*", NodeProjection.empty())
+                .withRelationshipType("*", RelationshipProjection.empty().withProjection(projection));
+        }
+
         default ImplicitCreationBuildStage withAnyLabel() {
             return withNodeLabel("*", NodeProjection.empty());
         }
