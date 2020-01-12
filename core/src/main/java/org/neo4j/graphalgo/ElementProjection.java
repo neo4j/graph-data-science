@@ -50,6 +50,8 @@ public abstract class ElementProjection {
         return value;
     }
 
+    abstract Object toMinimalObject(ElementIdentifier identifier);
+
     static <T extends ElementProjection> T create(
         Map<String, Object> config,
         Function<PropertyMappings, T> constructor

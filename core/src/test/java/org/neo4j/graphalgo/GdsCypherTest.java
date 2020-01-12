@@ -58,7 +58,7 @@ class GdsCypherTest {
         );
 
     private static final String STAR_PROJECTION_CYPHER_SYNTAX =
-        "{nodeProjection: {`*`: {label: \"\"}}, relationshipProjection: {`*`: {type: \"\", projection: \"NATURAL\", aggregation: \"DEFAULT\"}}}";
+        "{nodeProjection: \"*\", relationshipProjection: \"*\"}";
 
     static Stream<Arguments> testExplicitCreationWithAnyName() {
         //@formatter:off
@@ -356,8 +356,7 @@ class GdsCypherTest {
                             "defaultValue: 42.1337" +
                         "}, " +
                         "GlobalNodeProp: {" +
-                            "property: \"GlobalNodeProp\", " +
-                            "defaultValue: 0.0 / 0.0" +
+                            "property: \"GlobalNodeProp\"" +
                         "}" +
                     "}" +
                 "}" +
@@ -371,13 +370,9 @@ class GdsCypherTest {
             "{" +
                 "Rel: {" +
                     "type: \"TYPE\", " +
-                    "projection: \"NATURAL\", " +
-                    "aggregation: \"DEFAULT\", " +
                     "properties: {" +
                         "global: {" +
-                            "property: \"RelProp\", " +
-                            "defaultValue: 0.0 / 0.0, " +
-                            "aggregation: \"DEFAULT\"" +
+                            "property: \"RelProp\"" +
                         "}" +
                     "}" +
                 "}, " +
@@ -392,9 +387,7 @@ class GdsCypherTest {
                             "aggregation: \"MAX\"" +
                         "}, " +
                         "global: {" +
-                            "property: \"RelProp\", " +
-                            "defaultValue: 0.0 / 0.0, " +
-                            "aggregation: \"DEFAULT\"" +
+                            "property: \"RelProp\"" +
                         "}" +
                     "}" +
                 "}" +

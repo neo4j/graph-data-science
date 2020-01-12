@@ -149,6 +149,23 @@ public abstract class PropertyMapping {
         return new AbstractMap.SimpleImmutableEntry<>(propertyKey(), value);
     }
 
+    public @Nullable Object toMinimalObject(boolean includeAggregation, boolean allowStringShortcut) {
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put(PROPERTY_KEY, neoPropertyKey());
+        double defaultValue = defaultValue();
+        if (Double.compare(defaultValue, DEFAULT_FALLBACK_VALUE) != 0) {
+            value.put(DEFAULT_VALUE_KEY, defaultValue);
+        }
+        DeduplicationStrategy deduplicationStrategy = deduplicationStrategy();
+        if (includeAggregation && deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
+            value.put(RelationshipProjection.AGGREGATION_KEY, deduplicationStrategy.name());
+        }
+        if (allowStringShortcut && value.size() == 1 && Objects.equals(propertyKey(), neoPropertyKey())) {
+            return propertyKey();
+        }
+        return new AbstractMap.SimpleImmutableEntry<>(propertyKey(), value);
+    }
+
     public PropertyMapping setNonDefaultAggregation(DeduplicationStrategy deduplicationStrategy) {
         if (deduplicationStrategy == DeduplicationStrategy.DEFAULT || deduplicationStrategy() != DeduplicationStrategy.DEFAULT) {
             return this;

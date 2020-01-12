@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -102,6 +103,32 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         value.put(TYPE_KEY, type().orElse(""));
         value.put(PROJECTION_KEY, projection().name());
         value.put(AGGREGATION_KEY, aggregation().name());
+    }
+
+    @Override
+    Object toMinimalObject(ElementIdentifier identifier) {
+        Object properties = properties().toMinimalObject(true);
+        if (properties == null && matchesType(identifier.name)) {
+            return identifier.name;
+        }
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put(TYPE_KEY, type().orElse(""));
+        if (projection() != Projection.NATURAL) {
+            value.put(PROJECTION_KEY, projection().name());
+        }
+        if (aggregation() != DeduplicationStrategy.DEFAULT) {
+            value.put(AGGREGATION_KEY, aggregation().name());
+        }
+        if (properties != null) {
+            value.put(PROPERTIES_KEY, properties);
+        }
+        return value;
+    }
+
+    private boolean matchesType(String type) {
+        return projection() == Projection.NATURAL
+            && aggregation() == DeduplicationStrategy.DEFAULT
+            && type().map(s -> s.equals(type)).orElse(true);
     }
 
     @Override

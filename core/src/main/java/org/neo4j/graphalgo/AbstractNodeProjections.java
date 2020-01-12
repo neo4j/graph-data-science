@@ -116,7 +116,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
 
     public static NodeProjections empty() {
         return NodeProjections.of();
-    };
+    }
 
     public NodeProjection getProjection(ElementIdentifier identifier) {
         NodeProjection projection = projections().get(identifier);

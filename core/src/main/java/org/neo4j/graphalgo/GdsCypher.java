@@ -389,16 +389,30 @@ public abstract class GdsCypher {
                 parameters.size() + ADDITIONAL_PARAMETERS_FOR_IMPLICIT_GRAPH_CREATION
             );
 
+            Object nodeProjection = config.nodeProjection().toMinimalObject();
+            Object relationshipProjection = config.relationshipProjection().toMinimalObject();
             if (executionMode == InternalExecutionMode.GRAPH_CREATE) {
-                queryArguments.add(PRINTER.toCypherString(config.nodeProjection().toObject()));
-                queryArguments.add(PRINTER.toCypherString(config.relationshipProjection().toObject()));
+                queryArguments.add(PRINTER.toCypherString(nodeProjection));
+                queryArguments.add(PRINTER.toCypherString(relationshipProjection));
             } else {
-                newParameters.put("nodeProjection", config.nodeProjection().toObject());
-                newParameters.put("relationshipProjection", config.relationshipProjection().toObject());
+                if (nodeProjection != null) {
+                    newParameters.put("nodeProjection", nodeProjection);
+                }
+                if (relationshipProjection != null) {
+                    newParameters.put("relationshipProjection", relationshipProjection);
+                }
             }
 
-            newParameters.put("nodeProperties", config.nodeProperties().toObject(false));
-            newParameters.put("relationshipProperties", config.relationshipProperties().toObject(true));
+            Object nodeProperties = config.nodeProperties().toMinimalObject(false);
+            if (nodeProperties != null) {
+                newParameters.put("nodeProperties", nodeProperties);
+            }
+            Object relationshipProperties = config.relationshipProperties().toMinimalObject(true);
+            if (relationshipProperties != null) {
+                newParameters.put("relationshipProperties", nodeProperties);
+            }
+
+
             newParameters.putAll(parameters);
             parameters = newParameters;
         }

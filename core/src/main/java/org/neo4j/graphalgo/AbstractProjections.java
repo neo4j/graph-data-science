@@ -19,9 +19,14 @@
  */
 package org.neo4j.graphalgo;
 
+import org.jetbrains.annotations.Nullable;
+
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.singletonMap;
 
 public abstract class AbstractProjections<P extends ElementProjection> {
 
@@ -37,4 +42,36 @@ public abstract class AbstractProjections<P extends ElementProjection> {
             .collect(Collectors.toSet());
     }
 
+    final @Nullable Object toMinimalObject() {
+        Map<ElementIdentifier, P> projections = projections();
+        if (projections.isEmpty()) {
+            return null;
+        }
+        if (projections.size() == 1) {
+            Map.Entry<ElementIdentifier, P> entry = projections.entrySet().iterator().next();
+            ElementIdentifier identifier = entry.getKey();
+            if (PROJECT_ALL.equals(identifier)) {
+                return PROJECT_ALL.name;
+            }
+            Object projectionObject = entry.getValue().toMinimalObject(identifier);
+            if (projectionObject instanceof String) {
+                return projectionObject;
+            }
+            return singletonMap(
+                identifier.name,
+                projectionObject
+            );
+        }
+        Map<String, Object> value = new LinkedHashMap<>();
+        projections.forEach((identifier, projection) -> {
+            Object projectionObject = projection.toMinimalObject(identifier);
+            if (projectionObject != null) {
+                value.put(identifier.name, projectionObject);
+            }
+        });
+        if (value.isEmpty()) {
+            return null;
+        }
+        return value;
+    }
 }
