@@ -239,6 +239,98 @@ class GdsCypherTest {
         );
     }
 
+    @Test
+    void loadEverythingShortcut() {
+        String query = GdsCypher
+            .call()
+            .loadEverything()
+            .algo("foo")
+            .writeMode()
+            .yields();
+
+        assertEquals(
+            //@formatter:off
+            "CALL gds.foo.write({" +
+              "nodeProjection: {" +
+                "`*`: {label: \"\"}" +
+              "}, " +
+              "relationshipProjection: {" +
+                "`*`: {" +
+                  "type: \"\", " +
+                  "projection: \"NATURAL\", " +
+                  "aggregation: \"DEFAULT\"" +
+                "}" +
+              "}" +
+            "})",
+            //@formatter:on
+            query
+        );
+    }
+
+    @Test
+    void loadEverythingWithProjectionShortcut() {
+        String query = GdsCypher
+            .call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("foo")
+            .writeMode()
+            .yields();
+
+        assertEquals(
+            //@formatter:off
+            "CALL gds.foo.write({" +
+              "nodeProjection: {" +
+                "`*`: {label: \"\"}" +
+              "}, " +
+              "relationshipProjection: {" +
+                "`*`: {" +
+                  "type: \"\", " +
+                  "projection: \"UNDIRECTED\", " +
+                  "aggregation: \"DEFAULT\"" +
+                "}" +
+              "}" +
+            "})",
+            //@formatter:on
+            query
+        );
+    }
+
+    @Test
+    void loadEverythingWithRelationshipProperty() {
+        String query = GdsCypher
+            .call()
+            .withRelationshipProperty("weight")
+            .loadEverything()
+            .algo("foo")
+            .writeMode()
+            .yields();
+
+        assertEquals(
+            //@formatter:off
+            "CALL gds.foo.write({" +
+              "nodeProjection: {" +
+                "`*`: {label: \"\"}" +
+              "}, " +
+              "relationshipProjection: {" +
+                "`*`: {" +
+                  "type: \"\", " +
+                  "projection: \"NATURAL\", " +
+                  "aggregation: \"DEFAULT\", " +
+                  "properties: {" +
+                    "weight: {" +
+                        "property: \"weight\", " +
+                        "defaultValue: 0.0 / 0.0, " +
+                        "aggregation: \"DEFAULT\"" +
+                     "}" +
+                   "}" +
+                "}" +
+              "}" +
+            "})",
+            //@formatter:on
+            query
+        );
+    }
+
     private String expectedImplicitGraphCreateCall() {
         //@formatter:off
         return
@@ -544,6 +636,7 @@ class GdsCypherTest {
 
     static Stream<Arguments> placeholders() {
         return Stream.of(
+            //@formatter:off
             arguments("g"               , "$g"),
             arguments("var"             , "$var"),
             arguments("graphName"       , "$graphName"),
@@ -554,6 +647,7 @@ class GdsCypherTest {
             arguments("     "           , "$`     `"),
             arguments(" "               , "$` `"),
             arguments("%"               , "$`%`")
+            //@formatter:o
         );
     }
 
@@ -589,6 +683,7 @@ class GdsCypherTest {
 
     static Stream<Arguments> variables() {
         return Stream.of(
+            //@formatter:off
             arguments("g"               , "g"),
             arguments("var"             , "var"),
             arguments("graphName"       , "graphName"),
@@ -599,6 +694,7 @@ class GdsCypherTest {
             arguments("     "           , "`     `"),
             arguments(" "               , "` `"),
             arguments("%"               , "`%`")
+            //@formatter:on
         );
     }
 
