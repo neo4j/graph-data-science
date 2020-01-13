@@ -65,7 +65,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         Graph graph = computationResult.graph();
 
         AbstractResultBuilder<SccResult> builder = new SccResultBuilder(true, true, tracker)
-            .withCommunityFunction(components::get)
+            .withCommunityFunction(components != null ? components::get : null)
             .withLoadMillis(computationResult.createMillis())
             .withComputeMillis(computationResult.computeMillis())
             .withWriteProperty(config.writeProperty())
