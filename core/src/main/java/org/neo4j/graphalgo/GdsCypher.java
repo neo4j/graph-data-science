@@ -62,10 +62,28 @@ public abstract class GdsCypher {
     @SuppressWarnings("unused")
     public interface ImplicitCreationInlineBuilder {
 
+        /**
+         * Loads all nodes of any label and relationships of any type in the
+         * {@link Projection#NATURAL} projection.
+         *
+         * Does <strong>not</strong> load any properties.
+         *
+         * To load properties, call one of {@link #withNodeProperty(String)}
+         * or {@link #withRelationshipProperty(String)} or their variants.
+         */
         default QueryBuilder loadEverything() {
             return loadEverything(Projection.NATURAL);
         }
 
+        /**
+         * Loads all nodes of any label and relationships of any type in the
+         * given {@code projection}.
+         *
+         * Does <strong>not</strong> load any properties.
+         *
+         * To load properties, call one of {@link #withNodeProperty(String)}
+         * or {@link #withRelationshipProperty(String)} or their variants.
+         */
         default QueryBuilder loadEverything(Projection projection) {
             return this
                 .withNodeLabel("*", NodeProjection.empty())
