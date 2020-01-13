@@ -37,7 +37,7 @@ public interface SccConfig extends AlgoBaseConfig, WriteConfig {
     @Value.Default
     @Override
     default String writeProperty() {
-        return "cluster";
+        return "partition";
     }
 
     static SccConfig of(

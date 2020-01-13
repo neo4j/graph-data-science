@@ -85,13 +85,13 @@ class SccProcTest extends BaseProcTest {
             assertEquals(3, row.getNumber("setCount").longValue());
             assertEquals(3, row.getNumber("minSetSize").longValue());
             assertEquals(3, row.getNumber("maxSetSize").longValue());
-            assertEquals("cluster", row.getString("writeProperty"));
+            assertEquals("partition", row.getString("writeProperty"));
             assertNotEquals(-1, loadMillis);
             assertNotEquals(-1, computeMillis);
             assertNotEquals(-1, writeMillis);
         });
 
-        String validationQuery = "MATCH (n) RETURN n.cluster as c";
+        String validationQuery = "MATCH (n) RETURN n.partition as c";
         final IntIntScatterMap testMap = new IntIntScatterMap();
         runQueryWithRowConsumer(validationQuery, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
 
