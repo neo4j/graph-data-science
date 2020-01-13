@@ -50,89 +50,13 @@ Decomposing a directed graph into its strongly connected components is a classic
 // end::use-case[]
 
 
-[[algorithms-strongly-connected-components-sample]]
-== Strongly Connected Components algorithm sample
-
-image::strongly_connected_components.png[]
-
-A directed graph is strongly connected if there is a path between all pairs of vertices.
-This algorithm treats the graph as directed, which means that the direction of the relationship is important.
-A strongly connected component only exists if there are relationships between nodes in both direction.
-
-.The following will create a sample graph:
-[source, cypher]
-----
-include::scripts/strongly-connected-components.cypher[tag=create-sample-graph]
-----
-
-.The following will run the algorithm and write back results:
-[source, cypher]
-----
-include::scripts/strongly-connected-components.cypher[tag=write-sample-graph]
-----
-
-// tag::stream-sample-graph-result[]
-.Results
-[opts="header",cols="1,1"]
-|===
-| Name    | Partition
-| Alice   | 1
-| Bridget | 1
-| Michael | 1
-| Charles | 0
-| Doug    | 2
-| Mark    | 2
-|===
-// end::stream-sample-graph-result[]
-
-// tag::stream-sample-graph-explanation[]
-We have 3 strongly connected components in our sample graph.
-
-The first, and biggest, component has members Alice, Bridget, and Michael, while the second component has Doug and Mark.
-Charles ends up in his own component because there isn't an outgoing relationship from that node to any of the others.
-// end::stream-sample-graph-explanation[]
-
-.The following will find the largest partition:
-[source, cypher]
-----
-include::scripts/strongly-connected-components.cypher[tag=get-largest-component]
-----
-
-
-[[algorithms-strongly-connected-components-hgp]]
-== Huge graph projection
-
-include::huge-projection.adoc[tag=explanation]
-
-.Set `graph:'huge'` in the config:
-
-[source, cypher]
-----
-include::scripts/strongly-connected-components.cypher[tag=huge-projection]
-----
-
-
-[[algorithms-strongly-connected-components-cp]]
-== Cypher projection
-
-include::projected-graph-model/cypher-projection.adoc[tag=explanation]
-
-.Set `graph:'cypher'` in the config:
-
-[source, cypher]
-----
-include::scripts/strongly-connected-components.cypher[tag=cypher-loading]
-----
-
-
 [[algorithms-strongly-connected-components-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.scc(label:String, relationship:String,
-    {write:true,writeProperty:'partition',concurrency:4, graph:'huge'})
+CALL gds.alpha.scc.write(graphName: STRING, configuration: MAP)
 YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 ----
 
@@ -140,14 +64,10 @@ YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type    | Default                | Optional | Description
-| label            | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
-| write            | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
-| writeProperty    | string  | 'partition'            | yes      | The property name written back to.
+| writeProperty    | STRING  | 'partition'            | yes      | The property name written back to.
 | concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
@@ -173,7 +93,6 @@ YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 | p99                   | double  | The 99 percentile of community size.
 | p100                  | double  | The 100 percentile of community size.
 
-| write | boolean | Specifies if the result was written back as a node property.
 | writeProperty | string | The property name written back to.
 
 |===
@@ -181,7 +100,7 @@ YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.scc.stream(label:String, relationship:String, {concurrency:4})
+CALL gds.alpha.scc.stream(graphName: STRING, configuration: MAP)
 YIELD nodeId, partition
 ----
 
@@ -189,11 +108,8 @@ YIELD nodeId, partition
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type   | Default                | Optional | Description
-| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
 | concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| graph            | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
@@ -205,12 +121,131 @@ YIELD nodeId, partition
 |===
 
 
-[[algorithms-strongly-connected-components-imp]]
-== Implementations
+[[algorithms-strongly-connected-components-sample]]
+== Strongly Connected Components algorithm examples
 
-`algo.scc`
+image::strongly_connected_components.png[]
 
-* *Iterative* adaptation of tarjan algorithm.
+A directed graph is strongly connected if there is a path between all pairs of vertices.
+This algorithm treats the graph as directed, which means that the direction of the relationship is important.
+A strongly connected component only exists if there are relationships between nodes in both direction.
+
+.The following will create a sample graph:
+[source, cypher]
+----
+CREATE (nAlice:User {name:'Alice'})
+CREATE (nBridget:User {name:'Bridget'})
+CREATE (nCharles:User {name:'Charles'})
+CREATE (nDoug:User {name:'Doug'})
+CREATE (nMark:User {name:'Mark'})
+CREATE (nMichael:User {name:'Michael'})
+
+CREATE (nAlice)-[:FOLLOW]->(nBridget)
+CREATE (nAlice)-[:FOLLOW]->(nCharles)
+CREATE (nMark)-[:FOLLOW]->(nDoug)
+CREATE (nMark)-[:FOLLOW]->(nMichael)
+CREATE (nBridget)-[:FOLLOW]->(nMichael)
+CREATE (nDoug)-[:FOLLOW]->(nMark)
+CREATE (nMichael)-[:FOLLOW]->(nAlice)
+CREATE (nAlice)-[:FOLLOW]->(nMichael)
+CREATE (nBridget)-[:FOLLOW]->(nAlice)
+CREATE (nMichael)-[:FOLLOW]->(nBridget);
+----
+
+.The following will run the algorithm and write back results:
+[source, cypher]
+----
+CALL gds.alpha.scc.write({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOW',
+  writeProperty: 'partition'
+})
+YIELD setCount, maxSetSize, minSetSize;
+----
+
+.Results
+[opts="header",cols="1m,1m,1m"]
+|===
+| setCount | maxSetSize | minSetSize
+| 3        | 3          | 1
+|===
+
+.The following will run the algorithm and stream back results:
+[source, cypher]
+----
+CALL gds.alpha.scc.stream({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOW'
+})
+YIELD nodeId, partition
+RETURN algo.asNode(nodeId).name AS Name, partition AS Partition
+ORDER BY partition DESC
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| Name      | Partition
+| "Doug"    | 3
+| "Mark"    | 3
+| "Charles" | 2
+| "Alice"   | 0
+| "Bridget" | 0
+| "Michael" | 0
+|===
+
+// tag::stream-sample-graph-explanation[]
+We have 3 strongly connected components in our sample graph.
+
+The first, and biggest, component has members Alice, Bridget, and Michael, while the second component has Doug and Mark.
+Charles ends up in his own component because there isn't an outgoing relationship from that node to any of the others.
+// end::stream-sample-graph-explanation[]
+
+.The following will find the largest partition:
+[source, cypher]
+----
+MATCH (u:User)
+RETURN u.partition AS partition, count(*) AS size_of_partition
+ORDER BY size_of_partition DESC
+LIMIT 1
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| Partition | PartitionSize
+| 0         | 3
+|===
+
+
+[[algorithms-strongly-connected-components-cp]]
+== Cypher projection
+
+include::projected-graph-model/cypher-projection.adoc[tag=explanation]
+
+.Use `nodeQuery` and `relationshipQuery` in the config:
+
+[source, cypher]
+----
+CALL gds.alpha.scc.stream({
+  nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
+  relationshipQuery: 'MATCH (u1:User)-[:FOLLOW]->(u2:User) RETURN id(u1) AS source, id(u2) AS target' })
+YIELD nodeId, partition
+RETURN algo.asNode(nodeId).name AS Name, partition AS Partition
+ORDER BY partition DESC
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| Name      | Partition
+| "Doug"    | 3
+| "Mark"    | 3
+| "Charles" | 2
+| "Alice"   | 0
+| "Bridget" | 0
+| "Michael" | 0
+|===
 
 
 ifndef::env-docs[]
@@ -226,39 +261,3 @@ ifndef::env-docs[]
 
 // end::references[]
 endif::env-docs[]
-
-ifdef::implementation[]
-// tag::implementation[]
-
-
-== Implementation details
-
-:leveloffset: +1
-// copied from: https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/97
-
-Strongly Connected Components (SCC) is a class algorithms for finding groups of nodes where each node is directly reachable from every other node in the group. There are several algorithms to compute the SCC. Our current implementation (still in graphtest project) implements _Tarjan's_ SCC algorithm.
-
-## Progress
-
-- [x] implement procedure
-- [x] tests
-- [x] edge case tests
-- [x] simple benchmark
-- [x] benchmark on bigger graphs
-- [x] parallelization
-- [x] evaluation
-- [x] documentation
-
-
-== Details
-
-
-=== algo.scc
-
-- *iterative* adaption of tarjan algorithm
-- result is a cluster-id at all nodes
-- http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
-
-
-// end::implementation[]
-endif::implementation[]
