@@ -66,17 +66,17 @@ We can use it to compute the similarity of two hardcoded lists.
 .The following will return the cosine similarity of two lists of numbers:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=function]
+RETURN gds.alpha.similarity.cosine([3,8,7,5,2,9], [10,8,6,6,4,5]) AS similarity
 ----
 
-// tag::function[]
+
 .Results
 [opts="header",cols="1"]
 |===
 | `similarity`
-| 0.8638935626791596
+| 0.8638935626791597
 |===
-// end::function[]
+
 
 // tag::function-explanation[]
 These two lists of numbers have a Cosine similarity of 0.863.
@@ -95,32 +95,73 @@ We can also use it to compute the similarity of nodes based on lists computed by
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=create-sample-graph]
+MERGE (french:Cuisine {name:'French'})
+MERGE (italian:Cuisine {name:'Italian'})
+MERGE (indian:Cuisine {name:'Indian'})
+MERGE (lebanese:Cuisine {name:'Lebanese'})
+MERGE (portuguese:Cuisine {name:'Portuguese'})
+MERGE (british:Cuisine {name:'British'})
+MERGE (mauritian:Cuisine {name:'Mauritian'})
+
+MERGE (zhen:Person {name: "Zhen"})
+MERGE (praveena:Person {name: "Praveena"})
+MERGE (michael:Person {name: "Michael"})
+MERGE (arya:Person {name: "Arya"})
+MERGE (karin:Person {name: "Karin"})
+
+MERGE (praveena)-[:LIKES {score: 9}]->(indian)
+MERGE (praveena)-[:LIKES {score: 7}]->(portuguese)
+MERGE (praveena)-[:LIKES {score: 8}]->(british)
+MERGE (praveena)-[:LIKES {score: 1}]->(mauritian)
+
+MERGE (zhen)-[:LIKES {score: 10}]->(french)
+MERGE (zhen)-[:LIKES {score: 6}]->(indian)
+MERGE (zhen)-[:LIKES {score: 2}]->(british)
+
+MERGE (michael)-[:LIKES {score: 8}]->(french)
+MERGE (michael)-[:LIKES {score: 7}]->(italian)
+MERGE (michael)-[:LIKES {score: 9}]->(indian)
+MERGE (michael)-[:LIKES {score: 3}]->(portuguese)
+
+MERGE (arya)-[:LIKES {score: 10}]->(lebanese)
+MERGE (arya)-[:LIKES {score: 10}]->(italian)
+MERGE (arya)-[:LIKES {score: 7}]->(portuguese)
+MERGE (arya)-[:LIKES {score: 9}]->(mauritian)
+
+MERGE (karin)-[:LIKES {score: 9}]->(lebanese)
+MERGE (karin)-[:LIKES {score: 7}]->(italian)
+MERGE (karin)-[:LIKES {score: 10}]->(portuguese)
 ----
 
 .The following will return the Cosine similarity of Michael and Arya:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=function-cypher]
+ MATCH (p1:Person {name: 'Michael'})-[likes1:LIKES]->(cuisine)
+ MATCH (p2:Person {name: "Arya"})-[likes2:LIKES]->(cuisine)
+ RETURN p1.name AS from,
+        p2.name AS to,
+        gds.alpha.similarity.cosine(collect(likes1.score), collect(likes2.score)) AS similarity
 ----
 
-// tag::function-cypher[]
 .Results
 [opts="header"]
 |===
 | `from`       | `to`         | `similarity`
 | "Michael" | "Arya" | 0.9788908326303921
-
 |===
-// end::function-cypher[]
+
 
 .The following will return the Cosine similarity of Michael and the other people that have a cuisine in common:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=function-cypher-all]
+ MATCH (p1:Person {name: 'Michael'})-[likes1:LIKES]->(cuisine)
+ MATCH (p2:Person)-[likes2:LIKES]->(cuisine) WHERE p2 <> p1
+ RETURN p1.name AS from,
+        p2.name AS to,
+        gds.alpha.similarity.cosine(collect(likes1.score), collect(likes2.score)) AS similarity
+ ORDER BY similarity DESC
 ----
 
-// tag::function-cypher--all[]
 .Results
 [opts="header"]
 |===
@@ -131,7 +172,6 @@ include::scripts/similarity-cosine.cypher[tag=function-cypher-all]
 | "Michael" | "Karin"    | 0.8498063272285821
 
 |===
-// end::function-cypher-all[]
 
 
 [[algorithms-similarity-cosine-procedure-sample]]
@@ -144,17 +184,59 @@ include::labs-similarity.adoc[tag=weighted-note]
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=create-sample-graph]
+MERGE (french:Cuisine {name:'French'})
+MERGE (italian:Cuisine {name:'Italian'})
+MERGE (indian:Cuisine {name:'Indian'})
+MERGE (lebanese:Cuisine {name:'Lebanese'})
+MERGE (portuguese:Cuisine {name:'Portuguese'})
+MERGE (british:Cuisine {name:'British'})
+MERGE (mauritian:Cuisine {name:'Mauritian'})
+
+MERGE (zhen:Person {name: "Zhen"})
+MERGE (praveena:Person {name: "Praveena"})
+MERGE (michael:Person {name: "Michael"})
+MERGE (arya:Person {name: "Arya"})
+MERGE (karin:Person {name: "Karin"})
+
+MERGE (praveena)-[:LIKES {score: 9}]->(indian)
+MERGE (praveena)-[:LIKES {score: 7}]->(portuguese)
+MERGE (praveena)-[:LIKES {score: 8}]->(british)
+MERGE (praveena)-[:LIKES {score: 1}]->(mauritian)
+
+MERGE (zhen)-[:LIKES {score: 10}]->(french)
+MERGE (zhen)-[:LIKES {score: 6}]->(indian)
+MERGE (zhen)-[:LIKES {score: 2}]->(british)
+
+MERGE (michael)-[:LIKES {score: 8}]->(french)
+MERGE (michael)-[:LIKES {score: 7}]->(italian)
+MERGE (michael)-[:LIKES {score: 9}]->(indian)
+MERGE (michael)-[:LIKES {score: 3}]->(portuguese)
+
+MERGE (arya)-[:LIKES {score: 10}]->(lebanese)
+MERGE (arya)-[:LIKES {score: 10}]->(italian)
+MERGE (arya)-[:LIKES {score: 7}]->(portuguese)
+MERGE (arya)-[:LIKES {score: 9}]->(mauritian)
+
+MERGE (karin)-[:LIKES {score: 9}]->(lebanese)
+MERGE (karin)-[:LIKES {score: 7}]->(italian)
+MERGE (karin)-[:LIKES {score: 10}]->(portuguese)
 ----
 
 
 .The following will return a stream of node pairs along with their Cosine similarities:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=stream]
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData
+ With collect(userData) AS data
+ CALL gds.alpha.similarity.cosine.stream({data: data})
+ YIELD item1, item2, count1, count2, similarity
+ RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+ ORDER BY similarity DESC
 ----
 
-// tag::stream[]
+
 .Results
 [opts="header"]
 |===
@@ -171,7 +253,7 @@ include::scripts/similarity-cosine.cypher[tag=stream]
 | "Zhen"     | "Karin"    | 0.0
 
 |===
-// end::stream[]
+
 
 Praveena and Karin have the most similar food tastes, with a score of 1.0, and there are also several other pairs of users with similar tastes.
 The scores here are unusually high because our users haven't liked many of the same cuisines.
@@ -181,10 +263,19 @@ We'd probably want to filter those out, which we can do by passing in the `simil
 .The following will return a stream of node pairs that have a similarity of at least 0.1, along with their cosine similarities:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=stream-similarity-cutoff]
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData
+ WITH collect(userData) AS data
+ CALL gds.alpha.similarity.cosine.stream({
+   data: data,
+   similarityCutoff: 0.0
+ })
+ YIELD item1, item2, count1, count2, similarity
+ RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+ ORDER BY similarity DESC
 ----
 
-// tag::stream-similarity-cutoff[]
 .Results
 [opts="header"]
 |===
@@ -198,7 +289,6 @@ include::scripts/similarity-cosine.cypher[tag=stream-similarity-cutoff]
 | "Michael"  | "Karin"    | 0.8498063272285821
 | "Praveena" | "Arya"     | 0.7194014606174091
 |===
-// end::stream-similarity-cutoff[]
 
 We can see that those users with no similarity have been filtered out.
 If we're implementing a k-Nearest Neighbors type query we might instead want to find the most similar `k` users for a given user.
@@ -207,10 +297,20 @@ We can do that by passing in the `topK` parameter.
 .The following will return a stream of users along with the most similar user to them (i.e. `k=1`):
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=stream-topk]
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData
+ WITH collect(userData) AS data
+ CALL gds.alpha.similarity.cosine.stream({
+   data: data,
+   similarityCutoff: 0.0,
+   topK: 1
+ })
+ YIELD item1, item2, count1, count2, similarity
+ RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+ ORDER BY from
 ----
 
-// tag::stream-topk[]
 .Results
 [opts="header",cols="1,1,1"]
 |===
@@ -220,9 +320,8 @@ include::scripts/similarity-cosine.cypher[tag=stream-topk]
 | "Michael"  | "Arya"     | 0.9788908326303921
 | "Praveena" | "Karin"    | 1.0
 | "Zhen"     | "Michael"  | 0.9542262139256075
-
 |===
-// end::stream-topk[]
+
 
 These results will not be symmetrical.
 For example, the person most similar to Zhen is Michael, but the person most similar to Michael is Arya.
@@ -230,27 +329,39 @@ For example, the person most similar to Zhen is Michael, but the person most sim
 .The following will find the most similar user for each user, and store a relationship between those users:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=write-back]
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData
+ WITH collect(userData) as data
+ CALL gds.alpha.similarity.cosine.write({
+   data: data,
+   topK: 1,
+   similarityCutoff: 0.1
+ })
+ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+ RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
 ----
 
-// tag::write-back[]
+
 .Results
 [opts="header",cols="1,1,1,1,1,1,1,1,1"]
 |===
 | `nodes` | `similarityPairs` | `write` | `writeRelationshipType` | `writeProperty` | `min`  | `max`  | `mean` | `p95`
 | 5     | 5               | TRUE  | "SIMILAR"             | "score"       | 0.9542236328125 | 1.0000038146972656 | 0.9824020385742187 | 1.0000038146972656
 |===
-// end::write-back[]
+
 
 We then could write a query to find out what types of cuisine that other people similar to us might like.
 
 .The following will find the most similar user to Praveena, and return their favourite cuisines that Praveena doesn't (yet!) like:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=query]
+ MATCH (p:Person {name: "Praveena"})-[:SIMILAR]->(other),
+       (other)-[:LIKES]->(cuisine)
+ WHERE not((p)-[:LIKES]->(cuisine))
+ RETURN cuisine.name AS cuisine
 ----
 
-// tag::query[]
 .Results
 [opts="header",cols="1"]
 |===
@@ -258,7 +369,6 @@ include::scripts/similarity-cosine.cypher[tag=query]
 | Italian
 | Lebanese
 |===
-// end::query[]
 
 
 [[algorithms-similarity-cosine-source-target-ids]]
@@ -271,10 +381,23 @@ We could use this technique to compute the similarity of a subset of items to al
 .The following will find the most similar person (i.e. `k=1`) to Arya and Praveena:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=source-target-ids]
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), name: p.name, weights: collect(coalesce(likes.score, algo.NaN()))} as userData
+ WITH collect(userData) as personCuisines
+ WITH personCuisines,
+      [value in personCuisines WHERE value.name IN ["Praveena", "Arya"] | value.item ] AS sourceIds
+ CALL gds.alpha.similarity.cosine.stream({
+  data: personCuisines,
+  sourceIds: sourceIds,
+  topK: 1
+ })
+ YIELD item1, item2, similarity
+ WITH algo.getNodeById(item1) AS from, algo.getNodeById(item2) AS to, similarity
+ RETURN from.name AS from, to.name AS to, similarity
+  ORDER BY similarity DESC
 ----
 
-// tag::source-target-ids[]
 .Results
 [opts="header",cols="1,1,1"]
 |===
@@ -282,7 +405,6 @@ include::scripts/similarity-cosine.cypher[tag=source-target-ids]
 | Praveena | Karin   | 1.0                
 | Arya     | Michael | 0.9788908326303921 
 |===
-// end::source-target-ids[]
 
 [[algorithms-similarity-cosine-skipping-values]]
 == Skipping values
@@ -294,13 +416,28 @@ For cases where no values should be skipped, skipping can be disabled by setting
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=create-sample-embedding-graph]
+MERGE (french:Cuisine {name:'French'})          SET french.embedding = [0.71, 0.33, 0.81, 0.52, 0.41]
+MERGE (italian:Cuisine {name:'Italian'})        SET italian.embedding = [0.31, 0.72, 0.58, 0.67, 0.31]
+MERGE (indian:Cuisine {name:'Indian'})          SET indian.embedding = [0.43, 0.26, 0.98, 0.51, 0.76]
+MERGE (lebanese:Cuisine {name:'Lebanese'})      SET lebanese.embedding = [0.12, 0.23, 0.35, 0.31, 0.39]
+MERGE (portuguese:Cuisine {name:'Portuguese'})  SET portuguese.embedding = [0.47, 0.98, 0.81, 0.72, 0.89]
+MERGE (british:Cuisine {name:'British'})        SET british.embedding = [0.94, 0.12, 0.23, 0.4, 0.71]
+MERGE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31, 0.56, 0.98, 0.21, 0.62]
 ----
 
 .The following will find the similarity between cuisines based on the `embedding` property:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=embedding-graph-stream]
+ MATCH (c:Cuisine)
+ WITH {item:id(c), weights: c.embedding} as userData
+ WITH collect(userData) as data
+ CALL gds.alpha.similarity.cosine.stream({
+  data: data,
+  skipValue: null
+ })
+ YIELD item1, item2, count1, count2, similarity
+ RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+ ORDER BY similarity DESC
 ----
 
 [[algorithms-similarity-cosine-cypher-projection]]
@@ -312,7 +449,17 @@ include::projected-graph-model/cypher-projection.adoc[tag=similarity-explanation
 
 [source,cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=cypher-projection]
+ WITH 'MATCH (person:Person)-[likes:LIKES]->(c)
+       RETURN id(person) AS item, id(c) AS category, likes.score AS weight' AS query
+ CALL gds.alpha.similarity.cosine({
+  data: query,
+  graph: 'cypher',
+  topK: 1,
+  similarityCutoff: 0.1,
+  write:true
+ })
+ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p95
+ RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
 ----
 
 [[algorithms-similarity-cosine-syntax]]
@@ -321,14 +468,20 @@ include::scripts/similarity-cosine.cypher[tag=cypher-projection]
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.similarity.cosine(userData:List<Map> or String, {
-    topK: 1, similarityCutoff: 0.1, write:true, writeProperty: "cosineSimilarity"
-})
+CALL gds.alpha.similarity.cosine.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
-
 .Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+|===
+
+
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                    | Type           | Default                | Optional | Description
@@ -376,14 +529,20 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-CALL algo.similarity.cosine.stream(userData:List<Map> or String, {
-    degreeCutoff: 10, similarityCutoff: 0.1, concurrency:4
-})
+CALL gds.alpha.similarity.cosine.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD item1, item2, count1, count2, intersection, similarity
 
 ----
 
 .Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+|===
+
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name               | Type           | Default                | Optional | Description
