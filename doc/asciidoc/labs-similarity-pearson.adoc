@@ -326,17 +326,6 @@ We can do that by passing in the `topK` parameter.
 These results will not necessarily be symmetrical.
 For example, the person most similar to Arya is Karin, but the person most similar to Karin is Zhen.
 
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name         | Type | Description
-| `item1`      | int  | The ID of one node in the similarity pair.
-| `item2`      | int  | The ID of other node in the similarity pair.
-| `count1`       | int  | The size of the `targets` list of one node.
-| `count2`       | int  | The size of the `targets` list of other node.
-| `intersection` | int  | The number of intersecting values in the two nodes `targets` lists.
-| `similarity`   | int  | The cosine similarity of the two nodes.
-|===
 
 .The following will find the most similar user for each user, and store a relationship between those users:
 [source, cypher]
