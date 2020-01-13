@@ -249,20 +249,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            //@formatter:off
-            "CALL gds.foo.write({" +
-              "nodeProjection: {" +
-                "`*`: {label: \"\"}" +
-              "}, " +
-              "relationshipProjection: {" +
-                "`*`: {" +
-                  "type: \"\", " +
-                  "projection: \"NATURAL\", " +
-                  "aggregation: \"DEFAULT\"" +
-                "}" +
-              "}" +
-            "})",
-            //@formatter:on
+            String.format("CALL gds.foo.write(%s)", STAR_PROJECTION_CYPHER_SYNTAX),
             query
         );
     }
@@ -277,20 +264,7 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            //@formatter:off
-            "CALL gds.foo.write({" +
-              "nodeProjection: {" +
-                "`*`: {label: \"\"}" +
-              "}, " +
-              "relationshipProjection: {" +
-                "`*`: {" +
-                  "type: \"\", " +
-                  "projection: \"UNDIRECTED\", " +
-                  "aggregation: \"DEFAULT\"" +
-                "}" +
-              "}" +
-            "})",
-            //@formatter:on
+            String.format("CALL gds.foo.write(%s)", STAR_PROJECTION_CYPHER_SYNTAX),
             query
         );
     }
@@ -308,21 +282,11 @@ class GdsCypherTest {
         assertEquals(
             //@formatter:off
             "CALL gds.foo.write({" +
-              "nodeProjection: {" +
-                "`*`: {label: \"\"}" +
-              "}, " +
+              "nodeProjection: \"*\", " +
               "relationshipProjection: {" +
                 "`*`: {" +
                   "type: \"\", " +
-                  "projection: \"NATURAL\", " +
-                  "aggregation: \"DEFAULT\", " +
-                  "properties: {" +
-                    "weight: {" +
-                        "property: \"weight\", " +
-                        "defaultValue: 0.0 / 0.0, " +
-                        "aggregation: \"DEFAULT\"" +
-                     "}" +
-                   "}" +
+                  "properties: \"weight\"" +
                 "}" +
               "}" +
             "})",

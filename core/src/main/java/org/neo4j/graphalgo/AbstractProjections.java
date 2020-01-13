@@ -50,10 +50,11 @@ public abstract class AbstractProjections<P extends ElementProjection> {
         if (projections.size() == 1) {
             Map.Entry<ElementIdentifier, P> entry = projections.entrySet().iterator().next();
             ElementIdentifier identifier = entry.getKey();
-            if (PROJECT_ALL.equals(identifier)) {
+            P projection = entry.getValue();
+            if (PROJECT_ALL.equals(identifier) && !projection.properties().hasMappings()) {
                 return PROJECT_ALL.name;
             }
-            Object projectionObject = entry.getValue().toMinimalObject(identifier);
+            Object projectionObject = projection.toMinimalObject(identifier);
             if (projectionObject instanceof String) {
                 return projectionObject;
             }
