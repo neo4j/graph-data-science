@@ -342,6 +342,42 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     }
 
     @Test
+    default void failOnImplicitLoadingWithAlteringNodeQuery() {
+        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+            NODE_QUERY_KEY, "MATCH (n) SET n.name='foo' RETURN id(n) AS id",
+            RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY
+        ))).toMap();
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> applyOnProcedure((proc) -> proc.compute(
+                config,
+                Collections.emptyMap()
+            ))
+        );
+
+        assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
+    }
+
+    @Test
+    default void failOnImplicitLoadingWithAlteringRelationshipQuery() {
+        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+            NODE_QUERY_KEY, ALL_NODES_QUERY,
+            RELATIONSHIP_QUERY_KEY, "MATCH (s)-->(t) SET s.foo=false RETURN id(s) AS source, id(t) as target"
+        ))).toMap();
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> applyOnProcedure((proc) -> proc.compute(
+                config,
+                Collections.emptyMap()
+            ))
+        );
+
+        assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
+    }
+
+    @Test
     default void checkStatsModeExists() {
         applyOnProcedure((proc) -> {
             boolean inWriteClass = methodExists(proc, "write");
