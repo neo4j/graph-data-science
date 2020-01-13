@@ -85,6 +85,16 @@ class BetweennessCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesWithoutCypherTest
+    void testBC(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        BetweennessCentrality algo = new BetweennessCentrality(graph, Pools.DEFAULT, 1);
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
+        verifyMock(testConsumer);
+    }
+
+    @AllGraphTypesWithoutCypherTest
     void testRABrandesForceCompleteSampling(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
         RABrandesBetweennessCentrality algo = new RABrandesBetweennessCentrality(
