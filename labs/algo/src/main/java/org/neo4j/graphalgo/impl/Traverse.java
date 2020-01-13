@@ -143,7 +143,7 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
         ObjLongConsumer<LongArrayDeque> nodeFunc,
         ObjDoubleConsumer<DoubleArrayDeque> weightFunc
     ) {
-        final LongHashSet list = new LongHashSet(nodeCount);
+        final LongHashSet result = new LongHashSet(nodeCount);
         nodes.clear();
         sources.clear();
         visited.clear();
@@ -159,19 +159,20 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
             final double weight = weights.removeFirst();
             switch (exitCondition.test(source, node, weight)) {
                 case BREAK:
-                    list.add(graph.toOriginalNodeId(node));
+                    result.add(graph.toOriginalNodeId(node));
                     break loop;
                 case CONTINUE:
                     continue loop;
                 case FOLLOW:
-                    list.add(graph.toOriginalNodeId(node));
+                    result.add(graph.toOriginalNodeId(node));
                     break;
             }
 
             graph.forEachRelationship(
                 node,
-                direction, longToIntConsumer((s, t) -> {
-                    // remove from the visited nodes to allow revisiting in case the node is accessible via more than one paths.
+                direction,
+                longToIntConsumer((s, t) -> {
+                    // remove from the visited nodes to allow revisiting in case the node is accessible via more than one path.
                     double aggregatedWeight = agg.apply(s, t, weight);
                     final ExitPredicate.Result test = exitCondition.test(s, t, aggregatedWeight);
                     if (test == ExitPredicate.Result.FOLLOW && visited.get(t)) {
@@ -190,7 +191,7 @@ public class Traverse extends LegacyAlgorithm<Traverse> {
             );
         }
 
-        return list.toArray();
+        return result.toArray();
     }
 
     @Override

@@ -26,19 +26,22 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.logging.Log;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
 /**
  * Graph:
@@ -51,16 +54,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class BFSDFSMaxCostTest extends AlgoTestBase {
 
+    private Log testLog;
+
     private static Graph graph;
 
     private final String[] dfsExpected = new String[]{"a", "c", "d", "e", "b"};
-    private final String[]  bfsExpected = new String[]{"a", "b", "c", "d", "e"};
+    private final String[] bfsExpected = new String[]{"a", "b", "c", "d", "e"};
     private Traverse.ExitPredicate exitPredicate;
     private Traverse.Aggregator aggregator;
     private final double maxCost = 5.;
 
     @BeforeEach
     void setup() {
+        testLog = new TestLog();
         db = TestDatabaseCreator.createTestDatabase();
         String cypher = "CREATE (a:Place {name: 'a', id:'1'})\n" +
                         "CREATE (b:Place {name: 'b', id:'2'})\n" +
@@ -86,12 +92,12 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
 
         exitPredicate = (s, t, w) -> {
             Traverse.ExitPredicate.Result result = w >= maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
-            System.out.println("Exit Function: " + name(s) + " -(" + w + ")-> " + name(t) + " --> " + result);
+            testLog.debug("Exit Function: " + name(s) + " -(" + w + ")-> " + name(t) + " --> " + result);
             return result;
         };
         aggregator = (s, t, w) -> {
             final double v = graph.relationshipProperty(s, t, 0.0D);
-            System.out.println("Aggregator: " + name(s) + " -(" + (w + v) + ")-> " + name(t));
+            testLog.debug("Aggregator: " + name(s) + " -(" + (w + v) + ")-> " + name(t));
             return w + v;
         };
     }
@@ -120,9 +126,9 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
                 .map(Objects::toString)
                 .collect(Collectors.toList());
 
-            System.out.println(resultNodeNames);
+            testLog.debug("Result Nodes: ", resultNodeNames);
 
-            assertEquals(dfsExpected.length, resultNodeNames.size());
+            assertThat(resultNodeNames, containsInAnyOrder(dfsExpected));
 
             tx.success();
         }
@@ -148,9 +154,9 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
                 .map(Objects::toString)
                 .collect(Collectors.toList());
 
-            System.out.println(resultNodeNames);
+            testLog.debug("Result Nodes: ", resultNodeNames);
 
-            assertEquals(bfsExpected.length, resultNodeNames.size());
+            assertThat(resultNodeNames, containsInAnyOrder(bfsExpected));
 
             tx.success();
         }
