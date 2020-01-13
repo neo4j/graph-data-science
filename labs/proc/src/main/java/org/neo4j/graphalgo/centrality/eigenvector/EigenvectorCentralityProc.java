@@ -21,15 +21,16 @@ package org.neo4j.graphalgo.centrality.eigenvector;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityResultWithStatistics;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphalgo.results.PageRankScore;
@@ -54,36 +55,41 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-
-        ComputationResult<PageRank, PageRank, EigenvectorCentralityConfig> result = compute(
+        ComputationResult<PageRank, PageRank, EigenvectorCentralityConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
+        PageRank algorithm = computationResult.algorithm();
+        Graph graph = computationResult.graph();
+        CentralityResultWithStatistics stats = CentralityResultWithStatistics.of(algorithm.result());
+        EigenvectorCentralityConfig config = computationResult.config();
+        CentralityResult normalizedResults = normalization(config.normalization()).apply(stats);
 
-        PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
-        CentralityResultWithStatistics stats = CentralityResultWithStatistics.of(result.result().result());
-        String normalization = result.config().normalization();
-        CentralityResult normalizedResults = normalization(normalization).apply(stats);
+        AbstractResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder()
+            .withIterations(algorithm.iterations())
+            .withDampingFactor(algorithm.dampingFactor())
+            .withWrite(true)
+            .withWriteProperty(config.writeProperty())
+            .withLoadMillis(computationResult.createMillis())
+            .withComputeMillis(computationResult.computeMillis());
+
+        if (graph.isEmpty()) {
+            graph.release();
+            return Stream.of(statsBuilder.build());
+        }
 
         // NOTE: could not use `writeNodeProperties` just yet, as this requires changes to
         //  the PageRank class and therefore to all product PageRank procs as well.
-        PageRank prAlgo = result.algorithm();
-        String writePropertyName = result.config().writeProperty();
         try (ProgressTimer ignored = statsBuilder.timeWrite()) {
             NodePropertyExporter exporter = NodePropertyExporter
-                .of(api, result.graph(), TerminationFlag.wrap(transaction))
+                .of(api, computationResult.graph(), algorithm.getTerminationFlag())
                 .withLog(log)
-                .parallel(Pools.DEFAULT, result.config().writeConcurrency())
+                .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build();
-            normalizedResults.export(writePropertyName, exporter);
+            normalizedResults.export(config.writeProperty(), exporter);
         }
 
-        statsBuilder.withWrite(true).withWriteProperty(writePropertyName);
-
-        statsBuilder
-            .withIterations(prAlgo.iterations())
-            .withDampingFactor(prAlgo.dampingFactor());
-
+        graph.release();
         return Stream.of(statsBuilder.build());
     }
 
