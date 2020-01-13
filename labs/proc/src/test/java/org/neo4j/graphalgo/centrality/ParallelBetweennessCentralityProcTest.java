@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
@@ -59,14 +62,14 @@ public class ParallelBetweennessCentralityProcTest extends BaseProcTest {
             .setLabel("Node")
             .setRelationship(TYPE);
 
-        final RelationshipType type = RelationshipType.withName(TYPE);
+        RelationshipType type = RelationshipType.withName(TYPE);
 
         /**
          * create two rings of nodes where each node of ring A
          * is connected to center while center is connected to
          * each node of ring B.
          */
-        final Node center = builder.newDefaultBuilder()
+        Node center = builder.newDefaultBuilder()
                 .setLabel("Node")
                 .createNode();
 
@@ -74,14 +77,10 @@ public class ParallelBetweennessCentralityProcTest extends BaseProcTest {
 
         builder.newRingBuilder()
                 .createRing(5)
-                .forEachNodeInTx(node -> {
-                    node.createRelationshipTo(center, type);
-                })
+                .forEachNodeInTx(node -> node.createRelationshipTo(center, type))
                 .newRingBuilder()
                 .createRing(5)
-                .forEachNodeInTx(node -> {
-                    center.createRelationshipTo(node, type);
-                });
+                .forEachNodeInTx(node -> center.createRelationshipTo(node, type));
 
         registerProcedures(BetweennessCentralityProc.class);
         when(consumer.consume(anyLong(), anyDouble()))
@@ -95,20 +94,44 @@ public class ParallelBetweennessCentralityProcTest extends BaseProcTest {
 
     @Test
     void testParallelBC() {
-
-        String cypher = "CALL algo.betweenness('', '', {concurrency:4, write:true, writeProperty:'bc', stats:true}) YIELD " +
-                "loadMillis, computeMillis, writeMillis, nodes, minCentrality, maxCentrality, sumCentrality";
-
-        testBetweennessWrite(cypher);
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.betweenness")
+            .writeMode()
+            .addParameter("concurrency", 4)
+            .addParameter("writeProperty", "bc")
+            .yields(
+                "loadMillis",
+                "computeMillis",
+                "writeMillis",
+                "nodes",
+                "minCentrality",
+                "maxCentrality",
+                "sumCentrality"
+            );
+        testBetweennessWrite(query);
     }
 
     @Test
     void testBC() {
-
-        String cypher = "CALL algo.betweenness('', '', {write:true, writeProperty:'bc', stats:true}) YIELD " +
-                "loadMillis, computeMillis, writeMillis, nodes, minCentrality, maxCentrality, sumCentrality";
-
-        testBetweennessWrite(cypher);
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.betweenness")
+            .writeMode()
+            .addParameter("concurrency", 4)
+            .addParameter("writeProperty", "bc")
+            .yields(
+                "loadMillis",
+                "computeMillis",
+                "writeMillis",
+                "nodes",
+                "minCentrality",
+                "maxCentrality",
+                "sumCentrality"
+            );
+        testBetweennessWrite(query);
     }
 
     void testBetweennessWrite(String cypher) {
@@ -127,5 +150,4 @@ public class ParallelBetweennessCentralityProcTest extends BaseProcTest {
         verify(consumer, times(10)).consume(anyLong(), eq(6.0));
         verify(consumer, times(1)).consume(eq(centerNodeId), eq(25.0));
     }
-
 }

@@ -19,24 +19,24 @@
  */
 package org.neo4j.graphalgo.impl.betweenness;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.WriteConfig;
+import org.neo4j.graphdb.Direction;
 
-import java.util.Optional;
+import static org.neo4j.graphdb.Direction.OUTGOING;
 
-@ValueClass
-@Configuration("BetweennessCentralityConfigImpl")
-public interface BetweennessCentralityConfig extends BaseBetweennessCentralityConfig {
+public interface BaseBetweennessCentralityConfig extends WriteConfig {
 
-    static BetweennessCentralityConfig of(
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> implicitCreateConfig,
-        String username,
-        CypherMapWrapper config
-    ) {
-        return new BetweennessCentralityConfigImpl(graphName, implicitCreateConfig, username, config);
+    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
+    @Value.Default
+    default Direction direction() {
+        return OUTGOING;
     }
-}
 
+    @Value.Default
+    default String writeProperty() {
+        return "centrality";
+    }
+
+}

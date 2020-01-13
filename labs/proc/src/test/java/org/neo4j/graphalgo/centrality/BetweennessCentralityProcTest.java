@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -37,8 +36,6 @@ import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-
-import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -200,76 +197,6 @@ class BetweennessCentralityProcTest extends BaseProcTest {
                 assertNotEquals(-1L, row.getNumber("nodes"));
             }
         );
-    }
-
-    // TODO: Disable until there is a proc for sampled betweenness centrality
-    @Disabled
-    @Test
-    void testRABrandesHighProbability(String graphName) {
-        String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', probability:1.0, write:true, " +
-                       "stats:true, writeProperty:'centrality'}) YIELD " +
-                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
-            row -> {
-                assertEquals(85.0, (double) row.getNumber("sumCentrality"), 0.1);
-                assertEquals(25.0, (double) row.getNumber("maxCentrality"), 0.1);
-                assertEquals(6.0, (double) row.getNumber("minCentrality"), 0.1);
-                assertNotEquals(-1L, row.getNumber("writeMillis"));
-                assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("nodes"));
-            }
-        );
-    }
-
-    // TODO: Disable until there is a proc for sampled betweenness centrality
-    @Disabled
-    @Test
-    void testRABrandesNoProbability(String graphName) {
-        String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', write:true, stats:true, " +
-                       "writeProperty:'centrality'}) YIELD " +
-                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
-            row -> {
-                assertNotEquals(-1L, row.getNumber("writeMillis"));
-                assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("nodes"));
-            }
-        );
-    }
-
-    // TODO: Disable until there is a proc for sampled betweenness centrality
-    @Disabled
-    @Test
-    void testRABrandeseWrite(String graphName) {
-        String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', probability:1.0, " +
-                       "write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
-            row -> {
-                assertNotEquals(-1L, row.getNumber("writeMillis"));
-                assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("nodes"));
-            }
-        );
-    }
-
-    // TODO: Disable until there is a proc for sampled betweenness centrality
-    @Disabled
-    @Test
-    void testRABrandesStream(String graphName) {
-        String query = "CALL algo.betweenness.sampled.stream('','', {graph: $graph, strategy:'random', probability:1.0, " +
-                       "write:true, stats:true, writeProperty:'centrality'}) YIELD nodeId, centrality";
-        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
-            row -> {
-                consumer.consume(
-                    row.getNumber("nodeId").intValue(),
-                    row.getNumber("centrality").doubleValue()
-                );
-            }
-        );
-
-        verify(consumer, times(10)).consume(ArgumentMatchers.anyLong(), ArgumentMatchers.eq(6.0));
-        verify(consumer, times(1)).consume(ArgumentMatchers.eq(centerNodeId), ArgumentMatchers.eq(25.0));
     }
 
     private GdsCypher.ModeBuildStage gdsCypher() {

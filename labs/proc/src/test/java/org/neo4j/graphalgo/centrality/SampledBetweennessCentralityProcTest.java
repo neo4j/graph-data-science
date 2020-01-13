@@ -17,22 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+
+package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-
-import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -40,7 +42,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class BetweennessCentralityProcTest extends BaseProcTest {
+class SampledBetweennessCentralityProcTest extends BaseProcTest {
 
     private static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 
@@ -52,29 +54,29 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(BetweennessCentralityProc.class);
+        registerProcedures(SampledBetweennessCentralityProc.class);
 
         DefaultBuilder builder = GraphBuilder.create(db)
-                .setLabel("Node")
-                .setRelationship(TYPE.name());
+            .setLabel("Node")
+            .setRelationship(TYPE.name());
 
         /**
          * create two rings of nodes where each node of ring A
          * is connected to center while center is connected to
          * each node of ring B.
          */
-        final Node center = builder.newDefaultBuilder()
-                .setLabel("Node")
-                .createNode();
+        Node center = builder.newDefaultBuilder()
+            .setLabel("Node")
+            .createNode();
 
         centerNodeId = center.getId();
 
         builder.newRingBuilder()
-                .createRing(5)
-                .forEachNodeInTx(node -> node.createRelationshipTo(center, TYPE))
-                .newRingBuilder()
-                .createRing(5)
-                .forEachNodeInTx(node -> center.createRelationshipTo(node, TYPE));
+            .createRing(5)
+            .forEachNodeInTx(node -> node.createRelationshipTo(center, TYPE))
+            .newRingBuilder()
+            .createRing(5)
+            .forEachNodeInTx(node -> center.createRelationshipTo(node, TYPE));
     }
 
     @AfterEach
@@ -82,13 +84,25 @@ class BetweennessCentralityProcTest extends BaseProcTest {
         db.shutdown();
     }
 
-    @AllGraphNamesTest
-    void testRABrandesHighProbability(String graphName) {
-        String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', probability:1.0, write:true, " +
-                       "stats:true, writeProperty:'centrality'}) YIELD " +
-                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
-            row -> {
+    @Test
+    void testRABrandesHighProbability() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.betweenness.sampled")
+            .writeMode()
+            .addParameter("strategy", "random")
+            .addParameter("probability", 1.0)
+            .yields(
+                "nodes",
+                "minCentrality",
+                "maxCentrality",
+                "sumCentrality",
+                "loadMillis",
+                "computeMillis",
+                "writeMillis"
+            );
+        runQueryWithRowConsumer(query, row -> {
                 assertEquals(85.0, (double) row.getNumber("sumCentrality"), 0.1);
                 assertEquals(25.0, (double) row.getNumber("maxCentrality"), 0.1);
                 assertEquals(6.0, (double) row.getNumber("minCentrality"), 0.1);
@@ -99,13 +113,24 @@ class BetweennessCentralityProcTest extends BaseProcTest {
         );
     }
 
-    @AllGraphNamesTest
-    void testRABrandesNoProbability(String graphName) {
-        String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', write:true, stats:true, " +
-                       "writeProperty:'centrality'}) YIELD " +
-                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
-            row -> {
+    @Test
+    void testRABrandesNoProbability() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.betweenness.sampled")
+            .writeMode()
+            .addParameter("strategy", "random")
+            .yields(
+                "nodes",
+                "minCentrality",
+                "maxCentrality",
+                "sumCentrality",
+                "loadMillis",
+                "computeMillis",
+                "writeMillis"
+            );
+        runQueryWithRowConsumer(query, row -> {
                 assertNotEquals(-1L, row.getNumber("writeMillis"));
                 assertNotEquals(-1L, row.getNumber("computeMillis"));
                 assertNotEquals(-1L, row.getNumber("nodes"));
@@ -113,13 +138,25 @@ class BetweennessCentralityProcTest extends BaseProcTest {
         );
     }
 
-    @AllGraphNamesTest
-    void testRABrandeseWrite(String graphName) {
-        String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', probability:1.0, " +
-                       "write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
-            row -> {
+    @Test
+    void testRABrandeseWrite() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.betweenness.sampled")
+            .writeMode()
+            .addParameter("strategy", "random")
+            .addParameter("probability", 1.0)
+            .yields(
+                "nodes",
+                "minCentrality",
+                "maxCentrality",
+                "sumCentrality",
+                "loadMillis",
+                "computeMillis",
+                "writeMillis"
+            );
+        runQueryWithRowConsumer(query, row -> {
                 assertNotEquals(-1L, row.getNumber("writeMillis"));
                 assertNotEquals(-1L, row.getNumber("computeMillis"));
                 assertNotEquals(-1L, row.getNumber("nodes"));
@@ -127,20 +164,24 @@ class BetweennessCentralityProcTest extends BaseProcTest {
         );
     }
 
-    @AllGraphNamesTest
-    void testRABrandesStream(String graphName) {
-        String query = "CALL algo.betweenness.sampled.stream('','', {graph: $graph, strategy:'random', probability:1.0, " +
-                       "write:true, stats:true, writeProperty:'centrality'}) YIELD nodeId, centrality";
-        runQueryWithRowConsumer(query, Collections.singletonMap("graph", graphName),
-            row -> {
-                consumer.consume(
-                    row.getNumber("nodeId").intValue(),
-                    row.getNumber("centrality").doubleValue()
-                );
-            }
+    @Test
+    void testRABrandesStream() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.betweenness.sampled")
+            .streamMode()
+            .addParameter("strategy", "random")
+            .addParameter("probability", 1.0)
+            .yields("nodeId", "centrality");
+        runQueryWithRowConsumer(query, row -> consumer.consume(
+                row.getNumber("nodeId").intValue(),
+                row.getNumber("centrality").doubleValue()
+            )
         );
 
         verify(consumer, times(10)).consume(ArgumentMatchers.anyLong(), ArgumentMatchers.eq(6.0));
         verify(consumer, times(1)).consume(ArgumentMatchers.eq(centerNodeId), ArgumentMatchers.eq(25.0));
     }
+
 }

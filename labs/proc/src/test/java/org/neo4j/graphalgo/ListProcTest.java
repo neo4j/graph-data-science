@@ -24,8 +24,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.ArticleRankProc;
+import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
+import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
@@ -57,10 +59,10 @@ class ListProcTest extends BaseProcTest {
         "algo.asPath",
         "algo.balancedTriads",
         "algo.balancedTriads.stream",
-        "algo.betweenness",
-        "algo.betweenness.sampled",
-        "algo.betweenness.sampled.stream",
-        "algo.betweenness.stream",
+        "gds.alpha.betweenness.write",
+        "gds.alpha.betweenness.stream",
+        "gds.alpha.betweenness.sampled.write",
+        "gds.alpha.betweenness.sampled.stream",
         "algo.bfs.stream",
         "gds.alpha.closeness.write",
         "gds.alpha.closeness.stream",
@@ -150,6 +152,7 @@ class ListProcTest extends BaseProcTest {
             NodeWalkerProc.class,
             OneHotEncodingFunc.class,
             PrimProc.class,
+            SampledBetweennessCentralityProc.class,
             ShortestPathDeltaSteppingProc.class,
             ShortestPathProc.class,
             ShortestPathsProc.class,

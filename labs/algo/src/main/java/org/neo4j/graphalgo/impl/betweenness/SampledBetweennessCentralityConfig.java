@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.betweenness;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -27,16 +28,25 @@ import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("BetweennessCentralityConfigImpl")
-public interface BetweennessCentralityConfig extends BaseBetweennessCentralityConfig {
+@Configuration("SampledBetweennessCentralityConfigImpl")
+public interface SampledBetweennessCentralityConfig extends BaseBetweennessCentralityConfig {
 
-    static BetweennessCentralityConfig of(
+    @Value.Default
+    default String strategy() {
+        return "random";
+    }
+
+    @Value.Default
+    default double probability() {
+        return Double.NaN;
+    }
+
+    static SampledBetweennessCentralityConfig of(
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
         String username,
         CypherMapWrapper config
     ) {
-        return new BetweennessCentralityConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new SampledBetweennessCentralityConfigImpl(graphName, implicitCreateConfig, username, config);
     }
 }
-

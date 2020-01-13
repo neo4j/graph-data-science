@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
+import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
+import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,6 +44,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             KShortestPathsProc.class,
             KSpanningTreeProc.class,
             PrimProc.class,
+            SampledBetweennessCentralityProc.class,
             ShortestPathDeltaSteppingProc.class,
             ShortestPathProc.class,
             ShortestPathsProc.class,
@@ -87,24 +90,48 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testBetweennessCentralityStream() {
-        boolean hasNext = runQuery("CALL algo.betweenness.stream('', '', {graph:'" + graphImpl + "'})", Result::hasNext);
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.betweenness")
+            .streamMode()
+            .yields();
+        boolean hasNext = runQuery(query, Result::hasNext);
         assertFalse(hasNext);
     }
 
     @Test
     void testBetweennessCentrality() {
-        runQueryWithRowConsumer("CALL algo.betweenness('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodes")));
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.betweenness")
+            .writeMode()
+            .yields("nodes");
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
     }
 
     @Test
     void testSampledBetweennessCentralityStream() {
-        boolean hasNext = runQuery("CALL algo.betweenness.sampled.stream('', '', {graph:'" + graphImpl + "'})", Result::hasNext);
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.betweenness.sampled")
+            .streamMode()
+            .yields();
+        boolean hasNext = runQuery(query, Result::hasNext);
         assertFalse(hasNext);
     }
 
     @Test
     void testSampledBetweennessCentrality() {
-        runQueryWithRowConsumer("CALL algo.betweenness.sampled('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodes")));
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.betweenness.sampled")
+            .writeMode()
+            .yields("nodes");
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
     }
 
     @Test
