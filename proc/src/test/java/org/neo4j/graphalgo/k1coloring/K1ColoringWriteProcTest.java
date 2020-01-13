@@ -43,9 +43,12 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest {
         String query = algoBuildStage()
             .writeMode()
             .addParameter("writeProperty", "color")
-            .yields("nodes", "colorCount", "didConverge", "ranIterations", "writeProperty");
+            .yields();
 
         runQueryWithRowConsumer(query, row -> {
+            assertNotEquals(-1L, row.getNumber("loadMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
             assertEquals(4, row.getNumber("nodes").longValue());
             assertEquals(2, row.getNumber("colorCount").longValue());
             assertEquals("color", row.getString("writeProperty"));

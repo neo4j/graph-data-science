@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
@@ -58,12 +59,16 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
             configuration
         );
 
-        if (computationResult.graph().isEmpty()) {
+        MSClosenessCentrality algorithm = computationResult.algorithm();
+        Graph graph = computationResult.graph();
+
+        if (graph.isEmpty()) {
+            graph.release();
             return Stream.empty();
         }
 
-        computationResult.graph().releaseProperties();
-        return computationResult.algorithm().resultStream();
+        graph.release();
+        return algorithm.resultStream();
     }
 
     @Procedure(value = "gds.alpha.closeness.write", mode = Mode.WRITE)
@@ -76,31 +81,30 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
             configuration
         );
 
-        CentralityScore.Stats.Builder builder = new CentralityScore.Stats.Builder();
-
-        if (computationResult.graph().isEmpty()) {
-            return Stream.of(builder.build());
-        }
-
+        MSClosenessCentrality algorithm = computationResult.algorithm();
         ClosenessCentralityConfig config = computationResult.config();
-        builder.withNodeCount(computationResult.graph().nodeCount())
+        Graph graph = computationResult.graph();
+
+        AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder()
+            .withNodeCount(graph.nodeCount())
             .withWriteProperty(config.writeProperty())
             .withComputeMillis(computationResult.computeMillis())
             .withLoadMillis(computationResult.createMillis());
 
-        String writeProperty = config.writeProperty();
-        MSClosenessCentrality algorithm = computationResult.algorithm();
+        if (graph.isEmpty()) {
+            graph.release();
+            return Stream.of(builder.build());
+        }
 
         builder.timeWrite(() -> {
-            NodePropertyExporter exporter = NodePropertyExporter.of(api, computationResult.graph(), algorithm
-                .getTerminationFlag())
+            NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, computationResult.config().writeConcurrency())
                 .build();
-            algorithm.export(writeProperty, exporter);
+            algorithm.export(config.writeProperty(), exporter);
         });
-        algorithm.release();
 
+        graph.release();
         return Stream.of(builder.build());
     }
 

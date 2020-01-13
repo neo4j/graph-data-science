@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
@@ -223,7 +224,11 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             .addParameter("writeProperty", "eigen")
             .yields();
 
-        runQuery(eigenvectorWriteQuery);
+        runQueryWithRowConsumer(eigenvectorWriteQuery, row -> {
+            assertNotEquals(-1L, row.getNumber("loadMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
+        });
 
         runQueryWithRowConsumer(
             "MATCH (c:Character) " +

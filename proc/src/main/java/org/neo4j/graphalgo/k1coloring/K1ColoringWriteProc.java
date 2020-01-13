@@ -70,7 +70,9 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         builder
             .withWriteProperty(config.writeProperty())
             .withRanIterations(coloring.ranIterations())
-            .withDidConverge(coloring.didConverge());
+            .withDidConverge(coloring.didConverge())
+            .withCreateMillis(compute.createMillis())
+            .withComputeMillis(compute.computeMillis());
 
         writeNodeProperties(builder, compute);
         return Stream.of(builder.build());
