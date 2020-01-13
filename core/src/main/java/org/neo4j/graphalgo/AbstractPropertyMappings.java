@@ -25,8 +25,8 @@ import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -34,6 +34,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.Collections.singletonMap;
 
 @DataClass
 @Value.Immutable(singleton = true)
@@ -54,7 +56,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         }
         if (relPropertyMapping instanceof String) {
             String propertyMapping = (String) relPropertyMapping;
-            return fromObject(Collections.singletonMap(propertyMapping, propertyMapping));
+            return fromObject(singletonMap(propertyMapping, propertyMapping));
         } else if (relPropertyMapping instanceof List) {
             PropertyMappings.Builder builder = PropertyMappings.builder();
             for (Object mapping : (List<?>) relPropertyMapping) {
@@ -113,7 +115,12 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
     public Map<String, Object> toObject(boolean includeAggregation) {
         return stream()
             .map(mapping -> mapping.toObject(includeAggregation))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (u,v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); },
+                LinkedHashMap::new
+            ));
     }
 
     public PropertyMappings mergeWith(PropertyMappings other) {

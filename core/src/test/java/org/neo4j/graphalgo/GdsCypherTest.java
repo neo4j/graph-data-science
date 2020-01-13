@@ -351,13 +351,13 @@ class GdsCypherTest {
                 "FooNode: {" +
                     "label: \"Foo\", " +
                     "properties: {" +
-                        "GlobalNodeProp: {" +
-                            "property: \"GlobalNodeProp\", " +
-                            "defaultValue: 0.0 / 0.0" +
-                        "}, " +
                         "nodeProp: {" +
                             "property: \"NodePropertyName\", " +
                             "defaultValue: 42.1337" +
+                        "}, " +
+                        "GlobalNodeProp: {" +
+                            "property: \"GlobalNodeProp\", " +
+                            "defaultValue: 0.0 / 0.0" +
                         "}" +
                     "}" +
                 "}" +
@@ -386,15 +386,15 @@ class GdsCypherTest {
                     "projection: \"UNDIRECTED\", " +
                     "aggregation: \"SINGLE\", " +
                     "properties: {" +
-                        "global: {" +
-                            "property: \"RelProp\", " +
-                            "defaultValue: 0.0 / 0.0, " +
-                            "aggregation: \"DEFAULT\"" +
-                        "}, " +
                         "relProp: {" +
                             "property: \"RelationshipPropertyName\", " +
                             "defaultValue: 1337.0, " +
                             "aggregation: \"MAX\"" +
+                        "}, " +
+                        "global: {" +
+                            "property: \"RelProp\", " +
+                            "defaultValue: 0.0 / 0.0, " +
+                            "aggregation: \"DEFAULT\"" +
                         "}" +
                     "}" +
                 "}" +
