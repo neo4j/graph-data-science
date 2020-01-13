@@ -45,7 +45,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             ShortestPathDeltaSteppingProc.class,
             ShortestPathProc.class,
             ShortestPathsProc.class,
-            StronglyConnectedComponentsProc.class,
+            SccProc.class,
             TriangleProc.class
         );
     }
@@ -58,14 +58,25 @@ class EmptyGraphProcTest extends BaseProcTest {
     private String graphImpl = "huge";
 
     @Test
-    void testStronglyConnectedComponentsStream() {
-        boolean hastNext = runQuery("CALL algo.scc.stream('', '',{graph:'" + graphImpl + "'})", Result::hasNext);
-        assertFalse(hastNext);
+    void testSccStream() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.scc")
+            .streamMode()
+            .yields();
+        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
     }
 
     @Test
-    void testStronglyConnectedComponents() {
-        runQueryWithRowConsumer("CALL algo.scc('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("setCount")));
+    void testSccWrite() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.scc")
+            .writeMode()
+            .yields();
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
     }
 
     @Test

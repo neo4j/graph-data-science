@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.IntIntScatterMap;
-import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
@@ -29,7 +27,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.impl.scc.SCCAlgorithm;
+import org.neo4j.graphalgo.impl.scc.SccAlgorithm;
 import org.neo4j.graphdb.Node;
 
 import java.util.Arrays;
@@ -38,48 +36,39 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-/**        _______
- *        /       \
- *      (0)--(1) (3)--(4)
- *        \  /     \ /
- *        (2)  (6) (5)
- *             / \
- *           (7)-(8)
- */
-class StronglyConnectedComponentsTest extends BaseProcTest {
+class SccTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:Node {name: 'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (f:Node {name: 'f'})" +
-            ", (g:Node {name: 'g'})" +
-            ", (h:Node {name: 'h'})" +
-            ", (i:Node {name: 'i'})" +
+        "CREATE" +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (f:Node {name: 'f'})" +
+        ", (g:Node {name: 'g'})" +
+        ", (h:Node {name: 'h'})" +
+        ", (i:Node {name: 'i'})" +
 
-            ", (a)-[:TYPE {cost: 5}]->(b)" +
-            ", (b)-[:TYPE {cost: 5}]->(c)" +
-            ", (c)-[:TYPE {cost: 5}]->(a)" +
+        ", (a)-[:TYPE {cost: 5}]->(b)" +
+        ", (b)-[:TYPE {cost: 5}]->(c)" +
+        ", (c)-[:TYPE {cost: 5}]->(a)" +
 
-            ", (d)-[:TYPE {cost: 2}]->(e)" +
-            ", (e)-[:TYPE {cost: 2}]->(f)" +
-            ", (f)-[:TYPE {cost: 2}]->(d)" +
+        ", (d)-[:TYPE {cost: 2}]->(e)" +
+        ", (e)-[:TYPE {cost: 2}]->(f)" +
+        ", (f)-[:TYPE {cost: 2}]->(d)" +
 
-            ", (a)-[:TYPE {cost: 2}]->(d)" +
+        ", (a)-[:TYPE {cost: 2}]->(d)" +
 
-            ", (g)-[:TYPE {cost: 3}]->(h)" +
-            ", (h)-[:TYPE {cost: 3}]->(i)" +
-            ", (i)-[:TYPE {cost: 3}]->(g)";
+        ", (g)-[:TYPE {cost: 3}]->(h)" +
+        ", (h)-[:TYPE {cost: 3}]->(i)" +
+        ", (i)-[:TYPE {cost: 3}]->(g)";
 
     private Graph graph;
 
     @BeforeEach
-    void setupGraphDb() throws Exception {
+    void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(StronglyConnectedComponentsProc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -91,10 +80,10 @@ class StronglyConnectedComponentsTest extends BaseProcTest {
     @AllGraphTypesWithoutCypherTest
     void testDirect(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        SCCAlgorithm scc = new SCCAlgorithm(graph, AllocationTracker.EMPTY);
-        scc.compute();
+        SccAlgorithm scc = new SccAlgorithm(graph, AllocationTracker.EMPTY);
+        HugeLongArray components = scc.compute();
 
-        assertCC(scc.getConnectedComponents());
+        assertCC(components);
         assertEquals(3, scc.getMaxSetSize());
         assertEquals(3, scc.getMinSetSize());
         assertEquals(3, scc.getSetCount());
@@ -103,50 +92,9 @@ class StronglyConnectedComponentsTest extends BaseProcTest {
     @AllGraphTypesWithoutCypherTest
     void testHugeIterativeScc(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        SCCAlgorithm algo = new SCCAlgorithm(graph, AllocationTracker.EMPTY);
-        algo.compute();
-        assertCC(algo.getConnectedComponents());
-    }
-
-    @AllGraphTypesWithoutCypherTest
-    void testCypher(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
-        String cypher = "CALL algo.scc('', '', {write:true}) YIELD loadMillis, computeMillis, writeMillis";
-
-        runQueryWithRowConsumer(cypher, row -> {
-            long loadMillis = row.getNumber("loadMillis").longValue();
-            long computeMillis = row.getNumber("computeMillis").longValue();
-            long writeMillis = row.getNumber("writeMillis").longValue();
-            assertNotEquals(-1, loadMillis);
-            assertNotEquals(-1, computeMillis);
-            assertNotEquals(-1, writeMillis);
-        });
-
-        String cypher2 = "MATCH (n) RETURN n.partition as c";
-        final IntIntScatterMap testMap = new IntIntScatterMap();
-        runQueryWithRowConsumer(cypher2, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
-
-        // 3 sets with 3 elements each
-        assertEquals(3, testMap.size());
-        for (IntIntCursor cursor : testMap) {
-            assertEquals(3, cursor.value);
-        }
-    }
-
-    @AllGraphTypesWithoutCypherTest
-    void testCypherStream(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
-        final IntIntScatterMap testMap = new IntIntScatterMap();
-
-        String cypher = "CALL algo.scc.stream() YIELD nodeId, partition";
-
-        runQueryWithRowConsumer(cypher, row -> testMap.addTo(row.getNumber("partition").intValue(), 1));
-
-        // 3 sets with 3 elements each
-        assertEquals(3, testMap.size());
-        for (IntIntCursor cursor : testMap) {
-            assertEquals(3, cursor.value);
-        }
+        SccAlgorithm algo = new SccAlgorithm(graph, AllocationTracker.EMPTY);
+        HugeLongArray components = algo.compute();
+        assertCC(components);
     }
 
     private void setup(Class<? extends GraphFactory> graphFactory) {
@@ -176,9 +124,11 @@ class StronglyConnectedComponentsTest extends BaseProcTest {
 
     private long getMappedNodeId(String name) {
         final Node[] node = new Node[1];
-        runQueryWithRowConsumer("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> {
-            node[0] = row.getNode("n");
-        });
+
+        runQuery(
+            "MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n",
+            row -> node[0] = row.getNode("n")
+        );
         return graph.toMappedNodeId(node[0].getId());
     }
 
