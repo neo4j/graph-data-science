@@ -108,6 +108,7 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
                 );
         }
 
+        graph.release();
         return Stream.of(builder.build());
     }
 
