@@ -59,7 +59,7 @@ We might then use these computed subsets to https://jbarrasa.com/2017/03/31/quic
 .The following will return the Overlap similarity of two lists of numbers:
 [source, cypher]
 ----
-include::scripts/similarity-overlap.cypher[tag=function]
+RETURN gds.alpha.similarity.overlap([1,2,3], [1,2,4,5]) AS similarity
 ----
 
 // tag::function[]
@@ -67,7 +67,7 @@ include::scripts/similarity-overlap.cypher[tag=function]
 [opts="header",cols="1"]
 |===
 | `similarity`
-| 0.66
+| 0.6666666666666666
 |===
 // end::function[]
 
@@ -89,13 +89,48 @@ O(A,B) = 2 / min(3,4)
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/similarity-overlap.cypher[tag=create-sample-graph]
+ MERGE (fahrenheit451:Book {title:'Fahrenheit 451'})
+ MERGE (dune:Book {title:'Dune'})
+ MERGE (hungerGames:Book {title:'The Hunger Games'})
+ MERGE (nineteen84:Book {title:'1984'})
+ MERGE (gatsby:Book {title:'The Great Gatsby'})
+
+ MERGE (scienceFiction:Genre {name: "Science Fiction"})
+ MERGE (fantasy:Genre {name: "Fantasy"})
+ MERGE (dystopia:Genre {name: "Dystopia"})
+ MERGE (classics:Genre {name: "Classics"})
+
+ MERGE (fahrenheit451)-[:HAS_GENRE]->(dystopia)
+ MERGE (fahrenheit451)-[:HAS_GENRE]->(scienceFiction)
+ MERGE (fahrenheit451)-[:HAS_GENRE]->(fantasy)
+ MERGE (fahrenheit451)-[:HAS_GENRE]->(classics)
+
+ MERGE (hungerGames)-[:HAS_GENRE]->(scienceFiction)
+ MERGE (hungerGames)-[:HAS_GENRE]->(fantasy)
+ MERGE (hungerGames)-[:HAS_GENRE]->(romance)
+
+ MERGE (nineteen84)-[:HAS_GENRE]->(scienceFiction)
+ MERGE (nineteen84)-[:HAS_GENRE]->(dystopia)
+ MERGE (nineteen84)-[:HAS_GENRE]->(classics)
+
+ MERGE (dune)-[:HAS_GENRE]->(scienceFiction)
+ MERGE (dune)-[:HAS_GENRE]->(fantasy)
+ MERGE (dune)-[:HAS_GENRE]->(classics)
+
+ MERGE (gatsby)-[:HAS_GENRE]->(classics)
 ----
 
 .The following will return a stream of node pairs, along with their intersection and overlap similarities:
 [source, cypher]
 ----
-include::scripts/similarity-overlap.cypher[tag=stream]
+ MATCH (book:Book)-[:HAS_GENRE]->(genre)
+ WITH {item:id(genre), categories: collect(id(book))} as userData
+ WITH collect(userData) as data
+ CALL gds.alpha.similarity.overlap.stream({data: data})
+ YIELD item1, item2, count1, count2, intersection, similarity
+ RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to,
+        count1, count2, intersection, similarity
+ ORDER BY similarity DESC
 ----
 
 // tag::stream[]
@@ -119,7 +154,17 @@ The others are less obvious; Dystopia probably isn't a subgenre of Fantasy, but 
 .The following will return a stream of node pairs that have a similarity of at least 0.75, along with their intersection and overlap similarities:
 [source, cypher]
 ----
-include::scripts/similarity-overlap.cypher[tag=stream-similarity-cutoff]
+ MATCH (book:Book)-[:HAS_GENRE]->(genre)
+ WITH {item:id(genre), categories: collect(id(book))} as userData
+ WITH collect(userData) as data
+ CALL gds.alpha.similarity.overlap.stream({
+   data: data,
+   similarityCutoff: 0.75
+ })
+ YIELD item1, item2, count1, count2, intersection, similarity
+ RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to,
+        count1, count2, intersection, similarity
+ ORDER BY similarity DESC
 ----
 
 // tag::stream-similarity-cutoff[]
@@ -128,8 +173,8 @@ include::scripts/similarity-overlap.cypher[tag=stream-similarity-cutoff]
 |===
 | `from`          | `to`                | `count1` | `count2` | `intersection`   | `similarity`
 | Fantasy         | Science Fiction | 3      | 4      | 3            | 1.0
-| Dystopia        | Science Fiction | 2      | 4      | 2            | 1.0
 | Dystopia        | Classics        | 2      | 4      | 2            | 1.0
+| Dystopia        | Science Fiction | 2      | 4      | 2            | 1.0
 | Science Fiction | Classics        | 4      | 4      | 3            | 0.75
 |===
 // end::stream-similarity-cutoff[]
@@ -141,26 +186,46 @@ We can do that by passing in the `topK` parameter.
 .The following will return a stream of genres, along with the two most similar super genres to them (i.e. `k=2`):
 [source, cypher]
 ----
-include::scripts/similarity-overlap.cypher[tag=stream-topk]
+ MATCH (book:Book)-[:HAS_GENRE]->(genre)
+ WITH {item:id(genre), categories: collect(id(book))} as userData
+ WITH collect(userData) as data
+ CALL gds.alpha.similarity.overlap.stream({
+  data: data,
+  topK: 2
+ })
+ YIELD item1, item2, count1, count2, intersection, similarity
+ RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to,
+        count1, count2, intersection, similarity
+ ORDER BY from
 ----
 
 // tag::stream-topk[]
 .Results
 [opts="header"]
 |===
-| `from`          | `to`                | `count1` | `count2` | `intersection`   | `similarity`
-| Dystopia        | Classics        | 2      | 4      | 2            | 1.0
-| Dystopia        | Science Fiction | 2      | 4      | 2            | 1.0
-| Fantasy         | Science Fiction | 3      | 4      | 3            | 1.0
-| Fantasy         | Classics        | 3      | 4      | 2            | 0.6666666666666666
-| Science Fiction | Classics        | 4      | 4      | 3            | 0.75
+| `from`          | `to`                | `count1` | `count2` | `intersection` | `similarity`
+| Dystopia        | Classics            | 2        | 4        | 2              | 1.0
+| Dystopia        | Science Fiction     | 2        | 4        | 2              | 1.0
+| Fantasy         | Science Fiction     | 3        | 4        | 3              | 1.0
+| Fantasy         | Classics            | 3        | 4        | 2              | 0.6666666666666666
+| Science Fiction | Classics            | 4        | 4        | 3              | 0.75
 |===
 // end::stream-topk[]
 
 .The following will find the most similar genre for each genre, and store a relationship between those genres:
 [source, cypher]
 ----
-include::scripts/similarity-overlap.cypher[tag=write-back]
+ MATCH (book:Book)-[:HAS_GENRE]->(genre)
+ WITH {item:id(genre), categories: collect(id(book))} as userData
+ WITH collect(userData) as data
+ CALL gds.alpha.similarity.overlap.write({
+  data: data,
+  topK: 2,
+  similarityCutoff: 0.5,
+  write:true
+ })
+ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+ RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
 ----
 
 // tag::write-back[]
@@ -177,7 +242,9 @@ We then could write a query to find out the genre hierarchy for a specific genre
 .The following will find the genre hierarchy for the Fantasy genre
 [source, cypher]
 ----
-include::scripts/similarity-overlap.cypher[tag=query]
+ MATCH path = (fantasy:Genre {name: "Fantasy"})-[:NARROWER_THAN*]->(genre)
+ RETURN [node in nodes(path) | node.name] AS hierarchy
+ ORDER BY length(path)
 ----
 
 // tag::query[]
@@ -201,7 +268,18 @@ We could use this technique to compute the similarity of a subset of items to al
 .The following will return the super genres for the `Fantasy` and `Classics` genres:
 [source, cypher]
 ----
-include::scripts/similarity-overlap.cypher[tag=source-target-ids]
+ MATCH (book:Book)-[:HAS_GENRE]->(genre)
+ WITH {item:id(genre), name: genre.name, categories: collect(id(book))} as userData
+ WITH collect(userData) as data
+ WITH data,
+      [value in data WHERE value.name IN ["Fantasy", "Classics"] | value.item ] AS sourceIds
+ CALL gds.alpha.similarity.overlap.stream({
+  data: data,
+  sourceIds: sourceIds
+ })
+ YIELD item1, item2, count1, count2, intersection, similarity
+ RETURN algo.getNodeById(item1).name AS from, algo.getNodeById(item2).name AS to, similarity
+ ORDER BY similarity DESC
 ----
 
 // tag::source-target-ids-2[]
@@ -221,19 +299,26 @@ include::scripts/similarity-overlap.cypher[tag=source-target-ids]
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.similarity.overlap(userData:List<Map>, {
-    topK: 1, similarityCutoff: 0.1, write:true, writeProperty: "overlapSimilarity"
-})
+CALL gds.alpha.similarity.overlap.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+|===
+
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
 | Name                    | Type    | Default                | Optional | Description
 | `data`                  | list    | null                   | no       | A list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}`.
 | `top`                   | int     | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
-| `topK`                  | int     | 0                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| `topK`                  | int     | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | `similarityCutoff`      | int     | -1                     | yes      | The threshold for Overlap similarity. Values below this will not be returned.
 | `degreeCutoff`          | int     | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
 | `concurrency`           | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
@@ -273,20 +358,26 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-CALL algo.similarity.overlap.stream(userData:List<Map>, {
-    degreeCutoff: 10, similarityCutoff: 0.1, concurrency:4
-})
+CALL algo.similarity.overlap.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD item1, item2, count1, count2, similarity
-
 ----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
+| Name              | Type    | Default        | Optional | Description
+| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+|===
+
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
 | Name               | Type   | Default                | Optional | Description
 | `data`             | list   | null                   | no       | A list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}`.
 | `top`              | int    | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
-| `topK`             | int    | 0                      | yes      | The number of similar values to return per node. If `0`, it  will return as many as it finds.
+| `topK`             | int    | 3                      | yes      | The number of similar values to return per node. If `0`, it  will return as many as it finds.
 | `similarityCutoff` | int    | -1                     | yes      | The threshold for Overlap similarity. Values below this will not be returned.
 | `degreeCutoff`     | int    | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
 | `concurrency`      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
