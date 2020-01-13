@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class StronglyConnectedComponentsProcTest extends BaseProcTest {
+class SccProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -50,7 +50,7 @@ class StronglyConnectedComponentsProcTest extends BaseProcTest {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-        registerProcedures(GraphLoadProc.class, StronglyConnectedComponentsProc.class);
+        registerProcedures(GraphLoadProc.class, SccProc.class);
     }
 
     @AfterEach

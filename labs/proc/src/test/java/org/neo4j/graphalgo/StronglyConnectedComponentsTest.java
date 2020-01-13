@@ -79,7 +79,7 @@ class StronglyConnectedComponentsTest extends BaseProcTest {
     @BeforeEach
     void setupGraphDb() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(StronglyConnectedComponentsProc.class);
+        registerProcedures(SccProc.class);
         runQuery(DB_CYPHER);
     }
 

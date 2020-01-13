@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class StronglyConnectedComponentsProc extends LabsProc {
+public class SccProc extends LabsProc {
 
     public static final String CONFIG_WRITE_PROPERTY = "writeProperty";
     public static final String CONFIG_OLD_WRITE_PROPERTY = "partitionProperty";
