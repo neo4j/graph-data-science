@@ -347,18 +347,18 @@ For example, the person most similar to Arya is Karin, but the person most simil
 .Results
 [opts="header",cols="1,1,1,1,1,1,1,1,1"]
 |===
-| `nodes` | `similarityPairs` | `write` | `writeRelationshipType` | `writeProperty` | `min`  | `max`  | `mean` | `p95`
-| 5     | 5               | TRUE  | "SIMILAR"             | "score"       | 0.5198593139648438 | 1.0000038146972656 | 0.8981185913085937 | 1.0000038146972656
+| `nodes` | `similarityPairs` | `write` | `writeRelationshipType` | `writeProperty` | `min`              | `max`              | `mean`             | `p95`
+| 5       | 4                 | TRUE    | "SIMILAR"               | "score"         | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688
 |===
 
 We then could write a query to find out which are the movies that other people similar to us liked.
 
-.The following will find the most similar user to Praveena, and return their favourite movies that Praveena didn't (yet!) rate:
+.The following will find the most similar user to Karin, and return their movies that Karin didn't (yet!) rate:
 [source, cypher]
 ----
- MATCH (p:Person {name: "Praveena"})-[:SIMILAR]->(other),
+ MATCH (p:Person {name: 'Karin'})-[:SIMILAR]->(other),
        (other)-[r:RATED]->(movie)
- WHERE not((p)-[:RATED]->(movie)) and r.score >= 8
+ WHERE not((p)-[:RATED]->(movie)) and r.score >= 5
  RETURN movie.name AS movie
 ----
 
@@ -366,7 +366,7 @@ We then could write a query to find out which are the movies that other people s
 [opts="header",cols="1"]
 |===
 | `movie`
-| The Matrix
+| Jerry Maguire
 |===
 
 [[algorithms-similarity-pearson-source-target-ids]]

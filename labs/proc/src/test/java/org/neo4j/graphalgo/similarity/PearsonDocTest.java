@@ -33,7 +33,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PearsonDocTest extends BaseProcTest {
-
+    @Language("Cypher")
     private static final String DB_CYPHER =
         " MERGE (home_alone:Movie {name:'Home Alone'})" +
         " MERGE (matrix:Movie {name:'The Matrix'})" +
@@ -84,6 +84,7 @@ class PearsonDocTest extends BaseProcTest {
         );
         registerProcedures(PearsonProc.class);
         registerFunctions(GetNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
+        registerAggregationFunctions(SimilaritiesFunc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -101,7 +102,7 @@ class PearsonDocTest extends BaseProcTest {
     }
     
     @Test
-    void complexfunctionCall() {
+    void functionCallOnGraph() {
         String query = " MATCH (p1:Person {name: 'Arya'})-[rated:RATED]->(movie)" +
                        " WITH p1, gds.alpha.similarity.asVector(movie, rated.score) AS p1Vector" +
                        " MATCH (p2:Person {name: 'Karin'})-[rated:RATED]->(movie)" +
@@ -110,7 +111,12 @@ class PearsonDocTest extends BaseProcTest {
                        "        p2.name AS to," +
                        "        gds.alpha.similarity.pearson(p1Vector, p2Vector, {vectorType: 'maps'}) AS similarity";
 
-        String expectedString = "";
+        String expectedString = "+---------------------------------------+\n" +
+                                "| from   | to      | similarity         |\n" +
+                                "+---------------------------------------+\n" +
+                                "| \"Arya\" | \"Karin\" | 0.8194651785206903 |\n" +
+                                "+---------------------------------------+\n" +
+                                "1 row\n";
 
         runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
     }
@@ -126,7 +132,15 @@ class PearsonDocTest extends BaseProcTest {
                        "        gds.alpha.similarity.pearson(p1Vector, p2Vector, {vectorType: \"maps\"}) AS similarity" +
                        " ORDER BY similarity DESC";
 
-        String expectedString = "";
+        String expectedString = "+-------------------------------------------+\n" +
+                                "| from   | to         | similarity          |\n" +
+                                "+-------------------------------------------+\n" +
+                                "| \"Arya\" | \"Karin\"    | 0.8194651785206903  |\n" +
+                                "| \"Arya\" | \"Zhen\"     | 0.4839533792540704  |\n" +
+                                "| \"Arya\" | \"Praveena\" | 0.09262336892949784 |\n" +
+                                "| \"Arya\" | \"Michael\"  | -0.9551953674747637 |\n" +
+                                "+-------------------------------------------+\n" +
+                                "4 rows\n";
 
         runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
     }
@@ -159,7 +173,7 @@ class PearsonDocTest extends BaseProcTest {
                                 "| \"Michael\"  | \"Arya\"     | -0.9551953674747637 |\n" +
                                 "| \"Michael\"  | \"Karin\"    | -0.9863939238321437 |\n" +
                                 "+-----------------------------------------------+\n" +
-                                "10 rows";
+                                "10 rows\n";
 
         runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
     }
@@ -201,7 +215,7 @@ class PearsonDocTest extends BaseProcTest {
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.pearson.stream({" +
                        "  data: data, " +
-                       "  topK:1, " +
+                       "  topK: 1, " +
                        "  similarityCutoff: 0.0" +
                        " })" +
                        " YIELD item1, item2, count1, count2, similarity" +
@@ -223,7 +237,6 @@ class PearsonDocTest extends BaseProcTest {
     
     @Test
     void write() {
-        // TODO: find out regression
         String query = " MATCH (p:Person), (m:Movie)" +
                        " OPTIONAL MATCH (p)-[rated:RATED]->(m)" +
                        " WITH {item:id(p), weights: collect(coalesce(rated.score, algo.NaN()))} as userData" +
@@ -232,21 +245,31 @@ class PearsonDocTest extends BaseProcTest {
                        "  data: data," +
                        "  topK: 1, " +
                        "  similarityCutoff: 0.1, " +
-                       "  write:true" +
+                       "  write: true" +
                        " })" +
                        " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100" +
                        " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95";
 
-        String expectedString = "";
+        String expectedString = "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |\n" +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| 5     | 4               | true  | \"SIMILAR\"             | \"score\"       | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688 |\n" +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "1 row\n";
 
-        //runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
+        runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
 
-        String controlQuery = " MATCH (p:Person {name: \"Praveena\"})-[:SIMILAR]->(other)," +
+        String controlQuery = " MATCH (p:Person {name: 'Karin'})-[:SIMILAR]->(other)," +
                               "       (other)-[r:RATED]->(movie)" +
-                              " WHERE not((p)-[:RATED]->(movie)) and r.score >= 8" +
+                              " WHERE not((p)-[:RATED]->(movie)) and r.score >= 5" +
                               " RETURN movie.name AS movie";
 
-        String expectedString2 = "";
+        String expectedString2 = "+-----------------+\n" +
+                                 "| movie           |\n" +
+                                 "+-----------------+\n" +
+                                 "| \"Jerry Maguire\" |\n" +
+                                 "+-----------------+\n" +
+                                 "1 row\n";
 
         runQueryWithResultConsumer(controlQuery, result -> assertEquals(result.resultAsString(), expectedString2));
     }
@@ -318,14 +341,13 @@ class PearsonDocTest extends BaseProcTest {
                                 "| \"The Matrix\"     | \"A Few Good Men\" | -0.2545273235448378  |\n" +
                                 "| \"A Few Good Men\" | \"Jerry Maguire\"  | -0.31099199179883635 |\n" +
                                 "+------------------------------------------------------------+\n" +
-                                "10 rows";
+                                "10 rows\n";
 
         runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
     }
     
     @Test
     void cypherProjection() {
-        // TODO: find out regression
         String query = " WITH \"MATCH (person:Person)-[rated:RATED]->(c)" +
                        "       RETURN id(person) AS item, id(c) AS category, rated.score AS weight\" AS query" +
                        " CALL gds.alpha.similarity.pearson.write({" +
@@ -338,7 +360,12 @@ class PearsonDocTest extends BaseProcTest {
                        " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p95" +
                        " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95";
 
-        String expectedString = "";
+        String expectedString = "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |\n" +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| 5     | 4               | true  | \"SIMILAR\"             | \"score\"       | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688 |\n" +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "1 row\n";
 
         runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
     }
