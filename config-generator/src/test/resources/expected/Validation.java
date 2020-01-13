@@ -29,7 +29,7 @@ public final class ValidationConfig implements Validation {
 
     private final int foo;
 
-    public ValidationConfig(@NotNull CypherMapWrapper config) {
+    private ValidationConfig(@NotNull CypherMapWrapper config) {
         this.foo = config.requireInt("foo");
         validate();
     }

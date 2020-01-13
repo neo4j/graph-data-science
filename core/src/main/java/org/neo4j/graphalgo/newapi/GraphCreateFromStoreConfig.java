@@ -121,7 +121,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, relationshipProjections);
         }
 
-        return new GraphCreateFromStoreConfigImpl(
+        return GraphCreateFromStoreConfigImpl.of(
             graphName,
             userName,
             config
@@ -136,7 +136,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.empty());
         }
 
-        return new GraphCreateFromStoreConfigImpl(
+        return GraphCreateFromStoreConfigImpl.of(
             IMPLICIT_GRAPH_NAME,
             username,
             config

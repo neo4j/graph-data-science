@@ -107,15 +107,24 @@ final class GenerateConfiguration {
         builder.addFields(fieldDefinitions.fields());
 
         MethodSpec constructor = defineConstructor(config, fieldDefinitions.names());
-        builder.addMethod(constructor);
-
         Optional<MethodSpec> factory = defineFactory(
             config,
             generatedClassName,
             constructor,
             fieldDefinitions.names()
         );
-        factory.ifPresent(builder::addMethod);
+        if (factory.isPresent()) {
+            MethodSpec privateConstructor = MethodSpec.constructorBuilder()
+                .addAnnotations(constructor.annotations)
+                .addParameters(constructor.parameters)
+                .addCode(constructor.code)
+                .addModifiers(Modifier.PRIVATE)
+                .build();
+            builder.addMethod(privateConstructor);
+            builder.addMethod(factory.get());
+        } else {
+            builder.addMethod(constructor);
+        }
 
         return builder
             .addMethods(defineGetters(config, fieldDefinitions.names()))
