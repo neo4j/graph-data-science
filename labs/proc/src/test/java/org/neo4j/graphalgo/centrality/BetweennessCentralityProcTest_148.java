@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +26,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Matchers;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphdb.Result;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -36,29 +39,24 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class BetweennessCentralityProcTest_148 extends BaseProcTest {
 
+    public static final String DB_CYPHER =
+        "CREATE " +
+        "  (nAlice:User {name:'Alice'})" +
+        ", (nBridget:User {name:'Bridget'})" +
+        ", (nCharles:User {name:'Charles'})" +
+        ", (nDoug:User {name:'Doug'})" +
+        ", (nMark:User {name:'Mark'})" +
+        ", (nAlice)-[:FRIEND]->(nBridget)" +
+        ", (nCharles)-[:FRIEND]->(nBridget)" +
+        ", (nDoug)-[:FRIEND]->(nBridget)" +
+        ", (nMark)-[:FRIEND]->(nBridget)" +
+        ", (nMark)-[:FRIEND]->(nDoug)";
+
     @BeforeEach
     void setupGraph() throws Exception {
-
         db = TestDatabaseCreator.createTestDatabase();
-
         registerProcedures(BetweennessCentralityProc.class);
-
-        final String importQuery =
-                "CREATE (nAlice:User {name:'Alice'})\n" +
-                        ",(nBridget:User {name:'Bridget'})\n" +
-                        ",(nCharles:User {name:'Charles'})\n" +
-                        ",(nDoug:User {name:'Doug'})\n" +
-                        ",(nMark:User {name:'Mark'})\n" +
-                        "CREATE (nAlice)-[:FRIEND]->(nBridget)\n" +
-                        ",(nCharles)-[:FRIEND]->(nBridget)\n" +
-                        ",(nDoug)-[:FRIEND]->(nBridget)\n" +
-                        ",(nMark)-[:FRIEND]->(nBridget)\n" +
-                        ",(nMark)-[:FRIEND]->(nDoug)\n";
-
-        try (ProgressTimer timer = ProgressTimer.start(l -> System.out.printf("Setup took %d ms%n", l))) {
-            runQuery(importQuery);
-        }
-
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
@@ -79,13 +77,18 @@ class BetweennessCentralityProcTest_148 extends BaseProcTest {
     }
 
     @Test
-    void testBCStreamDirectionBoth() throws Exception {
-
-        final Consumer mock = mock(Consumer.class);
-        final String evalQuery = "CALL algo.betweenness.stream('User', 'FRIEND', {direction:'B'}) YIELD nodeId, centrality";
-        runQueryWithRowConsumer(evalQuery, row -> {
-            final long nodeId = row.getNumber("nodeId").longValue();
-            final double centrality = row.getNumber("centrality").doubleValue();
+    void testBCStreamDirectionBoth() {
+        Consumer mock = mock(Consumer.class);
+        String query = GdsCypher.call()
+            .withNodeLabel("User")
+            .withRelationshipType("FRIEND", RelationshipProjection.builder().projection(Projection.UNDIRECTED).build())
+            .algo("gds.alpha.betweenness")
+            .streamMode()
+            .addParameter("direction", "BOTH")
+            .yields("nodeId", "centrality");
+        runQueryWithRowConsumer(query, row -> {
+            long nodeId = row.getNumber("nodeId").longValue();
+            double centrality = row.getNumber("centrality").doubleValue();
             mock.consume(name(nodeId), centrality);
         });
 

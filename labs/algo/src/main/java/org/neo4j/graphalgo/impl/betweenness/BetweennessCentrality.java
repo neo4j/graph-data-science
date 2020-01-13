@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.betweenness;
 
 import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntStack;
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
@@ -49,7 +49,7 @@ import java.util.stream.Stream;
  * The algo can be adapted to use the MSBFS but at the time of development some must have
  * features in the MSBFS were missing (like manually canceling evaluation if some conditions have been met).
  */
-public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality> {
+public class BetweennessCentrality extends Algorithm<BetweennessCentrality, BetweennessCentrality> {
 
     private Graph graph;
     private volatile AtomicInteger nodeQueue = new AtomicInteger();
@@ -83,8 +83,10 @@ public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality
      * @return
      */
     public BetweennessCentrality withDirection(Direction direction) {
-        this.direction = direction;
-        this.divisor = direction == Direction.BOTH ? 2.0 : 1.0;
+        if (direction == Direction.BOTH) {
+            this.direction = Direction.OUTGOING;
+            this.divisor = 2.0;
+        }
         return this;
     }
 
@@ -94,14 +96,14 @@ public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality
      * @return itself for method chaining
      */
     @Override
-    public Void compute() {
-        nodeQueue.set(0); //
+    public BetweennessCentrality compute() {
+        nodeQueue.set(0);
         ArrayList<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {
             futures.add(executorService.submit(new BCTask()));
         }
         ParallelUtil.awaitTermination(futures);
-        return null;
+        return this;
     }
 
     /**
@@ -121,7 +123,10 @@ public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality
     public Stream<Result> resultStream() {
         return IntStream
             .range(0, nodeCount)
-            .mapToObj(nodeId -> new Result(graph.toOriginalNodeId(nodeId), centrality.get(nodeId)));
+            .mapToObj(nodeId ->
+                new Result(
+                    graph.toOriginalNodeId(nodeId),
+                    centrality.get(nodeId)));
     }
 
     /**
@@ -136,10 +141,7 @@ public class BetweennessCentrality extends LegacyAlgorithm<BetweennessCentrality
      * release internal data structures
      */
     @Override
-    public void release() {
-        graph = null;
-        centrality = null;
-    }
+    public void release() {}
 
     /**
      * a BCTask takes one element from the nodeQueue and calculates it's centrality
