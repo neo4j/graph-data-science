@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.scc;
 
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
  *
  * specified in:  http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
  */
-public class SCCAlgorithm extends LegacyAlgorithm<SCCAlgorithm> {
+public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
 
     /**
      * returns a initialized SCC algorithm based on which
@@ -45,8 +45,8 @@ public class SCCAlgorithm extends LegacyAlgorithm<SCCAlgorithm> {
      * @param tracker
      * @return
      */
-    public static SCCAlgorithm iterativeTarjan(Graph graph, AllocationTracker tracker) {
-        return new SCCAlgorithm(graph, tracker);
+    public static SccAlgorithm iterativeTarjan(Graph graph, AllocationTracker tracker) {
+        return new SccAlgorithm(graph, tracker);
     }
 
     private enum Action {
@@ -76,7 +76,7 @@ public class SCCAlgorithm extends LegacyAlgorithm<SCCAlgorithm> {
     private int minSetSize;
     private int maxSetSize;
 
-    public SCCAlgorithm(Graph graph, AllocationTracker tracker) {
+    public SccAlgorithm(Graph graph, AllocationTracker tracker) {
         this.graph = graph;
         nodeCount = graph.nodeCount();
         index = HugeLongArray.newArray(nodeCount, tracker);
@@ -91,7 +91,7 @@ public class SCCAlgorithm extends LegacyAlgorithm<SCCAlgorithm> {
      * compute scc
      * @return
      */
-    public Void compute() {
+    public HugeLongArray compute() {
         setCount = 0;
         minSetSize = Integer.MAX_VALUE;
         maxSetSize = 0;
@@ -101,11 +101,11 @@ public class SCCAlgorithm extends LegacyAlgorithm<SCCAlgorithm> {
         boundaries.clear();
         stack.clear();
         graph.forEachNode(this::compute);
-        return null;
+        return connectedComponents;
     }
 
     @Override
-    public SCCAlgorithm me() {
+    public SccAlgorithm me() {
         return this;
     }
 
@@ -135,10 +135,10 @@ public class SCCAlgorithm extends LegacyAlgorithm<SCCAlgorithm> {
      * get stream of original nodeId to component id pairs
      * @return
      */
-    public Stream<SCCAlgorithm.StreamResult> resultStream() {
+    public Stream<SccAlgorithm.StreamResult> resultStream() {
         return LongStream.range(0, nodeCount)
                 .filter(i -> connectedComponents.get(i) != -1)
-                .mapToObj(i -> new SCCAlgorithm.StreamResult(graph.toOriginalNodeId(i), connectedComponents.get(i)));
+                .mapToObj(i -> new SccAlgorithm.StreamResult(graph.toOriginalNodeId(i), connectedComponents.get(i)));
     }
 
     /**

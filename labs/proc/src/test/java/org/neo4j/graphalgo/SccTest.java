@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.impl.scc.SCCAlgorithm;
+import org.neo4j.graphalgo.impl.scc.SccAlgorithm;
 import org.neo4j.graphdb.Node;
 
 import java.util.Arrays;
@@ -88,7 +88,7 @@ class SccTest extends AlgoTestBase {
     @AllGraphTypesWithoutCypherTest
     void testDirect(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        SCCAlgorithm scc = new SCCAlgorithm(graph, AllocationTracker.EMPTY);
+        SccAlgorithm scc = new SccAlgorithm(graph, AllocationTracker.EMPTY);
         scc.compute();
 
         assertCC(scc.getConnectedComponents());
@@ -100,7 +100,7 @@ class SccTest extends AlgoTestBase {
     @AllGraphTypesWithoutCypherTest
     void testHugeIterativeScc(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        SCCAlgorithm algo = new SCCAlgorithm(graph, AllocationTracker.EMPTY);
+        SccAlgorithm algo = new SccAlgorithm(graph, AllocationTracker.EMPTY);
         algo.compute();
         assertCC(algo.getConnectedComponents());
     }
