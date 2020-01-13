@@ -36,41 +36,33 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-/**        _______
- *        /       \
- *      (0)--(1) (3)--(4)
- *        \  /     \ /
- *        (2)  (6) (5)
- *             / \
- *           (7)-(8)
- */
 class SccTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:Node {name: 'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (f:Node {name: 'f'})" +
-            ", (g:Node {name: 'g'})" +
-            ", (h:Node {name: 'h'})" +
-            ", (i:Node {name: 'i'})" +
+        "CREATE" +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (f:Node {name: 'f'})" +
+        ", (g:Node {name: 'g'})" +
+        ", (h:Node {name: 'h'})" +
+        ", (i:Node {name: 'i'})" +
 
-            ", (a)-[:TYPE {cost: 5}]->(b)" +
-            ", (b)-[:TYPE {cost: 5}]->(c)" +
-            ", (c)-[:TYPE {cost: 5}]->(a)" +
+        ", (a)-[:TYPE {cost: 5}]->(b)" +
+        ", (b)-[:TYPE {cost: 5}]->(c)" +
+        ", (c)-[:TYPE {cost: 5}]->(a)" +
 
-            ", (d)-[:TYPE {cost: 2}]->(e)" +
-            ", (e)-[:TYPE {cost: 2}]->(f)" +
-            ", (f)-[:TYPE {cost: 2}]->(d)" +
+        ", (d)-[:TYPE {cost: 2}]->(e)" +
+        ", (e)-[:TYPE {cost: 2}]->(f)" +
+        ", (f)-[:TYPE {cost: 2}]->(d)" +
 
-            ", (a)-[:TYPE {cost: 2}]->(d)" +
+        ", (a)-[:TYPE {cost: 2}]->(d)" +
 
-            ", (g)-[:TYPE {cost: 3}]->(h)" +
-            ", (h)-[:TYPE {cost: 3}]->(i)" +
-            ", (i)-[:TYPE {cost: 3}]->(g)";
+        ", (g)-[:TYPE {cost: 3}]->(h)" +
+        ", (h)-[:TYPE {cost: 3}]->(i)" +
+        ", (i)-[:TYPE {cost: 3}]->(g)";
 
     private Graph graph;
 
@@ -89,9 +81,9 @@ class SccTest extends AlgoTestBase {
     void testDirect(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
         SccAlgorithm scc = new SccAlgorithm(graph, AllocationTracker.EMPTY);
-        scc.compute();
+        HugeLongArray components = scc.compute();
 
-        assertCC(scc.getConnectedComponents());
+        assertCC(components);
         assertEquals(3, scc.getMaxSetSize());
         assertEquals(3, scc.getMinSetSize());
         assertEquals(3, scc.getSetCount());
@@ -101,10 +93,9 @@ class SccTest extends AlgoTestBase {
     void testHugeIterativeScc(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
         SccAlgorithm algo = new SccAlgorithm(graph, AllocationTracker.EMPTY);
-        algo.compute();
-        assertCC(algo.getConnectedComponents());
+        HugeLongArray components = algo.compute();
+        assertCC(components);
     }
-
 
     private void setup(Class<? extends GraphFactory> graphFactory) {
         graph = new GraphLoader(db)

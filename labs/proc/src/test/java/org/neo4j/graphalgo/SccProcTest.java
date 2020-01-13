@@ -141,9 +141,15 @@ class SccProcTest extends BaseProcTest {
     void testStream() {
         final IntIntScatterMap testMap = new IntIntScatterMap();
 
-        String cypher = "CALL algo.scc.stream()";
+        String query = GdsCypher
+            .call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.scc")
+            .streamMode()
+            .yields();
 
-        runQueryWithRowConsumer(cypher, row ->
+        runQueryWithRowConsumer(query, row ->
             testMap.addTo(row.getNumber("partition").intValue(), 1)
         );
 

@@ -27,27 +27,12 @@ import org.neo4j.graphalgo.core.utils.paged.PagedLongStack;
 import org.neo4j.graphalgo.core.utils.paged.PagedSimpleBitSet;
 import org.neo4j.graphdb.Direction;
 
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
-
 /**
  * huge iterative (non recursive) sequential strongly connected components algorithm.
  *
  * specified in:  http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
  */
 public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
-
-    /**
-     * returns a initialized SCC algorithm based on which
-     * type of graph has been supplied.
-     *
-     * @param graph
-     * @param tracker
-     * @return
-     */
-    public static SccAlgorithm iterativeTarjan(Graph graph, AllocationTracker tracker) {
-        return new SccAlgorithm(graph, tracker);
-    }
 
     private enum Action {
         VISIT(0L),
@@ -121,24 +106,6 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
         stack = null;
         boundaries = null;
         todo = null;
-    }
-
-    /**
-     * get nodeId to component id mapping
-     * @return
-     */
-    public HugeLongArray getConnectedComponents() {
-        return connectedComponents;
-    }
-
-    /**
-     * get stream of original nodeId to component id pairs
-     * @return
-     */
-    public Stream<SccAlgorithm.StreamResult> resultStream() {
-        return LongStream.range(0, nodeCount)
-                .filter(i -> connectedComponents.get(i) != -1)
-                .mapToObj(i -> new SccAlgorithm.StreamResult(graph.toOriginalNodeId(i), connectedComponents.get(i)));
     }
 
     /**

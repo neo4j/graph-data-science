@@ -21,8 +21,6 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -34,7 +32,6 @@ import org.neo4j.graphalgo.impl.scc.SccAlgorithm;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -43,6 +40,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -74,6 +72,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
             .withNodeCount(graph.nodeCount());
 
         if (graph.isEmpty()) {
+            graph.release();
             return Stream.of(builder.build());
         }
 
@@ -91,49 +90,33 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
                 );
         }
 
+        graph.release();
         return Stream.of(builder.build());
     }
 
-    // default algo.scc -> iter tarjan
-    @Procedure(value = "algo.scc.stream", mode = READ)
-    @Description("CALL algo.scc.stream(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-                 "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
-    public Stream<SccAlgorithm.StreamResult> sccDefaultMethodStream(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationship,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    @Procedure(value = "gds.alpha.scc.stream", mode = READ)
+    @Description(SCC_DESCRIPTION)
+    public Stream<SccAlgorithm.StreamResult> stream(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        ComputationResult<SccAlgorithm, HugeLongArray, SccConfig> computationResult = compute(graphNameOrConfig, configuration);
 
-        return sccIterativeTarjanStream(label, relationship, config);
-    }
-
-    private Stream<SccAlgorithm.StreamResult> sccIterativeTarjanStream(
-        String label,
-        String relationship,
-        Map<String, Object> config
-    ) {
-
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-
-        final Graph graph = new GraphLoader(api, Pools.DEFAULT)
-            .init(log, label, relationship, configuration)
-            .withDirection(Direction.OUTGOING)
-            .load(configuration.getGraphImpl());
+        AllocationTracker tracker = computationResult.tracker();
+        Graph graph = computationResult.graph();
+        HugeLongArray components = computationResult.result();
 
         if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
 
-        final AllocationTracker tracker = AllocationTracker.create();
-        final SccAlgorithm algo = SccAlgorithm.iterativeTarjan(graph, tracker)
-            .withProgressLogger(ProgressLogger.wrap(log, "SCC(IterativeTarjan)"))
-            .withTerminationFlag(TerminationFlag.wrap(transaction));
-        algo.compute();
-
+        log.info("Scc: overall memory usage: %s", tracker.getUsageString());
         graph.release();
 
-        return algo.resultStream();
+        return LongStream.range(0, graph.nodeCount())
+                .filter(i -> components.get(i) != -1)
+                .mapToObj(i -> new SccAlgorithm.StreamResult(graph.toOriginalNodeId(i), components.get(i)));
     }
 
     @Override
@@ -153,8 +136,8 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
             public SccAlgorithm build(
                 Graph graph, SccConfig configuration, AllocationTracker tracker, Log log
             ) {
-                return SccAlgorithm.iterativeTarjan(graph, tracker)
-                    .withProgressLogger(ProgressLogger.wrap(log, "SCC(IterativeTarjan)"))
+                return new SccAlgorithm(graph, tracker)
+                    .withProgressLogger(ProgressLogger.wrap(log, "Scc"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction));
             }
         };
