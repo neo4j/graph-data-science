@@ -19,9 +19,11 @@
  */
 package org.neo4j.graphalgo;
 
+import com.carrotsearch.hppc.IntIntScatterMap;
+import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -29,22 +31,30 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 class SccProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:Node) " +
-            ", (b:Node) " +
-            ", (c:Node) " +
-            ", (d:Node) " +
-            ", (e:Node) " +
-            // group 1
-            ", (a)-[:TYPE]->(b)" +
-            ", (a)<-[:TYPE]-(b)" +
-            ", (a)-[:TYPE]->(c)" +
-            ", (a)<-[:TYPE]-(c)" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (b)<-[:TYPE]-(c)" +
-            // group 2
-            ", (d)-[:TYPE]->(e)" +
-            ", (d)<-[:TYPE]-(e)";
+        "CREATE" +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (f:Node {name: 'f'})" +
+        ", (g:Node {name: 'g'})" +
+        ", (h:Node {name: 'h'})" +
+        ", (i:Node {name: 'i'})" +
+
+        ", (a)-[:TYPE {cost: 5}]->(b)" +
+        ", (b)-[:TYPE {cost: 5}]->(c)" +
+        ", (c)-[:TYPE {cost: 5}]->(a)" +
+
+        ", (d)-[:TYPE {cost: 2}]->(e)" +
+        ", (e)-[:TYPE {cost: 2}]->(f)" +
+        ", (f)-[:TYPE {cost: 2}]->(d)" +
+
+        ", (a)-[:TYPE {cost: 2}]->(d)" +
+
+        ", (g)-[:TYPE {cost: 3}]->(h)" +
+        ", (h)-[:TYPE {cost: 3}]->(i)" +
+        ", (i)-[:TYPE {cost: 3}]->(g)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -58,37 +68,79 @@ class SccProcTest extends BaseProcTest {
         db.shutdown();
     }
 
-    @AllGraphNamesTest
-    void testScc(String graphName) {
-        runQueryWithRowConsumer(
-            "CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "'}) " +
-            "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty",
-            row -> {
-                assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
-                assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
-                assertEquals(2, row.getNumber("setCount").longValue());
-                assertEquals(2, row.getNumber("minSetSize").longValue());
-                assertEquals(3, row.getNumber("maxSetSize").longValue());
-                assertEquals("partition", row.getString("partitionProperty"));
-                assertEquals("partition", row.getString("writeProperty"));
-            }
-        );
+    @Test
+    void testWrite() {
+        String procedureQuery = "CALL algo.scc('', '', {write:true})";
+
+        runQueryWithRowConsumer(procedureQuery, row -> {
+            long loadMillis = row.getNumber("loadMillis").longValue();
+            long computeMillis = row.getNumber("computeMillis").longValue();
+            long writeMillis = row.getNumber("writeMillis").longValue();
+            assertEquals(3, row.getNumber("setCount").longValue());
+            assertEquals(3, row.getNumber("minSetSize").longValue());
+            assertEquals(3, row.getNumber("maxSetSize").longValue());
+            assertEquals("partition", row.getString("partitionProperty"));
+            assertEquals("partition", row.getString("writeProperty"));
+            assertNotEquals(-1, loadMillis);
+            assertNotEquals(-1, computeMillis);
+            assertNotEquals(-1, writeMillis);
+        });
+
+        String validationQuery = "MATCH (n) RETURN n.partition as c";
+        final IntIntScatterMap testMap = new IntIntScatterMap();
+        runQueryWithRowConsumer(validationQuery, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
+
+        // 3 sets with 3 elements each
+        assertEquals(3, testMap.size());
+        for (IntIntCursor cursor : testMap) {
+            assertEquals(3, cursor.value);
+        }
     }
 
-    @AllGraphNamesTest
-    void explicitWriteProperty(String graphName) {
-        runQueryWithRowConsumer(
-            "CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "', writeProperty: 'scc'}) " +
-            "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty",
-            row -> {
-                assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
-                assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
-                assertEquals(2, row.getNumber("setCount").longValue());
-                assertEquals(2, row.getNumber("minSetSize").longValue());
-                assertEquals(3, row.getNumber("maxSetSize").longValue());
-                assertEquals("scc", row.getString("partitionProperty"));
-                assertEquals("scc", row.getString("writeProperty"));
-            }
-        );
+    @Test
+    void testWriteWithWriteProperty() {
+        String procedureQuery = "CALL algo.scc('', '', {write:true, writeProperty: 'scc'})";
+
+        runQueryWithRowConsumer(procedureQuery, row -> {
+            long loadMillis = row.getNumber("loadMillis").longValue();
+            long computeMillis = row.getNumber("computeMillis").longValue();
+            long writeMillis = row.getNumber("writeMillis").longValue();
+            assertEquals(3, row.getNumber("setCount").longValue());
+            assertEquals(3, row.getNumber("minSetSize").longValue());
+            assertEquals(3, row.getNumber("maxSetSize").longValue());
+            assertEquals("scc", row.getString("partitionProperty"));
+            assertEquals("scc", row.getString("writeProperty"));
+            assertNotEquals(-1, loadMillis);
+            assertNotEquals(-1, computeMillis);
+            assertNotEquals(-1, writeMillis);
+        });
+
+        String validationQuery = "MATCH (n) RETURN n.scc as c";
+        final IntIntScatterMap testMap = new IntIntScatterMap();
+        runQueryWithRowConsumer(validationQuery, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
+
+        // 3 sets with 3 elements each
+        assertEquals(3, testMap.size());
+        for (IntIntCursor cursor : testMap) {
+            assertEquals(3, cursor.value);
+        }
     }
+
+    @Test
+    void testStream() {
+        final IntIntScatterMap testMap = new IntIntScatterMap();
+
+        String cypher = "CALL algo.scc.stream()";
+
+        runQueryWithRowConsumer(cypher, row ->
+            testMap.addTo(row.getNumber("partition").intValue(), 1)
+        );
+
+        // 3 sets with 3 elements each
+        assertEquals(3, testMap.size());
+        for (IntIntCursor cursor : testMap) {
+            assertEquals(3, cursor.value);
+        }
+    }
+
 }

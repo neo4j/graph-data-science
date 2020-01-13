@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.IntIntScatterMap;
-import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
@@ -46,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  *             / \
  *           (7)-(8)
  */
-class StronglyConnectedComponentsTest extends BaseProcTest {
+class SccTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -77,9 +75,8 @@ class StronglyConnectedComponentsTest extends BaseProcTest {
     private Graph graph;
 
     @BeforeEach
-    void setupGraphDb() throws Exception {
+    void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(SccProc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -108,46 +105,6 @@ class StronglyConnectedComponentsTest extends BaseProcTest {
         assertCC(algo.getConnectedComponents());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testCypher(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
-        String cypher = "CALL algo.scc('', '', {write:true}) YIELD loadMillis, computeMillis, writeMillis";
-
-        runQueryWithRowConsumer(cypher, row -> {
-            long loadMillis = row.getNumber("loadMillis").longValue();
-            long computeMillis = row.getNumber("computeMillis").longValue();
-            long writeMillis = row.getNumber("writeMillis").longValue();
-            assertNotEquals(-1, loadMillis);
-            assertNotEquals(-1, computeMillis);
-            assertNotEquals(-1, writeMillis);
-        });
-
-        String cypher2 = "MATCH (n) RETURN n.partition as c";
-        final IntIntScatterMap testMap = new IntIntScatterMap();
-        runQueryWithRowConsumer(cypher2, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
-
-        // 3 sets with 3 elements each
-        assertEquals(3, testMap.size());
-        for (IntIntCursor cursor : testMap) {
-            assertEquals(3, cursor.value);
-        }
-    }
-
-    @AllGraphTypesWithoutCypherTest
-    void testCypherStream(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
-        final IntIntScatterMap testMap = new IntIntScatterMap();
-
-        String cypher = "CALL algo.scc.stream() YIELD nodeId, partition";
-
-        runQueryWithRowConsumer(cypher, row -> testMap.addTo(row.getNumber("partition").intValue(), 1));
-
-        // 3 sets with 3 elements each
-        assertEquals(3, testMap.size());
-        for (IntIntCursor cursor : testMap) {
-            assertEquals(3, cursor.value);
-        }
-    }
 
     private void setup(Class<? extends GraphFactory> graphFactory) {
         graph = new GraphLoader(db)
@@ -176,9 +133,11 @@ class StronglyConnectedComponentsTest extends BaseProcTest {
 
     private long getMappedNodeId(String name) {
         final Node[] node = new Node[1];
-        runQueryWithRowConsumer("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> {
-            node[0] = row.getNode("n");
-        });
+
+        runQuery(
+            "MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n",
+            row -> node[0] = row.getNode("n")
+        );
         return graph.toMappedNodeId(node[0].getId());
     }
 
