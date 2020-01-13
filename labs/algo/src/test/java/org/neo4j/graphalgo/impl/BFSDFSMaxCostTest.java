@@ -110,13 +110,14 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
     @Test
     void testDfsMaxCostOut() {
         final long source = id("a");
-        final long[] nodes = new Traverse(graph)
-            .computeDfs(
-                source,
-                Direction.OUTGOING,
-                exitPredicate,
-                aggregator
-            );
+        final long[] nodes = new Traverse(
+            graph,
+            Traverse.TraverseAlgo.DFS,
+            Direction.OUTGOING,
+            source,
+            exitPredicate,
+            aggregator
+        ).compute().resultNodes();
 
         try (Transaction tx = db.beginTx()) {
             List<String> resultNodeNames = Arrays
@@ -138,13 +139,14 @@ class BFSDFSMaxCostTest extends AlgoTestBase {
     void testBfsMaxCostOut() {
         final long source = id("a");
 
-        final long[] nodes = new Traverse(graph)
-            .computeBfs(
-                source,
-                Direction.OUTGOING,
-                exitPredicate,
-                aggregator
-            );
+        final long[] nodes = new Traverse(
+            graph,
+            Traverse.TraverseAlgo.BFS,
+            Direction.OUTGOING,
+            source,
+            exitPredicate,
+            aggregator
+        ).compute().resultNodes();
 
         try (Transaction tx = db.beginTx()) {
             List<String> resultNodeNames = Arrays

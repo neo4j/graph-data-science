@@ -66,10 +66,6 @@ public class TraverseProc extends LabsProc {
                 .withLog(log)
                 .load(configuration.getGraphImpl());
 
-        final Traverse traverse = new Traverse(graph)
-                .withProgressLogger(ProgressLogger.wrap(log, "BFS"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
-
         final List<Long> targetNodes = configuration.get("targetNodes", Collections.emptyList());
         final long maxDepth = configuration.getNumber("maxDepth", -1L).longValue();
         final Traverse.ExitPredicate exitFunction;
@@ -99,11 +95,18 @@ public class TraverseProc extends LabsProc {
             aggregatorFunction = (s, t, w) -> .0;
         }
 
-        final long[] nodes = traverse.computeBfs(
-                startNode,
-                configuration.getDirection(Direction.OUTGOING),
-                exitFunction,
-                aggregatorFunction);
+        final Traverse traverse = new Traverse(
+            graph,
+            Traverse.TraverseAlgo.BFS,
+            configuration.getDirection(Direction.OUTGOING),
+            startNode,
+            exitFunction,
+            aggregatorFunction
+        )
+            .withProgressLogger(ProgressLogger.wrap(log, "BFS"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
+
+        long[] nodes = traverse.compute().resultNodes();
 
         return Stream.of(new WalkResult(nodes, WalkPath.toPath(api, nodes)));
     }
@@ -130,10 +133,6 @@ public class TraverseProc extends LabsProc {
                 .withDirection(configuration.getDirection(Direction.OUTGOING))
                 .withLog(log)
                 .load(configuration.getGraphImpl());
-
-        final Traverse traverse = new Traverse(graph)
-                .withProgressLogger(ProgressLogger.wrap(log, "DFS"))
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
 
         final List<Long> targetNodes = configuration.get("targetNodes", Collections.emptyList());
         final long maxDepth = configuration.getNumber("maxDepth", -1L).longValue();
@@ -165,11 +164,18 @@ public class TraverseProc extends LabsProc {
             aggregatorFunction = (s, t, w) -> .0;
         }
 
-        final long[] nodes = traverse.computeDfs(
-                startNode,
-                configuration.getDirection(Direction.OUTGOING),
-                exitFunction,
-                aggregatorFunction);
+        final Traverse traverse = new Traverse(
+            graph,
+            Traverse.TraverseAlgo.DFS,
+            configuration.getDirection(Direction.OUTGOING),
+            startNode,
+            exitFunction,
+            aggregatorFunction
+        )
+            .withProgressLogger(ProgressLogger.wrap(log, "DFS"))
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
+
+        long[] nodes = traverse.compute().resultNodes();
 
         return Stream.of(new WalkResult(nodes, WalkPath.toPath(api, nodes)));
     }
