@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphalgo.results.PageRankScore;
 import org.neo4j.graphalgo.utils.CentralityUtils;
@@ -60,9 +61,12 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
         AllocationTracker tracker = computationResult.tracker();
         Graph graph = computationResult.graph();
 
-        PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
+        AbstractResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder()
+            .withLoadMillis(computationResult.createMillis())
+            .withComputeMillis(computationResult.computeMillis());
 
         if (graph.isEmpty()) {
+            graph.release();
             return Stream.of(statsBuilder.build());
         }
 
@@ -79,8 +83,7 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
             algo.result().export(config.writeProperty(), exporter);
         }
 
-        graph.releaseProperties();
-
+        graph.release();
         return Stream.of(statsBuilder.build());
     }
 

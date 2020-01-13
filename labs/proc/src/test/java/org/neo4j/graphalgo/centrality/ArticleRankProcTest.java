@@ -31,6 +31,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class ArticleRankProcTest extends BaseProcTest {
 
@@ -138,7 +139,12 @@ class ArticleRankProcTest extends BaseProcTest {
             "+---------------------------------+" + NL +
             "7 rows" + NL;
 
-        runQuery(algoQuery);
+        runQueryWithRowConsumer(algoQuery, row -> {
+            assertNotEquals(-1L, row.getNumber("loadMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
+        });
+
         String actual = runQuery(resultQuery, Result::resultAsString);
         assertEquals(expected, actual);
     }
