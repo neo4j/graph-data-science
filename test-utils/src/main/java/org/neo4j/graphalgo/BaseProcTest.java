@@ -67,6 +67,13 @@ public class BaseProcTest {
         }
     }
 
+    protected void registerAggregationFunctions(Class<?>... functionClasses) throws KernelException {
+        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
+        for (Class<?> clazz : functionClasses) {
+            procedures.registerAggregationFunction(clazz);
+        }
+    }
+
     protected void registerProcedures(Class<?>... procedureClasses) throws KernelException {
         registerProcedures(db, procedureClasses);
     }
