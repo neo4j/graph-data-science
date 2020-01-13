@@ -647,7 +647,7 @@ class GdsCypherTest {
             arguments("     "           , "$`     `"),
             arguments(" "               , "$` `"),
             arguments("%"               , "$`%`")
-            //@formatter:o
+            //@formatter:on
         );
     }
 
