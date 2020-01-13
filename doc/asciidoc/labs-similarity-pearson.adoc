@@ -135,7 +135,7 @@ We can also use it to compute the similarity of nodes based on lists computed by
 .Results
 [opts="header"]
 |===
-| `from`       | `to`         | `similarity`
+| `from`| `to`       | `similarity`
 |"Arya" |	"Karin"	 | 0.8194651785206903
 
 |===
@@ -163,7 +163,7 @@ We can't therefore just pass in collections of the ratings of movies that have b
 .Results
 [opts="header"]
 |===
-| `from`       | `to`         | `similarity`
+| `from` | `to`       | `similarity`
 | "Arya" | "Karin"    | 0.8194651785206903
 | "Arya" | "Zhen"     | 0.4839533792540704
 | "Arya" | "Praveena" | 0.09262336892949784
@@ -243,7 +243,7 @@ include::labs-similarity.adoc[tag=weighted-note]
 .Results
 [opts="header"]
 |===
-| `from`       | `to`         | `similarity`
+| `from`     | `to`       | `similarity`
 | "Zhen"     | "Praveena" | 0.8865926413116155
 | "Zhen"     | "Karin"    | 0.8320502943378437
 | "Arya"     | "Karin"    | 0.8194651785206903
@@ -283,7 +283,7 @@ We'd probably want to filter those out, which we can do by passing in the `simil
 .Results
 [opts="header"]
 |===
-| `from`       | `to`         | `similarity`
+| `from`     | `to`       | `similarity`
 | "Zhen"     | "Praveena" | 0.8865926413116155
 | "Zhen"     | "Karin"    | 0.8320502943378437
 | "Arya"     | "Karin"    | 0.8194651785206903
@@ -399,7 +399,7 @@ We could use this technique to compute the similarity of a subset of items to al
 .Results
 [opts="header",cols="1,1,1"]
 |===
-| `from`   | `to`     | `similarity`
+| `from`   | `to`  | `similarity`
 | Praveena | Zhen  | 0.8865926413116155 
 | Arya     | Karin | 0.8194651785206903 
 |===
@@ -439,7 +439,7 @@ For cases where no values should be skipped, skipping can be disabled by setting
 .Results
 [opts="header",cols="1,1,1"]
 |===
-| `from`   | `to`     | `similarity`
+| `from`         | `to`           | `similarity`
 | The Matrix     | Jerry Maguire  | 0.8689113641953199   
 | A Few Good Men | Top Gun        | 0.6846566091701214
 | Home Alone     | A Few Good Men | 0.556559508845268
@@ -474,6 +474,12 @@ include::projected-graph-model/cypher-projection.adoc[tag=similarity-explanation
  RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
 ----
 
+.Results
+[opts="header",cols="1,1,1,1,1,1,1,1,1"]
+|===
+| `nodes` | `similarityPairs` | `write` | `writeRelationshipType` | `writeProperty` | `min`              | `max`              | `mean`             | `p95`
+| 5       | 4                 | TRUE    | "SIMILAR"               | "score"         | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688
+|===
 
 
 [[algorithms-similarity-pearson-syntax]]
@@ -575,9 +581,9 @@ YIELD item1, item2, count1, count2, intersection, similarity
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name         | Type | Description
-| `item1`      | int  | The ID of one node in the similarity pair.
-| `item2`      | int  | The ID of other node in the similarity pair.
+| Name           | Type | Description
+| `item1`        | int  | The ID of one node in the similarity pair.
+| `item2`        | int  | The ID of other node in the similarity pair.
 | `count1`       | int  | The size of the `targets` list of one node.
 | `count2`       | int  | The size of the `targets` list of other node.
 | `intersection` | int  | The number of intersecting values in the two nodes `targets` lists.
