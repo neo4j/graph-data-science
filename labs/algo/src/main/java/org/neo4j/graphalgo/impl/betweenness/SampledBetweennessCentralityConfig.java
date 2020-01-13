@@ -38,6 +38,9 @@ public interface SampledBetweennessCentralityConfig extends BaseBetweennessCentr
 
     @Value.Default
     default double probability() {
+        // The default is N=nodeCount, log10(N) / e^2
+        // For the purposes of porting this, it is easier to make this calculation at the call site,
+        // where the graph with its node count is already provided.
         return Double.NaN;
     }
 
