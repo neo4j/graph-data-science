@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphdb.Direction.BOTH;
@@ -132,8 +133,11 @@ class DegreeCentralityProcTest extends BaseProcTest {
         String query = queryBuilder(INCOMING)
             .writeMode()
             .addParameter("direction", INCOMING)
-            .yields("writeMillis", "write", "writeProperty");
+            .yields();
         runQueryWithRowConsumer(query, row -> {
+                assertNotEquals(-1L, row.getNumber("loadMillis").longValue());
+                assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
+                assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
                 assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(

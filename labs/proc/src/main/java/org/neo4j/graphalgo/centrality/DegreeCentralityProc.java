@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.degree.DegreeCentrality;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
@@ -73,7 +74,9 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
     private Stream<CentralityScore.Stats> write(
         ComputationResult<DegreeCentrality, DegreeCentrality, DegreeCentralityConfig> computeResult
     ) {
-        if (computeResult.isGraphEmpty()) {
+        Graph graph = computeResult.graph();
+        if (graph.isEmpty()) {
+            graph.release();
             return Stream.of(new CentralityScore.Stats(
                     0,
                     0,
@@ -86,13 +89,12 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
         }
 
         DegreeCentralityConfig config = computeResult.config();
-        Graph graph = computeResult.graph();
         DegreeCentrality algorithm = computeResult.algorithm();
 
-        CentralityScore.Stats.Builder builder = new CentralityScore.Stats.Builder();
-        builder.setLoadMillis(computeResult.createMillis());
-        builder.setComputeMillis(computeResult.computeMillis());
-        builder.withNodeCount(graph.nodeCount());
+        AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder()
+            .withLoadMillis(computeResult.createMillis())
+            .withComputeMillis(computeResult.computeMillis())
+            .withNodeCount(graph.nodeCount());
 
         CentralityUtils.write(
             api,
@@ -103,8 +105,8 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
             config,
             builder
         );
-        graph.releaseProperties();
 
+        graph.release();
         return Stream.of(builder.build());
     }
 
