@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.Projection;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
+import static org.neo4j.graphalgo.GdsCypher.ExecutionModes.STREAM;
 
 class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcBaseTest {
 
@@ -81,5 +82,19 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcBas
 
         assertCommunities(communities, SEEDED_COMMUNITIES);
         assertTrue(communities[0] == 0 && communities[2] == 2);
+    }
+
+    @Test
+    void testStreamingEstimate() {
+        String query = GdsCypher.call()
+            .loadEverything()
+            .algo("gds", "beta", "modularityOptimization")
+            .estimationMode(STREAM)
+            .yields();
+
+        runQueryWithRowConsumer(query, (row) -> {
+            assertTrue(row.getNumber("bytesMin").longValue() > 0);
+            assertTrue(row.getNumber("bytesMax").longValue() > 0);
+        });
     }
 }

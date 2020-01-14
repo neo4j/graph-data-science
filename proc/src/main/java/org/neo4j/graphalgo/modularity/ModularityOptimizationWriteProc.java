@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -37,6 +38,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static org.neo4j.procedure.Mode.READ;
 
 public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseProc<ModularityOptimizationWriteConfig> {
 
@@ -53,6 +56,15 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
         return Optional.ofNullable(computationResult.result())
             .map(modularityOptimization -> write(computationResult, modularityOptimization))
             .orElse(Stream.empty());
+    }
+
+    @Procedure(value = "gds.beta.modularityOptimization.write.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @NotNull

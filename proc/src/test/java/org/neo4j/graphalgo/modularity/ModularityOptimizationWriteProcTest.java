@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
+import static org.neo4j.graphalgo.GdsCypher.ExecutionModes.WRITE;
 
 class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcBaseTest {
 
@@ -125,6 +126,21 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcBase
         runQueryWithRowConsumer(query, (row) -> {
             assertFalse(row.getBoolean("didConverge"));
             assertEquals(1, row.getNumber("ranIterations").longValue());
+        });
+    }
+
+    @Test
+    void testWritingEstimate() {
+        String query = GdsCypher.call()
+            .loadEverything()
+            .algo("gds", "beta", "modularityOptimization")
+            .estimationMode(WRITE)
+            .addParameter("writeProperty", "community")
+            .yields();
+
+        runQueryWithRowConsumer(query, (row) -> {
+            assertTrue(row.getNumber("bytesMin").longValue() > 0);
+            assertTrue(row.getNumber("bytesMax").longValue() > 0);
         });
     }
 

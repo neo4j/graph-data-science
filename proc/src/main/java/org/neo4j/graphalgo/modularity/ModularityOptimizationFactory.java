@@ -25,11 +25,48 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
 import org.neo4j.logging.Log;
 
 public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> extends AlgorithmFactory<ModularityOptimization, T> {
+
+    private static final MemoryEstimation MEMORY_ESTIMATION =
+        MemoryEstimations.builder(ModularityOptimization.class)
+            .perNode("currentCommunities", HugeLongArray::memoryEstimation)
+            .perNode("nextCommunities", HugeLongArray::memoryEstimation)
+            .perNode("cumulativeNodeWeights", HugeDoubleArray::memoryEstimation)
+            .perNode("nodeCommunityInfluences", HugeDoubleArray::memoryEstimation)
+            .perNode("communityWeights", HugeAtomicDoubleArray::memoryEstimation)
+            .perNode("colorsUsed", MemoryUsage::sizeOfBitset)
+            .perNode("colors", HugeLongArray::memoryEstimation)
+            .rangePerNode(
+                "reversedSeedCommunityMapping", (nodeCount) ->
+                    MemoryRange.of(0, HugeLongArray.memoryEstimation(nodeCount))
+            )
+            .perNode("communityWeightUpdates", HugeAtomicDoubleArray::memoryEstimation)
+            .perThread("ModularityOptimizationTask", MemoryEstimations.builder()
+                .rangePerNode(
+                    "communityInfluences",
+                    (nodeCount) -> MemoryRange.of(
+                        MemoryUsage.sizeOfLongDoubleHashMap(50),
+                        MemoryUsage.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
+                    )
+                )
+                .build()
+            )
+            .build();
+
+    @Override
+    public MemoryEstimation memoryEstimation(T configuration) {
+        return MEMORY_ESTIMATION;
+    }
+
     @Override
     public ModularityOptimization build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
         return new ModularityOptimization(
@@ -44,10 +81,5 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             tracker,
             log
         );
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation(T configuration) {
-        return MemoryEstimations.empty();
     }
 }
