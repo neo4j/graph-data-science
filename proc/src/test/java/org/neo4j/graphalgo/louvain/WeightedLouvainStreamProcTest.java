@@ -130,6 +130,7 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
                     .explicitCreation("weightedGraph")
                     .algo("louvain")
                     .streamMode()
+                    .addParameter("weightProperty", "weight")
                     .yields("nodeId", "communityId", "communityIds")
                     .concat(" RETURN algo.asNode(nodeId).name as name, communityId, communityIds")
                     .concat(" ORDER BY name ASC"),
@@ -156,6 +157,7 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
                     )
                     .algo("louvain")
                     .streamMode()
+                    .addParameter("weightProperty", "weight")
                     .yields("nodeId", "communityId", "communityIds")
                     .concat(" RETURN algo.asNode(nodeId).name as name, communityId, communityIds")
                     .concat(" ORDER BY name ASC"),
