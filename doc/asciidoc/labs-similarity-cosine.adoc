@@ -57,21 +57,34 @@ For example, to get movie recommendations based on the preferences of users who 
 [[algorithms-similarity-cosine-syntax]]
 == Syntax
 
-.The following will run the algorithm and write back results:
+.The following will run the algorithm on a graph in the catalog and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.similarity.cosine.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.alpha.similarity.cosine.write(graphName: STRING, configuration: MAP)
 YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default        | Optional | Description
-| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
-| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+| Name          | Type    | Default | Optional | Description
+| graphName     | STRING  | n/a     | no       | The name of a graph in the catalog.
+| configuration | MAP     | `{}`    | yes      | Algorithm-specific configuration.
 |===
 
+.The following will create an anonymous graph to run the algorithm on and write back results:
+[source, cypher]
+----
+CALL gds.alpha.similarity.cosine.write(configuration: MAP)
+YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name          | Type    | Default | Optional | Description
+| configuration | MAP     | `{}`    | no      | Graph creation and algorithm-specific configuration.
+|===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
@@ -86,7 +99,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | `concurrency`           | int            | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | `readConcurrency`       | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | `writeConcurrency`      | int            | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| `graph`                 | string         | dense                  | yes      | The graph name ('dense' or 'cypher').
+| `graph`                 | string         | dense                  | yes      | The graph type ('dense' or 'cypher').
 | `write`                 | boolean        | false                  | yes      | Indicates whether results should be stored.
 | `writeBatchSize`        | int            | 10000                  | yes      | The batch size to use when storing results.
 | `writeRelationshipType` | string         | SIMILAR                | yes      | The relationship type to use when storing results.
@@ -118,20 +131,33 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | `p100`                  | double  | The 100 percentile of similarities scores computed.
 |===
 
-.The following will run the algorithm and stream results:
+.The following will run the algorithm on a graph in the catalog and stream results:
 [source,cypher]
 ----
-CALL gds.alpha.similarity.cosine.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.alpha.similarity.cosine.stream(graphName: STRING, configuration: MAP)
 YIELD item1, item2, count1, count2, intersection, similarity
-
 ----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default        | Optional | Description
-| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
-| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+| Name          | Type    | Default | Optional | Description
+| graphName     | STRING  | n/a     | no       | The name of a graph in the catalog.
+| configuration | MAP     | `{}`    | yes      | Algorithm-specific configuration.
+|===
+
+.The following will create an anonymous graph to run the algorithm on and stream results:
+[source, cypher]
+----
+CALL gds.alpha.similarity.cosine.stream(configuration: MAP)
+YIELD item1, item2, count1, count2, intersection, similarity
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name          | Type    | Default | Optional | Description
+| configuration | MAP     | `{}`    | no      | Graph creation and algorithm-specific configuration.
 |===
 
 .Configuration
@@ -146,7 +172,7 @@ YIELD item1, item2, count1, count2, intersection, similarity
 | `skipValue`        | double         | null                   | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
 | `concurrency`      | int            | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | `readConcurrency`  | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| `graph`            | string         | dense                  | yes      | The graph name ('dense' or 'cypher').
+| `graph`            | string         | dense                  | yes      | The graph type ('dense' or 'cypher').
 | `sourceIds`        | long[]         | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 | `targetIds`        | long[]         | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 |===
