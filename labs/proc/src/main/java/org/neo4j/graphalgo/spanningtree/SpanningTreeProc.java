@@ -46,30 +46,30 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
 
     static DoubleUnaryOperator minMax;
 
-    @Procedure(value = "algo.spanningTree", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.spanningTree.write", mode = Mode.WRITE)
     public Stream<Prim.Result> spanningTree(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        minMax = (w) -> w;
+        minMax = Prim.MIN_OPERATOR;
         return computeAndWrite(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "algo.spanningTree.minimum", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.spanningTree.minimum.write", mode = Mode.WRITE)
     public Stream<Prim.Result> minimumSpanningTree(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        minMax = (w) -> w;
+        minMax = Prim.MIN_OPERATOR;
         return computeAndWrite(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "algo.spanningTree.maximum", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.spanningTree.maximum.write", mode = Mode.WRITE)
     public Stream<Prim.Result> maximumSpanningTree(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        minMax = (w) -> -w;
+        minMax = Prim.MAX_OPERATOR;
         return computeAndWrite(graphNameOrConfig, configuration);
     }
 
