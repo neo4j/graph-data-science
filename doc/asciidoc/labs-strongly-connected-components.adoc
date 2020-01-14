@@ -19,10 +19,8 @@ This section includes:
 * <<algorithms-strongly-connected-components-context, History and explanation>>
 * <<algorithms-strongly-connected-components-usecase, Use-cases - when to use the Strongly Connected Components algorithm>>
 * <<algorithms-strongly-connected-components-sample, Strongly Connected Components algorithm sample>>
-* <<algorithms-strongly-connected-components-hgp, Huge graph projection>>
 * <<algorithms-strongly-connected-components-cp, Cypher projection>>
 * <<algorithms-strongly-connected-components-syntax, Syntax>>
-* <<algorithms-strongly-connected-components-imp, Implementations>>
 
 
 [[algorithms-strongly-connected-components-context]]
