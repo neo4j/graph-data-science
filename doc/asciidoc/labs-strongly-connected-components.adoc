@@ -6,8 +6,10 @@
 This section describes the Strongly Connected Components algorithm in the Neo4j Labs Graph Algorithms library.
 --
 
-The Strongly Connected Components (SCC) algorithm finds sets of connected nodes in a directed graph where each node is reachable in both directions from any other node in the same set.
+The Strongly Connected Components (SCC) algorithm finds maximal sets of connected nodes in a directed graph.
+A set is considered a strongly connected component if there is a directed path between each pair of nodes within the set.
 It is often used early in a graph analysis process to help us get an idea of how our graph is structured.
+
 
 [WARNING]
 --
@@ -18,9 +20,9 @@ This section includes:
 
 * <<algorithms-strongly-connected-components-context, History and explanation>>
 * <<algorithms-strongly-connected-components-usecase, Use-cases - when to use the Strongly Connected Components algorithm>>
-* <<algorithms-strongly-connected-components-sample, Strongly Connected Components algorithm sample>>
-* <<algorithms-strongly-connected-components-cp, Cypher projection>>
 * <<algorithms-strongly-connected-components-syntax, Syntax>>
+* <<algorithms-strongly-connected-components-example, Strongly Connected Components algorithm example>>
+* <<algorithms-strongly-connected-components-cp, Cypher projection>>
 
 
 [[algorithms-strongly-connected-components-context]]
@@ -119,14 +121,10 @@ YIELD nodeId, partition
 |===
 
 
-[[algorithms-strongly-connected-components-sample]]
-== Strongly Connected Components algorithm examples
+[[algorithms-strongly-connected-components-example]]
+== Strongly Connected Components algorithm example
 
 image::strongly_connected_components.png[]
-
-A directed graph is strongly connected if there is a path between all pairs of vertices.
-This algorithm treats the graph as directed, which means that the direction of the relationship is important.
-A strongly connected component only exists if there are relationships between nodes in both direction.
 
 .The following will create a sample graph:
 [source, cypher]
