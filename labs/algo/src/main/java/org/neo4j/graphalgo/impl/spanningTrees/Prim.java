@@ -56,15 +56,15 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
     private final RelationshipIterator relationshipIterator;
     private final int nodeCount;
     private final DoubleUnaryOperator minMax;
-    private final int startNode;
+    private final int startNodeId;
 
     private SpanningTree spanningTree;
 
-    public Prim(IdMapping idMapping, RelationshipIterator relationshipIterator, DoubleUnaryOperator minMax, int startNode) {
+    public Prim(IdMapping idMapping, RelationshipIterator relationshipIterator, DoubleUnaryOperator minMax, int startNodeId) {
         this.relationshipIterator = relationshipIterator;
         this.nodeCount = Math.toIntExact(idMapping.nodeCount());
         this.minMax = minMax;
-        this.startNode = startNode;
+        this.startNodeId = startNodeId;
     }
 
     @Override
@@ -78,8 +78,8 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
         ProgressLogger logger = getProgressLogger();
         SimpleBitSet visited = new SimpleBitSet(nodeCount);
         Arrays.fill(parent, -1);
-        cost.put(startNode, 0.0);
-        queue.add(startNode, -1.0);
+        cost.put(startNodeId, 0.0);
+        queue.add(startNodeId, -1.0);
         int effectiveNodeCount = 0;
         while (!queue.isEmpty() && running()) {
             int node = queue.pop();
@@ -108,7 +108,7 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
             }));
             logger.logProgress(effectiveNodeCount, nodeCount - 1);
         }
-        this.spanningTree = new SpanningTree(startNode, nodeCount, effectiveNodeCount, parent);
+        this.spanningTree = new SpanningTree(startNodeId, nodeCount, effectiveNodeCount, parent);
         return this.spanningTree;
     }
 
@@ -128,16 +128,16 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
 
     public static class Result {
 
-        public final long loadMillis;
+        public final long createMillis;
         public final long computeMillis;
         public final long writeMillis;
         public final long effectiveNodeCount;
 
-        public Result(long loadMillis,
+        public Result(long createMillis,
                       long computeMillis,
                       long writeMillis,
                       int effectiveNodeCount) {
-            this.loadMillis = loadMillis;
+            this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.effectiveNodeCount = effectiveNodeCount;
