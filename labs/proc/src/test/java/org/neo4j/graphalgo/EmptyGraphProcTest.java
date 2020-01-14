@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
+import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
+import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,7 +45,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             BetweennessCentralityProc.class,
             ClosenessCentralityProc.class,
             KSpanningTreeProc.class,
-            PrimProc.class,
+            SpanningTreeProc.class,
             SampledBetweennessCentralityProc.class,
             ShortestPathDeltaSteppingProc.class,
             ShortestPathProc.class,

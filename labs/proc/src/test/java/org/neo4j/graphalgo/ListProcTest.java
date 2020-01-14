@@ -39,6 +39,8 @@ import org.neo4j.graphalgo.similarity.EuclideanProc;
 import org.neo4j.graphalgo.similarity.OverlapProc;
 import org.neo4j.graphalgo.similarity.PearsonProc;
 import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
+import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
+import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphalgo.traverse.TraverseProc;
 
 import java.util.Collection;
@@ -85,6 +87,11 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.similarity.overlap.stream",
         "gds.alpha.similarity.pearson.write",
         "gds.alpha.similarity.pearson.stream",
+        "gds.alpha.spanningTree.write",
+        "gds.alpha.spanningTree.kmax.write",
+        "gds.alpha.spanningTree.kmin.write",
+        "gds.alpha.spanningTree.maximum.write",
+        "gds.alpha.spanningTree.minimum.write",
         "gds.alpha.triangle.stream",
         "gds.alpha.triangleCount.write",
         "gds.alpha.triangleCount.stream",
@@ -97,12 +104,7 @@ class ListProcTest extends BaseProcTest {
         "algo.randomWalk.stream",
         "algo.shortestPath.astar.stream",
         "algo.shortestPath.deltaStepping",
-        "algo.shortestPath.deltaStepping.stream",
-        "algo.spanningTree",
-        "algo.spanningTree.kmax",
-        "algo.spanningTree.kmin",
-        "algo.spanningTree.maximum",
-        "algo.spanningTree.minimum"
+        "algo.shortestPath.deltaStepping.stream"
     ));
 
     private static final Collection<String> FUNCTIONS = new HashSet<>(asList(
@@ -121,11 +123,11 @@ class ListProcTest extends BaseProcTest {
     ));
 
     private static final Set<String> SPANNING_TREE = new HashSet<>(asList(
-        "algo.spanningTree",
-        "algo.spanningTree.kmax",
-        "algo.spanningTree.kmin",
-        "algo.spanningTree.maximum",
-        "algo.spanningTree.minimum"
+        "gds.alpha.spanningTree.write",
+        "gds.alpha.spanningTree.kmax.write",
+        "gds.alpha.spanningTree.kmin.write",
+        "gds.alpha.spanningTree.maximum.write",
+        "gds.alpha.spanningTree.minimum.write"
     ));
 
     private static final Set<String> ALL = Stream.concat(PROCEDURES.stream(), FUNCTIONS.stream()).collect(Collectors.toSet());
@@ -153,7 +155,7 @@ class ListProcTest extends BaseProcTest {
             PearsonProc.class,
             NodeWalkerProc.class,
             OneHotEncodingFunc.class,
-            PrimProc.class,
+            SpanningTreeProc.class,
             SampledBetweennessCentralityProc.class,
             ShortestPathDeltaSteppingProc.class,
             ShortestPathProc.class,

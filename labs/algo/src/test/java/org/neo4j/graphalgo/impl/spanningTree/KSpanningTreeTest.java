@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
+import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
 
@@ -77,9 +78,8 @@ class KSpanningTreeTest extends AlgoTestBase {
     @AllGraphTypesWithoutCypherTest
     void testMaximumKSpanningTree(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph)
-                .compute(a, 2, true)
-                .getSpanningTree();
+        final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MAX_OPERATOR, a, 2)
+                .compute();
 
         assertEquals(spanningTree.head(a), spanningTree.head(b));
         assertEquals(spanningTree.head(c), spanningTree.head(d));
@@ -91,9 +91,8 @@ class KSpanningTreeTest extends AlgoTestBase {
     @AllGraphTypesWithoutCypherTest
     void testMinimumKSpanningTree(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph)
-                .compute(a, 2, false)
-                .getSpanningTree();
+        final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, a, 2)
+                .compute();
 
         assertEquals(spanningTree.head(a), spanningTree.head(d));
         assertEquals(spanningTree.head(b), spanningTree.head(c));

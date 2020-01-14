@@ -22,6 +22,8 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 
 import java.util.HashMap;
 
@@ -56,12 +58,28 @@ class KSpanningTreeProcTest extends BaseProcTest {
         db.shutdown();
     }
 
+    private long id(String name) {
+        return runQuery(
+            "MATCH (n:Node) WHERE n.name = $name RETURN id(n) AS id",
+            MapUtil.map("name", name),
+            result -> result.<Long>columnAs("id").next()
+        );
+    }
+
     @Test
     void testMax() {
-        final String cypher = "MATCH (n:Node {name:'a'}) WITH n CALL algo.spanningTree.kmax(null, null, 'w', id(n), 2, {graph:'huge'}) " +
-                "YIELD loadMillis, computeMillis, writeMillis RETURN loadMillis, computeMillis, writeMillis";
-        runQueryWithRowConsumer(cypher, row -> {
-            assertTrue(row.getNumber("loadMillis").longValue() >= 0);
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipType("*", RelationshipProjection.builder().projection(Projection.UNDIRECTED).build())
+            .withRelationshipProperty("w")
+            .algo("gds.alpha.spanningTree.kmax")
+            .writeMode()
+            .addParameter("startNodeId", id("a"))
+            .addParameter("k", 2)
+            .yields("createMillis", "computeMillis", "writeMillis");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertTrue(row.getNumber("createMillis").longValue() >= 0);
             assertTrue(row.getNumber("writeMillis").longValue() >= 0);
             assertTrue(row.getNumber("computeMillis").longValue() >= 0);
         });
@@ -81,10 +99,18 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
     @Test
     void testMin() {
-        final String cypher = "MATCH (n:Node {name:'a'}) WITH n CALL algo.spanningTree.kmin(null, null, 'w', id(n), 2, {graph:'huge'}) " +
-                "YIELD loadMillis, computeMillis, writeMillis RETURN loadMillis, computeMillis, writeMillis";
-        runQueryWithRowConsumer(cypher, row -> {
-            assertTrue(row.getNumber("loadMillis").longValue() >= 0);
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipType("*", RelationshipProjection.builder().projection(Projection.UNDIRECTED).build())
+            .withRelationshipProperty("w")
+            .algo("gds.alpha.spanningTree.kmin")
+            .writeMode()
+            .addParameter("startNodeId", id("a"))
+            .addParameter("k", 2)
+            .yields("createMillis", "computeMillis", "writeMillis");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertTrue(row.getNumber("createMillis").longValue() >= 0);
             assertTrue(row.getNumber("writeMillis").longValue() >= 0);
             assertTrue(row.getNumber("computeMillis").longValue() >= 0);
         });

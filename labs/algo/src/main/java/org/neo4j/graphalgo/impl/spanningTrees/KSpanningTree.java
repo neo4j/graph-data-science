@@ -19,13 +19,15 @@
  */
 package org.neo4j.graphalgo.impl.spanningTrees;
 
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
+
+import java.util.function.DoubleUnaryOperator;
 
 /**
  * The algorithm computes the MST by traversing all nodes from a given
@@ -37,42 +39,47 @@ import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
  * relationships to form k spanning trees
  * @author mknblch
  */
-public class KSpanningTree extends LegacyAlgorithm<KSpanningTree> {
+public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
 
     private IdMapping idMapping;
     private RelationshipIterator relationshipIterator;
     private RelationshipProperties weights;
     private final int nodeCount;
+    private final DoubleUnaryOperator minMax;
+    private final int startNodeId;
+    private final long k;
 
-    private SpanningTree kSpanningTree;
+    private SpanningTree spanningTree;
 
-    public KSpanningTree(IdMapping idMapping, RelationshipIterator relationshipIterator, RelationshipProperties weights) {
+    public KSpanningTree(
+        IdMapping idMapping,
+        RelationshipIterator relationshipIterator,
+        RelationshipProperties weights,
+        DoubleUnaryOperator minMax,
+        int startNodeId,
+        long k
+) {
         this.idMapping = idMapping;
         this.relationshipIterator = relationshipIterator;
         this.weights = weights;
-        nodeCount = Math.toIntExact(idMapping.nodeCount());
+        this.nodeCount = Math.toIntExact(idMapping.nodeCount());
+        this.minMax = minMax;
+        this.startNodeId = startNodeId;
+        this.k = k;
     }
 
-    /**
-     * compute the spanning tree
-     * @param startNodeId the start node
-     * @param k
-     * @param max
-     * @return
-     */
-    public KSpanningTree compute(long startNodeId, long k, boolean max) {
-        int startNode = Math.toIntExact(startNodeId);
-
+    @Override
+    public SpanningTree compute() {
         ProgressLogger logger = getProgressLogger();
         Prim prim = new Prim(
             idMapping,
             relationshipIterator,
-            max ? Prim.MAX_OPERATOR : Prim.MIN_OPERATOR,
-            startNode
+            minMax,
+            startNodeId
         ).withProgressLogger(getProgressLogger())
             .withTerminationFlag(getTerminationFlag());
 
-        IntPriorityQueue priorityQueue = max ? IntPriorityQueue.min() : IntPriorityQueue.max();
+        IntPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR ? IntPriorityQueue.min() : IntPriorityQueue.max();
         SpanningTree spanningTree = prim.compute();
         int[] parent = spanningTree.parent;
         for (int i = 0; i < parent.length && running(); i++) {
@@ -88,12 +95,12 @@ public class KSpanningTree extends LegacyAlgorithm<KSpanningTree> {
             int cutNode = priorityQueue.pop();
             parent[cutNode] = -1;
         }
-        this.kSpanningTree = prim.getSpanningTree();
-        return this;
+        this.spanningTree = prim.getSpanningTree();
+        return this.spanningTree;
     }
 
     public SpanningTree getSpanningTree() {
-        return kSpanningTree;
+        return spanningTree;
     }
 
     @Override
@@ -106,6 +113,6 @@ public class KSpanningTree extends LegacyAlgorithm<KSpanningTree> {
         idMapping = null;
         relationshipIterator = null;
         weights = null;
-        kSpanningTree = null;
+        spanningTree = null;
     }
 }

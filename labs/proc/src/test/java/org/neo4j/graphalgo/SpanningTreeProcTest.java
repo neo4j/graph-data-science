@@ -62,7 +62,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(cypher);
-        registerProcedures(SpanningTreeProc.class, PrimProc.class);
+        registerProcedures(SpanningTreeProc.class);
     }
 
     private long getStartNodeId() {
@@ -87,7 +87,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
             .writeMode()
             .addParameter("startNodeId", getStartNodeId())
             .addParameter("weightProperty", "cost")
-            .yields("loadMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
+            .yields("createMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
 
         runQueryWithRowConsumer(
             query,
@@ -121,7 +121,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
             .addParameter("startNodeId", getStartNodeId())
             .addParameter("writeProperty", "MAX")
             .addParameter("weightProperty", "cost")
-            .yields("loadMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
+            .yields("createMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
 
         runQueryWithRowConsumer(
             query,
