@@ -23,6 +23,7 @@ This chapter is divided into the following sections:
 * <<algorithms-centrality>>
 * <<algorithms-community>>
 * <<algorithms-graph-similarity>>
+* <<algorithms-path-finding>>
 * <<algorithms-auxiliary>>
 * <<labs-algorithms>>
 
@@ -35,5 +36,7 @@ include::algorithms-community-detection.adoc[leveloffset=+1]
 include::algorithms-graph-similarity.adoc[leveloffset=+1]
 
 include::algorithms-auxiliary.adoc[leveloffset=+1]
+
+include::algorithms-path-finding.adoc[leveloffset=+1]
 
 include::labs-algorithms.adoc[leveloffset=+1]

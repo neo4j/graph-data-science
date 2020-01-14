@@ -93,6 +93,31 @@
                 </d:tocentry>
             </d:tocentry>
 
+            <d:tocentry linkend="algorithms-path-finding">
+                <?dbhtml filename="algorithms/pathfinding/index.html"?>
+                <d:tocentry linkend="labs-algorithms-minimum-weight-spanning-tree">
+                    <?dbhtml filename="labs-algorithms/minimum-weight-spanning-tree/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-shortest-path">
+                    <?dbhtml filename="labs-algorithms/shortest-path/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-single-source-shortest-path">
+                    <?dbhtml filename="labs-algorithms/single-source-shortest-path/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithm-all-pairs-shortest-path">
+                    <?dbhtml filename="labs-algorithms/all-pairs-shortest-path/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-a_star">
+                    <?dbhtml filename="labs-algorithms/a_star/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-yens-k-shortest-path">
+                    <?dbhtml filename="labs-algorithms/yen-s-k-shortest-path/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-random-walk">
+                    <?dbhtml filename="labs-algorithms/random-walk/index.html"?>
+                </d:tocentry>
+            </d:tocentry>
+
             <d:tocentry linkend="algorithms-auxiliary">
                 <?dbhtml filename="algorithms/auxiliary/index.html"?>
                 <d:tocentry linkend="algorithms-k1coloring">
@@ -104,31 +129,6 @@
                 <?dbhtml filename="labs-algorithms/index.html"?>
                 <d:tocentry linkend="labs-procedures">
                     <?dbhtml filename="labs-procedures/index.html"?>
-                </d:tocentry>
-
-                <d:tocentry linkend="labs-algorithms-path-finding">
-                    <?dbhtml filename="labs-algorithms/pathfinding/index.html"?>
-                    <d:tocentry linkend="labs-algorithms-minimum-weight-spanning-tree">
-                        <?dbhtml filename="labs-algorithms/minimum-weight-spanning-tree/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-shortest-path">
-                        <?dbhtml filename="labs-algorithms/shortest-path/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-single-source-shortest-path">
-                        <?dbhtml filename="labs-algorithms/single-source-shortest-path/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithm-all-pairs-shortest-path">
-                        <?dbhtml filename="labs-algorithms/all-pairs-shortest-path/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-a_star">
-                        <?dbhtml filename="labs-algorithms/a_star/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-yens-k-shortest-path">
-                        <?dbhtml filename="labs-algorithms/yen-s-k-shortest-path/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-random-walk">
-                        <?dbhtml filename="labs-algorithms/random-walk/index.html"?>
-                    </d:tocentry>
                 </d:tocentry>
 
                 <d:tocentry linkend="labs-algorithms-similarity">
