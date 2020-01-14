@@ -37,6 +37,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
@@ -81,6 +82,10 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
         SpanningTree spanningTree = computationResult.result();
         SpanningTreeConfig config = computationResult.config();
 
+        if (!Objects.nonNull(config.weightProperty())) {
+            throw new IllegalArgumentException("A weight property must be provided in order to run the spanning tree algorithm");
+        }
+
         Prim.Builder builder = new Prim.Builder();
 
         if (graph.isEmpty()) {
@@ -98,7 +103,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
             )
                 .withLog(log)
                 .build()
-                .write(config.writeRelationshipType(), config.writeProperty());
+                .write(config.writeProperty(), config.weightProperty());
         });
         return Stream.of(builder.build());
     }

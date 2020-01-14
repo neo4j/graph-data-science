@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -37,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  *     |       |        |      |
  *     d --6-- e        d      e
  */
-public class PrimProcTest extends BaseProcTest {
+public class SpanningTreeProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
@@ -46,7 +47,7 @@ public class PrimProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        String cypher = "CREATE(a:Node {start:true}) " +
+        String cypher = "CREATE(a:Node {start: true}) " +
                         "CREATE(b:Node) " +
                         "CREATE(c:Node) " +
                         "CREATE(d:Node) " +
@@ -61,23 +62,37 @@ public class PrimProcTest extends BaseProcTest {
 
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(cypher);
-        registerProcedures(PrimProc.class);
+        registerProcedures(SpanningTreeProc.class, PrimProc.class);
+    }
+
+    private long getStartNodeId() {
+        return runQuery(
+            "MATCH (n) WHERE n.start = true RETURN id(n) AS id",
+            result -> result.<Long>columnAs("id").next()
+        );
     }
 
     @Test
     void testMinimum() {
 
+        String query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType(
+                "TYPE",
+                RelationshipProjection.builder()
+                    .projection(Projection.UNDIRECTED)
+                    .addProperty(PropertyMapping.of("cost", 1.0D))
+                    .build()
+            )
+            .algo("gds.alpha.spanningTree")
+            .writeMode()
+            .addParameter("startNodeId", getStartNodeId())
+            .addParameter("writeProperty", "min")
+            .yields("loadMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
+
         runQueryWithRowConsumer(
-            "MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree('Node', 'TYPE', 'cost', id(n), {graph:'huge', write:true, stats:true}) " +
-            "YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount " +
-            "RETURN loadMillis, computeMillis, writeMillis, effectiveNodeCount",
+            query,
             res -> {
-
-                System.out.println(res.get("loadMillis"));
-                System.out.println(res.get("computeMillis"));
-                System.out.println(res.get("writeMillis"));
-                System.out.println(res.get("effectiveNodeCount"));
-
                 assertNotEquals(-1L, res.getNumber("writeMillis").longValue());
                 assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
             }
@@ -85,9 +100,7 @@ public class PrimProcTest extends BaseProcTest {
 
         final long relCount = runQuery(
             "MATCH (a)-[:MST]->(b) RETURN id(a) as a, id(b) as b",
-            result -> result.stream()
-                .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
-                .count()
+            result -> result.stream().count()
         );
 
         assertEquals(relCount, 4);
@@ -96,17 +109,25 @@ public class PrimProcTest extends BaseProcTest {
     @Test
     void testMaximum() {
 
+        String query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType(
+                "TYPE",
+                RelationshipProjection.builder()
+                    .projection(Projection.UNDIRECTED)
+                    .addProperty(PropertyMapping.of("cost", 1.0D))
+                    .build()
+            )
+            .algo("gds.alpha.spanningTree.maximum")
+            .writeMode()
+            .addParameter("startNodeId", getStartNodeId())
+            .addParameter("writeProperty", "MAX")
+            .addParameter("weightProperty", "cost")
+            .yields("loadMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
+
         runQueryWithRowConsumer(
-            "MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree.maximum('Node', 'TYPE', 'cost', id(n), {writeProperty:'MAX', graph:'huge', write:true, stats:true}) " +
-            "YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount " +
-            "RETURN loadMillis, computeMillis, writeMillis, effectiveNodeCount",
+            query,
             res -> {
-
-                System.out.println(res.get("loadMillis"));
-                System.out.println(res.get("computeMillis"));
-                System.out.println(res.get("writeMillis"));
-                System.out.println(res.get("effectiveNodeCount"));
-
                 assertNotEquals(-1L, res.getNumber("writeMillis").longValue());
                 assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
             }
@@ -114,9 +135,7 @@ public class PrimProcTest extends BaseProcTest {
 
         long relCount = runQuery(
             "MATCH (a)-[:MAX]->(b) RETURN id(a) as a, id(b) as b",
-            result -> result.stream()
-                .peek(m -> System.out.println(m.get("a") + " -> " + m.get("b")))
-                .count()
+            result -> result.stream().count()
         );
 
         assertEquals(relCount, 4);

@@ -44,11 +44,6 @@ public interface SpanningTreeConfig extends
     @Value.Default
     @Value.Derived
     default String writeProperty() {
-        return weightProperty();
-    }
-
-    @Value.Default
-    default String writeRelationshipType() {
         return WRITE_RELATIONSHIP_TYPE;
     }
 
