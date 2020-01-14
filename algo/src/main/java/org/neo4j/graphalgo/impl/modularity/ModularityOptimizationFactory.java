@@ -21,8 +21,6 @@ package org.neo4j.graphalgo.impl.modularity;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -32,16 +30,10 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.modularity.ModularityOptimizationConfig;
 import org.neo4j.logging.Log;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
-import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
-
-public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOptimization, ProcedureConfiguration> {
-
-    public static final int DEFAULT_MAX_ITERATIONS = 10;
+public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> extends AlgorithmFactory<ModularityOptimization, T> {
 
     public static final MemoryEstimation MEMORY_ESTIMATION =
         MemoryEstimations.builder(ModularityOptimization.class)
@@ -70,26 +62,20 @@ public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOp
             .build();
 
     @Override
-    public MemoryEstimation memoryEstimation(ProcedureConfiguration config) {
+    public MemoryEstimation memoryEstimation(T configuration) {
         return MEMORY_ESTIMATION;
     }
 
     @Override
-    public ModularityOptimization build(
-        Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log
-    ) {
-        NodeProperties seedProperty = configuration.getString(SEED_PROPERTY_KEY)
-            .map(graph::nodeProperties)
-            .orElse(null);
-
+    public ModularityOptimization build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
         return new ModularityOptimization(
             graph,
-            configuration.getDirection(Direction.OUTGOING),
-            configuration.getIterations(DEFAULT_MAX_ITERATIONS),
-            configuration.getNumber(TOLERANCE_KEY, TOLERANCE_DEFAULT).doubleValue(),
-            seedProperty,
+            configuration.direction(),
+            configuration.maxIterations(),
+            configuration.tolerance(),
+            graph.nodeProperties(configuration.seedProperty()),
             configuration.concurrency(),
-            configuration.getBatchSize(),
+            configuration.batchSize(),
             Pools.DEFAULT,
             tracker,
             log

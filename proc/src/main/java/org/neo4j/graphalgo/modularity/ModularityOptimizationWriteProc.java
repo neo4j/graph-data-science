@@ -109,7 +109,7 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
     }
 
     static final class ModularityOptimizationTranslator implements PropertyTranslator.OfLong<ModularityOptimization> {
-        public static final ModularityOptimizationProc.ModularityOptimizationTranslator INSTANCE = new ModularityOptimizationProc.ModularityOptimizationTranslator();
+        public static final ModularityOptimizationTranslator INSTANCE = new ModularityOptimizationTranslator();
 
         @Override
         public long toLong(ModularityOptimization data, long nodeId) {

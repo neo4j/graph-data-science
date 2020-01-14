@@ -33,12 +33,14 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.modularity.ImmutableModularityOptimizationStreamConfig;
+import org.neo4j.graphalgo.modularity.ModularityOptimizationStreamConfig;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.logging.NullLog;
 
 import java.util.stream.Stream;
@@ -277,8 +279,12 @@ class ModularityOptimizationTest extends AlgoTestBase {
     void testMemoryEstimation(int concurrency, long min, long max) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000L).build();
 
-        MemoryTree memoryTree = new ModularityOptimizationFactory()
-            .memoryEstimation(ProcedureConfiguration.empty())
+        ModularityOptimizationStreamConfig config = ImmutableModularityOptimizationStreamConfig.builder()
+            .username(AuthSubject.ANONYMOUS.username())
+            .graphName("")
+            .build();
+        MemoryTree memoryTree = new ModularityOptimizationFactory<>()
+            .memoryEstimation(config)
             .estimate(dimensions, concurrency);
         assertEquals(min, memoryTree.memoryUsage().min);
         assertEquals(max, memoryTree.memoryUsage().max);
