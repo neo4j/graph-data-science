@@ -74,7 +74,6 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
     @Test
     void testMinimum() {
-
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType(
@@ -87,7 +86,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
             .algo("gds.alpha.spanningTree")
             .writeMode()
             .addParameter("startNodeId", getStartNodeId())
-            .addParameter("writeProperty", "min")
+            .addParameter("weightProperty", "cost")
             .yields("loadMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
 
         runQueryWithRowConsumer(
@@ -108,7 +107,6 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
     @Test
     void testMaximum() {
-
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType(
