@@ -18,15 +18,6 @@ Neo4j GDS includes the following path finding algorithms, grouped by quality tie
 ** <<labs-algorithms-yens-k-shortest-path, Yen’s K-shortest paths>> (`algo.kShortestPaths`)
 ** <<labs-algorithms-random-walk, Random Walk>> (`algo.randomWalk`)
 
-[WARNING]
-====
-As of the 3.4.7.0 release, all the Shortest Path procedures assume that they are being executed on undirected graphs.
-Therefore, the direction of a relationship can be ignored.
-
-If you are running these algorithms on a graph where the direction is important, you can use the `direction` parameter.
-For example, `direction:"INCOMING"` or `direction:"OUTGOING"`.
-====
-
 include::labs-minimum-weight-spanning-tree.adoc[leveloffset=+1]
 
 include::labs-shortest-path.adoc[leveloffset=+1]
