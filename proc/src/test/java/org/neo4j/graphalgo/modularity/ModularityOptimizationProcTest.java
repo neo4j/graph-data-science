@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.modularity.ModularityOptimizationProc;
 
 import java.util.Map;
 
@@ -109,59 +108,6 @@ class ModularityOptimizationProcTest extends BaseProcTest {
         });
 
         assertWriteResult(WEIGHTED_COMMUNITIES);
-    }
-
-    @Test
-    void streamingOnImplicitlyLoadedGraph() {
-        String query = "CALL algo.beta.modularityOptimization.stream(" +
-                       "    null, null, {" +
-                       "        direction: 'BOTH'" +
-                       "    }" +
-                       ") YIELD nodeId, community";
-
-        long[] communities = new long[6];
-        runQueryWithRowConsumer(query, row -> {
-            long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int) nodeId] = row.getNumber("community").longValue();
-        });
-
-        assertCommunities(communities, UNWEIGHTED_COMMUNITIES);
-    }
-
-    @Test
-    @Disabled
-    void weightedStreamingOnImplicitlyLoadedGraph() {
-        String query = "CALL algo.beta.modularityOptimization.stream(" +
-                       "    null, null, {" +
-                       "        direction: 'BOTH', relationshipProperties: 'weight'" +
-                       "    }" +
-                       ") YIELD nodeId, community";
-
-        long[] communities = new long[6];
-        runQueryWithRowConsumer(query, row -> {
-            long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int) nodeId] = row.getNumber("community").longValue();
-        });
-
-        assertCommunities(communities, WEIGHTED_COMMUNITIES);
-    }
-
-    @Test
-    void streamingWithSeeding() {
-        String query = "CALL algo.beta.modularityOptimization.stream(" +
-                       "    null, null, {" +
-                       "        direction: 'BOTH', seedProperty: 'seed1'" +
-                       "    }" +
-                       ") YIELD nodeId, community";
-
-        long[] communities = new long[6];
-        runQueryWithRowConsumer(query, row -> {
-            long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int) nodeId] = row.getNumber("community").longValue();
-        });
-
-        assertCommunities(communities, SEEDED_COMMUNITIES);
-        assertTrue(communities[0] == 0 && communities[2] == 2);
     }
 
     @Test

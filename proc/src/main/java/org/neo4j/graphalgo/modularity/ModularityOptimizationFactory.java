@@ -17,44 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.k1coloring;
+
+package org.neo4j.graphalgo.modularity;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.impl.coloring.ColoringStep;
-import org.neo4j.graphalgo.impl.coloring.K1Coloring;
+import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
 import org.neo4j.logging.Log;
 
-public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFactory<K1Coloring, T> {
-
+public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> extends AlgorithmFactory<ModularityOptimization, T> {
     @Override
-    public K1Coloring build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
-        return new K1Coloring(
+    public ModularityOptimization build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
+        return new ModularityOptimization(
             graph,
             configuration.direction(),
             configuration.maxIterations(),
-            configuration.batchSize(),
+            configuration.tolerance(),
+            graph.nodeProperties(configuration.seedProperty()),
             configuration.concurrency(),
+            configuration.batchSize(),
             Pools.DEFAULT,
-            tracker
+            tracker,
+            log
         );
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(T config) {
-        return MemoryEstimations.builder(K1Coloring.class)
-            .perNode("colors", HugeLongArray::memoryEstimation)
-            .perNode("nodesToColor", MemoryUsage::sizeOfBitset)
-            .perThread("coloring", MemoryEstimations.builder()
-                .field("coloringStep", ColoringStep.class)
-                .perNode("forbiddenColors", MemoryUsage::sizeOfBitset)
-                .build())
-            .build();
+    public MemoryEstimation memoryEstimation(T configuration) {
+        return MemoryEstimations.empty();
     }
 }

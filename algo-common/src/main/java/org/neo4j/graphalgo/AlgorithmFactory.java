@@ -29,11 +29,7 @@ import org.neo4j.logging.Log;
 
 public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
 
-    public abstract ALGO build(
-            final Graph graph,
-            final CONFIG configuration,
-            final AllocationTracker tracker,
-            final Log log);
+    public abstract ALGO build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log);
 
     /**
      * Returns an estimation about the memory consumption of that algorithm. The memory estimation can be used to

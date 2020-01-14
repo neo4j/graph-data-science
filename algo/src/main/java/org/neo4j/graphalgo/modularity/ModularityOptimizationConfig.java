@@ -25,16 +25,26 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfig;
+import org.neo4j.graphalgo.newapi.SeedConfig;
 import org.neo4j.graphalgo.newapi.ToleranceConfig;
+import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphdb.Direction;
 
 public interface ModularityOptimizationConfig extends
     AlgoBaseConfig,
     IterationsConfig,
-    ToleranceConfig {
+    SeedConfig,
+    ToleranceConfig,
+    WeightConfig {
 
     Direction DEFAULT_DIRECTION = Direction.OUTGOING;
     int DEFAULT_ITERATIONS = 10;
+
+    @Value.Default
+    @Override
+    default double tolerance() {
+        return 1E-7;
+    }
 
     @Override
     @Value.Default
