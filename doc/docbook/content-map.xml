@@ -37,9 +37,6 @@
 
         <d:tocentry linkend="algorithms">
             <?dbhtml filename="algorithms/index.html"?>
-            <d:tocentry linkend="algorithms-pagerank">
-                <?dbhtml filename="algorithms/page-rank/index.html"?>
-            </d:tocentry>
 
             <d:tocentry linkend="algorithms-centrality">
                 <?dbhtml filename="algorithms/centrality/index.html"?>
