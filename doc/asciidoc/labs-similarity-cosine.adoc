@@ -95,42 +95,42 @@ We can also use it to compute the similarity of nodes based on lists computed by
 .The following will create a sample graph:
 [source, cypher]
 ----
-MERGE (french:Cuisine {name:'French'})
-MERGE (italian:Cuisine {name:'Italian'})
-MERGE (indian:Cuisine {name:'Indian'})
-MERGE (lebanese:Cuisine {name:'Lebanese'})
-MERGE (portuguese:Cuisine {name:'Portuguese'})
-MERGE (british:Cuisine {name:'British'})
-MERGE (mauritian:Cuisine {name:'Mauritian'})
+CREATE (french:Cuisine {name:'French'})
+CREATE (italian:Cuisine {name:'Italian'})
+CREATE (indian:Cuisine {name:'Indian'})
+CREATE (lebanese:Cuisine {name:'Lebanese'})
+CREATE (portuguese:Cuisine {name:'Portuguese'})
+CREATE (british:Cuisine {name:'British'})
+CREATE (mauritian:Cuisine {name:'Mauritian'})
 
-MERGE (zhen:Person {name: "Zhen"})
-MERGE (praveena:Person {name: "Praveena"})
-MERGE (michael:Person {name: "Michael"})
-MERGE (arya:Person {name: "Arya"})
-MERGE (karin:Person {name: "Karin"})
+CREATE (zhen:Person {name: "Zhen"})
+CREATE (praveena:Person {name: "Praveena"})
+CREATE (michael:Person {name: "Michael"})
+CREATE (arya:Person {name: "Arya"})
+CREATE (karin:Person {name: "Karin"})
 
-MERGE (praveena)-[:LIKES {score: 9}]->(indian)
-MERGE (praveena)-[:LIKES {score: 7}]->(portuguese)
-MERGE (praveena)-[:LIKES {score: 8}]->(british)
-MERGE (praveena)-[:LIKES {score: 1}]->(mauritian)
+CREATE (praveena)-[:LIKES {score: 9}]->(indian)
+CREATE (praveena)-[:LIKES {score: 7}]->(portuguese)
+CREATE (praveena)-[:LIKES {score: 8}]->(british)
+CREATE (praveena)-[:LIKES {score: 1}]->(mauritian)
 
-MERGE (zhen)-[:LIKES {score: 10}]->(french)
-MERGE (zhen)-[:LIKES {score: 6}]->(indian)
-MERGE (zhen)-[:LIKES {score: 2}]->(british)
+CREATE (zhen)-[:LIKES {score: 10}]->(french)
+CREATE (zhen)-[:LIKES {score: 6}]->(indian)
+CREATE (zhen)-[:LIKES {score: 2}]->(british)
 
-MERGE (michael)-[:LIKES {score: 8}]->(french)
-MERGE (michael)-[:LIKES {score: 7}]->(italian)
-MERGE (michael)-[:LIKES {score: 9}]->(indian)
-MERGE (michael)-[:LIKES {score: 3}]->(portuguese)
+CREATE (michael)-[:LIKES {score: 8}]->(french)
+CREATE (michael)-[:LIKES {score: 7}]->(italian)
+CREATE (michael)-[:LIKES {score: 9}]->(indian)
+CREATE (michael)-[:LIKES {score: 3}]->(portuguese)
 
-MERGE (arya)-[:LIKES {score: 10}]->(lebanese)
-MERGE (arya)-[:LIKES {score: 10}]->(italian)
-MERGE (arya)-[:LIKES {score: 7}]->(portuguese)
-MERGE (arya)-[:LIKES {score: 9}]->(mauritian)
+CREATE (arya)-[:LIKES {score: 10}]->(lebanese)
+CREATE (arya)-[:LIKES {score: 10}]->(italian)
+CREATE (arya)-[:LIKES {score: 7}]->(portuguese)
+CREATE (arya)-[:LIKES {score: 9}]->(mauritian)
 
-MERGE (karin)-[:LIKES {score: 9}]->(lebanese)
-MERGE (karin)-[:LIKES {score: 7}]->(italian)
-MERGE (karin)-[:LIKES {score: 10}]->(portuguese)
+CREATE (karin)-[:LIKES {score: 9}]->(lebanese)
+CREATE (karin)-[:LIKES {score: 7}]->(italian)
+CREATE (karin)-[:LIKES {score: 10}]->(portuguese)
 ----
 
 .The following will return the Cosine similarity of Michael and Arya:
@@ -184,42 +184,42 @@ include::labs-similarity.adoc[tag=weighted-note]
 .The following will create a sample graph:
 [source, cypher]
 ----
-MERGE (french:Cuisine {name:'French'})
-MERGE (italian:Cuisine {name:'Italian'})
-MERGE (indian:Cuisine {name:'Indian'})
-MERGE (lebanese:Cuisine {name:'Lebanese'})
-MERGE (portuguese:Cuisine {name:'Portuguese'})
-MERGE (british:Cuisine {name:'British'})
-MERGE (mauritian:Cuisine {name:'Mauritian'})
+CREATE (french:Cuisine {name:'French'})
+CREATE (italian:Cuisine {name:'Italian'})
+CREATE (indian:Cuisine {name:'Indian'})
+CREATE (lebanese:Cuisine {name:'Lebanese'})
+CREATE (portuguese:Cuisine {name:'Portuguese'})
+CREATE (british:Cuisine {name:'British'})
+CREATE (mauritian:Cuisine {name:'Mauritian'})
 
-MERGE (zhen:Person {name: "Zhen"})
-MERGE (praveena:Person {name: "Praveena"})
-MERGE (michael:Person {name: "Michael"})
-MERGE (arya:Person {name: "Arya"})
-MERGE (karin:Person {name: "Karin"})
+CREATE (zhen:Person {name: "Zhen"})
+CREATE (praveena:Person {name: "Praveena"})
+CREATE (michael:Person {name: "Michael"})
+CREATE (arya:Person {name: "Arya"})
+CREATE (karin:Person {name: "Karin"})
 
-MERGE (praveena)-[:LIKES {score: 9}]->(indian)
-MERGE (praveena)-[:LIKES {score: 7}]->(portuguese)
-MERGE (praveena)-[:LIKES {score: 8}]->(british)
-MERGE (praveena)-[:LIKES {score: 1}]->(mauritian)
+CREATE (praveena)-[:LIKES {score: 9}]->(indian)
+CREATE (praveena)-[:LIKES {score: 7}]->(portuguese)
+CREATE (praveena)-[:LIKES {score: 8}]->(british)
+CREATE (praveena)-[:LIKES {score: 1}]->(mauritian)
 
-MERGE (zhen)-[:LIKES {score: 10}]->(french)
-MERGE (zhen)-[:LIKES {score: 6}]->(indian)
-MERGE (zhen)-[:LIKES {score: 2}]->(british)
+CREATE (zhen)-[:LIKES {score: 10}]->(french)
+CREATE (zhen)-[:LIKES {score: 6}]->(indian)
+CREATE (zhen)-[:LIKES {score: 2}]->(british)
 
-MERGE (michael)-[:LIKES {score: 8}]->(french)
-MERGE (michael)-[:LIKES {score: 7}]->(italian)
-MERGE (michael)-[:LIKES {score: 9}]->(indian)
-MERGE (michael)-[:LIKES {score: 3}]->(portuguese)
+CREATE (michael)-[:LIKES {score: 8}]->(french)
+CREATE (michael)-[:LIKES {score: 7}]->(italian)
+CREATE (michael)-[:LIKES {score: 9}]->(indian)
+CREATE (michael)-[:LIKES {score: 3}]->(portuguese)
 
-MERGE (arya)-[:LIKES {score: 10}]->(lebanese)
-MERGE (arya)-[:LIKES {score: 10}]->(italian)
-MERGE (arya)-[:LIKES {score: 7}]->(portuguese)
-MERGE (arya)-[:LIKES {score: 9}]->(mauritian)
+CREATE (arya)-[:LIKES {score: 10}]->(lebanese)
+CREATE (arya)-[:LIKES {score: 10}]->(italian)
+CREATE (arya)-[:LIKES {score: 7}]->(portuguese)
+CREATE (arya)-[:LIKES {score: 9}]->(mauritian)
 
-MERGE (karin)-[:LIKES {score: 9}]->(lebanese)
-MERGE (karin)-[:LIKES {score: 7}]->(italian)
-MERGE (karin)-[:LIKES {score: 10}]->(portuguese)
+CREATE (karin)-[:LIKES {score: 9}]->(lebanese)
+CREATE (karin)-[:LIKES {score: 7}]->(italian)
+CREATE (karin)-[:LIKES {score: 10}]->(portuguese)
 ----
 
 
@@ -402,8 +402,8 @@ We could use this technique to compute the similarity of a subset of items to al
 [opts="header",cols="1,1,1"]
 |===
 | `from`   | `to`     | `similarity`
-| Praveena | Karin   | 1.0                
-| Arya     | Michael | 0.9788908326303921 
+| Praveena | Karin   | 1.0
+| Arya     | Michael | 0.9788908326303921
 |===
 
 [[algorithms-similarity-cosine-skipping-values]]
@@ -416,13 +416,13 @@ For cases where no values should be skipped, skipping can be disabled by setting
 .The following will create a sample graph:
 [source, cypher]
 ----
-MERGE (french:Cuisine {name:'French'})          SET french.embedding = [0.71, 0.33, 0.81, 0.52, 0.41]
-MERGE (italian:Cuisine {name:'Italian'})        SET italian.embedding = [0.31, 0.72, 0.58, 0.67, 0.31]
-MERGE (indian:Cuisine {name:'Indian'})          SET indian.embedding = [0.43, 0.26, 0.98, 0.51, 0.76]
-MERGE (lebanese:Cuisine {name:'Lebanese'})      SET lebanese.embedding = [0.12, 0.23, 0.35, 0.31, 0.39]
-MERGE (portuguese:Cuisine {name:'Portuguese'})  SET portuguese.embedding = [0.47, 0.98, 0.81, 0.72, 0.89]
-MERGE (british:Cuisine {name:'British'})        SET british.embedding = [0.94, 0.12, 0.23, 0.4, 0.71]
-MERGE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31, 0.56, 0.98, 0.21, 0.62]
+CREATE (french:Cuisine {name:'French'})          SET french.embedding = [0.71, 0.33, 0.81, 0.52, 0.41]
+CREATE (italian:Cuisine {name:'Italian'})        SET italian.embedding = [0.31, 0.72, 0.58, 0.67, 0.31]
+CREATE (indian:Cuisine {name:'Indian'})          SET indian.embedding = [0.43, 0.26, 0.98, 0.51, 0.76]
+CREATE (lebanese:Cuisine {name:'Lebanese'})      SET lebanese.embedding = [0.12, 0.23, 0.35, 0.31, 0.39]
+CREATE (portuguese:Cuisine {name:'Portuguese'})  SET portuguese.embedding = [0.47, 0.98, 0.81, 0.72, 0.89]
+CREATE (british:Cuisine {name:'British'})        SET british.embedding = [0.94, 0.12, 0.23, 0.4, 0.71]
+CREATE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31, 0.56, 0.98, 0.21, 0.62]
 ----
 
 .The following will find the similarity between cuisines based on the `embedding` property:

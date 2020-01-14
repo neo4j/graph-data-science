@@ -38,40 +38,40 @@ class CosineDocTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws KernelException {
-        String createGraph = "MERGE (french:Cuisine {name:'French'})" +
-                             "MERGE (italian:Cuisine {name:'Italian'})" +
-                             "MERGE (indian:Cuisine {name:'Indian'})" +
-                             "MERGE (lebanese:Cuisine {name:'Lebanese'})" +
-                             "MERGE (portuguese:Cuisine {name:'Portuguese'})" +
-                             "MERGE (british:Cuisine {name:'British'})" +
-                             "MERGE (mauritian:Cuisine {name:'Mauritian'})" +
+        String createGraph = "CREATE (french:Cuisine {name:'French'})" +
+                             "CREATE (italian:Cuisine {name:'Italian'})" +
+                             "CREATE (indian:Cuisine {name:'Indian'})" +
+                             "CREATE (lebanese:Cuisine {name:'Lebanese'})" +
+                             "CREATE (portuguese:Cuisine {name:'Portuguese'})" +
+                             "CREATE (british:Cuisine {name:'British'})" +
+                             "CREATE (mauritian:Cuisine {name:'Mauritian'})" +
 
-                             "MERGE (zhen:Person {name: \"Zhen\"})" +
-                             "MERGE (praveena:Person {name: \"Praveena\"})" +
-                             "MERGE (michael:Person {name: \"Michael\"})" +
-                             "MERGE (arya:Person {name: \"Arya\"})" +
-                             "MERGE (karin:Person {name: \"Karin\"})" +
-                             "MERGE (praveena)-[:LIKES {score: 9}]->(indian)" +
-                             "MERGE (praveena)-[:LIKES {score: 7}]->(portuguese)" +
-                             "MERGE (praveena)-[:LIKES {score: 8}]->(british)" +
-                             "MERGE (praveena)-[:LIKES {score: 1}]->(mauritian)" +
-                             "MERGE (zhen)-[:LIKES {score: 10}]->(french)" +
-                             "MERGE (zhen)-[:LIKES {score: 6}]->(indian)" +
-                             "MERGE (zhen)-[:LIKES {score: 2}]->(british)" +
+                             "CREATE (zhen:Person {name: \"Zhen\"})" +
+                             "CREATE (praveena:Person {name: \"Praveena\"})" +
+                             "CREATE (michael:Person {name: \"Michael\"})" +
+                             "CREATE (arya:Person {name: \"Arya\"})" +
+                             "CREATE (karin:Person {name: \"Karin\"})" +
+                             "CREATE (praveena)-[:LIKES {score: 9}]->(indian)" +
+                             "CREATE (praveena)-[:LIKES {score: 7}]->(portuguese)" +
+                             "CREATE (praveena)-[:LIKES {score: 8}]->(british)" +
+                             "CREATE (praveena)-[:LIKES {score: 1}]->(mauritian)" +
+                             "CREATE (zhen)-[:LIKES {score: 10}]->(french)" +
+                             "CREATE (zhen)-[:LIKES {score: 6}]->(indian)" +
+                             "CREATE (zhen)-[:LIKES {score: 2}]->(british)" +
 
-                             "MERGE (michael)-[:LIKES {score: 8}]->(french)" +
-                             "MERGE (michael)-[:LIKES {score: 7}]->(italian)" +
-                             "MERGE (michael)-[:LIKES {score: 9}]->(indian)" +
-                             "MERGE (michael)-[:LIKES {score: 3}]->(portuguese)" +
+                             "CREATE (michael)-[:LIKES {score: 8}]->(french)" +
+                             "CREATE (michael)-[:LIKES {score: 7}]->(italian)" +
+                             "CREATE (michael)-[:LIKES {score: 9}]->(indian)" +
+                             "CREATE (michael)-[:LIKES {score: 3}]->(portuguese)" +
 
-                             "MERGE (arya)-[:LIKES {score: 10}]->(lebanese)" +
-                             "MERGE (arya)-[:LIKES {score: 10}]->(italian)" +
-                             "MERGE (arya)-[:LIKES {score: 7}]->(portuguese)" +
-                             "MERGE (arya)-[:LIKES {score: 9}]->(mauritian)" +
+                             "CREATE (arya)-[:LIKES {score: 10}]->(lebanese)" +
+                             "CREATE (arya)-[:LIKES {score: 10}]->(italian)" +
+                             "CREATE (arya)-[:LIKES {score: 7}]->(portuguese)" +
+                             "CREATE (arya)-[:LIKES {score: 9}]->(mauritian)" +
 
-                             "MERGE (karin)-[:LIKES {score: 9}]->(lebanese)" +
-                             "MERGE (karin)-[:LIKES {score: 7}]->(italian)" +
-                             "MERGE (karin)-[:LIKES {score: 10}]->(portuguese)";
+                             "CREATE (karin)-[:LIKES {score: 9}]->(lebanese)" +
+                             "CREATE (karin)-[:LIKES {score: 7}]->(italian)" +
+                             "CREATE (karin)-[:LIKES {score: 10}]->(portuguese)";
 
         db = TestDatabaseCreator.createTestDatabase(builder -> {
                 builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
@@ -310,13 +310,13 @@ class CosineDocTest extends BaseProcTest {
 
     @Test
     void embeddings() {
-        String setEmbeddingsQuery = "MERGE (french:Cuisine {name:'French'})          SET french.embedding = [0.71, 0.33, 0.81, 0.52, 0.41]\n" +
-                                    "MERGE (italian:Cuisine {name:'Italian'})        SET italian.embedding = [0.31, 0.72, 0.58, 0.67, 0.31]\n" +
-                                    "MERGE (indian:Cuisine {name:'Indian'})          SET indian.embedding = [0.43, 0.26, 0.98, 0.51, 0.76]\n" +
-                                    "MERGE (lebanese:Cuisine {name:'Lebanese'})      SET lebanese.embedding = [0.12, 0.23, 0.35, 0.31, 0.39]\n" +
-                                    "MERGE (portuguese:Cuisine {name:'Portuguese'})  SET portuguese.embedding = [0.47, 0.98, 0.81, 0.72, 0.89]\n" +
-                                    "MERGE (british:Cuisine {name:'British'})        SET british.embedding = [0.94, 0.12, 0.23, 0.4, 0.71]\n" +
-                                    "MERGE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31, 0.56, 0.98, 0.21, 0.62]";
+        String setEmbeddingsQuery = "CREATE (french:Cuisine {name:'French'})          SET french.embedding = [0.71, 0.33, 0.81, 0.52, 0.41]\n" +
+                                    "CREATE (italian:Cuisine {name:'Italian'})        SET italian.embedding = [0.31, 0.72, 0.58, 0.67, 0.31]\n" +
+                                    "CREATE (indian:Cuisine {name:'Indian'})          SET indian.embedding = [0.43, 0.26, 0.98, 0.51, 0.76]\n" +
+                                    "CREATE (lebanese:Cuisine {name:'Lebanese'})      SET lebanese.embedding = [0.12, 0.23, 0.35, 0.31, 0.39]\n" +
+                                    "CREATE (portuguese:Cuisine {name:'Portuguese'})  SET portuguese.embedding = [0.47, 0.98, 0.81, 0.72, 0.89]\n" +
+                                    "CREATE (british:Cuisine {name:'British'})        SET british.embedding = [0.94, 0.12, 0.23, 0.4, 0.71]\n" +
+                                    "CREATE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31, 0.56, 0.98, 0.21, 0.62]";
 
         runQuery(setEmbeddingsQuery);
 
