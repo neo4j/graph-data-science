@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.Traverse;
+import org.neo4j.graphalgo.impl.traverse.Traverse;
 import org.neo4j.graphalgo.impl.traverse.TraverseConfig;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.walking.WalkResult;
@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class NewTraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig> {
+public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig> {
 
     private static Traverse.TraverseAlgo traverseAlgo;
 

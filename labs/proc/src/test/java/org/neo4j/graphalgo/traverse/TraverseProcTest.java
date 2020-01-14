@@ -28,8 +28,6 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Node;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +45,7 @@ import static org.neo4j.graphalgo.compat.MapUtil.map;
  *   1\ 2/ 1\ 2/
  *    (c)   (f)
  */
-class NewTraverseProcTest extends BaseProcTest {
+class TraverseProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -70,7 +68,7 @@ class NewTraverseProcTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(NewTraverseProc.class);
+        registerProcedures(TraverseProc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -80,9 +78,6 @@ class NewTraverseProcTest extends BaseProcTest {
     }
 
     private long id(String name) {
-//        Node[] node = new Node[1];
-//        runQueryWithRowConsumer("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
-//        return node[0].getId();
         return runQuery("MATCH (n:Node) WHERE n.name = $name RETURN id(n) AS id", map("name", name), result -> result.<Long>columnAs("id").next());
     }
 
@@ -131,7 +126,6 @@ class NewTraverseProcTest extends BaseProcTest {
             .addParameter("startNode", id)
             .addParameter("maxDepth", 2)
             .yields("nodeIds");
-//        String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '>', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
         runQueryWithRowConsumer(query, row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"a", "b", "c", "d"}, nodeIds);
@@ -150,7 +144,6 @@ class NewTraverseProcTest extends BaseProcTest {
             .addParameter("startNode", id)
             .addParameter("maxDepth", 2)
             .yields("nodeIds");
-//        String cypher = "MATCH (n:Node {name:'g'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '<', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
         runQueryWithRowConsumer(query, row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"g", "e", "f", "d"}, nodeIds);

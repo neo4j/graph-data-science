@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.traverse;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +52,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
  * |   \  |
  * b-(9)--d-(1)-e
  */
-class BFSDFSMaxCostTest extends AlgoTestBase {
+class TraverseMaxCostTest extends AlgoTestBase {
 
     private Log testLog;
 

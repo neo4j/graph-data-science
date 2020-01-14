@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.traverse;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.impl.Traverse.ExitPredicate.Result;
+import org.neo4j.graphalgo.impl.traverse.Traverse.ExitPredicate.Result;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 
@@ -36,9 +36,9 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.graphalgo.impl.Traverse.DEFAULT_AGGREGATOR;
-import static org.neo4j.graphalgo.impl.Traverse.TraverseAlgo.BFS;
-import static org.neo4j.graphalgo.impl.Traverse.TraverseAlgo.DFS;
+import static org.neo4j.graphalgo.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
+import static org.neo4j.graphalgo.impl.traverse.Traverse.TraverseAlgo.BFS;
+import static org.neo4j.graphalgo.impl.traverse.Traverse.TraverseAlgo.DFS;
 
 /**
  *
@@ -50,7 +50,7 @@ import static org.neo4j.graphalgo.impl.Traverse.TraverseAlgo.DFS;
  *   1\ 2/ 1\ 2/
  *    (c)   (f)
  */
-class BFSDFSTest extends AlgoTestBase {
+class TraverseTest extends AlgoTestBase {
 
     private static Graph graph;
 
@@ -105,7 +105,6 @@ class BFSDFSTest extends AlgoTestBase {
         );
         return node[0];
     }
-
 
     /**
      * bfs on outgoing rels. until target 'd' is reached

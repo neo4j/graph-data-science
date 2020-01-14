@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
-import org.neo4j.graphalgo.impl.Traverse;
+import org.neo4j.graphalgo.impl.traverse.Traverse;
 import org.neo4j.graphdb.Direction;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -42,8 +42,8 @@ import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.neo4j.graphalgo.impl.Traverse.TraverseAlgo.BFS;
-import static org.neo4j.graphalgo.impl.Traverse.TraverseAlgo.DFS;
+import static org.neo4j.graphalgo.impl.traverse.Traverse.TraverseAlgo.BFS;
+import static org.neo4j.graphalgo.impl.traverse.Traverse.TraverseAlgo.DFS;
 
 @Threads(1)
 @Fork(value = 1, jvmArgs = {"-Xms2g", "-Xmx2g"})
