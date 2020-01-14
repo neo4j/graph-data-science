@@ -49,7 +49,6 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     RelationshipProjections relationshipProjection();
 
     @Value.Check
-    @Configuration.Ignore
     default GraphCreateFromStoreConfig withNormalizedPropertyMappings() {
         PropertyMappings nodeProperties = nodeProperties();
         PropertyMappings relationshipProperties = relationshipProperties();
@@ -122,12 +121,11 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, relationshipProjections);
         }
 
-        GraphCreateFromStoreConfig GraphCreateFromStoreConfig = new GraphCreateFromStoreConfigImpl(
+        return GraphCreateFromStoreConfigImpl.of(
             graphName,
             userName,
             config
         );
-        return GraphCreateFromStoreConfig.withNormalizedPropertyMappings();
     }
 
     static GraphCreateFromStoreConfig fromProcedureConfig(String username, CypherMapWrapper config) {
@@ -138,11 +136,10 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.empty());
         }
 
-        GraphCreateFromStoreConfig createConfig = new GraphCreateFromStoreConfigImpl(
+        return GraphCreateFromStoreConfigImpl.of(
             IMPLICIT_GRAPH_NAME,
             username,
             config
         );
-        return createConfig.withNormalizedPropertyMappings();
     }
 }

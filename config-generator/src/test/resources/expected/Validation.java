@@ -17,36 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.nodesim;
+package positive;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
-import java.util.Optional;
+import javax.annotation.processing.Generated;
 
-@ValueClass
-@Configuration("NodeSimilarityStreamConfigImpl")
-public interface NodeSimilarityStreamConfig extends NodeSimilarityBaseConfig {
+@Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
+public final class ValidationConfig implements Validation {
 
-    static NodeSimilarityStreamConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new NodeSimilarityStreamConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            username,
-            userInput
-        );
+    private final int foo;
+
+    private ValidationConfig(@NotNull CypherMapWrapper config) {
+        this.foo = config.requireInt("foo");
+        validate();
+    }
+
+    public static Validation of(@NotNull CypherMapWrapper config) {
+        Validation instance = new ValidationConfig(config);
+        instance = instance.normalize();
+        return instance;
     }
 
     @Override
-    @Configuration.Ignore
-    default boolean computeToStream() {
-        return true;
+    public int foo() {
+        return this.foo;
     }
 }

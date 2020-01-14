@@ -62,10 +62,10 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.getAnnotationMirror;
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isTypeOf;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -73,6 +73,7 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 final class GenerateConfiguration {
 
     private static final String CONFIG_VAR = "config";
+    private static final String INSTANCE_VAR = "instance";
     private static final AnnotationSpec NULLABLE = AnnotationSpec.builder(Nullable.class).build();
     private static final AnnotationSpec NOT_NULL = AnnotationSpec.builder(NotNull.class).build();
 
@@ -100,10 +101,32 @@ final class GenerateConfiguration {
     }
 
     private TypeSpec process(ConfigParser.Spec config, String packageName, String generatedClassName) {
+        TypeSpec.Builder builder = classBuilder(config, packageName, generatedClassName);
+
         FieldDefinitions fieldDefinitions = defineFields(config);
-        return classBuilder(config, packageName, generatedClassName)
-            .addFields(fieldDefinitions.fields())
-            .addMethod(defineConstructor(config, fieldDefinitions.names()))
+        builder.addFields(fieldDefinitions.fields());
+
+        MethodSpec constructor = defineConstructor(config, fieldDefinitions.names());
+        Optional<MethodSpec> factory = defineFactory(
+            config,
+            generatedClassName,
+            constructor,
+            fieldDefinitions.names()
+        );
+        if (factory.isPresent()) {
+            MethodSpec privateConstructor = MethodSpec.constructorBuilder()
+                .addAnnotations(constructor.annotations)
+                .addParameters(constructor.parameters)
+                .addCode(constructor.code)
+                .addModifiers(Modifier.PRIVATE)
+                .build();
+            builder.addMethod(privateConstructor);
+            builder.addMethod(factory.get());
+        } else {
+            builder.addMethod(constructor);
+        }
+
+        return builder
             .addMethods(defineGetters(config, fieldDefinitions.names()))
             .build();
     }
@@ -133,7 +156,7 @@ final class GenerateConfiguration {
     private FieldDefinitions defineFields(ConfigParser.Spec config) {
         NameAllocator names = new NameAllocator();
         ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
-        config.members().stream().filter(member -> !member.collectsKeys()).map(member ->
+        config.members().stream().filter(ConfigParser.Member::isConfigValue).map(member ->
             FieldSpec.builder(
                 member.typeSpecWithAnnotation(Nullable.class),
                 names.newName(member.methodName(), member),
@@ -174,6 +197,12 @@ final class GenerateConfiguration {
             }
         }
 
+        for (ConfigParser.Member member : config.members()) {
+            if (member.validates()) {
+                configMapConstructor.addStatement("$N()", member.methodName());
+            }
+        }
+
         if (requiredMapParameter) {
             configMapConstructor.addParameter(
                 TypeName.get(CypherMapWrapper.class).annotated(NOT_NULL),
@@ -182,6 +211,46 @@ final class GenerateConfiguration {
         }
 
         return configMapConstructor.build();
+    }
+
+    private Optional<MethodSpec> defineFactory(
+        ConfigParser.Spec config,
+        String generatedClassName,
+        MethodSpec constructor,
+        NameAllocator names
+    ) {
+        List<ConfigParser.Member> normalizers = config
+            .members()
+            .stream()
+            .filter(ConfigParser.Member::normalizes)
+            .collect(Collectors.toList());
+
+        if (normalizers.isEmpty()) {
+            return Optional.empty();
+        }
+
+        CodeBlock constructorArgs = constructor.parameters
+            .stream()
+            .map(param -> CodeBlock.of("$N", param))
+            .collect(CodeBlock.joining(", "));
+
+        String instanceVarName = names.newName(INSTANCE_VAR, INSTANCE_VAR);
+        TypeName interfaceType = TypeName.get(config.rootType());
+
+        MethodSpec.Builder factory = MethodSpec
+            .methodBuilder("of")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .returns(interfaceType)
+            .addParameters(constructor.parameters)
+            .addStatement("$T $N = new $L($L)", interfaceType, instanceVarName, generatedClassName, constructorArgs);
+
+        for (ConfigParser.Member member : normalizers) {
+            factory.addStatement("$1N = $1N.$2N()", instanceVarName, member.methodName());
+        }
+
+        return Optional.of(factory
+            .addStatement("return $N", instanceVarName)
+            .build());
     }
 
     private void addConfigGetterToConstructor(
@@ -252,7 +321,7 @@ final class GenerateConfiguration {
     }
 
     private Optional<MemberDefinition> memberDefinition(NameAllocator names, ConfigParser.Member member) {
-        if (member.collectsKeys()) {
+        if (!member.isConfigValue()) {
             return Optional.empty();
         }
 
@@ -492,8 +561,7 @@ final class GenerateConfiguration {
         Collection<String> configKeys = config
             .members()
             .stream()
-            .filter(member -> !member.collectsKeys())
-            .filter(member -> !isAnnotationPresent(member.method(), Parameter.class))
+            .filter(ConfigParser.Member::isMapParameter)
             .map(ConfigParser.Member::lookupKey)
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -516,19 +584,27 @@ final class GenerateConfiguration {
             .members()
             .stream()
             .map(member -> defineGetter(config, names, member))
+            .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
             .collect(Collectors.toList());
     }
 
-    private MethodSpec defineGetter(ConfigParser.Spec config, NameAllocator names, ConfigParser.Member member) {
-        MethodSpec.Builder builder = MethodSpec
-            .overriding(member.method())
-            .returns(member.typeSpecWithAnnotation(Nullable.class));
-        if (member.collectsKeys()) {
-            builder.addStatement(collectKeysCode(config));
-        } else {
-            builder.addStatement("return this.$N", names.get(member));
+    private Optional<MethodSpec> defineGetter(
+        ConfigParser.Spec config,
+        NameAllocator names,
+        ConfigParser.Member member
+    ) {
+        if (member.isConfigValue() || member.collectsKeys()) {
+            MethodSpec.Builder builder = MethodSpec
+                .overriding(member.method())
+                .returns(member.typeSpecWithAnnotation(Nullable.class));
+            if (member.collectsKeys()) {
+                builder.addStatement(collectKeysCode(config));
+            } else {
+                builder.addStatement("return this.$N", names.get(member));
+            }
+            return Optional.of(builder.build());
         }
-        return builder.build();
+        return Optional.empty();
     }
 
     private <T> Optional<T> error(CharSequence message, Element element) {

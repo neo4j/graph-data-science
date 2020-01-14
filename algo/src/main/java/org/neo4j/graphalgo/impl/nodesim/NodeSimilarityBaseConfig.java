@@ -124,7 +124,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
     }
 
     @Value.Check
-    @Configuration.Ignore
     default void validate() {
         if (degreeCutoff() < 1) {
             throw new IllegalArgumentException("Must set degree cutoff to 1 or greater");

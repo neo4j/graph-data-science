@@ -104,18 +104,17 @@ class GraphCreateConfigFromStoreTest {
             ElementIdentifier.of("A"), NodeProjection.of("A", propertyMappings2)
         ));
 
-        GraphCreateFromStoreConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName("graph")
             .relationshipProjection(RelationshipProjections.of())
             .nodeProperties(propertyMappings1)
             .nodeProjection(nodeProjections)
             .build();
 
-        GraphCreateConfig mergedProperties = graphCreateConfig.withNormalizedPropertyMappings();
-        Set<String> allProperties = mergedProperties.nodeProjection().allProperties();
+        Set<String> allProperties = graphCreateConfig.nodeProjection().allProperties();
         assertTrue(allProperties.contains("foo"));
         assertTrue(allProperties.contains("bar"));
-        assertEquals(0, mergedProperties.nodeProperties().numberOfMappings());
+        assertEquals(0, graphCreateConfig.nodeProperties().numberOfMappings());
     }
 
     @Test
@@ -137,18 +136,17 @@ class GraphCreateConfigFromStoreTest {
                 .build()
         );
 
-        GraphCreateFromStoreConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName("graph")
             .nodeProjection(NodeProjections.empty())
             .relationshipProperties(propertyMappings1)
             .relationshipProjection(relProjections)
             .build();
 
-        GraphCreateConfig mergedProperties = graphCreateConfig.withNormalizedPropertyMappings();
-        Set<String> allProperties = mergedProperties.relationshipProjection().allProperties();
+        Set<String> allProperties = graphCreateConfig.relationshipProjection().allProperties();
         assertTrue(allProperties.contains("foo"));
         assertTrue(allProperties.contains("bar"));
-        assertEquals(0, mergedProperties.relationshipProperties().numberOfMappings());
+        assertEquals(0, graphCreateConfig.relationshipProperties().numberOfMappings());
     }
 
 }
