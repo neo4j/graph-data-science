@@ -37,6 +37,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
 
 public class PrimProc extends LabsProc {
@@ -110,17 +111,12 @@ public class PrimProc extends LabsProc {
             return Stream.of(builder.build());
         }
 
+        DoubleUnaryOperator minMax = max ? Prim.MAX_OPERATOR : Prim.MIN_OPERATOR;
         final int root = Math.toIntExact(graph.toMappedNodeId(startNode));
-        final Prim mstPrim = new Prim(graph, graph)
+        final Prim mstPrim = new Prim(graph, graph, minMax, root)
                 .withProgressLogger(ProgressLogger.wrap(log, "Prim(MaximumSpanningTree)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
-        builder.timeCompute(() -> {
-            if (max) {
-                mstPrim.computeMaximumSpanningTree(root);
-            } else {
-                mstPrim.computeMinimumSpanningTree(root);
-            }
-        });
+        builder.timeCompute(mstPrim::compute);
 
         final SpanningTree spanningTree = mstPrim.getSpanningTree();
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);

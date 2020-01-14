@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.spanningTrees;
 
 import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
+import java.util.function.DoubleUnaryOperator;
 
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
@@ -48,49 +49,40 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  *
  * @author mknblch
  */
-public class Prim extends LegacyAlgorithm<Prim> {
+public class Prim extends Algorithm<Prim, SpanningTree> {
 
+    public static final DoubleUnaryOperator MAX_OPERATOR = (w) -> -w;
+    public static final DoubleUnaryOperator MIN_OPERATOR = (w) -> w;
     private final RelationshipIterator relationshipIterator;
     private final int nodeCount;
+    private final DoubleUnaryOperator minMax;
+    private final int startNode;
 
     private SpanningTree spanningTree;
 
-    public Prim(IdMapping idMapping, RelationshipIterator relationshipIterator) {
+    public Prim(IdMapping idMapping, RelationshipIterator relationshipIterator, DoubleUnaryOperator minMax, int startNode) {
         this.relationshipIterator = relationshipIterator;
-        nodeCount = Math.toIntExact(idMapping.nodeCount());
+        this.nodeCount = Math.toIntExact(idMapping.nodeCount());
+        this.minMax = minMax;
+        this.startNode = startNode;
     }
 
-    public Prim computeMaximumSpanningTree(int startNode) {
-        this.spanningTree = prim(startNode, true);
-        return this;
-    }
-
-    public Prim computeMinimumSpanningTree(int startNode) {
-        this.spanningTree = prim(startNode, false);
-        return this;
-    }
-
-    /**
-     * Calculate min or max spanning trees
-     * @param startNode the start node
-     * @param max true to calc max spanning tree, false to calc min spanning tree
-     * @return
-     */
-    private SpanningTree prim(int startNode, boolean max) {
-        final int[] parent = new int[nodeCount];
-        final IntDoubleMap cost = new IntDoubleScatterMap(nodeCount);
-        final SharedIntPriorityQueue queue = SharedIntPriorityQueue.min(
+    @Override
+    public SpanningTree compute() {
+        int[] parent = new int[nodeCount];
+        IntDoubleMap cost = new IntDoubleScatterMap(nodeCount);
+        SharedIntPriorityQueue queue = SharedIntPriorityQueue.min(
                 nodeCount,
                 cost,
                 Double.MAX_VALUE);
-        final ProgressLogger logger = getProgressLogger();
-        final SimpleBitSet visited = new SimpleBitSet(nodeCount);
+        ProgressLogger logger = getProgressLogger();
+        SimpleBitSet visited = new SimpleBitSet(nodeCount);
         Arrays.fill(parent, -1);
         cost.put(startNode, 0.0);
         queue.add(startNode, -1.0);
         int effectiveNodeCount = 0;
         while (!queue.isEmpty() && running()) {
-            final int node = queue.pop();
+            int node = queue.pop();
             if (visited.contains(node)) {
                 continue;
             }
@@ -101,7 +93,7 @@ public class Prim extends LegacyAlgorithm<Prim> {
                     return true;
                 }
                 // invert weight to calculate maximum
-                final double weight = max ? -w : w;
+                double weight = minMax.applyAsDouble(w);
                 if (weight < cost.getOrDefault(t, Double.MAX_VALUE)) {
                     if (cost.containsKey(t)) {
                         cost.put(t, weight);
@@ -116,7 +108,8 @@ public class Prim extends LegacyAlgorithm<Prim> {
             }));
             logger.logProgress(effectiveNodeCount, nodeCount - 1);
         }
-        return new SpanningTree(startNode, nodeCount, effectiveNodeCount, parent);
+        this.spanningTree = new SpanningTree(startNode, nodeCount, effectiveNodeCount, parent);
+        return this.spanningTree;
     }
 
     public SpanningTree getSpanningTree() {

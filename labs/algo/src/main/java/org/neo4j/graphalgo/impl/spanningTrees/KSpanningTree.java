@@ -53,7 +53,6 @@ public class KSpanningTree extends LegacyAlgorithm<KSpanningTree> {
         nodeCount = Math.toIntExact(idMapping.nodeCount());
     }
 
-
     /**
      * compute the spanning tree
      * @param startNodeId the start node
@@ -64,22 +63,20 @@ public class KSpanningTree extends LegacyAlgorithm<KSpanningTree> {
     public KSpanningTree compute(long startNodeId, long k, boolean max) {
         int startNode = Math.toIntExact(startNodeId);
 
-        final ProgressLogger logger = getProgressLogger();
-        final Prim prim = new Prim(idMapping, relationshipIterator)
-                .withProgressLogger(getProgressLogger())
-                .withTerminationFlag(getTerminationFlag());
+        ProgressLogger logger = getProgressLogger();
+        Prim prim = new Prim(
+            idMapping,
+            relationshipIterator,
+            max ? Prim.MAX_OPERATOR : Prim.MIN_OPERATOR,
+            startNode
+        ).withProgressLogger(getProgressLogger())
+            .withTerminationFlag(getTerminationFlag());
 
-        final IntPriorityQueue priorityQueue;
-        if (max) {
-            prim.computeMaximumSpanningTree(startNode);
-            priorityQueue = IntPriorityQueue.min();
-        } else {
-            prim.computeMinimumSpanningTree(startNode);
-            priorityQueue = IntPriorityQueue.max();
-        }
-        final int[] parent = prim.getSpanningTree().parent;
+        IntPriorityQueue priorityQueue = max ? IntPriorityQueue.min() : IntPriorityQueue.max();
+        SpanningTree spanningTree = prim.compute();
+        int[] parent = spanningTree.parent;
         for (int i = 0; i < parent.length && running(); i++) {
-            final int p = parent[i];
+            int p = parent[i];
             if (p == -1) {
                 continue;
             }
@@ -88,7 +85,7 @@ public class KSpanningTree extends LegacyAlgorithm<KSpanningTree> {
         }
         // remove k-1 relationships
         for (int i = 0; i < k - 1 && running(); i++) {
-            final int cutNode = priorityQueue.pop();
+            int cutNode = priorityQueue.pop();
             parent[cutNode] = -1;
         }
         this.kSpanningTree = prim.getSpanningTree();

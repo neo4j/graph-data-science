@@ -85,61 +85,61 @@ class PrimTest extends AlgoTestBase {
     @AllGraphTypesWithoutCypherTest
     void testMaximumFromA(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(a).getSpanningTree());
+        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, a).compute());
     }
 
     @AllGraphTypesWithoutCypherTest
     void testMaximumFromB(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(b).getSpanningTree());
+        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, b).compute());
     }
 
     @AllGraphTypesWithoutCypherTest
     void testMaximumFromC(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(c).getSpanningTree());
+        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, c).compute());
     }
 
     @AllGraphTypesWithoutCypherTest
     void testMaximumFromD(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(d).getSpanningTree());
+        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, d).compute());
     }
 
     @AllGraphTypesWithoutCypherTest
     void testMaximumFromE(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(e).getSpanningTree());
+        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, e).compute());
     }
 
     @AllGraphTypesWithoutCypherTest
     void testMinimumFromA(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(a).getSpanningTree());
+        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, a).compute());
     }
 
     @AllGraphTypesWithoutCypherTest
     void testMinimumFromB(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(b).getSpanningTree());
+        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, b).compute());
     }
 
     @AllGraphTypesWithoutCypherTest
     void testMinimumFromC(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(c).getSpanningTree());
+        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, c).compute());
     }
 
     @AllGraphTypesWithoutCypherTest
     void testMinimumFromD(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(d).getSpanningTree());
+        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, d).compute());
     }
 
     @AllGraphTypesWithoutCypherTest
     void testMinimumFromE(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
-        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(d).getSpanningTree());
+        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, e).compute());
     }
 
     private void setup(Class<? extends GraphFactory> graphImpl) {
