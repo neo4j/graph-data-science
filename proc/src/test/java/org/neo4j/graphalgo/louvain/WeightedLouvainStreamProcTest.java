@@ -30,10 +30,9 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GetNodeFunc;
-import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.ImmutablePropertyMapping;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -61,8 +60,8 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
         "Bridget", 2L,
         "Charles", 2L,
         "Doug", 3L,
-        "Mark", 5L,
-        "Michael", 5L
+        "Mark", 4L,
+        "Michael", 4L
     );
 
     @BeforeEach
@@ -72,7 +71,7 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
             dbBuilder -> dbBuilder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );
 
-        registerProcedures(LouvainStreamProc.class, LouvainWriteProc.class, GraphLoadProc.class, GraphCreateProc.class);
+        registerProcedures(LouvainStreamProc.class, LouvainWriteProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
 
         @Language("Cypher") String createDataQuery =
@@ -87,6 +86,7 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
             ", (nAlice)-[:LINK {weight: 1}]->(nCharles)" +
             ", (nCharles)-[:LINK {weight: 1}]->(nBridget)" +
             ", (nAlice)-[:LINK {weight: 5}]->(nDoug)" +
+            ", (nAlice)-[:LINK  {weight: null}]->(nMark)" +
             ", (nMark)-[:LINK {weight: 1}]->(nDoug)" +
             ", (nMark)-[:LINK {weight: 1}]->(nMichael)" +
             ", (nMichael)-[:LINK {weight: 1}]->(nMark)";
@@ -104,7 +104,7 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
                     DeduplicationStrategy.NONE
                 )
             )
-            .withRelationshipProperty("weight")
+            .withRelationshipProperty(PropertyMapping.of("weight", 0.0d))
             .graphCreate("weightedGraph")
             .yields();
 
@@ -149,7 +149,7 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
                                         .type("LINK")
                                         .projection(Projection.UNDIRECTED)
                                         .aggregation(DeduplicationStrategy.NONE)
-                                        .addProperty(ImmutablePropertyMapping.builder().propertyKey("weight").build())
+                                        .addProperty(PropertyMapping.of("weight", 0.0d))
                                         .build()
                                 ).build()
                             ).build()
