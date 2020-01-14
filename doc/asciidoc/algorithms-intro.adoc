@@ -5,14 +5,17 @@ The Neo4j Graph Data Science library contains many graph algorithms.
 The algorithms are divided into categories.
 The categories are listed in this chapter.
 
-Additionally, algorithms exist in one of three tiers of maturity:
+Algorithms exist in one of three tiers of maturity:
 
 * Production-quality
+** Indicates that the algorithm has been tested with regards to stability and scalability.
+** Algorithms in this tier are prefixed with `gds.<algorithm>`.
 * Beta
+** Indicates that the algorithm is a candidate for the production-quality tier.
+** Algorithms in this tier are prefixed with `gds.beta.<algorithm>`.
 * Alpha
-
-The lower tiers are indicated in the syntax of the algorithm with either `alpha` or `beta`.
-Production-quality algorithms are indicated by the lack of such a prefix.
+** Indicates that the algorithm is experimental and might be changed or removed at any time.
+** Algorithms in this tier are prefixed with `gds.alpha.<algorithm>`.
 
 This chapter is divided into the following sections:
 

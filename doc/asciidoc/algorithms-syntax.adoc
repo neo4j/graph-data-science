@@ -1,5 +1,5 @@
 [[algorithms-syntax]]
-== Syntax overview
+= Syntax overview
 
 The general algorithm syntax comes in two variants:
 
@@ -18,14 +18,14 @@ There are three supported execution modes:
 * `stats`
 ** Returns a single record of summary statistics, but does not write to the Neo4j database.
 
-Finally, each execution mode may be estimated (read more in the section on estimation) by suffixing the command with `estimate`.
+Finally, an execution mode may be <<memory-requirements, estimated>> by appending the command with `estimate`.
 
 Including all above elements leads to these syntax outlines:
 
 .Syntax composition for the named graph variant:
 [source]
 ----
-CALL gds[.<tier>].<algorithm-name>.<execution-mode>[.<estimate>](
+CALL gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
   graphName: STRING,
   configuration: MAP
 )
@@ -34,11 +34,9 @@ CALL gds[.<tier>].<algorithm-name>.<execution-mode>[.<estimate>](
 .Syntax composition for the anonymous graph variant:
 [source]
 ----
-CALL gds[.<tier>].<algorithm-name>.<execution-mode>[.<estimate>](
+CALL gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
   configuration: MAP
 )
 ----
-
-`[]` is used to denote optional parts of the syntax.
 
 The detailed sections in this chapter include concrete syntax overviews and examples.
