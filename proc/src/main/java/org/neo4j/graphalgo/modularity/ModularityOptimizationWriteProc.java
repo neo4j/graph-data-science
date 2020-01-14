@@ -53,9 +53,9 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
             compute(graphNameOrConfig, configuration);
 
         // TODO product: check for an empty graph (not algorithm) and return a single "empty write result" value
-        return Optional.ofNullable(computationResult.result())
-            .map(modularityOptimization -> write(computationResult, modularityOptimization))
-            .orElse(Stream.empty());
+        return computationResult.result() != null
+            ? write(computationResult)
+            : Stream.empty();
     }
 
     @Procedure(value = "gds.beta.modularityOptimization.write.estimate", mode = READ)
@@ -67,20 +67,17 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @NotNull
-    private Stream<WriteResult> write(
-        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult,
-        ModularityOptimization modularityOptimization
-    ) {
+    private Stream<WriteResult> write(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult) {
         ModularityOptimizationWriteConfig config = computationResult.config();
+        ModularityOptimization result = computationResult.result();
         Graph graph = computationResult.graph();
 
         AbstractCommunityResultBuilder<ModularityOptimizationWriteConfig, WriteResult> builder = new WriteResultBuilder(config, graph.nodeCount(), callContext, computationResult.tracker())
             .withCommunityProperty(config.writeProperty())
-            .withModularity(modularityOptimization.getModularity())
-            .withRanIterations(modularityOptimization.getIterations())
-            .withDidConverge(modularityOptimization.didConverge())
-            .withCommunityFunction(modularityOptimization::getCommunityId);
+            .withModularity(result.getModularity())
+            .withRanIterations(result.getIterations())
+            .withDidConverge(result.didConverge())
+            .withCommunityFunction(result::getCommunityId);
 
         if (graph.isEmpty()) {
             graph.release();

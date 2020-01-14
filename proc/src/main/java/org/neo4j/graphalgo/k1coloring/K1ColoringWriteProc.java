@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.k1coloring;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.coloring.K1Coloring;
+import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfig> {
     private static final String COLOR_COUNT_FIELD_NAME = "colorCount";
 
@@ -44,33 +46,37 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computed = compute(
-            graphNameOrConfig,
-            configuration
-        );
+        ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult =
+            compute(graphNameOrConfig, configuration);
 
         // TODO product: check for an empty graph (not algorithm) and return a single "empty write result" value
-        return Optional.ofNullable(computed.algorithm())
-            .map(coloring -> write(computed, coloring))
-            .orElse(Stream.empty());
+        return computationResult.algorithm() != null
+            ? write(computationResult)
+            : Stream.empty();
     }
 
-    @NotNull
-    private Stream<WriteResult> write(
-        ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> compute,
-        K1Coloring coloring
+    @Procedure(value = "gds.beta.k1coloring.write.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        return computeEstimate(graphNameOrConfig, configuration);
+    }
+
+    private Stream<WriteResult> write(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> compute) {
         K1ColoringWriteConfig config = compute.config();
+        K1Coloring result = compute.algorithm();
         WriteResultBuilder builder = new WriteResultBuilder(config);
 
         if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
-            builder.withColorCount(coloring.usedColors().cardinality());
+            builder.withColorCount(result.usedColors().cardinality());
         }
 
         builder
             .withWriteProperty(config.writeProperty())
-            .withRanIterations(coloring.ranIterations())
-            .withDidConverge(coloring.didConverge())
+            .withRanIterations(result.ranIterations())
+            .withDidConverge(result.didConverge())
             .withCreateMillis(compute.createMillis())
             .withComputeMillis(compute.computeMillis());
 

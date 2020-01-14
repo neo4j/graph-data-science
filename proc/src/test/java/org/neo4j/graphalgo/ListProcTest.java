@@ -29,6 +29,8 @@ import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
+import org.neo4j.graphalgo.modularity.ModularityOptimizationStreamProc;
+import org.neo4j.graphalgo.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
@@ -55,6 +57,12 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.k1coloring.stream",
         "gds.beta.k1coloring.stream.estimate",
         "gds.beta.k1coloring.write",
+        "gds.beta.k1coloring.write.estimate",
+
+        "gds.beta.modularityOptimization.stream",
+        "gds.beta.modularityOptimization.stream.estimate",
+        "gds.beta.modularityOptimization.write",
+        "gds.beta.modularityOptimization.write.estimate",
 
         "gds.labelPropagation.stats",
         "gds.labelPropagation.stats.estimate",
@@ -117,6 +125,8 @@ class ListProcTest extends BaseProcTest {
             ListProc.class,
             LouvainWriteProc.class,
             LouvainStreamProc.class,
+            ModularityOptimizationWriteProc.class,
+            ModularityOptimizationStreamProc.class,
             PageRankWriteProc.class,
             PageRankStreamProc.class,
             WccWriteProc.class,

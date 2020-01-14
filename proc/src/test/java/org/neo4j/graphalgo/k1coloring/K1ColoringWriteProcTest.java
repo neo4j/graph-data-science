@@ -21,13 +21,16 @@ package org.neo4j.graphalgo.k1coloring;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphLoadProc;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class K1ColoringWriteProcTest extends K1ColoringProcBaseTest {
@@ -65,5 +68,23 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest {
 
         assertNotEquals(coloringResult.get(0L), coloringResult.get(1L));
         assertNotEquals(coloringResult.get(0L), coloringResult.get(2L));
+    }
+
+    @Test
+    void testWritingEstimate() {
+        @Language("Cypher")
+        String query = algoBuildStage()
+            .estimationMode(GdsCypher.ExecutionModes.WRITE)
+            .addParameter("writeProperty", "color")
+            .yields("requiredMemory", "treeView", "bytesMin", "bytesMax");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertTrue(row.getNumber("bytesMin").longValue() > 0);
+            assertTrue(row.getNumber("bytesMax").longValue() > 0);
+
+            String bytesHuman = MemoryUsage.humanReadable(row.getNumber("bytesMin").longValue());
+            assertNotNull(bytesHuman);
+            assertTrue(row.getString("requiredMemory").contains(bytesHuman));
+        });
     }
 }
