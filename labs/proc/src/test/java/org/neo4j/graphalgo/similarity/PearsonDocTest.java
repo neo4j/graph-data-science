@@ -42,11 +42,11 @@ class PearsonDocTest extends BaseProcTest {
         " MERGE (jerry:Movie {name:'Jerry Maguire'})" +
         " MERGE (gruffalo:Movie {name:'The Gruffalo'})" +
 
-        " MERGE (zhen:Person {name: \"Zhen\"})" +
-        " MERGE (praveena:Person {name: \"Praveena\"})" +
-        " MERGE (michael:Person {name: \"Michael\"})" +
-        " MERGE (arya:Person {name: \"Arya\"})" +
-        " MERGE (karin:Person {name: \"Karin\"})" +
+        " MERGE (zhen:Person {name: 'Zhen'})" +
+        " MERGE (praveena:Person {name: 'Praveena'})" +
+        " MERGE (michael:Person {name: 'Michael'})" +
+        " MERGE (arya:Person {name: 'Arya'})" +
+        " MERGE (karin:Person {name: 'Karin'})" +
 
         " MERGE (zhen)-[:RATED {score: 2}]->(home_alone)" +
         " MERGE (zhen)-[:RATED {score: 2}]->(good_men)" +
@@ -78,7 +78,6 @@ class PearsonDocTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder -> {
-                builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
                 builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*");
             }
         );
@@ -97,7 +96,7 @@ class PearsonDocTest extends BaseProcTest {
     void functionCall() {
         runQueryWithRowConsumer(
             "RETURN gds.alpha.similarity.pearson([5,8,7,5,4,9], [7,8,6,6,4,5]) AS similarity",
-            row -> assertEquals(row.get("similarity"), 0.28767798089123053)
+            row -> assertEquals(0.28767798089123053, row.get("similarity"))
         );
     }
     
@@ -111,14 +110,14 @@ class PearsonDocTest extends BaseProcTest {
                        "        p2.name AS to," +
                        "        gds.alpha.similarity.pearson(p1Vector, p2Vector, {vectorType: 'maps'}) AS similarity";
 
-        String expectedString = "+---------------------------------------+\n" +
-                                "| from   | to      | similarity         |\n" +
-                                "+---------------------------------------+\n" +
-                                "| \"Arya\" | \"Karin\" | 0.8194651785206903 |\n" +
-                                "+---------------------------------------+\n" +
-                                "1 row\n";
+        String expectedString = "+---------------------------------------+" + NL +
+                                "| from   | to      | similarity         |" + NL +
+                                "+---------------------------------------+" + NL +
+                                "| \"Arya\" | \"Karin\" | 0.8194651785206903 |" + NL +
+                                "+---------------------------------------+" + NL +
+                                "1 row" + NL;
 
-        runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
+        runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
 
     @Test
@@ -132,17 +131,17 @@ class PearsonDocTest extends BaseProcTest {
                        "        gds.alpha.similarity.pearson(p1Vector, p2Vector, {vectorType: \"maps\"}) AS similarity" +
                        " ORDER BY similarity DESC";
 
-        String expectedString = "+-------------------------------------------+\n" +
-                                "| from   | to         | similarity          |\n" +
-                                "+-------------------------------------------+\n" +
-                                "| \"Arya\" | \"Karin\"    | 0.8194651785206903  |\n" +
-                                "| \"Arya\" | \"Zhen\"     | 0.4839533792540704  |\n" +
-                                "| \"Arya\" | \"Praveena\" | 0.09262336892949784 |\n" +
-                                "| \"Arya\" | \"Michael\"  | -0.9551953674747637 |\n" +
-                                "+-------------------------------------------+\n" +
-                                "4 rows\n";
+        String expectedString = "+-------------------------------------------+" + NL +
+                                "| from   | to         | similarity          |" + NL +
+                                "+-------------------------------------------+" + NL +
+                                "| \"Arya\" | \"Karin\"    | 0.8194651785206903  |" + NL +
+                                "| \"Arya\" | \"Zhen\"     | 0.4839533792540704  |" + NL +
+                                "| \"Arya\" | \"Praveena\" | 0.09262336892949784 |" + NL +
+                                "| \"Arya\" | \"Michael\"  | -0.9551953674747637 |" + NL +
+                                "+-------------------------------------------+" + NL +
+                                "4 rows" + NL;
 
-        runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
+        runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
 
     @Test
@@ -159,23 +158,23 @@ class PearsonDocTest extends BaseProcTest {
                        " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
                        " ORDER BY similarity DESC";
 
-        String expectedString = "+-----------------------------------------------+\n" +
-                                "| from       | to         | similarity          |\n" +
-                                "+-----------------------------------------------+\n" +
-                                "| \"Zhen\"     | \"Praveena\" | 0.8865926413116155  |\n" +
-                                "| \"Zhen\"     | \"Karin\"    | 0.8320502943378437  |\n" +
-                                "| \"Arya\"     | \"Karin\"    | 0.8194651785206903  |\n" +
-                                "| \"Zhen\"     | \"Arya\"     | 0.4839533792540704  |\n" +
-                                "| \"Praveena\" | \"Karin\"    | 0.4472135954999579  |\n" +
-                                "| \"Praveena\" | \"Arya\"     | 0.09262336892949784 |\n" +
-                                "| \"Praveena\" | \"Michael\"  | -0.788492846568306  |\n" +
-                                "| \"Zhen\"     | \"Michael\"  | -0.9091365607973364 |\n" +
-                                "| \"Michael\"  | \"Arya\"     | -0.9551953674747637 |\n" +
-                                "| \"Michael\"  | \"Karin\"    | -0.9863939238321437 |\n" +
-                                "+-----------------------------------------------+\n" +
-                                "10 rows\n";
+        String expectedString = "+-----------------------------------------------+" + NL +
+                                "| from       | to         | similarity          |" + NL +
+                                "+-----------------------------------------------+" + NL +
+                                "| \"Zhen\"     | \"Praveena\" | 0.8865926413116155  |" + NL +
+                                "| \"Zhen\"     | \"Karin\"    | 0.8320502943378437  |" + NL +
+                                "| \"Arya\"     | \"Karin\"    | 0.8194651785206903  |" + NL +
+                                "| \"Zhen\"     | \"Arya\"     | 0.4839533792540704  |" + NL +
+                                "| \"Praveena\" | \"Karin\"    | 0.4472135954999579  |" + NL +
+                                "| \"Praveena\" | \"Arya\"     | 0.09262336892949784 |" + NL +
+                                "| \"Praveena\" | \"Michael\"  | -0.788492846568306  |" + NL +
+                                "| \"Zhen\"     | \"Michael\"  | -0.9091365607973364 |" + NL +
+                                "| \"Michael\"  | \"Arya\"     | -0.9551953674747637 |" + NL +
+                                "| \"Michael\"  | \"Karin\"    | -0.9863939238321437 |" + NL +
+                                "+-----------------------------------------------+" + NL +
+                                "10 rows" + NL;
 
-        runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
+        runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
 
     @Test
@@ -193,18 +192,18 @@ class PearsonDocTest extends BaseProcTest {
                        " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
                        " ORDER BY similarity DESC";
 
-        String expectedString = "+----------------------------------------------+\n" +
-                                "| from       | to         | similarity         |\n" +
-                                "+----------------------------------------------+\n" +
-                                "| \"Zhen\"     | \"Praveena\" | 0.8865926413116155 |\n" +
-                                "| \"Zhen\"     | \"Karin\"    | 0.8320502943378437 |\n" +
-                                "| \"Arya\"     | \"Karin\"    | 0.8194651785206903 |\n" +
-                                "| \"Zhen\"     | \"Arya\"     | 0.4839533792540704 |\n" +
-                                "| \"Praveena\" | \"Karin\"    | 0.4472135954999579 |\n" +
-                                "+----------------------------------------------+\n" +
-                                "5 rows\n";
+        String expectedString = "+----------------------------------------------+" + NL +
+                                "| from       | to         | similarity         |" + NL +
+                                "+----------------------------------------------+" + NL +
+                                "| \"Zhen\"     | \"Praveena\" | 0.8865926413116155 |" + NL +
+                                "| \"Zhen\"     | \"Karin\"    | 0.8320502943378437 |" + NL +
+                                "| \"Arya\"     | \"Karin\"    | 0.8194651785206903 |" + NL +
+                                "| \"Zhen\"     | \"Arya\"     | 0.4839533792540704 |" + NL +
+                                "| \"Praveena\" | \"Karin\"    | 0.4472135954999579 |" + NL +
+                                "+----------------------------------------------+" + NL +
+                                "5 rows" + NL;
 
-        runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
+        runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
 
     @Test
@@ -222,17 +221,17 @@ class PearsonDocTest extends BaseProcTest {
                        " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
                        " ORDER BY similarity DESC";
 
-        String expectedString = "+----------------------------------------------+\n" +
-                                "| from       | to         | similarity         |\n" +
-                                "+----------------------------------------------+\n" +
-                                "| \"Zhen\"     | \"Praveena\" | 0.8865926413116155 |\n" +
-                                "| \"Praveena\" | \"Zhen\"     | 0.8865926413116155 |\n" +
-                                "| \"Karin\"    | \"Zhen\"     | 0.8320502943378437 |\n" +
-                                "| \"Arya\"     | \"Karin\"    | 0.8194651785206903 |\n" +
-                                "+----------------------------------------------+\n" +
-                                "4 rows\n";
+        String expectedString = "+----------------------------------------------+" + NL +
+                                "| from       | to         | similarity         |" + NL +
+                                "+----------------------------------------------+" + NL +
+                                "| \"Zhen\"     | \"Praveena\" | 0.8865926413116155 |" + NL +
+                                "| \"Praveena\" | \"Zhen\"     | 0.8865926413116155 |" + NL +
+                                "| \"Karin\"    | \"Zhen\"     | 0.8320502943378437 |" + NL +
+                                "| \"Arya\"     | \"Karin\"    | 0.8194651785206903 |" + NL +
+                                "+----------------------------------------------+" + NL +
+                                "4 rows" + NL;
 
-        runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
+        runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
     
     @Test
@@ -250,28 +249,28 @@ class PearsonDocTest extends BaseProcTest {
                        " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100" +
                        " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95";
 
-        String expectedString = "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |\n" +
-                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| 5     | 4               | true  | \"SIMILAR\"             | \"score\"       | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688 |\n" +
-                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "1 row\n";
+        String expectedString = "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
+                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |" + NL +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
+                                "| 5     | 4               | true  | \"SIMILAR\"             | \"score\"       | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688 |" + NL +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
+                                "1 row" + NL;
 
-        runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
+        runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
 
         String controlQuery = " MATCH (p:Person {name: 'Karin'})-[:SIMILAR]->(other)," +
                               "       (other)-[r:RATED]->(movie)" +
                               " WHERE not((p)-[:RATED]->(movie)) and r.score >= 5" +
                               " RETURN movie.name AS movie";
 
-        String expectedString2 = "+-----------------+\n" +
-                                 "| movie           |\n" +
-                                 "+-----------------+\n" +
-                                 "| \"Jerry Maguire\" |\n" +
-                                 "+-----------------+\n" +
-                                 "1 row\n";
+        String expectedString2 = "+-----------------+" + NL +
+                                 "| movie           |" + NL +
+                                 "+-----------------+" + NL +
+                                 "| \"Jerry Maguire\" |" + NL +
+                                 "+-----------------+" + NL +
+                                 "1 row" + NL;
 
-        runQueryWithResultConsumer(controlQuery, result -> assertEquals(result.resultAsString(), expectedString2));
+        runQueryWithResultConsumer(controlQuery, result -> assertEquals(expectedString2, result.resultAsString()));
     }
 
     @Test
@@ -292,15 +291,15 @@ class PearsonDocTest extends BaseProcTest {
                        " RETURN from.name AS from, to.name AS to, similarity" +
                        " ORDER BY similarity DESC";
 
-        String expectedString = "+-------------------------------------------+\n" +
-                                "| from       | to      | similarity         |\n" +
-                                "+-------------------------------------------+\n" +
-                                "| \"Praveena\" | \"Zhen\"  | 0.8865926413116155 |\n" +
-                                "| \"Arya\"     | \"Karin\" | 0.8194651785206903 |\n" +
-                                "+-------------------------------------------+\n" +
-                                "2 rows\n";
+        String expectedString = "+-------------------------------------------+" + NL +
+                                "| from       | to      | similarity         |" + NL +
+                                "+-------------------------------------------+" + NL +
+                                "| \"Praveena\" | \"Zhen\"  | 0.8865926413116155 |" + NL +
+                                "| \"Arya\"     | \"Karin\" | 0.8194651785206903 |" + NL +
+                                "+-------------------------------------------+" + NL +
+                                "2 rows" + NL;
 
-        runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
+        runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
 
     @Test
@@ -327,23 +326,23 @@ class PearsonDocTest extends BaseProcTest {
                        " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
                        " ORDER BY similarity DESC";
 
-        String expectedString = "+------------------------------------------------------------+\n" +
-                                "| from             | to               | similarity           |\n" +
-                                "+------------------------------------------------------------+\n" +
-                                "| \"The Matrix\"     | \"Jerry Maguire\"  | 0.8689113641953199   |\n" +
-                                "| \"A Few Good Men\" | \"Top Gun\"        | 0.6846566091701214   |\n" +
-                                "| \"Home Alone\"     | \"A Few Good Men\" | 0.556559508845268    |\n" +
-                                "| \"The Matrix\"     | \"Top Gun\"        | 0.39320549183813097  |\n" +
-                                "| \"Home Alone\"     | \"Jerry Maguire\"  | 0.10026787755714502  |\n" +
-                                "| \"Top Gun\"        | \"Jerry Maguire\"  | 0.056232940630734043 |\n" +
-                                "| \"Home Alone\"     | \"Top Gun\"        | 0.006048691083898151 |\n" +
-                                "| \"Home Alone\"     | \"The Matrix\"     | -0.23435051666541426 |\n" +
-                                "| \"The Matrix\"     | \"A Few Good Men\" | -0.2545273235448378  |\n" +
-                                "| \"A Few Good Men\" | \"Jerry Maguire\"  | -0.31099199179883635 |\n" +
-                                "+------------------------------------------------------------+\n" +
-                                "10 rows\n";
+        String expectedString = "+------------------------------------------------------------+" + NL +
+                                "| from             | to               | similarity           |" + NL +
+                                "+------------------------------------------------------------+" + NL +
+                                "| \"The Matrix\"     | \"Jerry Maguire\"  | 0.8689113641953199   |" + NL +
+                                "| \"A Few Good Men\" | \"Top Gun\"        | 0.6846566091701214   |" + NL +
+                                "| \"Home Alone\"     | \"A Few Good Men\" | 0.556559508845268    |" + NL +
+                                "| \"The Matrix\"     | \"Top Gun\"        | 0.39320549183813097  |" + NL +
+                                "| \"Home Alone\"     | \"Jerry Maguire\"  | 0.10026787755714502  |" + NL +
+                                "| \"Top Gun\"        | \"Jerry Maguire\"  | 0.056232940630734043 |" + NL +
+                                "| \"Home Alone\"     | \"Top Gun\"        | 0.006048691083898151 |" + NL +
+                                "| \"Home Alone\"     | \"The Matrix\"     | -0.23435051666541426 |" + NL +
+                                "| \"The Matrix\"     | \"A Few Good Men\" | -0.2545273235448378  |" + NL +
+                                "| \"A Few Good Men\" | \"Jerry Maguire\"  | -0.31099199179883635 |" + NL +
+                                "+------------------------------------------------------------+" + NL +
+                                "10 rows" + NL;
 
-        runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
+        runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
     
     @Test
@@ -360,13 +359,13 @@ class PearsonDocTest extends BaseProcTest {
                        " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p95" +
                        " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95";
 
-        String expectedString = "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |\n" +
-                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| 5     | 4               | true  | \"SIMILAR\"             | \"score\"       | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688 |\n" +
-                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "1 row\n";
+        String expectedString = "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
+                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |" + NL +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
+                                "| 5     | 4               | true  | \"SIMILAR\"             | \"score\"       | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688 |" + NL +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
+                                "1 row" + NL;
 
-        runQueryWithResultConsumer(query, result -> assertEquals(result.resultAsString(), expectedString));
+        runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
 }
