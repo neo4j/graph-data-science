@@ -1,0 +1,71 @@
+[[algorithms]]
+= Algorithms
+
+The Neo4j Graph Data Science library contains many graph algorithms.
+The algorithms are divided into categories.
+The categories are listed in this chapter.
+
+Additionally, algorithms exist in one of three tiers of maturity:
+
+* Production-quality
+* Beta
+* Alpha
+
+The lower tiers are indicated in the syntax of the algorithm with either `alpha` or `beta`.
+Production-quality algorithms are indicated by the lack of such a prefix.
+
+
+== Syntax overview
+
+The general algorithm syntax comes in two variants:
+
+* Named graph variant
+** The graph to operate over will be read from the graph catalog.
+* Anonymous graph variant
+** The graph to operate over will be created and deleted as part of the algorithm execution.
+
+Additional to the syntax variants are execution modes.
+There are three supported execution modes:
+
+* `stream`
+** Returns the result of the algorithm as a stream of records.
+* `write`
+** Writes the results of the algorithm to the Neo4j database and returns a single record of summary statistics.
+* `stats`
+** Returns a single record of summary statistics, but does not write to the Neo4j database.
+
+Finally, each execution mode may be estimated (read more in the section on estimation) by suffixing the command with `estimate`.
+
+Including all above elements leads to these syntax outlines:
+
+.Syntax composition for the named graph variant:
+[source]
+----
+CALL gds[.<tier>].<algorithm-name>.<execution-mode>[.<estimate>](
+  graphName: STRING,
+  configuration: MAP
+)
+----
+
+.Syntax composition for the anonymous graph variant:
+[source]
+----
+CALL gds[.<tier>].<algorithm-name>.<execution-mode>[.<estimate>](
+  configuration: MAP
+)
+----
+
+`[]` is used to denote optional parts of the syntax.
+
+The detailed sections in this chapter include concrete syntax overviews and examples.
+
+
+include::algorithms-centrality.adoc[leveloffset=+1]
+
+include::algorithms-community-detection.adoc[leveloffset=+1]
+
+include::algorithms-graph-similarity.adoc[leveloffset=+1]
+
+include::algorithms-auxiliary.adoc[leveloffset=+1]
+
+include::labs-algorithms.adoc[leveloffset=+1]
