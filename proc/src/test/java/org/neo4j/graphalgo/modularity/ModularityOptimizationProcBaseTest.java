@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
 
-public abstract class ModularityOptimizationProcBaseTest extends BaseProcTest {
+abstract class ModularityOptimizationProcBaseTest extends BaseProcTest {
 
     static final String DB_CYPHER =
         "CREATE" +
@@ -53,7 +53,10 @@ public abstract class ModularityOptimizationProcBaseTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(ModularityOptimizationStreamProc.class, GraphCreateProc.class);
+        registerProcedures(
+            ModularityOptimizationStreamProc.class,
+            ModularityOptimizationWriteProc.class,
+            GraphCreateProc.class);
         runQuery(DB_CYPHER);
     }
 

@@ -19,23 +19,15 @@
  */
 package org.neo4j.graphalgo.modularity;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
 class ModularityOptimizationProcTest extends BaseProcTest {
 
@@ -74,88 +66,6 @@ class ModularityOptimizationProcTest extends BaseProcTest {
     }
 
     @Test
-    void writingOnImplicitlyLoadedGraph() {
-        String query = "CALL algo.beta.modularityOptimization.write(" +
-                       "    null, null, {" +
-                       "        write: true, writeProperty: 'community', direction: 'BOTH'" +
-                       "    }" +
-                       ")";
-
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(0.12244, row.getNumber("modularity").doubleValue(), 0.001);
-            assertEquals(2, row.getNumber("communityCount").longValue());
-            assertTrue(row.getNumber("ranIterations").longValue() <= 3);
-        });
-
-        assertWriteResult(UNWEIGHTED_COMMUNITIES);
-    }
-
-    @Test
-    @Disabled
-    void weightedWritingOnImplicitlyLoadedGraph() {
-        String query = "CALL algo.beta.modularityOptimization.write(" +
-                       "    null, null, {" +
-                       "        write: true, writeProperty: 'community', direction: 'BOTH', relationshipProperties: 'weight'" +
-                       "    }" +
-                       ")";
-
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(0.4985, row.getNumber("modularity").doubleValue(), 0.001);
-            assertEquals(2, row.getNumber("communityCount").longValue());
-            assertTrue(row.getNumber("ranIterations").longValue() <= 3);
-        });
-
-        assertWriteResult(WEIGHTED_COMMUNITIES);
-    }
-
-    @Test
-    void writingWithSeeding() {
-        String query = "CALL algo.beta.modularityOptimization.write(" +
-                       "    null, null, {" +
-                       "        write: true, writeProperty: 'community', direction: 'BOTH', seedProperty: 'seed1'" +
-                       "    }" +
-                       ")";
-        runQuery(query);
-
-        long[] communities = new long[6];
-        MutableInt i = new MutableInt(0);
-        runQueryWithRowConsumer("MATCH (n) RETURN n.community as community", (row) -> {
-            communities[i.getAndIncrement()] = row.getNumber("community").longValue();
-        });
-        assertCommunities(communities, SEEDED_COMMUNITIES);
-    }
-
-    @Test
-    void tolerance() {
-        String query = "CALL algo.beta.modularityOptimization.write(" +
-                       "    null, null, {" +
-                       "        write: false, direction: 'BOTH', tolerance: 1" +
-                       "    }" +
-                       ") YIELD didConverge, ranIterations";
-
-        runQueryWithRowConsumer(query, (row) -> {
-            assertTrue(row.getBoolean("didConverge"));
-            assertEquals(1, row.getNumber("ranIterations").longValue());
-        });
-    }
-
-    @Test
-    void setIterations() {
-        String query = "CALL algo.beta.modularityOptimization.write(" +
-                       "    null, null, {" +
-                       "        write: false, direction: 'BOTH', iterations: 1" +
-                       "    }" +
-                       ") YIELD didConverge, ranIterations";
-
-        runQueryWithRowConsumer(query, (row) -> {
-            assertFalse(row.getBoolean("didConverge"));
-            assertEquals(1, row.getNumber("ranIterations").longValue());
-        });
-    }
-
-    @Test
     void computeMemrec() {
         String query = "CALL algo.beta.modularityOptimization.memrec(" +
                        "    null, null" +
@@ -165,24 +75,5 @@ class ModularityOptimizationProcTest extends BaseProcTest {
             assertTrue(row.getNumber("bytesMin").longValue() > 0);
             assertTrue(row.getNumber("bytesMax").longValue() > 0);
         });
-    }
-
-    private void assertWriteResult(long[]... expectedCommunities) {
-        Map<String, Object> nameMapping = MapUtil.map(
-            "a", 0,
-            "b", 1,
-            "c", 2,
-            "d", 3,
-            "e", 4,
-            "f", 5
-        );
-        long[] actualCommunities = new long[6];
-        runQueryWithRowConsumer("MATCH (n) RETURN n.name as name, n.community as community", (row) -> {
-            long community = row.getNumber("community").longValue();
-            String name = row.getString("name");
-            actualCommunities[(int) nameMapping.get(name)] = community;
-        });
-
-        assertCommunities(actualCommunities, expectedCommunities);
     }
 }
