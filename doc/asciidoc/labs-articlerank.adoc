@@ -1,4 +1,4 @@
-[[labs-algorithms-articlerank]]
+[[algorithms-articlerank]]
 = The ArticleRank algorithm
 
 [abstract]

@@ -46,6 +46,22 @@
                 <d:tocentry linkend="algorithms-pagerank">
                     <?dbhtml filename="algorithms/page-rank/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-articlerank">
+                    <?dbhtml filename="algorithms/article-rank/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-betweenness-centrality">
+                    <?dbhtml filename="algorithms/betweenness-centrality/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-closeness-centrality">
+                    <?dbhtml filename="algorithms/closeness-centrality/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-degree-centrality">
+                    <?dbhtml filename="algorithms/degree-centrality/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-eigenvector">
+                    <?dbhtml filename="algorithms/eigenvector-centrality/index.html"?>
+                </d:tocentry>
+
             </d:tocentry>
             <d:tocentry linkend="algorithms-community">
                 <?dbhtml filename="algorithms/community/index.html"?>
@@ -77,24 +93,6 @@
                 <?dbhtml filename="labs-algorithms/index.html"?>
                 <d:tocentry linkend="labs-procedures">
                     <?dbhtml filename="labs-procedures/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="labs-algorithms-centrality">
-                    <?dbhtml filename="labs-algorithms/centrality/index.html"?>
-                    <d:tocentry linkend="labs-algorithms-articlerank">
-                        <?dbhtml filename="labs-algorithms/article-rank/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-betweenness-centrality">
-                        <?dbhtml filename="labs-algorithms/betweenness-centrality/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-closeness-centrality">
-                        <?dbhtml filename="labs-algorithms/closeness-centrality/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-degree-centrality">
-                        <?dbhtml filename="labs-algorithms/degree-centrality/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-eigenvector">
-                        <?dbhtml filename="labs-algorithms/eigenvector-centrality/index.html"?>
-                    </d:tocentry>
                 </d:tocentry>
                 <d:tocentry linkend="labs-algorithms-community">
                     <?dbhtml filename="labs-algorithms/community/index.html"?>

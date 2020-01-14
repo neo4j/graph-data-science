@@ -6,9 +6,26 @@
 This chapter provides explanations and examples for each of the centrality algorithms in the Neo4j Graph Algorithms library.
 --
 
-The following centrality algorithms determine the importance of distinct nodes in a network:
+Centrality algorithms are used to determine the importance of distinct nodes in a network.
+Neo4j GDS includes the following centrality algorithms, grouped by quality tier:
 
-* <<algorithms-pagerank, PageRank>> (`algo.pageRank`)
+* Production-quality:
+** <<algorithms-pagerank, PageRank>> (`algo.pageRank`)
+* Alpha
+** <<algorithms-articlerank, ArticleRank>> (`algo.articleRank`)
+** <<algorithms-betweenness-centrality, Betweenness Centrality>> (`algo.betweenness`)
+** <<algorithms-closeness-centrality, Closeness Centrality>> (`algo.closeness`)
+** <<algorithms-degree-centrality, Degree Centrality>> (`algo.degree`)
+** <<algorithms-eigenvector, Eigenvector Centrality>> (`algo.eigenvector`)
 
 include::pagerank.adoc[leveloffset=+1]
 
+include::labs-articlerank.adoc[leveloffset=+1]
+
+include::labs-betweenness-centrality.adoc[leveloffset=+1]
+
+include::labs-closeness-centrality.adoc[leveloffset=+1]
+
+include::labs-degree-centrality.adoc[leveloffset=+1]
+
+include::labs-eigenvector-centrality.adoc[leveloffset=+1]
