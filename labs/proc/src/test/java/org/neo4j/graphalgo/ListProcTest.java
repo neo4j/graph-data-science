@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.similarity.EuclideanProc;
 import org.neo4j.graphalgo.similarity.OverlapProc;
 import org.neo4j.graphalgo.similarity.PearsonProc;
 import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
+import org.neo4j.graphalgo.traverse.TraverseProc;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -64,11 +65,12 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.betweenness.stream",
         "gds.alpha.betweenness.sampled.write",
         "gds.alpha.betweenness.sampled.stream",
-        "algo.bfs.stream",
+        "gds.alpha.bfs.stream",
         "gds.alpha.closeness.write",
         "gds.alpha.closeness.stream",
         "gds.alpha.degree.write",
         "gds.alpha.degree.stream",
+        "gds.alpha.dfs.stream",
         "gds.alpha.scc.write",
         "gds.alpha.scc.stream",
         "gds.alpha.shortestPath.write",
@@ -86,7 +88,6 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.triangle.stream",
         "gds.alpha.triangleCount.write",
         "gds.alpha.triangleCount.stream",
-        "algo.dfs.stream",
         "gds.alpha.eigenvector.write",
         "gds.alpha.eigenvector.stream",
         "gds.alpha.kShortestPaths.write",
