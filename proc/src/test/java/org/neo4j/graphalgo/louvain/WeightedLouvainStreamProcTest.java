@@ -23,6 +23,8 @@ package org.neo4j.graphalgo.louvain;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -55,11 +57,20 @@ import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class WeightedLouvainStreamProcTest extends BaseProcTest {
 
-    private static final Map<String, Object> expectedResult = map(
+    private static final Map<String, Object> expectedWeightedResult = map(
         "Alice", 3L,
         "Bridget", 2L,
         "Charles", 2L,
         "Doug", 3L,
+        "Mark", 4L,
+        "Michael", 4L
+    );
+
+    private static final Map<String, Object> expectedUnweightedResult = map(
+        "Alice", 2L,
+        "Bridget", 2L,
+        "Charles", 2L,
+        "Doug", 4L,
         "Mark", 4L,
         "Michael", 4L
     );
@@ -109,6 +120,22 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
             .yields();
 
         runQuery(graphCreateQuery);
+
+        String unweightedGraphCreateQuery = GdsCypher.call()
+            .withNodeLabel("User")
+            .withNodeProperty("seed")
+            .withRelationshipType(
+                "LINK",
+                RelationshipProjection.of(
+                    "LINK",
+                    Projection.UNDIRECTED,
+                    DeduplicationStrategy.NONE
+                )
+            )
+            .graphCreate("unweightedGraph")
+            .yields();
+
+        runQuery(unweightedGraphCreateQuery);
     }
 
     @AfterEach
@@ -116,13 +143,43 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
         GraphCatalog.removeAllLoadedGraphs();
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("graphQueries")
-    void weightedLouvainTest(String query, String graphMode) {
-        QueryRunner.runQueryWithRowConsumer(db, query, this::assertLouvainResultRow);
+    @Test
+    void unweightedLouvainOnUnweightedGraphTest() {
+        String query = GdsCypher
+            .call()
+            .explicitCreation("unweightedGraph")
+            .algo("louvain")
+            .streamMode()
+            .yields("nodeId", "communityId", "communityIds")
+            .concat(" RETURN algo.asNode(nodeId).name as name, communityId, communityIds")
+            .concat(" ORDER BY name ASC");
+
+        QueryRunner.runQueryWithRowConsumer(db, query, row -> assertLouvainResultRow(row, expectedUnweightedResult));
     }
 
-    static Stream<Arguments> graphQueries() {
+    // TODO: merge with `unweightedLouvainOnUnweightedGraphTest` and use @ParametrizedTest once this can be enabled
+    @Disabled("Running Louvain on Weighted Graph without specifying weightProperty should run as unweighted")
+    @Test
+    void unweightedLouvainOnWeightedGraphTest() {
+        String query = GdsCypher
+            .call()
+            .explicitCreation("weightedGraph")
+            .algo("louvain")
+            .streamMode()
+            .yields("nodeId", "communityId", "communityIds")
+            .concat(" RETURN algo.asNode(nodeId).name as name, communityId, communityIds")
+            .concat(" ORDER BY name ASC");
+
+        QueryRunner.runQueryWithRowConsumer(db, query, row -> assertLouvainResultRow(row, expectedUnweightedResult));
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("weightedGraphQueries")
+    void weightedLouvainTest(String query, String graphMode) {
+        QueryRunner.runQueryWithRowConsumer(db, query, row -> assertLouvainResultRow(row, expectedWeightedResult));
+    }
+
+    static Stream<Arguments> weightedGraphQueries() {
         return Stream.of(
             arguments(
                 GdsCypher
@@ -166,7 +223,7 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
         );
     }
 
-    private void assertLouvainResultRow(Result.ResultRow row) {
+    private void assertLouvainResultRow(Result.ResultRow row, Map<String, Object> expectedResult) {
         String computedName = row.getString("name");
         Object computedCommunityId = row.get("communityId");
 
