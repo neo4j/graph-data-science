@@ -74,6 +74,17 @@
                 <d:tocentry linkend="algorithms-wcc">
                     <?dbhtml filename="algorithms/wcc/index.html"?>
                 </d:tocentry>
+
+                <d:tocentry linkend="algorithms-strongly-connected-components">
+                    <?dbhtml filename="algorithms/strongly-connected-components/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-triangle-count-clustering-coefficient">
+                    <?dbhtml filename="algorithms/triangle-counting-clustering-coefficient/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-balanced-triads">
+                    <?dbhtml filename="algorithms/balanced-triads/index.html"?>
+                </d:tocentry>
+
             </d:tocentry>
             <d:tocentry linkend="algorithms-graph-similarity">
                 <?dbhtml filename="algorithms/graph-similarity/index.html"?>
@@ -93,18 +104,6 @@
                 <?dbhtml filename="labs-algorithms/index.html"?>
                 <d:tocentry linkend="labs-procedures">
                     <?dbhtml filename="labs-procedures/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="labs-algorithms-community">
-                    <?dbhtml filename="labs-algorithms/community/index.html"?>
-                    <d:tocentry linkend="labs-algorithms-strongly-connected-components">
-                        <?dbhtml filename="labs-algorithms/strongly-connected-components/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-triangle-count-clustering-coefficient">
-                        <?dbhtml filename="labs-algorithms/triangle-counting-clustering-coefficient/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-balanced-triads">
-                        <?dbhtml filename="labs-algorithms/balanced-triads/index.html"?>
-                    </d:tocentry>
                 </d:tocentry>
 
                 <d:tocentry linkend="labs-algorithms-path-finding">

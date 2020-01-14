@@ -6,11 +6,17 @@
 This chapter provides explanations and examples for each of the community detection algorithms in the Neo4j Graph Algorithms library.
 --
 
-The following community detection algorithms evaluate how a group is clustered or partitioned, as well as its tendency to strengthen or break apart:
+Community detection algorithms are used to evaluate how a group of nodes is clustered or partitioned, as well as its tendency to strengthen or break apart.
+Neo4j GDS includes the following community detection algorithms, grouped by quality tier:
 
-* <<algorithms-louvain, Louvain>> (`algo.louvain`)
-* <<algorithms-label-propagation, Label Propagation>> (`algo.labelPropagation`)
-* <<algorithms-wcc, Weakly Connected Components>> (`algo.unionFind`)
+* Production-quality:
+** <<algorithms-louvain, Louvain>> (`algo.louvain`)
+** <<algorithms-label-propagation, Label Propagation>> (`algo.labelPropagation`)
+** <<algorithms-wcc, Weakly Connected Components>> (`algo.unionFind`)
+* Alpha
+** <<algorithms-strongly-connected-components, Strongly Connected Components>> (`algo.scc`)
+** <<algorithms-triangle-count-clustering-coefficient, Triangle Counting / Clustering Coefficient>> (`algo.triangleCount`)
+** <<algorithms-balanced-triads, Balanced Triads>> (`algo.balancedTriads`)
 
 include::louvain.adoc[leveloffset=+1]
 
@@ -18,3 +24,8 @@ include::label-propagation.adoc[leveloffset=+1]
 
 include::wcc.adoc[leveloffset=+1]
 
+include::labs-strongly-connected-components.adoc[leveloffset=+1]
+
+include::labs-triangleCount.adoc[leveloffset=+1]
+
+include::labs-balanced-triads.adoc[leveloffset=+1]

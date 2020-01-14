@@ -1,4 +1,4 @@
-[[labs-algorithms-triangle-count-clustering-coefficient]]
+[[algorithms-triangle-count-clustering-coefficient]]
 = The Triangle Counting / Clustering Coefficient algorithm
 
 [abstract]

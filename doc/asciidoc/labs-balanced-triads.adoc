@@ -1,4 +1,4 @@
-[[labs-algorithms-balanced-triads]]
+[[algorithms-balanced-triads]]
 = The Balanced Triads algorithm
 
 [abstract]
