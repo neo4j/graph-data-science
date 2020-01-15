@@ -112,6 +112,10 @@ public abstract class GdsCypher {
             return withRelationshipType(type, RelationshipProjection.builder().type(type).build());
         }
 
+        default ImplicitCreationBuildStage withRelationshipType(String type, Projection projection) {
+            return withRelationshipType(type, RelationshipProjection.builder().type(type).projection(projection).build());
+        }
+
         default ImplicitCreationBuildStage withRelationshipType(String type, String neoType) {
             return withRelationshipType(type, RelationshipProjection.builder().type(neoType).build());
         }
