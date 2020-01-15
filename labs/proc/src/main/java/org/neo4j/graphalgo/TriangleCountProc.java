@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModernTriangleCountProc extends AlgoBaseProc<ModernIntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> {
+public class TriangleCountProc extends AlgoBaseProc<ModernIntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> {
 
     @Procedure(name = "gds.alpha.triangleCount.stream", mode = READ)
     public Stream<ModernIntersectingTriangleCount.Result> stream(
@@ -79,7 +79,7 @@ public class ModernTriangleCountProc extends AlgoBaseProc<ModernIntersectingTria
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<ModernIntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> computationResult =
-            compute(graphNameOrConfig, configuration);
+            compute(graphNameOrConfig, configuration, true, false);
 
         AllocationTracker tracker = computationResult.tracker();
         TriangleCountConfig config = computationResult.config();
@@ -101,7 +101,7 @@ public class ModernTriangleCountProc extends AlgoBaseProc<ModernIntersectingTria
             .build();
 
         PagedAtomicIntegerArray triangles = algorithm.getTriangles();
-        String clusteringCoefficientProperty = config.clusteringCoefficientProperty();
+        String clusteringCoefficientProperty = config.clusterCoefficientProperty();
 
         if (clusteringCoefficientProperty != null) {
             // huge with coefficients

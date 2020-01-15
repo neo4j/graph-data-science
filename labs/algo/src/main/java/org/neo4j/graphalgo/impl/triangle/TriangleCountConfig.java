@@ -42,7 +42,7 @@ public interface TriangleCountConfig extends AlgoBaseConfig, WriteConfig {
     }
 
     @Value.Default
-    default @Nullable String clusteringCoefficientProperty() {
+    default @Nullable String clusterCoefficientProperty() {
         return null;
     }
 

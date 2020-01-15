@@ -161,6 +161,7 @@ class ListProcTest extends BaseProcTest {
             SimilarityProc.class,
             SccProc.class,
             TraverseProc.class,
+            TriangleCountProc.class,
             TriangleProc.class,
             UtilityProc.class
         );

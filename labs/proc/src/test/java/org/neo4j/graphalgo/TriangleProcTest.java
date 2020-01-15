@@ -69,7 +69,7 @@ class TriangleProcTest extends BaseProcTest {
                 " (i)-[:TYPE]->(g)";
 
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(TriangleProc.class, ModernTriangleProc.class);
+        registerProcedures(TriangleProc.class);
         runQuery(cypher);
 
         idToName = new String[9];

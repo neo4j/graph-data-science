@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.AdditionalMatchers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -72,7 +73,7 @@ class TriangleCountProcTest extends BaseProcTest {
                 " (i)-[:TYPE]->(g)";
 
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(TriangleProc.class, ModernTriangleProc.class, ModernTriangleCountProc.class);
+        registerProcedures(TriangleCountProc.class);
         runQuery(cypher);
 
         idToName = new String[9];
@@ -91,20 +92,9 @@ class TriangleCountProcTest extends BaseProcTest {
     }
 
     @Test
-    void testTriangleCountStream() {
-        final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
-        final String cypher = "CALL algo.triangleCount.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles";
-        runQueryWithRowConsumer(cypher, row -> {
-            final long nodeId = row.getNumber("nodeId").longValue();
-            final long triangles = row.getNumber("triangles").longValue();
-            mock.consume(nodeId, triangles);
-        });
-        verify(mock, times(9)).consume(anyLong(), eq(1L));
-    }
-
-    @Test
     void testStreaming() {
         TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
+
         String query = GdsCypher.call()
             .loadEverything(Projection.UNDIRECTED)
             .algo("gds", "alpha", "triangleCount")
@@ -114,9 +104,11 @@ class TriangleCountProcTest extends BaseProcTest {
         runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             long triangles = row.getNumber("triangles").longValue();
-            mock.consume(nodeId, triangles);
+            double coefficient = row.getNumber("coefficient").doubleValue();
+            mock.consume(nodeId, triangles, coefficient);
         });
-        verify(mock, times(9)).consume(anyLong(), eq(1L));
+        verify(mock, times(5)).consume(anyLong(), eq(1L), AdditionalMatchers.eq(1.0, 0.1));
+        verify(mock, times(4)).consume(anyLong(), eq(1L), AdditionalMatchers.eq(0.333, 0.1));
     }
 
     @Test
@@ -128,11 +120,11 @@ class TriangleCountProcTest extends BaseProcTest {
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            final long loadMillis = row.getNumber("loadMillis").longValue();
-            final long computeMillis = row.getNumber("computeMillis").longValue();
-            final long writeMillis = row.getNumber("writeMillis").longValue();
-            final long nodeCount = row.getNumber("nodeCount").longValue();
-            final long triangleCount = row.getNumber("triangleCount").longValue();
+            long loadMillis = row.getNumber("loadMillis").longValue();
+            long computeMillis = row.getNumber("computeMillis").longValue();
+            long writeMillis = row.getNumber("writeMillis").longValue();
+            long nodeCount = row.getNumber("nodeCount").longValue();
+            long triangleCount = row.getNumber("triangleCount").longValue();
             assertNotEquals(-1, loadMillis);
             assertNotEquals(-1, computeMillis);
             assertNotEquals(-1, writeMillis);
@@ -147,7 +139,42 @@ class TriangleCountProcTest extends BaseProcTest {
         });
     }
 
+    @Test
+    void testWritingWithClusterCoefficientProperty() {
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "triangleCount")
+            .writeMode()
+            .addParameter("clusterCoefficientProperty", "c")
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+            long loadMillis = row.getNumber("loadMillis").longValue();
+            long computeMillis = row.getNumber("computeMillis").longValue();
+            long writeMillis = row.getNumber("writeMillis").longValue();
+            long nodeCount = row.getNumber("nodeCount").longValue();
+            long triangles = row.getNumber("triangleCount").longValue();
+            double coefficient = row.getNumber("averageClusteringCoefficient").doubleValue();
+            long p100 = row.getNumber("p100").longValue();
+
+            assertNotEquals(-1, loadMillis);
+            assertNotEquals(-1, computeMillis);
+            assertNotEquals(-1, writeMillis);
+            assertEquals(9, nodeCount);
+            assertEquals(3, triangles);
+            assertEquals(0.704, coefficient, 0.1);
+            assertEquals(9, nodeCount);
+            assertEquals(9, p100);
+        });
+
+        String request = "MATCH (n) WHERE exists(n.clusteringCoefficient) RETURN n.clusteringCoefficient as c";
+        runQueryWithRowConsumer(request, row -> {
+            double triangles = row.getNumber("c").doubleValue();
+            System.out.println("triangles = " + triangles);
+        });
+    }
+
     interface TriangleCountConsumer {
-        void consume(long nodeId, long triangles);
+        void consume(long nodeId, long triangles, double value);
     }
 }

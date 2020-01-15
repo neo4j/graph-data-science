@@ -48,6 +48,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             ShortestPathProc.class,
             ShortestPathsProc.class,
             SccProc.class,
+            TriangleCountProc.class,
             TriangleProc.class
         );
     }
