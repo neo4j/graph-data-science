@@ -60,7 +60,7 @@ class BalancedTriadsProcTest extends BaseProcTest {
                 " (g)-[:TYPE {w:1.0}]->(b)";
 
         runQuery(cypher);
-        registerProcedures(BalancedTriadsProc.class);
+        registerProcedures(BalancedTriadsProc.class, ModernBalancedTriadsProc.class);
     }
 
     @AfterEach
@@ -82,19 +82,22 @@ class BalancedTriadsProcTest extends BaseProcTest {
     }
 
     @Test
-    void testHugeStream() {
-        final BalancedTriadsConsumer mock = mock(BalancedTriadsConsumer.class);
-        runQueryWithRowConsumer("CALL algo.balancedTriads.stream(" +
-                                "    'Node', 'TYPE', {" +
-                                "        weightProperty: 'w', graph: 'huge'" +
-                                "    }" +
-                                ") YIELD nodeId, balanced, unbalanced",
-                row -> {
-                    final long nodeId = row.getNumber("nodeId").longValue();
-                    final double balanced = row.getNumber("balanced").doubleValue();
-                    final double unbalanced = row.getNumber("unbalanced").doubleValue();
-                    mock.consume(nodeId, balanced, unbalanced);
-                });
+    void testStreaming() {
+        BalancedTriadsConsumer mock = mock(BalancedTriadsConsumer.class);
+        String query = GdsCypher.call()
+            .withRelationshipProperty("w")
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "balancedTriads")
+            .streamMode()
+            .addParameter("weightProperty", "w")
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+            long nodeId = row.getNumber("nodeId").longValue();
+            double balanced = row.getNumber("balanced").doubleValue();
+            double unbalanced = row.getNumber("unbalanced").doubleValue();
+            mock.consume(nodeId, balanced, unbalanced);
+        });
         verify(mock, times(7)).consume(anyLong(), AdditionalMatchers.eq(1.0, 3.0), AdditionalMatchers.eq(1.0, 3.0));
     }
 
