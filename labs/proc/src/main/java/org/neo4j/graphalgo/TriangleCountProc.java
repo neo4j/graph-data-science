@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.impl.triangle.TriangleCountConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,11 +43,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.TriangleProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class TriangleCountProc extends AlgoBaseProc<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> {
 
     @Procedure(name = "gds.alpha.triangleCount.stream", mode = READ)
+    @Description(DESCRIPTION)
     public Stream<IntersectingTriangleCount.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -65,6 +68,7 @@ public class TriangleCountProc extends AlgoBaseProc<IntersectingTriangleCount, P
     }
 
     @Procedure(value = "gds.alpha.triangleCount.write", mode = Mode.WRITE)
+    @Description(DESCRIPTION)
     public Stream<Result> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

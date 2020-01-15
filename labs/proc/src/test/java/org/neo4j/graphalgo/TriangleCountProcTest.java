@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
 
@@ -32,64 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- *      (a)-- (b)--(d)--(e)
- *        \T1/       \T2/
- *        (c)   (g)  (f)
- *          \  /T3\
- *          (h)--(i)
- */
-class TriangleCountProcTest extends BaseProcTest {
-
-    private static String[] idToName;
-
-    @BeforeEach
-    void setup() throws Exception {
-        final String cypher =
-                "CREATE (a:Node {name:'a'})\n" +
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE (d:Node {name:'d'})\n" +
-                "CREATE (e:Node {name:'e'})\n" +
-                "CREATE (f:Node {name:'f'})\n" +
-                "CREATE (g:Node {name:'g'})\n" +
-                "CREATE (h:Node {name:'h'})\n" +
-                "CREATE (i:Node {name:'i'})\n" +
-                "CREATE" +
-                " (a)-[:TYPE]->(b),\n" +
-                " (b)-[:TYPE]->(c),\n" +
-                " (c)-[:TYPE]->(a),\n" +
-
-                " (c)-[:TYPE]->(h),\n" +
-
-                " (d)-[:TYPE]->(e),\n" +
-                " (e)-[:TYPE]->(f),\n" +
-                " (f)-[:TYPE]->(d),\n" +
-
-                " (b)-[:TYPE]->(d),\n" +
-
-                " (g)-[:TYPE]->(h),\n" +
-                " (h)-[:TYPE]->(i),\n" +
-                " (i)-[:TYPE]->(g)";
-
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(TriangleCountProc.class);
-        runQuery(cypher);
-
-        idToName = new String[9];
-
-        QueryRunner.runInTransaction(db, () -> {
-            for (int i = 0; i < 9; i++) {
-                final String name = (String) db.getNodeById(i).getProperty("name");
-                idToName[i] = name;
-            }
-        });
-    }
-
-    @AfterEach
-    void shutdownGraph() {
-        db.shutdown();
-    }
+class TriangleCountProcTest extends TriangleProcBaseTest {
 
     @Test
     void testStreaming() {
