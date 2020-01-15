@@ -92,19 +92,6 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Bas
     }
 
     List<String> graphCreateQueries() {
-        GdsCypher.call()
-            .withNodeLabel("Node")
-            .withNodeProperty("seed")
-            .withRelationshipType(
-                "TYPE",
-                RelationshipProjection.of(
-                    "TYPE",
-                    Projection.UNDIRECTED,
-                    DeduplicationStrategy.DEFAULT
-                )
-            )
-            .graphCreate("myGraph")
-            .yields();
         return singletonList(
             GdsCypher.call()
                 .withNodeLabel("Node")
