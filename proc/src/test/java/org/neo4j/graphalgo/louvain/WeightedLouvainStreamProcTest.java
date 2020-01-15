@@ -20,34 +20,30 @@
 
 package org.neo4j.graphalgo.louvain;
 
-import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.newapi.GraphCreateProc;
+import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class WeightedLouvainStreamProcTest extends BaseProcTest {
+class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
 
     private static final Map<String, Object> expectedWeightedResult = map(
         "Alice", 3L,
@@ -75,72 +71,56 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
         "Michael", 4L
     );
 
-    @BeforeEach
-    void setupGraph() throws KernelException {
-
-        db = TestDatabaseCreator.createTestDatabase(
-            dbBuilder -> dbBuilder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
-        );
-
-        registerProcedures(LouvainStreamProc.class, LouvainWriteProc.class, GraphCreateProc.class);
-        registerFunctions(GetNodeFunc.class);
-
-        @Language("Cypher") String createDataQuery =
-            "CREATE" +
-            "  (nAlice:User {name: 'Alice', seed: 42})" +
-            ", (nBridget:User {name: 'Bridget', seed: 42})" +
-            ", (nCharles:User {name: 'Charles', seed: 42})" +
-            ", (nDoug:User {name: 'Doug'})" +
-            ", (nMark:User {name: 'Mark'})" +
-            ", (nMichael:User {name: 'Michael'})" +
-            ", (nAlice)-[:LINK {weight: 1}]->(nBridget)" +
-            ", (nAlice)-[:LINK {weight: 1}]->(nCharles)" +
-            ", (nCharles)-[:LINK {weight: 1}]->(nBridget)" +
-            ", (nAlice)-[:LINK {weight: 5}]->(nDoug)" +
-            ", (nAlice)-[:LINK  {weight: null}]->(nMark)" +
-            ", (nMark)-[:LINK {weight: 1}]->(nDoug)" +
-            ", (nMark)-[:LINK {weight: 1}]->(nMichael)" +
-            ", (nMichael)-[:LINK {weight: 1}]->(nMark)";
-
-        runQuery(createDataQuery);
-
-        String graphCreateQuery = GdsCypher.call()
-            .withNodeLabel("User")
-            .withNodeProperty("seed")
-            .withRelationshipType(
-                "LINK",
-                RelationshipProjection.of(
-                    "LINK",
-                    Projection.UNDIRECTED,
-                    DeduplicationStrategy.NONE
-                )
-            )
-            .withRelationshipProperty(PropertyMapping.of("weight", 0.0d))
-            .graphCreate("weightedGraph")
-            .yields();
-
-        runQuery(graphCreateQuery);
-
-        String unweightedGraphCreateQuery = GdsCypher.call()
-            .withNodeLabel("User")
-            .withNodeProperty("seed")
-            .withRelationshipType(
-                "LINK",
-                RelationshipProjection.of(
-                    "LINK",
-                    Projection.UNDIRECTED,
-                    DeduplicationStrategy.NONE
-                )
-            )
-            .graphCreate("unweightedGraph")
-            .yields();
-
-        runQuery(unweightedGraphCreateQuery);
+    @Override
+    String dbCypher() {
+        return "CREATE" +
+               "  (nAlice:User {name: 'Alice', seed: 42})" +
+               ", (nBridget:User {name: 'Bridget', seed: 42})" +
+               ", (nCharles:User {name: 'Charles', seed: 42})" +
+               ", (nDoug:User {name: 'Doug'})" +
+               ", (nMark:User {name: 'Mark'})" +
+               ", (nMichael:User {name: 'Michael'})" +
+               ", (nAlice)-[:LINK {weight: 1}]->(nBridget)" +
+               ", (nAlice)-[:LINK {weight: 1}]->(nCharles)" +
+               ", (nCharles)-[:LINK {weight: 1}]->(nBridget)" +
+               ", (nAlice)-[:LINK {weight: 5}]->(nDoug)" +
+               ", (nAlice)-[:LINK  {weight: null}]->(nMark)" +
+               ", (nMark)-[:LINK {weight: 1}]->(nDoug)" +
+               ", (nMark)-[:LINK {weight: 1}]->(nMichael)" +
+               ", (nMichael)-[:LINK {weight: 1}]->(nMark)";
     }
 
-    @AfterEach
-    void cleanup() {
-        GraphCatalog.removeAllLoadedGraphs();
+    @Override
+    List<String> graphCreateQueries() {
+        return Arrays.asList(
+            GdsCypher.call()
+                .withNodeLabel("User")
+                .withNodeProperty("seed")
+                .withRelationshipType(
+                    "LINK",
+                    RelationshipProjection.of(
+                        "LINK",
+                        Projection.UNDIRECTED,
+                        DeduplicationStrategy.NONE
+                    )
+                )
+                .withRelationshipProperty(PropertyMapping.of("weight", 0.0d))
+                .graphCreate("weightedLouvainGraph")
+                .yields(),
+            GdsCypher.call()
+                .withNodeLabel("User")
+                .withNodeProperty("seed")
+                .withRelationshipType(
+                    "LINK",
+                    RelationshipProjection.of(
+                        "LINK",
+                        Projection.UNDIRECTED,
+                        DeduplicationStrategy.NONE
+                    )
+                )
+                .graphCreate("unweightedGraph")
+                .yields()
+        );
     }
 
     @Test
@@ -163,7 +143,7 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
     void unweightedLouvainOnWeightedGraphTest() {
         String query = GdsCypher
             .call()
-            .explicitCreation("weightedGraph")
+            .explicitCreation("weightedLouvainGraph")
             .algo("louvain")
             .streamMode()
             .yields("nodeId", "communityId", "communityIds")
@@ -184,7 +164,7 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
             arguments(
                 GdsCypher
                     .call()
-                    .explicitCreation("weightedGraph")
+                    .explicitCreation("weightedLouvainGraph")
                     .algo("louvain")
                     .streamMode()
                     .addParameter("weightProperty", "weight")
@@ -229,5 +209,15 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
 
         assertEquals(expectedResult.get(computedName), computedCommunityId);
         assertNull(row.get("communityIds"));
+    }
+
+    @Override
+    public Class<? extends AlgoBaseProc<?, Louvain, LouvainStreamConfig>> getProcedureClazz() {
+        return LouvainStreamProc.class;
+    }
+
+    @Override
+    public LouvainStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return LouvainStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 }
