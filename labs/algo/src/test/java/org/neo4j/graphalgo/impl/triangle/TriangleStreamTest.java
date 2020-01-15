@@ -78,7 +78,7 @@ class TriangleStreamTest {
         final TripleConsumer mock = mock(TripleConsumer.class);
 
         new TriangleStream(graph, Pools.DEFAULT, 1)
-                .resultStream()
+                .compute()
                 .forEach(r -> mock.consume(r.nodeA, r.nodeB, r.nodeC));
 
         verify(mock, times((int) TRIANGLES)).consume(eq(centerId), anyLong(), anyLong());
@@ -90,7 +90,7 @@ class TriangleStreamTest {
         final TripleConsumer mock = mock(TripleConsumer.class);
 
         new TriangleStream(graph, Pools.DEFAULT, 8)
-                .resultStream()
+                .compute()
                 .forEach(r -> mock.consume(r.nodeA, r.nodeB, r.nodeC));
 
         verify(mock, times((int) TRIANGLES)).consume(eq(centerId), anyLong(), anyLong());

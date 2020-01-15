@@ -56,7 +56,7 @@ class IntersectingTriangleCountTest {
 
         assertEquals(0, triangleCount.getTriangleCount());
 
-        List<IntersectingTriangleCount.Result> results = triangleCount.resultStream().collect(Collectors.toList());
+        List<IntersectingTriangleCount.Result> results = triangleCount.computeStream().collect(Collectors.toList());
         assertEquals(2, results.size());
         assertThat(results, hasItem(new IntersectingTriangleCount.Result(1L, 0L, 0.0)));
         assertThat(results, hasItem(new IntersectingTriangleCount.Result(2L, 0L, 0.0)));
@@ -77,7 +77,7 @@ class IntersectingTriangleCountTest {
 
         assertEquals(0, triangleCount.getTriangleCount());
 
-        List<IntersectingTriangleCount.Result> results = triangleCount.resultStream().collect(Collectors.toList());
+        List<IntersectingTriangleCount.Result> results = triangleCount.computeStream().collect(Collectors.toList());
         assertEquals(2, results.size());
         assertThat(results, hasItem(new IntersectingTriangleCount.Result(1L, 0L, 0.0)));
         assertThat(results, hasItem(new IntersectingTriangleCount.Result(2L, 0L, 0.0)));
@@ -106,7 +106,7 @@ class IntersectingTriangleCountTest {
 
         assertEquals(1, triangleCount.getTriangleCount());
 
-        List<IntersectingTriangleCount.Result> results = triangleCount.resultStream().collect(Collectors.toList());
+        List<IntersectingTriangleCount.Result> results = triangleCount.computeStream().collect(Collectors.toList());
         assertEquals(3, results.size());
         assertThat(results, hasItem(new IntersectingTriangleCount.Result(1L, 1L, 1.0)));
         assertThat(results, hasItem(new IntersectingTriangleCount.Result(2L, 1L, 1.0)));

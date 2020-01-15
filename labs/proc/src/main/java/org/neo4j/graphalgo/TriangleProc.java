@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.triangle.ModernTriangleStream;
+import org.neo4j.graphalgo.impl.triangle.TriangleStream;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.logging.Log;
@@ -39,15 +39,15 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleProc extends AlgoBaseProc<ModernTriangleStream, Stream<ModernTriangleStream.Result>, TriangleConfig> {
+public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> {
 
     @Procedure(name = "gds.alpha.triangle.stream", mode = READ)
     @Description("Triangle counting is a community detection graph algorithm that is used to determine the number of triangles passing through each node in the graph.")
-    public Stream<ModernTriangleStream.Result> stream(
+    public Stream<TriangleStream.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModernTriangleStream, Stream<ModernTriangleStream.Result>, TriangleConfig> computationResult =
+        ComputationResult<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> computationResult =
             compute(graphNameOrConfig, configuration, false, false);
 
         Graph graph = computationResult.graph();
@@ -71,13 +71,13 @@ public class TriangleProc extends AlgoBaseProc<ModernTriangleStream, Stream<Mode
     }
 
     @Override
-    protected AlgorithmFactory<ModernTriangleStream, TriangleConfig> algorithmFactory(TriangleConfig config) {
-       return new AlphaAlgorithmFactory<ModernTriangleStream, TriangleConfig>() {
+    protected AlgorithmFactory<TriangleStream, TriangleConfig> algorithmFactory(TriangleConfig config) {
+       return new AlphaAlgorithmFactory<TriangleStream, TriangleConfig>() {
            @Override
-           public ModernTriangleStream build(
+           public TriangleStream build(
                Graph graph, TriangleConfig configuration, AllocationTracker tracker, Log log
            ) {
-               return new ModernTriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
+               return new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
                    .withProgressLogger(ProgressLogger.wrap(log, "Triangle"))
                    .withTerminationFlag(TerminationFlag.wrap(transaction));
            }

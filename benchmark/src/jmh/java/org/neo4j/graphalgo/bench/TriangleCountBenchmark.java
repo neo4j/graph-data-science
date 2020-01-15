@@ -109,6 +109,6 @@ public class TriangleCountBenchmark {
 
     @Benchmark
     public Object _02_stream() {
-        return new TriangleStream(g, Pools.DEFAULT, concurrency).resultStream().count();
+        return new TriangleStream(g, Pools.DEFAULT, concurrency).compute().count();
     }
 }

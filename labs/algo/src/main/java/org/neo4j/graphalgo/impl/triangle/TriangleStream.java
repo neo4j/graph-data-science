@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -43,10 +43,8 @@ import java.util.stream.StreamSupport;
  * as the number of triangles that passes through a node. Instead of
  * emitting the nodeId and the number of triangles the node is part of,
  * this impl. streams the actual nodeIds of each triangle once.
- *
- * @author mknblch
  */
-public class TriangleStream extends LegacyAlgorithm<TriangleStream> {
+public class TriangleStream extends Algorithm<TriangleStream, Stream<TriangleStream.Result>> {
 
     private Graph graph;
     private ExecutorService executorService;
@@ -74,23 +72,13 @@ public class TriangleStream extends LegacyAlgorithm<TriangleStream> {
     }
 
     /**
-     * release inner data structures
+     * This algorithm computes a stream, therefore we must not release before consumption.
      */
     @Override
-    public void release() {
-        visitedNodes = null;
-        runningThreads = null;
-        resultQueue = null;
-        graph = null;
-        executorService = null;
-    }
+    public void release() { }
 
-    /**
-     * return result stream of triangle triples
-     * consisting of its 3 nodeIds
-     * @return
-     */
-    public Stream<Result> resultStream() {
+    @Override
+    public Stream<Result> compute() {
         submitTasks();
         final TerminationFlag flag = getTerminationFlag();
         final Iterator<Result> it = new Iterator<Result>() {

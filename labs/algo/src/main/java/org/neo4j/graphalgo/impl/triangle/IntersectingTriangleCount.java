@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -48,10 +48,8 @@ import java.util.stream.Stream;
  *  http://www.cse.cuhk.edu.hk/~jcheng/papers/triangle_kdd11.pdf
  *  https://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf
  *  http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
- *
- * @author mknblch
  */
-public class IntersectingTriangleCount extends LegacyAlgorithm<IntersectingTriangleCount> {
+public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount, PagedAtomicIntegerArray> {
 
     private Graph graph;
     private ExecutorService executorService;
@@ -100,14 +98,6 @@ public class IntersectingTriangleCount extends LegacyAlgorithm<IntersectingTrian
         return array;
     }
 
-    public final Stream<Result> resultStream() {
-        return IntStream.range(0, Math.toIntExact(nodeCount))
-                .mapToObj(i -> new Result(
-                        graph.toOriginalNodeId(i),
-                        triangles.get(i),
-                        calculateCoefficient(triangles.get(i), graph.degree(i, Direction.OUTGOING))));
-    }
-
     @Override
     public final IntersectingTriangleCount me() {
         return this;
@@ -121,7 +111,7 @@ public class IntersectingTriangleCount extends LegacyAlgorithm<IntersectingTrian
     }
 
     @Override
-    public Void compute() {
+    public PagedAtomicIntegerArray compute() {
         visitedNodes.set(0);
         queue.set(0);
         triangleCount.reset();
@@ -130,7 +120,15 @@ public class IntersectingTriangleCount extends LegacyAlgorithm<IntersectingTrian
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(graph));
         // run
         ParallelUtil.run(tasks, executorService);
-        return null;
+        return triangles;
+    }
+
+    public Stream<Result> computeStream() {
+        return IntStream.range(0, Math.toIntExact(graph.nodeCount()))
+            .mapToObj(i -> new IntersectingTriangleCount.Result(
+                graph.toOriginalNodeId(i),
+                triangles.get(i),
+                calculateCoefficient(triangles.get(i), graph.degree(i, Direction.OUTGOING))));
     }
 
     private class IntersectTask implements Runnable, IntersectionConsumer {

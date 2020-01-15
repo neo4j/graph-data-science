@@ -29,11 +29,10 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.impl.triangle.ModernIntersectingTriangleCount;
+import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphalgo.impl.triangle.TriangleCountConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -41,20 +40,19 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleCountProc extends AlgoBaseProc<ModernIntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> {
+public class TriangleCountProc extends AlgoBaseProc<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> {
 
     @Procedure(name = "gds.alpha.triangleCount.stream", mode = READ)
-    public Stream<ModernIntersectingTriangleCount.Result> stream(
+    public Stream<IntersectingTriangleCount.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModernIntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> computationResult =
-            compute(graphNameOrConfig, configuration, true, false);
+        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> computationResult =
+            compute(graphNameOrConfig, configuration, false, false);
 
         Graph graph = computationResult.graph();
 
@@ -63,14 +61,7 @@ public class TriangleCountProc extends AlgoBaseProc<ModernIntersectingTriangleCo
             return Stream.empty();
         }
 
-        ModernIntersectingTriangleCount algorithm = computationResult.algorithm();
-        PagedAtomicIntegerArray triangles = computationResult.result();
-
-        return IntStream.range(0, Math.toIntExact(graph.nodeCount()))
-            .mapToObj(i -> new ModernIntersectingTriangleCount.Result(
-                graph.toOriginalNodeId(i),
-                triangles.get(i),
-                algorithm.calculateCoefficient(triangles.get(i), graph.degree(i, Direction.OUTGOING))));
+        return computationResult.algorithm().computeStream();
     }
 
     @Procedure(value = "gds.alpha.triangleCount.write", mode = Mode.WRITE)
@@ -78,13 +69,13 @@ public class TriangleCountProc extends AlgoBaseProc<ModernIntersectingTriangleCo
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModernIntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> computationResult =
-            compute(graphNameOrConfig, configuration, true, false);
+        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> computationResult =
+            compute(graphNameOrConfig, configuration, false, false);
 
         AllocationTracker tracker = computationResult.tracker();
         TriangleCountConfig config = computationResult.config();
         Graph graph = computationResult.graph();
-        ModernIntersectingTriangleCount algorithm = computationResult.algorithm();
+        IntersectingTriangleCount algorithm = computationResult.algorithm();
 
         TriangleCountResultBuilder builder = new TriangleCountResultBuilder(true, true, tracker);
         builder.withLoadMillis(computationResult.createMillis());
@@ -144,16 +135,16 @@ public class TriangleCountProc extends AlgoBaseProc<ModernIntersectingTriangleCo
     }
 
     @Override
-    protected AlgorithmFactory<ModernIntersectingTriangleCount, TriangleCountConfig> algorithmFactory(TriangleCountConfig config) {
-        return new AlphaAlgorithmFactory<ModernIntersectingTriangleCount, TriangleCountConfig>() {
+    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountConfig> algorithmFactory(TriangleCountConfig config) {
+        return new AlphaAlgorithmFactory<IntersectingTriangleCount, TriangleCountConfig>() {
             @Override
-            public ModernIntersectingTriangleCount build(
+            public IntersectingTriangleCount build(
                 Graph graph,
                 TriangleCountConfig configuration,
                 AllocationTracker tracker,
                 Log log
             ) {
-                return new ModernIntersectingTriangleCount(
+                return new IntersectingTriangleCount(
                     graph,
                     Pools.DEFAULT,
                     configuration.concurrency(),
