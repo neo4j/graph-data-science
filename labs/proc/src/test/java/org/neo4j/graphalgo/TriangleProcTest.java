@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.impl.triangle.ModernTriangleStream;
 
 import java.util.HashSet;
 
@@ -76,7 +77,7 @@ class TriangleProcTest extends BaseProcTest {
                 " (i)-[:TYPE]->(g)";
 
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(TriangleProc.class);
+        registerProcedures(TriangleProc.class, ModernTriangleProc.class);
         runQuery(cypher);
 
         idToName = new String[9];
@@ -143,14 +144,19 @@ class TriangleProcTest extends BaseProcTest {
     }
 
     @Test
-    void testTriangleStream() {
+    void testStreaming() {
         HashSet<Integer> sums = new HashSet<>();
-        final TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
-        final String cypher = "CALL algo.triangle.stream('Node', '', {concurrency:4}) YIELD nodeA, nodeB, nodeC";
-        runQueryWithRowConsumer(cypher, row -> {
-            final long nodeA = row.getNumber("nodeA").longValue();
-            final long nodeB = row.getNumber("nodeB").longValue();
-            final long nodeC = row.getNumber("nodeC").longValue();
+        TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
+        String query = GdsCypher
+            .call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "triangle")
+            .streamMode()
+            .yields();
+        runQueryWithRowConsumer(query, row -> {
+            long nodeA = row.getNumber("nodeA").longValue();
+            long nodeB = row.getNumber("nodeB").longValue();
+            long nodeC = row.getNumber("nodeC").longValue();
             consumer.consume(idToName[(int) nodeA], idToName[(int) nodeB], idToName[(int) nodeC]);
         });
 
