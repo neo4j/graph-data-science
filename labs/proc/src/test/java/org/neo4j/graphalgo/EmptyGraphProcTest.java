@@ -211,27 +211,67 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testKSpanningTreeKMax() {
-        runQueryWithRowConsumer("CALL algo.spanningTree.kmax('', '', '', 0, 3, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.spanningTree.kmax")
+            .writeMode()
+            .addParameter("startNodeId", 0)
+            .addParameter("k", 3)
+            .yields();
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
     void testKSpanningTreeKMin() {
-        runQueryWithRowConsumer("CALL algo.spanningTree.kmin('', '', '', 0, 3, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.spanningTree.kmin")
+            .writeMode()
+            .addParameter("startNodeId", 0)
+            .addParameter("k", 3)
+            .yields();
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
     void testSpanningTree() {
-        runQueryWithRowConsumer("CALL algo.spanningTree('', '', '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.spanningTree")
+            .writeMode()
+            .addParameter("startNodeId", 0)
+            .addParameter("weightWriteProperty", "weight")
+            .yields();
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
     void testSpanningTreeMinimum() {
-        runQueryWithRowConsumer("CALL algo.spanningTree.minimum('', '', '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.spanningTree.minimum")
+            .writeMode()
+            .addParameter("startNodeId", 0)
+            .addParameter("weightWriteProperty", "weight")
+            .yields();
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
     void testSpanningTreeMaximum() {
-        runQueryWithRowConsumer("CALL algo.spanningTree.maximum('', '', '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.spanningTree.maximum")
+            .writeMode()
+            .addParameter("startNodeId", 0)
+            .addParameter("weightWriteProperty", "weight")
+            .yields();
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
