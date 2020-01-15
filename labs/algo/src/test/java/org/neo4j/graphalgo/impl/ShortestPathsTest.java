@@ -112,9 +112,9 @@ public final class ShortestPathsTest extends AlgoTestBase {
     @Test
     public void testPaths() {
 
-        final ShortestPaths sssp = new ShortestPaths(graph);
+        final ShortestPaths sssp = new ShortestPaths(graph, head);
 
-        final IntDoubleMap sp = sssp.compute(head)
+        final IntDoubleMap sp = sssp.compute()
                 .getShortestPaths();
 
         assertEquals(8, sp.get(Math.toIntExact(graph.toMappedNodeId(tail))),0.1);

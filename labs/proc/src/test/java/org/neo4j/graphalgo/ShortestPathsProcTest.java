@@ -21,8 +21,11 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Matchers;
-import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphdb.Label;
 
 import java.util.function.DoubleConsumer;
@@ -48,35 +51,35 @@ import static org.mockito.Mockito.verify;
 final class ShortestPathsProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (s:Node {name: 's'})" +
-            ", (a:Node {name: 'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (f:Node {name: 'f'})" +
-            ", (g:Node {name: 'g'})" +
-            ", (h:Node {name: 'h'})" +
-            ", (i:Node {name: 'i'})" +
-            ", (x:Node {name: 'x'})" +
+        "CREATE" +
+        "  (s:Node {name: 's'})" +
+        ", (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (f:Node {name: 'f'})" +
+        ", (g:Node {name: 'g'})" +
+        ", (h:Node {name: 'h'})" +
+        ", (i:Node {name: 'i'})" +
+        ", (x:Node {name: 'x'})" +
 
-            ", (x)-[:TYPE {cost: 5}]->(s)" + // creates cycle
+        ", (x)-[:TYPE {cost: 5}]->(s)" + // creates cycle
 
-            ", (s)-[:TYPE {cost: 5}]->(a)" + // line 1
-            ", (a)-[:TYPE {cost: 5}]->(b)" +
-            ", (b)-[:TYPE {cost: 5}]->(c)" +
-            ", (c)-[:TYPE {cost: 5}]->(x)" +
+        ", (s)-[:TYPE {cost: 5}]->(a)" + // line 1
+        ", (a)-[:TYPE {cost: 5}]->(b)" +
+        ", (b)-[:TYPE {cost: 5}]->(c)" +
+        ", (c)-[:TYPE {cost: 5}]->(x)" +
 
-            ", (s)-[:TYPE {cost: 3}]->(d)" + // line 2
-            ", (d)-[:TYPE {cost: 3}]->(e)" +
-            ", (e)-[:TYPE {cost: 3}]->(f)" +
-            ", (f)-[:TYPE {cost: 3}]->(x)" +
+        ", (s)-[:TYPE {cost: 3}]->(d)" + // line 2
+        ", (d)-[:TYPE {cost: 3}]->(e)" +
+        ", (e)-[:TYPE {cost: 3}]->(f)" +
+        ", (f)-[:TYPE {cost: 3}]->(x)" +
 
-            ", (s)-[:TYPE {cost: 2}]->(g)" + // line 3
-            ", (g)-[:TYPE {cost: 2}]->(h)" +
-            ", (h)-[:TYPE {cost: 2}]->(i)" +
-            ", (i)-[:TYPE {cost: 2}]->(x)";
+        ", (s)-[:TYPE {cost: 2}]->(g)" + // line 3
+        ", (g)-[:TYPE {cost: 2}]->(h)" +
+        ", (h)-[:TYPE {cost: 2}]->(i)" +
+        ", (i)-[:TYPE {cost: 2}]->(x)";
 
     private static long startNode;
     private static long endNode;
@@ -84,26 +87,47 @@ final class ShortestPathsProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(ShortestPathsProc.class);
+        registerProcedures(ShortestPathsProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
         QueryRunner.runInTransaction(db, () -> {
             startNode = db.findNode(Label.label("Node"), "name", "s").getId();
             endNode = db.findNode(Label.label("Node"), "name", "x").getId();
         });
+
+        String graphCreateQuery = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType(
+                "TYPE",
+                RelationshipProjection.of(
+                    "TYPE",
+                    Projection.UNDIRECTED,
+                    DeduplicationStrategy.DEFAULT
+                )
+            )
+            .withRelationshipProperty(PropertyMapping.of("cost", 1.0d))
+            .graphCreate("shortestPathsGraph")
+            .yields();
+
+        runQuery(graphCreateQuery);
     }
 
     @AfterEach
     void shutdownGraph() {
+        GraphCatalog.removeAllLoadedGraphs();
         db.shutdown();
     }
 
-    @AllGraphNamesTest
-    void testResultStream(String graphName) {
+    @Test
+    void testResultStream() {
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
         final String cypher = "MATCH(n:Node {name:'s'}) " +
-                              "WITH n CALL algo.shortestPaths.stream(n, 'cost',{graph:'" + graphName + "'}) " +
+                              "WITH n CALL gds.alpha.shortestPaths.stream('shortestPathsGraph'," +
+                              "{" +
+                              "     startNode: n," +
+                              "     weightProperty: 'cost'" +
+                              "}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
         runQueryWithRowConsumer(cypher, row -> {
@@ -123,12 +147,18 @@ final class ShortestPathsProcTest extends BaseProcTest {
         verify(consumer, times(1)).accept(eq(8D));
     }
 
-    @AllGraphNamesTest
-    void testWriteBack(String graphName) {
-
+    @Test
+    void testWriteBack() {
         final String matchCypher = "MATCH(n:Node {name:'s'}) " +
-                                   "WITH n CALL algo.shortestPaths(n, 'cost', {write:true, writeProperty:'sp',graph:'" + graphName + "'}) " +
-                                   "YIELD nodeCount, loadMillis, evalMillis, writeMillis RETURN nodeCount, loadMillis, evalMillis, writeMillis";
+                                   "WITH n CALL gds.alpha.shortestPaths.write(" +
+                                   "        'shortestPathsGraph', " +
+                                   "        {" +
+                                   "            startNode: n, " +
+                                   "            weightProperty: 'cost', " +
+                                   "            writeProperty: 'sp'" +
+                                   "        })" +
+                                   " YIELD nodeCount, loadMillis, evalMillis, writeMillis" +
+                                   " RETURN nodeCount, loadMillis, evalMillis, writeMillis";
 
         runQueryWithRowConsumer(matchCypher, row -> {
             System.out.println("loadMillis = " + row.getNumber("loadMillis").longValue());
@@ -152,13 +182,13 @@ final class ShortestPathsProcTest extends BaseProcTest {
         verify(consumer, times(1)).accept(eq(8D));
     }
 
-    @AllGraphNamesTest
-    void testData(String graphName) {
+    @Test
+    void testData() {
 
         final Consumer mock = mock(Consumer.class);
 
         final String cypher = "MATCH(n:Node {name:'x'}) " +
-                              "WITH n CALL algo.shortestPaths.stream(n, 'cost', {graph:'" + graphName + "'}) " +
+                              "WITH n CALL gds.alpha.shortestPaths.stream('shortestPathsGraph', {startNode: n, weightProperty: 'cost'}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
         runQueryWithRowConsumer(cypher, row -> {

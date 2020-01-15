@@ -240,13 +240,13 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testShortestPathsStream() {
-        boolean hasNext = runQuery("CALL algo.shortestPaths.stream(null, '', {graph:'" + graphImpl + "'})", Result::hasNext);
+        boolean hasNext = runQuery("MATCH(n:Node {name:'s'}) WITH n CALL gds.alpha.shortestPaths.stream({startNode: n}) YIELD nodeId RETURN nodeId", Result::hasNext);
         assertFalse(hasNext);
     }
 
     @Test
     void testShortestPaths() {
-        runQueryWithRowConsumer("CALL algo.shortestPaths(null, '', {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
+        runQueryWithRowConsumer("MATCH(n:Node {name:'s'}) WITH n CALL gds.alpha.shortestPaths.write({startNode: n}) YIELD nodeCount RETURN nodeCount", row -> assertEquals(0L, row.getNumber("nodeCount")));
     }
 
     @Test

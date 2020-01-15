@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl;
 
 import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
@@ -40,34 +40,31 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntPredicate
  * node in the graph. {@link Double#POSITIVE_INFINITY} is returned
  * if no path exists between those nodes.
  */
-public class ShortestPaths extends LegacyAlgorithm<ShortestPaths> {
+public class ShortestPaths extends Algorithm<ShortestPaths, ShortestPaths> {
 
     private Graph graph;
     private IntDoubleMap costs;
     private IntPriorityQueue queue;
     private final int nodeCount;
     private ProgressLogger progressLogger;
+    private final long startNodeId;
 
-    public ShortestPaths(Graph graph) {
+    public ShortestPaths(Graph graph, long startNodeId) {
         this.graph = graph;
         nodeCount = Math.toIntExact(graph.nodeCount());
+        this.startNodeId = startNodeId;
         costs = new IntDoubleScatterMap(nodeCount);
         queue = IntPriorityQueue.min();
         progressLogger = getProgressLogger();
     }
 
-    /**
-     * compute the shortest paths from startNode
-     *
-     * @param startNode the start node id (original neo4j id)
-     * @return itself
-     */
-    public ShortestPaths compute(long startNode) {
+    @Override
+    public ShortestPaths compute() {
         graph.forEachNode(longToIntPredicate( node -> {
             costs.put(node, Double.POSITIVE_INFINITY);
             return true;
         }));
-        final int nodeId = Math.toIntExact(graph.toMappedNodeId(startNode));
+        final int nodeId = Math.toIntExact(graph.toMappedNodeId(startNodeId));
         costs.put(nodeId, 0D);
         queue.add(nodeId, 0D);
         run();
@@ -119,8 +116,6 @@ public class ShortestPaths extends LegacyAlgorithm<ShortestPaths> {
 
     @Override
     public void release() {
-        graph = null;
-        costs = null;
         queue = null;
     }
 
