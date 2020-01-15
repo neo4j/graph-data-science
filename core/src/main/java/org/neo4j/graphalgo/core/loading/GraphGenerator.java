@@ -105,7 +105,7 @@ public class GraphGenerator {
             this.executorService = executorService;
             this.tracker = tracker;
 
-            this.originalToInternalBuilder = SparseNodeMapping.Builder.create(maxOriginalId, tracker);
+            this.originalToInternalBuilder = SparseNodeMapping.Builder.create(maxOriginalId + 1, tracker);
             this.nextAvailableId = 0;
             seenOriginalIds = new BitSet(maxOriginalId);
         }
