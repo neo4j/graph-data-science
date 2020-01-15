@@ -238,6 +238,10 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     protected ComputationResult<A, RESULT, CONFIG> compute(Object graphNameOrConfig, Map<String, Object> configuration) {
+        return compute(graphNameOrConfig, configuration, true, true);
+    }
+
+    protected ComputationResult<A, RESULT, CONFIG> compute(Object graphNameOrConfig, Map<String, Object> configuration, boolean releaseAlgorithm, boolean releaseTopology) {
         ImmutableComputationResult.Builder<A, RESULT, CONFIG> builder = ImmutableComputationResult.builder();
         AllocationTracker tracker = AllocationTracker.create();
 
@@ -275,8 +279,12 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
         log.info(algoName() + ": overall memory usage %s", tracker.getUsageString());
 
-        algo.release();
-        graph.releaseTopology();
+        if (releaseAlgorithm) {
+            algo.release();
+        }
+        if (releaseTopology) {
+            graph.releaseTopology();
+        }
 
         return builder
             .graph(graph)

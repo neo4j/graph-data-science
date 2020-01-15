@@ -23,10 +23,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  *      (a)-- (b)--(d)--(e)
@@ -35,7 +36,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
  *          \  /T3\
  *          (h)--(i)
  */
-class TriangleProcTest extends BaseProcTest {
+class TriangleCountProcTest extends BaseProcTest {
 
     private static String[] idToName;
 
@@ -69,7 +70,7 @@ class TriangleProcTest extends BaseProcTest {
                 " (i)-[:TYPE]->(g)";
 
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(TriangleProc.class, ModernTriangleProc.class);
+        registerProcedures(TriangleProc.class, ModernTriangleProc.class, ModernTriangleCountProc.class);
         runQuery(cypher);
 
         idToName = new String[9];
@@ -87,39 +88,64 @@ class TriangleProcTest extends BaseProcTest {
         db.shutdown();
     }
 
-    private static int idsum(String... names) {
-        int sum = 0;
-        for (int i = 0; i < idToName.length; i++) {
-            for (String name : names) {
-                if (idToName[i].equals(name)) {
-                    sum += i;
-                }
-            }
-        }
-        return sum;
+    @Test
+    void testTriangleCountStream() {
+        final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
+        final String cypher = "CALL algo.triangleCount.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles";
+        runQueryWithRowConsumer(cypher, row -> {
+            final long nodeId = row.getNumber("nodeId").longValue();
+            final long triangles = row.getNumber("triangles").longValue();
+            mock.consume(nodeId, triangles);
+        });
+        verify(mock, times(9)).consume(anyLong(), eq(1L));
     }
 
     @Test
     void testStreaming() {
-        HashSet<Integer> sums = new HashSet<>();
-        TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
-        String query = GdsCypher
-            .call()
+        TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
+        String query = GdsCypher.call()
             .loadEverything(Projection.UNDIRECTED)
-            .algo("gds", "alpha", "triangle")
+            .algo("gds", "alpha", "triangleCount")
             .streamMode()
             .yields();
-        runQueryWithRowConsumer(query, row -> {
-            long nodeA = row.getNumber("nodeA").longValue();
-            long nodeB = row.getNumber("nodeB").longValue();
-            long nodeC = row.getNumber("nodeC").longValue();
-            consumer.consume(idToName[(int) nodeA], idToName[(int) nodeB], idToName[(int) nodeC]);
-        });
 
-        assertThat(sums, containsInAnyOrder(0 + 1 + 2, 3 + 4 + 5, 6 + 7 + 8));
+        runQueryWithRowConsumer(query, row -> {
+            long nodeId = row.getNumber("nodeId").longValue();
+            long triangles = row.getNumber("triangles").longValue();
+            mock.consume(nodeId, triangles);
+        });
+        verify(mock, times(9)).consume(anyLong(), eq(1L));
     }
 
-    interface TripleConsumer {
-        void consume(String nodeA, String nodeB, String nodeC);
+//    @Test
+//    void testWriting() {
+//        String query = GdsCypher.call()
+//            .loadEverything(Projection.UNDIRECTED)
+//            .algo("gds", "alpha", "triangleCount")
+//            .writeMode()
+//            .yields();
+//
+//        runQueryWithRowConsumer(query, row -> {
+//            final long loadMillis = row.getNumber("loadMillis").longValue();
+//            final long computeMillis = row.getNumber("computeMillis").longValue();
+//            final long writeMillis = row.getNumber("writeMillis").longValue();
+//            final long nodeCount = row.getNumber("nodeCount").longValue();
+//            final long triangleCount = row.getNumber("triangleCount").longValue();
+//            assertNotEquals(-1, loadMillis);
+//            assertNotEquals(-1, computeMillis);
+//            assertNotEquals(-1, writeMillis);
+//            assertEquals(3, triangleCount);
+//            assertEquals(9, nodeCount);
+//        });
+//
+//        final String request = "MATCH (n) WHERE exists(n.triangles) RETURN n.triangles as t";
+//        runQueryWithRowConsumer(request, row -> {
+//            final int triangles = row.getNumber("t").intValue();
+//            assertEquals(1, triangles);
+//        });
+//    }
+
+    interface TriangleCountConsumer {
+        void consume(long nodeId, long triangles);
     }
 }

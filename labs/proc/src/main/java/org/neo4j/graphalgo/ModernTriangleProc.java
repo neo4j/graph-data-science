@@ -22,18 +22,12 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.triangle.ModernTriangleStream;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountBase;
-import org.neo4j.graphalgo.impl.triangle.TriangleStream;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -54,9 +48,8 @@ public class ModernTriangleProc extends AlgoBaseProc<ModernTriangleStream, Strea
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-
         ComputationResult<ModernTriangleStream, Stream<ModernTriangleStream.Result>, TriangleConfig> computationResult =
-            compute(graphNameOrConfig, configuration);
+            compute(graphNameOrConfig, configuration, false, false);
 
         Graph graph = computationResult.graph();
 
@@ -80,7 +73,7 @@ public class ModernTriangleProc extends AlgoBaseProc<ModernTriangleStream, Strea
 
     @Override
     protected AlgorithmFactory<ModernTriangleStream, TriangleConfig> algorithmFactory(TriangleConfig config) {
-       return new AlgorithmFactory<ModernTriangleStream, TriangleConfig>() {
+       return new AlphaAlgorithmFactory<ModernTriangleStream, TriangleConfig>() {
            @Override
            public ModernTriangleStream build(
                Graph graph, TriangleConfig configuration, AllocationTracker tracker, Log log
@@ -88,11 +81,6 @@ public class ModernTriangleProc extends AlgoBaseProc<ModernTriangleStream, Strea
                return new ModernTriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
                    .withProgressLogger(ProgressLogger.wrap(log, "Triangle"))
                    .withTerminationFlag(TerminationFlag.wrap(transaction));
-           }
-
-           @Override
-           public MemoryEstimation memoryEstimation(TriangleConfig configuration) {
-               return MemoryEstimations.empty();
            }
        };
     }
