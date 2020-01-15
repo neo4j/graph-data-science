@@ -213,7 +213,12 @@ public interface WeightConfigTest<CONFIG extends WeightConfig & AlgoBaseConfig, 
     @Test
     default void testRunUnweightedOnWeightedNoRelTypeGraph() {
         String noRelGraph = "weightedGraph";
-        loadExplicitGraph(noRelGraph, RelationshipProjections.empty());
+
+        RelationshipProjections relationshipProjections = RelationshipProjections
+            .empty()
+            .addPropertyMappings(PropertyMappings.of(PropertyMapping.of("weight1", 1.0)));
+
+        loadExplicitGraph(noRelGraph, relationshipProjections);
 
         CypherMapWrapper algoConfig = createMinimalConfig(CypherMapWrapper.empty());
 
