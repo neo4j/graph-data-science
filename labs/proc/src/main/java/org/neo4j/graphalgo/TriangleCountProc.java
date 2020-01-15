@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -89,7 +90,6 @@ public class TriangleCountProc extends AlgoBaseProc<IntersectingTriangleCount, P
             graph.release();
             return Stream.of(builder.buildResult());
         }
-
         NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, algorithm.getTerminationFlag())
             .withLog(log)
             .parallel(Pools.DEFAULT, config.writeConcurrency())
@@ -98,23 +98,25 @@ public class TriangleCountProc extends AlgoBaseProc<IntersectingTriangleCount, P
         PagedAtomicIntegerArray triangles = algorithm.getTriangles();
         String clusteringCoefficientProperty = config.clusterCoefficientProperty();
 
-        if (clusteringCoefficientProperty != null) {
-            // huge with coefficients
-            exporter.write(
-                config.writeProperty(),
-                triangles,
-                PagedAtomicIntegerArray.Translator.INSTANCE,
-                clusteringCoefficientProperty,
-                algorithm.getCoefficients(),
-                HugeDoubleArray.Translator.INSTANCE
-            );
-        } else {
-            // huge without coefficients
-            exporter.write(
-                config.writeProperty(),
-                triangles,
-                PagedAtomicIntegerArray.Translator.INSTANCE
-            );
+        try (ProgressTimer ignored = builder.timeWrite()) {
+            if (clusteringCoefficientProperty != null) {
+                // huge with coefficients
+                exporter.write(
+                    config.writeProperty(),
+                    triangles,
+                    PagedAtomicIntegerArray.Translator.INSTANCE,
+                    clusteringCoefficientProperty,
+                    algorithm.getCoefficients(),
+                    HugeDoubleArray.Translator.INSTANCE
+                );
+            } else {
+                // huge without coefficients
+                exporter.write(
+                    config.writeProperty(),
+                    triangles,
+                    PagedAtomicIntegerArray.Translator.INSTANCE
+                );
+            }
         }
 
         return Stream.of(builder

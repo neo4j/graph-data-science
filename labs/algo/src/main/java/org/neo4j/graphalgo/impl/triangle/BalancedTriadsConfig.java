@@ -27,12 +27,13 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.WriteConfig;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration("BalancedTriadsConfigImpl")
-public interface BalancedTriadsConfig extends AlgoBaseConfig, WeightConfig {
+public interface BalancedTriadsConfig extends AlgoBaseConfig, WeightConfig, WriteConfig {
 
     @Value.Default
     default String balancedProperty() {
@@ -46,7 +47,7 @@ public interface BalancedTriadsConfig extends AlgoBaseConfig, WeightConfig {
 
     @Value.Default
     default String writeProperty() {
-        return "centrality";
+        return "unused";
     }
 
     static BalancedTriadsConfig of(

@@ -23,13 +23,17 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.triangle.BalancedTriadsConfig;
 import org.neo4j.graphalgo.impl.triangle.ModernBalancedTriads;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -46,7 +50,6 @@ public class ModernBalancedTriadsProc extends AlgoBaseProc<ModernBalancedTriads,
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-
         ComputationResult<ModernBalancedTriads, ModernBalancedTriads, BalancedTriadsConfig> computationResult =
             compute(graphNameOrConfig, configuration, false, false);
 
@@ -58,6 +61,52 @@ public class ModernBalancedTriadsProc extends AlgoBaseProc<ModernBalancedTriads,
         }
 
         return computationResult.algorithm().computeStream();
+    }
+
+    @Procedure(value = "gds.alpha.balancedTriads.write", mode = Mode.WRITE)
+    public Stream<Result> write(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration)
+    {
+        ComputationResult<ModernBalancedTriads, ModernBalancedTriads, BalancedTriadsConfig> computationResult =
+            compute(graphNameOrConfig, configuration, false, false);
+
+        Graph graph = computationResult.graph();
+        ModernBalancedTriads algorithm = computationResult.algorithm();
+        BalancedTriadsConfig config = computationResult.config();
+        AllocationTracker tracker = computationResult.tracker();
+
+        BalancedTriadsResultBuilder builder = new BalancedTriadsResultBuilder(true, true, tracker);
+        builder.setLoadMillis(computationResult.createMillis());
+        builder.setComputeMillis(computationResult.computeMillis());
+        builder.withBalancedProperty(config.balancedProperty());
+        builder.withUnbalancedProperty(config.unbalancedProperty());
+
+        if (graph.isEmpty()) {
+            graph.release();
+            return Stream.of(builder.buildResult());
+        }
+
+        try (ProgressTimer ignored = builder.timeWrite()) {
+            NodePropertyExporter.of(api, graph, algorithm.terminationFlag)
+                .withLog(log)
+                .parallel(Pools.DEFAULT, config.writeConcurrency())
+                .build()
+                .write(
+                    config.balancedProperty(),
+                    algorithm.getBalancedTriangles(),
+                    PagedAtomicIntegerArray.Translator.INSTANCE,
+                    config.unbalancedProperty(),
+                    algorithm.getUnbalancedTriangles(),
+                    PagedAtomicIntegerArray.Translator.INSTANCE);
+        }
+
+        return Stream.of(builder
+            .withBalancedTriadCount(algorithm.getBalancedTriangleCount())
+            .withUnbalancedTriadCount(algorithm.getUnbalancedTriangleCount())
+            .withCommunityFunction(algorithm.getBalancedTriangles()::get)
+            .build()
+        );
     }
 
     @Override
@@ -114,7 +163,6 @@ public class ModernBalancedTriadsProc extends AlgoBaseProc<ModernBalancedTriads,
         public final long p99;
         public final long p100;
 
-        public final boolean write;
         public final String balancedProperty;
         public final String unbalancedProperty;
 
@@ -125,7 +173,9 @@ public class ModernBalancedTriadsProc extends AlgoBaseProc<ModernBalancedTriads,
                 long postProcessingMillis,
                 long nodeCount, long balancedTriadCount,
                 long unbalancedTriadCount,
-                long p100, long p99, long p95, long p90, long p75, long p50, long p25, long p10, long p5, long p1, boolean write, String balancedProperty, String unbalancedProperty) {
+                long p100, long p99, long p95, long p90, long p75, long p50, long p25, long p10, long p5, long p1,
+                String balancedProperty,
+                String unbalancedProperty) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
@@ -143,20 +193,19 @@ public class ModernBalancedTriadsProc extends AlgoBaseProc<ModernBalancedTriads,
             this.p10 = p10;
             this.p5 = p5;
             this.p1 = p1;
-            this.write = write;
             this.balancedProperty = balancedProperty;
             this.unbalancedProperty = unbalancedProperty;
         }
     }
 
-    public class BalancedTriadsResultBuilder extends AbstractCommunityResultBuilder<Result> {
+    public static class BalancedTriadsResultBuilder extends AbstractCommunityResultBuilder<Result> {
 
         private long balancedTriadCount = 0;
         private long unbalancedTriadCount = 0;
         private String balancedProperty;
         private String unbalancedProperty;
 
-        protected BalancedTriadsResultBuilder(
+        BalancedTriadsResultBuilder(
             boolean buildHistogram,
             boolean buildCommunityCount,
             AllocationTracker tracker
@@ -165,22 +214,22 @@ public class ModernBalancedTriadsProc extends AlgoBaseProc<ModernBalancedTriads,
         }
 
 
-        public BalancedTriadsResultBuilder withBalancedTriadCount(long balancedTriadCount) {
+        BalancedTriadsResultBuilder withBalancedTriadCount(long balancedTriadCount) {
             this.balancedTriadCount = balancedTriadCount;
             return this;
         }
 
-        public BalancedTriadsResultBuilder withBalancedProperty(String property) {
+        BalancedTriadsResultBuilder withBalancedProperty(String property) {
             this.balancedProperty = property;
             return this;
         }
 
-        public BalancedTriadsResultBuilder withUnbalancedProperty(String property) {
+        BalancedTriadsResultBuilder withUnbalancedProperty(String property) {
             this.unbalancedProperty = property;
             return this;
         }
 
-        public BalancedTriadsResultBuilder withUnbalancedTriadCount(long unbalancedTriadCount) {
+        BalancedTriadsResultBuilder withUnbalancedTriadCount(long unbalancedTriadCount) {
             this.unbalancedTriadCount = unbalancedTriadCount;
             return this;
         }
@@ -199,7 +248,6 @@ public class ModernBalancedTriadsProc extends AlgoBaseProc<ModernBalancedTriads,
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(10)).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(5)).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
-                write,
                 balancedProperty,
                 unbalancedProperty
             );

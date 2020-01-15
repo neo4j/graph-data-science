@@ -32,35 +32,35 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 class BalancedTriadsProcTest extends BaseProcTest {
 
+    private static final String DB_CYPHER =
+        "CREATE " +
+        "  (a:Node {name: 'a'})" + // center node
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (f:Node {name: 'f'})" +
+        ", (g:Node {name: 'g'})" +
+
+        ", (a)-[:TYPE {w: 1.0}]->(b)" +
+        ", (a)-[:TYPE {w: -1.0}]->(c)" +
+        ", (a)-[:TYPE {w: 1.0}]->(d)" +
+        ", (a)-[:TYPE {w: -1.0}]->(e)" +
+        ", (a)-[:TYPE {w: 1.0}]->(f)" +
+        ", (a)-[:TYPE {w: -1.0}]->(g)" +
+
+        ", (b)-[:TYPE {w: -1.0}]->(c)" +
+        ", (c)-[:TYPE {w: 1.0}]->(d)" +
+        ", (d)-[:TYPE {w: -1.0}]->(e)" +
+        ", (e)-[:TYPE {w: 1.0}]->(f)" +
+        ", (f)-[:TYPE {w: -1.0}]->(g)" +
+        ", (g)-[:TYPE {w: 1.0}]->(b)";
+
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        String cypher =
-                "CREATE (a:Node {name:'a'})\n" + // center node
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE (d:Node {name:'d'})\n" +
-                "CREATE (e:Node {name:'e'})\n" +
-                "CREATE (f:Node {name:'f'})\n" +
-                "CREATE (g:Node {name:'g'})\n" +
-                "CREATE" +
-
-                " (a)-[:TYPE {w:1.0}]->(b),\n" +
-                " (a)-[:TYPE {w:-1.0}]->(c),\n" +
-                " (a)-[:TYPE {w:1.0}]->(d),\n" +
-                " (a)-[:TYPE {w:-1.0}]->(e),\n" +
-                " (a)-[:TYPE {w:1.0}]->(f),\n" +
-                " (a)-[:TYPE {w:-1.0}]->(g),\n" +
-
-                " (b)-[:TYPE {w:-1.0}]->(c),\n" +
-                " (c)-[:TYPE {w:1.0}]->(d),\n" +
-                " (d)-[:TYPE {w:-1.0}]->(e),\n" +
-                " (e)-[:TYPE {w:1.0}]->(f),\n" +
-                " (f)-[:TYPE {w:-1.0}]->(g),\n" +
-                " (g)-[:TYPE {w:1.0}]->(b)";
-
-        runQuery(cypher);
-        registerProcedures(BalancedTriadsProc.class, ModernBalancedTriadsProc.class);
+        runQuery(DB_CYPHER);
+        registerProcedures(ModernBalancedTriadsProc.class);
     }
 
     @AfterEach
@@ -69,16 +69,19 @@ class BalancedTriadsProcTest extends BaseProcTest {
     }
 
     @Test
-    void testHuge() {
-        runQueryWithRowConsumer("CALL algo.balancedTriads(" +
-                                "    'Node', 'TYPE', {" +
-                                "        weightProperty: 'w', graph: 'huge'" +
-                                "    }" +
-                                ") YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount",
-                row -> {
-                    assertEquals(3L, row.getNumber("balancedTriadCount"));
-                    assertEquals(3L, row.getNumber("unbalancedTriadCount"));
-                });
+    void testWriting() {
+        String query = GdsCypher.call()
+            .withRelationshipProperty("w")
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "balancedTriads")
+            .writeMode()
+            .addParameter("weightProperty", "w")
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(3L, row.getNumber("balancedTriadCount"));
+            assertEquals(3L, row.getNumber("unbalancedTriadCount"));
+        });
     }
 
     @Test
