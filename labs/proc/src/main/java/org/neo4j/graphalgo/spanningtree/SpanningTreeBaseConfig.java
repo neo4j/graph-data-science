@@ -20,36 +20,14 @@
 
 package org.neo4j.graphalgo.spanningtree;
 
-import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 
-import java.util.Optional;
-
-@Configuration("SpanningTreeConfigImpl")
-public interface SpanningTreeConfig extends SpanningTreeBaseConfig
+public interface SpanningTreeBaseConfig extends
+    AlgoBaseConfig,
+    WriteConfig,
+    WeightConfig
 {
-    String WRITE_RELATIONSHIP_TYPE = "MST";
-
-    String weightWriteProperty();
-
-    @Value.Default
-    @Value.Derived
-    default String writeProperty() {
-        return WRITE_RELATIONSHIP_TYPE;
-    }
-
-    static SpanningTreeConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new SpanningTreeConfigImpl(graphName, maybeImplicitCreate, username, userInput);
-    }
-
+    int startNodeId();
 }

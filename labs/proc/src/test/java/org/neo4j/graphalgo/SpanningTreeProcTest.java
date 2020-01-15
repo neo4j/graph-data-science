@@ -87,6 +87,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
             .writeMode()
             .addParameter("startNodeId", getStartNodeId())
             .addParameter("weightProperty", "cost")
+            .addParameter("weightWriteProperty", "cost")
             .yields("createMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
 
         runQueryWithRowConsumer(
@@ -121,6 +122,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
             .addParameter("startNodeId", getStartNodeId())
             .addParameter("writeProperty", "MAX")
             .addParameter("weightProperty", "cost")
+            .addParameter("weightWriteProperty", "cost")
             .yields("createMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
 
         runQueryWithRowConsumer(

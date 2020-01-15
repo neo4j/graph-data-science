@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import java.util.Optional;
 
 @Configuration("KSpanningTreeConfigImpl")
-public interface KSpanningTreeConfig extends SpanningTreeConfig {
+public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
 
     long k();
 

@@ -82,10 +82,6 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
         SpanningTree spanningTree = computationResult.result();
         SpanningTreeConfig config = computationResult.config();
 
-        if (!Objects.nonNull(config.weightProperty())) {
-            throw new IllegalArgumentException("A weight property must be provided in order to run the spanning tree algorithm");
-        }
-
         Prim.Builder builder = new Prim.Builder();
 
         if (graph.isEmpty()) {
@@ -103,7 +99,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
             )
                 .withLog(log)
                 .build()
-                .write(config.writeProperty(), config.weightProperty());
+                .write(config.writeProperty(), config.weightWriteProperty());
         });
         builder.setComputeMillis(computationResult.computeMillis());
         builder.setLoadMillis(computationResult.createMillis());
