@@ -91,7 +91,7 @@ public interface GraphsByRelationshipType {
 
         @Override
         public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
-            return graph;
+            return maybeRelationshipProperty.isPresent() ? graph : graph.withoutProperties();
         }
 
         @Override

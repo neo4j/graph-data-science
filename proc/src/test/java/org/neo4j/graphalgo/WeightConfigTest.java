@@ -56,7 +56,29 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
+public interface WeightConfigTest<CONFIG extends WeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
+
+    RelationshipProjections MULTI_RELATIONSHIPS_PROJECTION = RelationshipProjections.builder()
+        .putProjection(
+            ElementIdentifier.of("TYPE"),
+            RelationshipProjection.builder()
+                .type("TYPE")
+                .properties(
+                    PropertyMappings.of(
+                        PropertyMapping.of("weight1", 0.0),
+                        PropertyMapping.of("weight2", 1.0)
+                    )
+                )
+                .build()
+        )
+        .putProjection(
+            ElementIdentifier.of("TYPE1"),
+            RelationshipProjection.builder()
+                .type("TYPE1")
+                .build()
+        )
+        .build();
+
     @Test
     default void testDefaultWeightPropertyIsNull() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.empty();
@@ -132,12 +154,17 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
     }
 
     @ParameterizedTest
-    @CsvSource(value = { "weight1, 0.0", "weight2, 1.0"})
-    default void testFilteringOnPropertiesOnLoadedGraph(String propertyName, double expectedWeight) throws KernelException {
+    @CsvSource(value = {"weight1, 0.0", "weight2, 1.0"})
+    default void testFilteringOnPropertiesOnLoadedGraph(String propertyName, double expectedWeight) {
         String graphName = "foo";
-        loadExplicitGraph(graphName);
+        loadExplicitGraph(graphName, MULTI_RELATIONSHIPS_PROJECTION);
 
-        CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("relationshipTypes", Collections.singletonList("*"), "weightProperty", propertyName));
+        CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map(
+            "relationshipTypes", Collections.singletonList("*"),
+            "weightProperty", propertyName
+            )
+        );
+
         CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
 
         applyOnProcedure((proc) -> {
@@ -156,12 +183,22 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
         });
     }
 
-    @Test
-    default void testFilteringRelationshipWeightsOnLoadedGraph() {
+    @ParameterizedTest
+    @CsvSource(
+        delimiter = ';',
+        value = {
+            "TYPE1; ()-[]->(), ()",
+            "TYPE; (c)<--(a)-->(b)-->(c)",
+            "*; (a)-->(b)-->(c)-->(a)-->(c)"
+        })
+    default void testRunUnweightedOnWeightedMultiRelTypeGraph(String relType, String expectedGraph) {
         String weightedGraphName = "weightedGraph";
-        loadExplicitGraph(weightedGraphName);
+        loadExplicitGraph(weightedGraphName, MULTI_RELATIONSHIPS_PROJECTION);
 
-        CypherMapWrapper configWithoutRelWeight = CypherMapWrapper.create(MapUtil.map("relationshipTypes", Collections.singletonList("TYPE1")));
+        CypherMapWrapper configWithoutRelWeight = CypherMapWrapper.create(MapUtil.map(
+            "relationshipTypes",
+            Collections.singletonList(relType)
+        ));
         CypherMapWrapper algoConfig = createMinimalConfig(configWithoutRelWeight);
 
         applyOnProcedure((proc) -> {
@@ -169,16 +206,35 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
             Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(weightedGraphName));
 
             Graph graph = proc.createGraph(configAndName);
-            assertGraphEquals(fromGdl("()-[]->(), ()"), graph);
+            assertGraphEquals(fromGdl(expectedGraph), graph);
+        });
+    }
+
+    @Test
+    default void testRunUnweightedOnWeightedNoRelTypeGraph() {
+        String noRelGraph = "weightedGraph";
+        loadExplicitGraph(noRelGraph, RelationshipProjections.empty());
+
+        CypherMapWrapper algoConfig = createMinimalConfig(CypherMapWrapper.empty());
+
+        applyOnProcedure((proc) -> {
+            CONFIG config = proc.newConfig(Optional.of(noRelGraph), algoConfig);
+            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(noRelGraph));
+
+            Graph graph = proc.createGraph(configAndName);
+            assertGraphEquals(fromGdl("(a)-->(b)-->(c)-->(a)-->(c)"), graph);
         });
     }
 
     @Test
     default void testFilteringOnRelTypesOnLoadedGraph() {
         String graphName = "foo";
-        loadExplicitGraph(graphName);
+        loadExplicitGraph(graphName, MULTI_RELATIONSHIPS_PROJECTION);
 
-        CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("relationshipTypes", Collections.singletonList("TYPE1"), "weightProperty", "weight1"));
+        CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map(
+            "relationshipTypes", Collections.singletonList("TYPE1"),
+            "weightProperty", "weight1"
+        ));
         CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
 
         applyOnProcedure((proc) -> {
@@ -190,7 +246,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
         });
     }
 
-    default void loadExplicitGraph(String graphName) {
+    default void loadExplicitGraph(String graphName, RelationshipProjections relationshipProjections) {
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
 
         try {
@@ -198,7 +254,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
                 .getDependencyResolver()
                 .resolveDependency(Procedures.class, DependencyResolver.SelectionStrategy.ONLY);
             procedures.registerProcedure(GraphCreateProc.class);
-        } catch(KernelException ke) {
+        } catch (KernelException ke) {
             ke.printStackTrace();
         }
 
@@ -216,27 +272,7 @@ public interface WeightConfigTest <CONFIG extends WeightConfig & AlgoBaseConfig,
         GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName(graphName)
             .nodeProjection(NodeProjections.empty())
-            .relationshipProjection(RelationshipProjections.builder()
-                .putProjection(
-                    ElementIdentifier.of("TYPE"),
-                    RelationshipProjection.builder()
-                        .type("TYPE")
-                        .properties(
-                            PropertyMappings.of(
-                                PropertyMapping.of("weight1", 0.0),
-                                PropertyMapping.of("weight2", 1.0)
-                            )
-                        )
-                        .build()
-                )
-                .putProjection(
-                    ElementIdentifier.of("TYPE1"),
-                    RelationshipProjection.builder()
-                        .type("TYPE1")
-                        .build()
-                )
-                .build()
-            )
+            .relationshipProjection(relationshipProjections)
             .build();
 
         GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig)
