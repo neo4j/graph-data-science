@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl;
 
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.LegacyAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
@@ -53,7 +54,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  *
  * @author mknblch
  */
-public class ShortestPathDeltaStepping extends LegacyAlgorithm<ShortestPathDeltaStepping> {
+public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaStepping, ShortestPathDeltaStepping> {
 
     // distance array
     private AtomicIntegerArray distance;
@@ -65,6 +66,7 @@ public class ShortestPathDeltaStepping extends LegacyAlgorithm<ShortestPathDelta
     // list of futures of light and heavy edge relax-operations
     private Collection<Future<?>> futures;
 
+    private final long startNode;
     // delta parameter
     private final double delta;
     private final int nodeCount;
@@ -77,8 +79,9 @@ public class ShortestPathDeltaStepping extends LegacyAlgorithm<ShortestPathDelta
     private double multiplier = 100_000D; // double type is intended
     private Direction direction;
 
-    public ShortestPathDeltaStepping(Graph graph, double delta, Direction direction) {
+    public ShortestPathDeltaStepping(Graph graph, long startNode, double delta, Direction direction) {
         this.graph = graph;
+        this.startNode = startNode;
         this.delta = delta;
         this.iDelta = (int) (multiplier * delta);
         nodeCount = Math.toIntExact(graph.nodeCount());
@@ -116,14 +119,8 @@ public class ShortestPathDeltaStepping extends LegacyAlgorithm<ShortestPathDelta
         return this;
     }
 
-    /**
-     * compute the shortest path
-     *
-     * @param startNode UNmapped (original) neo4j nodeId as starting point
-     * @return itself for method chaining
-     */
-    public ShortestPathDeltaStepping compute(long startNode) {
-
+    @Override
+    public ShortestPathDeltaStepping compute() {
         // reset
         for (int i = 0; i < nodeCount; i++) {
             distance.set(i, Integer.MAX_VALUE);
@@ -155,7 +152,7 @@ public class ShortestPathDeltaStepping extends LegacyAlgorithm<ShortestPathDelta
                     return true;
                 });
 
-                graph.forEachRelationship(node, direction, 0.0D, relationshipConsumer);
+                graph.forEachRelationship(node, Direction.OUTGOING, 0.0D, relationshipConsumer);
                 return true;
             });
             ParallelUtil.run(light, executorService, futures);
@@ -245,9 +242,7 @@ public class ShortestPathDeltaStepping extends LegacyAlgorithm<ShortestPathDelta
 
     @Override
     public void release() {
-        distance = null;
         buckets = null;
-        graph = null;
         light = null;
         heavy = null;
         futures = null;

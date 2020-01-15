@@ -106,9 +106,9 @@ class ParallelDeltaSteppingTest {
     }
 
     private double[] compute(int threads) {
-        return new ShortestPathDeltaStepping(graph, 2.5, Direction.OUTGOING)
+        return new ShortestPathDeltaStepping(graph, rootNodeId, 2.5, Direction.OUTGOING)
                 .withExecutorService(Executors.newFixedThreadPool(threads))
-                .compute(rootNodeId)
+                .compute()
                 .getShortestPaths();
     }
 }

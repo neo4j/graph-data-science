@@ -112,9 +112,9 @@ final class ShortestPathDeltaSteppingTest extends AlgoTestBase {
 
     @Test
     void testSequential() {
-        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, 3, Direction.OUTGOING);
+        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, head,3, Direction.OUTGOING);
 
-        final double[] sp = sssp.compute(head)
+        final double[] sp = sssp.compute()
                 .getShortestPaths();
 
         assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId(tail))],0.1);
@@ -122,10 +122,10 @@ final class ShortestPathDeltaSteppingTest extends AlgoTestBase {
 
     @Test
     void testParallel() {
-        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, 3, Direction.OUTGOING)
+        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, head, 3, Direction.OUTGOING)
                 .withExecutorService(Executors.newFixedThreadPool(3));
 
-        final double[] sp = sssp.compute(head)
+        final double[] sp = sssp.compute()
                 .getShortestPaths();
 
         assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId(tail))],0.1);
@@ -133,9 +133,9 @@ final class ShortestPathDeltaSteppingTest extends AlgoTestBase {
 
     @Test
     void distanceToNodeInDifferentComponentShouldBeInfinity() {
-        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, 3, Direction.OUTGOING);
+        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, head,3, Direction.OUTGOING);
 
-        final double[] sp = sssp.compute(head).getShortestPaths();
+        final double[] sp = sssp.compute().getShortestPaths();
 
         assertEquals(Double.POSITIVE_INFINITY, sp[Math.toIntExact(graph.toMappedNodeId(getNode("z").getId()))],0.1);
     }

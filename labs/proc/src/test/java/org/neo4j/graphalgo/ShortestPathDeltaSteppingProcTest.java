@@ -21,7 +21,9 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
 
 import java.util.function.DoubleConsumer;
 
@@ -87,14 +89,18 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         db.shutdown();
     }
 
-    @AllGraphNamesTest
-    void testResultStream(String graphName) {
-
+    @Test
+    void testResultStream() {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
         final String cypher =
                 "MATCH(n:Node {name:'s'}) " +
-                "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "'}) " +
+                "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({" +
+                "   relationshipProperties: 'cost', " +
+                "   startNode: n, " +
+                "   delta: 3.0," +
+                "   weightProperty: 'cost'" +
+                "}) " +
                 "YIELD nodeId, distance RETURN nodeId, distance";
 
         runQueryWithRowConsumer(cypher, row -> {
@@ -106,15 +112,20 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         verify(consumer, times(1)).accept(eq(8D, 0.1D));
     }
 
-    @AllGraphNamesTest
-    void testOutgoingResultStream(String graphName) {
-
+    @Test
+    void testIncomingResultStream() {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
         final String cypher =
-                "MATCH(n:Node {name:'s'}) " +
-                "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "', direction: 'INCOMING'}) " +
-                "YIELD nodeId, distance RETURN nodeId, distance";
+            "MATCH(n:Node {name:'s'}) " +
+            "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({" +
+            "   relationshipProperties: 'cost', " +
+            "   startNode: n, " +
+            "   delta: 3.0," +
+            "   weightProperty: 'cost'," +
+            "   direction: 'INCOMING'" +
+            "}) " +
+            "YIELD nodeId, distance RETURN nodeId, distance";
 
         runQueryWithRowConsumer(cypher, row -> {
             double distance = row.getNumber("distance").doubleValue();
@@ -125,15 +136,20 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         verify(consumer, times(1)).accept(eq(8D, 0.1D));
     }
 
-    @AllGraphNamesTest
-    void testWriteBack(String graphName) {
+    @Test
+    void testWriteBack() {
+        final String cypher =
+            "MATCH(n:Node {name:'s'}) " +
+            "WITH n CALL gds.alpha.shortestPath.deltaStepping.write({" +
+            "   relationshipProperties: 'cost', " +
+            "   startNode: n, " +
+            "   delta: 3.0," +
+            "   weightProperty: 'cost'," +
+            "   writeProperty: 'sp'" +
+            "}) " +
+            "YIELD nodeCount, loadDuration, evalDuration, writeDuration RETURN nodeCount, loadDuration, evalDuration, writeDuration";
 
-        final String matchCypher =
-                "MATCH(n:Node {name:'s'}) " +
-                "WITH n CALL algo.shortestPath.deltaStepping(n, 'cost', 3.0, {write:true, writeProperty:'sp', graph:'" + graphName + "'}) " +
-                "YIELD nodeCount, loadDuration, evalDuration, writeDuration RETURN nodeCount, loadDuration, evalDuration, writeDuration";
-
-        runQueryWithRowConsumer(matchCypher, row -> {
+        runQueryWithRowConsumer(cypher, row -> {
             long writeDuration = row.getNumber("writeDuration").longValue();
             assertNotEquals(-1L, writeDuration);
         });

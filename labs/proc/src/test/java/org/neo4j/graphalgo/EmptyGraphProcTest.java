@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphalgo.triangle.BalancedTriadsProc;
 import org.neo4j.graphalgo.triangle.TriangleCountProc;
 import org.neo4j.graphalgo.triangle.TriangleProc;
+import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -302,12 +303,14 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testShortestPathsDeltaSteppingStream() {
-        boolean hasNext = runQuery("CALL algo.shortestPath.deltaStepping.stream(null, '', 0, {graph:'" + graphImpl + "'})", Result::hasNext);
+        boolean hasNext = runQuery("MATCH(n:Node {name:'s'}) WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({startNode: n, delta: 0}) YIELD nodeId RETURN nodeId", Result::hasNext);
         assertFalse(hasNext);
     }
 
     @Test
     void testShortestPathsDeltaStepping() {
-        runQueryWithRowConsumer("CALL algo.shortestPath.deltaStepping(null, '', 0, {graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
+        runQueryWithRowConsumer(
+            "MATCH(n:Node {name:'s'}) WITH n CALL gds.alpha.shortestPath.deltaStepping.write({startNode: n, delta: 0}) YIELD nodeCount RETURN nodeCount",
+            row -> assertEquals(0L, row.getNumber("nodeCount")));
     }
 }

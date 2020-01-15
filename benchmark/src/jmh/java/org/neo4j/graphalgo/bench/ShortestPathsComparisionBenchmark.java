@@ -18,7 +18,7 @@
  */
 package org.neo4j.graphalgo.bench;
 
-import org.neo4j.graphalgo.ShortestPathDeltaSteppingProc;
+import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.graphalgo.ShortestPathsProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Node;
