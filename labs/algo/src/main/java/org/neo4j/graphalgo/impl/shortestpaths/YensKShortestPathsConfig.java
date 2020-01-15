@@ -53,7 +53,7 @@ public interface YensKShortestPathsConfig extends AlgoBaseConfig, WeightConfig {
     }
 
     @Value.Default
-    default String writeRelationshipTypeProperty() {
+    default String relationshipWriteProperty() {
         return "weight";
     }
 

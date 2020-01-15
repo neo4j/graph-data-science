@@ -157,7 +157,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
                 graph,
                 graph,
                 config.writePropertyPrefix(),
-                config.writeRelationshipTypeProperty()
+                config.relationshipWriteProperty()
             ).export(algorithm.getPaths());
         }
 
