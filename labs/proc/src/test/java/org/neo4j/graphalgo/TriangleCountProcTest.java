@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -117,33 +119,33 @@ class TriangleCountProcTest extends BaseProcTest {
         verify(mock, times(9)).consume(anyLong(), eq(1L));
     }
 
-//    @Test
-//    void testWriting() {
-//        String query = GdsCypher.call()
-//            .loadEverything(Projection.UNDIRECTED)
-//            .algo("gds", "alpha", "triangleCount")
-//            .writeMode()
-//            .yields();
-//
-//        runQueryWithRowConsumer(query, row -> {
-//            final long loadMillis = row.getNumber("loadMillis").longValue();
-//            final long computeMillis = row.getNumber("computeMillis").longValue();
-//            final long writeMillis = row.getNumber("writeMillis").longValue();
-//            final long nodeCount = row.getNumber("nodeCount").longValue();
-//            final long triangleCount = row.getNumber("triangleCount").longValue();
-//            assertNotEquals(-1, loadMillis);
-//            assertNotEquals(-1, computeMillis);
-//            assertNotEquals(-1, writeMillis);
-//            assertEquals(3, triangleCount);
-//            assertEquals(9, nodeCount);
-//        });
-//
-//        final String request = "MATCH (n) WHERE exists(n.triangles) RETURN n.triangles as t";
-//        runQueryWithRowConsumer(request, row -> {
-//            final int triangles = row.getNumber("t").intValue();
-//            assertEquals(1, triangles);
-//        });
-//    }
+    @Test
+    void testWriting() {
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "triangleCount")
+            .writeMode()
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+            final long loadMillis = row.getNumber("loadMillis").longValue();
+            final long computeMillis = row.getNumber("computeMillis").longValue();
+            final long writeMillis = row.getNumber("writeMillis").longValue();
+            final long nodeCount = row.getNumber("nodeCount").longValue();
+            final long triangleCount = row.getNumber("triangleCount").longValue();
+            assertNotEquals(-1, loadMillis);
+            assertNotEquals(-1, computeMillis);
+            assertNotEquals(-1, writeMillis);
+            assertEquals(3, triangleCount);
+            assertEquals(9, nodeCount);
+        });
+
+        final String request = "MATCH (n) WHERE exists(n.triangles) RETURN n.triangles as t";
+        runQueryWithRowConsumer(request, row -> {
+            final int triangles = row.getNumber("t").intValue();
+            assertEquals(1, triangles);
+        });
+    }
 
     interface TriangleCountConsumer {
         void consume(long nodeId, long triangles);

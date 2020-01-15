@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.impl.triangle;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -38,6 +39,11 @@ public interface TriangleCountConfig extends AlgoBaseConfig, WriteConfig {
     @Value.Default
     default String writeProperty() {
         return "triangles";
+    }
+
+    @Value.Default
+    default @Nullable String clusteringCoefficientProperty() {
+        return null;
     }
 
     static TriangleCountConfig of(
