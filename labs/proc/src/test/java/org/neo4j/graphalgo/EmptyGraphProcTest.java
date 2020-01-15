@@ -39,6 +39,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
         registerProcedures(
             AllShortestPathsProc.class,
+            BalancedTriadsProc.class,
             BetweennessCentralityProc.class,
             ClosenessCentralityProc.class,
             KSpanningTreeProc.class,
@@ -158,19 +159,57 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testTriangleCountStream() {
-        boolean hasNext = runQuery("CALL algo.triangleCount.stream('', '', {graph:'" + graphImpl + "'})", Result::hasNext);
-        assertFalse(hasNext);
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.triangleCount")
+            .streamMode()
+            .yields();
+        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
     }
 
     @Test
-    void testTriangleCount() {
-        runQueryWithRowConsumer("CALL algo.triangleCount('', '',{graph:'" + graphImpl + "'})", row -> assertEquals(0L, row.getNumber("nodeCount")));
+    void testTriangleCountWrite() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.triangleCount")
+            .writeMode()
+            .yields();
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodeCount")));
     }
 
     @Test
     void testTriangleStream() {
-        boolean hasNext = runQuery("CALL algo.triangle.stream('', '', {graph:'" + graphImpl + "'})", Result::hasNext);
-        assertFalse(hasNext);
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.triangle")
+            .streamMode()
+            .yields();
+        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
+    }
+
+    @Test
+    void testBalancedTriadsStream() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.balancedTriads")
+            .streamMode()
+            .yields();
+        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
+    }
+
+    @Test
+    void testBalancedTriadsWrite() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.balancedTriads")
+            .writeMode()
+            .yields();
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodeCount")));
     }
 
     @Test

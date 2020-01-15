@@ -58,8 +58,8 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.articleRank.write",
         "gds.alpha.articleRank.stream",
         "algo.asPath",
-        "algo.balancedTriads",
-        "algo.balancedTriads.stream",
+        "gds.alpha.balancedTriads.write",
+        "gds.alpha.balancedTriads.stream",
         "gds.alpha.betweenness.write",
         "gds.alpha.betweenness.stream",
         "gds.alpha.betweenness.sampled.write",
@@ -81,6 +81,9 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.similarity.overlap.stream",
         "gds.alpha.similarity.pearson.write",
         "gds.alpha.similarity.pearson.stream",
+        "gds.alpha.triangle.stream",
+        "gds.alpha.triangleCount.write",
+        "gds.alpha.triangleCount.stream",
         "algo.dfs.stream",
         "gds.alpha.eigenvector.write",
         "gds.alpha.eigenvector.stream",
@@ -98,10 +101,7 @@ class ListProcTest extends BaseProcTest {
         "algo.spanningTree.kmax",
         "algo.spanningTree.kmin",
         "algo.spanningTree.maximum",
-        "algo.spanningTree.minimum",
-        "algo.triangle.stream",
-        "algo.triangleCount",
-        "algo.triangleCount.stream"
+        "algo.spanningTree.minimum"
     ));
 
     private static final Collection<String> FUNCTIONS = new HashSet<>(asList(
