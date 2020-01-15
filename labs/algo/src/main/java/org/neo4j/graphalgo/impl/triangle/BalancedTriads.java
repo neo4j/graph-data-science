@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -55,9 +55,8 @@ import java.util.stream.Stream;
  * is connected to each of its possible neighbors by either a
  * relation with positive or negative weight.
  *
- * @author mknblch
  */
-public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
+public class BalancedTriads extends Algorithm<BalancedTriads, BalancedTriads> {
 
     public interface BalancedPredicate {
 
@@ -113,7 +112,7 @@ public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
      * @return
      */
     @Override
-    public Void compute() {
+    public BalancedTriads compute() {
         visitedNodes.set(0);
         queue.set(0);
         balancedTriangleCount.reset();
@@ -122,7 +121,7 @@ public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(concurrency, () -> new HugeTask(graph));
         // run
         ParallelUtil.run(tasks, executorService);
-        return null;
+        return this;
     }
 
     /**
@@ -131,7 +130,7 @@ public class BalancedTriads extends LegacyAlgorithm<BalancedTriads> {
      *
      * @return
      */
-    public Stream<Result> stream() {
+    public Stream<Result> computeStream() {
         return IntStream.range(0, Math.toIntExact(nodeCount))
             .mapToObj(i -> new Result(
                 graph.toOriginalNodeId(i),

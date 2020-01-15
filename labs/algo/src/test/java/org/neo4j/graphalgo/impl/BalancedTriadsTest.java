@@ -98,7 +98,7 @@ class BalancedTriadsTest extends AlgoTestBase {
     void testStream() {
         BalancedTriads algo = new BalancedTriads(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY);
         algo.compute();
-        algo.stream().forEach(r -> consumer.accept(r.nodeId, r.balanced, r.unbalanced));
+        algo.computeStream().forEach(r -> consumer.accept(r.nodeId, r.balanced, r.unbalanced));
         verify(consumer, times(1)).accept(eq(0L), eq(3L), eq(3L));
         verify(consumer, times(6)).accept(anyLong(), eq(1L), eq(1L));
     }

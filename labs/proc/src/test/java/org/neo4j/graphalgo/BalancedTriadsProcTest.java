@@ -60,7 +60,7 @@ class BalancedTriadsProcTest extends BaseProcTest {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-        registerProcedures(ModernBalancedTriadsProc.class);
+        registerProcedures(BalancedTriadsProc.class);
     }
 
     @AfterEach

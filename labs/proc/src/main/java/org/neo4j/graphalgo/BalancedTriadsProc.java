@@ -20,9 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -30,143 +28,119 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
+import org.neo4j.graphalgo.impl.triangle.BalancedTriadsConfig;
 import org.neo4j.graphalgo.impl.triangle.BalancedTriads;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
-import org.neo4j.procedure.Description;
+import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class BalancedTriadsProc extends LabsProc {
+public class BalancedTriadsProc extends AlgoBaseProc<BalancedTriads, BalancedTriads, BalancedTriadsConfig> {
 
-    public static final String DEFAULT_BALANCED_PROPERTY = "balanced";
-    public static final String DEFAULT_UNBALANCED_PROPERTY = "unbalanced";
+    @Procedure(name = "gds.alpha.balancedTriads.stream", mode = READ)
+    public Stream<BalancedTriads.Result> stream(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<BalancedTriads, BalancedTriads, BalancedTriadsConfig> computationResult =
+            compute(graphNameOrConfig, configuration, false, false);
 
-    @Procedure(name = "algo.balancedTriads.stream", mode = READ)
-    @Description("CALL algo.balancedTriads.stream(label, relationship, {concurrency:8}) " +
-            "YIELD nodeId, balanced, unbalanced")
-    public Stream<BalancedTriads.Result> balancedTriadsStream(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        Graph graph = computationResult.graph();
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
-                .setNodeLabelOrQuery(label)
-                .setRelationshipTypeOrQuery(relationship);
-
-        // load
-        final Graph graph = new GraphLoader(api, Pools.DEFAULT)
-                .withOptionalLabel(configuration.getNodeLabelOrQuery())
-                .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
-                .withRelationshipProperties(PropertyMapping.of(configuration.getWeightProperty(), 0.0))
-                .withLog(log)
-                .sorted()
-                .undirected()
-                .load(configuration.getGraphImpl(HugeGraph.TYPE, HugeGraph.TYPE));
-
-        // omit empty graphs
         if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
 
-        // compute
-        BalancedTriads balancedTriads = new BalancedTriads(
-            graph,
-            Pools.DEFAULT,
-            configuration.concurrency(),
-            AllocationTracker.create()
-        )
-            .withProgressLogger(ProgressLogger.wrap(log, "balancedTriads"))
-            .withTerminationFlag(TerminationFlag.wrap(transaction));
-
-        balancedTriads.compute();
-
-        return balancedTriads.stream();
+        return computationResult.algorithm().computeStream();
     }
 
+    @Procedure(value = "gds.alpha.balancedTriads.write", mode = Mode.WRITE)
+    public Stream<Result> write(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration)
+    {
+        ComputationResult<BalancedTriads, BalancedTriads, BalancedTriadsConfig> computationResult =
+            compute(graphNameOrConfig, configuration, false, false);
 
-    @Procedure(value = "algo.balancedTriads", mode = Mode.WRITE)
-    @Description("CALL algo.balancedTriads(label, relationship" +
-            "{concurrency:4, write:true, weightProperty:'w', balancedProperty:'balanced', unbalancedProperty:'unbalanced'}) " +
-            "YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount")
-    public Stream<Result> balancedTriads(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        Graph graph = computationResult.graph();
+        BalancedTriads algorithm = computationResult.algorithm();
+        BalancedTriadsConfig config = computationResult.config();
+        AllocationTracker tracker = computationResult.tracker();
 
-        final Graph graph;
-        final BalancedTriads balancedTriads;
+        BalancedTriadsResultBuilder builder = new BalancedTriadsResultBuilder(true, true, tracker);
+        builder.setLoadMillis(computationResult.createMillis());
+        builder.setComputeMillis(computationResult.computeMillis());
+        builder.withBalancedProperty(config.balancedProperty());
+        builder.withUnbalancedProperty(config.unbalancedProperty());
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
-                .setNodeLabelOrQuery(label)
-                .setRelationshipTypeOrQuery(relationship);
-        final AllocationTracker tracker = AllocationTracker.create();
-
-        final BalancedTriadsResultBuilder builder = new BalancedTriadsResultBuilder(true, true, tracker);
-
-        // load
-        try (ProgressTimer timer = builder.timeLoad()) {
-            graph = new GraphLoader(api, Pools.DEFAULT)
-                    .withOptionalLabel(configuration.getNodeLabelOrQuery())
-                    .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
-                    .withRelationshipProperties(PropertyMapping.of(configuration.getWeightProperty(), 0.0))
-                    .withLog(log)
-                    .sorted()
-                    .undirected()
-                    .load(configuration.getGraphImpl(HugeGraph.TYPE, HugeGraph.TYPE));
+        if (graph.isEmpty()) {
+            graph.release();
+            return Stream.of(builder.buildResult());
         }
 
-        // compute
-        final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        try (ProgressTimer timer = builder.timeCompute()) {
-            balancedTriads = new BalancedTriads(graph, Pools.DEFAULT, configuration.concurrency(),
-                tracker
-            )
-                    .withProgressLogger(ProgressLogger.wrap(log, "balancedTriads"))
-                    .withTerminationFlag(terminationFlag);
-            balancedTriads.compute();
+        try (ProgressTimer ignored = builder.timeWrite()) {
+            NodePropertyExporter.of(api, graph, algorithm.terminationFlag)
+                .withLog(log)
+                .parallel(Pools.DEFAULT, config.writeConcurrency())
+                .build()
+                .write(
+                    config.balancedProperty(),
+                    algorithm.getBalancedTriangles(),
+                    PagedAtomicIntegerArray.Translator.INSTANCE,
+                    config.unbalancedProperty(),
+                    algorithm.getUnbalancedTriangles(),
+                    PagedAtomicIntegerArray.Translator.INSTANCE);
         }
 
-        // write
-        if (configuration.isWriteFlag()) {
-            builder.withWrite(true);
+        return Stream.of(builder
+            .withBalancedTriadCount(algorithm.getBalancedTriangleCount())
+            .withUnbalancedTriadCount(algorithm.getUnbalancedTriangleCount())
+            .withCommunityFunction(algorithm.getBalancedTriangles()::get)
+            .build()
+        );
+    }
 
-            String balancedProperty = configuration.get("balancedProperty", DEFAULT_BALANCED_PROPERTY);
-            builder.withBalancedProperty(balancedProperty);
+    @Override
+    protected BalancedTriadsConfig newConfig(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        return BalancedTriadsConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
 
-            String unbalancedProperty = configuration.get("unbalancedProperty", DEFAULT_UNBALANCED_PROPERTY);
-            builder.withUnbalancedProperty(unbalancedProperty);
-
-            try (ProgressTimer timer = builder.timeWrite()) {
-                NodePropertyExporter.of(api, graph, balancedTriads.terminationFlag)
-                        .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                        .build()
-                        .write(
-                                balancedProperty,
-                                balancedTriads.getBalancedTriangles(),
-                                PagedAtomicIntegerArray.Translator.INSTANCE,
-                                unbalancedProperty,
-                                balancedTriads.getUnbalancedTriangles(),
-                                PagedAtomicIntegerArray.Translator.INSTANCE);
+    @Override
+    protected AlgorithmFactory<BalancedTriads, BalancedTriadsConfig> algorithmFactory(BalancedTriadsConfig config) {
+        return new AlphaAlgorithmFactory<BalancedTriads, BalancedTriadsConfig>() {
+            @Override
+            public BalancedTriads build(
+                Graph graph,
+                BalancedTriadsConfig configuration,
+                AllocationTracker tracker,
+                Log log
+            ) {
+                return new BalancedTriads(
+                    graph,
+                    Pools.DEFAULT,
+                    configuration.concurrency(),
+                    AllocationTracker.create()
+                )
+                    .withProgressLogger(ProgressLogger.wrap(log, "BalancedTriads"))
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
             }
-        }
-
-        // result
-        builder.withBalancedTriadCount(balancedTriads.getBalancedTriangleCount())
-               .withUnbalancedTriadCount(balancedTriads.getUnbalancedTriangleCount());
-        return Stream.of(builder.withCommunityFunction(balancedTriads.getBalancedTriangles()::get).build());
+        };
     }
 
-    /**
-     * result dto
-     */
     public static class Result {
 
         public final long loadMillis;
@@ -189,7 +163,6 @@ public class BalancedTriadsProc extends LabsProc {
         public final long p99;
         public final long p100;
 
-        public final boolean write;
         public final String balancedProperty;
         public final String unbalancedProperty;
 
@@ -200,7 +173,9 @@ public class BalancedTriadsProc extends LabsProc {
                 long postProcessingMillis,
                 long nodeCount, long balancedTriadCount,
                 long unbalancedTriadCount,
-                long p100, long p99, long p95, long p90, long p75, long p50, long p25, long p10, long p5, long p1, boolean write, String balancedProperty, String unbalancedProperty) {
+                long p100, long p99, long p95, long p90, long p75, long p50, long p25, long p10, long p5, long p1,
+                String balancedProperty,
+                String unbalancedProperty) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
@@ -218,20 +193,19 @@ public class BalancedTriadsProc extends LabsProc {
             this.p10 = p10;
             this.p5 = p5;
             this.p1 = p1;
-            this.write = write;
             this.balancedProperty = balancedProperty;
             this.unbalancedProperty = unbalancedProperty;
         }
     }
 
-    public class BalancedTriadsResultBuilder extends AbstractCommunityResultBuilder<Result> {
+    public static class BalancedTriadsResultBuilder extends AbstractCommunityResultBuilder<Result> {
 
         private long balancedTriadCount = 0;
         private long unbalancedTriadCount = 0;
         private String balancedProperty;
         private String unbalancedProperty;
 
-        protected BalancedTriadsResultBuilder(
+        BalancedTriadsResultBuilder(
             boolean buildHistogram,
             boolean buildCommunityCount,
             AllocationTracker tracker
@@ -240,22 +214,22 @@ public class BalancedTriadsProc extends LabsProc {
         }
 
 
-        public BalancedTriadsResultBuilder withBalancedTriadCount(long balancedTriadCount) {
+        BalancedTriadsResultBuilder withBalancedTriadCount(long balancedTriadCount) {
             this.balancedTriadCount = balancedTriadCount;
             return this;
         }
 
-        public BalancedTriadsResultBuilder withBalancedProperty(String property) {
+        BalancedTriadsResultBuilder withBalancedProperty(String property) {
             this.balancedProperty = property;
             return this;
         }
 
-        public BalancedTriadsResultBuilder withUnbalancedProperty(String property) {
+        BalancedTriadsResultBuilder withUnbalancedProperty(String property) {
             this.unbalancedProperty = property;
             return this;
         }
 
-        public BalancedTriadsResultBuilder withUnbalancedTriadCount(long unbalancedTriadCount) {
+        BalancedTriadsResultBuilder withUnbalancedTriadCount(long unbalancedTriadCount) {
             this.unbalancedTriadCount = unbalancedTriadCount;
             return this;
         }
@@ -274,7 +248,6 @@ public class BalancedTriadsProc extends LabsProc {
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(10)).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(5)).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
-                write,
                 balancedProperty,
                 unbalancedProperty
             );
