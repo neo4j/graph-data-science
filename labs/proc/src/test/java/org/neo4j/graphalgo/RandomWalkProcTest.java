@@ -22,14 +22,12 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.neo4j.graphalgo.walking.RandomWalkProc;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
-import org.neo4j.helpers.collection.Iterators;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -43,37 +41,36 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-class Node2VecWalkProcTest extends BaseProcTest {
+class RandomWalkProcTest extends BaseProcTest {
 
     private static final int NODE_COUNT = 54;
 
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name:'a'})" +
+        ", (b:Fred {name:'b'})" +
+        ", (c:Fred {name:'c'})" +
+        ", (d:Bob {name:'d'})" +
+        ", (a)-[:OF_TYPE {cost:5, blue: 1}]->(b)" +
+        ", (a)-[:OF_TYPE {cost:10, blue: 1}]->(c)" +
+        ", (c)-[:DIFFERENT {cost:2, blue: 0}]->(b)" +
+        ", (b)-[:OF_TYPE {cost:5, blue: 1}]->(c)" +
+        "  WITH * UNWIND range(0, $count - 1) AS id " +
+        "  CREATE (n:Node {name: '' + id})" +
+        "  CREATE " +
+        "    (n)-[:OF_TYPE {cost: 5, blue: 1}]->(a)," +
+        "    (b)-[:OF_TYPE {cost: 5, blue: 1}]->(n)";
+
     @BeforeEach
-    void beforeClass() throws Exception {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(RandomWalkProc.class);
-        runQuery(buildDatabaseQuery(), Collections.singletonMap("count", NODE_COUNT - 4));
+        runQuery(DB_CYPHER, Collections.singletonMap("count", NODE_COUNT - 4));
     }
 
     @AfterEach
-    void AfterClass() {
+    void shutdown() {
         db.shutdown();
-    }
-
-    private static String buildDatabaseQuery() {
-        return "CREATE (a:Node {name:'a'})\n" +
-               "CREATE (b:Fred {name:'b'})\n" +
-               "CREATE (c:Fred {name:'c'})\n" +
-               "CREATE (d:Bob {name:'d'})\n" +
-
-               "CREATE" +
-               " (a)-[:OF_TYPE {cost:5, blue: 1}]->(b),\n" +
-               " (a)-[:OF_TYPE {cost:10, blue: 1}]->(c),\n" +
-               " (c)-[:DIFFERENT {cost:2, blue: 0}]->(b),\n" +
-               " (b)-[:OF_TYPE {cost:5, blue: 1}]->(c) " +
-
-               " WITH * UNWIND range(0,$count-1) AS id CREATE (n:Node {name:''+id})\n" +
-               "CREATE (n)-[:OF_TYPE {cost:5, blue: 1}]->(a),\n" +
-               "(b)-[:OF_TYPE {cost:5, blue: 1}]->(n)\n";
     }
 
     @Test
@@ -87,7 +84,6 @@ class Node2VecWalkProcTest extends BaseProcTest {
             .addParameter("walks", 1)
             .yields();
 
-
         try (ResourceIterator<List<Long>> result = runQuery(
             query,
             r -> r.columnAs("nodeIds")
@@ -99,7 +95,6 @@ class Node2VecWalkProcTest extends BaseProcTest {
     }
 
     @Test
-    @Timeout(100)
     void shouldHaveResultsRandom() {
         String query = GdsCypher.call()
             .loadEverything(Projection.UNDIRECTED)
@@ -110,20 +105,6 @@ class Node2VecWalkProcTest extends BaseProcTest {
             .yields();
 
         assertTrue(runQuery(query, Result::hasNext));
-    }
-
-    @Test
-    void shouldHandleLargeResults() {
-        String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
-            .algo("gds", "alpha", "randomWalk")
-            .streamMode()
-            .addParameter("steps", 100)
-            .addParameter("walks", 100000)
-            .yields();
-
-        long results = runQuery(query, Iterators::count);
-        assertEquals(100000, results);
     }
 
     @Test
@@ -155,7 +136,6 @@ class Node2VecWalkProcTest extends BaseProcTest {
     }
 
     @Test
-    @Timeout(200)
     void shouldHaveStartedFromEveryNodeRandom() {
         String query = GdsCypher.call()
             .loadEverything(Projection.UNDIRECTED)
@@ -215,7 +195,6 @@ class Node2VecWalkProcTest extends BaseProcTest {
     }
 
     @Test
-    @Timeout(100)
     void shouldHaveResultsN2V() {
         String query = GdsCypher.call()
             .loadEverything(Projection.UNDIRECTED)

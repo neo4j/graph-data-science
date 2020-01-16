@@ -56,17 +56,19 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<RandomWalk, Stream<long[]>, RandomWalkConfig> compute = compute(
-            graphNameOrConfig,
-            configuration,
-            false,
-            false
-        );
+        ComputationResult<RandomWalk, Stream<long[]>, RandomWalkConfig> computationResult =
+            compute(graphNameOrConfig, configuration, false, false);
 
-        RandomWalkConfig config = compute.config();
-        Stream<long[]> result = compute.result();
+        if (computationResult.graph().isEmpty()) {
+            computationResult.graph().release();
+            return Stream.empty();
+        }
 
-        return result.map(nodes -> new WalkResult(nodes, config.path() ? WalkPath.toPath(api, nodes) : null));
+        return computationResult.result()
+            .map(nodes -> new WalkResult(
+                nodes,
+                computationResult.config().path() ? WalkPath.toPath(api, nodes) : null
+            ));
     }
 
     @Override
