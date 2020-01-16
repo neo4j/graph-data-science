@@ -160,8 +160,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testTriangleCountStream() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .loadEverything(Projection.UNDIRECTED)
             .algo("gds.alpha.triangleCount")
             .streamMode()
             .yields();
@@ -171,8 +170,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testTriangleCountWrite() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .loadEverything(Projection.UNDIRECTED)
             .algo("gds.alpha.triangleCount")
             .writeMode()
             .yields();
@@ -182,8 +180,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testTriangleStream() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .loadEverything(Projection.UNDIRECTED)
             .algo("gds.alpha.triangle")
             .streamMode()
             .yields();
@@ -193,8 +190,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testBalancedTriadsStream() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .loadEverything(Projection.UNDIRECTED)
             .algo("gds.alpha.balancedTriads")
             .streamMode()
             .yields();
@@ -204,8 +200,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testBalancedTriadsWrite() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .loadEverything(Projection.UNDIRECTED)
             .algo("gds.alpha.balancedTriads")
             .writeMode()
             .yields();
