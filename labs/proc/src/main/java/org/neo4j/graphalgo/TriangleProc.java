@@ -39,9 +39,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> {
-
-    static final String DESCRIPTION = "Triangle counting is a community detection graph algorithm that is used to determine the number of triangles passing through each node in the graph.";
+public class TriangleProc extends TriangleBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> {
 
     @Procedure(name = "gds.alpha.triangle.stream", mode = READ)
     @Description(DESCRIPTION)

@@ -34,8 +34,6 @@ import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.RELATIONSHI
 public interface GraphCreateConfig extends BaseConfig {
 
     String IMPLICIT_GRAPH_NAME = "";
-    String NODE_PROPERTIES_KEY = "nodeProperties";
-    String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
 
     @Configuration.Parameter
     String graphName();

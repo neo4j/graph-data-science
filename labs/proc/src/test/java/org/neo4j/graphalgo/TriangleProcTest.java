@@ -21,13 +21,21 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
+import org.neo4j.graphalgo.impl.triangle.TriangleStream;
 
 import java.util.HashSet;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
-class TriangleProcTest extends TriangleProcBaseTest {
+class TriangleProcTest extends TriangleBaseProcTest<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> {
+
+    @Override
+    TriangleBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> newInstance() {
+        return new TriangleProc();
+    }
 
     private static String[] idToName;
 

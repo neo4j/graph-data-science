@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
+import org.neo4j.graphalgo.impl.triangle.BalancedTriads;
+import org.neo4j.graphalgo.impl.triangle.BalancedTriadsConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.anyLong;
@@ -30,42 +30,37 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
-class BalancedTriadsProcTest extends BaseProcTest {
+class BalancedTriadsProcTest extends TriangleBaseProcTest<BalancedTriads, BalancedTriads, BalancedTriadsConfig> {
 
-    private static final String DB_CYPHER =
-        "CREATE " +
-        "  (a:Node {name: 'a'})" + // center node
-        ", (b:Node {name: 'b'})" +
-        ", (c:Node {name: 'c'})" +
-        ", (d:Node {name: 'd'})" +
-        ", (e:Node {name: 'e'})" +
-        ", (f:Node {name: 'f'})" +
-        ", (g:Node {name: 'g'})" +
-
-        ", (a)-[:TYPE {w: 1.0}]->(b)" +
-        ", (a)-[:TYPE {w: -1.0}]->(c)" +
-        ", (a)-[:TYPE {w: 1.0}]->(d)" +
-        ", (a)-[:TYPE {w: -1.0}]->(e)" +
-        ", (a)-[:TYPE {w: 1.0}]->(f)" +
-        ", (a)-[:TYPE {w: -1.0}]->(g)" +
-
-        ", (b)-[:TYPE {w: -1.0}]->(c)" +
-        ", (c)-[:TYPE {w: 1.0}]->(d)" +
-        ", (d)-[:TYPE {w: -1.0}]->(e)" +
-        ", (e)-[:TYPE {w: 1.0}]->(f)" +
-        ", (f)-[:TYPE {w: -1.0}]->(g)" +
-        ", (g)-[:TYPE {w: 1.0}]->(b)";
-
-    @BeforeEach
-    void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(DB_CYPHER);
-        registerProcedures(BalancedTriadsProc.class);
+    @Override
+    TriangleBaseProc<BalancedTriads, BalancedTriads, BalancedTriadsConfig> newInstance() {
+        return new BalancedTriadsProc();
     }
 
-    @AfterEach
-    void teardown() {
-        db.shutdown();
+    @Override
+    String dbCypher() {
+        return "CREATE " +
+            "  (a:Node {name: 'a'})" + // center node
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (g:Node {name: 'g'})" +
+
+            ", (a)-[:TYPE {w: 1.0}]->(b)" +
+            ", (a)-[:TYPE {w: -1.0}]->(c)" +
+            ", (a)-[:TYPE {w: 1.0}]->(d)" +
+            ", (a)-[:TYPE {w: -1.0}]->(e)" +
+            ", (a)-[:TYPE {w: 1.0}]->(f)" +
+            ", (a)-[:TYPE {w: -1.0}]->(g)" +
+
+            ", (b)-[:TYPE {w: -1.0}]->(c)" +
+            ", (c)-[:TYPE {w: 1.0}]->(d)" +
+            ", (d)-[:TYPE {w: -1.0}]->(e)" +
+            ", (e)-[:TYPE {w: 1.0}]->(f)" +
+            ", (f)-[:TYPE {w: -1.0}]->(g)" +
+            ", (g)-[:TYPE {w: 1.0}]->(b)";
     }
 
     @Test

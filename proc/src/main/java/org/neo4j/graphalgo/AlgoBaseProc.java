@@ -235,13 +235,22 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 ));
             }
         }
+
+        validateGraphCreateConfig(graphCreateConfig);
     }
+
+    protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig) { }
 
     protected ComputationResult<A, RESULT, CONFIG> compute(Object graphNameOrConfig, Map<String, Object> configuration) {
         return compute(graphNameOrConfig, configuration, true, true);
     }
 
-    protected ComputationResult<A, RESULT, CONFIG> compute(Object graphNameOrConfig, Map<String, Object> configuration, boolean releaseAlgorithm, boolean releaseTopology) {
+    protected ComputationResult<A, RESULT, CONFIG> compute(
+        Object graphNameOrConfig,
+        Map<String, Object> configuration,
+        boolean releaseAlgorithm,
+        boolean releaseTopology
+    ) {
         ImmutableComputationResult.Builder<A, RESULT, CONFIG> builder = ImmutableComputationResult.builder();
         AllocationTracker tracker = AllocationTracker.create();
 

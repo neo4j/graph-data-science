@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class BalancedTriadsProc extends AlgoBaseProc<BalancedTriads, BalancedTriads, BalancedTriadsConfig> {
+public class BalancedTriadsProc extends TriangleBaseProc<BalancedTriads, BalancedTriads, BalancedTriadsConfig> {
 
     @Procedure(name = "gds.alpha.balancedTriads.stream", mode = READ)
     public Stream<BalancedTriads.Result> stream(

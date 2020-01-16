@@ -44,10 +44,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.TriangleProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleCountProc extends AlgoBaseProc<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> {
+public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> {
 
     @Procedure(name = "gds.alpha.triangleCount.stream", mode = READ)
     @Description(DESCRIPTION)

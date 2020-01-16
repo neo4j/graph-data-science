@@ -21,6 +21,9 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
+import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
+import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
+import org.neo4j.graphalgo.impl.triangle.TriangleCountConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -30,7 +33,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class TriangleCountProcTest extends TriangleProcBaseTest {
+class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> {
+
+    @Override
+    TriangleBaseProc<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> newInstance() {
+        return new TriangleCountProc();
+    }
 
     @Test
     void testStreaming() {
