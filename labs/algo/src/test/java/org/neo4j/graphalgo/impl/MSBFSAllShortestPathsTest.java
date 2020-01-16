@@ -29,6 +29,8 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
+import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
+import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -88,10 +90,10 @@ class MSBFSAllShortestPathsTest {
         testASP(new MSBFSAllShortestPaths(graph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, Direction.OUTGOING));
     }
 
-    private void testASP(final MSBFSASPAlgorithm<?> hugeMSBFSAllShortestPaths) {
+    private void testASP(final MSBFSASPAlgorithm hugeMSBFSAllShortestPaths) {
         final ResultConsumer mock = mock(ResultConsumer.class);
         hugeMSBFSAllShortestPaths
-                .resultStream()
+                .compute()
                 .forEach(r -> {
                     if (r.sourceNodeId > r.targetNodeId) {
                         fail("should not happen");

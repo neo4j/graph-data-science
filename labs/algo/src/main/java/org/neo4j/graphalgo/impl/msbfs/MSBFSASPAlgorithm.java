@@ -17,13 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.msbfs;
 
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 
 import java.util.stream.Stream;
 
-public abstract class MSBFSASPAlgorithm<ME extends MSBFSASPAlgorithm<ME>> extends LegacyAlgorithm<ME> {
-
-    public abstract Stream<WeightedAllShortestPaths.Result> resultStream();
-}
+public abstract class MSBFSASPAlgorithm extends Algorithm<MSBFSASPAlgorithm, Stream<WeightedAllShortestPaths.Result>> { }

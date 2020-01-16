@@ -25,8 +25,8 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.MSBFSAllShortestPaths;
-import org.neo4j.graphalgo.impl.WeightedAllShortestPaths;
+import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
+import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -131,13 +131,14 @@ public class AllShortestPathsComparisionBenchmark extends BaseBenchmark {
     @Benchmark
     public long _01_benchmark_ASP() {
         return new WeightedAllShortestPaths(graph, Pools.DEFAULT, 8, Direction.OUTGOING)
-                .resultStream()
+                .compute()
                 .count();
     }
 
     @Benchmark
     public long _02_benchmark_MS_ASP() {
         return new MSBFSAllShortestPaths(graph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, Direction.OUTGOING)
-                .resultStream().count();
+                .compute()
+                .count();
     }
 }

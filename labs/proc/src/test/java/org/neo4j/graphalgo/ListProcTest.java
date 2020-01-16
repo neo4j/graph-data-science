@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.shortestpath.DijkstraProc;
 import org.neo4j.graphalgo.shortestpath.KShortestPathsProc;
+import org.neo4j.graphalgo.shortestpath.AllShortestPathsProc;
 import org.neo4j.graphalgo.similarity.ApproxNearestNeighborsProc;
 import org.neo4j.graphalgo.similarity.CosineProc;
 import org.neo4j.graphalgo.similarity.EuclideanProc;
@@ -58,7 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ListProcTest extends BaseProcTest {
 
     private static final Collection<String> PROCEDURES = new HashSet<>(asList(
-        "algo.allShortestPaths.stream",
+        "gds.alpha.allShortestPaths.stream",
         "gds.alpha.articleRank.write",
         "gds.alpha.articleRank.stream",
         "algo.asPath",

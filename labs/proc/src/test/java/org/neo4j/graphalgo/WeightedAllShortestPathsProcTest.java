@@ -21,8 +21,9 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.shortestpath.AllShortestPathsProc;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -94,15 +95,18 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
         db.shutdown();
     }
 
-    @AllGraphNamesTest
-    void testMSBFSASP(String graphName) {
-
+    @Test
+    void testMSBFSASP() {
         final Consumer consumer = mock(Consumer.class);
 
-        final String cypher = "CALL algo.allShortestPaths.stream('', {graph:'" + graphName + "', direction: 'OUTGOING'}) " +
-                              "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
+        String query = GdsCypher.call()
+            .loadEverything()
+            .algo("gds", "alpha", "allShortestPaths")
+            .streamMode()
+            .addParameter("direction", Direction.OUTGOING)
+            .yields();
 
-        runQueryWithRowConsumer(cypher, row -> {
+        runQueryWithRowConsumer(query, row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();
@@ -118,15 +122,18 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
 
     }
 
-    @AllGraphNamesTest
-    void testMSBFSASPIncoming(String graphName) {
-
+    @Test
+    void testMSBFSASPIncoming() {
         final Consumer consumer = mock(Consumer.class);
 
-        final String cypher = "CALL algo.allShortestPaths.stream('', {graph:'" + graphName + "', direction: 'INCOMING'}) " +
-                              "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
+        String query = GdsCypher.call()
+            .loadEverything(Projection.REVERSE)
+            .algo("gds", "alpha", "allShortestPaths")
+            .streamMode()
+            .addParameter("direction", Direction.INCOMING)
+            .yields();
 
-        runQueryWithRowConsumer(cypher, row -> {
+        runQueryWithRowConsumer(query, row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();
@@ -141,16 +148,19 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
         verify(consumer, times(1)).test(eq(targetNodeId), eq(startNodeId), eq(4.0));
     }
 
-    @AllGraphNamesTest
-    @Disabled
-    void testWeightedASP(String graphName) {
-
+    @Test
+    void testWeightedASP() {
         final Consumer consumer = mock(Consumer.class);
 
-        final String cypher = "CALL algo.allShortestPaths.stream('cost', {graph:'" + graphName + "', direction: 'OUTGOING'}) " +
-                              "YIELD sourceNodeId, targetNodeId, distance RETURN sourceNodeId, targetNodeId, distance";
+        String query = GdsCypher.call()
+            .withRelationshipProperty("cost")
+            .loadEverything()
+            .algo("gds", "alpha", "allShortestPaths")
+            .streamMode()
+            .addParameter("weightProperty", "cost")
+            .yields();
 
-        runQueryWithRowConsumer(cypher, row -> {
+        runQueryWithRowConsumer(query, row -> {
             final long source = row.getNumber("sourceNodeId").longValue();
             final long target = row.getNumber("targetNodeId").longValue();
             final double distance = row.getNumber("distance").doubleValue();

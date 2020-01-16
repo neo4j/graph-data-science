@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.msbfs;
 
 import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.WeightedAllShortestPaths.Result;
-import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
+import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths.Result;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Iterator;
@@ -44,7 +43,7 @@ import java.util.stream.StreamSupport;
  * a blocking queue. The result stream takes elements from the queue while the workers
  * add elements to it.
  */
-public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm<MSBFSAllShortestPaths> {
+public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
 
     private Graph graph;
     private BlockingQueue<Result> resultQueue;
@@ -70,13 +69,13 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm<MSBFSAllShortestPat
     }
 
     /**
-     * the resultStream(..) method starts the computation and
+     * the compute(..) method starts the computation and
      * returns a Stream of SP-Tuples (source, target, minDist)
      *
      * @return the result stream
      */
     @Override
-    public Stream<Result> resultStream() {
+    public Stream<Result> compute() {
         executorService.submit(new ShortestPathTask(concurrency, executorService));
         Iterator<Result> iterator = new AbstractIterator<Result>() {
             @Override
@@ -93,8 +92,8 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm<MSBFSAllShortestPat
             }
         };
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
-                iterator,
-                0), false);
+            iterator,
+            0), false);
     }
 
     @Override

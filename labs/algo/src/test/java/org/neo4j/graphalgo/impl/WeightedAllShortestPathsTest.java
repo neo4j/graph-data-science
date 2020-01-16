@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
+import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -106,7 +107,7 @@ class WeightedAllShortestPathsTest {
         final ResultConsumer mock = mock(ResultConsumer.class);
 
         new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4, Direction.OUTGOING)
-                .resultStream()
+                .compute()
                 .peek(System.out::println)
                 .forEach(r -> {
                     assertNotEquals(Double.POSITIVE_INFINITY, r.distance);

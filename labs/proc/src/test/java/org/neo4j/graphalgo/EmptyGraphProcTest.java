@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
+import org.neo4j.graphalgo.shortestpath.AllShortestPathsProc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphdb.Result;
@@ -87,8 +88,13 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testAllShortestPathsStream() {
-        boolean hasNext = runQuery("CALL algo.allShortestPaths.stream('',{graph:'" + graphImpl + "'})", Result::hasNext);
-        assertFalse(hasNext);
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.allShortestPaths")
+            .streamMode()
+            .yields();
+        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
     }
 
     @Test

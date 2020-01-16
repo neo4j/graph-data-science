@@ -33,6 +33,9 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
+import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
+import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
 import org.neo4j.graphalgo.impl.shortestpath.SingleSourceShortestPathDijkstra;
 import org.neo4j.graphalgo.impl.util.DoubleAdder;
 import org.neo4j.graphalgo.impl.util.DoubleEvaluator;
@@ -52,7 +55,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WeightedAllShortestPaths427Test extends AlgoTestBase {
+class WeightedAllShortestPaths427Test extends AlgoTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -494,8 +497,8 @@ public class WeightedAllShortestPaths427Test extends AlgoTestBase {
         return expected;
     }
 
-    private void compare(MSBFSASPAlgorithm<?> asp, List<Result> expected) {
-        List<Result> results = asp.resultStream()
+    private void compare(MSBFSASPAlgorithm asp, List<Result> expected) {
+        List<Result> results = asp.compute()
             .filter(r -> r.sourceNodeId != r.targetNodeId)
             .map(r -> new Result(
                 r.sourceNodeId,

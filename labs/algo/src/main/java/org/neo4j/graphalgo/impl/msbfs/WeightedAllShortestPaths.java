@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.msbfs;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
@@ -54,7 +54,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  * add elements to it. The result stream is limited by N^2. If the stream gets closed
  * prematurely the workers get closed too.
  */
-public class WeightedAllShortestPaths extends MSBFSASPAlgorithm<WeightedAllShortestPaths> {
+public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
 
     private Graph graph;
     private final int nodeCount;
@@ -92,13 +92,13 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm<WeightedAllShort
     }
 
     /**
-     * the resultStream(..) method starts the computation and
+     * the compute(..) method starts the computation and
      * returns a Stream of SP-Tuples (source, target, minDist)
      *
      * @return the result stream
      */
     @Override
-    public Stream<Result> resultStream() {
+    public Stream<Result> compute() {
 
         counter.set(0);
         outputStreamOpen = true;
