@@ -212,8 +212,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testKSpanningTreeKMax() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .loadEverything()
             .algo("gds.alpha.spanningTree.kmax")
             .writeMode()
             .addParameter("startNodeId", 0)

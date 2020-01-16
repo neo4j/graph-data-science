@@ -69,9 +69,8 @@ class KSpanningTreeProcTest extends BaseProcTest {
     @Test
     void testMax() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withRelationshipType("*", RelationshipProjection.builder().projection(Projection.UNDIRECTED).build())
             .withRelationshipProperty("w")
+            .loadEverything(Projection.UNDIRECTED)
             .algo("gds.alpha.spanningTree.kmax")
             .writeMode()
             .addParameter("startNodeId", id("a"))
