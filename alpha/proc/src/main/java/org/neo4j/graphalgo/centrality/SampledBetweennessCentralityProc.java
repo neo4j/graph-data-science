@@ -162,7 +162,8 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
                 )
                     .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction))
-                    .withDirection(configuration.direction());
+                    .withDirection(configuration.direction())
+                    .withMaxDepth(configuration.maxDepth());
             }
         };
 

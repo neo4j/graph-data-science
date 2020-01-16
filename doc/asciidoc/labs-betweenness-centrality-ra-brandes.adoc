@@ -1,16 +1,13 @@
 [[algorithms-betweenness-centrality-approx]]
 = Approximation of Betweenness Centrality
 
-// tag::introduction[]
 As mentioned above, calculating the exact betweenness centrality on large graphs can be very time consuming.
 Therefore, you might choose to use an approximation algorithm that will run much quicker, and still provide useful information.
-// end::introduction[]
 
 
 [[algorithms-betweenness-centrality-ra_brandes]]
 == RA-Brandes algorithm
 
-// tag::explanation[]
 The RA-Brandes algorithm is the best known algorithm for calculating an approximate score for betweenness centrality.
 Rather than calculating the shortest path between every pair of nodes, the RA-Brandes algorithm considers only a subset of nodes.
 Two common strategies for selecting the subset of nodes are:
@@ -24,39 +21,62 @@ degree::
   First, the mean degree of the nodes is calculated, and then only the nodes whose degree is higher than the mean are visited (i.e. only dense nodes are visited).
 
 As a further optimisation, you can choose to limit the depth used by the shortest path algorithm.
-// end::explanation[]
 This can be controlled by the `maxDepth` parameter.
+
 
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-include::scripts/betweenness-centrality.cypher[tag=stream-rabrandes-graph]
+CALL gds.alpha.betweenness.sampled.stream({
+  nodeProjection: 'User',
+  relationshipProjection: 'MANAGE',
+  strategy: 'random',
+  probability: 1.0,
+  maxDepth: 1,
+  direction: 'OUTGOING'
+}) YIELD nodeId, centrality
+RETURN algo.asNode(nodeId).name AS user, centrality
+ORDER BY centrality DESC
 ----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| user | centrality
+| Alice | 3
+| Charles | 1
+| Bridget | 0
+| Doug | 0
+| Mark | 0
+| Michael | 0
+|===
+
+Alice is still the main broker in the network, and Charles is a minor broker, although their centrality score has reduced as the algorithm only considers relationships at a depth of 1.
+The others don’t have any influence, because all the shortest paths between pairs of people go via Alice or Charles.
+
 
 .The following will run the algorithm and write back results:
 [source,cypher]
 ----
-include::scripts/betweenness-centrality.cypher[tag=write-rabrandes-graph]
+CALL gds.alpha.betweenness.sampled.write({
+  nodeProjection: 'User',
+  relationshipProjection: 'MANAGE',
+  strategy: 'random',
+  probability: 1.0,
+  writeProperty: 'centrality',
+  maxDepth: 1,
+  direction: 'OUTGOING'
+})
+YIELD nodes, minCentrality, maxCentrality, sumCentrality
 ----
 
-// tag::stream-rabrandes-graph-result[]
 .Results
-[opts="header",cols="1,1"]
+[opts="header"]
 |===
-| Name | Centrality weight
-| Alice | 3
-| Charles | 1
-| Bridget | 0
-| Michael | 0
-| Doug | 0
-| Mark | 0
+| nodes | minCentrality | maxCentrality | sumCentrality
+| 6     | 0.0           | 3.0           | 4.0
 |===
-// end::stream-rabrandes-graph-result[]
 
-// tag::stream-rabrandes-graph-explanation[]
-Alice is still the main broker in the network, and Charles is a minor broker, although their centrality score has reduced as the algorithm only considers relationships at a depth of 1.
-The others don’t have any influence, because all the shortest paths between pairs of people go via Alice or Charles.
-// end::stream-rabrandes-graph-explanation[]
 
 
 [[algorithms-betweenness-centrality-syntax]]

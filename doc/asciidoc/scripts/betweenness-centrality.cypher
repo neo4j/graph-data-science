@@ -1,28 +1,3 @@
-// tag::cypher-loading[]
-
-
-// end::cypher-loading[]
-
-// tag::stream-rabrandes-graph[]
-
-CALL algo.betweenness.sampled.stream('User','MANAGE',
-  {strategy:'random', probability:1.0, maxDepth:1, direction: "out"})
-
-YIELD nodeId, centrality
-
-MATCH (user) WHERE id(user) = nodeId
-RETURN user.id AS user,centrality
-ORDER BY centrality DESC;
-
-// end::stream-rabrandes-graph[]
-
-// tag::write-rabrandes-graph[]
-
-CALL algo.betweenness.sampled('User','MANAGE',
-  {strategy:'random', probability:1.0, writeProperty:'centrality', maxDepth:1, direction: "out"})
-YIELD nodes, minCentrality, maxCentrality
-
-// end::write-rabrandes-graph[]
 
 
 CALL algo.<name>.stream('Label','TYPE',{conf})

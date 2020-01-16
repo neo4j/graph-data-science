@@ -57,7 +57,7 @@ public class BetweennessCentralityDocTest extends BaseProcTest {
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
         );
 
-        registerProcedures(BetweennessCentralityProc.class);
+        registerProcedures(BetweennessCentralityProc.class, SampledBetweennessCentralityProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);
     }
@@ -129,6 +129,61 @@ public class BetweennessCentralityDocTest extends BaseProcTest {
                           "| nodes | minCentrality | maxCentrality | sumCentrality |" + NL +
                           "+-------------------------------------------------------+" + NL +
                           "| 6     | 0.0           | 4.0           | 6.0           |" + NL +
+                          "+-------------------------------------------------------+" + NL +
+                          "1 row" + NL;
+
+        String actual = runQuery(query, Result::resultAsString);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldStreamSampled() {
+        String query = " CALL gds.alpha.betweenness.sampled.stream({" +
+                       "   nodeProjection: 'User'," +
+                       "   relationshipProjection: 'MANAGE'," +
+                       "   strategy: 'random'," +
+                       "   probability: 1.0," +
+                       "   maxDepth: 1," +
+                       "   direction: 'OUTGOING'" +
+                       " }) YIELD nodeId, centrality" +
+                       " RETURN algo.asNode(nodeId).name AS user, centrality" +
+                       " ORDER BY centrality DESC";
+
+        String expected = "+------------------------+" + NL +
+                          "| user      | centrality |" + NL +
+                          "+------------------------+" + NL +
+                          "| \"Alice\"   | 3.0        |" + NL +
+                          "| \"Charles\" | 1.0        |" + NL +
+                          "| \"Bridget\" | 0.0        |" + NL +
+                          "| \"Doug\"    | 0.0        |" + NL +
+                          "| \"Mark\"    | 0.0        |" + NL +
+                          "| \"Michael\" | 0.0        |" + NL +
+                          "+------------------------+" + NL +
+                          "6 rows" + NL;
+
+        String actual = runQuery(query, Result::resultAsString);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldWriteSampled() {
+        String query = " CALL gds.alpha.betweenness.sampled.write({" +
+                       "   nodeProjection: 'User'," +
+                       "   relationshipProjection: 'MANAGE'," +
+                       "   strategy: 'random'," +
+                       "   probability: 1.0," +
+                       "   writeProperty: 'centrality'," +
+                       "   maxDepth: 1," +
+                       "   direction: 'OUTGOING'" +
+                       " })" +
+                       " YIELD nodes, minCentrality, maxCentrality, sumCentrality";
+
+        String expected = "+-------------------------------------------------------+" + NL +
+                          "| nodes | minCentrality | maxCentrality | sumCentrality |" + NL +
+                          "+-------------------------------------------------------+" + NL +
+                          "| 6     | 0.0           | 3.0           | 4.0           |" + NL +
                           "+-------------------------------------------------------+" + NL +
                           "1 row" + NL;
 
