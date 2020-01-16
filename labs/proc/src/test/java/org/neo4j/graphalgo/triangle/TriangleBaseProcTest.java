@@ -17,15 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.triangle;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.triangle.BalancedTriadsProc;
+import org.neo4j.graphalgo.triangle.TriangleBaseProc;
+import org.neo4j.graphalgo.triangle.TriangleCountProc;
+import org.neo4j.graphalgo.triangle.TriangleProc;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
