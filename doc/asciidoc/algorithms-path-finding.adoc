@@ -10,13 +10,13 @@ Path finding algorithms find the shortest path between two or more nodes or eval
 The Neo4j GDS library includes the following path finding algorithms, grouped by quality tier:
 
 * Alpha
-** <<labs-algorithms-minimum-weight-spanning-tree, Minimum Weight Spanning Tree>> (`algo.spanningTree`)
-** <<labs-algorithms-shortest-path, Shortest Path>> (`algo.shortestPath`)
-** <<labs-algorithms-single-source-shortest-path, Single Source Shortest Path>> (`algo.shortestPath.deltaStepping`)
-** <<labs-algorithm-all-pairs-shortest-path, All Pairs Shortest Path>> (`algo.allShortestPaths`)
-** <<labs-algorithms-a_star, A*>> (`algo.shortestPath.astar`)
-** <<labs-algorithms-yens-k-shortest-path, Yen’s K-shortest paths>> (`algo.kShortestPaths`)
-** <<labs-algorithms-random-walk, Random Walk>> (`algo.randomWalk`)
+** <<labs-algorithms-minimum-weight-spanning-tree, Minimum Weight Spanning Tree>>
+** <<labs-algorithms-shortest-path, Shortest Path>>
+** <<labs-algorithms-single-source-shortest-path, Single Source Shortest Path>>
+** <<labs-algorithm-all-pairs-shortest-path, All Pairs Shortest Path>>
+** <<labs-algorithms-a_star, A*>>
+** <<labs-algorithms-yens-k-shortest-path, Yen’s K-shortest paths>>
+** <<labs-algorithms-random-walk, Random Walk>>
 
 include::labs-minimum-weight-spanning-tree.adoc[leveloffset=+1]
 

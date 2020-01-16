@@ -9,12 +9,12 @@ This chapter provides explanations and examples for each of the link prediction 
 These algorithms help determine the closeness of a pair of nodes.
 We would then use the computed scores as part of a link prediction solution:
 
-* <<labs-algorithms-linkprediction-adamic-adar, Adamic Adar>> (`algo.linkprediction.adamicAdar`)
-* <<labs-algorithms-linkprediction-common-neighbors, Common Neighbors>> (`algo.linkprediction.commonNeighbors`)
-* <<labs-algorithms-linkprediction-preferential-attachment, Preferential Attachment>> (`algo.linkprediction.preferentialAttachment`)
-* <<labs-algorithms-linkprediction-resource-allocation, Resource Allocation>> (`algo.linkprediction.resourceAllocation`)
-* <<labs-algorithms-linkprediction-same-community, Same Community>> (`algo.linkprediction.sameCommunity`)
-* <<labs-algorithms-linkprediction-total-neighbors, Total Neighbors>> (`algo.linkprediction.totalNeighbors`)
+* <<labs-algorithms-linkprediction-adamic-adar, Adamic Adar>>
+* <<labs-algorithms-linkprediction-common-neighbors, Common Neighbors>>
+* <<labs-algorithms-linkprediction-preferential-attachment, Preferential Attachment>>
+* <<labs-algorithms-linkprediction-resource-allocation, Resource Allocation>>
+* <<labs-algorithms-linkprediction-same-community, Same Community>>
+* <<labs-algorithms-linkprediction-total-neighbors, Total Neighbors>>
 
 
 include::labs-linkprediction-adamic-adar.adoc[leveloffset=+1]

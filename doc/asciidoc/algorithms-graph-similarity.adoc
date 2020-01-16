@@ -10,6 +10,6 @@ Graph similarity algorithms can help calculate the similarity of nodes.
 The Neo4j GDS library includes the following graph similarity algorithms, grouped by quality tier:
 
 * Production-quality:
-** <<algorithms-node-similarity, Node Similarity>> (`algo.nodeSimilarity`)
+** <<algorithms-node-similarity, Node Similarity>>
 
 include::node-similarity.adoc[leveloffset=+1]

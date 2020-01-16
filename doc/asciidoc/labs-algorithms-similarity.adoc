@@ -8,12 +8,12 @@ This chapter provides explanations and examples for each of the similarity algor
 
 These algorithms help calculate the similarity of nodes:
 
-* <<labs-algorithms-similarity-jaccard, Jaccard Similarity>> (`algo.similarity.jaccard`)
-* <<labs-algorithms-similarity-cosine, Cosine Similarity>> (`algo.similarity.cosine`)
-* <<labs-algorithms-similarity-pearson, Pearson Similarity>> (`algo.similarity.pearson`)
-* <<labs-algorithms-similarity-euclidean, Euclidean Distance>> (`algo.similarity.euclidean`)
-* <<labs-algorithms-similarity-overlap, Overlap Similarity>> (`algo.similarity.overlap`)
-* <<labs-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbors>> (`algo.ml.ann`)
+* <<labs-algorithms-similarity-jaccard, Jaccard Similarity>>
+* <<labs-algorithms-similarity-cosine, Cosine Similarity>>
+* <<labs-algorithms-similarity-pearson, Pearson Similarity>>
+* <<labs-algorithms-similarity-euclidean, Euclidean Distance>>
+* <<labs-algorithms-similarity-overlap, Overlap Similarity>>
+* <<labs-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbors>>
 
 include::labs-similarity-jaccard.adoc[leveloffset=+1]
 
