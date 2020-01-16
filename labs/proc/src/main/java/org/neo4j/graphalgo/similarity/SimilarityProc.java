@@ -26,13 +26,13 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.results.SimilarityExporter;
-import org.neo4j.graphalgo.impl.results.SimilarityResult;
-import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
 import org.neo4j.graphalgo.impl.similarity.Computations;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
+import org.neo4j.graphalgo.results.SimilarityExporter;
+import org.neo4j.graphalgo.results.SimilarityResult;
+import org.neo4j.graphalgo.results.SimilaritySummaryResult;
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.logging.Log;
 

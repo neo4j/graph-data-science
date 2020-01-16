@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.neo4j.graphalgo.impl.results.SimilarityResult;
+import org.neo4j.graphalgo.results.SimilarityResult;
 
 public interface SimilarityComputer<T> {
     SimilarityResult similarity(RleDecoder decoder, T source, T target, double cutoff);

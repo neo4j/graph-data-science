@@ -29,8 +29,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityWriteConfig;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Map;

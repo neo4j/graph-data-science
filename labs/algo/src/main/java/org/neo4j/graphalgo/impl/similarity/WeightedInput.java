@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.core.utils.Intersections;
-import org.neo4j.graphalgo.impl.results.SimilarityResult;
+import org.neo4j.graphalgo.results.SimilarityResult;
 
 import java.util.Arrays;
 import java.util.List;

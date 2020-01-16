@@ -24,8 +24,8 @@ import org.HdrHistogram.Histogram;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
-import org.neo4j.graphalgo.impl.wcc.ImmutableWccWriteConfig;
-import org.neo4j.graphalgo.impl.wcc.WccWriteConfig;
+import org.neo4j.graphalgo.wcc.ImmutableWccWriteConfig;
+import org.neo4j.graphalgo.wcc.WccWriteConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Optional;

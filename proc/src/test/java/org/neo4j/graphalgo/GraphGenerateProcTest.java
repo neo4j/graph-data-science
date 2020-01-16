@@ -28,9 +28,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.impl.generator.RelationshipPropertyProducer;
+import org.neo4j.graphalgo.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.generator.RelationshipDistribution;
+import org.neo4j.graphalgo.generator.RelationshipPropertyProducer;
 
 import java.util.ArrayList;
 import java.util.Collection;

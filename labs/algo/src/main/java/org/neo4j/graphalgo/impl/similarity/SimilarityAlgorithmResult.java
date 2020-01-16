@@ -20,8 +20,7 @@
 package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.impl.results.SimilarityResult;
-import org.neo4j.graphalgo.impl.similarity.Computations;
+import org.neo4j.graphalgo.results.SimilarityResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;

@@ -22,9 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.newapi.GraphCreateProc;
-import org.neo4j.graphalgo.wcc.WccStreamProc;
-import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 

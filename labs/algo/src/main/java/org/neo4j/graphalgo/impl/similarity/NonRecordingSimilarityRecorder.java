@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.neo4j.graphalgo.impl.results.SimilarityResult;
+import org.neo4j.graphalgo.results.SimilarityResult;
 
 public class NonRecordingSimilarityRecorder<T> implements SimilarityRecorder<T> {
     private final SimilarityComputer<T> computer;

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.impl.pagerank.PageRank;
+import org.neo4j.graphalgo.pagerank.PageRank;
 
 public class PageRankScore {
 

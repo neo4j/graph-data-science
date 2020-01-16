@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.impl.wcc.WccWriteConfig;
+import org.neo4j.graphalgo.wcc.WccWriteConfig;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 
 import java.util.List;

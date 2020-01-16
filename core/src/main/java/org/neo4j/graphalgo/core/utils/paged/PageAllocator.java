@@ -24,8 +24,8 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import java.lang.reflect.Array;
 import java.util.function.Supplier;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public abstract class PageAllocator<T> {
 

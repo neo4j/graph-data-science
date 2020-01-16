@@ -22,8 +22,6 @@ package org.neo4j.graphalgo.modularity;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
-import org.neo4j.graphalgo.impl.modularity.ModularityOptimizationFactory;
 
 public abstract class ModularityOptimizationBaseProc<T extends ModularityOptimizationConfig> extends AlgoBaseProc<ModularityOptimization, ModularityOptimization, T> {
     static final String DESCRIPTION = "The Modularity Optimization algorithm groups the nodes in the graph by optimizing the graphs modularity.";

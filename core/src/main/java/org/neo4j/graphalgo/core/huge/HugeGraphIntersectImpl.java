@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.IntersectionConsumer;
 
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will

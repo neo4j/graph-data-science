@@ -1,6 +1,5 @@
-import org.neo4j.doc.build.xslt.XsltTask
-
 import org.neo4j.doc.build.docbook.DocBookPlugin
+import org.neo4j.doc.build.xslt.XsltTask
 
 buildscript {
     ext {

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.utils;
 
-import org.neo4j.graphalgo.impl.results.CentralityResult;
+import org.neo4j.graphalgo.results.CentralityResult;
 import org.neo4j.graphalgo.results.CentralityResultWithStatistics;
 import org.neo4j.graphalgo.results.NormalizedCentralityResult;
 

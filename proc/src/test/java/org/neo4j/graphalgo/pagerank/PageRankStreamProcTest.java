@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.HashMap;

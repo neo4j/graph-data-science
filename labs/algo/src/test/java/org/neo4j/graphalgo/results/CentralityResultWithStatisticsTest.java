@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.results;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.impl.results.CentralityResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.WriteConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 
 import java.util.Arrays;
 import java.util.Map;

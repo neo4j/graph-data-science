@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.impl.louvain.Louvain;
-import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 
 abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBaseProc<Louvain, Louvain, CONFIG> {
 

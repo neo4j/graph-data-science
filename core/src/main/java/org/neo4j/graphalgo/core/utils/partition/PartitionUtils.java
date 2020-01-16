@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static org.neo4j.graphalgo.core.utils.partition.Partition.MAX_NODE_COUNT;

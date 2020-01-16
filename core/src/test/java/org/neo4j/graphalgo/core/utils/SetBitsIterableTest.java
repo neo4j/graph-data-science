@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 
 import java.util.Arrays;
 import java.util.List;

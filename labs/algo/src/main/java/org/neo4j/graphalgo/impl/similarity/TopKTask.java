@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.neo4j.graphalgo.impl.results.SimilarityResult;
+import org.neo4j.graphalgo.results.SimilarityResult;
 
 import static org.neo4j.graphalgo.impl.similarity.SimilarityStreamGenerator.computeSimilarityForSourceIndex;
 import static org.neo4j.graphalgo.impl.similarity.TopKConsumer.initializeTopKConsumers;

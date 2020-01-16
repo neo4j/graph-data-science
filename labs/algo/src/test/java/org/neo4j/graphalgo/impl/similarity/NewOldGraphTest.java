@@ -29,8 +29,6 @@ import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.graphalgo.impl.similarity.HugeRelationshipsBuilder;
-import org.neo4j.graphalgo.impl.similarity.NewOldGraph;
 import org.roaringbitmap.RoaringBitmap;
 
 import java.util.Collections;

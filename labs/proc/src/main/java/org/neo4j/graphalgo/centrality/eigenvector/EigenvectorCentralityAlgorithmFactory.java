@@ -25,8 +25,8 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.pagerank.LabsPageRankAlgorithmType;
-import org.neo4j.graphalgo.impl.pagerank.PageRank;
+import org.neo4j.graphalgo.pagerank.LabsPageRankAlgorithmType;
+import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.logging.Log;
 
 class EigenvectorCentralityAlgorithmFactory extends AlgorithmFactory<PageRank, EigenvectorCentralityConfig> {

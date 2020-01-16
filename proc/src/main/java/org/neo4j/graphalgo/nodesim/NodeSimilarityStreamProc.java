@@ -21,12 +21,8 @@ package org.neo4j.graphalgo.nodesim;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityStreamConfig;
-import org.neo4j.graphalgo.impl.nodesim.SimilarityResult;
-import org.neo4j.graphalgo.impl.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;

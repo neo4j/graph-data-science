@@ -22,10 +22,6 @@ package org.neo4j.graphalgo.nodesim;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarity;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityBaseConfig;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityFactory;
-import org.neo4j.graphalgo.impl.nodesim.NodeSimilarityResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
 import java.util.Optional;

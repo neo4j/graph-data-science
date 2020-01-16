@@ -20,26 +20,26 @@
 package org.neo4j.graphalgo.similarity;
 
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.results.SimilarityResult;
-import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
+import org.neo4j.graphalgo.impl.similarity.ApproxNearestNeighborsAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.ApproximateNearestNeighborsConfig;
 import org.neo4j.graphalgo.impl.similarity.ApproximateNearestNeighborsConfigImpl;
+import org.neo4j.graphalgo.impl.similarity.CosineAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.CosineConfig;
+import org.neo4j.graphalgo.impl.similarity.EuclideanAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.EuclideanConfig;
 import org.neo4j.graphalgo.impl.similarity.ImmutableCosineConfig;
 import org.neo4j.graphalgo.impl.similarity.ImmutableEuclideanConfig;
 import org.neo4j.graphalgo.impl.similarity.ImmutableJaccardConfig;
 import org.neo4j.graphalgo.impl.similarity.ImmutablePearsonConfig;
-import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
-import org.neo4j.graphalgo.impl.similarity.ApproximateNearestNeighborsConfig;
-import org.neo4j.graphalgo.impl.similarity.CosineConfig;
-import org.neo4j.graphalgo.impl.similarity.EuclideanConfig;
-import org.neo4j.graphalgo.impl.similarity.ApproxNearestNeighborsAlgorithm;
-import org.neo4j.graphalgo.impl.similarity.CosineAlgorithm;
-import org.neo4j.graphalgo.impl.similarity.EuclideanAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.JaccardAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.JaccardConfig;
 import org.neo4j.graphalgo.impl.similarity.PearsonAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.PearsonConfig;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.results.SimilarityResult;
+import org.neo4j.graphalgo.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 

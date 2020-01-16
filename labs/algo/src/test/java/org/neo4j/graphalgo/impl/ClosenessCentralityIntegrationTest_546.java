@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 class ClosenessCentralityIntegrationTest_546 extends AlgoTestBase {
 

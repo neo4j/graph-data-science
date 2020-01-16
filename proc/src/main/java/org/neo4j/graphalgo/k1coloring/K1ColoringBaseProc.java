@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.k1coloring;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.impl.coloring.K1Coloring;
 
 public abstract class K1ColoringBaseProc<T extends K1ColoringConfig> extends AlgoBaseProc<K1Coloring, HugeLongArray, T> {
     static final String DESCRIPTION = "The K-1 Coloring algorithm assigns a color to every node in the graph.";
