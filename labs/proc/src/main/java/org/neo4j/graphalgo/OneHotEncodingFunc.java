@@ -31,8 +31,8 @@ import java.util.stream.LongStream;
 
 public class OneHotEncodingFunc {
 
-    @UserFunction("algo.ml.oneHotEncoding")
-    @Description("CALL algo.ml.oneHotEncoding(availableValues, selectedValues) - return a list of selected values in a one hot encoding format.")
+    @UserFunction("gds.alpha.ml.oneHotEncoding")
+    @Description("CALL gds.alpha.ml.oneHotEncoding(availableValues, selectedValues) - return a list of selected values in a one hot encoding format.")
     public List<Long> oneHotEncoding(@Name(value = "availableValues") List<Object> availableValues,
                                      @Name(value = "selectedValues") List<Object> selectedValues) {
         if (availableValues == null) {

@@ -1,5 +1,5 @@
 // tag::basic[]
-RETURN algo.ml.oneHotEncoding(["Chinese", "Indian", "Italian"], ["Italian"]) AS vector
+RETURN gds.alpha.ml.oneHotEncoding(["Chinese", "Indian", "Italian"], ["Italian"]) AS vector
 // end::basic[]
 
 // tag::create-sample-graph[]
@@ -26,6 +26,6 @@ WITH cuisine ORDER BY cuisine.name
 WITH collect(cuisine) AS cuisines
 MATCH (p:Person)
 RETURN p.name AS person,
-       algo.ml.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS encoding
+       gds.alpha.ml.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS encoding
 ORDER BY person
 // end::one-hot-encoding-query[]
