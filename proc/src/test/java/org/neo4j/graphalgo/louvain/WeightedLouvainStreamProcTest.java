@@ -20,8 +20,6 @@
 
 package org.neo4j.graphalgo.louvain;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -48,6 +46,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
@@ -123,40 +122,100 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
         );
     }
 
-    @Test
-    void unweightedLouvainOnUnweightedGraphTest() {
-        String query = GdsCypher
-            .call()
-            .explicitCreation("unweightedGraph")
-            .algo("louvain")
-            .streamMode()
-            .yields("nodeId", "communityId", "communityIds")
-            .concat(" RETURN algo.asNode(nodeId).name as name, communityId, communityIds")
-            .concat(" ORDER BY name ASC");
+    @ParameterizedTest(name = " {1}")
+    @MethodSource("unweightedGraphQueries")
+    void unweightedLouvainTest(String query, String graphCreation) {
+        assumeFalse(
+            graphCreation.equals("implicit graph created with weights"),
+            "Disable `implicit graph created with weights` until cleared up what the expected behaviour should be"
+        );
 
-        QueryRunner.runQueryWithRowConsumer(db, query, row -> assertLouvainResultRow(row, expectedUnweightedResult));
-    }
-
-    // TODO: merge with `unweightedLouvainOnUnweightedGraphTest` and use @ParametrizedTest once this can be enabled
-    @Disabled("Running Louvain on Weighted Graph without specifying weightProperty should run as unweighted")
-    @Test
-    void unweightedLouvainOnWeightedGraphTest() {
-        String query = GdsCypher
-            .call()
-            .explicitCreation("weightedLouvainGraph")
-            .algo("louvain")
-            .streamMode()
-            .yields("nodeId", "communityId", "communityIds")
-            .concat(" RETURN algo.asNode(nodeId).name as name, communityId, communityIds")
-            .concat(" ORDER BY name ASC");
-
-        QueryRunner.runQueryWithRowConsumer(db, query, row -> assertLouvainResultRow(row, expectedUnweightedResult));
+        QueryRunner.runQueryWithRowConsumer(
+            db, query, row -> assertLouvainResultRow(row, expectedUnweightedResult));
     }
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("weightedGraphQueries")
     void weightedLouvainTest(String query, String graphMode) {
         QueryRunner.runQueryWithRowConsumer(db, query, row -> assertLouvainResultRow(row, expectedWeightedResult));
+    }
+
+    static Stream<Arguments> unweightedGraphQueries() {
+        return Stream.of(
+            arguments(
+                GdsCypher
+                    .call()
+                    .explicitCreation("unweightedGraph")
+                    .algo("louvain")
+                    .streamMode()
+                    .yields("nodeId", "communityId", "communityIds")
+                    .concat(" RETURN algo.asNode(nodeId).name as name, communityId, communityIds")
+                    .concat(" ORDER BY name ASC"),
+                "explicit graph created without weights"
+            ),
+            arguments(
+                GdsCypher
+                    .call()
+                    .explicitCreation("weightedLouvainGraph")
+                    .algo("louvain")
+                    .streamMode()
+                    .yields("nodeId", "communityId", "communityIds")
+                    .concat(" RETURN algo.asNode(nodeId).name as name, communityId, communityIds")
+                    .concat(" ORDER BY name ASC"),
+                "explicit graph created with weights"
+            ),
+            arguments(
+                GdsCypher
+                    .call()
+                    .implicitCreation(
+                        ImmutableGraphCreateFromStoreConfig.builder()
+                            .graphName("implicitWeightedGraph")
+                            .nodeProjection(NodeProjections.fromString("User"))
+                            .relationshipProjection(RelationshipProjections.builder()
+                                .putProjection(
+                                    ElementIdentifier.of("LINK"),
+                                    RelationshipProjection.builder()
+                                        .type("LINK")
+                                        .projection(Projection.UNDIRECTED)
+                                        .aggregation(DeduplicationStrategy.NONE)
+                                        .build()
+                                ).build()
+                            ).build()
+                    )
+                    .algo("louvain")
+                    .streamMode()
+                    .yields("nodeId", "communityId", "communityIds")
+                    .concat(" RETURN algo.asNode(nodeId).name as name, communityId, communityIds")
+                    .concat(" ORDER BY name ASC"),
+                "implicit graph created without weights"
+            ),
+            arguments(
+                GdsCypher
+                    .call()
+                    .implicitCreation(
+                        ImmutableGraphCreateFromStoreConfig.builder()
+                            .graphName("implicitWeightedGraph")
+                            .nodeProjection(NodeProjections.fromString("User"))
+                            .relationshipProjection(RelationshipProjections.builder()
+                                .putProjection(
+                                    ElementIdentifier.of("LINK"),
+                                    RelationshipProjection.builder()
+                                        .type("LINK")
+                                        .projection(Projection.UNDIRECTED)
+                                        .aggregation(DeduplicationStrategy.NONE)
+                                        .addProperty(PropertyMapping.of("weight", 0.0d))
+                                        .build()
+                                ).build()
+                            ).build()
+                    )
+                    .algo("louvain")
+                    .streamMode()
+                    .yields("nodeId", "communityId", "communityIds")
+                    .concat(" RETURN algo.asNode(nodeId).name as name, communityId, communityIds")
+                    .concat(" ORDER BY name ASC"),
+                "implicit graph created with weights"
+            )
+        );
     }
 
     static Stream<Arguments> weightedGraphQueries() {
