@@ -30,10 +30,12 @@ import org.neo4j.graphalgo.impl.traverse.TraverseConfig;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.walking.WalkResult;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphdb.Path;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,14 +46,14 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig> {
 
-    private static Traverse.TraverseAlgo traverseAlgo;
+    private static boolean isBfs;
 
     @Procedure(name = "gds.alpha.bfs.stream", mode = READ)
     public Stream<WalkResult> bfs(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        this.traverseAlgo = Traverse.TraverseAlgo.BFS;
+        isBfs = true;
         return stream(graphNameOrConfig, configuration);
     }
 
@@ -60,7 +62,7 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        this.traverseAlgo = Traverse.TraverseAlgo.DFS;
+        isBfs = false;
         return stream(graphNameOrConfig, configuration);
     }
 
@@ -90,7 +92,7 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
                     aggregatorFunction = (s, t, w) -> .0;
                     // maxDepth given; continue to aggregate nodes with lower depth until no more nodes left
                 } else if (config.maxDepth() != -1) {
-                    exitFunction = traverseAlgo == Traverse.TraverseAlgo.BFS
+                    exitFunction = isBfs
                         // TODO: Not sure this difference is intentional.
                         //       But it is required to maintain algo behavior.
                         ? (s, t, w) -> w >= config.maxDepth() ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW
@@ -106,7 +108,9 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
                     exitFunction = (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW;
                     aggregatorFunction = (s, t, w) -> .0;
                 }
-                return new Traverse(graph, traverseAlgo, config.direction(), config.startNode(), exitFunction, aggregatorFunction);
+                return isBfs
+                    ? Traverse.bfs(graph, config.direction(), config.startNode(), exitFunction, aggregatorFunction)
+                    : Traverse.dfs(graph, config.direction(), config.startNode(), exitFunction, aggregatorFunction);
             }
         };
     }

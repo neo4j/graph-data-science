@@ -35,7 +35,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("TraverseConfigImpl")
-public interface TraverseConfig extends WeightConfig, AlgoBaseConfig {
+public interface TraverseConfig extends AlgoBaseConfig, WeightConfig {
 
     @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
     @Value.Default

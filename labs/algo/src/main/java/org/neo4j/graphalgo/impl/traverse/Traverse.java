@@ -32,159 +32,87 @@ import java.util.function.ObjLongConsumer;
 
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
-public class Traverse extends Algorithm<Traverse, Traverse> {
-
-    public enum TraverseAlgo {
-        BFS,
-        DFS
-    }
+public final class Traverse extends Algorithm<Traverse, Traverse> {
 
     public static final Aggregator DEFAULT_AGGREGATOR = (s, t, w) -> .0;
 
     private final int nodeCount;
-    private final TraverseAlgo traverseAlgo;
     private final Direction direction;
     private final long startNodeId;
     private final ExitPredicate exitPredicate;
     private final Aggregator aggregatorFunction;
-    private Graph graph;
+    private final ObjLongConsumer<LongArrayDeque> nodeFunc;
+    private final ObjDoubleConsumer<DoubleArrayDeque> weightFunc;
+    private final Graph graph;
     private LongArrayDeque nodes;
-    private LongArrayDeque sources;
+    private final LongArrayDeque sources;
     private DoubleArrayDeque weights;
     private BitSet visited;
 
     private long[] resultNodes;
 
-    public Traverse(Graph graph, TraverseAlgo traverseAlgo, Direction direction, long startNodeId, ExitPredicate exitPredicate, Aggregator aggregatorFunction) {
+    private Traverse(
+        Graph graph,
+        Direction direction,
+        long startNodeId,
+        ExitPredicate exitPredicate,
+        Aggregator aggregatorFunction,
+        ObjLongConsumer<LongArrayDeque> nodeFunc,
+        ObjDoubleConsumer<DoubleArrayDeque> weightFunc
+    ) {
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
-        this.traverseAlgo = traverseAlgo;
         this.direction = direction;
         this.startNodeId = startNodeId;
         this.exitPredicate = exitPredicate;
         this.aggregatorFunction = aggregatorFunction;
+        this.nodeFunc = nodeFunc;
+        this.weightFunc = weightFunc;
         this.nodes = new LongArrayDeque(nodeCount);
         this.sources = new LongArrayDeque(nodeCount);
         this.weights = new DoubleArrayDeque(nodeCount);
         this.visited = new BitSet(nodeCount);
     }
 
-    @Override
-    public Traverse compute() {
-        if (traverseAlgo == TraverseAlgo.BFS) {
-            computeBfs(
-                startNodeId,
-                direction,
-                exitPredicate,
-                aggregatorFunction);
-        } else {
-            computeDfs(
-                startNodeId,
-                direction,
-                exitPredicate,
-                aggregatorFunction);
-        }
-
-        return me();
-    }
-
-    public long[] resultNodes() {
-        return resultNodes;
-    }
-
-    /**
-     * start BFS without aggregator
-     *
-     * @param sourceId      source node id
-     * @param direction     traversal direction
-     * @param exitCondition
-     * @return
-     */
-    private void computeBfs(long sourceId, Direction direction, ExitPredicate exitCondition) {
-        computeBfs(
-            graph.toMappedNodeId(sourceId),
+    public static Traverse dfs(
+        Graph graph,
+        Direction direction,
+        long startNodeId,
+        ExitPredicate exitPredicate,
+        Aggregator aggregatorFunction
+    ) {
+        return new Traverse(
+            graph,
             direction,
-            exitCondition,
-            DEFAULT_AGGREGATOR
-        );
-    }
-
-    /**
-     * start DSF without aggregator
-     *
-     * @param sourceId      source node id
-     * @param direction     traversal direction
-     * @param exitCondition
-     * @return
-     */
-    private void computeDfs(long sourceId, Direction direction, ExitPredicate exitCondition) {
-        computeDfs(
-            graph.toMappedNodeId(sourceId),
-            direction,
-            exitCondition,
-            (s, t, w) -> .0
-        );
-    }
-
-    /**
-     * start BFS using an aggregator function
-     *
-     * @param sourceId      source node id
-     * @param direction     traversal direction
-     * @param exitCondition
-     * @param aggregator
-     * @return
-     */
-    private void computeBfs(long sourceId, Direction direction, ExitPredicate exitCondition, Aggregator aggregator) {
-        traverse(
-            graph.toMappedNodeId(sourceId),
-            direction,
-            exitCondition,
-            aggregator,
-            LongArrayDeque::addLast,
-            DoubleArrayDeque::addLast
-        );
-    }
-
-    /**
-     * start DFS using an aggregator function
-     *
-     * @param sourceId      source node id
-     * @param direction     traversal direction
-     * @param exitCondition
-     * @param aggregator
-     * @return
-     */
-    private void computeDfs(long sourceId, Direction direction, ExitPredicate exitCondition, Aggregator aggregator) {
-        traverse(
-            graph.toMappedNodeId(sourceId),
-            direction,
-            exitCondition,
-            aggregator,
+            startNodeId,
+            exitPredicate,
+            aggregatorFunction,
             LongArrayDeque::addFirst,
             DoubleArrayDeque::addFirst
         );
     }
 
-    /**
-     * traverse along the path
-     *
-     * @param sourceNode    source node (mapped id)
-     * @param direction     the traversal direction
-     * @param exitCondition exit condition
-     * @param agg           weight accumulator function
-     * @param nodeFunc      node accessor function (either ::addLast or ::addFirst to switch between fifo and lifo behaviour)
-     * @param weightFunc    weight accessor function (either ::addLast or ::addFirst to switch between fifo and lifo behaviour)
-     * @return a list of nodes that have been visited
-     */
-    private void traverse(
-        long sourceNode,
+    public static Traverse bfs(
+        Graph graph,
         Direction direction,
-        ExitPredicate exitCondition,
-        Aggregator agg,
-        ObjLongConsumer<LongArrayDeque> nodeFunc,
-        ObjDoubleConsumer<DoubleArrayDeque> weightFunc
+        long startNodeId,
+        ExitPredicate exitPredicate,
+        Aggregator aggregatorFunction
     ) {
+        return new Traverse(
+            graph,
+            direction,
+            startNodeId,
+            exitPredicate,
+            aggregatorFunction,
+            LongArrayDeque::addLast,
+            DoubleArrayDeque::addLast
+        );
+    }
+
+    @Override
+    public Traverse compute() {
+        long sourceNode = graph.toMappedNodeId(startNodeId);
         final LongHashSet result = new LongHashSet(nodeCount);
         nodes.clear();
         sources.clear();
@@ -199,7 +127,7 @@ public class Traverse extends Algorithm<Traverse, Traverse> {
             final long source = sources.removeFirst();
             final long node = nodes.removeFirst();
             final double weight = weights.removeFirst();
-            switch (exitCondition.test(source, node, weight)) {
+            switch (exitPredicate.test(source, node, weight)) {
                 case BREAK:
                     result.add(graph.toOriginalNodeId(node));
                     break loop;
@@ -215,8 +143,8 @@ public class Traverse extends Algorithm<Traverse, Traverse> {
                 direction,
                 longToIntConsumer((s, t) -> {
                     // remove from the visited nodes to allow revisiting in case the node is accessible via more than one path.
-                    double aggregatedWeight = agg.apply(s, t, weight);
-                    final ExitPredicate.Result test = exitCondition.test(s, t, aggregatedWeight);
+                    double aggregatedWeight = aggregatorFunction.apply(s, t, weight);
+                    final ExitPredicate.Result test = exitPredicate.test(s, t, aggregatedWeight);
                     if (test == ExitPredicate.Result.FOLLOW && visited.get(t)) {
                         visited.clear(t);
                     }
@@ -234,6 +162,11 @@ public class Traverse extends Algorithm<Traverse, Traverse> {
         }
 
         this.resultNodes = result.toArray();
+        return me();
+    }
+
+    public long[] resultNodes() {
+        return resultNodes;
     }
 
     @Override

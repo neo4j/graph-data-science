@@ -110,9 +110,8 @@ class TraverseMaxCostTest extends AlgoTestBase {
     @Test
     void testDfsMaxCostOut() {
         final long source = id("a");
-        final long[] nodes = new Traverse(
+        final long[] nodes = Traverse.dfs(
             graph,
-            Traverse.TraverseAlgo.DFS,
             Direction.OUTGOING,
             source,
             exitPredicate,
@@ -139,9 +138,8 @@ class TraverseMaxCostTest extends AlgoTestBase {
     void testBfsMaxCostOut() {
         final long source = id("a");
 
-        final long[] nodes = new Traverse(
+        final long[] nodes = Traverse.bfs(
             graph,
-            Traverse.TraverseAlgo.BFS,
             Direction.OUTGOING,
             source,
             exitPredicate,

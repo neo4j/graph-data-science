@@ -37,8 +37,6 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
-import static org.neo4j.graphalgo.impl.traverse.Traverse.TraverseAlgo.BFS;
-import static org.neo4j.graphalgo.impl.traverse.Traverse.TraverseAlgo.DFS;
 
 /**
  *
@@ -113,9 +111,8 @@ class TraverseTest extends AlgoTestBase {
     void testBfsToTargetOut() {
         final long source = id("a");
         final long target = id("d");
-        final long[] nodes = new Traverse(
+        final long[] nodes = Traverse.bfs(
             graph,
-            Traverse.TraverseAlgo.BFS,
             Direction.OUTGOING,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
@@ -133,16 +130,14 @@ class TraverseTest extends AlgoTestBase {
     void testDfsToTargetOut() {
         final long source = id("a");
         final long target = id("g");
-        final long[] nodes = new Traverse(
+        final long[] nodes = Traverse.dfs(
             graph,
-            DFS,
             Direction.OUTGOING,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             DEFAULT_AGGREGATOR
         ).compute().resultNodes();
 
-        System.out.println(Arrays.toString(nodes));
         assertEquals(5, nodes.length);
     }
 
@@ -153,9 +148,8 @@ class TraverseTest extends AlgoTestBase {
     @Test
     void testExitConditionNeverTerminates() {
         final long source = id("a");
-        final long[] nodes = new Traverse(
+        final long[] nodes = Traverse.dfs(
             graph,
-            DFS,
             Direction.OUTGOING,
             source,
             (s, t, w) -> Result.FOLLOW,
@@ -172,15 +166,13 @@ class TraverseTest extends AlgoTestBase {
     void testDfsToTargetIn() {
         final long source = id("g");
         final long target = id("a");
-        final long[] nodes = new Traverse(
+        final long[] nodes = Traverse.dfs(
             graph,
-            DFS,
             Direction.INCOMING,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             DEFAULT_AGGREGATOR
         ).compute().resultNodes();
-        System.out.println(Arrays.toString(nodes));
         assertEquals(5, nodes.length);
     }
 
@@ -193,15 +185,13 @@ class TraverseTest extends AlgoTestBase {
     void testBfsToTargetIn() {
         final long source = id("g");
         final long target = id("a");
-        final long[] nodes = new Traverse(
+        final long[] nodes = Traverse.bfs(
             graph,
-            BFS,
             Direction.INCOMING,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             DEFAULT_AGGREGATOR
         ).compute().resultNodes();
-        System.out.println(Arrays.toString(nodes));
         assertEquals(7, nodes.length);
     }
 
@@ -215,18 +205,15 @@ class TraverseTest extends AlgoTestBase {
     void testBfsMaxDepthOut() {
         final long source = id("a");
         final double maxHops = 3.;
-        final long[] nodes = new Traverse(
+        final long[] nodes = Traverse.bfs(
             graph,
-            BFS,
             Direction.OUTGOING,
             source,
             (s, t, w) -> w >= maxHops ? Result.CONTINUE : Result.FOLLOW,
             (s, t, w) -> {
-                System.out.println(s + " -> " + t + " : " + (w + 1));
                 return w + 1.;
             }
         ).compute().resultNodes();
-        System.out.println(Arrays.toString(nodes));
         assertContains(new String[]{"a", "b", "c", "d"}, nodes);
     }
 
@@ -234,19 +221,16 @@ class TraverseTest extends AlgoTestBase {
     void testBfsMaxCostOut() {
         final long source = id("a");
         final double maxCost = 3.;
-        final long[] nodes = new Traverse(
+        final long[] nodes = Traverse.bfs(
             graph,
-            BFS,
             Direction.OUTGOING,
             source,
             (s, t, w) -> w > maxCost ? Result.CONTINUE : Result.FOLLOW,
             (s, t, w) -> {
                 final double v = graph.relationshipProperty(s, t, Double.NaN);
-                System.out.println(s + " -> " + t + " : " + (w + v));
                 return w + v;
             }
         ).compute().resultNodes();
-        System.out.println(Arrays.toString(nodes));
         assertEquals(4, nodes.length);
     }
 
@@ -254,19 +238,16 @@ class TraverseTest extends AlgoTestBase {
     void testDfsMaxCostOut() {
         final long source = id("a");
         final double maxCost = 3.;
-        final long[] nodes = new Traverse(
+        final long[] nodes = Traverse.dfs(
             graph,
-            DFS,
             Direction.OUTGOING,
             source,
             (s, t, w) -> w > maxCost ? Result.CONTINUE : Result.FOLLOW,
             (s, t, w) -> {
                 final double v = graph.relationshipProperty(s, t, Double.NaN);
-                System.out.println(s + " -> " + t + " : " + (w + v));
                 return w + v;
             }
         ).compute().resultNodes();
-        System.out.println(Arrays.toString(nodes));
         assertEquals(4, nodes.length);
     }
 

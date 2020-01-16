@@ -42,9 +42,6 @@ import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.neo4j.graphalgo.impl.traverse.Traverse.TraverseAlgo.BFS;
-import static org.neo4j.graphalgo.impl.traverse.Traverse.TraverseAlgo.DFS;
-
 @Threads(1)
 @Fork(value = 1, jvmArgs = {"-Xms2g", "-Xmx2g"})
 @Warmup(iterations = 5, time = 3)
@@ -89,11 +86,11 @@ public class BFSBenchmark extends BaseBenchmark {
 
     @Benchmark
     public Object bfs() {
-        return new Traverse(g, BFS, Direction.OUTGOING, 0L, (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
+        return Traverse.bfs(g, Direction.OUTGOING, 0L, (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
     }
 
     @Benchmark
     public Object dfs() {
-        return new Traverse(g, DFS, Direction.OUTGOING, 0L, (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
+        return Traverse.dfs(g, Direction.OUTGOING, 0L, (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
     }
 }
