@@ -1,4 +1,4 @@
-[[algorithms-closeness-centrality]]
+[[labs-algorithms-closeness-centrality]]
 = The Closeness Centrality algorithm
 
 [abstract]
@@ -20,17 +20,15 @@ The Closeness Centrality algorithm was developed by the Neo4j Labs team and is n
 
 This section includes:
 
-* <<algorithms-closeness-centrality-context, History and explanation>>
-* <<algorithms-closeness-centrality-usecase, Use-cases - when to use the Closeness Centrality algorithm>>
-* <<algorithms-closeness-centrality-limitations, Constraints - when not to use the Closeness Centrality algorithm>>
-* <<algorithms-closeness-centrality-sample, Closeness Centrality algorithm sample>>
-* <<algorithms-closeness-centrality-hgp, Huge graph projection>>
-* <<algorithms-closeness-centrality-cp, Cypher projection>>
-* <<algorithms-closeness-centrality-syntax, Syntax>>
-* <<algorithms-closeness-centrality-support, Graph type support>>
+* <<labs-algorithms-closeness-centrality-context, History and explanation>>
+* <<labs-algorithms-closeness-centrality-usecase, Use-cases - when to use the Closeness Centrality algorithm>>
+* <<labs-algorithms-closeness-centrality-limitations, Constraints - when not to use the Closeness Centrality algorithm>>
+* <<labs-algorithms-closeness-centrality-syntax, Syntax>>
+* <<labs-algorithms-closeness-centrality-sample, Closeness Centrality algorithm sample>>
+* <<labs-algorithms-closeness-centrality-cp, Cypher projection>>
 
 
-[[algorithms-closeness-centrality-context]]
+[[labs-algorithms-closeness-centrality-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -52,7 +50,7 @@ The formula for *normalized closeness centrality* is as follows:
 // end::formula[]
 
 
-[[algorithms-closeness-centrality-usecase]]
+[[labs-algorithms-closeness-centrality-usecase]]
 == Use-cases - when to use the Closeness Centrality algorithm
 
 // tag::use-case[]
@@ -70,7 +68,7 @@ The formula for *normalized closeness centrality* is as follows:
 // end::use-case[]
 
 
-[[algorithms-closeness-centrality-limitations]]
+[[labs-algorithms-closeness-centrality-limitations]]
 == Constraints - when not to use the Closeness Centrality algorithm
 
 // tag::constraint[]
@@ -82,7 +80,63 @@ In practice, a variation on the original formula is used so that we don't run in
 // end::constraint[]
 
 
-[[algorithms-closeness-centrality-sample]]
+[[labs-algorithms-closeness-centrality-syntax]]
+== Syntax
+
+.The following will run the algorithm and write back results:
+[source, cypher]
+----
+CALL gds.alpha.closeness.write(configuration: MAP)
+YIELD nodes, loadMillis, computeMillis, writeMillis
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                          | Type    | Default                | Optional | Description
+| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| writeProperty                 | string  | 'centrality'           | yes      | The property name written back to.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type | Description
+| nodes         | int  | The number of nodes considered.
+| loadMillis    | int  | Milliseconds for loading data.
+| evalMillis    | int  | Milliseconds for running the algorithm.
+| writeMillis   | int  | Milliseconds for writing result data back.
+| writeProperty | string  | The property name written back to.
+|===
+
+
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+CALL gds.alpha.closeness.stream(configuration: MAP)
+YIELD nodeId, centrality
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                          | Type    | Default                | Optional | Description
+| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+|===
+
+.Results
+[opts="header"]
+|===
+| Name       | Type  | Description
+| node       | long  | Node ID
+| centrality | float | Closeness centrality weight
+|===
+
+
+[[labs-algorithms-closeness-centrality-sample]]
 == Closeness Centrality algorithm sample
 
 image::closeness_centrality.png[]
@@ -90,19 +144,31 @@ image::closeness_centrality.png[]
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/closeness-centrality.cypher[tag=create-sample-graph]
+CREATE (a:Node{id:"A"}),
+       (b:Node{id:"B"}),
+       (c:Node{id:"C"}),
+       (d:Node{id:"D"}),
+       (e:Node{id:"E"}),
+       (a)-[:LINK]->(b),
+       (b)-[:LINK]->(a),
+       (b)-[:LINK]->(c),
+       (c)-[:LINK]->(b),
+       (c)-[:LINK]->(d),
+       (d)-[:LINK]->(c),
+       (d)-[:LINK]->(e),
+       (e)-[:LINK]->(d);
 ----
 
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-include::scripts/closeness-centrality.cypher[tag=stream-sample-graph]
-----
-
-.The following will run the algorithm and write back results:
-[source, cypher]
-----
-include::scripts/closeness-centrality.cypher[tag=write-sample-graph]
+CALL gds.alpha.closeness.stream({
+  nodeProjection: 'Node',
+  relationshipProjection: 'LINK'
+})
+YIELD nodeId, centrality
+RETURN algo.asNode(nodeId).name AS user, centrality
+ORDER BY centrality DESC
 ----
 
 // tag::stream-sample-graph-result[]
@@ -123,6 +189,43 @@ C is the best connected node in this graph, although B and D aren't far behind.
 A and E don't have close ties to many other nodes, so their scores are lower.
 Any node that has a direct connection to all other nodes would score 1.
 // end::stream-sample-graph-explanation[]
+
+.The following will run the algorithm and write back results:
+[source, cypher]
+----
+CALL gds.alpha.closeness.write({
+  nodeProjection: 'Node',
+  relationshipProjection: 'LINK',
+  writeProperty: 'centrality'
+}) YIELD nodes, writeProperty
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| nodes | writeProperty
+| 5     | "centrality"
+|===
+
+[[labs-algorithms-closeness-centrality-cp]]
+== Cypher projection
+
+include::projected-graph-model/cypher-projection.adoc[tag=explanation]
+
+[source, cypher]
+----
+CALL gds.alpha.closeness.write({
+  nodeQuery: 'MATCH (p:Node) RETURN id(p) as id',
+  relationshipQuery: 'MATCH (p1:Node)-[:LINK]->(p2:Node) RETURN id(p1) as source, id(p2) as target'
+}) YIELD nodes, writeProperty
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| nodes | writeProperty
+| 5     | "centrality"
+|===
 
 Calculation:
 
@@ -146,142 +249,3 @@ Calculation:
  ==|=============================
 k/S| 0.4  0.57  0.67  0.57   0.4     // normalized closeness centrality
 ....
-
-
-[[algorithms-closeness-centrality-hgp]]
-== Huge graph projection
-
-include::huge-projection.adoc[tag=explanation]
-
-.Set `graph:'huge'` in the config:
-
-[source, cypher]
-----
-include::scripts/closeness-centrality.cypher[tag=huge-projection]
-----
-
-
-[[algorithms-closeness-centrality-cp]]
-== Cypher projection
-
-include::projected-graph-model/cypher-projection.adoc[tag=explanation]
-
-.Set `graph:'cypher'` in the config:
-
-[source, cypher]
-----
-include::scripts/closeness-centrality.cypher[tag=cypher-loading]
-----
-
-
-[[algorithms-closeness-centrality-syntax]]
-== Syntax
-
-.The following will run the algorithm and write back results:
-[source, cypher]
-----
-CALL algo.closeness(label:String, relationship:String,
-    {write:true, writeProperty:'centrality',graph:'huge', concurrency:4})
-YIELD nodes, loadMillis, computeMillis, writeMillis
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type    | Default                | Optional | Description
-| label            | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
-| write            | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
-| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| writeProperty    | string  | 'centrality'           | yes      | The property name written back to.
-| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name        | Type | Description
-| nodes       | int  | The number of nodes considered.
-| loadMillis  | int  | Milliseconds for loading data.
-| evalMillis  | int  | Milliseconds for running the algorithm.
-| writeMillis | int  | Milliseconds for writing result data back.
-|===
-
-
-.The following will run the algorithm and stream results:
-[source, cypher]
-----
-CALL algo.closeness.stream(label:String, relationship:String, {concurrency:4})
-YIELD nodeId, centrality
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type   | Default                | Optional | Description
-| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
-| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| graph            | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-|===
-
-.Results
-[opts="header"]
-|===
-| Name       | Type  | Description
-| node       | long  | Node ID
-| centrality | float | Closeness centrality weight
-|===
-
-
-[[algorithms-closeness-centrality-support]]
-== Graph type support
-
-The Closeness Centrality algorithm supports the following graph types:
-
-* [x] directed, unweighted
-* [ ] directed, weighted
-* [x] undirected, unweighted
-** Only with cypher projection
-* [ ] undirected, weighted
-
-
-ifndef::env-docs[]
-== References
-
-// tag::references[]
-* [1]  https://infoscience.epfl.ch/record/200525/files/[EN]ASNA09.pdf?
-* https://toreopsahl.com/2010/03/20/closeness-centrality-in-networks-with-disconnected-components/
-* http://www.casos.cs.cmu.edu/publications/papers/CMU-ISR-11-113.pdf
-* http://mrvar.fdv.uni-lj.si/sola/info4/uvod/part4.pdf
-* http://qualquant.org/wp-content/uploads/networks/2008%201-7-3.pdf
-* https://www.andrew.cmu.edu/user/andersok/Katharine_A._Anderson/Social_Economic_and_Information_Networks_files/CentralitySlides.pdf
-// end::references[]
-endif::env-docs[]
-
-ifdef::implementation[]
-// tag::implementation[]
-
-
-== Implementation details
-
-:leveloffset: +1
-// copied from: https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/99
-
-Closeness centrality of a node is a measure of centrality in a network, calculated as the sum of the length of the shortest paths between the node and all other nodes in the graph.
-Thus, the more central a node is, the closer it is to all other nodes.
-
-
-== Details
-
-* Use `org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS` for BFS
-* MSBFS gives depth and number of sources.
-* In this scheme, the farness can be calculated as follows
-
-`farness(v) = farness(v) + numberOfSources(v) * depth(v)`
-
-// end::implementation[]
-endif::implementation[]
