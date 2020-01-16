@@ -10,13 +10,13 @@ Centrality algorithms are used to determine the importance of distinct nodes in 
 The Neo4j GDS library includes the following centrality algorithms, grouped by quality tier:
 
 * Production-quality:
-** <<algorithms-pagerank, PageRank>> (`algo.pageRank`)
+** <<algorithms-pagerank, PageRank>>
 * Alpha
-** <<algorithms-articlerank, ArticleRank>> (`algo.articleRank`)
-** <<algorithms-betweenness-centrality, Betweenness Centrality>> (`algo.betweenness`)
-** <<algorithms-closeness-centrality, Closeness Centrality>> (`algo.closeness`)
-** <<algorithms-degree-centrality, Degree Centrality>> (`algo.degree`)
-** <<algorithms-eigenvector, Eigenvector Centrality>> (`algo.eigenvector`)
+** <<algorithms-articlerank, ArticleRank>>
+** <<algorithms-betweenness-centrality, Betweenness Centrality>>
+** <<algorithms-closeness-centrality, Closeness Centrality>>
+** <<algorithms-degree-centrality, Degree Centrality>>
+** <<algorithms-eigenvector, Eigenvector Centrality>>
 
 include::pagerank.adoc[leveloffset=+1]
 

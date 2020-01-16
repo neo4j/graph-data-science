@@ -10,13 +10,13 @@ Community detection algorithms are used to evaluate how a group of nodes is clus
 The Neo4j GDS library includes the following community detection algorithms, grouped by quality tier:
 
 * Production-quality:
-** <<algorithms-louvain, Louvain>> (`algo.louvain`)
-** <<algorithms-label-propagation, Label Propagation>> (`algo.labelPropagation`)
-** <<algorithms-wcc, Weakly Connected Components>> (`algo.unionFind`)
+** <<algorithms-louvain, Louvain>>
+** <<algorithms-label-propagation, Label Propagation>>
+** <<algorithms-wcc, Weakly Connected Components>>
 * Alpha
-** <<algorithms-strongly-connected-components, Strongly Connected Components>> (`algo.scc`)
-** <<algorithms-triangle-count-clustering-coefficient, Triangle Counting / Clustering Coefficient>> (`algo.triangleCount`)
-** <<algorithms-balanced-triads, Balanced Triads>> (`algo.balancedTriads`)
+** <<algorithms-strongly-connected-components, Strongly Connected Components>>
+** <<algorithms-triangle-count-clustering-coefficient, Triangle Counting / Clustering Coefficient>>
+** <<algorithms-balanced-triads, Balanced Triads>>
 
 include::louvain.adoc[leveloffset=+1]
 
