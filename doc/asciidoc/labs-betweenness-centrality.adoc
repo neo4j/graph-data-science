@@ -29,10 +29,10 @@ This section includes:
 * <<algorithms-betweenness-centrality-context, History and explanation>>
 * <<algorithms-betweenness-centrality-usecase, Use-cases - when to use the Betweenness Centrality algorithm>>
 * <<algorithms-betweenness-centrality-limitations, Constraints - when not to use the Betweenness Centrality algorithm>>
-* <<algorithms-betweenness-centrality-sample, Betweenness Centrality algorithm sample>>
-* <<algorithms-betweenness-centrality-approx, Approximation of Betweenness Centrality>>
-** <<algorithms-betweenness-centrality-ra_brandes, RA-Brandes algorithm>>
 * <<algorithms-betweenness-centrality-syntax, Syntax>>
+* <<algorithms-betweenness-centrality-sample, Betweenness Centrality example>>
+* <<algorithms-betweenness-centrality-approx, Sampled Betweenness Centrality>>
+** <<algorithms-betweenness-centrality-ra_brandes, Sampled Betweenness Centrality example>>
 * <<algorithms-betweenness-centrality-cp, Cypher projection>>
 
 
@@ -73,6 +73,139 @@ It was considered to be one of the "three distinct intuitive conceptions of cent
 * For large graphs, exact centrality computation isn't practical.
   The fastest known algorithm for exactly computing betweenness of all the nodes requires at least `O(nm)` time for unweighted graphs, where `n` is the number of nodes and `m` is the number of relationships.
   Instead, we can use an approximation algorithm that works with a subset of nodes.
+
+
+[[algorithms-betweenness-centrality-syntax]]
+== Syntax
+
+.The following will run the Betweenness Centrality algorithm and write back results:
+[source, cypher]
+----
+CALL gds.alpha.betweenness.write(configuration: MAP)
+YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name          | Type    | Default | Optional | Description
+| configuration | map     | {}      | no       | Configuration parameters.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name             | Type    | Default                | Optional | Description
+| direction        | string  | OUTGOING               | yes      | The relationship direction to load from the graph. If 'BOTH', treats the relationships as undirected.
+| writeProperty    | string  | 'centrality'           | yes      | The property name written back to.
+| concurrency      | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type | Description
+| nodes         | int  | The number of nodes considered
+| minCentrality | int  | The minimum centrality value
+| maxCentrality | int  | The maximum centrality value
+| sumCentrality | int  | The sum of all centrality values
+| loadMillis    | int  | Milliseconds for loading data
+| computeMillis | int  | Milliseconds for running the algorithm
+| writeMillis   | int  | Milliseconds for writing result data back
+|===
+
+
+.The following will run the Betweenness Centrality algorithm and stream results:
+[source,cypher]
+----
+CALL gds.alpha.betweenness.stream(configuration: MAP)
+YIELD nodeId, centrality
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name            | Type   | Default                | Optional | Description
+| direction       | string | OUTGOING               | yes      | The relationship direction to load from the graph. If 'BOTH', treats the relationships as undirected.
+| concurrency     | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+|===
+
+.Results
+[opts="headers"]
+|===
+| Name        | Type  | Description
+| node        | long  | Node ID
+| centrality  | float | Betweenness centrality weight
+|===
+
+
+.The following will run the Sampled Betweenness Centrality algorithm and write back results:
+[source,cypher]
+----
+CALL gds.alpha.betweenness.sampled.write(configuration: MAP)
+YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name             | Type   | Default                | Optional | Description
+| Name             | Type   | Default                | Optional | Description
+| direction        | string | OUTGOING               | yes      | The relationship direction to load from the graph. If 'BOTH', treats the relationships as undirected.
+| writeProperty    | string | 'centrality'           | yes      | The property name written back to.
+| strategy         | string | 'random'               | yes      | The node selection strategy.
+| probability      | float  | log10(N) / e^2         | yes      | The probability a node is selected. Values between 0 and 1. If 1, selects all nodes and works like original Brandes algorithm.
+| maxDepth         | int    | Integer.MAX            | yes      | The depth of the shortest paths traversal.
+| concurrency      | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int    | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type | Description
+| nodes         | int  | The number of nodes considered
+| minCentrality | int  | The minimum centrality value
+| maxCentrality | int  | The maximum centrality value
+| sumCentrality | int  | The sum of all centrality values
+| loadMillis    | int  | Milliseconds for loading data
+| computeMillis | int  | Milliseconds for running the algorithm
+| writeMillis   | int  | Milliseconds for writing result data back
+|===
+
+
+.The following will run the Sampled Betweenness Centrality algorithm and stream results:
+[source,cypher]
+----
+CALL gds.alpha.betweenness.sampled.stream(configuration: MAP)
+YIELD nodeId, centrality
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name            | Type   | Default                | Optional | Description
+| label           | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
+| relationship    | string | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
+| concurrency     | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| direction       | string | outgoing               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected.
+| strategy        | string | 'random'               | yes      | The node selection strategy.
+| probability     | float  | log10(N) / e^2         | yes      | The probability a node is selected. Values between 0 and 1. If 1, selects all nodes and works like original Brandes algorithm.
+| maxDepth        | int    | Integer.MAX            | yes      | The depth of the shortest paths traversal.
+|===
+
+.Results
+[opts="headers"]
+|===
+| Name       | Type  | Description
+| node       | long  | Node ID.
+| centrality | float | Betweenness centrality weight.
+|===
 
 
 [[algorithms-betweenness-centrality-sample]]
@@ -153,7 +286,7 @@ Therefore, you might choose to use an approximation algorithm that will run much
 
 
 [[algorithms-betweenness-centrality-ra_brandes]]
-=== RA-Brandes algorithm
+=== Sampled Betweenness Centrality algorithm
 
 The RA-Brandes algorithm is the best known algorithm for calculating an approximate score for betweenness centrality.
 Rather than calculating the shortest path between every pair of nodes, the RA-Brandes algorithm considers only a subset of nodes.
@@ -223,152 +356,6 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality
 | nodes | minCentrality | maxCentrality | sumCentrality
 | 6     | 0.0           | 3.0           | 4.0
 |===
-
-
-
-[[algorithms-betweenness-centrality-syntax]]
-=== Syntax
-
-.The following will run the Brandes algorithm and write back results:
-[source,cypher]
-----
-CALL algo.betweenness(label:String, relationship:String,
-  {direction:'out',write:true, stats:true, writeProperty:'centrality',concurrency:1})
-YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis
-- calculates betweenness centrality and potentially writes back
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type    | Default                | Optional | Description
-| label            | string  | null                   | yes      | The label to load from the graph. If null, load all nodes
-| relationship     | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships
-| direction        | string  | outgoing               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
-| write            | boolean | true                   | yes      | Specifies if the result should be written back as a node property
-| stats            | boolean | true                   | yes      | Specifies if stats about centrality should be returned
-| writeProperty    | string  | 'centrality'           | yes      | The property name written back to
-| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement
-| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name | Type | Description
-| nodes | int | The number of nodes considered
-| minCentrality | int | The minimum centrality value
-| maxCentrality | int | The maximum centrality value
-| sumCentrality | int | The sum of all centrality values
-| loadMillis | int | Milliseconds for loading data
-| evalMillis | int | Milliseconds for running the algorithm
-| writeMillis | int | Milliseconds for writing result data back
-|===
-
-
-.The following will run the Brandes algorithm and stream results:
-[source,cypher]
-----
-CALL algo.betweenness.stream(label:String, relationship:String,
-{direction:'out',concurrency:1})
-YIELD nodeId, centrality - yields centrality for each node
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type   | Default                | Optional | Description
-| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes
-| relationship     | string | null                   | yes      | The relationship type to load from the graph. If null, load all relationships
-| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| direction        | string | outgoing               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
-|===
-
-.Results
-[opts="headers"]
-|===
-| Name | Type | Description
-| node | long | Node ID
-| centrality | float | Betweenness centrality weight
-|===
-
-
-.The following will run the RA-Brandes algorithm and write back results:
-[source,cypher]
-----
-CALL algo.betweenness.sampled(label:String, relationship:String,
-  {direction:'out', strategy:'random', probability: 1, maxDepth: 4, stats:true,
- writeProperty:'centrality',concurrency:1})
-YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis
-- calculates betweenness centrality and potentially writes back
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type    | Default                | Optional | Description
-| label            | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string  | null                   | yes      | The relationship type to load from the graph. If null, load all nodes.
-| direction        | string  | outgoing               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected.
-| write            | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
-| strategy         | string  | 'random'               | yes      | The node selection strategy.
-| probability      | float   | log10(N) / e^2         | yes      | The probability a node is selected. Values between 0 and 1. If 1, selects all nodes and works like original Brandes algorithm.
-| maxDepth         | int     | Integer.MAX            | yes      | The depth of the shortest paths traversal.
-| stats            | boolean | true                   | yes      | Specifies if stats about centrality should be returned.
-| writeProperty    | string  | 'centrality'           | yes      | The property name written back to.
-| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name | Type | Description
-| nodes | int | The number of nodes considered.
-| minCentrality | int | The minimum centrality value.
-| maxCentrality | int | The maximum centrality value.
-| sumCentrality | int | The sum of all centrality values.
-| loadMillis | int | Milliseconds for loading data.
-| evalMillis | int | Milliseconds for running the algorithm.
-| writeMillis | int | Milliseconds for writing result data back.
-|===
-
-
-.The following will run the RA-Brandes algorithm and stream results:
-[source,cypher]
-----
-CALL algo.betweenness.sampled.stream(label:String, relationship:String,
-  {direction:'out',concurrency:1, strategy:'random', probability: 1, maxDepth: 4})
-YIELD nodeId, centrality - yields centrality for each node
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type   | Default                | Optional | Description
-| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
-| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| direction        | string | outgoing               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected.
-| strategy         | string | 'random'               | yes      | The node selection strategy.
-| probability      | float  | log10(N) / e^2         | yes      | The probability a node is selected. Values between 0 and 1. If 1, selects all nodes and works like original Brandes algorithm.
-| maxDepth         | int    | Integer.MAX            | yes      | The depth of the shortest paths traversal.
-|===
-
-.Results
-[opts="headers"]
-|===
-| Name | Type | Description
-| node | long | Node ID.
-| centrality | float | Betweenness centrality weight.
-|===
-
 
 
 [[algorithms-betweenness-centrality-cp]]
