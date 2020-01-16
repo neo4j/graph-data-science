@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
@@ -51,7 +52,7 @@ class AsPathFuncTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
         runQuery(DB_CYPHER);
         registerFunctions(AsPathFunc.class);
@@ -64,7 +65,7 @@ class AsPathFuncTest extends BaseProcTest {
 
     @Test
     void shouldReturnPath() {
-        final String cypher = "RETURN algo.asPath([0, 1, 2]) AS path";
+        final String cypher = "RETURN gds.util.asPath([0, 1, 2]) AS path";
 
         List<Node> expectedNodes = getNodes("a", "b", "c");
 
@@ -75,7 +76,7 @@ class AsPathFuncTest extends BaseProcTest {
 
     @Test
     void shouldReturnPathWithCosts() {
-        final String cypher = "RETURN algo.asPath([0, 1, 2], [0.1, 0.2], false) AS path";
+        final String cypher = "RETURN gds.util.asPath([0, 1, 2], [0.1, 0.2], false) AS path";
 
         List<Node> expectedNodes = getNodes("a", "b", "c");
         List<Double> expectedCosts = Arrays.asList(0.1, 0.2);
@@ -92,18 +93,8 @@ class AsPathFuncTest extends BaseProcTest {
     }
 
     @Test
-    void shouldThrowExceptionIfNotEnoughCostsProvided() {
-        String cypher = "RETURN algo.asPath([0, 1, 2], [0.1], false) AS path";
-        assertThrows(
-            RuntimeException.class,
-            () -> runQuery(cypher, Result::next),
-            "'weights' contains 1 values, but 2 values were expected"
-        );
-    }
-
-    @Test
     void shouldPreprocessCumulativeWeights() {
-        String cypher = "RETURN algo.asPath([0, 1, 2], [0, 40.0, 70.0]) AS path";
+        String cypher = "RETURN gds.util.asPath([0, 1, 2], [0, 40.0, 70.0]) AS path";
 
         List<Node> expectedNodes = getNodes("a", "b", "c");
         List<Double> expectedCosts = Arrays.asList(40.0, 30.0);
@@ -119,10 +110,20 @@ class AsPathFuncTest extends BaseProcTest {
     }
 
     @Test
-    void shouldThrowExceptionIfNotEnoughCumulativeWeightsProvided() {
-        String cypher = "RETURN algo.asPath([0, 1, 2], [0, 40.0]) AS path";
+    void shouldThrowExceptionIfNotEnoughCostsProvided() {
+        String cypher = "RETURN gds.util.asPath([0, 1, 2], [0.1], false) AS path";
         assertThrows(
-            RuntimeException.class,
+            QueryExecutionException.class,
+            () -> runQuery(cypher, Result::next),
+            "'weights' contains 1 values, but 2 values were expected"
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionIfNotEnoughCumulativeWeightsProvided() {
+        String cypher = "RETURN gds.util.asPath([0, 1, 2], [0, 40.0]) AS path";
+        assertThrows(
+            QueryExecutionException.class,
             () -> runQuery(cypher, Result::next),
             "'weights' contains 2 values, but 3 values were expected"
         );

@@ -35,36 +35,41 @@ public class AsPathFunc {
     @Context
     public GraphDatabaseAPI api;
 
-    @UserFunction("algo.asPath")
-    @Description("CALL algo.asPath - returns a path for the provided node ids and weights")
+    @UserFunction("gds.util.asPath")
+    @Description("CALL gds.util.asPath - returns a path for the provided node ids and weights")
     public Path asPath(
-            @Name(value = "nodeIds", defaultValue = "") List<Long> nodeIds,
-            @Name(value = "weights", defaultValue = "") List<Double> weights,
-            @Name(value = "cumulativeWeights", defaultValue = "true") boolean cumulativeWeights) {
-
-        if (nodeIds.size() <= 0) {
+        @Name(value = "nodeIds", defaultValue = "") List<Long> nodes,
+        @Name(value = "weights", defaultValue = "") List<Double> weights,
+        @Name(value = "cumulativeWeights", defaultValue = "true") boolean cumulativeWeights
+    ) {
+        if (nodes.size() <= 0) {
             return WalkPath.EMPTY;
         }
-        long[] nodes = nodeIds.stream().mapToLong(l -> l).toArray();
 
-        if (!weights.isEmpty()) {
-            if (cumulativeWeights) {
-                if (nodeIds.size() != weights.size()) {
-                    throw new RuntimeException(message(weights.size(), nodeIds.size(), "size of 'nodeIds'"));
-                }
-                return WalkPath.toPath(api, nodes, IntStream.range(0, weights.size() - 1).mapToDouble(index -> weights.get(index + 1) - weights.get(index)).toArray());
-            } else {
-                if (nodeIds.size() - 1 != weights.size()) {
-                    throw new RuntimeException(message(weights.size(), nodeIds.size() - 1, "size of 'nodeIds'-1"));
-                }
-                return WalkPath.toPath(api, nodes, weights.stream().mapToDouble(d -> d).toArray());
-            }
-        } else {
-            return WalkPath.toPath(api, nodes);
+        long[] ids = nodes.stream().mapToLong(l -> l).toArray();
+
+        if (weights.isEmpty()) {
+            return WalkPath.toPath(api, ids);
         }
+
+        if (cumulativeWeights && nodes.size() != weights.size()) {
+            throw new IllegalArgumentException(message(weights.size(), nodes.size(), "size of 'nodeIds'"));
+        }
+        if (!cumulativeWeights && nodes.size() - 1 != weights.size()) {
+            throw new IllegalArgumentException(message(weights.size(), nodes.size() - 1, "size of 'nodeIds' - 1"));
+        }
+
+        return cumulativeWeights
+            ? WalkPath.toPath(api, ids, IntStream.range(0, weights.size() - 1).mapToDouble(i -> weights.get(i + 1) - weights.get(i)).toArray())
+            : WalkPath.toPath(api, ids, weights.stream().mapToDouble(d -> d).toArray());
     }
 
     private String message(int actualSize, int expectedSize, String explanation) {
-        return String.format("'weights' contains %d values, but %d values were expected (%s)", actualSize, expectedSize, explanation);
+        return String.format(
+            "'weights' contains %d values, but %d values were expected (%s)",
+            actualSize,
+            expectedSize,
+            explanation
+        );
     }
 }
