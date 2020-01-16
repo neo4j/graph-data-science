@@ -18,11 +18,9 @@ This section includes:
 * <<algorithms-yens-k-shortest-path-context, History and explanation>>
 * <<algorithms-yens-k-shortest-path-usecase, Use-cases - when to use the Yen's K-shortest paths algorithm>>
 * <<algorithms-yens-k-shortest-path-limitations, Constraints - when not to use the Yen's K-shortest paths algorithm>>
+* <<algorithms-yens-k-shortest-path-syntax, Syntax>>
 * <<algorithms-yens-k-shortest-path-sample, Yen's K-shortest paths algorithm sample>>
 * <<algorithms-yens-k-shortest-path-cp, Cypher projection>>
-* <<algorithms-yens-k-shortest-path-syntax, Syntax>>
-* <<algorithms-yens-k-shortest-path-support, Graph type support>>
-* <<algorithms-yens-k-shortest-path-imp, Implementations>>
 
 
 [[algorithms-yens-k-shortest-path-context]]
@@ -55,90 +53,13 @@ The algorithm assumes that adding a relationship to a path can never make a path
 // end::constraint[]
 
 
-[[algorithms-yens-k-shortest-path-sample]]
-== Yen's K-shortest paths algorithm sample
-
-image::yens.png[]
-
-.The following will create a sample graph:
-[source, cypher]
-----
-include::scripts/yens-k-shortest-paths.cypher[tag=create-sample-graph]
-----
-
-.The following will run the algorithm and stream results:
-[source, cypher]
-----
-include::scripts/yens-k-shortest-paths.cypher[tag=stream-sample-graph]
-----
-
-// tag::stream[]
-.Results
-[opts="header"]
-|===
-| `places`                    | `costs`                    | `totalCost`
-| ["A", "B", "D", "E", "F"] | [50.0, 40.0, 30.0, 40.0] | 160.0
-| ["A", "C", "D", "E", "F"] | [50.0, 40.0, 30.0, 40.0] | 160.0
-| ["A", "B", "D", "F"]      | [50.0, 40.0, 80.0]       | 170.0
-|===
-// end::stream[]
-
-This procedure doesn't return paths by default, but we can have it return those by passing in the config `path: true`.
-
-.The following will run the algorithm and stream results, including paths:
-[source, cypher]
-----
-include::scripts/yens-k-shortest-paths.cypher[tag=stream-sample-with-path-graph]
-----
-
-image::yens-path.svg[]
-
-.The following will run the algorithm and write back results:
-[source, cypher]
-----
-include::scripts/yens-k-shortest-paths.cypher[tag=write-sample-graph]
-----
-
-// tag::write-sample-graph-result[]
-
-.The following will return all 3 of the shortest path:
-[source, cypher]
-----
-include::scripts/yens-k-shortest-paths.cypher[tag=return-all-paths-sample-graph]
-----
-
-image::yens_result.png[]
-
-// end::write-sample-graph-result[]
-
-// tag::write-sample-graph-explanation[]
-The quickest route takes us from A to B, via D and E and is saved as `PATH_0`.
-Second quickest path is saved as `PATH_1` and third one is saved as`PATH_2`
-// end::write-sample-graph-explanation[]
-
-
-[[algorithms-yens-k-shortest-path-cp]]
-== Cypher projection
-
-include::projected-graph-model/cypher-projection.adoc[tag=explanation]
-
-.Set `graph:'cypher'` in the config:
-
-[source, cypher]
-----
-include::scripts/yens-k-shortest-paths.cypher[tag=cypher-loading]
-----
-
-
 [[algorithms-yens-k-shortest-path-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.kShortestPaths(startNode:Node, endNode:Node, k:int, weightProperty:String,
-    {nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'OUT', defaultValue:1.0,
-    maxDepth:42, write:'true', writePropertyPrefix:'PATH_'})
+CALL gds.alpha.kShortestPaths.write(configuration: MAP)
 YIELD resultCount, loadMillis, evalMillis, writeMillis
 
 ----
@@ -170,59 +91,147 @@ YIELD resultCount, loadMillis, evalMillis, writeMillis
 |===
 
 
-[[algorithms-yens-k-shortest-path-support]]
-== Graph type support
+[[algorithms-yens-k-shortest-path-sample]]
+== Yen's K-shortest paths algorithm sample
 
-The Shortest Path algorithms support the following graph types:
+image::yens.png[]
 
-* [x] directed, unweighted:
-** direction: 'OUTGOING' or INCOMING, weightProperty: null
-* [x] directed, weighted
-** direction: 'OUTGOING' or INCOMING, weightProperty: 'cost'
-* [x] undirected, unweighted
-** direction: 'BOTH', weightProperty: null
-* [x] undirected, weighted
-** direction: 'BOTH', weightProperty: 'cost'
+.The following will create a sample graph:
+[source, cypher]
+----
+CREATE (a:Loc {name:'A'}),
+      (b:Loc {name:'B'}),
+      (c:Loc {name:'C'}),
+      (d:Loc {name:'D'}),
+      (e:Loc {name:'E'}),
+      (f:Loc {name:'F'}),
+      (a)-[:ROAD {cost:50}]->(b),
+      (a)-[:ROAD {cost:50}]->(c),
+      (a)-[:ROAD {cost:100}]->(d),
+      (b)-[:ROAD {cost:40}]->(d),
+      (c)-[:ROAD {cost:40}]->(d),
+      (c)-[:ROAD {cost:80}]->(e),
+      (d)-[:ROAD {cost:30}]->(e),
+      (d)-[:ROAD {cost:80}]->(f),
+      (e)-[:ROAD {cost:40}]->(f);
+----
+
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+MATCH (start:Loc{name:'A'}), (end:Loc{name:'F'})
+CALL gds.alpha.kShortestPaths.stream({
+  nodeProjection: 'Loc',
+  relationshipProjection: {
+    ROAD: {
+      type: 'ROAD',
+      properties: 'cost'
+    }
+  },
+  startNode: start,
+  endNode: end,
+  k: 3,
+  weightProperty: 'cost'
+})
+YIELD index, nodeIds, costs
+RETURN [node in algo.getNodesById(nodeIds) | node.name] AS places,
+       costs,
+       reduce(acc = 0.0, cost in costs | acc + cost) AS totalCost
+----
+
+.Results
+[opts="header"]
+|===
+| `places`                    | `costs`                    | `totalCost`
+| ["A", "B", "D", "E", "F"] | [50.0, 40.0, 30.0, 40.0] | 160.0
+| ["A", "C", "D", "E", "F"] | [50.0, 40.0, 30.0, 40.0] | 160.0
+| ["A", "B", "D", "F"]      | [50.0, 40.0, 80.0]       | 170.0
+|===
+
+This procedure doesn't return paths by default, but we can have it return those by passing in the config `path: true`.
+
+.The following will run the algorithm and stream results, including paths:
+[source, cypher]
+----
+MATCH (start:Loc{name:'A'}), (end:Loc{name:'F'})
+CALL gds.alpha.kShortestPaths.stream({
+  nodeProjection: 'Loc',
+  relationshipProjection: {
+    ROAD: {
+      type: 'ROAD',
+      properties: 'cost'
+    }
+  },
+  startNode: start,
+  endNode: end,
+  k: 3,
+  weightProperty: 'cost',
+  path: true
+})
+YIELD path
+RETURN path
+LIMIT 1
+----
+
+image::yens-path.svg[]
+
+.The following will run the algorithm and write back results:
+[source, cypher]
+----
+MATCH (start:Loc{name:'A'}), (end:Loc{name:'F'})
+CALL gds.alpha.kShortestPaths.write({
+  nodeProjection: 'Loc',
+  relationshipProjection: {
+    ROAD: {
+      type: 'ROAD',
+      properties: 'cost'
+    }
+  },
+  startNode: start,
+  endNode: end,
+  k: 3,
+  weightProperty: 'cost'
+})
+YIELD resultCount
+RETURN resultCount
+----
+
+.Results
+[opts="header"]
+|===
+| `resultCount`
+| 3
+|===
+
+.The following will return all 3 of the shortest path:
+[source, cypher]
+----
+MATCH p=()-[r:PATH_0|:PATH_1|:PATH_2]->() RETURN p LIMIT 25
+----
+
+image::yens_result.png[]
+
+The quickest route takes us from A to B, via D and E and is saved as `PATH_0`.
+Second quickest path is saved as `PATH_1` and third one is saved as`PATH_2`
 
 
-[[algorithms-yens-k-shortest-path-imp]]
-== Implementations
+[[algorithms-yens-k-shortest-path-cp]]
+== Cypher projection
 
-`algo.kShortestPaths`
+include::projected-graph-model/cypher-projection.adoc[tag=explanation]
 
-* Specify start and end node, find the k-shortest path between them.
-* If initialized with an non-existing weight-property, it will treat the graph as unweighted.
-
-
-ifndef::env-docs[]
-== References
-
-// tag::references[]
-
-// end::references[]
-endif::env-docs[]
-
-ifdef::implementation[]
-// tag::implementation[]
-
-
-== Implementation details
-
-:leveloffset: +1
-
-Yen's algorithm computes single-source K-shortest loopless paths for a graph with non-negative relationship cost.
-The algorithm was published by Jin Y. Yen in 1971 and employs any shortest path algorithm to find the best path, then proceeds to find K − 1 deviations of the best path.
-
-## Progress
-
-- [x] single threaded implementation
-- [x] tests
-- [x] simple benchmark
-- [x] implement procedure
-- [ ] benchmark on bigger graphs
-- [ ] parallelization
-- [ ] evaluation
-
-
-// end::implementation[]
-endif::implementation[]
+[source, cypher]
+----
+MATCH (start:Loc{name:'A'}), (end:Loc{name:'F'})
+CALL gds.alpha.kShortestPaths.write({
+  nodeQuery:'MATCH(n:Loc) WHERE not n.name = "C" RETURN id(n) as id',
+  relationshipQuery:'MATCH (n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) as source, id(m) as target, r.cost as weight',
+  startNode: start,
+  endNode: end,
+  k: 3,
+  weightProperty: 'cost',
+  writePropertyPrefix:'cypher_'
+})
+YIELD resultCount
+RETURN resultCount
+----
