@@ -200,7 +200,7 @@ CALL gds.wcc.stream({
   relationshipProjection: ["LINK"]
 })
 YIELD nodeId, componentId
-RETURN algo.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
+RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
 ----
 
 .Results
@@ -260,7 +260,7 @@ CALL gds.wcc.stream({
   threshold: 1.0
 })
 YIELD nodeId, componentId
-RETURN algo.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
+RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
 ----
 
 .Results
@@ -369,7 +369,7 @@ CALL gds.wcc.stream({
   threshold: 1.0
 })
 YIELD nodeId, componentId
-RETURN algo.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
+RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
 ----
 
 .Results
@@ -427,7 +427,7 @@ CALL gds.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;
 
 CALL gds.wcc.stream('myGraph')
 YIELD nodeId, componentId
-RETURN algo.asNode(nodeId).name AS name, componentId
+RETURN gds.util.asNode(nodeId).name AS name, componentId
 ORDER BY componentId, Name;
 ----
 
@@ -453,7 +453,7 @@ CALL gds.wcc.stream({
     relationshipQuery: 'MATCH (u1:User)-[:LINK]->(u2:User) RETURN id(u1) AS source, id(u2) AS target'
 })
 YIELD nodeId, componentId
-RETURN algo.asNode(nodeId).name AS name, componentId
+RETURN gds.util.asNode(nodeId).name AS name, componentId
 ORDER BY componentId, name
 ----
 

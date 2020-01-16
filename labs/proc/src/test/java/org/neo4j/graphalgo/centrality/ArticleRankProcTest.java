@@ -64,7 +64,7 @@ class ArticleRankProcTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(
-            GraphDatabaseSettings.procedure_unrestricted, "algo.*"
+            GraphDatabaseSettings.procedure_unrestricted, "gds.*"
         ));
         registerProcedures(ArticleRankProc.class);
         registerFunctions(GetNodeFunc.class);
@@ -87,7 +87,7 @@ class ArticleRankProcTest extends BaseProcTest {
             .addParameter("dampingFactor", 0.85)
             .addParameter("concurrency", 1)
             .yields("nodeId", "score")
-            .concat(" RETURN algo.asNode(nodeId).name AS page, score")
+            .concat(" RETURN gds.util.asNode(nodeId).name AS page, score")
             .concat(" ORDER BY score DESC");
 
         String expected =

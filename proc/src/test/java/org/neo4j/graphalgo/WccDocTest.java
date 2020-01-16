@@ -48,7 +48,7 @@ class WccDocTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
         runQuery(DB_CYPHER);
         registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphCreateProc.class);
@@ -69,7 +69,7 @@ class WccDocTest extends BaseProcTest {
             .streamMode()
             .yields("nodeId", "componentId");
 
-        query += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+        query += " RETURN gds.util.asNode(nodeId).name AS name, componentId" +
                  " ORDER BY componentId, name";
 
         String expected = "+-------------------------+\n" +
@@ -119,7 +119,7 @@ class WccDocTest extends BaseProcTest {
             .addParameter("threshold", 1.0D)
             .yields("nodeId", "componentId");
 
-        query += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+        query += " RETURN gds.util.asNode(nodeId).name AS name, componentId" +
                  " ORDER BY componentId, name";
 
         String expected = "+-------------------------+\n" +
@@ -200,7 +200,7 @@ class WccDocTest extends BaseProcTest {
             .addParameter("threshold", 1.0D)
             .yields("nodeId", "componentId");
 
-        query += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+        query += " RETURN gds.util.asNode(nodeId).name AS name, componentId" +
                  " ORDER BY componentId, name";
 
         expected = "+-------------------------+\n" +
@@ -283,7 +283,7 @@ class WccDocTest extends BaseProcTest {
             .streamMode()
             .yields("nodeId", "componentId");
 
-        query += " RETURN algo.asNode(nodeId).name AS name, componentId" +
+        query += " RETURN gds.util.asNode(nodeId).name AS name, componentId" +
                  " ORDER BY componentId, name;";
 
         String expected = "+-------------------------+\n" +
@@ -308,7 +308,7 @@ class WccDocTest extends BaseProcTest {
                        "   relationshipQuery: 'MATCH (u1:User)-[:LINK]->(u2:User) RETURN id(u1) AS source, id(u2) AS target'" +
                        "}) " +
                        "YIELD nodeId, componentId " +
-                       "RETURN algo.asNode(nodeId).name AS name, componentId " +
+                       "RETURN gds.util.asNode(nodeId).name AS name, componentId " +
                        "ORDER BY componentId, name";
 
         String expected = "+-------------------------+\n" +

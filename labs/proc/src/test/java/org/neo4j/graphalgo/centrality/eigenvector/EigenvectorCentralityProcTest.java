@@ -71,7 +71,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase((dbBuilder) -> {
             dbBuilder
                 .setConfig(GraphDatabaseSettings.load_csv_file_url_root, file.getParent())
-                .setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*");
+                .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
         });
 
         runQuery("CREATE CONSTRAINT ON (c:Character)\n" +

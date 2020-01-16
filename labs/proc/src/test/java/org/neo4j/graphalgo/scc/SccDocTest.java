@@ -54,8 +54,9 @@ class SccDocTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
+
         runQuery(DB_CYPHER);
         registerProcedures(SccProc.class);
         registerFunctions(GetNodeFunc.class);
@@ -73,7 +74,7 @@ class SccDocTest extends BaseProcTest {
                        "  relationshipProjection: 'FOLLOW' " +
                        "}) " +
                        "YIELD nodeId, partition " +
-                       "RETURN algo.asNode(nodeId).name AS Name, partition AS Partition " +
+                       "RETURN gds.util.asNode(nodeId).name AS Name, partition AS Partition " +
                        "ORDER BY partition DESC";
 
         String expected = "+-----------------------+\n" +
@@ -142,7 +143,7 @@ class SccDocTest extends BaseProcTest {
                        "  relationshipQuery: 'MATCH (u1:User)-[:FOLLOW]->(u2:User) RETURN id(u1) AS source, id(u2) AS target' " +
                        "}) " +
                        "YIELD nodeId, partition " +
-                       "RETURN algo.asNode(nodeId).name AS Name, partition AS Partition " +
+                       "RETURN gds.util.asNode(nodeId).name AS Name, partition AS Partition " +
                        "ORDER BY partition DESC ";
         System.out.println(query);
 

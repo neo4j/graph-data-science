@@ -39,7 +39,7 @@ class GetNodeFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*"));
+        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*"));
         registerProcedures(Procedures.class);
         registerFunctions(GetNodeFunc.class);
     }
@@ -55,7 +55,7 @@ class GetNodeFuncTest extends BaseProcTest {
         Node savedNode = (Node) runQuery(createNodeQuery, Result::next).get("node");
 
         Map<String, Object> params = MapUtil.map("nodeId", savedNode.getId());
-        Map<String, Object> row = runQuery("RETURN algo.asNode($nodeId) AS node", params, Result::next);
+        Map<String, Object> row = runQuery("RETURN gds.util.asNode($nodeId) AS node", params, Result::next);
 
         Node node = (Node) row.get("node");
         assertEquals(savedNode, node);
@@ -64,7 +64,7 @@ class GetNodeFuncTest extends BaseProcTest {
     @Test
     void lookupNonExistentNode() {
         Map<String, Object> row = runQuery(
-                "RETURN algo.asNode(3) AS node", Result::next);
+                "RETURN gds.util.asNode(3) AS node", Result::next);
 
         assertNull(row.get("node"));
     }
@@ -77,7 +77,7 @@ class GetNodeFuncTest extends BaseProcTest {
         Node savedNode2 = (Node) savedRow.get("p2");
 
         Map<String, Object> params = MapUtil.map("nodeIds", Arrays.asList(savedNode1.getId(), savedNode2.getId()));
-        Map<String, Object> row = runQuery("RETURN algo.asNodes($nodeIds) AS nodes", params, Result::next);
+        Map<String, Object> row = runQuery("RETURN gds.util.asNodes($nodeIds) AS nodes", params, Result::next);
 
         List<Node> nodes = (List<Node>) row.get("nodes");
         assertEquals(Arrays.asList(savedNode1, savedNode2), nodes);
@@ -86,7 +86,7 @@ class GetNodeFuncTest extends BaseProcTest {
     @Test
     void lookupNonExistentNodes() {
         Map<String, Object> row = runQuery(
-                "RETURN algo.getNodesById([3,4,5]) AS nodes", Result::next);
+                "RETURN gds.util.getNodesById([3,4,5]) AS nodes", Result::next);
 
         List<Node> nodes = (List<Node>) row.get("nodes");
         assertEquals(0, nodes.size());

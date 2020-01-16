@@ -174,7 +174,7 @@ CALL gds.alpha.scc.stream({
   relationshipProjection: 'FOLLOW'
 })
 YIELD nodeId, partition
-RETURN algo.asNode(nodeId).name AS Name, partition AS Partition
+RETURN gds.util.asNode(nodeId).name AS Name, partition AS Partition
 ORDER BY partition DESC
 ----
 
@@ -227,7 +227,7 @@ CALL gds.alpha.scc.stream({
   nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
   relationshipQuery: 'MATCH (u1:User)-[:FOLLOW]->(u2:User) RETURN id(u1) AS source, id(u2) AS target' })
 YIELD nodeId, partition
-RETURN algo.asNode(nodeId).name AS Name, partition AS Partition
+RETURN gds.util.asNode(nodeId).name AS Name, partition AS Partition
 ORDER BY partition DESC
 ----
 

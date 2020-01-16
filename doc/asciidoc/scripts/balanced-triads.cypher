@@ -26,7 +26,7 @@ MERGE (g)-[:TYPE {weight:1.0}]->(b);
 
 call algo.balancedTriads.stream('Person','TYPE',{weightProperty:'weight'})
 YIELD nodeId, balanced, unbalanced
-RETURN algo.asNode(nodeId).name as person,balanced,unbalanced
+RETURN gds.util.asNode(nodeId).name as person,balanced,unbalanced
 ORDER BY balanced + unbalanced DESC
 LIMIT 10
 

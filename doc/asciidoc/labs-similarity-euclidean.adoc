@@ -247,7 +247,7 @@ Lower scores are better here; a score of 0 would indicate that users have exactl
 We can also see at the bottom of the list that Zhen and Arya and Zhen and Karin have a similarity of `NaN`.
 We get this result because there is no overlap in their food preferences.
 
-We can filter those results out using the `algo.isFinite` function.
+We can filter those results out using the `gds.util.isFinite` function.
 
 .The following will return a stream of node pairs, along with their intersection and finite euclidean similarities:
 [source,cypher]
@@ -430,7 +430,7 @@ We could use this technique to compute the similarity of a subset of items to al
 [[algorithms-similarity-euclidean-skipping-values]]
 == Skipping values
 
-By default the `skipValue` parameter is `algo.Nan()`.
+By default the `skipValue` parameter is `gds.util.NaN()`.
 The algorithm checks every value against the `skipValue` to determine whether that value should be considered as part of the similarity result.
 For cases where no values should be skipped, skipping can be disabled by setting `skipValue` to `null`.
 
@@ -513,7 +513,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | `topK`                  | int            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | `similarityCutoff`      | int            | -1                     | yes      | The threshold for Euclidean distance. Values above this will not be returned.
 | `degreeCutoff`          | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| `skipValue`             | double         | algo.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| `skipValue`             | double         | gds.util.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
 | `concurrency`           | int            | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | `readConcurrency`       | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | `writeConcurrency`      | int            | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
@@ -574,7 +574,7 @@ YIELD item1, item2, count1, count2, intersection, similarity
 | `topK`             | int            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | `similarityCutoff` | int            | -1                     | yes      | The threshold for euclidean distance. Values above this will not be returned.
 | `degreeCutoff`     | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| `skipValue`        | double         | algo.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| `skipValue`        | double         | gds.util.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
 | `concurrency`      | int            | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | `readConcurrency`  | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | `graph`            | string         | dense                  | yes      | The graph name ('dense' or 'cypher').

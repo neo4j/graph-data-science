@@ -36,7 +36,7 @@ class LabelPropagationDocTest extends BaseProcTest {
     @BeforeEach
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
         String createGraph =
@@ -76,7 +76,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                     "   relationshipProjection: 'FOLLOW'" +
                     "})" +
                     "YIELD nodeId, communityId AS Community " +
-                    "RETURN algo.asNode(nodeId).name AS Name, Community " +
+                    "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
                     "ORDER BY Community, Name";
 
         String expectedString = "+-----------------------+\n" +
@@ -119,7 +119,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                     "   weightProperty: 'weight'" +
                     "})" +
                     "YIELD nodeId, communityId AS Community " +
-                    "RETURN algo.asNode(nodeId).name AS Name, Community " +
+                    "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
                     "ORDER BY Community, Name";
 
         String expectedString = "+-----------------------+\n" +
@@ -164,7 +164,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                     "   seedProperty: 'seed_label'" +
                     "})" +
                     "YIELD nodeId, communityId AS Community " +
-                    "RETURN algo.asNode(nodeId).name AS Name, Community " +
+                    "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
                     "ORDER BY Community, Name";
 
         String expectedString = "+-----------------------+\n" +
@@ -209,7 +209,7 @@ class LabelPropagationDocTest extends BaseProcTest {
 
         String q1 = "CALL gds.labelPropagation.stream('myGraph', {})" +
                     "YIELD nodeId, communityId AS Community " +
-                    "RETURN algo.asNode(nodeId).name AS Name, Community " +
+                    "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
                     "ORDER BY Community, Name";
 
         String expectedString = "+-----------------------+\n" +
@@ -232,7 +232,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                     "   RETURN id(p1) AS source, id(p2) AS target'" +
                     "})" +
                     "YIELD nodeId, communityId AS Community " +
-                    "RETURN algo.asNode(nodeId).name AS Name, Community " +
+                    "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
                     "ORDER BY Community, Name";
 
         assertEquals(expectedString, db.execute(q2).resultAsString());

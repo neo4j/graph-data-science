@@ -39,7 +39,7 @@ CALL gds.alpha.articleRank.stream({
   dampingFactor: 0.85
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS page,score
+RETURN gds.util.asNode(nodeId).name AS page,score
 ORDER BY score DESC
 
 // end::stream-sample-graph[]

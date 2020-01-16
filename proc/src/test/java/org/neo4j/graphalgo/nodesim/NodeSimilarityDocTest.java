@@ -56,7 +56,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
         runQuery(DB_CYPHER);
         registerProcedures(NodeSimilarityStreamProc.class, NodeSimilarityWriteProc.class);
@@ -76,7 +76,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                        "  direction: 'OUTGOING'\n" +
                        "})\n" +
                        "YIELD node1, node2, similarity\n" +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
                        "ORDER BY similarity DESCENDING, Person1, Person2\n";
 
         String expectedString = "+----------------------------------------+\n" +
@@ -129,7 +129,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                        "  topN: 3\n" +
                        "})\n" +
                        "YIELD node1, node2, similarity\n" +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
                        "ORDER BY similarity DESC, Person1, Person2\n";
 
         String expectedString = "+----------------------------------------+\n" +
@@ -153,7 +153,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                        "  topK: 1\n" +
                        "})\n" +
                        "YIELD node1, node2, similarity\n" +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
                        "ORDER BY Person1\n";
 
         String expectedString = "+----------------------------------------+\n" +
@@ -178,7 +178,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                        "  bottomK: 1\n" +
                        "})\n" +
                        "YIELD node1, node2, similarity\n" +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
                        "ORDER BY Person1\n";
 
         String expectedString = "+----------------------------------------+\n" +
@@ -204,7 +204,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                        "  degreeCutoff: 3\n" +
                        "})\n" +
                        "YIELD node1, node2, similarity\n" +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
                        "ORDER BY Person1\n";
 
         String expectedString = "+--------------------------------+\n" +
@@ -227,7 +227,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
                        "  similarityCutoff: 0.5\n" +
                        "})\n" +
                        "YIELD node1, node2, similarity\n" +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity\n" +
+                       "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
                        "ORDER BY Person1\n";
 
         String expectedString = "+----------------------------------------+\n" +

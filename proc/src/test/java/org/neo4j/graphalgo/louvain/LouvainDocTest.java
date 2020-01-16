@@ -38,7 +38,7 @@ class LouvainDocTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
         final String cypher =
@@ -82,7 +82,7 @@ class LouvainDocTest extends BaseProcTest {
                 "    }" +
                 "}" +
             "}) YIELD nodeId, communityId, communityIds " +
-            "RETURN algo.asNode(nodeId).name as name, communityId, communityIds";
+            "RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds";
 
         String expected =
             "+----------------------------------------+\n" +
@@ -145,7 +145,7 @@ class LouvainDocTest extends BaseProcTest {
             "   }," +
             "   weightProperty: 'weight'" +
             "}) YIELD nodeId, communityId, communityIds " +
-            "RETURN algo.asNode(nodeId).name as name, communityId, communityIds " +
+            "RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds " +
             "ORDER BY name ASC";
 
         String expected =
@@ -185,7 +185,7 @@ class LouvainDocTest extends BaseProcTest {
             "   }," +
             "   seedProperty: 'seed'" +
             "}) YIELD nodeId, communityId, communityIds " +
-            "RETURN algo.asNode(nodeId).name as name, communityId, communityIds " +
+            "RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds " +
             "ORDER BY name ASC";
 
         String expected =
@@ -266,7 +266,7 @@ class LouvainDocTest extends BaseProcTest {
             "   }," +
             "   includeIntermediateCommunities: true" +
             "}) YIELD nodeId, communityId, communityIds " +
-            "RETURN algo.asNode(nodeId).name as name, communityId, communityIds";
+            "RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds";
 
         String expected =
             "+-----------------------------------+\n" +

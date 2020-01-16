@@ -17,7 +17,7 @@ The number of computations is `((# items)^2 / 2) - # items`, which can be very c
 [NOTE]
 ====
 {procedure-name} is only calculated over non-NULL dimensions.
-The procedures expect to receive the same length lists for all items, so we need to pad those lists with `algo.NaN()` where necessary.
+The procedures expect to receive the same length lists for all items, so we need to pad those lists with `gds.util.NaN()` where necessary.
 ====
 // end::weighted-note[]
 

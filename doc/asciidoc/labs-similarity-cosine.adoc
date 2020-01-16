@@ -95,7 +95,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | `topK`                  | int            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | `similarityCutoff`      | int            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | `degreeCutoff`          | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| `skipValue`             | double         | algo.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| `skipValue`             | double         | gds.util.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
 | `concurrency`           | int            | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | `readConcurrency`       | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | `writeConcurrency`      | int            | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
@@ -364,11 +364,11 @@ CREATE (karin)-[:LIKES {score: 10}]->(portuguese)
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
- WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
  With collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stream({data: data})
  YIELD item1, item2, count1, count2, similarity
- RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
  ORDER BY similarity DESC
 ----
 
@@ -401,14 +401,14 @@ We'd probably want to filter those out, which we can do by passing in the `simil
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
- WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stream({
    data: data,
    similarityCutoff: 0.0
  })
  YIELD item1, item2, count1, count2, similarity
- RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
  ORDER BY similarity DESC
 ----
 
@@ -435,7 +435,7 @@ We can do that by passing in the `topK` parameter.
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
- WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stream({
    data: data,
@@ -443,7 +443,7 @@ We can do that by passing in the `topK` parameter.
    topK: 1
  })
  YIELD item1, item2, count1, count2, similarity
- RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
  ORDER BY from
 ----
 
@@ -467,7 +467,7 @@ For example, the person most similar to Zhen is Michael, but the person most sim
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
- WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
  WITH collect(userData) as data
  CALL gds.alpha.similarity.cosine.write({
    data: data,
@@ -519,7 +519,7 @@ We could use this technique to compute the similarity of a subset of items to al
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
- WITH {item:id(p), name: p.name, weights: collect(coalesce(likes.score, algo.NaN()))} as userData
+ WITH {item:id(p), name: p.name, weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
  WITH collect(userData) as personCuisines
  WITH personCuisines,
       [value in personCuisines WHERE value.name IN ["Praveena", "Arya"] | value.item ] AS sourceIds
@@ -529,7 +529,7 @@ We could use this technique to compute the similarity of a subset of items to al
   topK: 1
  })
  YIELD item1, item2, similarity
- WITH algo.getNodeById(item1) AS from, algo.getNodeById(item2) AS to, similarity
+ WITH gds.util.getNodeById(item1) AS from, gds.util.getNodeById(item2) AS to, similarity
  RETURN from.name AS from, to.name AS to, similarity
   ORDER BY similarity DESC
 ----
@@ -545,7 +545,7 @@ We could use this technique to compute the similarity of a subset of items to al
 [[algorithms-similarity-cosine-skipping-values]]
 == Skipping values
 
-By default the `skipValue` parameter is `algo.Nan()`.
+By default the `skipValue` parameter is `gds.util.NaN()`.
 The algorithm checks every value against the `skipValue` to determine whether that value should be considered as part of the similarity result.
 For cases where no values should be skipped, skipping can be disabled by setting `skipValue` to `null`.
 
@@ -572,7 +572,7 @@ CREATE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31
   skipValue: null
  })
  YIELD item1, item2, count1, count2, similarity
- RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
  ORDER BY similarity DESC
 ----
 

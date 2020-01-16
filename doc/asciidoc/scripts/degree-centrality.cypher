@@ -50,7 +50,7 @@ CALL gds.alpha.degree.stream({
   direction: 'INCOMING'
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).id AS name, score AS followers
+RETURN gds.util.asNode(nodeId).id AS name, score AS followers
 ORDER BY followers DESC
 // end::stream-sample-graph-followers[]
 
@@ -74,7 +74,7 @@ CALL gds.alpha.degree.stream({
   relationshipProjection: 'FOLLOWS'
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).id AS name, score AS followers
+RETURN gds.util.asNode(nodeId).id AS name, score AS followers
 ORDER BY followers DESC
 // end::stream-sample-graph-following[]
 
@@ -102,7 +102,7 @@ CALL gds.alpha.degree.stream({
   direction: 'INCOMING'
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).id AS name, score AS weightedFollowers
+RETURN gds.util.asNode(nodeId).id AS name, score AS weightedFollowers
 ORDER BY weightedFollowers DESC
 // end::stream-sample-weighted-graph-followers[]
 

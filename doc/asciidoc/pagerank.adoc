@@ -232,7 +232,7 @@ CALL gds.pageRank.stream({
   dampingFactor: 0.85
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS name, score
+RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC
 ----
 
@@ -290,7 +290,7 @@ CALL gds.pageRank.stream({
   weightProperty: 'weight'
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS name, score
+RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC
 ----
 
@@ -357,7 +357,7 @@ CALL gds.pageRank.stream({
   sourceNodes: [siteA]
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS name, score
+RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC
 ----
 
@@ -457,7 +457,7 @@ CALL algo.beta.graph.create('myGraph', ['Page'], ['LINKS']);
 
 CALL gds.pageRank.stream('myGraph')
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS name, score
+RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC
 ----
 
@@ -489,7 +489,7 @@ CALL gds.pageRank.stream({
   dampingFactor:0.85
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS name, score
+RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC
 ----
 

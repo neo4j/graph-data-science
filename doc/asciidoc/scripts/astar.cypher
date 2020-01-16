@@ -24,7 +24,7 @@ MERGE (c)-[:CONNECTION{time:2}]->(e);
 MATCH (start:Station{name:"King's Cross St. Pancras"}),(end:Station{name:"Kentish Town"})
 CALL algo.shortestPath.astar.stream(start, end, 'time', 'latitude', 'longitude', {defaultValue:1.0})
 YIELD nodeId, cost
-RETURN algo.asNode(nodeId).name as station,cost
+RETURN gds.util.asNode(nodeId).name as station,cost
 
 // end::stream-sample-graph[]
 

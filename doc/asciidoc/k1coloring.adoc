@@ -165,7 +165,7 @@ CALL algo.graph.load('myGraph', 'User', 'LINK');
 
 CALL algo.beta.k1coloring.stream(null, null, {graph: 'myGraph'})
 YIELD nodeId, color
-RETURN algo.asNode(nodeId).name AS Name, color AS Color
+RETURN gds.util.asNode(nodeId).name AS Name, color AS Color
 ORDER BY Name;
 ----
 
@@ -189,7 +189,7 @@ CALL algo.beta.k1coloring.stream(
    {graph:'cypher'}
 )
 YIELD nodeId, color
-RETURN algo.asNode(nodeId).name AS Name, color AS Color
+RETURN gds.util.asNode(nodeId).name AS Name, color AS Color
 ORDER BY Name
 ----
 

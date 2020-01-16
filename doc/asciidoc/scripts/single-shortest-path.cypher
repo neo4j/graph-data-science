@@ -25,7 +25,7 @@ MERGE (e)-[:ROAD {cost:40}]->(f);
 MATCH (start:Loc{name:'A'}), (end:Loc{name:'F'})
 CALL algo.shortestPath.stream(start, end, 'cost') 
 YIELD nodeId, cost
-RETURN algo.asNode(nodeId).name AS name, cost
+RETURN gds.util.asNode(nodeId).name AS name, cost
 
 // end::single-pair-stream-sample-graph[]
 
@@ -46,7 +46,7 @@ MATCH (n:Loc {name:'A'})
 CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0)
 YIELD nodeId, distance
 
-RETURN algo.asNode(nodeId).name AS destination, distance
+RETURN gds.util.asNode(nodeId).name AS destination, distance
 
 // end::delta-stream-sample-graph[]
 
@@ -66,7 +66,7 @@ RETURN nodeCount, loadDuration, evalDuration, writeDuration
 CALL algo.allShortestPaths.stream('cost',{nodeQuery:'Loc',defaultValue:1.0})
 YIELD sourceNodeId, targetNodeId, distance
 WITH sourceNodeId, targetNodeId, distance 
-WHERE algo.isFinite(distance) = true
+WHERE gds.util.isFinite(distance) = true
 
 MATCH (source:Loc) WHERE id(source) = sourceNodeId
 MATCH (target:Loc) WHERE id(target) = targetNodeId

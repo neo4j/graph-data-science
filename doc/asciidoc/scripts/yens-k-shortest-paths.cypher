@@ -26,7 +26,7 @@ MATCH (start:Loc{name:'A'}), (end:Loc{name:'F'})
 CALL algo.kShortestPaths.stream(start, end, 3, 'cost' ,{})
 
 YIELD index, nodeIds, costs
-RETURN [node in algo.getNodesById(nodeIds) | node.name] AS places,
+RETURN [node in gds.util.getNodesById(nodeIds) | node.name] AS places,
        costs,
        reduce(acc = 0.0, cost in costs | acc + cost) AS totalCost
 // end::stream-sample-graph[]

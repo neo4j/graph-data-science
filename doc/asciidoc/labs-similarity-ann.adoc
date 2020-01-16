@@ -50,7 +50,7 @@ WITH {item:id(p), categories: collect(id(cuisine))} as userData
 WITH collect(userData) as data
 CALL algo.labs.ml.ann.stream("jaccard", data, {similarityCutoff: 0.1})
 YIELD item1, item2, similarity
-return algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+return gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
 ORDER BY from
 ----
 

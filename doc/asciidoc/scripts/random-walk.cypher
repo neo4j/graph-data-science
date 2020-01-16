@@ -34,7 +34,7 @@ YIELD nodeIds
 
 UNWIND nodeIds AS nodeId
 
-RETURN algo.asNode(nodeId).name AS page
+RETURN gds.util.asNode(nodeId).name AS page
 
 // end::stream-sample-graph[]
 
@@ -50,7 +50,7 @@ YIELD nodeIds
 
 UNWIND nodeIds AS nodeId
 
-RETURN algo.asNode(nodeId).name AS page
+RETURN gds.util.asNode(nodeId).name AS page
 
 // end::cypher-loading[]
 

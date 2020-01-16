@@ -33,7 +33,7 @@ CALL algo.pageRank('Page','Link',{iterations:5, dampingFactor:0.85, write: true,
 ----
 CALL algo.pageRank.stream('Page','Link',{iterations:5, dampingFactor:0.85})
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).title, score
+RETURN gds.util.asNode(nodeId).title, score
 ORDER BY score DESC LIMIT 10;
 ----
 

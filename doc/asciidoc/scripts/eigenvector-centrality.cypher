@@ -31,7 +31,7 @@ MERGE (d)-[:LINKS]->(home)
 CALL algo.eigenvector.stream('Page', 'LINKS', {})
 YIELD nodeId, score
 
-RETURN algo.asNode(nodeId).name AS page,score
+RETURN gds.util.asNode(nodeId).name AS page,score
 ORDER BY score DESC
 
 // end::stream-sample-graph[]
@@ -48,7 +48,7 @@ YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, 
 CALL algo.eigenvector.stream('Page', 'LINKS', {normalization: "max"})
 YIELD nodeId, score
 
-RETURN algo.asNode(nodeId).name AS page,score
+RETURN gds.util.asNode(nodeId).name AS page,score
 ORDER BY score DESC
 
 // end::stream-sample-graph-max-norm[]
@@ -97,7 +97,7 @@ CALL algo.eigenvector.stream('Page', 'LINKS', {
 })
 YIELD nodeId, score
 
-RETURN algo.asNode(nodeId).name AS page,score
+RETURN gds.util.asNode(nodeId).name AS page,score
 ORDER BY score DESC
 
 // end::stream-sample-weighted-graph[]
@@ -117,7 +117,7 @@ MATCH (siteA:Page {name: "Site A"})
 CALL algo.eigenvector.stream('Page', 'LINKS', {iterations:20, dampingFactor:0.85, sourceNodes: [siteA]})
 YIELD nodeId, score
 
-RETURN algo.asNode(nodeId).name AS page,score
+RETURN gds.util.asNode(nodeId).name AS page,score
 ORDER BY score DESC
 
 // end::ppr-stream-sample-graph[]

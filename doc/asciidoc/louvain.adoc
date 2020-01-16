@@ -191,7 +191,7 @@ CALL gds.louvain.stream({
         }
     }
 }) YIELD nodeId, communityId, communityIds
-RETURN algo.asNode(nodeId).name as name, communityId, communityIds
+RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds
 ORDER BY name ASC
 ----
 
@@ -267,7 +267,7 @@ CALL gds.louvain.stream({
     },
     weightProperty: 'weight'
 }) YIELD nodeId, communityId, communityIds
-RETURN algo.asNode(nodeId).name as name, communityId, communityIds
+RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds
 ORDER BY name ASC
 ----
 
@@ -313,7 +313,7 @@ CALL gds.louvain.stream({
     },
     seedProperty: 'seed'
 }) YIELD nodeId, communityId, communityIds
-RETURN algo.asNode(nodeId).name as name, communityId, communityIds
+RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds
 ORDER BY name ASC
 ----
 
@@ -361,7 +361,7 @@ CALL gds.louvain.stream({
     },
     includeIntermediateCommunities: true
 }) YIELD nodeId, communityId, communityIds
-RETURN algo.asNode(nodeId).name as name, communityId, communityIds
+RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds
 ORDER BY name ASC
 ----
 

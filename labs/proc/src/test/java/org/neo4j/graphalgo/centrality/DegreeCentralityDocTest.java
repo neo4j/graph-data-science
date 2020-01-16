@@ -43,7 +43,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
         final String cypherUnweighted = "CREATE" +
@@ -88,7 +88,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "   direction: '" + oldDirection + "' " +
             "})" +
             "YIELD nodeId, score " +
-            "RETURN algo.asNode(nodeId).id AS name, score AS followers " +
+            "RETURN gds.util.asNode(nodeId).id AS name, score AS followers " +
             "ORDER BY followers DESC";
         String actual = runQuery(query, Result::resultAsString);
 
@@ -112,7 +112,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "   direction: '" + oldDirection + "' " +
             "})" +
             "YIELD nodeId, score " +
-            "RETURN algo.asNode(nodeId).id AS name, score AS weightedFollowers " +
+            "RETURN gds.util.asNode(nodeId).id AS name, score AS weightedFollowers " +
             "ORDER BY weightedFollowers DESC";
         String actual = runQuery(query, Result::resultAsString);
 

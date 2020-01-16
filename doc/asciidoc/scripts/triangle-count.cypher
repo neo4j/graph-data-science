@@ -23,7 +23,7 @@ MERGE (chris)-[:KNOWS]->(karin);
 CALL algo.triangle.stream('Person','KNOWS')
 YIELD nodeA,nodeB,nodeC
 
-RETURN algo.asNode(nodeA).id AS nodeA, algo.asNode(nodeB).id AS nodeB, algo.asNode(nodeC).id AS nodeC
+RETURN gds.util.asNode(nodeA).id AS nodeA, gds.util.asNode(nodeB).id AS nodeB, gds.util.asNode(nodeC).id AS nodeC
 
 // end::stream-triples[]
 
@@ -41,7 +41,7 @@ YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageC
 CALL algo.triangleCount.stream('Person', 'KNOWS', {concurrency:4})
 YIELD nodeId, triangles, coefficient
 
-RETURN algo.asNode(nodeId).id AS name, triangles, coefficient
+RETURN gds.util.asNode(nodeId).id AS name, triangles, coefficient
 ORDER BY coefficient DESC
 
 // end::triangle-stream-sample-graph[]

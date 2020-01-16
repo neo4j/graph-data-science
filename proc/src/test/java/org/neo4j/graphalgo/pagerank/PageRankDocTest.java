@@ -60,7 +60,7 @@ class PageRankDocTest extends BaseProcTest {
                              "CREATE (links)-[:LINKS {weight: 0.05}]->(d)";
 
         db = TestDatabaseCreator.createTestDatabase(builder ->
-                builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+                builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
         db.execute(createGraph);
         registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
@@ -85,7 +85,7 @@ class PageRankDocTest extends BaseProcTest {
                 "   dampingFactor: 0.85" +
                 "}) " +
                 "YIELD nodeId, score " +
-                "RETURN algo.asNode(nodeId).name AS name, score " +
+                "RETURN gds.util.asNode(nodeId).name AS name, score " +
                 "ORDER BY score DESC ";
 
         String expectedString = "+--------------------------------+\n" +
@@ -142,7 +142,7 @@ class PageRankDocTest extends BaseProcTest {
             "  weightProperty: 'weight'" +
             "}) " +
             "YIELD nodeId, score " +
-            "RETURN algo.asNode(nodeId).name AS name, score " +
+            "RETURN gds.util.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC ";
 
         String expectedString = "+---------------------------------+\n" +
@@ -199,7 +199,7 @@ class PageRankDocTest extends BaseProcTest {
             "  sourceNodes: [siteA]" +
             "}) " +
             "YIELD nodeId, score " +
-            "RETURN algo.asNode(nodeId).name AS name, score " +
+            "RETURN gds.util.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC ";
 
         String expectedString = "+---------------------------------+\n" +
@@ -250,7 +250,7 @@ class PageRankDocTest extends BaseProcTest {
         String q1 =
             "CALL gds.pageRank.stream('myGraph')" +
             "YIELD nodeId, score " +
-            "RETURN algo.asNode(nodeId).name AS name, score " +
+            "RETURN gds.util.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC ";
 
         String namedQueryResult = db.execute(q1).resultAsString();
@@ -280,7 +280,7 @@ class PageRankDocTest extends BaseProcTest {
             "   dampingFactor:0.85" +
             "})" +
             "YIELD nodeId, score " +
-            "RETURN algo.asNode(nodeId).name AS name, score " +
+            "RETURN gds.util.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC";
 
         assertEquals(namedQueryResult, db.execute(q2).resultAsString());

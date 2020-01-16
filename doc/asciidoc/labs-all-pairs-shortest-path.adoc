@@ -31,7 +31,7 @@ Some pairs of nodes might not be reachable between each other, so no shortest pa
 In this scenario, the algorithm will return `Infinity` value as a result between these pairs of nodes.
 // end::explanation[]
 
-Plain cypher does not support filtering `Infinity` values, so `algo.isFinite` function was added to help filter `Infinity` values from results.
+Plain cypher does not support filtering `Infinity` values, so `gds.util.isFinite` function was added to help filter `Infinity` values from results.
 
 
 [[algorithm-all-pairs-shortest-path-usecase]]

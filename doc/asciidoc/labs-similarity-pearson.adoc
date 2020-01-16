@@ -228,14 +228,14 @@ MERGE (karin)-[:RATED {score: 9}]->(gruffalo)
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
-WITH {item:id(p), weights: collect(coalesce(rated.score, algo.NaN()))} as userData
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
 WITH collect(userData) as data
 CALL gds.alpha.similarity.pearson.stream({
  data: data,
  topK: 0
 })
 YIELD item1, item2, count1, count2, similarity
-RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
 ORDER BY similarity DESC
 ----
 
@@ -268,7 +268,7 @@ We'd probably want to filter those out, which we can do by passing in the `simil
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
-WITH {item:id(p), weights: collect(coalesce(rated.score, algo.NaN()))} as userData
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
 WITH collect(userData) as data
 CALL gds.alpha.similarity.pearson.stream({
  data: data,
@@ -276,7 +276,7 @@ CALL gds.alpha.similarity.pearson.stream({
  topK: 0
 })
 YIELD item1, item2, count1, count2, similarity
-RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
 ORDER BY similarity DESC
 ----
 
@@ -300,7 +300,7 @@ We can do that by passing in the `topK` parameter.
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
-WITH {item:id(p), weights: collect(coalesce(rated.score, algo.NaN()))} as userData
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
 WITH collect(userData) as data
 CALL gds.alpha.similarity.pearson.stream({
  data: data,
@@ -308,7 +308,7 @@ CALL gds.alpha.similarity.pearson.stream({
  similarityCutoff: 0.0
 })
 YIELD item1, item2, count1, count2, similarity
-RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
 ORDER BY similarity DESC
 ----
 
@@ -332,7 +332,7 @@ For example, the person most similar to Arya is Karin, but the person most simil
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
-WITH {item:id(p), weights: collect(coalesce(rated.score, algo.NaN()))} as userData
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
 WITH collect(userData) as data
 CALL gds.alpha.similarity.pearson.write({
  data: data,
@@ -381,7 +381,7 @@ We could use this technique to compute the similarity of a subset of items to al
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
-WITH {item:id(p), name: p.name, weights: collect(coalesce(rated.score, algo.NaN()))} as userData
+WITH {item:id(p), name: p.name, weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
 WITH collect(userData) as personCuisines
 WITH personCuisines,
      [value in personCuisines WHERE value.name IN ["Praveena", "Arya"] | value.item ] AS sourceIds
@@ -391,7 +391,7 @@ CALL gds.alpha.similarity.pearson.stream({
  topK: 1
 })
 YIELD item1, item2, similarity
-WITH algo.getNodeById(item1) AS from, algo.getNodeById(item2) AS to, similarity
+WITH gds.util.getNodeById(item1) AS from, gds.util.getNodeById(item2) AS to, similarity
 RETURN from.name AS from, to.name AS to, similarity
 ORDER BY similarity DESC
 ----
@@ -407,7 +407,7 @@ ORDER BY similarity DESC
 [[algorithms-similarity-pearson-skipping-values]]
 == Skipping values
 
-By default the `skipValue` parameter is `algo.Nan()`.
+By default the `skipValue` parameter is `gds.util.NaN()`.
 The algorithm checks every value against the `skipValue` to determine whether that value should be considered as part of the similarity result.
 For cases where no values should be skipped, skipping can be disabled by setting `skipValue` to `null`.
 
@@ -432,7 +432,7 @@ CALL gds.alpha.similarity.pearson.stream({
  skipValue: null
 })
 YIELD item1, item2, count1, count2, similarity
-RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
 ORDER BY similarity DESC
 ----
 
@@ -509,7 +509,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | `topK`                  | int            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | `similarityCutoff`      | int            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | `degreeCutoff`          | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| `skipValue`             | double         | algo.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| `skipValue`             | double         | gds.util.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
 | `concurrency`           | int            | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | `readConcurrency`       | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | `writeConcurrency`      | int            | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
@@ -569,7 +569,7 @@ YIELD item1, item2, count1, count2, intersection, similarity
 | `topK`             | int            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | `similarityCutoff` | int            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | `degreeCutoff`     | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| `skipValue`        | double         | algo.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| `skipValue`        | double         | gds.util.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
 | `concurrency`      | int            | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | `readConcurrency`  | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | `writeConcurrency` | int            | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.

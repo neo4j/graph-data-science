@@ -78,7 +78,7 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(
-            GraphDatabaseSettings.procedure_unrestricted, "algo.*"
+            GraphDatabaseSettings.procedure_unrestricted, "gds.*"
         ));
         registerProcedures(ApproxNearestNeighborsProc.class);
         registerFunctions(GetNodeFunc.class);
@@ -122,7 +122,7 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
             " WITH config {.*, data: data} AS input" +
             " CALL gds.alpha.ml.ann.stream(input)" +
             " YIELD item1, item2, count1, count2, intersection, similarity" +
-            " RETURN algo.asNode(item1).name as from, algo.asNode(item2).name AS to, similarity" +
+            " RETURN gds.util.asNode(item1).name as from, gds.util.asNode(item2).name AS to, similarity" +
             " ORDER BY from";
 
         runQueryWithRowConsumer(query, config, row -> {

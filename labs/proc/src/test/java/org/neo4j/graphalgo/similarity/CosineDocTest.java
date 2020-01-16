@@ -75,7 +75,7 @@ class CosineDocTest extends BaseProcTest {
 
         db = TestDatabaseCreator.createTestDatabase(builder -> {
                 builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
-                builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*");
+                builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
             }
         );
         db.execute(createGraph);
@@ -147,11 +147,11 @@ class CosineDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p:Person), (c:Cuisine)" +
                        " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
-                       " WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData" +
+                       " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) AS data" +
                        " CALL gds.alpha.similarity.cosine.stream({data: data, topK: 0})" +
                        " YIELD item1, item2, count1, count2, similarity" +
-                       " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+                       " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
                        "    ORDER BY similarity DESC";
 
         String expectedString = "+----------------------------------------------+\n" +
@@ -179,7 +179,7 @@ class CosineDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p:Person), (c:Cuisine)" +
                        " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
-                       " WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData" +
+                       " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) AS data" +
                        " CALL gds.alpha.similarity.cosine.stream({" +
                        "    data: data," +
@@ -187,7 +187,7 @@ class CosineDocTest extends BaseProcTest {
                        "    topK: 0" +
                        " })" +
                        " YIELD item1, item2, count1, count2, similarity" +
-                       " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+                       " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
                        "    ORDER BY similarity DESC";
 
         String expectedString = "+----------------------------------------------+\n" +
@@ -212,7 +212,7 @@ class CosineDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p:Person), (c:Cuisine)" +
                        " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
-                       " WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData" +
+                       " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) AS data" +
                        " CALL gds.alpha.similarity.cosine.stream({" +
                        "    data: data, " +
@@ -220,7 +220,7 @@ class CosineDocTest extends BaseProcTest {
                        "    topK: 1" +
                        " })" +
                        " YIELD item1, item2, count1, count2, similarity" +
-                       " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+                       " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
                        "    ORDER BY from";
 
         String expectedString = "+----------------------------------------------+\n" +
@@ -242,7 +242,7 @@ class CosineDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p:Person), (c:Cuisine)" +
                        " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
-                       " WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData" +
+                       " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.cosine.write({" +
                        "    data: data," +
@@ -282,7 +282,7 @@ class CosineDocTest extends BaseProcTest {
     void sourceTargetIds() {
         String query = " MATCH (p:Person), (c:Cuisine)" +
                        " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
-                       " WITH {item:id(p), name: p.name, weights: collect(coalesce(likes.score, algo.NaN()))} as userData" +
+                       " WITH {item:id(p), name: p.name, weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as personCuisines" +
                        " WITH personCuisines," +
                        "      [value in personCuisines WHERE value.name IN [\"Praveena\", \"Arya\"] | value.item ] AS sourceIds" +
@@ -292,7 +292,7 @@ class CosineDocTest extends BaseProcTest {
                        "  topK: 1" +
                        " })" +
                        " YIELD item1, item2, similarity" +
-                       " WITH algo.getNodeById(item1) AS from, algo.getNodeById(item2) AS to, similarity" +
+                       " WITH gds.util.getNodeById(item1) AS from, gds.util.getNodeById(item2) AS to, similarity" +
                        " RETURN from.name AS from, to.name AS to, similarity" +
                        "  ORDER BY similarity DESC";
 
@@ -328,7 +328,7 @@ class CosineDocTest extends BaseProcTest {
                        "  skipValue: null" +
                        " })" +
                        " YIELD item1, item2, count1, count2, similarity" +
-                       " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+                       " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
                        " ORDER BY similarity DESC";
 
         String expectedString = "+--------------------------------------------------+\n" +

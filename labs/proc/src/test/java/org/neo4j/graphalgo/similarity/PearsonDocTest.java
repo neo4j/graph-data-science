@@ -78,7 +78,7 @@ class PearsonDocTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder -> {
-                builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*");
+                builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
             }
         );
         registerProcedures(PearsonProc.class);
@@ -148,14 +148,14 @@ class PearsonDocTest extends BaseProcTest {
     void stream() {
         String query = " MATCH (p:Person), (m:Movie)" +
                        " OPTIONAL MATCH (p)-[rated:RATED]->(m)" +
-                       " WITH {item:id(p), weights: collect(coalesce(rated.score, algo.NaN()))} as userData" +
+                       " WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.pearson.stream({" +
                        "    data: data," +
                        "    topK: 0" +
                        "})" +
                        " YIELD item1, item2, count1, count2, similarity" +
-                       " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+                       " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
                        " ORDER BY similarity DESC";
 
         String expectedString = "+-----------------------------------------------+" + NL +
@@ -181,7 +181,7 @@ class PearsonDocTest extends BaseProcTest {
     void streamCutOff() {
         String query = " MATCH (p:Person), (m:Movie)" +
                        " OPTIONAL MATCH (p)-[rated:RATED]->(m)" +
-                       " WITH {item:id(p), weights: collect(coalesce(rated.score, algo.NaN()))} as userData" +
+                       " WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.pearson.stream({" +
                        "  data: data," +
@@ -189,7 +189,7 @@ class PearsonDocTest extends BaseProcTest {
                        "  topK: 0" +
                        " })" +
                        " YIELD item1, item2, count1, count2, similarity" +
-                       " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+                       " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
                        " ORDER BY similarity DESC";
 
         String expectedString = "+----------------------------------------------+" + NL +
@@ -210,7 +210,7 @@ class PearsonDocTest extends BaseProcTest {
     void streamTopK() {
         String query = "  MATCH (p:Person), (m:Movie)" +
                        " OPTIONAL MATCH (p)-[rated:RATED]->(m)" +
-                       " WITH {item:id(p), weights: collect(coalesce(rated.score, algo.NaN()))} as userData" +
+                       " WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.pearson.stream({" +
                        "  data: data, " +
@@ -218,7 +218,7 @@ class PearsonDocTest extends BaseProcTest {
                        "  similarityCutoff: 0.0" +
                        " })" +
                        " YIELD item1, item2, count1, count2, similarity" +
-                       " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+                       " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
                        " ORDER BY similarity DESC";
 
         String expectedString = "+----------------------------------------------+" + NL +
@@ -238,7 +238,7 @@ class PearsonDocTest extends BaseProcTest {
     void write() {
         String query = " MATCH (p:Person), (m:Movie)" +
                        " OPTIONAL MATCH (p)-[rated:RATED]->(m)" +
-                       " WITH {item:id(p), weights: collect(coalesce(rated.score, algo.NaN()))} as userData" +
+                       " WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.pearson.write({" +
                        "  data: data," +
@@ -277,7 +277,7 @@ class PearsonDocTest extends BaseProcTest {
     void sourceIds() {
         String query = " MATCH (p:Person), (m:Movie)" +
                        " OPTIONAL MATCH (p)-[rated:RATED]->(m)" +
-                       " WITH {item:id(p), name: p.name, weights: collect(coalesce(rated.score, algo.NaN()))} as userData" +
+                       " WITH {item:id(p), name: p.name, weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as personCuisines" +
                        " WITH personCuisines," +
                        "      [value in personCuisines WHERE value.name IN [\"Praveena\", \"Arya\"] | value.item ] AS sourceIds" +
@@ -287,7 +287,7 @@ class PearsonDocTest extends BaseProcTest {
                        "    topK: 1" +
                        " })" +
                        " YIELD item1, item2, similarity" +
-                       " WITH algo.getNodeById(item1) AS from, algo.getNodeById(item2) AS to, similarity" +
+                       " WITH gds.util.getNodeById(item1) AS from, gds.util.getNodeById(item2) AS to, similarity" +
                        " RETURN from.name AS from, to.name AS to, similarity" +
                        " ORDER BY similarity DESC";
 
@@ -323,7 +323,7 @@ class PearsonDocTest extends BaseProcTest {
                        "  topK: 0" +
                        " })" +
                        " YIELD item1, item2, count1, count2, similarity" +
-                       " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+                       " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
                        " ORDER BY similarity DESC";
 
         String expectedString = "+------------------------------------------------------------+" + NL +

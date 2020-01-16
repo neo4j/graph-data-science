@@ -275,7 +275,7 @@ CALL gds.algo.labelPropagation.stream({
   relationshipProjection: 'FOLLOW'
 })
 YIELD nodeId, communityId AS Community
-RETURN algo.asNode(nodeId).name AS Name, Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
 ----
 
@@ -332,7 +332,7 @@ CALL gds.algo.labelPropagation.stream({
   weightProperty: 'weight'
 })
 YIELD nodeId, communityId AS Community
-RETURN algo.asNode(nodeId).name AS Name, Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
 ----
 
@@ -398,7 +398,7 @@ CALL gds.algo.labelPropagation.stream({
   seedProperty: 'seed_label'
 })
 YIELD nodeId, communityId AS Community
-RETURN algo.asNode(nodeId).name AS Name, Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
 ----
 
@@ -451,7 +451,7 @@ CALL algo.beta.graph.create('myGraph', 'User', 'FOLLOW');
 
 CALL gds.algo.labelPropagation.stream('myGraph', {})
 YIELD nodeId, communityId AS Community
-RETURN algo.asNode(nodeId).name AS Name, Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
 ----
 
@@ -479,7 +479,7 @@ CALL gds.algo.labelPropagation.stream({
   graph: 'cypher'
 })
 YIELD nodeId, communityId AS Community
-RETURN algo.asNode(nodeId).name AS Name, Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
 ----
 
