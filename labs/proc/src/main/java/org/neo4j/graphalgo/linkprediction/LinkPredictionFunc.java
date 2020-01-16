@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.linkprediction;
 
-import org.neo4j.graphalgo.LabsProc;
+import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -31,7 +31,7 @@ import org.neo4j.procedure.UserFunction;
 import java.util.Map;
 import java.util.Set;
 
-public class LinkPredictionFunc extends LabsProc {
+public class LinkPredictionFunc extends BaseProc {
 
     @UserFunction("gds.alpha.linkprediction.adamicAdar")
     @Description("gds.alpha.linkprediction.adamicAdar(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
