@@ -1,7 +1,7 @@
 [[algorithms]]
 = Algorithms
 
-The Neo4j Graph Data Science library contains many graph algorithms.
+The Neo4j Graph Data Science (GDS) library contains many graph algorithms.
 The algorithms are divided into categories.
 The categories are listed in this chapter.
 

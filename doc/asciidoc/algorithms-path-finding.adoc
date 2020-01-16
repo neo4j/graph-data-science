@@ -3,11 +3,11 @@
 
 [abstract]
 --
-This chapter provides explanations and examples for each of the path finding algorithms in the Neo4j Graph Algorithms library.
+This chapter provides explanations and examples for each of the path finding algorithms in the Neo4j Graph Data Science library.
 --
 
 Path finding algorithms help find the shortest path or evaluate the availability and quality of routes.
-Neo4j GDS includes the following path finding algorithms, grouped by quality tier:
+The Neo4j GDS library includes the following path finding algorithms, grouped by quality tier:
 
 * Alpha
 ** <<labs-algorithms-minimum-weight-spanning-tree, Minimum Weight Spanning Tree>> (`algo.spanningTree`)

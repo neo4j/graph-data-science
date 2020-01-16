@@ -3,11 +3,11 @@
 
 [abstract]
 --
-This chapter provides explanations and examples for each of the centrality algorithms in the Neo4j Graph Algorithms library.
+This chapter provides explanations and examples for each of the centrality algorithms in the Neo4j Graph Data Science library.
 --
 
 Centrality algorithms are used to determine the importance of distinct nodes in a network.
-Neo4j GDS includes the following centrality algorithms, grouped by quality tier:
+The Neo4j GDS library includes the following centrality algorithms, grouped by quality tier:
 
 * Production-quality:
 ** <<algorithms-pagerank, PageRank>> (`algo.pageRank`)

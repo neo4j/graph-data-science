@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This chapter provides explanations and examples for auxiliary procedures in the Neo4j Graph Algorithms library.
+This chapter provides explanations and examples for auxiliary procedures in the Neo4j Graph Data Science library.
 --
 
 The following procedures can be used to improve your workflow:
