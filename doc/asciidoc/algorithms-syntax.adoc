@@ -20,6 +20,9 @@ There are three supported execution modes:
 
 Finally, an execution mode may be <<memory-requirements, estimated>> by appending the command with `estimate`.
 
+[NOTE]
+Only the production-quality tier guarantees availability of all execution modes.
+
 Including all of the above mentioned elements leads to the following syntax outlines:
 
 .Syntax composition for the named graph variant:
