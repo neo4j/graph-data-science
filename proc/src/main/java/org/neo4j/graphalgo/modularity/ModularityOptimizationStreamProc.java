@@ -48,12 +48,12 @@ public class ModularityOptimizationStreamProc extends ModularityOptimizationBase
             compute(graphNameOrConfig, configuration);
 
         return Optional.ofNullable(compute.result())
-            .map(coloring -> {
+            .map(modularityOptimization -> {
                 Graph graph = compute.graph();
                 return LongStream.range(0, graph.nodeCount())
                     .mapToObj(nodeId -> {
                         long neoNodeId = graph.toOriginalNodeId(nodeId);
-                        return new StreamResult(neoNodeId, coloring.getCommunityId(nodeId));
+                        return new StreamResult(neoNodeId, modularityOptimization.getCommunityId(nodeId));
                     });
 
             }).orElse(Stream.empty());
