@@ -21,14 +21,14 @@ The following is a procedure reference for calling the algorithms in the Neo4j L
 | algo.bfs.stream                                                                                          | CALL algo.bfs.stream(label:String, relationshipType:String, startNodeId:long, direction:Direction, {writeProperty:String, target:long, maxDepth:long, weightProperty:String, maxCost:double}) YIELD nodeId
 | <<algorithms-balanced-triads-syntax, algo.balancedTriads>>                                               | CALL algo.balancedTriads(label, relationship{concurrency:4, write:true, weightProperty:'w', balancedProperty:'balanced', unbalancedProperty:'unbalanced'}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount
 | <<algorithms-balanced-triads-syntax, algo.balancedTriads.stream>>                                        | CALL algo.balancedTriads.stream(label, relationship, {concurrency:8}) YIELD nodeId, balanced, unbalanced
-| <<labs-algorithms-betweenness-centrality-syntax, algo.betweenness>>                | Betweenness centrality algorithm writing results back to the graph.
-| <<labs-algorithms-betweenness-centrality-syntax, algo.betweenness.stream>>         | Betweenness centrality algorithm streaming results back to the user.
-| <<labs-algorithms-betweenness-centrality-syntax, algo.betweenness.sampled>>        | Approximate betweenness centrality algorithm writing results back to the graph.
-| <<labs-algorithms-betweenness-centrality-syntax, algo.betweenness.sampled.stream>> | Approximate betweenness centrality algorithm streaming results to the user.
-| <<labs-algorithms-closeness-centrality-syntax, algo.closeness>>                    | Closeness centrality algorithm writing results back to the graph.
-| <<labs-algorithms-closeness-centrality-syntax, algo.closeness.stream>>             | Closeness centrality algorithm streaming results back to the user.
-| <<labs-algorithms-degree-syntax, algo.degree>>                                     | Degree centrality algorithm writing results back to the graph.
-| <<labs-algorithms-degree-syntax, algo.degree.stream>>                              | Degree centrality algorithm streaming results back to the user.
+| <<algorithms-betweenness-centrality-syntax, algo.betweenness>>                | Betweenness centrality algorithm writing results back to the graph.
+| <<algorithms-betweenness-centrality-syntax, algo.betweenness.stream>>         | Betweenness centrality algorithm streaming results back to the user.
+| <<algorithms-betweenness-centrality-syntax, algo.betweenness.sampled>>        | Approximate betweenness centrality algorithm writing results back to the graph.
+| <<algorithms-betweenness-centrality-syntax, algo.betweenness.sampled.stream>> | Approximate betweenness centrality algorithm streaming results to the user.
+| <<algorithms-closeness-centrality-syntax, algo.closeness>>                    | Closeness centrality algorithm writing results back to the graph.
+| <<algorithms-closeness-centrality-syntax, algo.closeness.stream>>             | Closeness centrality algorithm streaming results back to the user.
+| <<algorithms-degree-syntax, algo.degree>>                                     | Degree centrality algorithm writing results back to the graph.
+| <<algorithms-degree-syntax, algo.degree.stream>>                              | Degree centrality algorithm streaming results back to the user.
 | algo.dfs.stream                                                                                          | CALL algo.dfs.stream(label:String, relationshipType:String, startNodeId:long, direction:Direction, {writeProperty:String, target:long, maxDepth:long, weightProperty:String, maxCost:double}) YIELD nodeId
 | <<algorithms-eigenvector-syntax, algo.eigenvector>>                                                      | CALL algo.eigenvector(label:String, relationship:String, {weightProperty: null, write: true, writeProperty:'eigenvector', concurrency:4}) YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty - calculates eigenvector centrality and potentially writes back
 | <<algorithms-eigenvector-syntax, algo.eigenvector.stream>>                                               | CALL algo.eigenvector.stream(label:String, relationship:String, {weightProperty: null, concurrency:4}) YIELD node, score - calculates eigenvector centrality and streams results

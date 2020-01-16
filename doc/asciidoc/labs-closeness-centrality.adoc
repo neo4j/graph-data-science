@@ -1,4 +1,4 @@
-[[labs-algorithms-closeness-centrality]]
+[[algorithms-closeness-centrality]]
 = The Closeness Centrality algorithm
 
 [abstract]
@@ -20,17 +20,17 @@ The Closeness Centrality algorithm was developed by the Neo4j Labs team and is n
 
 This section includes:
 
-* <<labs-algorithms-closeness-centrality-context, History and explanation>>
-* <<labs-algorithms-closeness-centrality-usecase, Use-cases - when to use the Closeness Centrality algorithm>>
-* <<labs-algorithms-closeness-centrality-limitations, Constraints - when not to use the Closeness Centrality algorithm>>
-* <<labs-algorithms-closeness-centrality-sample, Closeness Centrality algorithm sample>>
-* <<labs-algorithms-closeness-centrality-hgp, Huge graph projection>>
-* <<labs-algorithms-closeness-centrality-cp, Cypher projection>>
-* <<labs-algorithms-closeness-centrality-syntax, Syntax>>
-* <<labs-algorithms-closeness-centrality-support, Graph type support>>
+* <<algorithms-closeness-centrality-context, History and explanation>>
+* <<algorithms-closeness-centrality-usecase, Use-cases - when to use the Closeness Centrality algorithm>>
+* <<algorithms-closeness-centrality-limitations, Constraints - when not to use the Closeness Centrality algorithm>>
+* <<algorithms-closeness-centrality-sample, Closeness Centrality algorithm sample>>
+* <<algorithms-closeness-centrality-hgp, Huge graph projection>>
+* <<algorithms-closeness-centrality-cp, Cypher projection>>
+* <<algorithms-closeness-centrality-syntax, Syntax>>
+* <<algorithms-closeness-centrality-support, Graph type support>>
 
 
-[[labs-algorithms-closeness-centrality-context]]
+[[algorithms-closeness-centrality-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -52,7 +52,7 @@ The formula for *normalized closeness centrality* is as follows:
 // end::formula[]
 
 
-[[labs-algorithms-closeness-centrality-usecase]]
+[[algorithms-closeness-centrality-usecase]]
 == Use-cases - when to use the Closeness Centrality algorithm
 
 // tag::use-case[]
@@ -70,7 +70,7 @@ The formula for *normalized closeness centrality* is as follows:
 // end::use-case[]
 
 
-[[labs-algorithms-closeness-centrality-limitations]]
+[[algorithms-closeness-centrality-limitations]]
 == Constraints - when not to use the Closeness Centrality algorithm
 
 // tag::constraint[]
@@ -82,7 +82,7 @@ In practice, a variation on the original formula is used so that we don't run in
 // end::constraint[]
 
 
-[[labs-algorithms-closeness-centrality-sample]]
+[[algorithms-closeness-centrality-sample]]
 == Closeness Centrality algorithm sample
 
 image::closeness_centrality.png[]
@@ -148,7 +148,7 @@ k/S| 0.4  0.57  0.67  0.57   0.4     // normalized closeness centrality
 ....
 
 
-[[labs-algorithms-closeness-centrality-hgp]]
+[[algorithms-closeness-centrality-hgp]]
 == Huge graph projection
 
 include::huge-projection.adoc[tag=explanation]
@@ -161,7 +161,7 @@ include::scripts/closeness-centrality.cypher[tag=huge-projection]
 ----
 
 
-[[labs-algorithms-closeness-centrality-cp]]
+[[algorithms-closeness-centrality-cp]]
 == Cypher projection
 
 include::projected-graph-model/cypher-projection.adoc[tag=explanation]
@@ -174,7 +174,7 @@ include::scripts/closeness-centrality.cypher[tag=cypher-loading]
 ----
 
 
-[[labs-algorithms-closeness-centrality-syntax]]
+[[algorithms-closeness-centrality-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:
@@ -237,7 +237,7 @@ YIELD nodeId, centrality
 |===
 
 
-[[labs-algorithms-closeness-centrality-support]]
+[[algorithms-closeness-centrality-support]]
 == Graph type support
 
 The Closeness Centrality algorithm supports the following graph types:

@@ -1,4 +1,4 @@
-[[labs-algorithms-degree-centrality]]
+[[algorithms-degree-centrality]]
 = The Degree Centrality algorithm
 
 [abstract]
@@ -19,16 +19,16 @@ The Degree Centrality algorithm was developed by the Neo4j Labs team and is not 
 
 This section includes:
 
-* <<labs-algorithms-degree-context, History and explanation>>
-* <<labs-algorithms-degree-usecase, Use-cases - when to use the Degree Centrality algorithm>>
-* <<labs-algorithms-degree-sample, Degree Centrality algorithm sample>>
-* <<labs-algorithms-degree-weighted-sample, Weighted Degree Centrality algorithm sample>>
-* <<labs-algorithms-degree-hgp, Huge graph projection>>
-* <<labs-algorithms-degree-cp, Cypher projection>>
-* <<labs-algorithms-degree-syntax, Syntax>>
+* <<algorithms-degree-context, History and explanation>>
+* <<algorithms-degree-usecase, Use-cases - when to use the Degree Centrality algorithm>>
+* <<algorithms-degree-sample, Degree Centrality algorithm sample>>
+* <<algorithms-degree-weighted-sample, Weighted Degree Centrality algorithm sample>>
+* <<algorithms-degree-hgp, Huge graph projection>>
+* <<algorithms-degree-cp, Cypher projection>>
+* <<algorithms-degree-syntax, Syntax>>
 
 
-[[labs-algorithms-degree-context]]
+[[algorithms-degree-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -38,7 +38,7 @@ While the Degree Centrality algorithm can be used to find the popularity of indi
 // end::explanation[]
 
 
-[[labs-algorithms-degree-usecase]]
+[[algorithms-degree-usecase]]
 == Use-cases - when to use the Degree Centrality algorithm
 
 
@@ -54,7 +54,7 @@ Read more in https://link.springer.com/chapter/10.1007/978-3-319-23461-8_11[Two 
 // end::use-case[]
 
 
-[[labs-algorithms-degree-sample]]
+[[algorithms-degree-sample]]
 == Degree Centrality algorithm sample
 
 This sample will explain the Degree Centrality algorithm, using a simple graph:
@@ -126,7 +126,7 @@ We could therefore consider Doug a celebrity!
 // end::stream-sample-graph-explanation[]
 
 
-[[labs-algorithms-degree-weighted-sample]]
+[[algorithms-degree-weighted-sample]]
 == Weighted Degree Centrality algorithm sample
 
 This sample will explain the weighted Degree Centrality algorithm, using a simple graph:
@@ -172,7 +172,7 @@ Charles and Michael both only have one follower, but those relationships have a 
 // end::stream-sample-weighted-graph-explanation[]
 
 
-[[labs-algorithms-degree-hgp]]
+[[algorithms-degree-hgp]]
 == Huge graph projection
 
 include::huge-projection.adoc[tag=explanation]
@@ -185,7 +185,7 @@ include::scripts/degree-centrality.cypher[tag=huge-projection]
 ----
 
 
-[[labs-algorithms-degree-cp]]
+[[algorithms-degree-cp]]
 == Cypher projection
 
 include::projected-graph-model/cypher-projection.adoc[tag=explanation]
@@ -207,7 +207,7 @@ include::scripts/degree-centrality.cypher[tag=cypher-loading-following]
 ----
 
 
-[[labs-algorithms-degree-syntax]]
+[[algorithms-degree-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:

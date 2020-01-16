@@ -27,15 +27,15 @@ The Neo4j Graph Algorithms library contains the following algorithms, grouped by
 .Centrality algorithms:
 Determines the importance of distinct nodes in a network.
 
-* <<algorithms-pagerank, PageRank>> (`algo.pageRank`)
+* <<algorithms-pagerank, PageRank>>
 
 .Community detection algorithms:
 
 Evaluate how a group is clustered or partitioned, as well as its tendency to strengthen or break apart.
 
-* <<algorithms-louvain, Louvain>> (`algo.louvain`)
-* <<algorithms-label-propagation, Label Propagation>> (`algo.labelPropagation`)
-* <<algorithms-wcc, Weakly Connected Components>> (`algo.unionFind`)
+* <<algorithms-louvain, Louvain>>
+* <<algorithms-label-propagation, Label Propagation>>
+* <<algorithms-wcc, Weakly Connected Components>>
 
 
 == Installation

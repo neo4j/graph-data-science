@@ -1,4 +1,4 @@
-= The Neo4j Graph Algorithms User Guide v{docs-version}
+= The Neo4j Graph Data Science Library Manual v{docs-version}
 :toc: left
 :experimental:
 :sectid:
@@ -21,15 +21,15 @@ endif::[]
 
 [abstract]
 --
-This is the user guide for Neo4j Graph Algorithms version {docs-version}, authored by the Neo4j Team.
+This is the manual for Neo4j Graph Data Science Library version {docs-version}.
 --
 
-The guide covers the following areas:
+The manual covers the following areas:
 
-* <<introduction>> -- An introduction to Neo4j Graph Algorithms.
+* <<introduction>> -- An introduction to Neo4j Graph Data Science Library.
 * <<projected-graph-model>> -- A detailed guide to the projected graph model.
 * <<yelp-example>> -- An illustration of how to use graph algorithms on a social network of friends.
-* <<procedures>> -- A list of Neo4j Graph Algorithm procedures.
+* <<procedures>> -- A list of Neo4j Graph Data Science Library procedures.
 * <<algorithms-centrality>> -- A detailed guide to each of the centrality algorithms, including use-cases and examples.
 * <<algorithms-community>> -- A detailed guide to each of the community detection algorithms, including use-cases and examples.
 * <<algorithms-graph-similarity>> -- A detailed guide to each of the similarity detection algorithms, including use-cases and examples.
@@ -57,19 +57,7 @@ include::yelp-example.adoc[leveloffset=+1]
 
 include::procedures.adoc[leveloffset=+1]
 
-include::algorithms-centrality.adoc[leveloffset=+1]
-
-include::algorithms-community-detection.adoc[leveloffset=+1]
-
-include::algorithms-graph-similarity.adoc[leveloffset=+1]
-
-include::algorithms-auxiliary.adoc[leveloffset=+1]
-
-include::labs-algorithms.adoc[leveloffset=+1]
-
-ifndef::env-docs[]
-include::implementation-index.adoc[]
-endif::env-docs[]
+include::algorithms-intro.adoc[leveloffset=+1]
 
 // ifdef::backend-html5[]
 // ++++

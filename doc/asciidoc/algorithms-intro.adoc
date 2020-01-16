@@ -1,0 +1,42 @@
+[[algorithms]]
+= Algorithms
+
+The Neo4j Graph Data Science (GDS) library contains many graph algorithms.
+The algorithms are divided into categories which represent different problem classes.
+The categories are listed in this chapter.
+
+Algorithms exist in one of three tiers of maturity:
+
+* Production-quality
+** Indicates that the algorithm has been tested with regards to stability and scalability.
+** Algorithms in this tier are prefixed with `gds.<algorithm>`.
+* Beta
+** Indicates that the algorithm is a candidate for the production-quality tier.
+** Algorithms in this tier are prefixed with `gds.beta.<algorithm>`.
+* Alpha
+** Indicates that the algorithm is experimental and might be changed or removed at any time.
+** Algorithms in this tier are prefixed with `gds.alpha.<algorithm>`.
+
+This chapter is divided into the following sections:
+
+* <<algorithms-syntax>>
+* <<algorithms-centrality>>
+* <<algorithms-community>>
+* <<algorithms-graph-similarity>>
+* <<algorithms-path-finding>>
+* <<algorithms-auxiliary>>
+* <<labs-algorithms>>
+
+include::algorithms-syntax.adoc[leveloffset=+1]
+
+include::algorithms-centrality.adoc[leveloffset=+1]
+
+include::algorithms-community-detection.adoc[leveloffset=+1]
+
+include::algorithms-graph-similarity.adoc[leveloffset=+1]
+
+include::algorithms-auxiliary.adoc[leveloffset=+1]
+
+include::algorithms-path-finding.adoc[leveloffset=+1]
+
+include::labs-algorithms.adoc[leveloffset=+1]

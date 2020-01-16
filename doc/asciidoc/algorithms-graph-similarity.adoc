@@ -3,11 +3,13 @@
 
 [abstract]
 --
-This chapter provides explanations and examples for each of the graph similarity algorithms in the Neo4j Graph Algorithms library.
+This chapter provides explanations and examples for each of the graph similarity algorithms in the Neo4j Graph Data Science library.
 --
 
-The following similarity algorithms can help calculate the similarity of nodes:
+Graph similarity algorithms can help calculate the similarity of nodes.
+The Neo4j GDS library includes the following graph similarity algorithms, grouped by quality tier:
 
-* <<algorithms-node-similarity, Node Similarity>> (`algo.nodeSimilarity`)
+* Production-quality:
+** <<algorithms-node-similarity, Node Similarity>>
 
 include::node-similarity.adoc[leveloffset=+1]

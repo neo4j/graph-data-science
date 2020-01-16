@@ -1,4 +1,4 @@
-[[labs-algorithms-betweenness-centrality]]
+[[algorithms-betweenness-centrality]]
 = The Betweenness Centrality algorithm
 
 [abstract]
@@ -27,19 +27,19 @@ This makes Alice important, because she ensures that no nodes are isolated.
 
 This section includes:
 
-* <<labs-algorithms-betweenness-centrality-context, History and explanation>>
-* <<labs-algorithms-betweenness-centrality-usecase, Use-cases - when to use the Betweenness Centrality algorithm>>
-* <<labs-algorithms-betweenness-centrality-limitations, Constraints - when not to use the Betweenness Centrality algorithm>>
-* <<labs-algorithms-betweenness-centrality-sample, Betweenness Centrality algorithm sample>>
-* <<labs-algorithms-betweenness-centrality-approx, Approximation of Betweenness Centrality>>
-** <<labs-algorithms-betweenness-centrality-ra_brandes, RA-Brandes algorithm>>
-* <<labs-algorithms-betweenness-centrality-syntax, Syntax>>
-* <<labs-algorithms-betweenness-centrality-cp, Cypher projection>>
-* <<labs-algorithms-betweenness-centrality-support, Graph type support>>
-* <<labs-algorithms-betweenness-centrality-imp, Implementations>>
+* <<algorithms-betweenness-centrality-context, History and explanation>>
+* <<algorithms-betweenness-centrality-usecase, Use-cases - when to use the Betweenness Centrality algorithm>>
+* <<algorithms-betweenness-centrality-limitations, Constraints - when not to use the Betweenness Centrality algorithm>>
+* <<algorithms-betweenness-centrality-sample, Betweenness Centrality algorithm sample>>
+* <<algorithms-betweenness-centrality-approx, Approximation of Betweenness Centrality>>
+** <<algorithms-betweenness-centrality-ra_brandes, RA-Brandes algorithm>>
+* <<algorithms-betweenness-centrality-syntax, Syntax>>
+* <<algorithms-betweenness-centrality-cp, Cypher projection>>
+* <<algorithms-betweenness-centrality-support, Graph type support>>
+* <<algorithms-betweenness-centrality-imp, Implementations>>
 
 
-[[labs-algorithms-betweenness-centrality-context]]
+[[algorithms-betweenness-centrality-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -52,7 +52,7 @@ It was considered to be one of the "three distinct intuitive conceptions of cent
 // end::explanation[]
 
 
-[[labs-algorithms-betweenness-centrality-usecase]]
+[[algorithms-betweenness-centrality-usecase]]
 == Use-cases - when to use the Betweenness Centrality algorithm
 
 // tag::use-case[]
@@ -71,7 +71,7 @@ It was considered to be one of the "three distinct intuitive conceptions of cent
 // end::use-case[]
 
 
-[[labs-algorithms-betweenness-centrality-limitations]]
+[[algorithms-betweenness-centrality-limitations]]
 == Constraints - when not to use the Betweenness Centrality algorithm
 
 // tag::constraint[]
@@ -85,7 +85,7 @@ It was considered to be one of the "three distinct intuitive conceptions of cent
 // end::constraint[]
 
 
-[[labs-algorithms-betweenness-centrality-sample]]
+[[algorithms-betweenness-centrality-sample]]
 == Betweenness Centrality algorithm sample
 
 People with high betweenness tend to be the innovators and brokers in social networks.
@@ -131,7 +131,7 @@ The others don't have any influence, because all the shortest paths between pair
 include::labs-betweenness-centrality-ra-brandes.adoc[leveloffset=+1]
 
 
-[[labs-algorithms-betweenness-centrality-cp]]
+[[algorithms-betweenness-centrality-cp]]
 == Cypher projection
 
 include::projected-graph-model/cypher-projection.adoc[tag=explanation]
@@ -144,7 +144,7 @@ include::scripts/betweenness-centrality.cypher[tag=cypher-loading]
 ----
 
 
-[[labs-algorithms-betweenness-centrality-support]]
+[[algorithms-betweenness-centrality-support]]
 == Graph type support
 
 The Betweenness Centrality algorithm supports the following graph types:
@@ -163,7 +163,7 @@ The Betweenness Centrality algorithm supports the following graph types:
 * [ ] undirected, weighted
 
 
-[[labs-algorithms-betweenness-centrality-imp]]
+[[algorithms-betweenness-centrality-imp]]
 == Implementations
 
 `algo.betweenness()`

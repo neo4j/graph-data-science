@@ -17,21 +17,12 @@ The Neo4j Labs algorithms were developed by the Neo4j labs team and are not offi
 The documentation for the Neo4j Labs algorithms is divided into the following sections:
 
 * <<labs-procedures>>
-* <<labs-algorithms-centrality>>
-* <<labs-algorithms-community>>
-* <<labs-algorithms-path-finding>>
 * <<labs-algorithms-similarity>>
 * <<labs-algorithms-linkprediction>>
 * <<labs-algorithms-preprocessing>>
 * <<labs-graph-generation>>
 
 include::labs-procedures.adoc[leveloffset=+1]
-
-include::labs-algorithms-centrality.adoc[leveloffset=+1]
-
-include::labs-algorithms-community.adoc[leveloffset=+1]
-
-include::labs-algorithms-path-finding.adoc[leveloffset=+1]
 
 include::labs-algorithms-similarity.adoc[leveloffset=+1]
 

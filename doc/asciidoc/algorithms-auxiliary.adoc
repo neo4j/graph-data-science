@@ -3,12 +3,12 @@
 
 [abstract]
 --
-This chapter provides explanations and examples for auxiliary procedures in the Neo4j Graph Algorithms library.
+This chapter provides explanations and examples for auxiliary procedures in the Neo4j Graph Data Science library.
 --
 
 The following procedures can be used to improve your workflow:
 
-* <<algorithms-k1coloring, K-1 Coloring>> (`algo.beta.k1coloring`)
+* <<algorithms-k1coloring, K-1 Coloring>>
 
 include::k1coloring.adoc[leveloffset=+1]
 
