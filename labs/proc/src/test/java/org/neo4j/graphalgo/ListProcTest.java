@@ -42,6 +42,7 @@ import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphalgo.traverse.TraverseProc;
+import org.neo4j.graphalgo.walking.RandomWalkProc;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -75,6 +76,7 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.dfs.stream",
         "gds.alpha.scc.write",
         "gds.alpha.scc.stream",
+        "gds.alpha.randomWalk.stream",
         "gds.alpha.shortestPath.write",
         "gds.alpha.shortestPath.stream",
         "gds.alpha.shortestPaths.write",
@@ -101,7 +103,6 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.kShortestPaths.stream",
         "gds.alpha.ml.ann.write",
         "gds.alpha.ml.ann.stream",
-        "algo.randomWalk.stream",
         "algo.shortestPath.astar.stream",
         "algo.shortestPath.deltaStepping",
         "algo.shortestPath.deltaStepping.stream"
@@ -153,7 +154,7 @@ class ListProcTest extends BaseProcTest {
             EuclideanProc.class,
             OverlapProc.class,
             PearsonProc.class,
-            NodeWalkerProc.class,
+            RandomWalkProc.class,
             OneHotEncodingFunc.class,
             SpanningTreeProc.class,
             SampledBetweennessCentralityProc.class,

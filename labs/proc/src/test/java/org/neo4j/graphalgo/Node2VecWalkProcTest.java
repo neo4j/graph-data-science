@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.neo4j.graphalgo.walking.RandomWalkProc;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -49,7 +50,7 @@ class Node2VecWalkProcTest extends BaseProcTest {
     @BeforeEach
     void beforeClass() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(NodeWalkerProc.class);
+        registerProcedures(RandomWalkProc.class);
         runQuery(buildDatabaseQuery(), Collections.singletonMap("count", NODE_COUNT - 4));
     }
 
@@ -77,8 +78,18 @@ class Node2VecWalkProcTest extends BaseProcTest {
 
     @Test
     void shouldHaveGivenStartNodeRandom() {
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("start", 1)
+            .addParameter("steps", 1)
+            .addParameter("walks", 1)
+            .yields();
+
+
         try (ResourceIterator<List<Long>> result = runQuery(
-            "CALL algo.randomWalk.stream(1, 1, 1)",
+            query,
             r -> r.columnAs("nodeIds")
         )) {
             List<Long> path = result.next();
@@ -90,20 +101,46 @@ class Node2VecWalkProcTest extends BaseProcTest {
     @Test
     @Timeout(100)
     void shouldHaveResultsRandom() {
-        assertTrue(runQuery("CALL algo.randomWalk.stream(null, 1, 5)", Result::hasNext));
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("steps", 1)
+            .addParameter("walks", 5)
+            .yields();
+
+        assertTrue(runQuery(query, Result::hasNext));
     }
 
     @Test
     void shouldHandleLargeResults() {
-        long results = runQuery("CALL algo.randomWalk.stream(null, 100, 100000)", Iterators::count);
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("steps", 100)
+            .addParameter("walks", 100000)
+            .yields();
+
+        long results = runQuery(query, Iterators::count);
         assertEquals(100000, results);
     }
 
     @Test
     void shouldHaveSameTypesForStartNodesRandom() {
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("start", "Fred")
+            .addParameter("steps", 2)
+            .addParameter("walks", 5)
+            .addParameter("path", true)
+            .yields();
+
         // TODO: make this test predictable (i.e. set random seed)
         runInTransaction(db, () -> {
-            ResourceIterator<Path> results = runQuery("CALL algo.randomWalk.stream('Fred', 2, 5,{path:true})", r -> r.columnAs("path"));
+            ResourceIterator<Path> results = runQuery(query, r -> r.columnAs("path"));
             int count = 0;
             while (results.hasNext()) {
                 Path path = results.next();
@@ -120,7 +157,15 @@ class Node2VecWalkProcTest extends BaseProcTest {
     @Test
     @Timeout(200)
     void shouldHaveStartedFromEveryNodeRandom() {
-        ResourceIterator<List<Long>> results = runQuery("CALL algo.randomWalk.stream(null,1,100)", r -> r.columnAs("nodeIds"));
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("steps", 1)
+            .addParameter("walks", 100)
+            .yields();
+
+        ResourceIterator<List<Long>> results = runQuery(query, r -> r.columnAs("nodeIds"));
 
         Set<Long> nodeIds = new HashSet<>();
         while (results.hasNext()) {
@@ -132,7 +177,16 @@ class Node2VecWalkProcTest extends BaseProcTest {
 
     @Test
     void shouldNotFailRandom() {
-        Boolean noMoreNext = runQuery("CALL algo.randomWalk.stream(2, 7, 2)", r -> {
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("start", 2)
+            .addParameter("steps", 7)
+            .addParameter("walks", 2)
+            .yields();
+
+        Boolean noMoreNext = runQuery(query, r -> {
             r.next();
             r.next();
 
@@ -144,30 +198,55 @@ class Node2VecWalkProcTest extends BaseProcTest {
 
     @Test
     void shouldHaveGivenStartNode() {
-        List<Long> result = runQuery(
-            "CALL algo.randomWalk.stream(1, 1, 1, {mode:'node2vec', return: 1, inOut:1})",
-            r -> r.<List<Long>>columnAs("nodeIds").next()
-        );
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("start", 1)
+            .addParameter("steps", 1)
+            .addParameter("walks", 1)
+            .addParameter("mode", "node2vec")
+            .addParameter("return", 1)
+            .addParameter("inOut", 1)
+            .yields();
+
+        List<Long> result = runQuery(query, r -> r.<List<Long>>columnAs("nodeIds").next());
         assertThat(1L, equalTo(result.get(0)));
     }
 
     @Test
     @Timeout(100)
     void shouldHaveResultsN2V() {
-        ResourceIterator<List<Long>> results = runQuery(
-            "CALL algo.randomWalk.stream(null, 1, 5, {mode:'node2vec', return: 1, inOut:1})",
-            r -> r.columnAs("nodeIds")
-        );
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("steps", 1)
+            .addParameter("walks", 5)
+            .addParameter("mode", "node2vec")
+            .addParameter("return", 1)
+            .addParameter("inOut", 1)
+            .yields();
+
+        ResourceIterator<List<Long>> results = runQuery(query, r -> r.columnAs("nodeIds"));
 
         assertTrue(results.hasNext());
     }
 
     @Test
     void shouldHaveStartedFromEveryNodeN2V() {
-        ResourceIterator<List<Long>> results = runQuery(
-            "CALL algo.randomWalk.stream(null, 1, 100, {mode:'node2vec', return: 1, inOut:1})",
-            r -> r.columnAs("nodeIds")
-        );
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("steps", 1)
+            .addParameter("walks", 100)
+            .addParameter("mode", "node2vec")
+            .addParameter("return", 1)
+            .addParameter("inOut", 1)
+            .yields();
+
+        ResourceIterator<List<Long>> results = runQuery(query, r -> r.columnAs("nodeIds"));
 
         Set<Long> nodeIds = new HashSet<>();
         while (results.hasNext()) {
@@ -179,10 +258,19 @@ class Node2VecWalkProcTest extends BaseProcTest {
 
     @Test
     void shouldNotFailN2V() {
-        ResourceIterator<List<Long>> results = runQuery(
-            "CALL algo.randomWalk.stream(2, 7, 2, {mode:'node2vec', return: 1, inOut:1})",
-            r -> r.columnAs("nodeIds")
-        );
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("start", 2)
+            .addParameter("steps", 7)
+            .addParameter("walks", 2)
+            .addParameter("mode", "node2vec")
+            .addParameter("return", 1)
+            .addParameter("inOut", 1)
+            .yields();
+
+        ResourceIterator<List<Long>> results = runQuery(query, r -> r.columnAs("nodeIds"));
 
         results.next();
         results.next();

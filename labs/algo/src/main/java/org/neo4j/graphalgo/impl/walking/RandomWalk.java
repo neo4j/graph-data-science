@@ -21,15 +21,14 @@ package org.neo4j.graphalgo.impl.walking;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntBinaryPredicate;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.queue.QueueBasedSpliterator;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.procedure.Name;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,9 +42,33 @@ import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
-public class NodeWalker {
+public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
-    public Stream<long[]> randomWalk(Graph graph, @Name(value = "steps", defaultValue = "80") int steps, NodeWalker.NextNodeStrategy strategy, TerminationFlag terminationFlag, int concurrency, int limit, PrimitiveIterator.OfInt idStream) {
+    private final Graph graph;
+    private final int steps;
+    private final NextNodeStrategy strategy;
+    private final int concurrency;
+    private final int limit;
+    private final PrimitiveIterator.OfInt idStream;
+
+    public RandomWalk(
+        Graph graph,
+        int steps,
+        NextNodeStrategy strategy,
+        int concurrency,
+        int limit,
+        PrimitiveIterator.OfInt idStream
+    ) {
+        this.graph = graph;
+        this.steps = steps;
+        this.strategy = strategy;
+        this.concurrency = concurrency;
+        this.limit = limit;
+        this.idStream = idStream;
+    }
+
+    @Override
+    public Stream<long[]> compute() {
         int timeout = 100;
         int queueSize = 1000;
 
@@ -57,24 +80,56 @@ public class NodeWalker {
 
         while (idStream.hasNext()) {
             int[] ids = new int[batchSize];
-            int i=0;
-            while (i<batchSize && idStream.hasNext()) {
-                ids[i++]=idStream.nextInt();
+            int i = 0;
+            while (i < batchSize && idStream.hasNext()) {
+                ids[i++] = idStream.nextInt();
             }
             int size = i;
             tasks.add(() -> {
                 for (int j = 0; j < size; j++) {
-                    put(queue, doWalk(ids[j], steps, strategy, graph, terminationFlag));
+                    put(queue, doWalk(ids[j]));
                 }
             });
         }
         new Thread(() -> {
             ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
-            put(queue,TOMB);
+            put(queue, TOMB);
         }).start();
 
         QueueBasedSpliterator<long[]> spliterator = new QueueBasedSpliterator<>(queue, TOMB, terminationFlag, timeout);
         return StreamSupport.stream(spliterator, false);
+    }
+
+    @Override
+    public RandomWalk me() {
+        return this;
+    }
+
+    @Override
+    public void release() { }
+
+    private long[] doWalk(int startNodeId) {
+        long[] nodeIds = new long[steps + 1];
+        int currentNodeId = startNodeId;
+        int previousNodeId = currentNodeId;
+        nodeIds[0] = toOriginalNodeId(currentNodeId);
+        for (int i = 1; i <= steps; i++) {
+            int nextNodeId = Math.toIntExact(strategy.getNextNode(currentNodeId, previousNodeId));
+            previousNodeId = currentNodeId;
+            currentNodeId = nextNodeId;
+
+            if (currentNodeId == -1 || !running()) {
+                // End walk when there is no way out and return empty result
+                return Arrays.copyOf(nodeIds, 1);
+            }
+            nodeIds[i] = toOriginalNodeId(currentNodeId);
+        }
+
+        return nodeIds;
+    }
+
+    private long toOriginalNodeId(int currentNodeId) {
+        return currentNodeId == -1 ? -1 : graph.toOriginalNodeId(currentNodeId);
     }
 
     private static <T> void put(BlockingQueue<T> queue, T items) {
@@ -85,28 +140,16 @@ public class NodeWalker {
         }
     }
 
-    private long[] doWalk(int startNodeId, int steps, NodeWalker.NextNodeStrategy nextNodeStrategy, Graph graph, TerminationFlag terminationFlag) {
-        long[] nodeIds = new long[steps + 1];
-        int currentNodeId = startNodeId;
-        int previousNodeId = currentNodeId;
-        nodeIds[0] = toOriginalNodeId(graph, currentNodeId);
-        for(int i = 1; i <= steps; i++){
-            int nextNodeId = Math.toIntExact(nextNodeStrategy.getNextNode(currentNodeId, previousNodeId));
-            previousNodeId = currentNodeId;
-            currentNodeId = nextNodeId;
+    public abstract static class NextNodeStrategy {
+        protected Graph graph;
+        protected Degrees degrees;
 
-            if (currentNodeId == -1 || !terminationFlag.running()) {
-                // End walk when there is no way out and return empty result
-                return Arrays.copyOf(nodeIds,1);
-            }
-            nodeIds[i] = toOriginalNodeId(graph, currentNodeId);
+        public NextNodeStrategy(Graph graph, Degrees degrees) {
+            this.graph = graph;
+            this.degrees = degrees;
         }
 
-        return nodeIds;
-    }
-
-    private long toOriginalNodeId(Graph graph, int currentNodeId) {
-        return currentNodeId == -1 ? -1 : graph.toOriginalNodeId(currentNodeId);
+        public abstract long getNextNode(long currentNodeId, long previousNodeId);
     }
 
     public static class RandomNextNodeStrategy extends NextNodeStrategy {
@@ -117,7 +160,7 @@ public class NodeWalker {
 
         @Override
         public long getNextNode(long currentNodeId, long previousNodeId) {
-            int degree = degrees.degree(currentNodeId, Direction.BOTH);
+            int degree = degrees.degree(currentNodeId, Direction.OUTGOING);
             if (degree == 0) {
                 return -1;
             }
@@ -125,7 +168,7 @@ public class NodeWalker {
 
             MutableLong targetNodeId = new MutableLong(-1L);
             MutableInt counter = new MutableInt(0);
-            graph.concurrentCopy().forEachRelationship(currentNodeId, Direction.BOTH, (s, t) -> {
+            graph.concurrentCopy().forEachRelationship(currentNodeId, Direction.OUTGOING, (s, t) -> {
                 if (counter.getAndIncrement() == randomEdgeIndex) {
                     targetNodeId.setValue(t);
                     return false;
@@ -152,7 +195,7 @@ public class NodeWalker {
             int currentNodeId = Math.toIntExact(currentNode);
             int previousNodeId = Math.toIntExact(previousNode);
 
-            int degree = degrees.degree(currentNodeId, Direction.BOTH);
+            int degree = degrees.degree(currentNodeId, Direction.OUTGOING);
             if (degree == 0) {
                 return -1;
             }
@@ -160,13 +203,13 @@ public class NodeWalker {
             double[] distribution = buildProbabilityDistribution(currentNodeId, previousNodeId, returnParam, inOutParam, degree);
             int neighbourIndex = pickIndexFromDistribution(distribution, ThreadLocalRandom.current().nextDouble());
 
-            return graph.getTarget(currentNodeId, neighbourIndex, Direction.BOTH);
+            return graph.getTarget(currentNodeId, neighbourIndex, Direction.OUTGOING);
         }
 
         private double[] buildProbabilityDistribution(int currentNodeId, int previousNodeId,
                                                       double returnParam, double inOutParam, int degree) {
             ProbabilityDistributionComputer consumer = new ProbabilityDistributionComputer(degree, currentNodeId, previousNodeId, returnParam, inOutParam);
-            graph.concurrentCopy().forEachRelationship(currentNodeId, Direction.BOTH, longToIntConsumer(consumer));
+            graph.concurrentCopy().forEachRelationship(currentNodeId, Direction.OUTGOING, longToIntConsumer(consumer));
             return consumer.probabilities();
         }
 
@@ -216,7 +259,7 @@ public class NodeWalker {
                 if (neighbourId == previousNodeId) {
                     // node is previous node
                     probability = 1D / returnParam;
-                } else if (graph.exists(previousNodeId, neighbourId, Direction.BOTH)) {
+                } else if (graph.exists(previousNodeId, neighbourId, Direction.OUTGOING)) {
                     // node is also adjacent to previous node --> distance to previous node is 1
                     probability = 1D;
                 } else {
@@ -233,21 +276,5 @@ public class NodeWalker {
                 return normalizeDistribution(probabilities, probSum);
             }
         }
-    }
-
-    /**
-     * @author mh
-     * @since 03.07.18
-     */
-    public abstract static class NextNodeStrategy {
-        protected Graph graph;
-        protected Degrees degrees;
-
-        public NextNodeStrategy(Graph graph, Degrees degrees) {
-            this.graph = graph;
-            this.degrees = degrees;
-        }
-
-        public abstract long getNextNode(long currentNodeId, long previousNodeId);
     }
 }

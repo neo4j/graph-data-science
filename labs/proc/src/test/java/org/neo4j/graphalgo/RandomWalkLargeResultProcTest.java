@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.walking.RandomWalkProc;
 import org.neo4j.helpers.collection.Iterators;
 
 import java.util.Collections;
@@ -35,7 +36,7 @@ class RandomWalkLargeResultProcTest extends BaseProcTest {
     @BeforeEach
     void beforeClass() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(NodeWalkerProc.class);
+        registerProcedures(RandomWalkProc.class);
         runQuery(buildDatabaseQuery(), Collections.singletonMap("count",NODE_COUNT));
     }
 
@@ -54,7 +55,14 @@ class RandomWalkLargeResultProcTest extends BaseProcTest {
 
     @Test
     void shouldHandleLargeResults() {
-        long resultsCount = runQuery("CALL algo.randomWalk.stream(null, 100, 100000)", Iterators::count);
+        String query = GdsCypher.call()
+            .loadEverything(Projection.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("steps", 100)
+            .addParameter("walks", 100000)
+            .yields();
+        long resultsCount = runQuery(query, Iterators::count);
         assertEquals(100000, resultsCount);
     }
 }
