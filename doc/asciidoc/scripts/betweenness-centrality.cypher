@@ -1,46 +1,5 @@
-// tag::create-sample-graph[]
-
-MERGE (nAlice:User {id:'Alice'})
-MERGE (nBridget:User {id:'Bridget'})
-MERGE (nCharles:User {id:'Charles'})
-MERGE (nDoug:User {id:'Doug'})
-MERGE (nMark:User {id:'Mark'})
-MERGE (nMichael:User {id:'Michael'})
-
-MERGE (nAlice)-[:MANAGE]->(nBridget)
-MERGE (nAlice)-[:MANAGE]->(nCharles)
-MERGE (nAlice)-[:MANAGE]->(nDoug)
-MERGE (nMark)-[:MANAGE]->(nAlice)
-MERGE (nCharles)-[:MANAGE]->(nMichael);
-
-// end::create-sample-graph[]
-
-// tag::stream-sample-graph[]
-
-CALL algo.betweenness.stream('User','MANAGE',{direction:'out'}) 
-YIELD nodeId, centrality
-
-MATCH (user:User) WHERE id(user) = nodeId
-
-RETURN user.id AS user,centrality
-ORDER BY centrality DESC;
-
-// end::stream-sample-graph[]
-
-// tag::write-sample-graph[]
-
-CALL algo.betweenness('User','MANAGE', {direction:'out',write:true, writeProperty:'centrality'}) 
-YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis;
-
-// end::write-sample-graph[]
-
 // tag::cypher-loading[]
 
-CALL algo.betweenness(
-  'MATCH (p:User) RETURN id(p) as id',
-  'MATCH (p1:User)-[:MANAGE]->(p2:User) RETURN id(p1) as source, id(p2) as target',
-  {graph:'cypher', write: true}
-);
 
 // end::cypher-loading[]
 
