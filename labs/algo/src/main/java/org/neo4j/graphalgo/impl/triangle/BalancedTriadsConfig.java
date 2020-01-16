@@ -27,13 +27,12 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
-import org.neo4j.graphalgo.newapi.WriteConfig;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration("BalancedTriadsConfigImpl")
-public interface BalancedTriadsConfig extends AlgoBaseConfig, WeightConfig, WriteConfig {
+public interface BalancedTriadsConfig extends AlgoBaseConfig, WeightConfig {
 
     @Value.Default
     default String balancedProperty() {
@@ -45,9 +44,12 @@ public interface BalancedTriadsConfig extends AlgoBaseConfig, WeightConfig, Writ
         return "unbalanced";
     }
 
+    // BalancedTriads does not use the `writeProperty` options,
+    // but requires `writeConcurrency` to be present. We opted
+    // for not setting `writeProperty` to some arbitrary default.
     @Value.Default
-    default String writeProperty() {
-        return "unused";
+    default int writeConcurrency() {
+        return concurrency();
     }
 
     static BalancedTriadsConfig of(
