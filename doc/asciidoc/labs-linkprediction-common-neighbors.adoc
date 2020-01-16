@@ -87,7 +87,7 @@ include::scripts/linkprediction-common-neighbors.cypher[tag=only-friends]
 .The following will run the algorithm and return the result:
 [source, cypher]
 ----
-RETURN algo.linkprediction.commonNeighbors(node1:Node, node2:Node, {
+RETURN gds.alpha.linkprediction.commonNeighbors(node1:Node, node2:Node, {
     relationshipQuery: null,
     direction: "BOTH"
 })

@@ -109,7 +109,7 @@ include::scripts/linkprediction-same-community.cypher[tag=same-community-specifi
 .The following will run the algorithm and return the result:
 [source, cypher]
 ----
-RETURN algo.linkprediction.sameCommunity(node1:Node, node2:Node, communityProperty:String)
+RETURN gds.alpha.linkprediction.sameCommunity(node1:Node, node2:Node, communityProperty:String)
 ----
 
 

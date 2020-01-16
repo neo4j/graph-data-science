@@ -88,7 +88,7 @@ include::scripts/linkprediction-adamic-adar.cypher[tag=only-friends]
 .The following will run the algorithm and return the result:
 [source, cypher]
 ----
-RETURN algo.linkprediction.adamicAdar(node1:Node, node2:Node, {
+RETURN gds.alpha.linkprediction.adamicAdar(node1:Node, node2:Node, {
     relationshipQuery: null,
     direction: "BOTH"
 })

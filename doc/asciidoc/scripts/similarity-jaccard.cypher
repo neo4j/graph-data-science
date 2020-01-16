@@ -1,5 +1,5 @@
 // tag::function[]
-RETURN algo.similarity.jaccard([1,2,3], [1,2,4,5]) AS similarity
+RETURN gds.alpha.similarity.jaccard([1,2,3], [1,2,4,5]) AS similarity
 // end::function[]
 
 // tag::create-sample-graph[]
@@ -42,7 +42,7 @@ MATCH (p2:Person {name: "Arya"})-[:LIKES]->(cuisine2)
 WITH p1, p1Cuisine, p2, collect(id(cuisine2)) AS p2Cuisine
 RETURN p1.name AS from,
        p2.name AS to,
-       algo.similarity.jaccard(p1Cuisine, p2Cuisine) AS similarity
+       gds.alpha.similarity.jaccard(p1Cuisine, p2Cuisine) AS similarity
 // end::function-cypher[]
 
 // tag::function-cypher-all[]
@@ -52,6 +52,6 @@ MATCH (p2:Person)-[:LIKES]->(cuisine2) WHERE p1 <> p2
 WITH p1, p1Cuisine, p2, collect(id(cuisine2)) AS p2Cuisine
 RETURN p1.name AS from,
        p2.name AS to,
-       algo.similarity.jaccard(p1Cuisine, p2Cuisine) AS similarity
+       gds.alpha.similarity.jaccard(p1Cuisine, p2Cuisine) AS similarity
 ORDER BY similarity DESC
 // end::function-cypher-all[]

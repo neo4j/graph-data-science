@@ -80,12 +80,12 @@ These algorithms help calculate the similarity of nodes:
 
 These algorithms can be used as part of Link Prediction solution:
 
-* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-adamic-adar/[Adamic Adar^] (`algo.linkprediction.adamicAdar`)
-* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-common-neighbors/[Common Neighbors^] (`algo.linkprediction.commonNeighbors`)
-* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-preferential-attachment/[Preferential Attachment^] (`algo.linkprediction.preferentialAttachment`)
-* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-resource-allocation/[Resource Allocation^] (`algo.linkprediction.resourceAllocation`)
-* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-same-community/[Same Community^] (`algo.linkprediction.sameCommunity`)
-* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-total-neighbors/[Total Neighbors^] (`algo.linkprediction.totalNeighbors`)
+* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-adamic-adar/[Adamic Adar^] (`gds.alpha.linkprediction.adamicAdar`)
+* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-common-neighbors/[Common Neighbors^] (`gds.alpha.linkprediction.commonNeighbors`)
+* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-preferential-attachment/[Preferential Attachment^] (`gds.alpha.linkprediction.preferentialAttachment`)
+* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-resource-allocation/[Resource Allocation^] (`gds.alpha.linkprediction.resourceAllocation`)
+* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-same-community/[Same Community^] (`gds.alpha.linkprediction.sameCommunity`)
+* https://neo4j.com/docs/graph-algorithms/current/algorithms/linkprediction-total-neighbors/[Total Neighbors^] (`gds.alpha.linkprediction.totalNeighbors`)
 
 === Preprocessing
 

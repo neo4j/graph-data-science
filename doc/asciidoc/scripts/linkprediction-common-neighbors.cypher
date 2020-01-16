@@ -18,11 +18,11 @@ MERGE (arya)-[:FRIENDS]-(karin)
 // tag::all-rels[]
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Karin'})
-RETURN algo.linkprediction.commonNeighbors(p1, p2) AS score
+RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score
 // end::all-rels[]
 
 // tag::only-friends[]
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Karin'})
-RETURN algo.linkprediction.commonNeighbors(p1, p2, {relationshipQuery: "FRIENDS"}) AS score
+RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2, {relationshipQuery: "FRIENDS"}) AS score
 // end::only-friends[]

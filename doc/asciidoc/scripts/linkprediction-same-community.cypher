@@ -14,23 +14,23 @@ MERGE (jennifer:Person {name: "Jennifer"})
 // tag::same-community[]
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Zhen'})
-RETURN algo.linkprediction.sameCommunity(p1, p2) AS score
+RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score
 // end::same-community[]
 
 // tag::different-community[]
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Praveena'})
-RETURN algo.linkprediction.sameCommunity(p1, p2) AS score
+RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score
 // end::different-community[]
 
 // tag::missing-community[]
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Jennifer'})
-RETURN algo.linkprediction.sameCommunity(p1, p2) AS score
+RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score
 // end::missing-community[]
 
 // tag::same-community-specific[]
 MATCH (p1:Person {name: 'Arya'})
 MATCH (p2:Person {name: 'Karin'})
-RETURN algo.linkprediction.sameCommunity(p1, p2, 'partition') AS score
+RETURN gds.alpha.linkprediction.sameCommunity(p1, p2, 'partition') AS score
 // end::same-community-specific[]
