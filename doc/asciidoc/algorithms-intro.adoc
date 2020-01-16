@@ -2,7 +2,7 @@
 = Algorithms
 
 The Neo4j Graph Data Science (GDS) library contains many graph algorithms.
-The algorithms are divided into categories.
+The algorithms are divided into categories which represent different problem classes.
 The categories are listed in this chapter.
 
 Algorithms exist in one of three tiers of maturity:

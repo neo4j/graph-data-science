@@ -8,7 +8,7 @@ The general algorithm syntax comes in two variants:
 * Anonymous graph variant
 ** The graph to operate over will be created and deleted as part of the algorithm execution.
 
-Additional to the syntax variants are execution modes.
+Each syntax variant additionally provides different execution modes.
 There are three supported execution modes:
 
 * `stream`
@@ -20,7 +20,7 @@ There are three supported execution modes:
 
 Finally, an execution mode may be <<memory-requirements, estimated>> by appending the command with `estimate`.
 
-Including all above elements leads to these syntax outlines:
+Including all of the above mentioned elements leads to the following syntax outlines:
 
 .Syntax composition for the named graph variant:
 [source]
