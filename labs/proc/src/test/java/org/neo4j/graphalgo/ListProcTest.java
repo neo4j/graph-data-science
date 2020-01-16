@@ -168,7 +168,7 @@ class ListProcTest extends BaseProcTest {
             TraverseProc.class,
             TriangleCountProc.class,
             TriangleProc.class,
-            UtilityProc.class
+            AsPathFunc.class
         );
         registerFunctions(
             LinkPredictionFunc.class,
