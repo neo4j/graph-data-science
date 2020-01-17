@@ -34,10 +34,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.triangle.BalancedTriadsProc;
-import org.neo4j.graphalgo.triangle.TriangleBaseProc;
-import org.neo4j.graphalgo.triangle.TriangleCountProc;
-import org.neo4j.graphalgo.triangle.TriangleProc;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -90,6 +86,8 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
 
     abstract TriangleBaseProc<A, RESULT, CONFIG> newInstance();
 
+    abstract CONFIG newConfig();
+
     @Test
     void testValidateUndirectedProjection() {
         RelationshipProjections invalidRelationshipProjections = RelationshipProjections.builder()
@@ -107,9 +105,9 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
             CypherMapWrapper.empty()
         );
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-            newInstance().validateGraphCreateConfig(graphCreateFromStoreConfig);
-        });
+        TriangleBaseProc<A, RESULT, CONFIG> proc = newInstance();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> proc.validateGraphCreateConfig(graphCreateFromStoreConfig, newConfig()));
 
         assertThat(ex.getMessage(), containsString("Projection for `TYPE` uses projection `NATURAL`"));
     }

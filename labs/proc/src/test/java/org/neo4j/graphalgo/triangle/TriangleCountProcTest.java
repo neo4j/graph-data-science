@@ -23,9 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
+import org.neo4j.graphalgo.impl.triangle.BalancedTriadsConfig;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphalgo.impl.triangle.TriangleCountConfig;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -40,6 +44,16 @@ class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCou
     @Override
     TriangleBaseProc<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> newInstance() {
         return new TriangleCountProc();
+    }
+
+    @Override
+    TriangleCountConfig newConfig() {
+        return TriangleCountConfig.of(
+            getUsername(),
+            Optional.empty(),
+            Optional.empty(),
+            CypherMapWrapper.empty()
+        );
     }
 
     @Test

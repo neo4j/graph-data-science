@@ -236,10 +236,10 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             }
         }
 
-        validateGraphCreateConfig(graphCreateConfig);
+        validateGraphCreateConfig(graphCreateConfig, config);
     }
 
-    protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig) { }
+    protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) { }
 
     protected ComputationResult<A, RESULT, CONFIG> compute(Object graphNameOrConfig, Map<String, Object> configuration) {
         return compute(graphNameOrConfig, configuration, true, true);

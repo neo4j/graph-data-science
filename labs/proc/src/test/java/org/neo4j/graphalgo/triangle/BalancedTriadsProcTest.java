@@ -24,8 +24,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.triangle.BalancedTriads;
 import org.neo4j.graphalgo.impl.triangle.BalancedTriadsConfig;
+import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.anyLong;
@@ -38,6 +42,16 @@ class BalancedTriadsProcTest extends TriangleBaseProcTest<BalancedTriads, Balanc
     @Override
     TriangleBaseProc<BalancedTriads, BalancedTriads, BalancedTriadsConfig> newInstance() {
         return new BalancedTriadsProc();
+    }
+
+    @Override
+    BalancedTriadsConfig newConfig() {
+        return BalancedTriadsConfig.of(
+            getUsername(),
+            Optional.empty(),
+            Optional.empty(),
+            CypherMapWrapper.empty()
+        );
     }
 
     @Override

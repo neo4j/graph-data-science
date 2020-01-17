@@ -24,10 +24,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.QueryRunner;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
+import org.neo4j.graphalgo.impl.triangle.TriangleCountConfig;
 import org.neo4j.graphalgo.impl.triangle.TriangleStream;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,6 +41,16 @@ class TriangleProcTest extends TriangleBaseProcTest<TriangleStream, Stream<Trian
     @Override
     TriangleBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> newInstance() {
         return new TriangleProc();
+    }
+
+    @Override
+    TriangleConfig newConfig() {
+        return TriangleConfig.of(
+            getUsername(),
+            Optional.empty(),
+            Optional.empty(),
+            CypherMapWrapper.empty()
+        );
     }
 
     private static String[] idToName;

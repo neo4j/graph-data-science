@@ -34,7 +34,7 @@ public abstract class TriangleBaseProc<A extends Algorithm<A, RESULT>, RESULT, C
         "determine the number of triangles passing through each node in the graph.";
 
     @Override
-    protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig) {
+    protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
         graphCreateConfig.relationshipProjection().projections().entrySet().stream()
             .filter(entry -> entry.getValue().projection() != Projection.UNDIRECTED)
             .forEach(entry -> {
