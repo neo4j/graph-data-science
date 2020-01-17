@@ -44,10 +44,6 @@ public interface ShortestPathDeltaSteppingConfig extends BaseConfig, WeightConfi
 
     double delta();
 
-    static long nodeId(Node node) {
-        return node.getId();
-    }
-
     @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
     @Value.Default
     default Direction direction() {
@@ -57,6 +53,10 @@ public interface ShortestPathDeltaSteppingConfig extends BaseConfig, WeightConfi
     @Override
     default String writeProperty() {
         return DEFAULT_TARGET_PROPERTY;
+    }
+
+    static long nodeId(Node node) {
+        return node.getId();
     }
 
     static ShortestPathDeltaSteppingConfig of(

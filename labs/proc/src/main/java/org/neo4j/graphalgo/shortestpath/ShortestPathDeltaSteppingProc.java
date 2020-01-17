@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
@@ -34,7 +33,6 @@ import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.DeltaSteppingProcResult;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -59,9 +57,6 @@ import static org.neo4j.procedure.Mode.READ;
  * <a href="http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf">http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf</a>
  */
 public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> {
-
-    public static final String WRITE_PROPERTY = "writeProperty";
-    public static final String DEFAULT_TARGET_PROPERTY = "sssp";
 
     @Procedure(name = "gds.alpha.shortestPath.deltaStepping.stream", mode = READ)
     public Stream<ShortestPathDeltaStepping.DeltaSteppingResult> stream(
@@ -115,8 +110,8 @@ public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDelt
         });
 
         return Stream.of(builder
-                .withNodeCount(graph.nodeCount())
-                .build());
+            .withNodeCount(graph.nodeCount())
+            .build());
     }
 
     @Override
@@ -141,7 +136,12 @@ public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDelt
                 AllocationTracker tracker,
                 Log log
             ) {
-                return new ShortestPathDeltaStepping(graph, configuration.startNode(), configuration.delta(), configuration.direction());
+                return new ShortestPathDeltaStepping(
+                    graph,
+                    configuration.startNode(),
+                    configuration.delta(),
+                    configuration.direction()
+                );
             }
         };
     }

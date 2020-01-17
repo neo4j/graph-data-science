@@ -112,7 +112,7 @@ final class ShortestPathDeltaSteppingTest extends AlgoTestBase {
 
     @Test
     void testSequential() {
-        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, head,3, Direction.OUTGOING);
+        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, head, 3, Direction.OUTGOING);
 
         final double[] sp = sssp.compute()
                 .getShortestPaths();
