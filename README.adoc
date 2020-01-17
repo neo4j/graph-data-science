@@ -1,0 +1,13 @@
+= Neo4j Graph Data Science Library
+
+This repository hosts the sources of the Neo4j Graph Data Science (GDS) library.
+The GDS library consists of a number of graph algorithms, exposed as procedures that can be installed and executed in a Neo4j graph database.
+
+== Issues
+
+Please report any bugs, concerns, or other questions as GitHub issues to this repository.
+
+== License
+
+The Neo4j Graph Data Science library is licensed under the GNU Public License version 3.0.
+All content is copyright © Neo4j Sweden AB.
