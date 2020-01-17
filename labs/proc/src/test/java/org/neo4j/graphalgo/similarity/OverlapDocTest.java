@@ -35,35 +35,35 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OverlapDocTest extends BaseProcTest {
 
-    public final String DB_CYPHER = "  MERGE (fahrenheit451:Book {title:'Fahrenheit 451'}) " +
-                                    " MERGE (dune:Book {title:'Dune'}) " +
-                                    " MERGE (hungerGames:Book {title:'The Hunger Games'}) " +
-                                    " MERGE (nineteen84:Book {title:'1984'}) " +
-                                    " MERGE (gatsby:Book {title:'The Great Gatsby'}) " +
+    public final String DB_CYPHER = "CREATE" +
+                                    " (fahrenheit451:Book {title:'Fahrenheit 451'})," +
+                                    " (dune:Book {title:'Dune'})," +
+                                    " (hungerGames:Book {title:'The Hunger Games'})," +
+                                    " (nineteen84:Book {title:'1984'})," +
+                                    " (gatsby:Book {title:'The Great Gatsby'})," +
 
-                                    " MERGE (scienceFiction:Genre {name: \"Science Fiction\"}) " +
-                                    " MERGE (fantasy:Genre {name: \"Fantasy\"}) " +
-                                    " MERGE (dystopia:Genre {name: \"Dystopia\"}) " +
-                                    " MERGE (classics:Genre {name: \"Classics\"}) " +
+                                    " (scienceFiction:Genre {name: \"Science Fiction\"})," +
+                                    " (fantasy:Genre {name: \"Fantasy\"})," +
+                                    " (dystopia:Genre {name: \"Dystopia\"})," +
+                                    " (classics:Genre {name: \"Classics\"})," +
 
-                                    " MERGE (fahrenheit451)-[:HAS_GENRE]->(dystopia) " +
-                                    " MERGE (fahrenheit451)-[:HAS_GENRE]->(scienceFiction) " +
-                                    " MERGE (fahrenheit451)-[:HAS_GENRE]->(fantasy) " +
-                                    " MERGE (fahrenheit451)-[:HAS_GENRE]->(classics) " +
+                                    " (fahrenheit451)-[:HAS_GENRE]->(dystopia)," +
+                                    " (fahrenheit451)-[:HAS_GENRE]->(scienceFiction)," +
+                                    " (fahrenheit451)-[:HAS_GENRE]->(fantasy)," +
+                                    " (fahrenheit451)-[:HAS_GENRE]->(classics)," +
 
-                                    " MERGE (hungerGames)-[:HAS_GENRE]->(scienceFiction) " +
-                                    " MERGE (hungerGames)-[:HAS_GENRE]->(fantasy) " +
-                                    " MERGE (hungerGames)-[:HAS_GENRE]->(romance) " +
+                                    " (hungerGames)-[:HAS_GENRE]->(scienceFiction)," +
+                                    " (hungerGames)-[:HAS_GENRE]->(fantasy)," +
 
-                                    " MERGE (nineteen84)-[:HAS_GENRE]->(scienceFiction) " +
-                                    " MERGE (nineteen84)-[:HAS_GENRE]->(dystopia) " +
-                                    " MERGE (nineteen84)-[:HAS_GENRE]->(classics) " +
+                                    " (nineteen84)-[:HAS_GENRE]->(scienceFiction)," +
+                                    " (nineteen84)-[:HAS_GENRE]->(dystopia)," +
+                                    " (nineteen84)-[:HAS_GENRE]->(classics)," +
 
-                                    " MERGE (dune)-[:HAS_GENRE]->(scienceFiction) " +
-                                    " MERGE (dune)-[:HAS_GENRE]->(fantasy) " +
-                                    " MERGE (dune)-[:HAS_GENRE]->(classics) " +
+                                    " (dune)-[:HAS_GENRE]->(scienceFiction)," +
+                                    " (dune)-[:HAS_GENRE]->(fantasy)," +
+                                    " (dune)-[:HAS_GENRE]->(classics)," +
 
-                                    " MERGE (gatsby)-[:HAS_GENRE]->(classics)";
+                                    " (gatsby)-[:HAS_GENRE]->(classics)";
 
     @BeforeEach
     void setupGraph() throws KernelException {
