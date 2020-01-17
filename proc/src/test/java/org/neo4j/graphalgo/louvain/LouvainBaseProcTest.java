@@ -79,7 +79,7 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Bas
     void setupGraph() throws KernelException {
 
         db = TestDatabaseCreator.createTestDatabase(
-            dbBuilder -> dbBuilder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            dbBuilder -> dbBuilder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
         registerProcedures(LouvainStreamProc.class, LouvainWriteProc.class, GraphCreateProc.class);

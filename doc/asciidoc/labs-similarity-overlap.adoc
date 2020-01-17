@@ -128,7 +128,7 @@ O(A,B) = 2 / min(3,4)
  WITH collect(userData) as data
  CALL gds.alpha.similarity.overlap.stream({data: data})
  YIELD item1, item2, count1, count2, intersection, similarity
- RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to,
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to,
         count1, count2, intersection, similarity
  ORDER BY similarity DESC
 ----
@@ -162,7 +162,7 @@ The others are less obvious; Dystopia probably isn't a subgenre of Fantasy, but 
    similarityCutoff: 0.75
  })
  YIELD item1, item2, count1, count2, intersection, similarity
- RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to,
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to,
         count1, count2, intersection, similarity
  ORDER BY similarity DESC
 ----
@@ -194,7 +194,7 @@ We can do that by passing in the `topK` parameter.
   topK: 2
  })
  YIELD item1, item2, count1, count2, intersection, similarity
- RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to,
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to,
         count1, count2, intersection, similarity
  ORDER BY from
 ----
@@ -278,7 +278,7 @@ We could use this technique to compute the similarity of a subset of items to al
   sourceIds: sourceIds
  })
  YIELD item1, item2, count1, count2, intersection, similarity
- RETURN algo.getNodeById(item1).name AS from, algo.getNodeById(item2).name AS to, similarity
+ RETURN gds.util.getNodeById(item1).name AS from, gds.util.getNodeById(item2).name AS to, similarity
  ORDER BY similarity DESC
 ----
 

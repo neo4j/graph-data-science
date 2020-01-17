@@ -167,7 +167,7 @@ CALL gds.alpha.closeness.stream({
   relationshipProjection: 'LINK'
 })
 YIELD nodeId, centrality
-RETURN algo.asNode(nodeId).name AS user, centrality
+RETURN gds.util.asNode(nodeId).name AS user, centrality
 ORDER BY centrality DESC
 ----
 

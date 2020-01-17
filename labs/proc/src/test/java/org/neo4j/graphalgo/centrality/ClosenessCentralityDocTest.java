@@ -56,7 +56,7 @@ public class ClosenessCentralityDocTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
         registerProcedures(ClosenessCentralityProc.class);
@@ -77,7 +77,7 @@ public class ClosenessCentralityDocTest extends BaseProcTest {
             "  nodeProjection: 'Node'," +
             "  relationshipProjection: 'LINK'" +
             "}) YIELD nodeId, centrality" +
-            " RETURN algo.asNode(nodeId).name AS user, centrality" +
+            " RETURN gds.util.asNode(nodeId).name AS user, centrality" +
             " ORDER BY centrality DESC";
 
         String actual = runQuery(query, Result::resultAsString);

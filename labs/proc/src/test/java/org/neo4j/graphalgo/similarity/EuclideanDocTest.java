@@ -75,7 +75,7 @@ public class EuclideanDocTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
         registerProcedures(EuclideanProc.class);
@@ -141,14 +141,14 @@ public class EuclideanDocTest extends BaseProcTest {
         String query =
             " MATCH (p:Person), (c:Cuisine)" +
             " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
-            " WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} AS userData" +
+            " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData" +
             " WITH collect(userData) AS data" +
             " CALL gds.alpha.similarity.euclidean.stream({" +
             "   data: data," +
             "   topK: 0" +
             " })" +
             " YIELD item1, item2, count1, count2, similarity" +
-            " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+            " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
             " ORDER BY similarity";
 
         String expectedResult = "+---------------------------------------------+\n" +
@@ -175,15 +175,15 @@ public class EuclideanDocTest extends BaseProcTest {
         String query =
             "  MATCH (p:Person), (c:Cuisine)" +
             " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
-            " WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData" +
+            " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
             " WITH collect(userData) as data" +
             " CALL gds.alpha.similarity.euclidean.stream({" +
             "   data: data," +
             "   topK: 0" +
             " })" +
             " YIELD item1, item2, count1, count2, similarity" +
-            " WHERE algo.isFinite(similarity)" +
-            " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+            " WHERE gds.util.isFinite(similarity)" +
+            " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
             " ORDER BY similarity";
 
         String expectedResult = "+---------------------------------------------+\n" +
@@ -209,7 +209,7 @@ public class EuclideanDocTest extends BaseProcTest {
         String query = 
             " MATCH (p:Person), (c:Cuisine)" +
             " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
-            " WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData" +
+            " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
             " WITH collect(userData) as data" +
             " CALL gds.alpha.similarity.euclidean.stream({" +
             "  data: data," +
@@ -217,8 +217,8 @@ public class EuclideanDocTest extends BaseProcTest {
             "  topK: 0" +
             " })" +
             " YIELD item1, item2, count1, count2, similarity" +
-            " WHERE algo.isFinite(similarity)" +
-            " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+            " WHERE gds.util.isFinite(similarity)" +
+            " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
             " ORDER BY similarity";
 
         String expectedResult = "+--------------------------------------------+\n" +
@@ -239,14 +239,14 @@ public class EuclideanDocTest extends BaseProcTest {
         String query =
             " MATCH (p:Person), (c:Cuisine)" +
             " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
-            " WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} AS userData" +
+            " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData" +
             " WITH collect(userData) AS data" +
             " CALL gds.alpha.similarity.euclidean.stream({" +
             "  data: data," +
             "  topK: 1" +
             " })" +
             " YIELD item1, item2, count1, count2, similarity" +
-            " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+            " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
             " ORDER BY from";
 
         String expectedResult = "+---------------------------------------------+\n" +
@@ -269,7 +269,7 @@ public class EuclideanDocTest extends BaseProcTest {
         String query =
             " MATCH (p:Person), (c:Cuisine)" +
             " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
-            " WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} AS userData" +
+            " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData" +
             " WITH collect(userData) AS data" +
             " CALL gds.alpha.similarity.euclidean.write({" +
             "  data: data," +
@@ -310,7 +310,7 @@ public class EuclideanDocTest extends BaseProcTest {
         String query =
             " MATCH (p:Person), (c:Cuisine)" +
             " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
-            " WITH {item:id(p), name: p.name, weights: collect(coalesce(likes.score, algo.NaN()))} AS userData" +
+            " WITH {item:id(p), name: p.name, weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData" +
             " WITH collect(userData) AS personCuisines" +
             " WITH personCuisines," +
             "      [value IN personCuisines WHERE value.name IN ['Praveena', 'Arya'] | value.item ] AS sourceIds" +
@@ -320,7 +320,7 @@ public class EuclideanDocTest extends BaseProcTest {
             "   topK: 1" +
             " })" +
             " YIELD item1, item2, similarity" +
-            " WITH algo.getNodeById(item1) AS from, algo.getNodeById(item2) AS to, similarity" +
+            " WITH gds.util.getNodeById(item1) AS from, gds.util.getNodeById(item2) AS to, similarity" +
             " RETURN from.name AS from, to.name AS to, similarity" +
             " ORDER BY similarity DESC";
 
@@ -358,7 +358,7 @@ public class EuclideanDocTest extends BaseProcTest {
             "  skipValue: null" +
             " })" +
             " YIELD item1, item2, count1, count2, similarity" +
-            " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity" +
+            " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
             " ORDER BY similarity DESC";
 
         String expectedResult = "+---------------------------------------------------+\n" +

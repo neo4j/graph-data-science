@@ -68,7 +68,7 @@ public class OverlapDocTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
         registerProcedures(OverlapProc.class);
@@ -97,7 +97,7 @@ public class OverlapDocTest extends BaseProcTest {
             " WITH collect(userData) AS data " +
             " CALL gds.alpha.similarity.overlap.stream({data: data}) " +
             " YIELD item1, item2, count1, count2, intersection, similarity " +
-            " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, " +
+            " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, " +
             "        count1, count2, intersection, similarity " +
             " ORDER BY similarity DESC";
 
@@ -128,7 +128,7 @@ public class OverlapDocTest extends BaseProcTest {
             "   similarityCutoff: 0.75 " +
             " }) " +
             " YIELD item1, item2, count1, count2, intersection, similarity " +
-            " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, " +
+            " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, " +
             "        count1, count2, intersection, similarity " +
             " ORDER BY similarity DESC";
 
@@ -157,7 +157,7 @@ public class OverlapDocTest extends BaseProcTest {
             "  topK: 2 " +
             " }) " +
             " YIELD item1, item2, count1, count2, intersection, similarity " +
-            " RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, " +
+            " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, " +
             "        count1, count2, intersection, similarity " +
             " ORDER BY from";
 
@@ -230,7 +230,7 @@ public class OverlapDocTest extends BaseProcTest {
             "  sourceIds: sourceIds " +
             " }) " +
             " YIELD item1, item2, count1, count2, intersection, similarity " +
-            " RETURN algo.getNodeById(item1).name AS from, algo.getNodeById(item2).name AS to, similarity " +
+            " RETURN gds.util.getNodeById(item1).name AS from, gds.util.getNodeById(item2).name AS to, similarity " +
             " ORDER BY similarity DESC";
 
         String expectedResult = "+-----------------------------------------------------+\n" +
