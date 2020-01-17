@@ -66,7 +66,6 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.allShortestPaths.stream",
         "gds.alpha.articleRank.write",
         "gds.alpha.articleRank.stream",
-        "algo.asPath",
         "gds.alpha.balancedTriads.write",
         "gds.alpha.balancedTriads.stream",
         "gds.alpha.betweenness.write",
@@ -145,6 +144,7 @@ class ListProcTest extends BaseProcTest {
             AllShortestPathsProc.class,
             ApproxNearestNeighborsProc.class,
             ArticleRankProc.class,
+            AsPathFunc.class,
             BalancedTriadsProc.class,
             BetweennessCentralityProc.class,
             ClosenessCentralityProc.class,
@@ -171,8 +171,7 @@ class ListProcTest extends BaseProcTest {
             SccProc.class,
             TraverseProc.class,
             TriangleCountProc.class,
-            TriangleProc.class,
-            UtilityProc.class
+            TriangleProc.class
         );
         registerFunctions(
             LinkPredictionFunc.class,
