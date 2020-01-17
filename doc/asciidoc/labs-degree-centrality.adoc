@@ -6,11 +6,9 @@
 This section describes the Degree Centrality algorithm in the Neo4j Labs Graph Algorithms library.
 --
 
-// tag::introduction[]
 Degree centrality measures the number of incoming and outgoing relationships from a node.
 
 The Degree Centrality algorithm can help us find popular nodes in a graph.
-// end::introduction[]
 
 [WARNING]
 --
@@ -23,7 +21,6 @@ This section includes:
 * <<algorithms-degree-usecase, Use-cases - when to use the Degree Centrality algorithm>>
 * <<algorithms-degree-sample, Degree Centrality algorithm sample>>
 * <<algorithms-degree-weighted-sample, Weighted Degree Centrality algorithm sample>>
-* <<algorithms-degree-hgp, Huge graph projection>>
 * <<algorithms-degree-cp, Cypher projection>>
 * <<algorithms-degree-syntax, Syntax>>
 
@@ -31,18 +28,12 @@ This section includes:
 [[algorithms-degree-context]]
 == History and explanation
 
-// tag::explanation[]
 Degree Centrality was proposed by Linton C. Freeman in his 1979 paper http://leonidzhukov.net/hse/2014/socialnetworks/papers/freeman79-centrality.pdf[Centrality in Social Networks Conceptual Clarification^].
 While the Degree Centrality algorithm can be used to find the popularity of individual nodes, it is often used as part of a global analysis where we calculate the minimum degree, maximum degree, mean degree, and standard deviation across the whole graph.
-
-// end::explanation[]
 
 
 [[algorithms-degree-usecase]]
 == Use-cases - when to use the Degree Centrality algorithm
-
-
-// tag::use-case[]
 
 * Degree centrality is an important component of any attempt to determine the most important people on a social network.
 For example, in BrandWatch's https://www.brandwatch.com/blog/react-influential-men-and-women-2017/[most influential men and women on Twitter 2017^] the top 5 people in each category have over 40m followers each.
@@ -50,8 +41,6 @@ For example, in BrandWatch's https://www.brandwatch.com/blog/react-influential-m
 * Weighted degree centrality has been used to help separate fraudsters from legitimate users of an online auction.
 The weighted centrality for fraudsters is significantly higher because they tend to collude with each other to artificially increase the price of items.
 Read more in https://link.springer.com/chapter/10.1007/978-3-319-23461-8_11[Two Step graph-based semi-supervised Learning for Online Auction Fraud Detection^]
-
-// end::use-case[]
 
 
 [[algorithms-degree-sample]]
@@ -62,22 +51,56 @@ This sample will explain the Degree Centrality algorithm, using a simple graph:
 .Create sample graph
 [source,cypher]
 ----
-include::scripts/degree-centrality.cypher[tag=create-sample-graph]
+CREATE (alice:User {name: 'Alice'}),
+       (bridget:User {name: 'Bridget'}),
+       (charles:User {name: 'Charles'}),
+       (doug:User {name: 'Doug'}),
+       (mark:User {name: 'Mark'}),
+       (michael:User {name: 'Michael'}),
+       (alice)-[:FOLLOWS]->(doug),
+       (alice)-[:FOLLOWS]->(bridget),
+       (alice)-[:FOLLOWS]->(charles),
+       (mark)-[:FOLLOWS]->(doug),
+       (mark)-[:FOLLOWS]->(michael),
+       (bridget)-[:FOLLOWS]->(doug),
+       (charles)-[:FOLLOWS]->(doug),
+       (michael)-[:FOLLOWS]->(doug)
 ----
 
 .The following will run the algorithm and stream results, showing which users have the most followers:
 [source,cypher]
 ----
-include::scripts/degree-centrality.cypher[tag=stream-sample-graph-followers]
+CALL gds.alpha.degree.stream({
+  nodeProjection: 'User',
+  relationshipProjection: {
+    FOLLOWS: {
+      type: 'FOLLOWS',
+      projection: 'REVERSE'
+    }
+  },
+  direction: 'INCOMING'
+})
+YIELD nodeId, score
+RETURN algo.asNode(nodeId).id AS name, score AS followers
+ORDER BY followers DESC
 ----
 
 .The following will run the algorithm and store results, showing which users have the most followers:
 [source,cypher]
 ----
-include::scripts/degree-centrality.cypher[tag=write-sample-graph-followers]
+CALL gds.alpha.degree.write({
+  nodeProjection: 'User',
+  relationshipProjection: {
+    FOLLOWS: {
+      type: 'FOLLOWS',
+      projection: 'REVERSE'
+    }
+  },
+  writeProperty: 'followers',
+  direction: 'INCOMING'
+})
 ----
 
-// tag::stream-sample-graph-followers-result[]
 .Results
 [opts="header",cols="1,1"]
 |===
@@ -89,21 +112,29 @@ include::scripts/degree-centrality.cypher[tag=write-sample-graph-followers]
 | Mark    | 0.0
 | Alice   | 0.0
 |===
-// end::stream-sample-graph-followers-result[]
 
 .The following will run the algorithm and stream results, showing which users follow the most other users:
 [source,cypher]
 ----
-include::scripts/degree-centrality.cypher[tag=stream-sample-graph-following]
+CALL gds.alpha.degree.stream({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOWS'
+})
+YIELD nodeId, score
+RETURN algo.asNode(nodeId).id AS name, score AS followers
+ORDER BY followers DESC
 ----
 
 .The following will run the algorithm and store results, showing which users follow the most other users:
 [source,cypher]
 ----
-include::scripts/degree-centrality.cypher[tag=write-sample-graph-following]
+CALL gds.alpha.degree.write({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOWS',
+  writeProperty: 'followers'
+})
 ----
 
-// tag::stream-sample-graph-following-result[]
 .Results
 [opts="header",cols="1,1"]
 |===
@@ -115,15 +146,10 @@ include::scripts/degree-centrality.cypher[tag=write-sample-graph-following]
 | Michael | 1.0
 | Doug    | 0.0
 |===
-// end::stream-sample-graph-following-result[]
-
-// tag::stream-sample-graph-explanation[]
 
 We can see that Doug is the most popular user in our imaginary Twitter graph, with 5 followers - all other users follow him, but he doesn't follow anybody back.
 In the real Twitter network celebrities have very high follower counts but tend to follow very few back people.
 We could therefore consider Doug a celebrity!
-
-// end::stream-sample-graph-explanation[]
 
 
 [[algorithms-degree-weighted-sample]]
@@ -135,7 +161,20 @@ This sample will explain the weighted Degree Centrality algorithm, using a simpl
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/degree-centrality.cypher[tag=create-sample-weighted-graph]
+CREATE (alice:User {name:'Alice'}),
+       (bridget:User {name:'Bridget'}),
+       (charles:User {name:'Charles'}),
+       (doug:User {name:'Doug'}),
+       (mark:User {name:'Mark'}),
+       (michael:User {name:'Michael'}),
+       (alice)-[:FOLLOWS {score: 1}]->(doug),
+       (alice)-[:FOLLOWS {score: 2}]->(bridget),
+       (alice)-[:FOLLOWS {score: 5}]->(charles),
+       (mark)-[:FOLLOWS {score: 1.5}]->(doug),
+       (mark)-[:FOLLOWS {score: 4.5}]->(michael),
+       (bridget)-[:FOLLOWS {score: 1.5}]->(doug),
+       (charles)-[:FOLLOWS {score: 2}]->(doug),
+       (michael)-[:FOLLOWS {score: 1.5}]->(doug)
 ----
 
 This algorithm is a variant of the Degree Centrality algorithm, that measures the sum of the weights of incoming and outgoing relationships.
@@ -143,16 +182,42 @@ This algorithm is a variant of the Degree Centrality algorithm, that measures th
 .The following will run the algorithm and stream results, showing which users have the most weighted followers:
 [source,cypher]
 ----
-include::scripts/degree-centrality.cypher[tag=stream-sample-weighted-graph-followers]
+CALL gds.alpha.degree.stream({
+   nodeProjection: 'User',
+   relationshipProjection: {
+       FOLLOWS: {
+           type: 'FOLLOWS',
+           projection: 'REVERSE',
+           properties: 'score'
+       }
+   },
+   weightProperty: 'score',
+  direction: 'INCOMING'
+})
+YIELD nodeId, score
+RETURN algo.asNode(nodeId).id AS name, score AS weightedFollowers
+ORDER BY weightedFollowers DESC
 ----
 
 .The following will run the algorithm and store results, showing which users have the most weighted followers:
 [source,cypher]
 ----
-include::scripts/degree-centrality.cypher[tag=write-sample-weighted-graph-followers]
+CALL gds.alpha.degree.write({
+   nodeProjection: 'User',
+   relationshipProjection: {
+       FOLLOWS: {
+           type: 'FOLLOWS',
+           projection: 'REVERSE',
+           properties: 'score'
+       }
+   },
+   weightProperty: 'score',
+   writeProperty: 'weightedFollowers',
+   direction: 'INCOMING'
+})
+YIELD nodes, writeProperty
 ----
 
-// tag::stream-sample-weighted-graph-followers-result[]
 .Results
 [opts="header",cols="1,1"]
 |===
@@ -164,25 +229,9 @@ include::scripts/degree-centrality.cypher[tag=write-sample-weighted-graph-follow
 | Alice   | 0.0
 | Mark    | 0.0
 |===
-// end::stream-sample-weighted-graph-followers-result[]
 
-// tag::stream-sample-weighted-graph-explanation[]
 Doug still remains our most popular user, but there isn't such a big gap to the next person.
 Charles and Michael both only have one follower, but those relationships have a high relationship weight.
-// end::stream-sample-weighted-graph-explanation[]
-
-
-[[algorithms-degree-hgp]]
-== Huge graph projection
-
-include::huge-projection.adoc[tag=explanation]
-
-.Set `graph:'huge'` in the config:
-
-[source, cypher]
-----
-include::scripts/degree-centrality.cypher[tag=huge-projection]
-----
 
 
 [[algorithms-degree-cp]]
@@ -190,11 +239,13 @@ include::scripts/degree-centrality.cypher[tag=huge-projection]
 
 include::projected-graph-model/cypher-projection.adoc[tag=explanation]
 
-.Set `graph:'cypher'` in the config:
-
 [source, cypher]
 ----
-include::scripts/degree-centrality.cypher[tag=cypher-loading]
+CALL gds.alpha.degree.write({
+  nodeQuery: 'MATCH (u:User) RETURN id(u) as id',
+  relationshipQuery: 'MATCH (u1:User)<-[:FOLLOWS]-(u2:User) RETURN id(u1) as source, id(u2) as target',
+  writeProperty: 'followers'
+})
 ----
 
 Note that the `direction` config parameter is ignored when using a Cypher projection for Degree Centrality.
@@ -203,7 +254,11 @@ If we want to find the number of users that a user is following rather than thei
 .The following will run the algorithm and store the results, calculating the number of users that a user follows:
 [source, cypher]
 ----
-include::scripts/degree-centrality.cypher[tag=cypher-loading-following]
+CALL gds.alpha.degree.write({
+  nodeQuery: 'MATCH (u:User) RETURN id(u) as id',
+  relationshipQuery: 'MATCH (u1:User)-[:FOLLOWS]->(u2:User) RETURN id(u1) as source, id(u2) as target',
+  writeProperty: 'followers'
+})
 ----
 
 
@@ -250,7 +305,7 @@ YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.degree.stream(graphName: STRING, configuration: MAP)
+CALL gds.alpha.degree.stream(graphName: STRING, configuration: MAP)
 YIELD node, score
 ----
 

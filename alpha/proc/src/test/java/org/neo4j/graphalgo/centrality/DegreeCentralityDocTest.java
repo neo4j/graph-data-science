@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
@@ -40,31 +39,32 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class DegreeCentralityDocTest extends BaseProcTest {
 
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (alice:User {name: 'Alice'})" +
+        ", (bridget:User {name: 'Bridget'})" +
+        ", (charles:User {name: 'Charles'})" +
+        ", (doug:User {name: 'Doug'})" +
+        ", (mark:User {name: 'Mark'})" +
+        ", (michael:User {name: 'Michael'})" +
+        ", (alice)-[:FOLLOWS {score: 1}]->(doug)" +
+        ", (alice)-[:FOLLOWS {score: 2}]->(bridget)" +
+        ", (alice)-[:FOLLOWS {score: 5}]->(charles)" +
+        ", (mark)-[:FOLLOWS {score: 1.5}]->(doug)" +
+        ", (mark)-[:FOLLOWS {score: 4.5}]->(michael)" +
+        ", (bridget)-[:FOLLOWS {score: 1.5}]->(doug)" +
+        ", (charles)-[:FOLLOWS {score: 2}]->(doug)" +
+        ", (michael)-[:FOLLOWS {score: 1.5}]->(doug)";
+
     @BeforeEach
     void setupGraph() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
-        final String cypherUnweighted = "CREATE" +
-                              "  (nAlice:User {id:'Alice'})\n" +
-                              ", (nBridget:User {id:'Bridget'})\n" +
-                              ", (nCharles:User {id:'Charles'})\n" +
-                              ", (nDoug:User {id:'Doug'})\n" +
-                              ", (nMark:User {id:'Mark'})\n" +
-                              ", (nMichael:User {id:'Michael'})\n" +
-                              ", (nAlice)-[:FOLLOWS {score: 1}]->(nDoug)\n" +
-                              ", (nAlice)-[:FOLLOWS {score: 2}]->(nBridget)\n" +
-                              ", (nAlice)-[:FOLLOWS {score: 5}]->(nCharles)\n" +
-                              ", (nMark)-[:FOLLOWS {score: 1.5}]->(nDoug)\n" +
-                              ", (nMark)-[:FOLLOWS {score: 4.5}]->(nMichael)\n" +
-                              ", (nBridget)-[:FOLLOWS {score: 1.5}]->(nDoug)\n" +
-                              ", (nCharles)-[:FOLLOWS {score: 2}]->(nDoug)\n" +
-                              ", (nMichael)-[:FOLLOWS {score: 1.5}]->(nDoug)";
-
         registerProcedures(DegreeCentralityProc.class);
         registerFunctions(GetNodeFunc.class);
-        runQuery(cypherUnweighted);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach
