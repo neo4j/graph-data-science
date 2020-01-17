@@ -50,6 +50,12 @@ public interface ShortestPathDeltaSteppingConfig extends BaseConfig, WeightConfi
         return Direction.OUTGOING;
     }
 
+    @Configuration.Ignore
+    @Value.Derived
+    default Direction resolvedDirection() {
+        return direction() == Direction.BOTH ? Direction.OUTGOING : direction();
+    }
+
     @Override
     default String writeProperty() {
         return DEFAULT_TARGET_PROPERTY;

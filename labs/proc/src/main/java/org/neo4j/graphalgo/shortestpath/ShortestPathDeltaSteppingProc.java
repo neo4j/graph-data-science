@@ -140,7 +140,7 @@ public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDelt
                     graph,
                     configuration.startNode(),
                     configuration.delta(),
-                    configuration.direction()
+                    configuration.resolvedDirection()
                 );
             }
         };

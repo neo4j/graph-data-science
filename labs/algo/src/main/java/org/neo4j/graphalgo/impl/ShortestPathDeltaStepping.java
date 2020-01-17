@@ -151,7 +151,7 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
                     return true;
                 });
 
-                graph.forEachRelationship(node, Direction.OUTGOING, 0.0D, relationshipConsumer);
+                graph.forEachRelationship(node, direction, 0.0D, relationshipConsumer);
                 return true;
             });
             ParallelUtil.run(light, executorService, futures);

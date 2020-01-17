@@ -116,13 +116,49 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
         final String cypher =
-            "MATCH(n:Node {name:'s'}) " +
+            "MATCH(n:Node {name: 's'}) " +
             "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({" +
-            "   relationshipProperties: 'cost', " +
+            "   relationshipProjection: {" +
+            "       TYPE: {" +
+            "         type: 'TYPE'," +
+            "         projection: 'REVERSE'," +
+            "         properties: 'cost'" +
+            "       }" +
+            "   }," +
             "   startNode: n, " +
             "   delta: 3.0," +
             "   weightProperty: 'cost'," +
             "   direction: 'INCOMING'" +
+            "}) " +
+            "YIELD nodeId, distance RETURN nodeId, distance";
+
+        runQueryWithRowConsumer(cypher, row -> {
+            double distance = row.getNumber("distance").doubleValue();
+            consumer.accept(distance);
+        });
+
+        verify(consumer, times(11)).accept(anyDouble());
+        verify(consumer, times(1)).accept(eq(8D, 0.1D));
+    }
+
+    @Test
+    void testBothResultStream() {
+        final DoubleConsumer consumer = mock(DoubleConsumer.class);
+
+        final String cypher =
+            "MATCH(n:Node {name: 's'}) " +
+            "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({" +
+            "   relationshipProjection: {" +
+            "       TYPE: {" +
+            "         type: 'TYPE'," +
+            "         projection: 'UNDIRECTED'," +
+            "         properties: 'cost'" +
+            "       }" +
+            "   }," +
+            "   startNode: n, " +
+            "   delta: 3.0," +
+            "   weightProperty: 'cost'," +
+            "   direction: 'BOTH'" +
             "}) " +
             "YIELD nodeId, distance RETURN nodeId, distance";
 
