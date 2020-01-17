@@ -78,10 +78,10 @@ public class ShortestPathProc extends LabsProc {
             return Stream.empty();
         }
 
-        return new ShortestPathAStar(graph, api)
+        return new ShortestPathAStar(graph, api, startNode.getId(), endNode.getId(), propertyKeyLat, propertyKeyLon, direction)
             .withProgressLogger(ProgressLogger.wrap(log, "ShortestPath(AStar)"))
             .withTerminationFlag(TerminationFlag.wrap(transaction))
-            .compute(startNode.getId(), endNode.getId(), propertyKeyLat, propertyKeyLon, direction)
+            .compute()
             .resultStream();
     }
 }

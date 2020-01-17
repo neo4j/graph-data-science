@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntScatterMap;
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
@@ -39,13 +39,18 @@ import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
-public class ShortestPathAStar extends LegacyAlgorithm<ShortestPathAStar> {
+public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPathAStar> {
 
-    private final GraphDatabaseAPI dbService;
+    private final GraphDatabaseAPI db;
     private static final int PATH_END = -1;
 
     private Graph graph;
     private final int nodeCount;
+    private final long startNode;
+    private final long goalNode;
+    private final String propertyKeyLat;
+    private final String propertyKeyLon;
+    private final Direction direction;
     private IntDoubleMap gCosts;
     private IntDoubleMap fCosts;
     private double totalCost;
@@ -57,36 +62,45 @@ public class ShortestPathAStar extends LegacyAlgorithm<ShortestPathAStar> {
 
     public static final double NO_PATH_FOUND = -1.0;
 
-    public ShortestPathAStar(final Graph graph, final GraphDatabaseAPI dbService) {
+    public ShortestPathAStar(
+        Graph graph,
+        GraphDatabaseAPI db,
+        long startNode,
+        long goalNode,
+        String propertyKeyLat,
+        String propertyKeyLon,
+        Direction direction
+    ) {
         this.graph = graph;
-        this.dbService = dbService;
-        nodeCount = Math.toIntExact(graph.nodeCount());
-        gCosts = new IntDoubleScatterMap(nodeCount);
-        fCosts = new IntDoubleScatterMap(nodeCount);
-        openNodes = SharedIntPriorityQueue.min(
+        this.db = db;
+        this.nodeCount = Math.toIntExact(graph.nodeCount());
+        this.startNode = startNode;
+        this.goalNode = goalNode;
+        this.propertyKeyLat = propertyKeyLat;
+        this.propertyKeyLon = propertyKeyLon;
+        this.direction = direction;
+        this.gCosts = new IntDoubleScatterMap(nodeCount);
+        this.fCosts = new IntDoubleScatterMap(nodeCount);
+        this.openNodes = SharedIntPriorityQueue.min(
                 nodeCount,
                 fCosts,
                 Double.MAX_VALUE);
-        path = new IntIntScatterMap(nodeCount);
-        closedNodes = new SimpleBitSet(nodeCount);
-        shortestPath = new IntArrayDeque();
-        progressLogger = getProgressLogger();
+        this.path = new IntIntScatterMap(nodeCount);
+        this.closedNodes = new SimpleBitSet(nodeCount);
+        this.shortestPath = new IntArrayDeque();
+        this.progressLogger = getProgressLogger();
     }
 
-    public ShortestPathAStar compute(
-            final long startNode,
-            final long goalNode,
-            final String propertyKeyLat,
-            final String propertyKeyLon,
-            final Direction direction) {
+    @Override
+    public ShortestPathAStar compute() {
         reset();
-        final int startNodeInternal = Math.toIntExact(graph.toMappedNodeId(startNode));
-        final double startNodeLat = getNodeCoordinate(startNodeInternal, propertyKeyLat);
-        final double startNodeLon = getNodeCoordinate(startNodeInternal, propertyKeyLon);
-        final int goalNodeInternal = Math.toIntExact(graph.toMappedNodeId(goalNode));
-        final double goalNodeLat = getNodeCoordinate(goalNodeInternal, propertyKeyLat);
-        final double goalNodeLon = getNodeCoordinate(goalNodeInternal, propertyKeyLon);
-        final double initialHeuristic = computeHeuristic(startNodeLat, startNodeLon, goalNodeLat, goalNodeLon);
+        int startNodeInternal = Math.toIntExact(graph.toMappedNodeId(startNode));
+        double startNodeLat = getNodeCoordinate(startNodeInternal, propertyKeyLat);
+        double startNodeLon = getNodeCoordinate(startNodeInternal, propertyKeyLon);
+        int goalNodeInternal = Math.toIntExact(graph.toMappedNodeId(goalNode));
+        double goalNodeLat = getNodeCoordinate(goalNodeInternal, propertyKeyLat);
+        double goalNodeLon = getNodeCoordinate(goalNodeInternal, propertyKeyLon);
+        double initialHeuristic = computeHeuristic(startNodeLat, startNodeLon, goalNodeLat, goalNodeLon);
         gCosts.put(startNodeInternal, 0.0);
         fCosts.put(startNodeInternal, initialHeuristic);
         openNodes.add(startNodeInternal, 0.0);
@@ -103,12 +117,12 @@ public class ShortestPathAStar extends LegacyAlgorithm<ShortestPathAStar> {
     }
 
     private void run(
-            final int goalNodeId,
-            final String propertyKeyLat,
-            final String propertyKeyLon,
-            final Direction direction) {
-        final double goalLat = getNodeCoordinate(goalNodeId, propertyKeyLat);
-        final double goalLon = getNodeCoordinate(goalNodeId, propertyKeyLon);
+            int goalNodeId,
+            String propertyKeyLat,
+            String propertyKeyLon,
+            Direction direction) {
+        double goalLat = getNodeCoordinate(goalNodeId, propertyKeyLat);
+        double goalLon = getNodeCoordinate(goalNodeId, propertyKeyLon);
         while (!openNodes.isEmpty() && running()) {
             int currentNodeId = openNodes.pop();
             if (currentNodeId == goalNodeId) {
@@ -138,27 +152,27 @@ public class ShortestPathAStar extends LegacyAlgorithm<ShortestPathAStar> {
         }
     }
 
-    private double computeHeuristic(final double lat1, final double lon1, final double lat2, final double lon2) {
+    private double computeHeuristic(double lat1, double lon1, double lat2, double lon2) {
         final int earthRadius = 6371;
         final double kmToNM = 0.539957;
-        final double latDistance = Math.toRadians(lat2 - lat1);
-        final double lonDistance = Math.toRadians(lon2 - lon1);
-        final double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
                 * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        final double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        final double distance = earthRadius * c * kmToNM;
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = earthRadius * c * kmToNM;
         return distance;
     }
 
-    private double getNodeCoordinate(final int nodeId, final String coordinateType) {
-        final long neo4jId = graph.toOriginalNodeId(nodeId);
-        final Node node = dbService.getNodeById(neo4jId);
+    private double getNodeCoordinate(int nodeId, String coordinateType) {
+        long neo4jId = graph.toOriginalNodeId(nodeId);
+        Node node = db.getNodeById(neo4jId);
         return (double) node.getProperty(coordinateType);
     }
 
-    private boolean updateCosts(final int source, final int target, final double newCost, final double heuristic) {
-        final double oldCost = gCosts.getOrDefault(target, Double.MAX_VALUE);
+    private boolean updateCosts(int source, int target, double newCost, double heuristic) {
+        double oldCost = gCosts.getOrDefault(target, Double.MAX_VALUE);
         if (newCost < oldCost) {
             gCosts.put(target, newCost);
             fCosts.put(target, newCost + heuristic);
