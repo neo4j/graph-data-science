@@ -1,4 +1,4 @@
-description = 'Neo4j Labs :: Graph Data Science :: Procedures'
+description = 'Neo4j Graph Data Science :: Alpha Procedures'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 
@@ -7,7 +7,7 @@ dependencies {
     annotationProcessor project(':config-generator')
 
     compileOnly project(':proc')
-    compile project(':labs-algo')
+    compile project(':alpha-algo')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'

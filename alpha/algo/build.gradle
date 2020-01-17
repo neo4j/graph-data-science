@@ -1,4 +1,4 @@
-description = 'Neo4j Labs :: Graph Data Science :: Algorithms'
+description = 'Neo4j Graph Data Science :: Alpha Algorithms'
 
 dependencies {
     annotationProcessor project(':annotations')
@@ -6,7 +6,7 @@ dependencies {
     annotationProcessor group: 'org.immutables', name: 'value', version: ver.immutables
 
     compileOnly project(':algo')
-    compile project(':labs-core')
+    compile project(':alpha-core')
     compile group: 'org.roaringbitmap', name: 'RoaringBitmap', version: ver.'RoaringBitmap'
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
