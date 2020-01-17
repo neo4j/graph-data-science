@@ -264,7 +264,10 @@ class GdsCypherTest {
             .yields();
 
         assertEquals(
-            String.format("CALL gds.foo.write(%s)", STAR_PROJECTION_CYPHER_SYNTAX),
+            String.format(
+                "CALL gds.foo.write({nodeProjection: \"*\", relationshipProjection: %s})",
+                "{`*`: {type: \"\", projection: \"UNDIRECTED\"}}"
+            ),
             query
         );
     }
