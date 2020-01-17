@@ -32,10 +32,11 @@ import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.scc.SccProc;
+import org.neo4j.graphalgo.shortestpath.AllShortestPathsProc;
 import org.neo4j.graphalgo.shortestpath.DijkstraProc;
 import org.neo4j.graphalgo.shortestpath.KShortestPathsProc;
-import org.neo4j.graphalgo.shortestpath.AllShortestPathsProc;
 import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
+import org.neo4j.graphalgo.shortestpath.ShortestPathProc;
 import org.neo4j.graphalgo.similarity.ApproxNearestNeighborsProc;
 import org.neo4j.graphalgo.similarity.CosineProc;
 import org.neo4j.graphalgo.similarity.EuclideanProc;
@@ -110,7 +111,7 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.kShortestPaths.stream",
         "gds.alpha.ml.ann.write",
         "gds.alpha.ml.ann.stream",
-        "algo.shortestPath.astar.stream"
+        "gds.alpha.shortestPath.astar.stream"
     ));
 
     private static final Collection<String> FUNCTIONS = new HashSet<>(asList(

@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
 import org.neo4j.graphalgo.scc.SccProc;
 import org.neo4j.graphalgo.shortestpath.AllShortestPathsProc;
+import org.neo4j.graphalgo.shortestpath.ShortestPathProc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphalgo.triangle.BalancedTriadsProc;
@@ -282,12 +283,6 @@ class EmptyGraphProcTest extends BaseProcTest {
             .addParameter("weightWriteProperty", "weight")
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
-    }
-
-    @Test
-    void testShortestPathAStarStream() {
-        boolean hasNext = runQuery("CALL algo.shortestPath.astar.stream(null, null, '', '', '', {graph:'" + graphImpl + "'})", Result::hasNext);
-        assertFalse(hasNext);
     }
 
     @Test

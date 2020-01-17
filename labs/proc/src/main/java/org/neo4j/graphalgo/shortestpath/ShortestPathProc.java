@@ -41,63 +41,26 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathProc extends AlgoBaseProc<ShortestPathAStar, ShortestPathAStar, ShortestPathConfig> {
 
-    @Procedure(name = "algo.shortestPath.astar.stream", mode = READ)
+    @Procedure(name = "gds.alpha.shortestPath.astar.stream", mode = READ)
     public Stream<ShortestPathAStar.Result> astarStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-//        @Name("startNode") Node startNode,
-//        @Name("endNode") Node endNode,
-//        @Name("propertyName") String propertyName,
-//        @Name(value = "propertyKeyLat", defaultValue = "latitude") String propertyKeyLat,
-//        @Name(value = "propertyKeyLon", defaultValue = "longitude") String propertyKeyLon,
-//        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
         ComputationResult<ShortestPathAStar, ShortestPathAStar, ShortestPathConfig> computationResult = compute(
             graphNameOrConfig,
-            configuration
+            configuration,
+            false,
+            false
         );
 
         Graph graph = computationResult.graph();
         if (graph.isEmpty()) {
+            graph.release();
             return Stream.empty();
         }
 
         ShortestPathAStar algo = computationResult.algorithm();
         return algo.resultStream();
-
-        /**
-         *         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-         *         Direction direction = configuration.getDirection(Direction.BOTH);
-         *
-         *         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
-         *             .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
-         *             .withRelationshipProperties(PropertyMapping.of(
-         *                 propertyName,
-         *                 configuration.getWeightPropertyDefaultValue(0.0)
-         *             ))
-         *             .withDirection(direction);
-         *
-         *
-         *         if (direction == Direction.BOTH) {
-         *             direction = Direction.OUTGOING;
-         *             graphLoader.undirected().withDirection(direction);
-         *         } else {
-         *             graphLoader.withDirection(direction);
-         *         }
-         *
-         *         Graph graph = graphLoader.load(configuration.getGraphImpl());
-         *
-         *         if (graph.isEmpty() || startNode == null || endNode == null) {
-         *             graph.release();
-         *             return Stream.empty();
-         *         }
-         *
-         *         return new ShortestPathAStar(graph, api)
-         *             .withProgressLogger(ProgressLogger.wrap(log, "ShortestPath(AStar)"))
-         *             .withTerminationFlag(TerminationFlag.wrap(transaction))
-         *             .compute(startNode.getId(), endNode.getId(), propertyKeyLat, propertyKeyLon, direction)
-         *             .resultStream();
-         */
     }
 
     @Override
