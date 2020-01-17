@@ -307,7 +307,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type    | Default        | Optional | Description
-| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| graphNameOrConfig | string  | null           | no      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the config map must contain configuration for creating a graph.
 | configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
 |===
 
@@ -366,7 +366,7 @@ YIELD item1, item2, count1, count2, similarity
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type    | Default        | Optional | Description
-| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
+| graphNameOrConfig | string  | null           | no      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the config map must contain configuration for creating a graph.
 | configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
 |===
 
