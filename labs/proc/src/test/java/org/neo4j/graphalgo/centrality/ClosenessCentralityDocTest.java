@@ -37,20 +37,21 @@ public class ClosenessCentralityDocTest extends BaseProcTest {
 
     private static final String NL = System.lineSeparator();
 
-    public static final String DB_CYPHER = "CREATE " +
-                                           " (a:Node{name: \"A\"})" +
-                                           " ,(b:Node{name: \"B\"})" +
-                                           " ,(c:Node{name: \"C\"})" +
-                                           " ,(d:Node{name: \"D\"})" +
-                                           " ,(e:Node{name: \"E\"})" +
-                                           " ,(a)-[:LINK]->(b)" +
-                                           " ,(b)-[:LINK]->(a)" +
-                                           " ,(b)-[:LINK]->(c)" +
-                                           " ,(c)-[:LINK]->(b)" +
-                                           " ,(c)-[:LINK]->(d)" +
-                                           " ,(d)-[:LINK]->(c)" +
-                                           " ,(d)-[:LINK]->(e)" +
-                                           " ,(e)-[:LINK]->(d);";
+    public static final String DB_CYPHER =
+        "CREATE " +
+       "  (a:Node{name: \"A\"})" +
+       " ,(b:Node{name: \"B\"})" +
+       " ,(c:Node{name: \"C\"})" +
+       " ,(d:Node{name: \"D\"})" +
+       " ,(e:Node{name: \"E\"})" +
+       " ,(a)-[:LINK]->(b)" +
+       " ,(b)-[:LINK]->(a)" +
+       " ,(b)-[:LINK]->(c)" +
+       " ,(c)-[:LINK]->(b)" +
+       " ,(c)-[:LINK]->(d)" +
+       " ,(d)-[:LINK]->(c)" +
+       " ,(d)-[:LINK]->(e)" +
+       " ,(e)-[:LINK]->(d);";
 
     @BeforeEach
     void setupGraph() throws KernelException {

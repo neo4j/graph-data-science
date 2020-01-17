@@ -132,7 +132,7 @@ YIELD nodeId, centrality
 |===
 | Name       | Type  | Description
 | node       | long  | Node ID
-| centrality | float | Closeness centrality weight
+| centrality | float | Closeness centrality score
 |===
 
 
