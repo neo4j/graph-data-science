@@ -28,15 +28,11 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.beta.generator.RelationshipPropertyProducer;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -47,10 +43,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.beta.generator.GraphGenerateProc.RELATIONSHIP_SEED_KEY;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_SEED_KEY;
+import static org.neo4j.graphalgo.core.CypherMapWrapper.create;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_DISTRIBUTION_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MAX_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MIN_KEY;
@@ -75,33 +71,33 @@ class GraphGenerateProcTest extends BaseProcTest {
 
     @Test
     void shouldGenerateGraphWithDefaults() {
-        String query = "CALL algo.beta.graph.generate(" +
+        String query = "CALL gds.beta.graph.generate(" +
                        "    'foo', 10, 5 " +
                        ")";
 
-        runQueryWithRowConsumer(query,
-                row -> {
-                    assertEquals(10, row.getNumber("nodes").intValue());
-                    assertEquals(50, row.getNumber("relationships").intValue());
-                    assertEquals("foo", row.getString(RELATIONSHIP_PROPERTY_NAME_KEY));
-                    assertEquals("UNIFORM", row.get(RELATIONSHIP_DISTRIBUTION_KEY));
-                    assertNull(row.get(RELATIONSHIP_PROPERTY_KEY));
-                    assertNull(row.get(RELATIONSHIP_SEED_KEY));
-                }
+        runQueryWithRowConsumer(
+            query,
+            row -> {
+                assertEquals(10, row.getNumber("nodes").intValue());
+                assertEquals(50, row.getNumber("relationships").intValue());
+                assertEquals("foo", row.getString(RELATIONSHIP_PROPERTY_NAME_KEY));
+                assertEquals("UNIFORM", row.get(RELATIONSHIP_DISTRIBUTION_KEY));
+                assertEquals(Collections.emptyMap(), row.get(RELATIONSHIP_PROPERTY_KEY));
+                assertNull(row.get(RELATIONSHIP_SEED_KEY));
+            }
         );
     }
 
     @ParameterizedTest
     @EnumSource(RelationshipDistribution.class)
     void shouldGenerateGraphWithRelationshipDistribution(RelationshipDistribution relationshipDistribution) {
-
         Map<String, Object> configMap = new HashMap<>();
         configMap.put(RELATIONSHIP_DISTRIBUTION_KEY, relationshipDistribution.name());
 
-        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap, getUsername());
+        RandomGraphGeneratorConfig cfg = RandomGraphGeneratorConfig.of(getUsername(), "", 10, 5, create(configMap));
 
         GraphGenerateProc proc = new GraphGenerateProc();
-        RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, procedureConfig);
+        RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, cfg);
 
         assertEquals(relationshipDistribution, generator.getRelationshipDistribution());
         assertFalse(generator.getMaybePropertyProducer().isPresent());
@@ -110,15 +106,16 @@ class GraphGenerateProcTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("relationshipPropertyProducers")
     void shouldGenerateGraphWithRelationshipProperty(
-            Map<String, Object> config,
-            RelationshipPropertyProducer propertyProducer) {
+        Map<String, Object> config,
+        RelationshipPropertyProducer propertyProducer
+    ) {
         Map<String, Object> configMap = new HashMap<>();
         configMap.put(RELATIONSHIP_PROPERTY_KEY, config);
 
-        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap, getUsername());
+        RandomGraphGeneratorConfig cfg = RandomGraphGeneratorConfig.of(getUsername(), "", 10, 5, create(configMap));
 
         GraphGenerateProc proc = new GraphGenerateProc();
-        RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, procedureConfig);
+        RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, cfg);
 
         assertTrue(generator.getMaybePropertyProducer().isPresent());
         RelationshipPropertyProducer actuallPropertyProducer = generator.getMaybePropertyProducer().get();
@@ -129,29 +126,32 @@ class GraphGenerateProcTest extends BaseProcTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("invalidRelationshipPropertyProducers")
     void shouldThrowOnInvalidRelationshipPropertyParameters(
-            String description,
-            Object config,
-            Iterable<String> errorFragments) {
+        String description,
+        Object config,
+        Iterable<String> errorFragments
+    ) {
         Map<String, Object> configMap = new HashMap<>();
         configMap.put(RELATIONSHIP_PROPERTY_KEY, config);
 
-        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap, getUsername());
+        RandomGraphGeneratorConfig cfg = RandomGraphGeneratorConfig.of(getUsername(), "", 10, 5, create(configMap));
 
         GraphGenerateProc proc = new GraphGenerateProc();
 
         IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> proc.initializeGraphGenerator(10, 5, procedureConfig)
+            IllegalArgumentException.class,
+            () -> proc.initializeGraphGenerator(10, 5, cfg)
         );
 
         String message = exception.getMessage();
         errorFragments.forEach((expectedErrorFragment) -> {
             assertTrue(
-                    message.contains(expectedErrorFragment),
-                    String.format(
-                            "Expected error message to contain `%s`, but got `%s`",
-                            expectedErrorFragment,
-                            message));
+                message.contains(expectedErrorFragment),
+                String.format(
+                    "Expected error message to contain `%s`, but got `%s`",
+                    expectedErrorFragment,
+                    message
+                )
+            );
         });
     }
 
@@ -159,10 +159,10 @@ class GraphGenerateProcTest extends BaseProcTest {
     void shouldGenerateGraphFromDefaults() {
         Map<String, Object> configMap = new HashMap<>();
 
-        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap, getUsername());
+        RandomGraphGeneratorConfig cfg = RandomGraphGeneratorConfig.of(getUsername(), "", 10, 5, create(configMap));
 
         GraphGenerateProc proc = new GraphGenerateProc();
-        RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, procedureConfig);
+        RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, cfg);
 
         assertEquals(generator.getRelationshipDistribution(), RelationshipDistribution.UNIFORM);
         assertFalse(generator.getMaybePropertyProducer().isPresent());
@@ -174,15 +174,14 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         Map<String, Object> configMap = map("relationshipSeed", relationshipSeed);
 
-        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap, getUsername());
+        RandomGraphGeneratorConfig cfg = RandomGraphGeneratorConfig.of(getUsername(), "", 10, 5, create(configMap));
 
         GraphGenerateProc proc = new GraphGenerateProc();
-        RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, procedureConfig);
-        RandomGraphGenerator otherGenerator = proc.initializeGraphGenerator(10, 5, procedureConfig);
+        RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, cfg);
+        RandomGraphGenerator otherGenerator = proc.initializeGraphGenerator(10, 5, cfg);
 
         assertGraphEquals(generator.generate(), otherGenerator.generate());
     }
-
 
     static Stream<Arguments> relationshipPropertyProducers() {
         Collection<Arguments> producers = new ArrayList<>();
@@ -192,8 +191,8 @@ class GraphGenerateProcTest extends BaseProcTest {
         paramsMap.put(RELATIONSHIP_PROPERTY_TYPE_KEY, "FIXED");
         paramsMap.put(RELATIONSHIP_PROPERTY_VALUE_KEY, 42.0D);
         producers.add(Arguments.of(
-                paramsMap,
-                new RelationshipPropertyProducer.Fixed("fixed", 42)
+            paramsMap,
+            new RelationshipPropertyProducer.Fixed("fixed", 42)
         ));
 
         paramsMap = new HashMap<>();
@@ -202,8 +201,8 @@ class GraphGenerateProcTest extends BaseProcTest {
         paramsMap.put(RELATIONSHIP_PROPERTY_MIN_KEY, 21.0D);
         paramsMap.put(RELATIONSHIP_PROPERTY_MAX_KEY, 42.0D);
         producers.add(Arguments.of(
-                paramsMap,
-                new RelationshipPropertyProducer.Random("random", 21, 42)
+            paramsMap,
+            new RelationshipPropertyProducer.Random("random", 21, 42)
         ));
 
         paramsMap = new HashMap<>();
@@ -211,8 +210,8 @@ class GraphGenerateProcTest extends BaseProcTest {
         paramsMap.put(RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM");
 
         producers.add(Arguments.of(
-                paramsMap,
-                new RelationshipPropertyProducer.Random("random", 0, 1)
+            paramsMap,
+            new RelationshipPropertyProducer.Random("random", 0, 1)
         ));
 
         return producers.stream();
@@ -222,75 +221,69 @@ class GraphGenerateProcTest extends BaseProcTest {
         Collection<Arguments> producers = new ArrayList<>();
 
         producers.add(Arguments.of(
-                "Missing `name`",
-                map(
-                        "foobar", "baz"
-                ),
-                asList("`name`", "specified")
+            "Missing `name`",
+            map(
+                "foobar", "baz"
+            ),
+            asList("`name`", "specified")
         ));
 
         producers.add(Arguments.of(
-                "Missing `type`",
-                map(
-                        RELATIONSHIP_PROPERTY_NAME_KEY, "prop"
-                ),
-                asList("`type`", "specified")
+            "Missing `type`",
+            map(
+                RELATIONSHIP_PROPERTY_NAME_KEY, "prop"
+            ),
+            asList("`type`", "specified")
         ));
 
         producers.add(Arguments.of(
-                "Invalid type for `type`",
-                map(
-                        RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
-                        RELATIONSHIP_PROPERTY_TYPE_KEY, "foobar"
-                ),
-                asList("Unknown Relationship property generator", "foobar")
+            "Invalid type for `type`",
+            map(
+                RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
+                RELATIONSHIP_PROPERTY_TYPE_KEY, "foobar"
+            ),
+            asList("Unknown Relationship property generator", "foobar")
         ));
 
         producers.add(Arguments.of(
-                "Invalid type for `min`",
-                map(
-                        RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
-                        RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
-                        RELATIONSHIP_PROPERTY_MIN_KEY, "Zweiundvierzig"
-                ),
-                asList(RELATIONSHIP_PROPERTY_MIN_KEY, "of type `Double`", "`String`")
+            "Invalid type for `min`",
+            map(
+                RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
+                RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
+                RELATIONSHIP_PROPERTY_MIN_KEY, "Zweiundvierzig"
+            ),
+            asList(RELATIONSHIP_PROPERTY_MIN_KEY, "of type `Double`", "`String`")
         ));
 
         producers.add(Arguments.of(
-                "Invalid type for `max`",
-                map(
-                        RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
-                        RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
-                        RELATIONSHIP_PROPERTY_MIN_KEY, 0.0,
-                        RELATIONSHIP_PROPERTY_MAX_KEY, "Zweiundvierzig"
-                ),
-                asList(RELATIONSHIP_PROPERTY_MAX_KEY, "of type `Double`", "`String`")
+            "Invalid type for `max`",
+            map(
+                RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
+                RELATIONSHIP_PROPERTY_TYPE_KEY, "RANDOM",
+                RELATIONSHIP_PROPERTY_MIN_KEY, 0.0,
+                RELATIONSHIP_PROPERTY_MAX_KEY, "Zweiundvierzig"
+            ),
+            asList(RELATIONSHIP_PROPERTY_MAX_KEY, "of type `Double`", "`String`")
         ));
 
         producers.add(Arguments.of(
-                "Invalid type for `value`",
-                map(
-                        RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
-                        RELATIONSHIP_PROPERTY_TYPE_KEY, "FIXED",
-                        RELATIONSHIP_PROPERTY_VALUE_KEY, "Zweiundvierzig"
-                ),
-                asList(RELATIONSHIP_PROPERTY_VALUE_KEY, "of type `Double`", "`String`")
+            "Invalid type for `value`",
+            map(
+                RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
+                RELATIONSHIP_PROPERTY_TYPE_KEY, "FIXED",
+                RELATIONSHIP_PROPERTY_VALUE_KEY, "Zweiundvierzig"
+            ),
+            asList(RELATIONSHIP_PROPERTY_VALUE_KEY, "of type `Double`", "`String`")
         ));
 
         producers.add(Arguments.of(
-                "Null value for `value`",
-                map(
-                        RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
-                        RELATIONSHIP_PROPERTY_TYPE_KEY, "FIXED",
-                        RELATIONSHIP_PROPERTY_VALUE_KEY, null
-                ),
-                asList(RELATIONSHIP_PROPERTY_VALUE_KEY, "No value specified")
-        ));
-
-        producers.add(Arguments.of(
-                "Invalid type for `relationshipProperty`",
-                "some other config",
-                asList(RELATIONSHIP_PROPERTIES_KEY, "Map", "String")
+            "Null value for `value`",
+            map(
+                RELATIONSHIP_PROPERTY_NAME_KEY, "prop",
+                RELATIONSHIP_PROPERTY_TYPE_KEY, "FIXED",
+                RELATIONSHIP_PROPERTY_VALUE_KEY, null
+            ),
+            asList(RELATIONSHIP_PROPERTY_VALUE_KEY, "No value specified")
         ));
 
         return producers.stream();

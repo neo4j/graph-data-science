@@ -22,17 +22,12 @@ package org.neo4j.graphalgo.beta.generator;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.beta.generator.RelationshipPropertyProducer;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
-import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,9 +37,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_DISTRIBUTION_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MAX_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MIN_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_NAME_KEY;
@@ -53,33 +45,43 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_
 
 public final class GraphGenerateProc extends BaseProc {
 
-    public static final String DUMMY_RELATIONSHIP_NAME = "RELATIONSHIP";
-    public static final String RELATIONSHIP_SEED_KEY = "relationshipSeed";
+    private static final String DUMMY_RELATIONSHIP_NAME = "RELATIONSHIP";
 
-
-    @Procedure(name = "algo.beta.graph.generate", mode = Mode.READ)
-    @Description("CALL algo.beta.graph.generate(" +
-                 "name:String, nodeCount:Integer, averageDegree:Integer" +
-                 "{distribution: 'UNIFORM,RANDOM,POWERLAW', relationshipSeed: 42, relationshipProperty: {name: '[PROPERTY_NAME]' type: 'FIXED,RANDOM', min: 0.0, max: 1.0, value: 1.0}}) " +
-                 "YIELD name, nodes, relationships, relationshipSeed, generateMillis, averageDegree, relationshipDistribution, relationshipProperty")
+    @Procedure(name = "gds.beta.graph.generate", mode = Mode.READ)
     public Stream<GraphGenerationStats> generate(
-            @Name(value = "name") String name,
-            @Name(value = "nodeCount") Long nodeCount,
-            @Name(value = "averageDegree") Long averageDegree,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeCount") long nodeCount,
+        @Name(value = "averageDegree") long averageDegree,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        validateGraphName(getUsername(), graphName);
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-        GraphGenerationStats stats = runWithExceptionLogging(
-                "Graph generation failed",
-                () -> generateGraph(configuration, name, nodeCount, averageDegree));
-        return Stream.of(stats);
+        // input
+        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
+        RandomGraphGeneratorConfig config = RandomGraphGeneratorConfig.of(
+            getUsername(),
+            graphName,
+            nodeCount,
+            averageDegree,
+            cypherConfig
+        );
+        validateConfig(cypherConfig, config);
+
+        // computation
+        GraphGenerationStats result = runWithExceptionLogging(
+            "Graph creation failed",
+            () -> generateGraph(graphName, nodeCount, averageDegree, config)
+        );
+        // result
+        return Stream.of(result);
     }
 
     private GraphGenerationStats generateGraph(
-            ProcedureConfiguration config,
-            String name,
-            long nodeCount,
-            long averageDegree) {
+        String name,
+        long nodeCount,
+        long averageDegree,
+        RandomGraphGeneratorConfig config
+    ) {
         GraphGenerationStats stats = new GraphGenerationStats(name, averageDegree, config);
 
         if (GraphCatalog.exists(getUsername(), name)) {
@@ -95,10 +97,9 @@ public final class GraphGenerateProc extends BaseProc {
 
             if (generator.shouldGenerateRelationshipProperty()) {
                 Map<String, Map<String, Graph>> mapping = Collections.singletonMap(
-                        DUMMY_RELATIONSHIP_NAME,
-                        Collections.singletonMap(generator.getMaybePropertyProducer().get().getPropertyName(), graph)
+                    DUMMY_RELATIONSHIP_NAME,
+                    Collections.singletonMap(generator.getMaybePropertyProducer().get().getPropertyName(), graph)
                 );
-
                 graphFromType = GraphsByRelationshipType.of(mapping);
             } else {
                 graphFromType = GraphsByRelationshipType.of(graph);
@@ -112,77 +113,61 @@ public final class GraphGenerateProc extends BaseProc {
         return stats;
     }
 
-    RandomGraphGenerator initializeGraphGenerator(long nodeCount, long averageDegree, ProcedureConfiguration config) {
+    RandomGraphGenerator initializeGraphGenerator(long nodeCount, long averageDegree, RandomGraphGeneratorConfig config) {
         return new RandomGraphGenerator(
                 nodeCount,
                 averageDegree,
-                getRelationshipDistribution(config),
-                config.get(RELATIONSHIP_SEED_KEY, null),
-                getRelationshipPropertyProducer(config),
+                config.relationshipDistribution(),
+                config.relationshipSeed(),
+                getRelationshipPropertyProducer(config.relationshipProperty()),
                 AllocationTracker.EMPTY
         );
     }
 
-    private RelationshipDistribution getRelationshipDistribution(ProcedureConfiguration config) {
-        String distributionValue = config
-                .getString(RELATIONSHIP_DISTRIBUTION_KEY, RelationshipDistribution.UNIFORM.name())
-                .toLowerCase();
-        return RelationshipDistribution.valueOf(distributionValue.toUpperCase());
-    }
-
-    private Optional<RelationshipPropertyProducer> getRelationshipPropertyProducer(ProcedureConfiguration procedureConfig) {
-        Object maybeMap = procedureConfig.get(RELATIONSHIP_PROPERTY_KEY, null);
-
-        if ((maybeMap instanceof Map)) {
-            Map<String, Object> configMap = (Map<String, Object>) maybeMap;
-            if (configMap.isEmpty()) {
-                return Optional.empty();
-            }
-            CypherMapWrapper config = CypherMapWrapper.create(configMap);
-
-            String propertyName = config.requireString(RELATIONSHIP_PROPERTY_NAME_KEY);
-            String generatorString = config.requireString(RELATIONSHIP_PROPERTY_TYPE_KEY);
-
-            RelationshipPropertyProducer propertyProducer;
-            switch (generatorString.toLowerCase()) {
-                case "random":
-                    double min = config.getDouble(RELATIONSHIP_PROPERTY_MIN_KEY, 0.0);
-                    double max = config.getDouble(RELATIONSHIP_PROPERTY_MAX_KEY, 1.0);
-                    propertyProducer = RelationshipPropertyProducer.random(propertyName, min, max);
-                    break;
-
-                case "fixed":
-                    double value = config.requireDouble(RELATIONSHIP_PROPERTY_VALUE_KEY);
-                    propertyProducer = RelationshipPropertyProducer.fixed(propertyName, value);
-                    break;
-
-                default:
-                    throw new IllegalArgumentException("Unknown Relationship property generator: " + generatorString);
-            }
-            return Optional.of(propertyProducer);
-        } else if (maybeMap == null) {
+    private Optional<RelationshipPropertyProducer> getRelationshipPropertyProducer(Map<String, Object> configMap) {
+        if (configMap.isEmpty()) {
             return Optional.empty();
-        } else {
-            throw new IllegalArgumentException(String.format(
-                    "Expected the value of `%s` to be a Map but got `%s`",
-                    RELATIONSHIP_PROPERTIES_KEY,
-                    maybeMap.getClass().getSimpleName()));
         }
+        CypherMapWrapper config = CypherMapWrapper.create(configMap);
+
+        String propertyName = config.requireString(RELATIONSHIP_PROPERTY_NAME_KEY);
+        String generatorString = config.requireString(RELATIONSHIP_PROPERTY_TYPE_KEY);
+
+        RelationshipPropertyProducer propertyProducer;
+        switch (generatorString.toLowerCase()) {
+            case "random":
+                double min = config.getDouble(RELATIONSHIP_PROPERTY_MIN_KEY, 0.0);
+                double max = config.getDouble(RELATIONSHIP_PROPERTY_MAX_KEY, 1.0);
+                propertyProducer = RelationshipPropertyProducer.random(propertyName, min, max);
+                break;
+
+            case "fixed":
+                double value = config.requireDouble(RELATIONSHIP_PROPERTY_VALUE_KEY);
+                propertyProducer = RelationshipPropertyProducer.fixed(propertyName, value);
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unknown Relationship property generator: " + generatorString);
+        }
+        return Optional.of(propertyProducer);
     }
 
     public static class GraphGenerationStats {
         public String name;
-        public long nodes, relationships, generateMillis;
+        public long nodes;
+        public long relationships;
+        public long generateMillis;
         public Long relationshipSeed;
         public double averageDegree;
-        public Object relationshipDistribution, relationshipProperty;
+        public Object relationshipDistribution;
+        public Object relationshipProperty;
 
-        GraphGenerationStats(String graphName, double averageDegree, ProcedureConfiguration configuration) {
+        GraphGenerationStats(String graphName, double averageDegree, RandomGraphGeneratorConfig configuration) {
             this.name = graphName;
             this.averageDegree = averageDegree;
-            this.relationshipDistribution = configuration.getString(RELATIONSHIP_DISTRIBUTION_KEY, "UNIFORM");
-            this.relationshipProperty = configuration.get(RELATIONSHIP_PROPERTY_KEY, null);
-            this.relationshipSeed = configuration.get(RELATIONSHIP_SEED_KEY, null);
+            this.relationshipDistribution = configuration.relationshipDistribution().name();
+            this.relationshipProperty = configuration.relationshipProperty();
+            this.relationshipSeed = configuration.relationshipSeed();
         }
     }
 }

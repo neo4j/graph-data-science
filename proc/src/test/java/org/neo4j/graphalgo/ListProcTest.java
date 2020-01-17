@@ -48,12 +48,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ListProcTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
-        "algo.beta.graph.generate",
         "algo.graph.info",
         "algo.graph.list",
         "algo.graph.load",
         "algo.graph.load.memrec",
         "algo.graph.remove",
+
+        "gds.beta.graph.generate",
 
         "gds.beta.k1coloring.stream",
         "gds.beta.k1coloring.stream.estimate",

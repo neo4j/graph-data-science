@@ -102,16 +102,6 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
-    private void validateGraphName(String username, String graphName) {
-        CypherMapWrapper.failOnBlank("graphName", graphName);
-        if (GraphCatalog.exists(username, graphName)) {
-            throw new IllegalArgumentException(String.format(
-                "A graph with name '%s' already exists.",
-                graphName
-            ));
-        }
-    }
-
     private GraphCreateResult createGraph(GraphCreateConfig config, Class<? extends GraphFactory> factoryClazz) {
         GraphCreateResult.Builder builder = new GraphCreateResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {

@@ -110,14 +110,6 @@ public final class RandomGraphGenerator {
         return relationshipsImporter.buildGraph();
     }
 
-    long getNodeCount() {
-        return nodeCount;
-    }
-
-    long getAverageDegree() {
-        return averageDegree;
-    }
-
     public RelationshipDistribution getRelationshipDistribution() {
         return relationshipDistribution;
     }

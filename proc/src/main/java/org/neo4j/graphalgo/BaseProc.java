@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.BaseConfig;
@@ -86,6 +87,16 @@ public abstract class BaseProc {
 
     protected void validateConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
         cypherConfig.withoutAny(config.configKeys()).requireEmpty();
+    }
+
+    protected void validateGraphName(String username, String graphName) {
+        CypherMapWrapper.failOnBlank("graphName", graphName);
+        if (GraphCatalog.exists(username, graphName)) {
+            throw new IllegalArgumentException(String.format(
+                "A graph with name '%s' already exists.",
+                graphName
+            ));
+        }
     }
 
     static final class OutputFieldParser {

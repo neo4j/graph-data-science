@@ -62,6 +62,19 @@ public enum RelationshipDistribution {
         }
     };
 
+    public static RelationshipDistribution parse(Object object) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof String) {
+            return RelationshipDistribution.valueOf(((String) object).toUpperCase());
+        }
+        if (object instanceof RelationshipDistribution) {
+            return (RelationshipDistribution) object;
+        }
+        return null;
+    }
+
     /**
      * Produces a unary function which accepts a node id parameter and returns the number of outgoing relationships
      * that should be generated for this node.
