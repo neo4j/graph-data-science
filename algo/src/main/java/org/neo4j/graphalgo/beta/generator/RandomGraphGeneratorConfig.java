@@ -35,6 +35,13 @@ import java.util.Map;
 public interface RandomGraphGeneratorConfig extends BaseConfig {
 
     String RELATIONSHIP_SEED_KEY = "relationshipSeed";
+    String RELATIONSHIP_PROPERTY_KEY = "relationshipProperty";
+    String RELATIONSHIP_DISTRIBUTION_KEY = "relationshipDistribution";
+    String RELATIONSHIP_PROPERTY_NAME_KEY = "name";
+    String RELATIONSHIP_PROPERTY_TYPE_KEY = "type";
+    String RELATIONSHIP_PROPERTY_MIN_KEY = "min";
+    String RELATIONSHIP_PROPERTY_MAX_KEY = "max";
+    String RELATIONSHIP_PROPERTY_VALUE_KEY = "value";
 
     @Configuration.Parameter
     String graphName();

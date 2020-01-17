@@ -35,20 +35,6 @@ public final class ProcedureConstants {
     public static final String RELATIONSHIP_WEIGHT_KEY = "relationshipWeight";
     public static final String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
 
-    // graph.generate specific
-
-    // also refers to the relationship property  to be used in algorithms that make use of a property
-    //  - most often interpreted as a weight of some sort.
-    //  That property is also considered in graph.load, despite being documented
-    public static final String RELATIONSHIP_PROPERTY_KEY = "relationshipProperty";
-
-    public static final String RELATIONSHIP_DISTRIBUTION_KEY = "relationshipDistribution";
-    public static final String RELATIONSHIP_PROPERTY_NAME_KEY = "name";
-    public static final String RELATIONSHIP_PROPERTY_TYPE_KEY = "type";
-    public static final String RELATIONSHIP_PROPERTY_MIN_KEY = "min";
-    public static final String RELATIONSHIP_PROPERTY_MAX_KEY = "max";
-    public static final String RELATIONSHIP_PROPERTY_VALUE_KEY = "value";
-
     // algos specific
     public static final String SEED_PROPERTY_KEY = "seedProperty";
 

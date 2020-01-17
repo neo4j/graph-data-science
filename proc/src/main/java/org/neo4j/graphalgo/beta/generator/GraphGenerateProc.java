@@ -37,11 +37,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MAX_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MIN_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_NAME_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_TYPE_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_VALUE_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MAX_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MIN_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_NAME_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_TYPE_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
 
 public final class GraphGenerateProc extends BaseProc {
 

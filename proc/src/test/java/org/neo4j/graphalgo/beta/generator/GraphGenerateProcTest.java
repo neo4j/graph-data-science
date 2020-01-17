@@ -46,13 +46,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_SEED_KEY;
 import static org.neo4j.graphalgo.core.CypherMapWrapper.create;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_DISTRIBUTION_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MAX_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_MIN_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_NAME_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_TYPE_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_VALUE_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_DISTRIBUTION_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MAX_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MIN_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_NAME_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_TYPE_KEY;
+import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 class GraphGenerateProcTest extends BaseProcTest {
