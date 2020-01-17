@@ -18,9 +18,8 @@ This section includes:
 
 * <<algorithm-all-pairs-shortest-path-context, History and explanation>>
 * <<algorithm-all-pairs-shortest-path-usecase, Use-cases - when to use the All Pairs Shortest Path algorithm>>
+* <<algorithm-all-pairs-shortest-path-syntax, Syntax>>
 * <<algorithm-all-pairs-shortest-path-sample, All Pairs Shortest Path algorithm sample>>
-* <<algorithm-all-pairs-shortest-path-hgp, Huge graph projection>>
-* <<algorithm-all-pairs-shortest-path-imp, Implementations>>
 
 
 [[algorithm-all-pairs-shortest-path-context]]
@@ -48,6 +47,26 @@ Plain cypher does not support filtering `Infinity` values, so `gds.util.isFinite
 // end::use-case[]
 
 
+[[algorithm-all-pairs-shortest-path-syntax]]
+== Syntax
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+CALL gds.alpha.allShortestPaths.stream(configuration: MAP)
+YIELD startNodeId, targetNodeId, distance
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                | Type    | Default                | Optional | Description
+| weightProperty      | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| direction           | string  | both                   | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
+| concurrency         | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency     | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+|===
+
+
 [[algorithm-all-pairs-shortest-path-sample]]
 == All Pairs Shortest Path algorithm sample
 
@@ -56,37 +75,69 @@ image::sssp.png[]
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/single-shortest-path.cypher[tag=create-sample-graph]
+CREATE (a:Loc {name:'A'}),
+      (b:Loc {name:'B'}),
+      (c:Loc {name:'C'}),
+      (d:Loc {name:'D'}),
+      (e:Loc {name:'E'}),
+      (f:Loc {name:'F'}),
+      (a)-[:ROAD {cost:50}]->(b),
+      (a)-[:ROAD {cost:50}]->(c),
+      (a)-[:ROAD {cost:100}]->(d),
+      (b)-[:ROAD {cost:40}]->(d),
+      (c)-[:ROAD {cost:40}]->(d),
+      (c)-[:ROAD {cost:80}]->(e),
+      (d)-[:ROAD {cost:30}]->(e),
+      (d)-[:ROAD {cost:80}]->(f),
+      (e)-[:ROAD {cost:40}]->(f);
+
 ----
 
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-include::scripts/single-shortest-path.cypher[tag=all-pairs-sample-graph]
+CALL gds.alpha.allShortestPaths.stream({
+  nodeProjection: 'Loc',
+  relationshipProjection: {
+    ROAD: {
+      type: 'ROAD',
+      properties: 'cost',
+      defaultValue: 1.0
+    }
+  },
+  weightProperty: 'cost'
+})
+YIELD sourceNodeId, targetNodeId, distance
+WITH sourceNodeId, targetNodeId, distance
+WHERE algo.isFinite(distance) = true
+
+MATCH (source:Loc) WHERE id(source) = sourceNodeId
+MATCH (target:Loc) WHERE id(target) = targetNodeId
+WITH source, target, distance WHERE source <> target
+
+RETURN source.name AS source, target.name AS target, distance
+ORDER BY distance DESC, source ASC, target ASC
+LIMIT 10
 ----
 
-// tag::all-pairs-stream-sample-graph-result[]
 .Results
 [opts="header",cols="1,1,1"]
 |===
 | Source | Target | Cost
-| A      | F      | 100
-| C      | F      | 90
-| B      | F      | 90
-| A      | E      | 80
+| A      | F      | 160
+| A      | E      | 120
+| B      | F      | 110
+| C      | F      | 110
+| A      | D      | 90
+| B      | E      | 70
 | C      | E      | 70
-| B      | E      | 80
+| D      | F      | 70
 | A      | B      | 50
-| D      | F      | 50
 | A      | C      | 50
-| A      | D      | 50
 |===
-// end::all-pairs-stream-sample-graph-result[]
 
-// tag::all-pairs-stream-sample-graph-explanation[]
 This query returned the top 10 pairs of nodes that are the furthest away from each other.
 F and E appear to be quite distant from the others.
-// end::all-pairs-stream-sample-graph-explanation[]
 
 For now, only single-source shortest path support loading the relationship as undirected, but we can use Cypher loading to help us solve this.
 Undirected graph can be represented as https://en.wikipedia.org/wiki/Bidirected_graph[Bidirected graph], which is a directed graph in which the reverse of every relationship is also a relationship.
@@ -98,65 +149,36 @@ This is applicable to all other algorithms that use Cypher loading.
 .The following will run the algorithm, treating the graph as undirected:
 [source, cypher]
 ----
-include::scripts/single-shortest-path.cypher[tag=all-pairs-bidirected-graph]
+CALL gds.alpha.allShortestPaths.stream({
+  nodeQuery:'MATCH (n:Loc) RETURN id(n) as id',
+  relationshipQuery:'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) as source, id(p) as target, r.cost as weight',
+  weightProperty: 'cost'
+})
+YIELD sourceNodeId, targetNodeId, distance
+WITH sourceNodeId, targetNodeId, distance
+WHERE algo.isFinite(distance) = true
+
+MATCH (source:Loc) WHERE id(source) = sourceNodeId
+MATCH (target:Loc) WHERE id(target) = targetNodeId
+WITH source, target, distance WHERE source <> target
+
+RETURN source.name AS source, target.name AS target, distance
+ORDER BY distance DESC
+LIMIT 10
 ----
 
-
-[[algorithm-all-pairs-shortest-path-hgp]]
-== Huge graph projection
-
-include::huge-projection.adoc[tag=explanation]
-
-.Set `graph:'huge'` in the config:
-
-[source, cypher]
-----
-include::scripts/single-shortest-path.cypher[tag=all-pairs-huge-projection]
-----
-
-
-[[algorithm-all-pairs-shortest-path-imp]]
-== Implementations
-
-`algo.allShortestPaths.stream`
-
-* Find shortest paths between all pairs of nodes.
-* Returns a stream of source-target node to distance tuples for each pair of nodes.
-* Writeback is not supported.
-* If initialized with an non-existing weight-property, it will treat the graph as unweighted.
-
-ifdef::implementation[]
-// tag::implementation[]
-
-
-ifndef::env-docs[]
-== References
-
-// tag::references[]
-* [1] http://web.mit.edu/urban_or_book/www/book/[Urban Operations Research^] - Richard C. Larson and Amedeo R. Odoni
-* [2] https://cs.uwaterloo.ca/research/tr/2011/CS-2011-21.pdf[REWIRE: An optimization-based framework for unstructured data center network design^] - Andrew R. Curtis, Tommy Carpenter, Mustafa Elsheikh, Alejandro López-Ortiz, S. Keshav
-// end::references[]
-endif::env-docs[]
-
-
-== Implementation details
-
-:leveloffset: +1
-
-
-== Details
-
-
-=== algo.allShortestPaths.stream
-
-- Returns a stream of source-target node to distance tuples for each pair of nodes
-- Since all nodeId's have already been ordered by the idMapping we can use an integer instead of a queue which just counts up for each startNodeId as long as it is < nodeCount.
-- Each thread tries to take one int from the counter at one time and starts its computation on it.
-- The {@link AllShortestPaths#concurrency} value determines the count of workers that should be spawned.
-- Due to the high memory footprint the result set would have we emit each result into a blocking queue.
-  The result stream takes elements from the queue while the workers add elements to it.
-- The result stream is limited by N^2. If the stream gets closed prematurely the workers get closed too.
-- Writeback not supported!
-
-// end::implementation[]
-endif::implementation[]
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| Source | Target | Cost
+| A      | F      | 160
+| F      | A      | 160
+| A      | E      | 120
+| E      | A      | 120
+| B      | F      | 110
+| C      | F      | 110
+| F      | B      | 110
+| F      | C      | 110
+| A      | D      | 90
+| D      | A      | 90
+|===

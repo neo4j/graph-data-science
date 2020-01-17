@@ -61,7 +61,7 @@ These algorithms help find the shortest path or evaluate the availability and qu
 
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/shortest-path/[Shortest Path^] (`algo.shortestPath`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/single-source-shortest-path/[Single Source Shortest Path^] (`algo.shortestPath.deltastepping`)
-* https://neo4j.com/docs/graph-algorithms/current/algorithms/all-pairs-shortest-path/[All Pairs Shortest Path^] (`algo.allShortestPaths`)
+* https://neo4j.com/docs/graph-algorithms/current/algorithms/all-pairs-shortest-path/[All Pairs Shortest Path^] (`gds.alpha.allShortestPaths`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/a_star/[A*^] (`algo.shortestPath.astar`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/yen-s-k-shortest-path/[Yen’s K-shortest paths^] (`algo.kShortestPaths`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/random-walk/[Random Walk^] (`algo.randomWalk`)
