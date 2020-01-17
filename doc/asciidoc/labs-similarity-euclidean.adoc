@@ -286,7 +286,7 @@ We can see in these results that Zhen and Arya and Zhen and Karin have been remo
 We might decide that we don't want to see users with a similarity above 4 returned in our results.
 If so, we can filter those out by passing in the `similarityCutoff` parameter.
 
-.The following will return a stream of node pairs that have a similarity of at most 17, along with their euclidean distance:
+.The following will return a stream of node pairs that have a similarity of at most 4, along with their euclidean distance:
 [source, cypher]
 ----
  MATCH (p:Person), (c:Cuisine)
