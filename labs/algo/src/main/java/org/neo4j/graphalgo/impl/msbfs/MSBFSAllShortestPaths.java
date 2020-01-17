@@ -86,14 +86,16 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
                         return done();
                     }
                     return result;
-                } catch (InterruptedException e1) {
-                    throw new RuntimeException(e1);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         };
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
-            iterator,
-            0), false);
+
+        return StreamSupport.stream(
+            Spliterators.spliteratorUnknownSize(iterator, 0),
+            false
+        );
     }
 
     @Override
