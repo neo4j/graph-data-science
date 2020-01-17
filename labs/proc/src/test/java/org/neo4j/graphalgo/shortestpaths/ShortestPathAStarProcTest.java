@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.shortestpath;
+package org.neo4j.graphalgo.shortestpaths;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,7 +82,7 @@ class ShortestPathAStarProcTest extends BaseProcTest {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-        registerProcedures(ShortestPathProc.class);
+        registerProcedures(ShortestPathAStarProc.class);
     }
 	
     @AfterEach

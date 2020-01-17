@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.shortestpath;
+package org.neo4j.graphalgo.shortestpaths;
 
 import com.carrotsearch.hppc.IntArrayDeque;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -30,11 +30,10 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
-import org.neo4j.graphalgo.impl.ShortestPathDijkstra;
+import org.neo4j.graphalgo.impl.shortestpaths.DijkstraConfig;
+import org.neo4j.graphalgo.impl.shortestpaths.ShortestPathDijkstra;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
-import org.neo4j.graphalgo.shortestPath.DijkstraConfig;
-import org.neo4j.graphalgo.shortestPath.DijkstraConfigImpl;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -116,9 +115,9 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
+        CypherMapWrapper userInput
     ) {
-        return new DijkstraConfigImpl(graphName, maybeImplicitCreate, username, config);
+        return DijkstraConfig.of(graphName, maybeImplicitCreate, username, userInput);
     }
 
     @Override

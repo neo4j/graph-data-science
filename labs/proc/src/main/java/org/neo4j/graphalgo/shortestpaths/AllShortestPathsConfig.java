@@ -17,30 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.shortestPath;
+package org.neo4j.graphalgo.shortestpaths;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WeightConfig;
-import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Node;
+
+import java.util.Optional;
 
 import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
 @ValueClass
-@Configuration("DijkstraConfigImpl")
-public interface DijkstraConfig extends AlgoBaseConfig, WeightConfig, WriteConfig {
-
-    String WRITE_PROPERTY_DEFAULT_VALUE = "sssp";
+@Configuration("AllShortestPathsConfigImpl")
+public interface AllShortestPathsConfig extends AlgoBaseConfig, WeightConfig {
 
     @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
     @Value.Default
     default Direction direction() {
-        return OUTGOING;
+        return Direction.OUTGOING;
     }
 
     @Configuration.Ignore
@@ -49,27 +49,17 @@ public interface DijkstraConfig extends AlgoBaseConfig, WeightConfig, WriteConfi
         return direction() == BOTH ? OUTGOING : direction();
     }
 
-    @Override
-    @Value.Default
-    default String writeProperty() {
-        return WRITE_PROPERTY_DEFAULT_VALUE;
-    }
-
-    @Configuration.ConvertWith("nodeId")
-    long startNode();
-
-    @Configuration.ConvertWith("nodeId")
-    long endNode();
-
-    static DijkstraConfig of(long startNode, long endNode) {
-        return ImmutableDijkstraConfig.builder().startNode(startNode).endNode(endNode).build();
-    }
-
-    static DijkstraConfig of(long startNode, long endNode, Direction direction) {
-        return ImmutableDijkstraConfig.builder().startNode(startNode).endNode(endNode).direction(direction).build();
-    }
-
-    static long nodeId(Node node) {
-        return node.getId();
+    static AllShortestPathsConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper userInput
+    ) {
+        return new AllShortestPathsConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            userInput
+        );
     }
 }

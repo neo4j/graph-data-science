@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.shortestpath;
+package org.neo4j.graphalgo.shortestpaths;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.ShortestPathAStar;
+import org.neo4j.graphalgo.impl.shortestpaths.ShortestPathAStar;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
@@ -39,14 +39,14 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ShortestPathProc extends AlgoBaseProc<ShortestPathAStar, ShortestPathAStar, ShortestPathConfig> {
+public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, ShortestPathAStar, ShortestPathAStarConfig> {
 
     @Procedure(name = "gds.alpha.shortestPath.astar.stream", mode = READ)
     public Stream<ShortestPathAStar.Result> astarStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ShortestPathAStar, ShortestPathAStar, ShortestPathConfig> computationResult = compute(
+        ComputationResult<ShortestPathAStar, ShortestPathAStar, ShortestPathAStarConfig> computationResult = compute(
             graphNameOrConfig,
             configuration,
             false,
@@ -66,7 +66,7 @@ public class ShortestPathProc extends AlgoBaseProc<ShortestPathAStar, ShortestPa
     @Override
     protected void validateGraphCreateConfig(
         GraphCreateConfig graphCreateConfig,
-        ShortestPathConfig config
+        ShortestPathAStarConfig config
     ) {
         if (config.direction() == Direction.BOTH) {
             graphCreateConfig.relationshipProjection().projections().entrySet().stream()
@@ -82,21 +82,21 @@ public class ShortestPathProc extends AlgoBaseProc<ShortestPathAStar, ShortestPa
     }
 
     @Override
-    protected ShortestPathConfig newConfig(
+    protected ShortestPathAStarConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ShortestPathConfig.of(graphName, maybeImplicitCreate, username, config);
+        return ShortestPathAStarConfig.of(graphName, maybeImplicitCreate, username, config);
     }
 
     @Override
-    protected AlgorithmFactory<ShortestPathAStar, ShortestPathConfig> algorithmFactory(ShortestPathConfig config) {
-        return new AlphaAlgorithmFactory<ShortestPathAStar, ShortestPathConfig>() {
+    protected AlgorithmFactory<ShortestPathAStar, ShortestPathAStarConfig> algorithmFactory(ShortestPathAStarConfig config) {
+        return new AlphaAlgorithmFactory<ShortestPathAStar, ShortestPathAStarConfig>() {
             @Override
             public ShortestPathAStar build(
-                Graph graph, ShortestPathConfig configuration, AllocationTracker tracker, Log log
+                Graph graph, ShortestPathAStarConfig configuration, AllocationTracker tracker, Log log
             ) {
                 return new ShortestPathAStar(
                     graph,

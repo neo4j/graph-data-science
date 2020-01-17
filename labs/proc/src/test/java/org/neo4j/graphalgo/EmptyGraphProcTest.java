@@ -26,8 +26,9 @@ import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
 import org.neo4j.graphalgo.scc.SccProc;
-import org.neo4j.graphalgo.shortestpath.AllShortestPathsProc;
-import org.neo4j.graphalgo.shortestpath.ShortestPathProc;
+import org.neo4j.graphalgo.shortestpaths.AllShortestPathsProc;
+import org.neo4j.graphalgo.shortestpaths.ShortestPathAStarProc;
+import org.neo4j.graphalgo.shortestpaths.ShortestPathsProc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphalgo.triangle.BalancedTriadsProc;
@@ -55,7 +56,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             SpanningTreeProc.class,
             SampledBetweennessCentralityProc.class,
             ShortestPathDeltaSteppingProc.class,
-            ShortestPathProc.class,
+            ShortestPathAStarProc.class,
             ShortestPathsProc.class,
             SccProc.class,
             TriangleCountProc.class,

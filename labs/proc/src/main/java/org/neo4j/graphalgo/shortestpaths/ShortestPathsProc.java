@@ -17,19 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.shortestpaths;
 
 import com.carrotsearch.hppc.IntDoubleMap;
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
-import org.neo4j.graphalgo.impl.ShortestPaths;
+import org.neo4j.graphalgo.impl.shortestpaths.ShortestPaths;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.results.ShortestPathResult;
-import org.neo4j.graphalgo.shortestpath.ShortestPathsConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -83,7 +85,7 @@ public class ShortestPathsProc extends AlgoBaseProc<ShortestPaths, ShortestPaths
             algorithm.release();
 
             ShortestPathsConfig config = computationResult.config();
-            NodePropertyExporter.of(api, computationResult.graph(), algorithm.terminationFlag)
+            NodePropertyExporter.of(api, computationResult.graph(), algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build()
