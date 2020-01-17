@@ -79,7 +79,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
                        "})" +
                        " YIELD sourceNodeId, targetNodeId, distance" +
                        " WITH sourceNodeId, targetNodeId, distance" +
-                       " WHERE algo.isFinite(distance) = true" +
+                       " WHERE gds.util.isFinite(distance) = true" +
                        " MATCH (source:Loc) WHERE id(source) = sourceNodeId" +
                        " MATCH (target:Loc) WHERE id(target) = targetNodeId" +
                        " WITH source, target, distance WHERE source <> target" +
@@ -116,7 +116,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
                        "})" +
                        " YIELD sourceNodeId, targetNodeId, distance" +
                        " WITH sourceNodeId, targetNodeId, distance" +
-                       " WHERE algo.isFinite(distance) = true" +
+                       " WHERE gds.util.isFinite(distance) = true" +
                        " MATCH (source:Loc) WHERE id(source) = sourceNodeId" +
                        " MATCH (target:Loc) WHERE id(target) = targetNodeId" +
                        " WITH source, target, distance WHERE source <> target" +
