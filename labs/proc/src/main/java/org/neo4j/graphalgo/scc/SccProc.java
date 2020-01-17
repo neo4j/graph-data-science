@@ -17,8 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.scc;
 
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.AlphaAlgorithmFactory;
+import org.neo4j.graphalgo.impl.scc.SccConfig;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -79,7 +83,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         log.info("Scc: overall memory usage: %s", tracker.getUsageString());
 
         try (ProgressTimer ignored = builder.timeWrite()) {
-            NodePropertyExporter.of(api, graph, algorithm.terminationFlag)
+            NodePropertyExporter.of(api, graph, algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build()

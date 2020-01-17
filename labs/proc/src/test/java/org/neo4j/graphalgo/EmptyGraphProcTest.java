@@ -25,9 +25,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
+import org.neo4j.graphalgo.scc.SccProc;
 import org.neo4j.graphalgo.shortestpath.AllShortestPathsProc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
+import org.neo4j.graphalgo.triangle.BalancedTriadsProc;
+import org.neo4j.graphalgo.triangle.TriangleCountProc;
+import org.neo4j.graphalgo.triangle.TriangleProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

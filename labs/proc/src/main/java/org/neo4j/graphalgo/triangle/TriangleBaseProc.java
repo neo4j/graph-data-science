@@ -18,8 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.triangle;
 
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 

@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
+import org.neo4j.graphalgo.scc.SccProc;
 import org.neo4j.graphalgo.shortestpath.DijkstraProc;
 import org.neo4j.graphalgo.shortestpath.KShortestPathsProc;
 import org.neo4j.graphalgo.shortestpath.AllShortestPathsProc;
@@ -43,6 +44,9 @@ import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphalgo.traverse.TraverseProc;
+import org.neo4j.graphalgo.triangle.BalancedTriadsProc;
+import org.neo4j.graphalgo.triangle.TriangleCountProc;
+import org.neo4j.graphalgo.triangle.TriangleProc;
 import org.neo4j.graphalgo.walking.RandomWalkProc;
 
 import java.util.Collection;

@@ -17,10 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.triangle;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 import org.neo4j.graphalgo.impl.triangle.TriangleStream;
 
