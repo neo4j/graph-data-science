@@ -36,4 +36,5 @@ public abstract class AbstractProjections<P extends ElementProjection> {
             .flatMap(p -> p.properties().mappings().stream().map(PropertyMapping::propertyKey))
             .collect(Collectors.toSet());
     }
+
 }

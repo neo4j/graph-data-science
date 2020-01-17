@@ -149,8 +149,6 @@ public abstract class PropertyMapping {
         return new AbstractMap.SimpleImmutableEntry<>(propertyKey(), value);
     }
 
-
-
     public PropertyMapping setNonDefaultAggregation(DeduplicationStrategy deduplicationStrategy) {
         if (deduplicationStrategy == DeduplicationStrategy.DEFAULT || deduplicationStrategy() != DeduplicationStrategy.DEFAULT) {
             return this;
