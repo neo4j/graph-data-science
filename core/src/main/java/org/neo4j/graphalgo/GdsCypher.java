@@ -23,6 +23,7 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.cypher.v3_5.CypherPrinter;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
@@ -38,8 +39,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
+import static org.neo4j.graphalgo.AbstractRelationshipProjection.PROJECTION_KEY;
+import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
+import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.graphalgo.Projection.NATURAL;
+import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_VALUE_KEY;
+import static org.neo4j.graphalgo.PropertyMapping.PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.DeduplicationStrategy.DEFAULT;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE, depluralize = true, deepImmutablesDetection = true)
 public abstract class GdsCypher {
@@ -72,7 +86,7 @@ public abstract class GdsCypher {
          * or {@link #withRelationshipProperty(String)} or their variants.
          */
         default QueryBuilder loadEverything() {
-            return loadEverything(Projection.NATURAL);
+            return loadEverything(NATURAL);
         }
 
         /**
@@ -113,7 +127,10 @@ public abstract class GdsCypher {
         }
 
         default ImplicitCreationBuildStage withRelationshipType(String type, Projection projection) {
-            return withRelationshipType(type, RelationshipProjection.builder().type(type).projection(projection).build());
+            return withRelationshipType(
+                type,
+                RelationshipProjection.builder().type(type).projection(projection).build()
+            );
         }
 
         default ImplicitCreationBuildStage withRelationshipType(String type, String neoType) {
@@ -389,29 +406,22 @@ public abstract class GdsCypher {
                 parameters.size() + ADDITIONAL_PARAMETERS_FOR_IMPLICIT_GRAPH_CREATION
             );
 
-            Object nodeProjection = config.nodeProjection().toMinimalObject();
-            Object relationshipProjection = config.relationshipProjection().toMinimalObject();
+            Optional<Object> nodeProjection = toMinimalObject(config.nodeProjection()).toObject();
+            Optional<Object> relationshipProjection = toMinimalObject(config.relationshipProjection()).toObject();
             if (executionMode == InternalExecutionMode.GRAPH_CREATE) {
-                queryArguments.add(PRINTER.toCypherString(nodeProjection));
-                queryArguments.add(PRINTER.toCypherString(relationshipProjection));
+                queryArguments.add(PRINTER.toCypherString(nodeProjection.orElse(emptyMap())));
+                queryArguments.add(PRINTER.toCypherString(relationshipProjection.orElse(emptyMap())));
             } else {
-                if (nodeProjection != null) {
-                    newParameters.put("nodeProjection", nodeProjection);
-                }
-                if (relationshipProjection != null) {
-                    newParameters.put("relationshipProjection", relationshipProjection);
-                }
+                nodeProjection.ifPresent(np -> newParameters.put("nodeProjection", np));
+                relationshipProjection.ifPresent(rp -> newParameters.put("relationshipProjection", rp));
             }
 
-            Object nodeProperties = config.nodeProperties().toMinimalObject(false);
-            if (nodeProperties != null) {
-                newParameters.put("nodeProperties", nodeProperties);
-            }
-            Object relationshipProperties = config.relationshipProperties().toMinimalObject(true);
-            if (relationshipProperties != null) {
-                newParameters.put("relationshipProperties", nodeProperties);
-            }
-
+            toMinimalObject(config.nodeProperties(), false)
+                .toObject()
+                .ifPresent(np -> newParameters.put("nodeProperties", np));
+            toMinimalObject(config.relationshipProperties(), false)
+                .toObject()
+                .ifPresent(rp -> newParameters.put("relationshipProperties", rp));
 
             newParameters.putAll(parameters);
             parameters = newParameters;
@@ -611,5 +621,211 @@ public abstract class GdsCypher {
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(PropertyMappings.of(relProperties))
             .build();
+    }
+
+    @ValueClass
+    @Value.Immutable(singleton = true)
+    interface MinimalObject {
+        Optional<String> string();
+
+        Optional<Map<String, Object>> map();
+
+        default boolean isEmpty() {
+            return !string().isPresent() && !map().isPresent();
+        }
+
+        default MinimalObject map(
+            Function<String, MinimalObject> string,
+            Function<Map<String, Object>, MinimalObject> map
+        ) {
+            return fold(string, map).orElse(empty());
+        }
+
+        default MinimalObject map(Function<Map<String, Object>, MinimalObject> map) {
+            return fold(MinimalObject::string, map).orElse(empty());
+        }
+
+        default Optional<Object> toObject() {
+            return fold(s -> s, m -> m);
+        }
+
+        default <R> Optional<R> fold(
+            Function<String, R> string,
+            Function<Map<String, Object>, R> map
+        ) {
+            if (string().isPresent()) {
+                return Optional.of(string.apply(string().get()));
+            }
+            if (map().isPresent()) {
+                return Optional.of(map.apply(map().get()));
+            }
+            return Optional.empty();
+        }
+
+        @Value.Check
+        default void validate() {
+            if (string().isPresent() && map().isPresent()) {
+                throw new IllegalStateException("Cannot be both, string and map");
+            }
+        }
+
+        static MinimalObject string(String value) {
+            return ImmutableMinimalObject.builder().string(value).build();
+        }
+
+        static MinimalObject map(Map<String, Object> value) {
+            if (value.isEmpty()) {
+                return empty();
+            }
+            return ImmutableMinimalObject.builder().map(value).build();
+        }
+
+        static MinimalObject map(String key, Object value) {
+            return map(singletonMap(key, value));
+        }
+
+        static MinimalObject empty() {
+            return ImmutableMinimalObject.of();
+        }
+    }
+
+    private static <P extends ElementProjection> MinimalObject toMinimalObject(
+        AbstractProjections<P> allProjections
+    ) {
+        Map<ElementIdentifier, P> projections = allProjections.projections();
+        if (projections.isEmpty()) {
+            return MinimalObject.empty();
+        }
+        if (projections.size() == 1) {
+            Map.Entry<ElementIdentifier, P> entry = projections.entrySet().iterator().next();
+            ElementIdentifier identifier = entry.getKey();
+            P projection = entry.getValue();
+            if (PROJECT_ALL.equals(identifier) && isAllDefault(projection)) {
+                return MinimalObject.string(PROJECT_ALL.name);
+            }
+            MinimalObject projectionObject = toMinimalObject(projection, identifier);
+            return projectionObject.map(m -> MinimalObject.map(identifier.name, m));
+        }
+        Map<String, Object> value = new LinkedHashMap<>();
+        projections.forEach((identifier, projection) ->
+            toMinimalObject(projection, identifier)
+                .toObject()
+                .ifPresent(o -> value.put(identifier.name, o)));
+        return MinimalObject.map(value);
+    }
+
+    private static boolean isAllDefault(ElementProjection projection) {
+        if (projection instanceof AbstractRelationshipProjection) {
+            AbstractRelationshipProjection rel = (AbstractRelationshipProjection) projection;
+            if (rel.projection() != NATURAL || rel.aggregation() != DEFAULT) {
+                return false;
+            }
+        }
+        return !projection.properties().hasMappings();
+    }
+
+    private static MinimalObject toMinimalObject(
+        ElementProjection projection,
+        ElementIdentifier identifier
+    ) {
+        if (projection instanceof AbstractNodeProjection) {
+            return toMinimalObject(((AbstractNodeProjection) projection), identifier);
+        }
+        if (projection instanceof AbstractRelationshipProjection) {
+            return toMinimalObject(((AbstractRelationshipProjection) projection), identifier);
+        }
+        throw new IllegalArgumentException("Unexpected projection type: " + projection.getClass().getName());
+    }
+
+    private static MinimalObject toMinimalObject(
+        AbstractNodeProjection projection,
+        ElementIdentifier identifier
+    ) {
+        MinimalObject properties = toMinimalObject(projection.properties(), false);
+        if (properties.isEmpty() && matchesLabel(identifier.name, projection)) {
+            return MinimalObject.string(identifier.name);
+        }
+
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put(AbstractNodeProjection.LABEL_KEY, projection.label().orElse(""));
+        properties.toObject().ifPresent(o -> value.put(PROPERTIES_KEY, o));
+        return MinimalObject.map(value);
+    }
+
+    private static boolean matchesLabel(String label, AbstractNodeProjection projection) {
+        return projection.label().map(s -> s.equals(label)).orElse(true);
+    }
+
+    private static MinimalObject toMinimalObject(
+        AbstractRelationshipProjection projection,
+        ElementIdentifier identifier
+    ) {
+        MinimalObject properties = toMinimalObject(projection.properties(), true);
+        if (properties.isEmpty() && matchesType(identifier.name, projection)) {
+            return MinimalObject.string(identifier.name);
+        }
+
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put(TYPE_KEY, projection.type().orElse(""));
+        if (projection.projection() != NATURAL) {
+            value.put(PROJECTION_KEY, projection.projection().name());
+        }
+        if (projection.aggregation() != DEFAULT) {
+            value.put(AGGREGATION_KEY, projection.aggregation().name());
+        }
+        properties.toObject().ifPresent(o -> value.put(PROPERTIES_KEY, o));
+        return MinimalObject.map(value);
+    }
+
+    private static boolean matchesType(String type, AbstractRelationshipProjection projection) {
+        return projection.projection() == NATURAL
+               && projection.aggregation() == DEFAULT
+               && projection.type().map(s -> s.equals(type)).orElse(true);
+    }
+
+    private static MinimalObject toMinimalObject(
+        AbstractPropertyMappings propertyMappings,
+        boolean includeAggregation
+    ) {
+        List<PropertyMapping> mappings = propertyMappings.mappings();
+        if (mappings.isEmpty()) {
+            return MinimalObject.empty();
+        }
+        if (mappings.size() == 1) {
+            return toMinimalObject(mappings.get(0), includeAggregation, true);
+        }
+        Map<String, Object> properties = new LinkedHashMap<>();
+        for (PropertyMapping mapping : mappings) {
+            toMinimalObject(mapping, includeAggregation, false)
+                .map()
+                .ifPresent(properties::putAll);
+        }
+        return MinimalObject.map(properties);
+    }
+
+    private static MinimalObject toMinimalObject(
+        PropertyMapping propertyMapping,
+        boolean includeAggregation,
+        boolean allowStringShortcut
+    ) {
+        String propertyKey = propertyMapping.propertyKey();
+        String neoPropertyKey = propertyMapping.neoPropertyKey();
+        if (propertyKey == null || neoPropertyKey == null) {
+            return MinimalObject.empty();
+        }
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put(PROPERTY_KEY, neoPropertyKey);
+        double defaultValue = propertyMapping.defaultValue();
+        if (Double.compare(defaultValue, PropertyMapping.DEFAULT_FALLBACK_VALUE) != 0) {
+            value.put(DEFAULT_VALUE_KEY, defaultValue);
+        }
+        DeduplicationStrategy deduplicationStrategy = propertyMapping.deduplicationStrategy();
+        if (includeAggregation && deduplicationStrategy != DEFAULT) {
+            value.put(AGGREGATION_KEY, deduplicationStrategy.name());
+        }
+        if (allowStringShortcut && value.size() == 1 && propertyKey.equals(propertyMapping.neoPropertyKey())) {
+            return MinimalObject.string(propertyKey);
+        }
+        return MinimalObject.map(propertyKey, value);
     }
 }

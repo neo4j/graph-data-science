@@ -21,7 +21,6 @@ package org.neo4j.graphalgo;
 
 import org.immutables.builder.Builder.AccessibleFields;
 import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
@@ -119,36 +118,9 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 Map.Entry::getValue,
-                (u,v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); },
+                (u, v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); },
                 LinkedHashMap::new
             ));
-    }
-
-    public @Nullable Object toMinimalObject(boolean includeAggregation) {
-        List<PropertyMapping> mappings = mappings();
-        if (mappings.isEmpty()) {
-            return null;
-        }
-        if (mappings.size() == 1) {
-            Object mappingObject = mappings.get(0).toMinimalObject(includeAggregation, true);
-            if (mappingObject instanceof String) {
-                return mappingObject;
-            }
-            if (mappingObject instanceof Map.Entry) {
-                Map.Entry<?, ?> object = (Map.Entry<?, ?>) mappingObject;
-                return singletonMap(String.valueOf(object.getKey()), object.getValue());
-            }
-            return null;
-        }
-        Map<String, Object> properties = new LinkedHashMap<>();
-        for (PropertyMapping mapping : mappings) {
-            Object mappingObject = mapping.toMinimalObject(includeAggregation, false);
-            if (mappingObject instanceof Map.Entry) {
-                Map.Entry<?, ?> object = (Map.Entry<?, ?>) mappingObject;
-                properties.put(String.valueOf(object.getKey()), object.getValue());
-            }
-        }
-        return properties;
     }
 
     public PropertyMappings mergeWith(PropertyMappings other) {
@@ -213,7 +185,10 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         }
 
         public void setGlobalDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
-            this.deduplicationStrategy = Objects.requireNonNull(deduplicationStrategy, "deduplicationStrategy must not be empty");
+            this.deduplicationStrategy = Objects.requireNonNull(
+                deduplicationStrategy,
+                "deduplicationStrategy must not be empty"
+            );
         }
 
         @Override

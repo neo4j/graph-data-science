@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -76,24 +75,6 @@ public abstract class AbstractNodeProjection extends ElementProjection {
     @Override
     void writeToObject(Map<String, Object> value) {
         value.put(LABEL_KEY, label().orElse(""));
-    }
-
-    @Override
-    Object toMinimalObject(ElementIdentifier identifier) {
-        Object properties = properties().toMinimalObject(false);
-        if (properties == null && matchesLabel(identifier.name)) {
-            return identifier.name;
-        }
-        Map<String, Object> value = new LinkedHashMap<>();
-        writeToObject(value);
-        if (properties != null) {
-            value.put(PROPERTIES_KEY, properties);
-        }
-        return value;
-    }
-
-    private boolean matchesLabel(String label) {
-        return label().map(s -> s.equals(label)).orElse(true);
     }
 
     @Override

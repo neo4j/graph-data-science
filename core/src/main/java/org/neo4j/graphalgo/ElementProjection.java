@@ -50,8 +50,6 @@ public abstract class ElementProjection {
         return value;
     }
 
-    abstract Object toMinimalObject(ElementIdentifier identifier);
-
     static <T extends ElementProjection> T create(
         Map<String, Object> config,
         Function<PropertyMappings, T> constructor
@@ -97,7 +95,9 @@ public abstract class ElementProjection {
             double defaultValue,
             DeduplicationStrategy deduplicationStrategy
         ) {
-            inlineBuilder().propertiesBuilder().addMapping(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
+            inlineBuilder()
+                .propertiesBuilder()
+                .addMapping(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
             return (Self) this;
         }
 
