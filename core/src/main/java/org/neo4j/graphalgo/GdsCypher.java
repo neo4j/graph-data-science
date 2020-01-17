@@ -665,7 +665,7 @@ public abstract class GdsCypher {
         @Value.Check
         default void validate() {
             if (string().isPresent() && map().isPresent()) {
-                throw new IllegalStateException("Cannot be both, string and map");
+                throw new IllegalStateException("Cannot be both string and map");
             }
         }
 
