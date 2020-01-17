@@ -17,14 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.generator;
+package org.neo4j.graphalgo.beta.generator;
 
 import java.util.Random;
 import java.util.function.LongUnaryOperator;
-
-import static org.neo4j.graphalgo.generator.DistributionHelper.gauseanSample;
-import static org.neo4j.graphalgo.generator.DistributionHelper.powerLawSample;
-import static org.neo4j.graphalgo.generator.DistributionHelper.uniformSample;
 
 public enum RelationshipDistribution {
     UNIFORM {
@@ -35,19 +31,19 @@ public enum RelationshipDistribution {
 
         @Override
         public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random) {
-            return (ignore) -> uniformSample(nodeCount, random);
+            return (ignore) -> DistributionHelper.uniformSample(nodeCount, random);
         }
     },
     RANDOM {
         @Override
         public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random) {
             long stdDev = averageDegree / 2;
-            return (ignore) -> gauseanSample(nodeCount, averageDegree, stdDev, random);
+            return (ignore) -> DistributionHelper.gauseanSample(nodeCount, averageDegree, stdDev, random);
         }
 
         @Override
         public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random) {
-            return (ignore) -> uniformSample(nodeCount, random);
+            return (ignore) -> DistributionHelper.uniformSample(nodeCount, random);
 
         }
     },
@@ -55,14 +51,14 @@ public enum RelationshipDistribution {
         @Override
         public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random) {
             long stdDev = averageDegree / 2;
-            return (ignore) -> gauseanSample(nodeCount, averageDegree, stdDev, random);
+            return (ignore) -> DistributionHelper.gauseanSample(nodeCount, averageDegree, stdDev, random);
         }
 
         @Override
         public LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random) {
             long min = 1;
             double gamma = 1 + 1.0 / averageDegree;
-            return (ignore) -> powerLawSample(min, nodeCount - 1, gamma, random);
+            return (ignore) -> DistributionHelper.powerLawSample(min, nodeCount - 1, gamma, random);
         }
     };
 

@@ -17,9 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.generator;
+package org.neo4j.graphalgo.beta.generator;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -27,10 +29,6 @@ import org.neo4j.graphdb.Direction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class RandomGraphGeneratorTest {
 
@@ -49,8 +47,8 @@ class RandomGraphGeneratorTest {
         );
         HugeGraph graph = randomGraphGenerator.generate();
 
-        assertEquals(graph.nodeCount(), nbrNodes);
-        assertEquals(nbrNodes * avgDeg, graph.relationshipCount());
+        Assertions.assertEquals(graph.nodeCount(), nbrNodes);
+        Assertions.assertEquals(nbrNodes * avgDeg, graph.relationshipCount());
 
         graph.forEachNode((nodeId) -> {
             long[] degree = {0L};
@@ -60,7 +58,7 @@ class RandomGraphGeneratorTest {
                 return true;
             });
 
-            assertEquals(avgDeg, degree[0]);
+            Assertions.assertEquals(avgDeg, degree[0]);
             return true;
         });
     }
@@ -79,8 +77,8 @@ class RandomGraphGeneratorTest {
         );
         HugeGraph graph = randomGraphGenerator.generate();
 
-        assertEquals(graph.nodeCount(), nbrNodes);
-        assertEquals((double) nbrNodes * avgDeg, graph.relationshipCount(), 1000D);
+        Assertions.assertEquals(graph.nodeCount(), nbrNodes);
+        Assertions.assertEquals((double) nbrNodes * avgDeg, graph.relationshipCount(), 1000D);
     }
 
     @Test
@@ -97,7 +95,7 @@ class RandomGraphGeneratorTest {
         );
         HugeGraph graph = randomGraphGenerator.generate();
 
-        assertEquals(graph.nodeCount(), nbrNodes);
+        Assertions.assertEquals(graph.nodeCount(), nbrNodes);
 
         List<Long> degrees = new ArrayList<Long>();
         graph.forEachNode((nodeId) -> {
@@ -113,7 +111,7 @@ class RandomGraphGeneratorTest {
         });
 
         double actualAverage = degrees.stream().reduce(Long::sum).orElseGet(() -> 0L) / (double) degrees.size();
-        assertEquals((double) avgDeg, actualAverage, 1D);
+        Assertions.assertEquals((double) avgDeg, actualAverage, 1D);
     }
 
     @Test
@@ -132,7 +130,7 @@ class RandomGraphGeneratorTest {
 
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, Direction.BOTH, Double.NaN, (s, t, p) -> {
-                assertEquals(42D, p);
+                Assertions.assertEquals(42D, p);
                 return true;
             });
             return true;
@@ -155,8 +153,8 @@ class RandomGraphGeneratorTest {
 
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, Direction.BOTH, Double.NaN, (s, t, p) -> {
-                assertTrue(p >= -10);
-                assertTrue(p <= 10);
+                Assertions.assertTrue(p >= -10);
+                Assertions.assertTrue(p <= 10);
                 return true;
             });
             return true;
@@ -190,6 +188,6 @@ class RandomGraphGeneratorTest {
         HugeGraph graph1 = randomGraphGenerator.generate();
         HugeGraph graph2 = otherRandomGenerator.generate();
 
-        assertGraphEquals(graph1, graph2);
+        TestSupport.assertGraphEquals(graph1, graph2);
     }
 }
