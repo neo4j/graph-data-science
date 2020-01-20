@@ -153,26 +153,6 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
 
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
-    void testStatsYieldRanAndMaxIterationsAndDidConverge(ModeBuildStage queryBuilder, String testCaseName) {
-        String query = queryBuilder
-            .writeMode()
-            .addParameter("writeProperty", "writeProp")
-            .addParameter("tolerance", 0.0001)
-            .yields("ranIterations", "didConverge", "maxIterations", "dampingFactor");
-
-        runQueryWithRowConsumer(
-            query,
-            row -> {
-                assertEquals(20, row.getNumber("ranIterations").longValue());
-                assertEquals(20, row.getNumber("maxIterations").longValue());
-                assertEquals(0.85D, row.getNumber("dampingFactor").doubleValue());
-                assertFalse(row.getBoolean("didConverge"));
-            }
-        );
-    }
-
     @Override
     public PageRankWriteConfig createConfig(CypherMapWrapper mapWrapper) {
         return PageRankWriteConfig.of(

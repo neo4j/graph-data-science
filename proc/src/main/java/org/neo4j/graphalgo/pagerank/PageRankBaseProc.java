@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.Graph;
+
+import java.util.stream.Stream;
 
 abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoBaseProc<PageRank, PageRank, CONFIG> {
 
@@ -37,5 +40,47 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
     @Override
     protected boolean legacyMode() {
         return false;
+    }
+
+    protected Stream<PageRankWriteProc.WriteResult> write(ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
+        CONFIG config = computeResult.config();
+        boolean write = config instanceof PageRankWriteConfig;
+        PageRankWriteConfig writeConfig = ImmutablePageRankWriteConfig.builder()
+            .writeProperty("stats does not support a write property")
+            .from(config)
+            .build();
+        if (computeResult.isGraphEmpty()) {
+            return Stream.of(
+                new PageRankWriteProc.WriteResult(
+                    writeConfig.writeProperty(),
+                    writeConfig.relationshipWeightProperty(),
+                    writeConfig.maxIterations(),
+                    0,
+                    computeResult.createMillis(),
+                    0,
+                    0,
+                    0,
+                    computeResult.config().dampingFactor(),
+                    false
+                )
+            );
+        } else {
+            Graph graph = computeResult.graph();
+            PageRank pageRank = computeResult.algorithm();
+
+            PageRankWriteProc.WriteResultBuilder builder = new PageRankWriteProc.WriteResultBuilder(writeConfig);
+
+            builder.withCreateMillis(computeResult.createMillis());
+            builder.withComputeMillis(computeResult.computeMillis());
+            builder.withRanIterations(pageRank.iterations());
+            builder.withDidConverge(pageRank.didConverge());
+
+            if (write && !writeConfig.writeProperty().isEmpty()) {
+                writeNodeProperties(builder, computeResult);
+                graph.releaseProperties();
+            }
+
+            return Stream.of(builder.build());
+        }
     }
 }

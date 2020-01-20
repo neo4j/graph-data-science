@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -157,4 +158,22 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
         assertMapEquals(weightedExpected, actual);
     }
 
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    void testStatsYieldRanAndMaxIterationsAndDidConverge(ModeBuildStage queryBuilder, String testCaseName) {
+        String query = queryBuilder
+            .statsMode()
+            .addParameter("tolerance", 0.0001)
+            .yields("ranIterations", "didConverge", "maxIterations", "dampingFactor");
+
+        runQueryWithRowConsumer(
+            query,
+            row -> {
+                assertEquals(20, row.getNumber("ranIterations").longValue());
+                assertEquals(20, row.getNumber("maxIterations").longValue());
+                assertEquals(0.85D, row.getNumber("dampingFactor").doubleValue());
+                assertFalse(row.getBoolean("didConverge"));
+            }
+        );
+    }
 }

@@ -58,6 +58,28 @@ public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
+    @Procedure(value = "gds.pageRank.stats", mode = READ)
+    @Description(STATS_DESCRIPTION)
+    public Stream<PageRankWriteProc.WriteResult> stats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
+        return write(computationResult);
+    }
+
+    @Procedure(value = "gds.pageRank.stats.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateStats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
+    }
+
     private Stream<StreamResult> stream(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult) {
         Graph graph = computationResult.graph();
         PageRank pageRank = computationResult.result();

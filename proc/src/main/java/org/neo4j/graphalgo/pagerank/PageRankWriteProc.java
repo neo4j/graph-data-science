@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
@@ -49,20 +48,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
             graphNameOrConfig,
             configuration
         );
-        return write(computationResult, true);
-    }
-
-    @Procedure(value = "gds.pageRank.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
-    public Stream<WriteResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<PageRank, PageRank, PageRankWriteConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(computationResult, false);
+        return write(computationResult);
     }
 
     @Procedure(value = "gds.pageRank.write.estimate", mode = READ)
@@ -72,55 +58,6 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    @Procedure(value = "gds.pageRank.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateStats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    private Stream<WriteResult> write(
-        ComputationResult<PageRank, PageRank, PageRankWriteConfig> computeResult,
-        boolean write
-    ) {
-        if (computeResult.isGraphEmpty()) {
-          return Stream.of(
-              new WriteResult(
-                  computeResult.config().writeProperty(),
-                  computeResult.config().relationshipWeightProperty(),
-                  computeResult.config().maxIterations(),
-                  0,
-                  computeResult.createMillis(),
-                  0,
-                  0,
-                  0,
-                  computeResult.config().dampingFactor(),
-                  false
-              )
-          );
-        } else {
-            PageRankWriteConfig config = computeResult.config();
-            Graph graph = computeResult.graph();
-            PageRank pageRank = computeResult.algorithm();
-
-            WriteResultBuilder builder = new WriteResultBuilder(config);
-
-            builder.withCreateMillis(computeResult.createMillis());
-            builder.withComputeMillis(computeResult.computeMillis());
-            builder.withRanIterations(pageRank.iterations());
-            builder.withDidConverge(pageRank.didConverge());
-
-            if (write && !config.writeProperty().isEmpty()) {
-                writeNodeProperties(builder, computeResult);
-                graph.releaseProperties();
-            }
-
-            return Stream.of(builder.build());
-        }
     }
 
     @Override
