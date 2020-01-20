@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.k1coloring;
+package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
@@ -27,27 +27,40 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class K1ColoringStreamProcTest extends K1ColoringProcBaseTest {
+class K1ColoringWriteProcTest extends K1ColoringProcBaseTest {
 
     @Override
     void registerProcs() throws Exception {
-        registerProcedures(K1ColoringStreamProc.class);
+        registerProcedures(K1ColoringWriteProc.class);
     }
 
     @Test
-    void testStreamingImplicit() {
+    void testWriting() {
         @Language("Cypher")
-        String yields = algoBuildStage()
-            .streamMode()
-            .yields("nodeId", "color");
+        String query = algoBuildStage()
+            .writeMode()
+            .addParameter("writeProperty", "color")
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+            assertNotEquals(-1L, row.getNumber("loadMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
+            assertEquals(4, row.getNumber("nodes").longValue());
+            assertEquals(2, row.getNumber("colorCount").longValue());
+            assertEquals("color", row.getString("writeProperty"));
+            assertTrue(row.getBoolean("didConverge"));
+            assertTrue(row.getNumber("ranIterations").longValue() < 3);
+        });
 
         Map<Long, Long> coloringResult = new HashMap<>(4);
-        runQueryWithRowConsumer(yields, (row) -> {
-            long nodeId = row.getNumber("nodeId").longValue();
+        runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS id, n.color AS color", row -> {
+            long nodeId = row.getNumber("id").longValue();
             long color = row.getNumber("color").longValue();
             coloringResult.put(nodeId, color);
         });
@@ -57,10 +70,11 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest {
     }
 
     @Test
-    void testStreamingEstimate() {
+    void testWritingEstimate() {
         @Language("Cypher")
         String query = algoBuildStage()
-            .estimationMode(GdsCypher.ExecutionModes.STREAM)
+            .estimationMode(GdsCypher.ExecutionModes.WRITE)
+            .addParameter("writeProperty", "color")
             .yields("requiredMemory", "treeView", "bytesMin", "bytesMax");
 
         runQueryWithRowConsumer(query, row -> {

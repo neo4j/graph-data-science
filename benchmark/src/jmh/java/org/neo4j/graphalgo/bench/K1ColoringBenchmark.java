@@ -22,13 +22,13 @@ package org.neo4j.graphalgo.bench;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
+import org.neo4j.graphalgo.beta.k1coloring.ColoringStep;
+import org.neo4j.graphalgo.beta.k1coloring.K1Coloring;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.k1coloring.ColoringStep;
-import org.neo4j.graphalgo.k1coloring.K1Coloring;
 import org.neo4j.graphdb.Direction;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;

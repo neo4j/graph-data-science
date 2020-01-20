@@ -18,26 +18,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.k1coloring;
+package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.WriteConfig;
 
 import java.util.Optional;
 
-@Configuration("K1ColoringStreamConfigImpl")
+@Configuration("K1ColoringWriteConfigImpl")
 @ValueClass
-interface K1ColoringStreamConfig extends K1ColoringConfig {
+interface K1ColoringWriteConfig extends K1ColoringConfig, WriteConfig {
 
-    static K1ColoringStreamConfig of(
+    static K1ColoringWriteConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new K1ColoringStreamConfigImpl(
+        return new K1ColoringWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

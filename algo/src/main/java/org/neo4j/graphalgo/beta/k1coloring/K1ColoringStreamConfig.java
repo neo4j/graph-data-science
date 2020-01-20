@@ -17,17 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.k1coloring;
 
-import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+package org.neo4j.graphalgo.beta.k1coloring;
 
-public abstract class K1ColoringBaseProc<T extends K1ColoringConfig> extends AlgoBaseProc<K1Coloring, HugeLongArray, T> {
-    static final String DESCRIPTION = "The K-1 Coloring algorithm assigns a color to every node in the graph.";
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
-    @Override
-    protected AlgorithmFactory<K1Coloring, T> algorithmFactory(T config) {
-        return new K1ColoringFactory<>();
+import java.util.Optional;
+
+@Configuration("K1ColoringStreamConfigImpl")
+@ValueClass
+interface K1ColoringStreamConfig extends K1ColoringConfig {
+
+    static K1ColoringStreamConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        return new K1ColoringStreamConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            config
+        );
     }
+
 }

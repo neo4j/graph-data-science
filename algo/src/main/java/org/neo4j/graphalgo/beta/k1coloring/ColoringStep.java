@@ -17,29 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.k1coloring;
+package org.neo4j.graphalgo.beta.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 
-final class ValidationStep implements Runnable {
+public final class ColoringStep implements Runnable {
 
+    public static final int INITIAL_FORBIDDEN_COLORS = 1000;
+    
     private final RelationshipIterator graph;
     private final Direction direction;
     private final HugeLongArray colors;
-    private final BitSet currentNodesToColor;
-    private final BitSet nextNodesToColor;
+    private final BitSet nodesToColor;
+    private final BitSet forbiddenColors;
     private final long offset;
     private final long batchEnd;
+    private final long[] resetMask;
 
-    ValidationStep(
+    public ColoringStep(
         RelationshipIterator graph,
         Direction direction,
         HugeLongArray colors,
-        BitSet currentNodesToColor,
-        BitSet nextNodesToColor,
+        BitSet nodesToColor,
         long nodeCount,
         long offset,
         long batchSize
@@ -47,29 +49,40 @@ final class ValidationStep implements Runnable {
         this.graph = graph;
         this.direction = direction;
         this.colors = colors;
-        this.currentNodesToColor = currentNodesToColor;
-        this.nextNodesToColor = nextNodesToColor;
+        this.nodesToColor = nodesToColor;
         this.offset = offset;
         this.batchEnd = Math.min(offset + batchSize, nodeCount);
+        this.forbiddenColors = new BitSet(INITIAL_FORBIDDEN_COLORS);
+        this.resetMask = new long[INITIAL_FORBIDDEN_COLORS];
     }
 
     @Override
     public void run() {
         for (long nodeId = offset; nodeId <= batchEnd; nodeId++) {
-            if (currentNodesToColor.get(nodeId)) {
-                graph.forEachRelationship(nodeId, direction, (source, target) -> {
-                    if (
-                        source != target &&
-                        colors.get(source) == colors.get(target) &&
-                        !nextNodesToColor.get(target)
-                    ) {
-                        nextNodesToColor.set(source);
-                        return false;
-                    }
+            if (nodesToColor.get(nodeId)) {
+                resetForbiddenColors();
 
+                graph.forEachRelationship(nodeId, direction, (s, target) -> {
+                    if (s != target) {
+                        forbiddenColors.set(colors.get(target));
+                    }
                     return true;
                 });
+
+                long nextColor = 0;
+                while (forbiddenColors.get(nextColor)) {
+                    nextColor++;
+                }
+
+                colors.set(nodeId, nextColor);
             }
+        }
+    }
+
+    private void resetForbiddenColors() {
+        for (int i = 0; i <= forbiddenColors.bits.length; i += resetMask.length) {
+            System.arraycopy(resetMask, 0, forbiddenColors.bits, i, Math.min(forbiddenColors.bits.length -i, INITIAL_FORBIDDEN_COLORS));
+            forbiddenColors.wlen = 0;
         }
     }
 }

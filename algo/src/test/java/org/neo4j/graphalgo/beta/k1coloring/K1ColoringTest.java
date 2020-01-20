@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.coloring;
+package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.AfterEach;
@@ -39,9 +39,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.k1coloring.ColoringStep;
-import org.neo4j.graphalgo.k1coloring.K1Coloring;
-import org.neo4j.graphalgo.k1coloring.K1ColoringFactory;
 import org.neo4j.graphdb.Direction;
 
 import java.util.HashSet;
