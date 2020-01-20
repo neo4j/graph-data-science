@@ -383,8 +383,8 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     @Test
     default void checkStatsModeExists() {
         applyOnProcedure((proc) -> {
-            boolean inWriteClass = methodExists(proc, "write");
-            if (inWriteClass) {
+            boolean inStreamClass = methodExists(proc, "stream");
+            if (inStreamClass) {
                 assertTrue(
                     methodExists(proc, "stats"),
                     String.format("Expected %s to have a `stats` method", proc.getClass().getSimpleName())
