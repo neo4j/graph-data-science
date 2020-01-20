@@ -49,20 +49,18 @@ Read more in https://link.springer.com/chapter/10.1007/978-3-319-23461-8_11[Two 
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.degree.write(graphName: STRING, configuration: MAP)
+CALL gds.alpha.degree.write(configuration: MAP)
 YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 ----
 
-.Parameters
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type    | Default                | Optional | Description
-| direction        | string  | incoming               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected.
-| iterations       | int     | 20                     | yes      | How many iterations of PageRank to run.
+| direction        | string  | INCOMING               | yes      | The relationship direction to load from the graph. If 'BOTH', treats the relationships as undirected.
 | concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| dampingFactor    | float   | 0.85                   | yes      | The damping factor of the PageRank calculation.
 | weightProperty   | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | defaultValue     | float   | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
 |===
@@ -81,15 +79,15 @@ YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.degree.stream(graphName: STRING, configuration: MAP)
+CALL gds.alpha.degree.stream(configuration: MAP)
 YIELD node, score
 ----
 
-.Parameters
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type   | Default                | Optional | Description
-| direction        | string | incoming               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected.
+| direction        | string | INCOMING               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected.
 | concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | weightProperty   | string | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
