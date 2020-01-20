@@ -191,7 +191,6 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         if (maybeGraphName.isPresent()) {
             graphCandidate = GraphCatalog.get(getUsername(), maybeGraphName.get());
             relationshipTypes = config.relationshipTypes();
-
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             ModernGraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
@@ -252,7 +251,10 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
     protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) { }
 
-    protected ComputationResult<A, RESULT, CONFIG> compute(Object graphNameOrConfig, Map<String, Object> configuration) {
+    protected ComputationResult<A, RESULT, CONFIG> compute(
+        Object graphNameOrConfig,
+        Map<String, Object> configuration
+    ) {
         return compute(graphNameOrConfig, configuration, true, true);
     }
 
@@ -318,7 +320,8 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     protected PropertyTranslator<RESULT> nodePropertyTranslator(
         ComputationResult<A, RESULT, CONFIG> computationResult
     ) {
-        throw new UnsupportedOperationException("Write procedures needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyTranslator");
+        throw new UnsupportedOperationException(
+            "Write procedures needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyTranslator");
     }
 
     protected void writeNodeProperties(
@@ -355,7 +358,10 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         }
     }
 
-    protected Stream<MemoryEstimateResult> computeEstimate(Object graphNameOrConfig, Map<String, Object> configuration) {
+    protected Stream<MemoryEstimateResult> computeEstimate(
+        Object graphNameOrConfig,
+        Map<String, Object> configuration
+    ) {
         Pair<CONFIG, Optional<String>> configAndGraphName = processInput(
             graphNameOrConfig,
             configuration

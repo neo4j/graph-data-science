@@ -19,12 +19,20 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
+import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import static org.neo4j.graphdb.Direction.OUTGOING;
 
 public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseConfig> extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, CONFIG> {
 
@@ -43,5 +51,98 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
     @Override
     protected AlgorithmFactory<NodeSimilarity, CONFIG> algorithmFactory(CONFIG config) {
         return new NodeSimilarityFactory<>();
+    }
+
+    public Stream<NodeSimilarityWriteProc.NodeSimilarityWriteResult> write(
+        ComputationResult<NodeSimilarity, NodeSimilarityResult, CONFIG> computationResult
+    ) {
+        CONFIG config = computationResult.config();
+        boolean write = config instanceof NodeSimilarityWriteConfig;
+        NodeSimilarityWriteConfig writeConfig = ImmutableNodeSimilarityWriteConfig.builder()
+            .writeProperty("stats does not support a write property")
+            .from(config)
+            .build();
+        if (computationResult.isGraphEmpty()) {
+            return Stream.of(
+                new NodeSimilarityWriteProc.NodeSimilarityWriteResult(
+                    writeConfig,
+                    computationResult.createMillis(),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    Collections.emptyMap()
+                )
+            );
+        }
+
+        String writeRelationshipType = writeConfig.writeRelationshipType();
+        String writeProperty = writeConfig.writeProperty();
+        NodeSimilarityResult result = computationResult.result();
+        NodeSimilarity algorithm = computationResult.algorithm();
+        SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
+        Graph similarityGraph = similarityGraphResult.similarityGraph();
+
+        NodeSimilarityWriteProc.WriteResultBuilder resultBuilder = new NodeSimilarityWriteProc.WriteResultBuilder(
+            writeConfig);
+        resultBuilder
+            .withNodesCompared(similarityGraphResult.comparedNodes())
+            .withRelationshipsWritten(similarityGraphResult.similarityGraph().relationshipCount());
+        resultBuilder.withCreateMillis(computationResult.createMillis());
+        resultBuilder.withComputeMillis(computationResult.computeMillis());
+
+        boolean shouldComputeHistogram = callContext
+            .outputFields()
+            .anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
+        if (write && similarityGraph.relationshipCount() > 0) {
+            runWithExceptionLogging(
+                "NodeSimilarity write-back failed",
+                () -> {
+                    try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
+                        RelationshipExporter exporter = RelationshipExporter
+                            .of(
+                                api,
+                                similarityGraph,
+                                similarityGraph.getLoadDirection(),
+                                algorithm.getTerminationFlag()
+                            )
+                            .withLog(log)
+                            .build();
+                        if (shouldComputeHistogram) {
+                            DoubleHistogram histogram = new DoubleHistogram(5);
+                            exporter.write(
+                                writeRelationshipType,
+                                writeProperty,
+                                (node1, node2, similarity) -> {
+                                    histogram.recordValue(similarity);
+                                    return true;
+                                }
+                            );
+                            resultBuilder.withHistogram(histogram);
+                        } else {
+                            exporter.write(writeRelationshipType, writeProperty);
+                        }
+                    }
+                }
+            );
+        } else if (shouldComputeHistogram) {
+            try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
+                resultBuilder.withHistogram(computeHistogram(similarityGraph));
+            }
+        }
+        return Stream.of(resultBuilder.build());
+    }
+
+    private DoubleHistogram computeHistogram(Graph similarityGraph) {
+        DoubleHistogram histogram = new DoubleHistogram(5);
+        similarityGraph.forEachNode(nodeId -> {
+            similarityGraph.forEachRelationship(nodeId, OUTGOING, Double.NaN, (node1, node2, property) -> {
+                histogram.recordValue(property);
+                return true;
+            });
+            return true;
+        });
+        return histogram;
     }
 }

@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class NodeSimilarityStreamProc extends NodeSimilarityBaseProc<NodeSimilarityStreamConfig> {
 
     @Procedure(value = "gds.nodeSimilarity.stream", mode = Mode.READ)
@@ -62,6 +64,28 @@ public class NodeSimilarityStreamProc extends NodeSimilarityBaseProc<NodeSimilar
     @Procedure(value = "gds.nodeSimilarity.stream.estimate", mode = Mode.READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
+    }
+
+    @Procedure(name = "gds.nodeSimilarity.stats", mode = Mode.WRITE)
+    @Description(STATS_DESCRIPTION)
+    public Stream<NodeSimilarityWriteProc.NodeSimilarityWriteResult> stats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig> result = compute(
+            graphNameOrConfig,
+            configuration
+        );
+        return write(result);
+    }
+
+    @Procedure(value = "gds.nodeSimilarity.stats.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

@@ -20,11 +20,9 @@
 package org.neo4j.graphalgo.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -38,7 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphdb.Direction.OUTGOING;
 import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilarityWriteConfig> {
@@ -53,7 +50,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
             graphNameOrConfig,
             configuration
         );
-        return write(result, true);
+        return write(result);
     }
 
     @Procedure(value = "gds.nodeSimilarity.write.estimate", mode = READ)
@@ -63,106 +60,6 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    @Procedure(name = "gds.nodeSimilarity.stats", mode = Mode.WRITE)
-    @Description(STATS_DESCRIPTION)
-    public Stream<NodeSimilarityWriteResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> result = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(result, false);
-    }
-
-    @Procedure(value = "gds.nodeSimilarity.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateStats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    public Stream<NodeSimilarityWriteResult> write(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult, boolean write) {
-        NodeSimilarityWriteConfig config = computationResult.config();
-        if (computationResult.isGraphEmpty()) {
-            return Stream.of(
-                new NodeSimilarityWriteResult(
-                    config,
-                    computationResult.createMillis(),
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    Collections.emptyMap()
-                )
-            );
-        }
-
-        String writeRelationshipType = config.writeRelationshipType();
-        String writeProperty = config.writeProperty();
-        NodeSimilarityResult result = computationResult.result();
-        NodeSimilarity algorithm = computationResult.algorithm();
-        SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
-        Graph similarityGraph = similarityGraphResult.similarityGraph();
-
-        WriteResultBuilder resultBuilder = new WriteResultBuilder(config);
-        resultBuilder
-            .withNodesCompared(similarityGraphResult.comparedNodes())
-            .withRelationshipsWritten(similarityGraphResult.similarityGraph().relationshipCount());
-        resultBuilder.withCreateMillis(computationResult.createMillis());
-        resultBuilder.withComputeMillis(computationResult.computeMillis());
-
-        boolean shouldComputeHistogram = callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
-        if (write && similarityGraph.relationshipCount() > 0) {
-            runWithExceptionLogging(
-                "NodeSimilarity write-back failed",
-                () -> {
-                    try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                        RelationshipExporter exporter = RelationshipExporter
-                            .of(api, similarityGraph, similarityGraph.getLoadDirection(), algorithm.getTerminationFlag())
-                            .withLog(log)
-                            .build();
-                        if (shouldComputeHistogram) {
-                            DoubleHistogram histogram = new DoubleHistogram(5);
-                            exporter.write(
-                                writeRelationshipType,
-                                writeProperty,
-                                (node1, node2, similarity) -> {
-                                    histogram.recordValue(similarity);
-                                    return true;
-                                }
-                            );
-                            resultBuilder.withHistogram(histogram);
-                        } else {
-                            exporter.write(writeRelationshipType, writeProperty);
-                        }
-                    }
-                }
-            );
-        } else if (shouldComputeHistogram) {
-            try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
-                resultBuilder.withHistogram(computeHistogram(similarityGraph));
-            }
-        }
-        return Stream.of(resultBuilder.build());
-    }
-
-    private DoubleHistogram computeHistogram(Graph similarityGraph) {
-        DoubleHistogram histogram = new DoubleHistogram(5);
-        similarityGraph.forEachNode(nodeId -> {
-            similarityGraph.forEachRelationship(nodeId, OUTGOING, Double.NaN, (node1, node2, property) -> {
-                histogram.recordValue(property);
-                return true;
-            });
-            return true;
-        });
-        return histogram;
     }
 
     @Override
