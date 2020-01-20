@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.Graph;
+
+import java.util.stream.Stream;
 
 public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBaseConfig> extends AlgoBaseProc<LabelPropagation, LabelPropagation, CONFIG> {
 
@@ -34,5 +37,42 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
     @Override
     protected boolean legacyMode() {
         return false;
+    }
+
+    protected Stream<LabelPropagationWriteProc.WriteResult> write(
+        ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult
+    ) {
+        log.debug("Writing results");
+
+        CONFIG config = computationResult.config();
+        boolean write = config instanceof LabelPropagationWriteConfig;
+        LabelPropagationWriteConfig writeConfig = ImmutableLabelPropagationWriteConfig.builder()
+            .writeProperty("stats does not support a write property")
+            .from(config)
+            .build();
+
+        Graph graph = computationResult.graph();
+        LabelPropagation result = computationResult.result();
+
+        LabelPropagationWriteProc.WriteResultBuilder builder = new LabelPropagationWriteProc.WriteResultBuilder(
+            writeConfig,
+            graph.nodeCount(),
+            callContext,
+            computationResult.tracker()
+        );
+        builder.withCreateMillis(computationResult.createMillis());
+        builder.withComputeMillis(computationResult.computeMillis());
+
+        if (!computationResult.isGraphEmpty()) {
+            builder
+                .didConverge(result.didConverge())
+                .ranIterations(result.ranIterations())
+                .withCommunityFunction((nodeId) -> result.labels().get(nodeId));
+            if (write) {
+                writeNodeProperties(builder, computationResult);
+                graph.releaseProperties();
+            }
+        }
+        return Stream.of(builder.build());
     }
 }

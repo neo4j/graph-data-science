@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -51,34 +50,12 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
             graphNameOrConfig,
             configuration
         );
-        return write(result, true);
-    }
-
-    @Procedure(value = "gds.labelPropagation.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
-    public Stream<LabelPropagationWriteProc.WriteResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(computationResult, false);
+        return write(result);
     }
 
     @Procedure(value = "gds.labelPropagation.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    @Procedure(value = "gds.labelPropagation.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -113,38 +90,6 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
         CypherMapWrapper config
     ) {
         return LabelPropagationWriteConfig.of(username, graphName, maybeImplicitCreate, config);
-    }
-
-    private Stream<WriteResult> write(
-        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult,
-        boolean write
-    ) {
-        log.debug("Writing results");
-
-        LabelPropagationWriteConfig config = computationResult.config();
-        Graph graph = computationResult.graph();
-        LabelPropagation result = computationResult.result();
-
-        WriteResultBuilder builder = new WriteResultBuilder(
-            config,
-            graph.nodeCount(),
-            callContext,
-            computationResult.tracker()
-        );
-        builder.withCreateMillis(computationResult.createMillis());
-        builder.withComputeMillis(computationResult.computeMillis());
-
-        if (!computationResult.isGraphEmpty()) {
-            builder
-                .didConverge(result.didConverge())
-                .ranIterations(result.ranIterations())
-                .withCommunityFunction((nodeId) -> result.labels().get(nodeId));
-            if (write) {
-                writeNodeProperties(builder, computationResult);
-                graph.releaseProperties();
-            }
-        }
-        return Stream.of(builder.build());
     }
 
     public static class WriteResultBuilder extends AbstractCommunityResultBuilder<LabelPropagationWriteConfig, WriteResult> {

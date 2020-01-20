@@ -60,6 +60,28 @@ public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPr
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
+    @Procedure(value = "gds.labelPropagation.stats", mode = READ)
+    @Description(STATS_DESCRIPTION)
+    public Stream<LabelPropagationWriteProc.WriteResult> stats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
+        return write(computationResult);
+    }
+
+    @Procedure(value = "gds.labelPropagation.stats.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateStats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
+    }
+
     private Stream<LabelPropagationStreamProc.StreamResult> stream(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult) {
         Graph graph = computationResult.graph();
         if (computationResult.isGraphEmpty()) {
