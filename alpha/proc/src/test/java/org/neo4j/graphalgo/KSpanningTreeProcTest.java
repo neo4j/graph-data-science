@@ -74,6 +74,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
             .algo("gds.alpha.spanningTree.kmax")
             .writeMode()
             .addParameter("startNodeId", id("a"))
+            .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
             .yields("createMillis", "computeMillis", "writeMillis");
 
@@ -105,6 +106,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
             .algo("gds.alpha.spanningTree.kmin")
             .writeMode()
             .addParameter("startNodeId", id("a"))
+            .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
             .yields("createMillis", "computeMillis", "writeMillis");
 
