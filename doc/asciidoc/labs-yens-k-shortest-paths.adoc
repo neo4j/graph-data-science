@@ -162,7 +162,7 @@ CALL gds.alpha.kShortestPaths.stream({
   weightProperty: 'cost'
 })
 YIELD index, nodeIds, costs
-RETURN [node IN algo.getNodesById(nodeIds) | node.name] AS places,
+RETURN [node IN gds.util.getNodesById(nodeIds) | node.name] AS places,
        costs,
        reduce(acc = 0.0, cost IN costs | acc + cost) AS totalCost
 ----

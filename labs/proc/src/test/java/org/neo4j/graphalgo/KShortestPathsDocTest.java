@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.shortestpath.KShortestPathsProc;
+import org.neo4j.graphalgo.shortestpaths.KShortestPathsProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
@@ -32,27 +32,28 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class KShortestPathsDocTest extends BaseProcTest {
 
     private static final String NL = System.lineSeparator();
-    public static final String DB_CYPHER = "CREATE " +
-                                       " (a:Loc {name:'A'})," +
-                                       " (b:Loc {name:'B'})," +
-                                       " (c:Loc {name:'C'})," +
-                                       " (d:Loc {name:'D'})," +
-                                       " (e:Loc {name:'E'})," +
-                                       " (f:Loc {name:'F'})," +
-                                       " (a)-[:ROAD {cost:50}]->(b)," +
-                                       " (a)-[:ROAD {cost:50}]->(c)," +
-                                       " (a)-[:ROAD {cost:100}]->(d)," +
-                                       " (b)-[:ROAD {cost:40}]->(d)," +
-                                       " (c)-[:ROAD {cost:40}]->(d)," +
-                                       " (c)-[:ROAD {cost:80}]->(e)," +
-                                       " (d)-[:ROAD {cost:30}]->(e)," +
-                                       " (d)-[:ROAD {cost:80}]->(f)," +
-                                       " (e)-[:ROAD {cost:40}]->(f);";
+    public static final String DB_CYPHER =
+        "CREATE " +
+        " (a:Loc {name:'A'})," +
+        " (b:Loc {name:'B'})," +
+        " (c:Loc {name:'C'})," +
+        " (d:Loc {name:'D'})," +
+        " (e:Loc {name:'E'})," +
+        " (f:Loc {name:'F'})," +
+        " (a)-[:ROAD {cost:50}]->(b)," +
+        " (a)-[:ROAD {cost:50}]->(c)," +
+        " (a)-[:ROAD {cost:100}]->(d)," +
+        " (b)-[:ROAD {cost:40}]->(d)," +
+        " (c)-[:ROAD {cost:40}]->(d)," +
+        " (c)-[:ROAD {cost:80}]->(e)," +
+        " (d)-[:ROAD {cost:30}]->(e)," +
+        " (d)-[:ROAD {cost:80}]->(f)," +
+        " (e)-[:ROAD {cost:40}]->(f);";
 
     @BeforeEach
     void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.util.*")
         );
         registerProcedures(KShortestPathsProc.class);
         registerFunctions(GetNodeFunc.class);
@@ -82,7 +83,7 @@ class KShortestPathsDocTest extends BaseProcTest {
                        "  weightProperty: 'cost' " +
                        "})" +
                        " YIELD index, nodeIds, costs " +
-                       " RETURN [node in algo.getNodesById(nodeIds) | node.name] AS places, " +
+                       " RETURN [node in gds.util.getNodesById(nodeIds) | node.name] AS places, " +
                        "       costs, " +
                        "       reduce(acc = 0.0, cost in costs | acc + cost) AS totalCost";
 
