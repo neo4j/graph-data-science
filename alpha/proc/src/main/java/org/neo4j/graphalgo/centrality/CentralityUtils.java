@@ -46,33 +46,6 @@ public final class CentralityUtils {
         IdMapping graph,
         TerminationFlag terminationFlag,
         CentralityResult result,
-        ProcedureConfiguration configuration,
-        AbstractResultBuilder<R> statsBuilder,
-        String defaultScoreProperty
-    ) {
-        if (configuration.isWriteFlag(true)) {
-            log.debug("Writing results");
-            String propertyName = configuration.getWriteProperty(defaultScoreProperty);
-            try (ProgressTimer ignored = statsBuilder.timeWrite()) {
-                NodePropertyExporter exporter = NodePropertyExporter
-                    .of(api, graph, terminationFlag)
-                    .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
-                    .build();
-                result.export(propertyName, exporter);
-            }
-            statsBuilder.withWrite(true).withWriteProperty(propertyName);
-        } else {
-            statsBuilder.withWrite(false);
-        }
-    }
-
-    public static <R> void write(
-        GraphDatabaseAPI api,
-        Log log,
-        IdMapping graph,
-        TerminationFlag terminationFlag,
-        CentralityResult result,
         WriteConfig configuration,
         AbstractResultBuilder<R> statsBuilder
     ) {
