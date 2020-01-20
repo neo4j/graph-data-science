@@ -52,7 +52,7 @@ These algorithms evaluate how a group is clustered or partitioned, as well as it
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/connected-components/[Connected Components^] (`algo.unionFind`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/strongly-connected-components/[Strongly Connected Components^] (`algo.scc`)
 * https://neo4j.com/docs/graph-algorithms/current/algorithms/triangle-counting-clustering-coefficient/[Triangle Counting / Clustering Coefficient^] (`algo.triangleCount`)
-* https://neo4j.com/docs/graph-algorithms/current/algorithms/balanced-triads/[Balanced Triads^] (`algo.balancedTriads`)
+* https://neo4j.com/docs/graph-algorithms/current/algorithms/balanced-triads/[Balanced Triads^] (`gds.alpha.balancedTriads`)
 
 
 === Path finding

@@ -22,15 +22,12 @@ This section includes:
 
 * <<algorithms-balanced-triads-context, History and explanation>>
 * <<algorithms-balanced-triads-usecase, Use-cases - when to use the Balance Triads algorithm>>
-* <<algorithms-balanced-triads-sample, Balanced Triads algorithm sample>>
 * <<algorithms-balanced-triads-syntax, Syntax>>
-* <<algorithms-balanced-triads-support, Graph type support>>
+* <<algorithms-balanced-triads-sample, Balanced Triads algorithm sample>>
 
 
 [[algorithms-balanced-triads-context]]
 == History and explanation
-
-// tag::explanation[]
 
 Balanced triads is an algorithm that counts the number of balanced and unbalanced triads a node is member of.
 It uses https://en.wikipedia.org/wiki/Signed_graph[Signed graph] model to differentiate between positive and negative relationships using the sign of the weight.
@@ -42,62 +39,13 @@ Determining if the triad is balanced is simple math:
 - + + = Unbalanced
 - - - = Unbalanced
 
-// end::explanation[]
-
 
 [[algorithms-balanced-triads-usecase]]
 == Use-cases - when to use the Balance Triads algorithm
 
-// tag::use-case[]
 * Balanced triads algorithm has been used to analyse structural balance of networks in the animal kingdom. Find this study in https://www.tau.ac.il/~geffene/PDFs/93-Anim_Behav_2013b.pdf[Structural balance in the social networks of a wild mammal].
 * Balanced triads algorithm has been used to evaluate dynamics in the process of "healing" imbalanced triads and restoring structural balance in a social network. Find more details in https://www.maths.ed.ac.uk/~antal/Mypapers/friends05.pdf[Dynamics of social balance on networks].
 * Balanced triads algorithm and balance theory allow us to better understand consumer to brand relationship and consumer behaviour as shown in the study of https://www2.bc.edu/arch-woodside/sep%2021heider%20balance%20theory.pdf[Updating Heider’s Balance Theory in Consumer Behaviour] by Woodside and Chabet.
-// end::use-case[]
-
-
-[[algorithms-balanced-triads-sample]]
-== Balanced Triads algorithm sample
-
-This sample will explain the Balanced Triads algorithm, using a simple graph:
-
-image::balanced_triads.png[]
-
-.The following will create a sample graph:
-[source, cypher]
-----
-include::scripts/balanced-triads.cypher[tag=create-sample-graph]
-----
-
-.The following will count the number of balanced and unbalanced triads that a node is a member of, and return a stream with `nodeId`, `balanced` and `unbalanced`:
-[source, cypher]
-----
-include::scripts/balanced-triads.cypher[tag=stream-sample-graph]
-----
-
-.The following will count the number of balanced and unbalanced triads that a node is member of, and write it back. It will return the total balanced triads and unbalanced triads count of the given graph:
-[source, cypher]
-----
-include::scripts/balanced-triads.cypher[tag=write-sample-graph]
-----
-
-// tag::stream-sample-graph-result[]
-.Results
-[opts="header",cols="1,1,1"]
-|===
-| nodeId  | balanced | unbalanced
-| Anna    | 3        | 3
-| Matt    | 1        | 1
-| Larry   | 1        | 1
-| Stefan  | 1        | 1
-| Sophia  | 1        | 1
-| Dolores | 1        | 1
-|===
-// end::stream-sample-graph-result[]
-
-// tag::stream-sample-graph-explanation[]
-Anna is a member of six triads out of which three are balanced and three are unbalanced.
-All others are each members of one balanced and one unbalanced triad or triangle.
-// end::stream-sample-graph-explanation[]
 
 
 [[algorithms-balanced-triads-syntax]]
@@ -106,18 +54,16 @@ All others are each members of one balanced and one unbalanced triad or triangle
 .The following will count the number of balanced and unbalanced triads that a node is a member of, and return a stream with `nodeId`, `balanced` and 'unbalanced':
 [source, cypher]
 ----
-CALL algo.balancedTriads.stream(label:String, relationship:String, {concurrency:4})
+CALL gds.alpha.balancedTriads.stream(configuration: Map)
 YIELD nodeId, balanced, unbalanced
 ----
 
-.Parameters
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name            | Type   | Default                | Optional | Description
-| label           | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship    | string | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
 | weightProperty  | string | null                   | no       | The property name that contains weight. If weight is positive, algorithm treats the relationship as positive. With a negative weight, relationship is treated as negative. Must be numeric.
-| concurrency     | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| concurrency     | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 
@@ -133,29 +79,26 @@ YIELD nodeId, balanced, unbalanced
 .The following will count the number of balanced and unbalanced triads that a node is member of, and write it back. It will return the total balanced triads and unbalanced triads count of the given graph:
 [source, cypher]
 ----
-CALL algo.balancedTriads(label:String, relationship:String,
-  {concurrency:4, write:true, weightProperty:'weight', balancedProperty:'balanced', unbalancedProperty:'unbalanced'})
-YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount
+CALL gds.alpha.balancedTriads.write(configuration: Map)
+YIELD createMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount
 ----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name               | Type    | Default                | Optional | Description
-| label              | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship       | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
-| concurrency        | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency    | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| unbalancedProperty | string  | 'unbalanced'           | yes      | The property name written back to the count of unbalanced triads a node is member of.
-| write              | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
+| Name                  | Type    | Default                | Optional | Description
+| balancedProperty      | string  | 'balanced'             | yes      | The property name written back to the count of balanced triads a node is member of.
+| unbalancedProperty    | string  | 'unbalanced'           | yes      | The property name written back to the count of unbalanced triads a node is member of.
+| concurrency           | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency      | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name                         | Type  | Description
-| loadMillis    | int  | Milliseconds for loading data
+| createMillis    | int  | Milliseconds for loading data
 | computeMillis | int  | Milliseconds for running the algorithm
 | writeMillis   | int  | Milliseconds for writing result data back
 | postProcessingMillis    | int  | Milliseconds for computing percentiles and community count
@@ -175,28 +118,97 @@ YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unb
 | p99                   | double  | The 99 percentile of number of balanced triads.
 | p100                  | double  | The 100 percentile of number of balanced triads.
 
-| write | boolean | Specifies if the result was written back as a node property
 | balancedProperty | string | The property name the number of balanced triads is written to
 | unbalancedProperty | string | The property name the number of unbalanced triads is written to
 |===
 
 
-[[algorithms-balanced-triads-support]]
-== Graph type support
+[[algorithms-balanced-triads-sample]]
+== Balanced Triads algorithm sample
 
-The Balanced Triads algorithm support the following graph type:
+This sample will explain the Balanced Triads algorithm, using a simple graph:
 
-* [x] undirected, weighted
+image::balanced_triads.png[]
 
+.The following will create a sample graph:
+[source, cypher]
+----
+CREATE (a:Person {name:'Anna'}),
+       (b:Person {name:'Dolores'}),
+       (c:Person {name:'Matt'}),
+       (d:Person {name:'Larry'}),
+       (e:Person {name:'Stefan'}),
+       (f:Person {name:'Sophia'}),
+       (g:Person {name:'Robin'}),
+       (a)-[:TYPE {weight:1.0}]->(b),
+       (a)-[:TYPE {weight:-1.0}]->(c),
+       (a)-[:TYPE {weight:1.0}]->(d),
+       (a)-[:TYPE {weight:-1.0}]->(e),
+       (a)-[:TYPE {weight:1.0}]->(f),
+       (a)-[:TYPE {weight:-1.0}]->(g),
+       (b)-[:TYPE {weight:-1.0}]->(c),
+       (c)-[:TYPE {weight:1.0}]->(d),
+       (d)-[:TYPE {weight:-1.0}]->(e),
+       (e)-[:TYPE {weight:1.0}]->(f),
+       (f)-[:TYPE {weight:-1.0}]->(g),
+       (g)-[:TYPE {weight:1.0}]->(b);
+----
 
-ifndef::env-docs[]
-== References
+.The following will count the number of balanced and unbalanced triads that a node is a member of, and return a stream with `nodeId`, `balanced` and `unbalanced`:
+[source, cypher]
+----
+CALL gds.alpha.balancedTriads.stream({
+  nodeProjection: 'Person',
+  relationshipProjection: {
+    TYPE: {
+      type: 'TYPE',
+      properties: 'weight',
+      projection: 'UNDIRECTED'
+    }
+  },
+  weightProperty: 'weight'
+})
+YIELD nodeId, balanced, unbalanced
+RETURN gds.util.asNode(nodeId).name AS person,balanced,unbalanced
+ORDER BY balanced + unbalanced DESC
+LIMIT 10
+----
 
-// tag::references[]
-* [1] https://en.wikipedia.org/wiki/Balance_theory
-* [2] https://en.wikipedia.org/wiki/Signed_graph
-* [3] https://www.tau.ac.il/~geffene/PDFs/93-Anim_Behav_2013b.pdf
-* [4] https://www.maths.ed.ac.uk/~antal/Mypapers/friends05.pdf
-* [5] https://www2.bc.edu/arch-woodside/sep%2021heider%20balance%20theory.pdf
-// end::references[]
-endif::env-docs[]
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| nodeId  | balanced | unbalanced
+| Anna    | 3        | 3
+| Matt    | 1        | 1
+| Larry   | 1        | 1
+| Stefan  | 1        | 1
+| Sophia  | 1        | 1
+| Dolores | 1        | 1
+|===
+
+Anna is a member of six triads out of which three are balanced and three are unbalanced.
+All others are each members of one balanced and one unbalanced triad or triangle.
+
+.The following will count the number of balanced and unbalanced triads that a node is member of, and write it back. It will return the total balanced triads and unbalanced triads count of the given graph:
+[source, cypher]
+----
+CALL gds.alpha.balancedTriads.write({
+  nodeProjection: 'Person',
+  relationshipProjection: {
+    TYPE: {
+      type: 'TYPE',
+      properties: 'weight',
+      projection: 'UNDIRECTED'
+    }
+  },
+  weightProperty: 'weight'
+})
+YIELD balancedProperty, balancedTriadCount, unbalancedProperty, unbalancedTriadCount;
+----
+
+.Results
+[opts="header",cols="1,1,1,1"]
+|===
+| balancedProperty  | balancedTriadCount    | unbalancedProperty    | unbalancedTriadCount
+| balanced          | 3                     | unbalanced            | 3
+|===
