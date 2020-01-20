@@ -141,7 +141,7 @@ CALL gds.alpha.eigenvector.stream({
   relationshipProjection: 'LINKS'
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS page, score
+RETURN gds.util.asNode(nodeId).name AS page, score
 ORDER BY score DESC
 ----
 
@@ -197,7 +197,7 @@ CALL gds.alpha.eigenvector.stream({
   normalization: 'max'
 })
 YIELD nodeId, score
-RETURN algo.asNode(nodeId).name AS page,score
+RETURN gds.util.asNode(nodeId).name AS page,score
 ORDER BY score DESC
 ----
 
