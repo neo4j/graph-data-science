@@ -32,6 +32,10 @@ import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphalgo.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.modularity.ModularityOptimizationWriteProc;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
+import org.neo4j.graphalgo.newapi.GraphDropProc;
+import org.neo4j.graphalgo.newapi.GraphExistsProc;
+import org.neo4j.graphalgo.newapi.GraphListProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
@@ -48,12 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ListProcTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
-        "algo.graph.info",
-        "algo.graph.list",
-        "algo.graph.load",
-        "algo.graph.load.memrec",
-        "algo.graph.remove",
-
         "gds.beta.graph.generate",
 
         "gds.beta.k1coloring.stream",
@@ -65,6 +63,12 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.modularityOptimization.stream.estimate",
         "gds.beta.modularityOptimization.write",
         "gds.beta.modularityOptimization.write.estimate",
+
+        "gds.graph.create",
+        "gds.graph.create.cypher",
+        "gds.graph.drop",
+        "gds.graph.exists",
+        "gds.graph.list",
 
         "gds.labelPropagation.stats",
         "gds.labelPropagation.stats.estimate",
@@ -118,7 +122,10 @@ class ListProcTest extends BaseProcTest {
     void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
-            GraphLoadProc.class,
+            GraphCreateProc.class,
+            GraphDropProc.class,
+            GraphExistsProc.class,
+            GraphListProc.class,
             GraphGenerateProc.class,
             K1ColoringWriteProc.class,
             K1ColoringStreamProc.class,

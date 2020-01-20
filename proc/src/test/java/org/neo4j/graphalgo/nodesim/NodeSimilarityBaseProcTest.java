@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -116,12 +115,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(
-            NodeSimilarityWriteProc.class,
-            NodeSimilarityStreamProc.class,
-            GraphLoadProc.class,
-            GraphCreateProc.class
-        );
+        registerProcedures(NodeSimilarityWriteProc.class, NodeSimilarityStreamProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
 
         TestSupport.allDirectedProjections().forEach(projection -> {

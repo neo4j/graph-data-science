@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -78,17 +77,9 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws KernelException {
-
         db = TestDatabaseCreator.createTestDatabase();
-
-        registerProcedures(
-            PageRankStreamProc.class,
-            PageRankWriteProc.class,
-            GraphLoadProc.class,
-            GraphCreateProc.class
-        );
+        registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
-
 
         expected = new HashMap<>();
 

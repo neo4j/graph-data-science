@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
-import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
@@ -57,8 +56,7 @@ class LouvainDocTest extends BaseProcTest {
             ", (nMark)-[:LINK {weight: 1}]->(nMichael)" +
             ", (nMichael)-[:LINK {weight: 1}]->(nMark)";
 
-
-        registerProcedures(LouvainWriteProc.class, LouvainStreamProc.class, GraphLoadProc.class);
+        registerProcedures(LouvainWriteProc.class, LouvainStreamProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(cypher);
     }

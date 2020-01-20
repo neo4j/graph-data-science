@@ -24,12 +24,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
+import org.neo4j.graphalgo.newapi.GraphDropProc;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -99,11 +99,11 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
 
         int idOffset = 100;
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, NodeSimilarityStreamProc.class, GraphCreateProc.class, GraphLoadProc.class);
+        registerProcedures(localDb, NodeSimilarityStreamProc.class, GraphCreateProc.class, GraphDropProc.class);
         QueryRunner.runQuery(localDb, "MATCH (n) DETACH DELETE n");
         QueryRunner.runQuery(localDb, String.format("UNWIND range(1, %d) AS i CREATE (:IncrementIdSpace)", idOffset));
         QueryRunner.runQuery(localDb, DB_CYPHER);
-        QueryRunner.runQuery(localDb, "CALL algo.graph.remove('myGraphNATURAL')");
+        QueryRunner.runQuery(localDb, "CALL gds.graph.drop('myGraphNATURAL')");
         QueryRunner.runQuery(localDb, graphCreate);
         QueryRunner.runQuery(localDb, "MATCH (n:IncrementIdSpace) DELETE n");
 

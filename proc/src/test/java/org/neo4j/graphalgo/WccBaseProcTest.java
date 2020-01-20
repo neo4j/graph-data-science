@@ -81,7 +81,7 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTes
             // {H, I}
             ",(nH)-[:TYPE]->(nI)";
 
-        registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphLoadProc.class, GraphCreateProc.class);
+        registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphCreateProc.class);
         runQuery(cypher);
     }
 

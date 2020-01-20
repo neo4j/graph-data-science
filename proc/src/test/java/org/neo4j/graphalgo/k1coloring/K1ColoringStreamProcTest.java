@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.k1coloring;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.HashMap;
@@ -36,7 +35,7 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest {
 
     @Override
     void registerProcs() throws Exception {
-        registerProcedures(K1ColoringStreamProc.class, GraphLoadProc.class);
+        registerProcedures(K1ColoringStreamProc.class);
     }
 
     @Test

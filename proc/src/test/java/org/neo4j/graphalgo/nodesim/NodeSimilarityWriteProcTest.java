@@ -115,17 +115,16 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
         });
 
         String resultGraphName = "simGraph_" + projection.name();
-        String loadQuery = "CALL algo.graph.load($resultGraphName, $label, 'SIMILAR', {nodeProperties: 'id', relationshipProperties: 'score', projection: $projection})";
-        runQuery(
-            loadQuery,
-            MapUtil.map("resultGraphName",
-                resultGraphName,
-                "label",
-                projection == REVERSE ? "Item" : "Person",
-                "projection",
-                projection.name()
-            )
-        );
+        String loadQuery = GdsCypher.call()
+            .withNodeLabel(projection == REVERSE ? "Item" : "Person")
+            .withRelationshipType("SIMILAR", projection)
+            .withNodeProperty("id")
+            .withRelationshipProperty("score")
+            .graphCreate(resultGraphName)
+            .yields();
+
+        runQuery(loadQuery);
+
         Graph simGraph = GraphCatalog.getUnion(getUsername(), resultGraphName).orElse(null);
         assertNotNull(simGraph);
         assertGraphEquals(

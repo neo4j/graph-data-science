@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.ImmutablePropertyMapping;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Projection;
@@ -120,12 +119,7 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
             ", (u)-[:TYPE3 {weight: 1.0}]->(w)" +
             ", (v)-[:TYPE3 {weight: 1.0}]->(w)";
 
-        registerProcedures(
-            PageRankStreamProc.class,
-            PageRankWriteProc.class,
-            GraphLoadProc.class,
-            GraphCreateProc.class
-        );
+        registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
         runQuery(cypher);
 
         runQuery("CALL gds.graph.create(" +

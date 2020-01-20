@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
@@ -60,9 +59,9 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
     WeightConfigTest<CONFIG, LabelPropagation>,
     MemoryEstimateTest<CONFIG, LabelPropagation>
 {
-
     static final List<Long> RESULT = Arrays.asList(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);
-    public static final String TEST_GRAPH_NAME = "myGraph";
+    static final String TEST_GRAPH_NAME = "myGraph";
+    static final String TEST_CYPHER_GRAPH_NAME = "myCypherGraph";
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -91,19 +90,17 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
             ", (b)-[:X]->(:B {id: 10, weight: 1.0, score: 1.0, seed: 1}) " +
             ", (b)-[:X]->(:B {id: 11, weight: 8.0, score: 8.0, seed: 2})";
 
-        registerProcedures(LabelPropagationStreamProc.class, LabelPropagationWriteProc.class, GraphLoadProc.class, GraphCreateProc.class);
+        registerProcedures(LabelPropagationStreamProc.class, LabelPropagationWriteProc.class, GraphCreateProc.class);
         runQuery(cypher);
 
+        // Create explicit graphs with both projection variants
         runQuery(createGraphQuery(Projection.NATURAL, TEST_GRAPH_NAME));
-        // TODO: is this flaky?
-        runQuery("CALL algo.graph.load('myCypherGraph', '" +
-                 nodeQuery +
-                 "','" +
-                 relQuery +
-                 "', {" +
-                 "  graph: 'cypher'," +
-                 "  nodeProperties: ['seed', 'score', 'weight']" +
-                 "})");
+        runQuery(String.format(
+            "CALL gds.graph.create.cypher('%s', '%s', '%s', {nodeProperties: ['seed', 'score', 'weight']})",
+            TEST_CYPHER_GRAPH_NAME,
+            nodeQuery,
+            relQuery
+        ));
     }
 
     private static final String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.weight AS weight, n.seed AS seed";
@@ -138,7 +135,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
     static Stream<Arguments> gdsGraphVariations() {
         return Stream.of(
             arguments(
-                GdsCypher.call().explicitCreation("myGraph"),
+                GdsCypher.call().explicitCreation(TEST_GRAPH_NAME),
                 "explicit graph"
             ),
             arguments(

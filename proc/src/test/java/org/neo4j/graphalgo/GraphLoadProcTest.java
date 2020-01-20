@@ -108,7 +108,6 @@ class GraphLoadProcTest extends BaseProcTest {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
-            GraphLoadProc.class,
             GraphCreateProc.class,
             LabelPropagationWriteProc.class,
             PageRankWriteProc.class,
@@ -123,6 +122,7 @@ class GraphLoadProcTest extends BaseProcTest {
         GraphCatalog.removeAllLoadedGraphs();
     }
 
+    @Disabled
     @ParameterizedTest
     @MethodSource("graphTypesFullGraph")
     void shouldLoadGraph(String graphType, String nodeQuery, String relationshipQuery) {
@@ -156,6 +156,7 @@ class GraphLoadProcTest extends BaseProcTest {
         );
     }
 
+    @Disabled
     @ParameterizedTest(name = "graphType = {0}, relationshipWeightParameter = {3}")
     @MethodSource("relationshipWeightParameters")
     void shouldLoadGraphWithRelationshipWeight(String graphType, String nodeQuery, String relationshipQuery, String relationshipWeightParam) {
@@ -176,6 +177,7 @@ class GraphLoadProcTest extends BaseProcTest {
         assertOutProperties(fooGraph, 1, 42.0, 42.0, 42.0, 42.0, 42.0);
     }
 
+    @Disabled
     @ParameterizedTest
     @MethodSource("graphTypesFullGraph")
     void shouldLoadGraphWithSaturatedThreadPool(String graphType, String nodeQuery, String relationshipQuery) {
@@ -205,11 +207,12 @@ class GraphLoadProcTest extends BaseProcTest {
         }
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(strings = {"huge", "cypher"})
     void shouldLoadGraphWithMultipleNodeProperties(String graphType) throws KernelException {
         GraphDatabaseAPI testLocalDb = TestDatabaseCreator.createTestDatabase();
-        testLocalDb.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(GraphLoadProc.class);
+        testLocalDb.getDependencyResolver().resolveDependency(Procedures.class);
 
         String testGraph =
                 "CREATE" +
@@ -275,6 +278,7 @@ class GraphLoadProcTest extends BaseProcTest {
         );
     }
 
+    @Disabled
     @ParameterizedTest(name = "graphType = {0}, relTypeQuery = {1}")
     @MethodSource("graphTypesWithRelationshipFilter")
     void shouldLoadGraphWithMultipleRelationships(String graphType, String nodeQuery, String relationshipQuery) {
@@ -296,6 +300,7 @@ class GraphLoadProcTest extends BaseProcTest {
         );
     }
 
+    @Disabled
     @AllGraphNamesTest
     void shouldFailToLoadGraphWithMultipleRelationships(String graphImpl) {
         String query = String.format("CALL algo.graph.load(" +
@@ -307,10 +312,11 @@ class GraphLoadProcTest extends BaseProcTest {
         assertThrows(QueryExecutionException.class, () -> runQuery(query));
     }
 
+    @Disabled
     @Test
     void shouldLoadGraphWithMultipleRelationshipProperties() throws KernelException {
         GraphDatabaseAPI testLocalDb = TestDatabaseCreator.createTestDatabase();
-        testLocalDb.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(GraphLoadProc.class);
+        testLocalDb.getDependencyResolver().resolveDependency(Procedures.class);
 
         String testGraph =
                 "CREATE" +
@@ -375,6 +381,7 @@ class GraphLoadProcTest extends BaseProcTest {
         testLocalDb.shutdown();
     }
 
+    @Disabled
     @Test
     void shouldFailOnMissingRelationshipProperty() {
         QueryExecutionException exMissingProperty = assertThrows(QueryExecutionException.class, () -> {
@@ -395,6 +402,7 @@ class GraphLoadProcTest extends BaseProcTest {
         assertThat(rootCause.getMessage(), containsString("Relationship properties not found: 'cost'"));
     }
 
+    @Disabled
     @Test
     void shouldFailOnInvalidAggregationFunction() {
         QueryExecutionException exMissingProperty = assertThrows(QueryExecutionException.class, () -> {
@@ -415,6 +423,7 @@ class GraphLoadProcTest extends BaseProcTest {
         assertThat(rootCause.getMessage(), containsString("Deduplication strategy `FOOBAR` is not supported."));
     }
 
+    @Disabled
     @Test
     void shouldComputeMemoryEstimationForHuge() {
         String query = "CALL algo.graph.load.memrec(" +
@@ -430,6 +439,7 @@ class GraphLoadProcTest extends BaseProcTest {
         );
     }
 
+    @Disabled
     @Test
     void shouldComputeMemoryEstimationForHugeWithProperties() {
         String query = "CALL algo.graph.load.memrec(" +
@@ -445,6 +455,7 @@ class GraphLoadProcTest extends BaseProcTest {
                 });
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(strings = {"huge", "cypher"})
     void shouldUseLoadedGraph(String graph) {
@@ -468,6 +479,7 @@ class GraphLoadProcTest extends BaseProcTest {
                 row -> assertEquals(12, row.getNumber("nodePropertiesWritten").intValue()));
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(strings = {"huge", "cypher"})
     void multiUseLoadedGraph(String graph) {
@@ -523,6 +535,7 @@ class GraphLoadProcTest extends BaseProcTest {
                 row -> assertEquals(10, row.getNumber("componentCount").intValue()));
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(strings = {"huge", "cypher"})
     void shouldThrowIfGraphAlreadyLoaded(String graph) {
@@ -557,6 +570,7 @@ class GraphLoadProcTest extends BaseProcTest {
                         .map(comb -> arguments(comb.get()[0], comb.get()[1], computeDegreeDistribution)));
     }
 
+    @Disabled
     @ParameterizedTest(name = "graph = {0}, direction = {1}, computeDegreeDistribution = {2}")
     @MethodSource("graphImplAndDirectionAndComputeDegreeDistribution")
     void shouldReturnGraphInfoWithDegreeDistributionAndLoadDirection(
@@ -580,6 +594,7 @@ class GraphLoadProcTest extends BaseProcTest {
                 });
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(strings = {"huge", "cypher"})
     void removeGraph(String graph) {
@@ -613,6 +628,7 @@ class GraphLoadProcTest extends BaseProcTest {
         });
     }
 
+    @Disabled
     @Test
     void removeGraphWithMultipleRelationshipTypes() {
         String query = "CALL algo.graph.load(" +
@@ -642,6 +658,7 @@ class GraphLoadProcTest extends BaseProcTest {
         });
     }
 
+    @Disabled
     @Test
     void removeMissingGraphIsNoOp() {
         runQueryWithRowConsumer("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
@@ -654,6 +671,7 @@ class GraphLoadProcTest extends BaseProcTest {
         });
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(strings = {"huge", "cypher"})
     void degreeDistribution(String graph) {
@@ -716,6 +734,7 @@ class GraphLoadProcTest extends BaseProcTest {
         });
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(strings = {"huge", "cypher"})
     void incomingDegreeDistribution(String graph) {
@@ -748,11 +767,13 @@ class GraphLoadProcTest extends BaseProcTest {
         });
     }
 
+    @Disabled
     @Test
     void shouldReturnEmptyList() {
         assertEmptyResult("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction");
     }
 
+    @Disabled
     @Test
     void shouldListAllAvailableGraphs() {
         String loadQuery = "CALL algo.graph.load(" +
@@ -788,6 +809,7 @@ class GraphLoadProcTest extends BaseProcTest {
         assertEquals(parameters.get(0), actual.get(0));
     }
 
+    @Disabled
     @Test
     void shouldListAllAvailableGraphsForUser() {
         String loadQuery = "CALL algo.graph.load(" +
@@ -804,6 +826,7 @@ class GraphLoadProcTest extends BaseProcTest {
         runQueryWithRowConsumer("bob", listQuery, resultRow -> Assertions.assertEquals("bobGraph", resultRow.getString("name")));
     }
 
+    @Disabled
     @ParameterizedTest
     @CsvSource(value = {
             "'CREATE (n) RETURN id(n) AS id', 'RETURN 0 AS source, 1 AS target'",
@@ -824,6 +847,7 @@ class GraphLoadProcTest extends BaseProcTest {
         assertThat(root.getMessage(), containsString("Query must be read only. Query: "));
     }
 
+    @Disabled
     @Test
     void shouldPreferRelationshipPropertiesForCypherLoading() {
         String nodeQuery = ALL_NODES_QUERY.replaceAll("'", "");
