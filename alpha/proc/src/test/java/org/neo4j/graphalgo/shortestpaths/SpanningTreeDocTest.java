@@ -24,12 +24,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -39,13 +37,13 @@ class SpanningTreeDocTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE " +
-        " (a:Place {id:\"A\"})," +
-        " (b:Place {id:\"B\"})," +
-        " (c:Place {id:\"C\"})," +
-        " (d:Place {id:\"D\"})," +
-        " (e:Place {id:\"E\"})," +
-        " (f:Place {id:\"F\"})," +
-        " (g:Place {id:\"G\"})," +
+        " (a:Place {id: 'A'})," +
+        " (b:Place {id: 'B'})," +
+        " (c:Place {id: 'C'})," +
+        " (d:Place {id: 'D'})," +
+        " (e:Place {id: 'E'})," +
+        " (f:Place {id: 'F'})," +
+        " (g:Place {id: 'G'})," +
         " (d)-[:LINK {cost:4}]->(b)," +
         " (d)-[:LINK {cost:6}]->(e)," +
         " (b)-[:LINK {cost:1}]->(a)," +
@@ -56,14 +54,11 @@ class SpanningTreeDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.util.*")
-        );
+        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             SpanningTreeProc.class,
             KSpanningTreeProc.class
         );
-        registerFunctions(GetNodeFunc.class);
 
         runQuery(DB_CYPHER);
     }
@@ -75,7 +70,7 @@ class SpanningTreeDocTest extends BaseProcTest {
 
     @Test
     void shouldWriteMinimumWeightSpanningTree() {
-        String spanningTreeQuery = "MATCH (n:Place {id:\"D\"})" +
+        String spanningTreeQuery = "MATCH (n:Place {id: 'D'})" +
                        " CALL gds.alpha.spanningTree.minimum.write({"+
                        "   nodeProjection: 'Place'," +
                        "   relationshipProjection: {" +
@@ -96,7 +91,7 @@ class SpanningTreeDocTest extends BaseProcTest {
         runQuery(spanningTreeQuery);
 
         // Can't assert on the written cost because of currently open bug: https://trello.com/c/EWgz8KfE
-        String query = "MATCH path = (n:Place {id:\"D\"})-[:MINST*]-()" + NL +
+        String query = "MATCH path = (n:Place {id: 'D'})-[:MINST*]-()" + NL +
                        "WITH relationships(path) AS rels" + NL +
                        "UNWIND rels AS rel" + NL +
                        "WITH DISTINCT rel AS rel" + NL +
@@ -118,7 +113,7 @@ class SpanningTreeDocTest extends BaseProcTest {
 
     @Test
     void shouldWriteMaximumWeightSpanningTree() {
-        String spanningTreeQuery = "MATCH (n:Place {id:\"D\"})" +
+        String spanningTreeQuery = "MATCH (n:Place {id: 'D'})" +
                        " CALL gds.alpha.spanningTree.maximum.write({"+
                        "   nodeProjection: 'Place'," +
                        "   relationshipProjection: {" +
@@ -139,7 +134,7 @@ class SpanningTreeDocTest extends BaseProcTest {
         runQuery(spanningTreeQuery);
 
         // Can't assert on the written cost because of currently open bug: https://trello.com/c/EWgz8KfE
-        String query = "MATCH path = (n:Place {id:\"D\"})-[:MAXST*]-()" + NL +
+        String query = "MATCH path = (n:Place {id: 'D'})-[:MAXST*]-()" + NL +
                        "WITH relationships(path) AS rels" + NL +
                        "UNWIND rels AS rel" + NL +
                        "WITH DISTINCT rel AS rel" + NL +

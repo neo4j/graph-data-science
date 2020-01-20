@@ -87,10 +87,11 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type      | Default   | Optional | Description
-| startNodeId       | long      | null      | no       | The start node ID
-| weightProperty    | string    | null      | no       | The property name that contains weight. Must be numeric.
-| writeProperty     | string    | 'mst'     | yes      | The relationship type written back as result
+| Name                  | Type      | Default   | Optional  | Description
+| startNodeId           | long      | null      | no        | The start node ID
+| weightProperty        | string    | null      | no        | The property name that contains weight. Must be numeric.
+| writeProperty         | string    | 'mst'     | yes       | The relationship type written back as result
+| weightWriteProperty   | string    | n/a       | no        | The weight property of the `writeProperty` relationship type written back
 |===
 
 .Results
@@ -146,13 +147,13 @@ image::mst.png[]
 .The following will create a sample graph:
 [source, cypher]
 ----
-CREATE (a:Place {id:"A"}),
-       (b:Place {id:"B"}),
-       (c:Place {id:"C"}),
-       (d:Place {id:"D"}),
-       (e:Place {id:"E"}),
-       (f:Place {id:"F"}),
-       (g:Place {id:"G"}),
+CREATE (a:Place {id: 'A'}),
+       (b:Place {id: 'B'}),
+       (c:Place {id: 'C'}),
+       (d:Place {id: 'D'}),
+       (e:Place {id: 'E'}),
+       (f:Place {id: 'F'}),
+       (g:Place {id: 'G'}),
        (d)-[:LINK {cost:4}]->(b),
        (d)-[:LINK {cost:6}]->(e),
        (b)-[:LINK {cost:1}]->(a),
@@ -167,7 +168,7 @@ Minimum weight spanning tree visits all nodes that are in the same connected com
 .The following will run the Minimum Weight Spanning Tree algorithm and write back results:
 [source, cypher]
 ----
-MATCH (n:Place {id: "D"})
+MATCH (n:Place {id: 'D'})
 CALL gds.alpha.spanningTree.minimum.write({
   nodeProjection: 'Place',
   relationshipProjection: {
@@ -189,7 +190,7 @@ RETURN createMillis, computeMillis, writeMillis, effectiveNodeCount;
 .To find all pairs of nodes included in our minimum spanning tree, run the following query:
 [source, cypher]
 ----
-MATCH path = (n:Place {id: "D"})-[:MINST*]-()
+MATCH path = (n:Place {id: 'D'})-[:MINST*]-()
 WITH relationships(path) AS rels
 UNWIND rels AS rel
 WITH DISTINCT rel AS rel
@@ -217,7 +218,7 @@ Maximum weighted tree spanning algorithm is similar to the minimum one, except t
 .The following will run the maximum weight spanning tree algorithm and write back results:
 [source, cypher]
 ----
-MATCH (n:Place{id: "D"})
+MATCH (n:Place{id: 'D'})
 CALL algo.spanningTree.maximum.write({
   nodeProjection: 'Place',
   relationshipProjection: {
@@ -273,7 +274,7 @@ RETURN createMillis,computeMillis,writeMillis, effectiveNodeCount;
 [source, cypher]
 ----
 MATCH (n:Place)
-WITH n.id AS Place, n.kminst AS Partition, count(*) as count
+WITH n.id AS Place, n.kminst AS Partition, count(*) AS count
 WHERE count = 3
 RETURN Place, Partition
 ----
@@ -316,7 +317,7 @@ RETURN createMillis,computeMillis,writeMillis, effectiveNodeCount;
 [source, cypher]
 ----
 MATCH (n:Place)
-WITH n.id AS Place, n.kmaxst AS Partition, count(*) as count
+WITH n.id AS Place, n.kmaxst AS Partition, count(*) AS count
 WHERE count = 3
 RETURN Place, Partition
 ----
