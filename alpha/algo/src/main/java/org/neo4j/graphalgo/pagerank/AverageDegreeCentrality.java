@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.HdrHistogram.AtomicHistogram;
 import org.HdrHistogram.Histogram;
-import org.neo4j.graphalgo.LegacyAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class AverageDegreeCentrality extends LegacyAlgorithm<AverageDegreeCentrality> {
+public class AverageDegreeCentrality extends Algorithm<AverageDegreeCentrality, AverageDegreeCentrality> {
     private final long nodeCount;
     private Graph graph;
     private final ExecutorService executor;
@@ -56,7 +56,7 @@ public class AverageDegreeCentrality extends LegacyAlgorithm<AverageDegreeCentra
     }
 
     @Override
-    public Void compute() {
+    public AverageDegreeCentrality compute() {
         nodeQueue.set(0);
 
         List<Runnable> tasks = new ArrayList<>();
