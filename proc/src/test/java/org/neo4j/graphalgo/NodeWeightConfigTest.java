@@ -34,9 +34,8 @@ import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
+import org.neo4j.graphalgo.newapi.NodeWeightConfig;
 import org.neo4j.graphdb.DependencyResolver;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -53,16 +52,15 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
+public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
-    RelationshipProjections MULTI_RELATIONSHIPS_PROJECTION = RelationshipProjections.builder()
+    NodeProjections MULTI_PROPERTY_NODE_PROJECTION = NodeProjections.builder()
         .putProjection(
-            ElementIdentifier.of("TYPE"),
-            RelationshipProjection.builder()
-                .type("TYPE")
+            ElementIdentifier.of("Label"),
+            NodeProjection.builder()
+                .label("Label")
                 .properties(
                     PropertyMappings.of(
                         PropertyMapping.of("weight1", 0.0),
@@ -70,45 +68,38 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
                     )
                 )
                 .build()
-        )
-        .putProjection(
-            ElementIdentifier.of("TYPE1"),
-            RelationshipProjection.builder()
-                .type("TYPE1")
-                .build()
-        )
-        .build();
+        ).build();
 
     @Test
-    default void testDefaultRelationshipWeightPropertyIsNull() {
+    default void testDefaultNodeWeightPropertyIsNull() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.empty();
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
-        assertNull(config.relationshipWeightProperty());
+        assertNull(config.nodeWeightProperty());
     }
 
     @Test
-    default void testRelationshipWeightPropertyFromConfig() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("relationshipWeightProperty", "weight"));
+    default void testNodeWeightPropertyFromConfig() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", "weight"));
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
-        assertEquals("weight", config.relationshipWeightProperty());
+        assertEquals("weight", config.nodeWeightProperty());
     }
 
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.AlgoBaseProcTest#emptyStringPropertyValues")
-    default void testEmptyRelationshipWeightPropertyValues(String weightPropertyParameter) {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("relationshipWeightProperty", weightPropertyParameter));
+    default void testEmptyNodeWeightPropertyValues(String weightPropertyParameter) {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", weightPropertyParameter));
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
-        assertNull(config.relationshipWeightProperty());
+        assertNull(config.nodeWeightProperty());
     }
 
     @Test
-    default void testRelationshipWeightPropertyValidation() {
-        List<String> relationshipProperties = Arrays.asList("a");
+    default void testNodeWeightPropertyValidation() {
+        List<String> nodeProperties = Arrays.asList("a");
         Map<String, Object> tempConfig = MapUtil.map(
-            "relationshipWeightProperty", "foo",
-            "relationshipProjection", MapUtil.map(
+            "nodeWeightProperty", "foo",
+            "nodeProjection", MapUtil.map(
                 "A", MapUtil.map(
-                    "properties", relationshipProperties
+                    "properties", nodeProperties
                 )
             )
         );
@@ -126,7 +117,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
     }
 
     @Test
-    default void shouldFailWithInvalidRelationshipWeightProperty() {
+    default void shouldFailWithInvalidNodeWeightProperty() {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
         Graph graph = graphLoader(graphCreateConfig)
@@ -136,11 +127,11 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
         applyOnProcedure((proc) -> {
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
-                "relationshipWeightProperty",
+                "nodeWeightProperty",
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Relationship weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found";
+            String error = "Node weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap
@@ -155,13 +146,12 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
     @ParameterizedTest
     @CsvSource(value = {"weight1, 0.0", "weight2, 1.0"})
-    default void testFilteringOnRelationshipPropertiesOnLoadedGraph(String propertyName, double expectedWeight) {
+    default void testFilteringOnNodePropertiesOnLoadedGraph(String propertyName, double expectedWeight) {
         String graphName = "foo";
-        loadExplicitGraphWithRelationshipWeights(graphName, MULTI_RELATIONSHIPS_PROJECTION);
+        loadExplicitGraphWithNodeWeights(graphName, MULTI_PROPERTY_NODE_PROJECTION);
 
         CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map(
-            "relationshipTypes", Collections.singletonList("*"),
-            "relationshipWeightProperty", propertyName
+            "nodeWeightProperty", propertyName
             )
         );
 
@@ -173,85 +163,14 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
             Graph graph = proc.createGraph(configAndName);
             graph.forEachNode(nodeId -> {
-                graph.forEachRelationship(nodeId, Direction.OUTGOING, Double.NaN, (s, t, w) -> {
-                    assertEquals(expectedWeight, w);
-                    return true;
-                });
+                assertEquals(expectedWeight, graph.nodeProperties(propertyName).nodeProperty(nodeId));
                 return true;
             });
 
         });
     }
 
-    @ParameterizedTest
-    @CsvSource(
-        delimiter = ';',
-        value = {
-            "TYPE1; ()-[]->(), ()",
-            "TYPE; (c)<--(a)-->(b)-->(c)",
-            "*; (a)-->(b)-->(c)-->(a)-->(c)"
-        })
-    default void testRunUnweightedOnWeightedMultiRelTypeGraph(String relType, String expectedGraph) {
-        String weightedGraphName = "weightedGraph";
-        loadExplicitGraphWithRelationshipWeights(weightedGraphName, MULTI_RELATIONSHIPS_PROJECTION);
-
-        CypherMapWrapper configWithoutRelWeight = CypherMapWrapper.create(MapUtil.map(
-            "relationshipTypes",
-            Collections.singletonList(relType)
-        ));
-        CypherMapWrapper algoConfig = createMinimalConfig(configWithoutRelWeight);
-
-        applyOnProcedure((proc) -> {
-            CONFIG config = proc.newConfig(Optional.of(weightedGraphName), algoConfig);
-            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(weightedGraphName));
-
-            Graph graph = proc.createGraph(configAndName);
-            assertGraphEquals(fromGdl(expectedGraph), graph);
-        });
-    }
-
-    @Test
-    default void testRunUnweightedOnWeightedNoRelTypeGraph() {
-        String noRelGraph = "weightedGraph";
-
-        RelationshipProjections relationshipProjections = RelationshipProjections
-            .empty()
-            .addPropertyMappings(PropertyMappings.of(PropertyMapping.of("weight1", 1.0)));
-
-        loadExplicitGraphWithRelationshipWeights(noRelGraph, relationshipProjections);
-
-        CypherMapWrapper algoConfig = createMinimalConfig(CypherMapWrapper.empty());
-
-        applyOnProcedure((proc) -> {
-            CONFIG config = proc.newConfig(Optional.of(noRelGraph), algoConfig);
-            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(noRelGraph));
-
-            Graph graph = proc.createGraph(configAndName);
-            assertGraphEquals(fromGdl("(a)-->(b)-->(c)-->(a)-->(c)"), graph);
-        });
-    }
-
-    @Test
-    default void testFilteringOnRelTypesOnLoadedGraph() {
-        String graphName = "foo";
-        loadExplicitGraphWithRelationshipWeights(graphName, MULTI_RELATIONSHIPS_PROJECTION);
-
-        CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map(
-            "relationshipTypes", Collections.singletonList("TYPE1"),
-            "relationshipWeightProperty", "weight1"
-        ));
-        CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
-
-        applyOnProcedure((proc) -> {
-            CONFIG config = proc.newConfig(Optional.of(graphName), algoConfig);
-            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(graphName));
-
-            Graph graph = proc.createGraph(configAndName);
-            assertGraphEquals(fromGdl("()-[{w1: 0.0}]->(), ()"), graph);
-        });
-    }
-
-    default void loadExplicitGraphWithRelationshipWeights(String graphName, RelationshipProjections relationshipProjections) {
+    default void loadExplicitGraphWithNodeWeights(String graphName, NodeProjections nodeProjections) {
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
 
         try {
@@ -264,20 +183,16 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
         }
 
         String createQuery = "CREATE" +
-                             "  (a: Label)" +
-                             ", (b: Label)" +
-                             ", (c: Label)" +
-                             ", (a)-[:TYPE { weight1: 0.0, weight2: 1.0 }]->(b)" +
-                             ", (a)-[:TYPE { weight2: 1.0 }]->(c)" +
-                             ", (b)-[:TYPE { weight1: 0.0 }]->(c)" +
-                             ", (c)-[:TYPE1 { weight1: 0.0 }]->(a)";
+                             "  (a: Label { weight1: 0.0, weight2: 1.0 })" +
+                             ", (b: Label { weight2: 1.0 })" +
+                             ", (c: Label { weight1: 0.0 })";
 
         db.execute(createQuery);
 
         GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName(graphName)
-            .nodeProjection(NodeProjections.empty())
-            .relationshipProjection(relationshipProjections)
+            .nodeProjection(nodeProjections)
+            .relationshipProjection(RelationshipProjections.empty())
             .build();
 
         GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig)
