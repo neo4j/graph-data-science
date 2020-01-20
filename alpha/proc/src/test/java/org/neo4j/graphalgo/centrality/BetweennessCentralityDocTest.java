@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
@@ -54,7 +53,7 @@ public class BetweennessCentralityDocTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
+            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
         registerProcedures(BetweennessCentralityProc.class, SampledBetweennessCentralityProc.class);
@@ -76,7 +75,7 @@ public class BetweennessCentralityDocTest extends BaseProcTest {
                        "   direction: 'OUTGOING'" +
                        " })" +
                        " YIELD nodeId, centrality" +
-                       " RETURN algo.asNode(nodeId).name AS user, centrality" +
+                       " RETURN gds.util.asNode(nodeId).name AS user, centrality" +
                        " ORDER BY centrality DESC";
 
         String expected = "+------------------------+" + NL +
@@ -147,7 +146,7 @@ public class BetweennessCentralityDocTest extends BaseProcTest {
                        "   maxDepth: 1," +
                        "   direction: 'OUTGOING'" +
                        " }) YIELD nodeId, centrality" +
-                       " RETURN algo.asNode(nodeId).name AS user, centrality" +
+                       " RETURN gds.util.asNode(nodeId).name AS user, centrality" +
                        " ORDER BY centrality DESC";
 
         String expected = "+------------------------+" + NL +
