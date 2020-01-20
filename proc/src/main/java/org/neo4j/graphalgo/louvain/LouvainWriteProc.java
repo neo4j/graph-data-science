@@ -33,7 +33,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,20 +55,7 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
             graphNameOrConfig,
             configuration
         );
-        return write(computationResult, true);
-    }
-
-    @Procedure(value = "gds.louvain.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
-    public Stream<WriteResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(computationResult, false);
+        return write(computationResult);
     }
 
     @Procedure(value = "gds.louvain.write.estimate", mode = READ)
@@ -79,57 +65,6 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    @Procedure(value = "gds.louvain.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateStats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    private Stream<WriteResult> write(
-        ComputationResult<Louvain, Louvain, LouvainWriteConfig> computeResult,
-        boolean write
-    ) {
-        if (computeResult.isGraphEmpty()) {
-            return Stream.of(
-                new WriteResult(
-                    computeResult.config(),
-                    0, computeResult.createMillis(),
-                    0, 0, 0, 0, 0, 0,
-                    new double[0], Collections.emptyMap()
-                )
-            );
-        }
-
-        LouvainWriteConfig config = computeResult.config();
-        Graph graph = computeResult.graph();
-        Louvain louvain = computeResult.algorithm();
-
-        WriteResultBuilder builder = new WriteResultBuilder(
-            config,
-            graph.nodeCount(),
-            callContext,
-            computeResult.tracker()
-        );
-
-        builder.withCreateMillis(computeResult.createMillis());
-        builder.withComputeMillis(computeResult.computeMillis());
-        builder
-            .withLevels(louvain.levels())
-            .withModularity(louvain.modularities()[louvain.levels() - 1])
-            .withModularities(louvain.modularities())
-            .withCommunityFunction(louvain::getCommunity);
-
-        if (write && !config.writeProperty().isEmpty()) {
-            writeNodeProperties(builder, computeResult);
-            graph.releaseProperties();
-        }
-
-        return Stream.of(builder.build());
     }
 
     @Override

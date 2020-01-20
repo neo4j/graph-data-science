@@ -20,6 +20,10 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.Graph;
+
+import java.util.Collections;
+import java.util.stream.Stream;
 
 abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBaseProc<Louvain, Louvain, CONFIG> {
 
@@ -29,5 +33,51 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
     @Override
     protected final LouvainFactory<CONFIG> algorithmFactory(CONFIG config) {
         return new LouvainFactory<>();
+    }
+
+    protected Stream<LouvainWriteProc.WriteResult> write(
+        ComputationResult<Louvain, Louvain, CONFIG> computeResult
+    ) {
+        CONFIG config = computeResult.config();
+        boolean write = config instanceof LouvainWriteConfig;
+        LouvainWriteConfig writeConfig = ImmutableLouvainWriteConfig.builder()
+            .writeProperty("stats does not support a write property")
+            .from(config)
+            .build();
+        if (computeResult.isGraphEmpty()) {
+            return Stream.of(
+                new LouvainWriteProc.WriteResult(
+                    writeConfig,
+                    0, computeResult.createMillis(),
+                    0, 0, 0, 0, 0, 0,
+                    new double[0], Collections.emptyMap()
+                )
+            );
+        }
+
+        Graph graph = computeResult.graph();
+        Louvain louvain = computeResult.algorithm();
+
+        LouvainWriteProc.WriteResultBuilder builder = new LouvainWriteProc.WriteResultBuilder(
+            writeConfig,
+            graph.nodeCount(),
+            callContext,
+            computeResult.tracker()
+        );
+
+        builder.withCreateMillis(computeResult.createMillis());
+        builder.withComputeMillis(computeResult.computeMillis());
+        builder
+            .withLevels(louvain.levels())
+            .withModularity(louvain.modularities()[louvain.levels() - 1])
+            .withModularities(louvain.modularities())
+            .withCommunityFunction(louvain::getCommunity);
+
+        if (write && !writeConfig.writeProperty().isEmpty()) {
+            writeNodeProperties(builder, computeResult);
+            graph.releaseProperties();
+        }
+
+        return Stream.of(builder.build());
     }
 }

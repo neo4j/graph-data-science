@@ -76,6 +76,28 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
+    @Procedure(value = "gds.louvain.stats", mode = READ)
+    @Description(STATS_DESCRIPTION)
+    public Stream<LouvainWriteProc.WriteResult> stats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
+        return write(computationResult);
+    }
+
+    @Procedure(value = "gds.louvain.stats.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateStats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
+    }
+
     @Override
     protected LouvainStreamConfig newConfig(
         String username,
