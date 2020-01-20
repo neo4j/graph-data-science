@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.wcc;
 
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -53,34 +52,12 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
             graphNameOrConfig,
             configuration
         );
-        return write(computationResult, true);
-    }
-
-    @Procedure(value = "gds.wcc.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
-    public Stream<WriteResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(computationResult, false);
+        return write(computationResult);
     }
 
     @Procedure(value = "gds.wcc.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> writeEstimate(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    @Procedure(value = "gds.wcc.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> statsEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -112,38 +89,15 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
             NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
             propertyTranslator = new PropertyTranslator.OfLongIfChanged<>(seedProperties, DisjointSetStruct::setIdOf);
         } else if (consecutiveIds && !isIncremental) {
-            propertyTranslator = new ConsecutivePropertyTranslator(computationResult.result(), computationResult.tracker());
+            propertyTranslator = new ConsecutivePropertyTranslator(
+                computationResult.result(),
+                computationResult.tracker()
+            );
         } else {
             propertyTranslator = (PropertyTranslator.OfLong<DisjointSetStruct>) DisjointSetStruct::setIdOf;
         }
 
         return propertyTranslator;
-    }
-
-    private Stream<WccWriteProc.WriteResult> write(
-        ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computeResult,
-        boolean write
-    ) {
-        if (computeResult.isGraphEmpty()) {
-            return Stream.of(WriteResult.empty(computeResult.config(), computeResult.createMillis()));
-        } else {
-            WccWriteConfig config = computeResult.config();
-            Graph graph = computeResult.graph();
-
-            WriteResultBuilder builder = new WriteResultBuilder(config, graph.nodeCount(), callContext, computeResult.tracker());
-            DisjointSetStruct dss = computeResult.result();
-
-            builder.withCreateMillis(computeResult.createMillis());
-            builder.withComputeMillis(computeResult.computeMillis());
-            builder.withCommunityFunction(dss::setIdOf);
-
-            if (write && !config.writeProperty().isEmpty()) {
-                writeNodeProperties(builder, computeResult);
-                graph.releaseProperties();
-            }
-
-            return Stream.of(builder.build());
-        }
     }
 
     public static final class WriteResult {
@@ -203,7 +157,12 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
 
         private final WccWriteConfig config;
 
-        WriteResultBuilder(WccWriteConfig config, long nodeCount, ProcedureCallContext context, AllocationTracker tracker) {
+        WriteResultBuilder(
+            WccWriteConfig config,
+            long nodeCount,
+            ProcedureCallContext context,
+            AllocationTracker tracker
+        ) {
             super(
                 config,
                 nodeCount,

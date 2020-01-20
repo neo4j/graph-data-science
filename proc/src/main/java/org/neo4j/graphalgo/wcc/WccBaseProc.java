@@ -20,12 +20,15 @@
 package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+
+import java.util.stream.Stream;
 
 public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBaseProc<Wcc, DisjointSetStruct, CONFIG> {
 
@@ -42,6 +45,42 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
         return false;
     }
 
+    protected Stream<WccWriteProc.WriteResult> write(
+        ComputationResult<Wcc, DisjointSetStruct, CONFIG> computeResult
+    ) {
+        CONFIG config = computeResult.config();
+        boolean write = config instanceof WccWriteConfig;
+        WccWriteConfig writeConfig = ImmutableWccWriteConfig.builder()
+            .writeProperty("stats does not support a write property")
+            .from(config)
+            .build();
+
+        if (computeResult.isGraphEmpty()) {
+            return Stream.of(WccWriteProc.WriteResult.empty(writeConfig, computeResult.createMillis()));
+        } else {
+            Graph graph = computeResult.graph();
+
+            WccWriteProc.WriteResultBuilder builder = new WccWriteProc.WriteResultBuilder(
+                writeConfig,
+                graph.nodeCount(),
+                callContext,
+                computeResult.tracker()
+            );
+            DisjointSetStruct dss = computeResult.result();
+
+            builder.withCreateMillis(computeResult.createMillis());
+            builder.withComputeMillis(computeResult.computeMillis());
+            builder.withCommunityFunction(dss::setIdOf);
+
+            if (write && !writeConfig.writeProperty().isEmpty()) {
+                writeNodeProperties(builder, computeResult);
+                graph.releaseProperties();
+            }
+
+            return Stream.of(builder.build());
+        }
+    }
+
     static class ConsecutivePropertyTranslator implements PropertyTranslator.OfLong<DisjointSetStruct> {
 
         // Magic number to estimate the number of communities that need to be mapped into consecutive space
@@ -56,7 +95,8 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
             // TODO is there a better way to set the initial size, e.g. dss.setCount
             HugeLongLongMap setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
                 dss.size(),
-                MAPPING_SIZE_QUOTIENT), tracker);
+                MAPPING_SIZE_QUOTIENT
+            ), tracker);
             this.communities = HugeLongArray.newArray(dss.size(), tracker);
 
             for (int nodeId = 0; nodeId < dss.size(); nodeId++) {

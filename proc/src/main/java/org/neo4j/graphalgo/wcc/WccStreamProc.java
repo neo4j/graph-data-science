@@ -61,6 +61,28 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
+    @Procedure(value = "gds.wcc.stats", mode = READ)
+    @Description(STATS_DESCRIPTION)
+    public Stream<WccWriteProc.WriteResult> stats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
+        return write(computationResult);
+    }
+
+    @Procedure(value = "gds.wcc.stats.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> statsEstimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
+    }
+
     private Stream<StreamResult> stream(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
         if (computationResult.isGraphEmpty()) {
             return Stream.empty();
@@ -78,7 +100,8 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
         return LongStream.range(IdMapping.START_NODE_ID, graph.nodeCount())
             .mapToObj(mappedId -> new StreamResult(
                 graph.toOriginalNodeId(mappedId),
-                propertyTranslator.toLong(dss, mappedId)));
+                propertyTranslator.toLong(dss, mappedId)
+            ));
     }
 
     @Override
