@@ -221,6 +221,18 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 ));
             }
         }
+        if (config instanceof NodeWeightConfig) {
+            Set<String> properties = new HashSet<>(graphCreateConfig.nodeProjection().allProperties());
+
+            String weightProperty = ((NodeWeightConfig) config).nodeWeightProperty();
+            if (weightProperty != null && !properties.contains(weightProperty)) {
+                throw new IllegalArgumentException(String.format(
+                    "Node weight property `%s` not found in graph with node properties: %s",
+                    weightProperty,
+                    properties
+                ));
+            }
+        }
         if (config instanceof RelationshipWeightConfig) {
             Set<String> properties = new HashSet<>();
             properties.addAll(graphCreateConfig.relationshipProjection().allProperties());
