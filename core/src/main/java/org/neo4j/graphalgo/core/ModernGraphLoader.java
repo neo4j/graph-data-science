@@ -55,7 +55,10 @@ public interface ModernGraphLoader extends SharedGraphLoader {
         return new HashMap<>();
     }
 
-    String username();
+    @Value.Default
+    default String username() {
+        return createConfig().username();
+    }
 
     Log log();
 

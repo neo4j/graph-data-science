@@ -128,6 +128,15 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         );
     }
 
+    static GraphCreateFromStoreConfig all(String userName, String graphName) {
+        return ImmutableGraphCreateFromStoreConfig.builder()
+            .username(userName)
+            .graphName(graphName)
+            .nodeProjection(NodeProjections.empty())
+            .relationshipProjection(RelationshipProjections.empty())
+            .build();
+    }
+
     static GraphCreateFromStoreConfig fromProcedureConfig(String username, CypherMapWrapper config) {
         if (!config.containsKey(NODE_PROJECTION_KEY)) {
             config = config.withEntry(NODE_PROJECTION_KEY, NodeProjections.empty());
