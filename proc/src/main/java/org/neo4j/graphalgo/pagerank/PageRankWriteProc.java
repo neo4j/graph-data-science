@@ -141,7 +141,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
     public static final class WriteResult {
 
         public String writeProperty;
-        public @Nullable String weightProperty;
+        public @Nullable String relationshipWeightProperty;
         public long nodePropertiesWritten;
         public long relationshipPropertiesWritten;
         public long createMillis;
@@ -154,7 +154,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
 
         WriteResult(
             String writeProperty,
-            @Nullable String weightProperty,
+            @Nullable String relationshipWeightProperty,
             long maxIterations,
             long nodePropertiesWritten,
             long createMillis,
@@ -166,7 +166,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
         ) {
             this.relationshipPropertiesWritten = 0;
             this.writeProperty = writeProperty;
-            this.weightProperty = weightProperty;
+            this.relationshipWeightProperty = relationshipWeightProperty;
             this.maxIterations = maxIterations;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
