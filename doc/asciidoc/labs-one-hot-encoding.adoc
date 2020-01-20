@@ -22,13 +22,13 @@ In the list, `selected values` are represented by `1`, and `unselected values` a
 .The following will run the algorithm on hardcoded lists:
 [source, cypher]
 ----
-RETURN gds.alpha.ml.oneHotEncoding(["Chinese", "Indian", "Italian"], ["Italian"]) AS vector
+RETURN gds.alpha.ml.oneHotEncoding(['Chinese', 'Indian', 'Italian'], ['Italian']) AS embedding
 ----
 
 .Results
 [opts="header",cols="1"]
 |===
-| `vector`
+| embedding
 | [0,0,1]
 |===
 
@@ -58,14 +58,14 @@ WITH cuisine
   ORDER BY cuisine.name
 WITH collect(cuisine) AS cuisines
 MATCH (p:Person)
-RETURN p.name AS person, gds.alpha.ml.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS encoding
-  ORDER BY person
+RETURN p.name AS name, gds.alpha.ml.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS embedding
+  ORDER BY name
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header",cols="1, 1"]
 |===
-| Name     | Embedding
+| name     | embedding
 | Arya     | [0,0,0]
 | Michael  | [1,0,1]
 | Praveena | [0,1,0]
