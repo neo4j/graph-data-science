@@ -61,9 +61,8 @@ class BalancedTriadsDocTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.util.*")
         );
-        registerProcedures(
-            BalancedTriadsProc.class
-        );
+
+        registerProcedures(BalancedTriadsProc.class);
         registerFunctions(GetNodeFunc.class);
 
         runQuery(DB_CYPHER);
