@@ -22,31 +22,46 @@ In the list, `selected values` are represented by `1`, and `unselected values` a
 .The following will run the algorithm on hardcoded lists:
 [source, cypher]
 ----
-include::scripts/one-hot-encoding.cypher[tag=basic]
+RETURN gds.alpha.ml.oneHotEncoding(["Chinese", "Indian", "Italian"], ["Italian"]) AS vector
 ----
 
-// tag::basic-result[]
 .Results
 [opts="header",cols="1"]
 |===
 | `vector`
 | [0,0,1]
 |===
-// end::basic-result[]
 
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/one-hot-encoding.cypher[tag=create-sample-graph]
+CREATE (french:Cuisine {name:'French'}),
+       (italian:Cuisine {name:'Italian'}),
+       (indian:Cuisine {name:'Indian'}),
+
+       (zhen:Person {name: "Zhen"}),
+       (praveena:Person {name: "Praveena"}),
+       (michael:Person {name: "Michael"}),
+       (arya:Person {name: "Arya"}),
+
+       (praveena)-[:LIKES]->(indian),
+       (zhen)-[:LIKES]->(french),
+       (michael)-[:LIKES]->(french),
+       (michael)-[:LIKES]->(italian)
 ----
 
 .The following will return a one hot encoding for each user and the types of cuisine that they like:
 [source, cypher]
 ----
-include::scripts/one-hot-encoding.cypher[tag=one-hot-encoding-query]
+MATCH (cuisine:Cuisine)
+WITH cuisine
+  ORDER BY cuisine.name
+WITH collect(cuisine) AS cuisines
+MATCH (p:Person)
+RETURN p.name AS person, gds.alpha.ml.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS encoding
+  ORDER BY person
 ----
 
-// tag::stream-sample-graph-result[]
 .Results
 [opts="header",cols="1,1"]
 |===
@@ -56,7 +71,6 @@ include::scripts/one-hot-encoding.cypher[tag=one-hot-encoding-query]
 | Praveena | [0,1,0]
 | Zhen     | [1,0,0]
 |===
-// end::stream-sample-graph-result[]
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
