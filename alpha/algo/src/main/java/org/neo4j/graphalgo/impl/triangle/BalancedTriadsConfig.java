@@ -32,7 +32,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("BalancedTriadsConfigImpl")
-public interface BalancedTriadsConfig extends AlgoBaseConfig, WeightConfig {
+public interface BalancedTriadsConfig extends TriangleConfig, WeightConfig {
 
     @Value.Default
     default String balancedProperty() {

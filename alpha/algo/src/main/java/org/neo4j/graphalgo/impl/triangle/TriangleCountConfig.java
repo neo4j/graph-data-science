@@ -33,7 +33,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("TriangleCountConfigImpl")
-public interface TriangleCountConfig extends AlgoBaseConfig, WriteConfig {
+public interface TriangleCountConfig extends TriangleConfig, WriteConfig {
 
     @Override
     @Value.Default

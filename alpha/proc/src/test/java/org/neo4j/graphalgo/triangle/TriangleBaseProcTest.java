@@ -32,14 +32,14 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
+import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends AlgoBaseConfig> extends BaseProcTest {
+abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends TriangleConfig> extends BaseProcTest {
     /**
      *      (a)-- (b)--(d)--(e)
      *        \T1/       \T2/
