@@ -72,7 +72,7 @@ public abstract class SimilarityAlgorithm<ME extends SimilarityAlgorithm<ME, INP
         }
 
         if (config.showComputations()) {
-            RecordingSimilarityRecorder<INPUT> recorder = new RecordingSimilarityRecorder<>(computer);
+            SimilarityRecorder<INPUT> recorder = new SimilarityRecorder<>(computer);
             builder.computations(recorder);
             computer = recorder;
         }

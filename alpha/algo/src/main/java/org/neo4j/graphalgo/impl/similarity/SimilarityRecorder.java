@@ -19,5 +19,39 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-public interface SimilarityRecorder<T> extends Computations, SimilarityComputer<T> {
+import org.neo4j.graphalgo.results.SimilarityResult;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
+
+public class SimilarityRecorder<T extends SimilarityInput> implements Computations, SimilarityComputer<T> {
+
+    private final SimilarityComputer<T> computer;
+
+    private final LongAdder computations = new LongAdder();
+    private final Map<Set<Long>, AtomicLong> comparisons = new ConcurrentHashMap<>();
+
+    public SimilarityRecorder(SimilarityComputer<T> computer) {
+        this.computer = computer;
+    }
+
+    @Override
+    public long count() {
+        return computations.longValue();
+    }
+
+    public Map<Set<Long>, AtomicLong> comparisons() {
+        return comparisons;
+    }
+
+    @Override
+    public SimilarityResult similarity(RleDecoder decoder, T source, T target, double cutoff) {
+
+        computations.increment();
+        return computer.similarity(decoder, source, target, cutoff);
+    }
 }
+
