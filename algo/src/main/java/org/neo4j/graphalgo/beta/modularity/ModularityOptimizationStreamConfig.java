@@ -18,27 +18,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.modularity;
+package org.neo4j.graphalgo.beta.modularity;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.WriteConfig;
 
 import java.util.Optional;
 
-@Configuration("ModularityOptimizationWriteConfigImpl")
+@Configuration("ModularityOptimizationStreamConfigImpl")
 @ValueClass
-public interface ModularityOptimizationWriteConfig extends ModularityOptimizationConfig, WriteConfig {
+public interface ModularityOptimizationStreamConfig extends ModularityOptimizationConfig {
 
-    static ModularityOptimizationWriteConfig of(
+    static ModularityOptimizationStreamConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new ModularityOptimizationWriteConfigImpl(
+        return new ModularityOptimizationStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

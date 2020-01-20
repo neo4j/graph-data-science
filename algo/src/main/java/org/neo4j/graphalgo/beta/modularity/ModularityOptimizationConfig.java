@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.modularity;
+package org.neo4j.graphalgo.beta.modularity;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;

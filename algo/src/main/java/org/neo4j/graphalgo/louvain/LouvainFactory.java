@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -28,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.modularity.ModularityOptimizationFactory;
 import org.neo4j.logging.Log;
 
 public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmFactory<Louvain, CONFIG> {
