@@ -107,7 +107,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
         });
         Throwable rootCause = ExceptionUtil.rootCause(exception);
         assertTrue(
-            rootCause.getMessage().contains("Weight property `does_not_exist` not found in graph") ||
+            rootCause.getMessage().contains("Relationship weight property `does_not_exist` not found in graph") ||
             rootCause.getMessage().contains("No graph was loaded for property does_not_exist"));
     }
 

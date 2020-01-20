@@ -82,7 +82,7 @@ class KShortestPathsDocTest extends BaseProcTest {
                        "  startNode: start, " +
                        "  endNode: end, " +
                        "  k: 3," +
-                       "  weightProperty: 'cost' " +
+                       "  relationshipWeightProperty: 'cost' " +
                        "})" +
                        " YIELD index, nodeIds, costs " +
                        " RETURN [node in gds.util.getNodesById(nodeIds) | node.name] AS places, " +
@@ -116,7 +116,7 @@ class KShortestPathsDocTest extends BaseProcTest {
                        "  startNode: start, " +
                        "  endNode: end, " +
                        "  k: 3," +
-                       "  weightProperty: 'cost'," +
+                       "  relationshipWeightProperty: 'cost'," +
                        "  path: true " +
                        "})" +
                        " YIELD path " +
@@ -143,7 +143,7 @@ class KShortestPathsDocTest extends BaseProcTest {
                        "  startNode: start, " +
                        "  endNode: end, " +
                        "  k: 3," +
-                       "  weightProperty: 'cost'" +
+                       "  relationshipWeightProperty: 'cost'" +
                        "})" +
                        " YIELD resultCount " +
                        " RETURN resultCount";
@@ -168,7 +168,7 @@ class KShortestPathsDocTest extends BaseProcTest {
                        "  startNode: start, " +
                        "  endNode: end, " +
                        "  k: 3," +
-                       "  weightProperty: 'cost'," +
+                       "  relationshipWeightProperty: 'cost'," +
                        "  writePropertyPrefix:'cypher_'" +
                        "})" +
                        " YIELD resultCount " +

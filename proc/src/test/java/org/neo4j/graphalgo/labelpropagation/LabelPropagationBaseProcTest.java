@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.NodeWeightConfigTest;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -98,7 +99,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
         runQuery(cypher);
 
         // Create explicit graphs with both projection variants
-        runQuery(createGraphQuery(Projection.NATURAL, TEST_GRAPH_NAME));
+        runQuery(graphCreateQuery(Projection.NATURAL, TEST_GRAPH_NAME));
         runQuery(String.format(
             "CALL gds.graph.create.cypher('%s', '%s', '%s', {nodeProperties: ['seed', 'score', 'weight']})",
             TEST_CYPHER_GRAPH_NAME,

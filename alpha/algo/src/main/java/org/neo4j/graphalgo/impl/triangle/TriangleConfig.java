@@ -25,12 +25,13 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration("TriangleConfigImpl")
-public interface TriangleConfig extends AlgoBaseConfig {
+public interface TriangleConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     static TriangleConfig of(
         String username,
