@@ -26,6 +26,6 @@ include::wcc.adoc[leveloffset=+1]
 
 include::labs-strongly-connected-components.adoc[leveloffset=+1]
 
-include::labs-triangleCount.adoc[leveloffset=+1]
+include::alpha-triangle-count.adoc[leveloffset=+1]
 
 include::labs-balanced-triads.adoc[leveloffset=+1]
