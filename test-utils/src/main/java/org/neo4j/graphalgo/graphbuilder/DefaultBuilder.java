@@ -30,8 +30,6 @@ import java.util.Random;
 /**
  * default builder makes methods
  * from abstract graphBuilder accessible
- *
- * @author mknblch
  */
 public class DefaultBuilder extends GraphBuilder<DefaultBuilder> {
 

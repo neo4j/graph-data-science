@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-/**
- * @author mknobloch
- */
 public class RelationshipCursor {
 
     /**

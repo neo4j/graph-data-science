@@ -24,9 +24,6 @@ import org.neo4j.logging.Log;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-/**
- * @author mknblch
- */
 public class ProgressLoggerAdapter implements ProgressLogger {
 
     private final Log log;

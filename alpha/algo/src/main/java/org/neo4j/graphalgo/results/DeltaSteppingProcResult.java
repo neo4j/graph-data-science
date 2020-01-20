@@ -21,9 +21,6 @@ package org.neo4j.graphalgo.results;
 
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 
-/**
- * @author mknblch
- */
 public class DeltaSteppingProcResult {
 
     public final long loadDuration;

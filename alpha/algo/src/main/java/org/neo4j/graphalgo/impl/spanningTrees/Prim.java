@@ -46,8 +46,6 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  * <p>
  * The algorithm also computes the minimum, maximum and sum of all
  * weights in the MST.
- *
- * @author mknblch
  */
 public class Prim extends Algorithm<Prim, SpanningTree> {
 

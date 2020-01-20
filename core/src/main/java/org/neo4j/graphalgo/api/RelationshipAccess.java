@@ -21,9 +21,6 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphdb.Direction;
 
-/**
- * @author mknblch
- */
 public interface RelationshipAccess {
 
     long getTarget(long nodeId, long index, Direction direction);

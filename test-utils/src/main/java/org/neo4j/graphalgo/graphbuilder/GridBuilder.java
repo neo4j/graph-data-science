@@ -36,8 +36,6 @@ import java.util.Random;
  * G -- H -- I -- J -- K -- L ..
  * |    |    |    |    |    |
  * ..   ..   ..   ..   ..   ..
- *
- * @author mknblch
  */
 public class GridBuilder extends GraphBuilder<GridBuilder> {
 

@@ -19,13 +19,9 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongConsumer;
 
-/**
- * @author mknobloch
- */
 public class ProgressTimer implements AutoCloseable {
 
     private final LongConsumer onStop;

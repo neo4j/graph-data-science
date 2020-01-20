@@ -27,8 +27,6 @@ import java.util.function.LongPredicate;
  * Iterate over each node Id until either
  * all nodes have been consumed or the consumer
  * decides to stop the iteration.
- *
- * @author mknblch
  */
 public interface NodeIterator {
     /**

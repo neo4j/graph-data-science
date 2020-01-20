@@ -54,8 +54,6 @@ import java.util.stream.Stream;
  *
  * There is a significant performance drop if the direction is BOOTH. Its more efficient
  * to load the graph as undirected and do the
- *
- * @author mknblch
  */
 public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweennessCentrality, RABrandesBetweennessCentrality> {
 

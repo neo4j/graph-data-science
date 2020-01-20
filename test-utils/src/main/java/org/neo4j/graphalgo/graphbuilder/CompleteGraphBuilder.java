@@ -29,8 +29,6 @@ import java.util.Random;
 
 /**
  * Builds a complete graph where all nodes are interconnected
- *
- * @author mknblch
  */
 public class CompleteGraphBuilder extends GraphBuilder<CompleteGraphBuilder> {
 

@@ -39,8 +39,6 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
  * Put()'s and pop()'s require log(size) time but the remove() cost implemented here is linear.
  * <p>
  * <b>NOTE</b>: Iteration order is not specified.
- *
- * @author phorn@avantgarde-labs.de
  */
 public abstract class LongPriorityQueue implements PrimitiveLongIterable {
 

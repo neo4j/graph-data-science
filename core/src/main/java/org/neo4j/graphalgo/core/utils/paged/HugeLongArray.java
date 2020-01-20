@@ -61,8 +61,6 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
  * // value = 37L
  * {@code}
  * </pre>
- *
- * @author phorn@avantgarde-labs.de
  */
 public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArray> {
 

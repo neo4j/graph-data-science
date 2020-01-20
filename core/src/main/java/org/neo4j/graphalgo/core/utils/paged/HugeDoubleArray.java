@@ -61,8 +61,6 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
  * // value = 37D
  * {@code}
  * </pre>
- *
- * @author phorn@avantgarde-labs.de
  */
 public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDoubleArray> {
 

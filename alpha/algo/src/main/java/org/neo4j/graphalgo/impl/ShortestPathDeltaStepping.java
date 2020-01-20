@@ -50,8 +50,6 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  * <a href="https://ae.cs.uni-frankfurt.de/pdf/diss_uli.pdf">https://ae.cs.uni-frankfurt.de/pdf/diss_uli.pdf</a><br>
  * <a href="http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf">http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf</a><br>
  * <a href="http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf">http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf</a>
- *
- * @author mknblch
  */
 public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaStepping, ShortestPathDeltaStepping> {
 

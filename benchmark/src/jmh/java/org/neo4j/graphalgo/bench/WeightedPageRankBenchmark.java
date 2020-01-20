@@ -46,9 +46,6 @@ import org.openjdk.jmh.annotations.Warmup;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
-/**
- * @author mknobloch
- */
 @Threads(1)
 @Fork(1)
 @Warmup(iterations = 5)

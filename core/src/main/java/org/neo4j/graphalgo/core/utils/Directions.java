@@ -50,8 +50,6 @@ import org.neo4j.graphdb.Direction;
  *         <li>both</li>
  *     </ul>
  * </p>
- *
- * @author mknblch
  */
 public class Directions {
 

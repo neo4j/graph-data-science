@@ -38,10 +38,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 
-/**
- * @author mh
- * @since 16.03.16
- */
 public class VirtualNode implements Node {
     private static AtomicLong MIN_ID = new AtomicLong(-1);
     private final List<Label> labels = new ArrayList<>();

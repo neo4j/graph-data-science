@@ -23,9 +23,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author mknblch
- */
 class AtomicDoubleArrayTest {
 
     private final AtomicDoubleArray array =

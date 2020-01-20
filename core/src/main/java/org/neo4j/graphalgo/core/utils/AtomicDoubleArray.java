@@ -24,8 +24,6 @@ import java.util.stream.IntStream;
 
 /**
  * Atomic double Array implementation
- *
- * @author mknblch
  */
 public class AtomicDoubleArray {
 

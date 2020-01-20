@@ -27,8 +27,6 @@ import com.carrotsearch.hppc.IntDoubleMap;
  * shared map for the costs that are associated with the values.
  * The queue will only ever read costs and never write them. It is up to the
  * user of this queue to maintain the correct costs.
- *
- * @author phorn@avantgarde-labs.de
  */
 public abstract class SharedIntPriorityQueue extends IntPriorityQueue {
 

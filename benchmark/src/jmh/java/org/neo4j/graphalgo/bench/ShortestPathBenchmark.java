@@ -44,9 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author mknblch
- */
 @Threads(1)
 @Fork(1)
 @Warmup(iterations = 5, time = 1)

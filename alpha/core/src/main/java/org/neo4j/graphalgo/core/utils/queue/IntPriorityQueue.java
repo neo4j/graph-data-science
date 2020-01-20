@@ -34,8 +34,6 @@ import java.util.Arrays;
  * Put()'s and pop()'s require log(size) time but the remove() cost implemented here is linear.
  * <p>
  * <b>NOTE</b>: Iteration order is not specified.
- *
- * @author phorn@avantgarde-labs.de
  */
 public abstract class IntPriorityQueue implements PrimitiveIntIterable {
 

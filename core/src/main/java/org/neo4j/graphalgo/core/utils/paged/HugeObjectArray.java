@@ -57,8 +57,6 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
  * // value = "37"
  * {@code}
  * </pre>
- *
- * @author phorn@avantgarde-labs.de
  */
 public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArray<T>> {
 

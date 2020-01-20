@@ -21,11 +21,7 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphdb.Direction;
 
-/**
- * @author mknblch
- */
 public interface RelationshipIterator extends RelationshipPredicate {
-
 
     /**
      * Calls the given consumer function for every relationship of a given node, respection the direction.

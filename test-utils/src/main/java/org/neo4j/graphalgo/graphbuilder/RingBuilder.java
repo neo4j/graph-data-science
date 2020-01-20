@@ -30,8 +30,6 @@ import java.util.Random;
  * RingBuilder creates a ring of nodes where each node is
  * connected to its successor while the last element of the
  * chain connects back to its head.
- *
- * @author mknblch
  */
 public class RingBuilder extends GraphBuilder<RingBuilder> {
 

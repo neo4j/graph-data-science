@@ -33,8 +33,6 @@ import java.util.function.Supplier;
 /**
  * The GraphBuilder intends to ease the creation
  * of test graphs with well known properties
- *
- * @author mknblch
  */
 public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
 

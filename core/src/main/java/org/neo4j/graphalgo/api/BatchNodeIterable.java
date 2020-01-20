@@ -25,8 +25,6 @@ import java.util.Collection;
 
 /**
  * Iterate over each graph-nodeId in batches.
- *
- * @author knutwalker
  */
 public interface BatchNodeIterable {
 

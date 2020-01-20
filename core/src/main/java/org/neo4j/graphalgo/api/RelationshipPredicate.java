@@ -21,9 +21,6 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphdb.Direction;
 
-/**
- * @author mknblch
- */
 public interface RelationshipPredicate {
 
     boolean exists(long sourceNodeId, long targetNodeId, Direction direction);
