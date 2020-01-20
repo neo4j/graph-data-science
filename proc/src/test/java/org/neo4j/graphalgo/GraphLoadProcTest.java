@@ -76,6 +76,11 @@ import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
 
+/**
+ * TODO:
+ * Tests in this class are currently disabled as the legacy catalog procedures have been removed.
+ * We can't remove the tests yet, as we might want to harvest them for useful tests to port.
+ */
 class GraphLoadProcTest extends BaseProcTest {
 
     private static final String ALL_NODES_QUERY = "'MATCH (n) RETURN id(n) AS id'";
@@ -127,18 +132,18 @@ class GraphLoadProcTest extends BaseProcTest {
     @MethodSource("graphTypesFullGraph")
     void shouldLoadGraph(String graphType, String nodeQuery, String relationshipQuery) {
         String query = "CALL algo.graph.load(" +
-                               "    'foo', $nodeQuery, $relationshipQuery, {" +
-                               "        graph: $graphType" +
-                               "    }" +
-                               ")";
+                       "    'foo', $nodeQuery, $relationshipQuery, {" +
+                       "        graph: $graphType" +
+                       "    }" +
+                       ")";
 
         runQueryWithRowConsumer(query, MapUtil.map("graphType", graphType, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
-                row -> {
-                    assertEquals(12, row.getNumber("nodes").intValue());
-                    assertEquals(10, row.getNumber("relationships").intValue());
-                    assertEquals(graphType, row.getString("graph"));
-                    assertFalse(row.getBoolean("alreadyLoaded"));
-                }
+            row -> {
+                assertEquals(12, row.getNumber("nodes").intValue());
+                assertEquals(10, row.getNumber("relationships").intValue());
+                assertEquals(graphType, row.getString("graph"));
+                assertFalse(row.getBoolean("alreadyLoaded"));
+            }
         );
     }
 
