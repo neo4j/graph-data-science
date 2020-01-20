@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-public class DegreeCentralityDocTest extends BaseProcTest {
+public class EigenvectorCentralityDocTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws KernelException {

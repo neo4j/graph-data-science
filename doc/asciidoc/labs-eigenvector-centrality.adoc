@@ -44,21 +44,21 @@ Eigenvector Centrality can be used in many of the https://arxiv.org/pdf/1407.510
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.apha.eigenvector.write(configuration: MAP)
+CALL gds.alpha.eigenvector.write(configuration: MAP)
 YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 ----
 
-.Parameters
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name             | Type    | Default                | Optional | Description
-| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| weightProperty   | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue     | float   | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
-| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-| normalization    | string  | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
+| Name             | Type       | Default                | Optional | Description
+| concurrency      | int        | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency  | int        | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int        | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| weightProperty   | string     | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| normalization    | string     | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
+| maxIterations    | int        | 20                     | yes      | The maximum number of iterations of EigenvectorCentrality to run.
+| sourceNodes      | list<node> | empty list             | yes      | A list f nodes to start the computation from.
 |===
 
 .Results
@@ -79,16 +79,16 @@ CALL gds.alpha.eigenvector.stream(configuration: MAP)
 YIELD node, score
 ----
 
-.Parameters
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name             | Type   | Default                | Optional | Description
-| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| weightProperty   | string | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue     | float  | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
-| graph            | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-| normalization    | string | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
+| Name             | Type       | Default                | Optional | Description
+| concurrency      | int        | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency  | int        | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| weightProperty   | string     | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| normalization    | string     | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
+| maxIterations    | int        | 20                     | yes      | The maximum number of iterations of EigenvectorCentrality to run.
+| sourceNodes      | list<node> | empty list             | yes      | A list f nodes to start the computation from.
 |===
 
 .Results
@@ -154,9 +154,9 @@ ORDER BY score DESC
 | Product | 14.4039280
 | Links   | 14.4039280
 | Site A  | 6.57243168
+| Site B  | 6.57243168
 | Site C  | 6.57243168
 | Site D  | 6.57243168
-| Site B  | 6.57243168
 |===
 
 As we might expect, the _Home_ page has the highest Eigenvector Centrality because it has incoming links from all other pages.
@@ -210,9 +210,9 @@ ORDER BY score DESC
 | Product | 0.4578684012627926
 | Links   | 0.4578684012627926
 | Site A  | 0.2089227868044046
+| Site B  | 0.2089227868044046
 | Site C  | 0.2089227868044046
 | Site D  | 0.2089227868044046
-| Site B  | 0.2089227868044046
 
 |===
 
