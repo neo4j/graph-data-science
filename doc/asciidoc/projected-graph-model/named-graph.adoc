@@ -163,12 +163,16 @@ As for the Huge graph, we can specify a `duplicateRelationships` strategy.
 [source,cypher]
 ----
 MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
-CALL algo.shortestPath(start, end, 'cost', {
-  nodeQuery:'MATCH (n:Loc) RETURN id(n) as id',
-  relationshipQuery:'MATCH (n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) AS source, id(m) AS target, r.cost AS weight',
-  {graph: 'cypher', duplicateRelationships: 'min'})
-YIELD writeMillis, loadMillis, nodeCount, totalCost
-RETURN writeMillis, loadMillis, nodeCount, totalCost
+CALL gds.alpha.shortestPath.write({
+  nodeQuery:'MATCH(n:Loc) WHERE NOT n.name = "c" RETURN id(n) AS id',
+  relationshipQuery:'MATCH(n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) AS source, id(m) AS target, r.cost AS weight',
+  startNode: start,
+  endNode: end,
+  weightProperty: 'weight',
+  writeProperty: 'sssp'
+})
+YIELD nodeCount, totalCost
+RETURN nodeCount,totalCost
 ----
 
 
@@ -283,14 +287,20 @@ CALL algo.graph.load('allRoads', 'Loc', 'ROAD', {
 
 When executed, our `allRoads` in-memory graph stores two relationship properties: `minDistance` and `maxQuality`.
 We can access the loaded properties by specifying them in an algorithm configuration.
-Let us use `algo.shortestPath` again as an example weighted algorithm.
+Let us use `gds.alpha.shortestPath` again as an example weighted algorithm.
 
 .We first compute the shortest path using the `minDistance` property as weight to compute the path with shortest distance:
 [source,cypher]
 ----
 MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
-CALL algo.shortestPath(start, end, 'minDistance', {graph: 'allRoads'})
-YIELD writeMillis, loadMillis, nodeCount, totalCost
+CALL gds.alpha.shortestPath.write(
+  'allRoads',
+  {
+      startNode: start,
+      endNode: end,
+      weightProperty: 'minDistance'
+  }
+) YIELD writeMillis, loadMillis, nodeCount, totalCost
 RETURN writeMillis, loadMillis, nodeCount, totalCost
 ----
 
@@ -298,8 +308,14 @@ RETURN writeMillis, loadMillis, nodeCount, totalCost
 [source,cypher]
 ----
 MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
-CALL algo.shortestPath(start, end, 'maxQuality', {graph: 'allRoads'})
-YIELD writeMillis, loadMillis, nodeCount, totalCost
+CALL gds.alpha.shortestPath.write(
+  'allRoads',
+  {
+      startNode: start,
+      endNode: end,
+      weightProperty: 'maxQuality'
+  }
+) YIELD writeMillis, loadMillis, nodeCount, totalCost
 RETURN writeMillis, loadMillis, nodeCount, totalCost
 ----
 
