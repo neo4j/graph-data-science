@@ -645,6 +645,9 @@ public class HugeGraph implements Graph {
     }
 
     private int degree(long node, AdjacencyOffsets offsets, AdjacencyList array) {
+        if (offsets == null) {
+            return 0;
+        }
         long offset = offsets.get(node);
         if (offset == 0L) {
             return 0;

@@ -77,7 +77,7 @@ public class GraphInfo {
                 PrimitiveLongIterator iterator = nodeIds.iterator();
                 while (iterator.hasNext()) {
                     long nodeId = iterator.next();
-                    int degree = graph.degree(nodeId, Direction.OUTGOING);
+                    int degree = graph.degree(nodeId, Direction.BOTH);
                     histogram.recordValue(degree);
                 }
             }
