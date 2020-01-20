@@ -78,15 +78,15 @@ YIELD nodes, maxIterations, loadMillis, computeMillis, writeMillis, dampingFacto
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| dampingFactor     | float   | 0.85                   | yes | The damping factor of the PageRank calculation.
-| maxIterations     | int     | 20                     | yes | The maximum number of iterations of PageRank to run.
-| tolerance         | float   | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
-| concurrency       | int     | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency   | int     | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
-| writeConcurrency  | int     | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
-| weightProperty    | string  | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| writeProperty     | string  | n/a                    | no  | The property name written back to.
-| graph             | string  | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
+| dampingFactor                 | float   | 0.85                   | yes | The damping factor of the PageRank calculation.
+| maxIterations                 | int     | 20                     | yes | The maximum number of iterations of PageRank to run.
+| tolerance                     | float   | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
+| concurrency                   | int     | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency               | int     | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
+| writeConcurrency              | int     | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
+| relationshipWeightProperty    | string  | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| writeProperty                 | string  | n/a                    | no  | The property name written back to.
+| graph                         | string  | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
@@ -120,14 +120,14 @@ YIELD node, score
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| dampingFactor    | float  | 0.85                   | yes | The damping factor of the PageRank calculation.
-| maxIterations    | int    | 20                     | yes | The maximum number of iterations of PageRank to run.
-| tolerance        | float  | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
-| concurrency      | int    | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | int    | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
-| writeConcurrency | int    | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
-| weightProperty   | string | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| graph            | string | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
+| dampingFactor                 | float  | 0.85                   | yes | The damping factor of the PageRank calculation.
+| maxIterations                 | int    | 20                     | yes | The maximum number of iterations of PageRank to run.
+| tolerance                     | float  | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
+| concurrency                   | int    | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency               | int    | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
+| writeConcurrency              | int    | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
+| relationshipWeightProperty    | string | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| graph                         | string | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
@@ -287,7 +287,7 @@ CALL gds.pageRank.stream({
   },
   maxIterations: 20,
   dampingFactor: 0.85,
-  weightProperty: 'weight'
+  relationshipWeightProperty: 'weight'
 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
@@ -323,7 +323,7 @@ CALL gds.pageRank.write({
   maxIterations: 20,
   dampingFactor: 0.85,
   writeProperty: 'pagerank',
-  weightProperty: 'weight'
+  relationshipWeightProperty: 'weight'
 })
 YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty
 ----

@@ -121,7 +121,7 @@ include::scripts/single-shortest-path.cypher[tag=cypher-loading]
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.shortestPath.deltaStepping(startNode:Node, weightProperty:String, delta:Float,
+CALL algo.shortestPath.deltaStepping(startNode:Node, relationshipWeightProperty:String, delta:Float,
     {defaultValue:1.0, write:true, writeProperty:'sssp'})
 YIELD nodeCount, loadDuration, evalDuration, writeDuration
 RETURN nodeCount, loadDuration, evalDuration, writeDuration
@@ -130,15 +130,15 @@ RETURN nodeCount, loadDuration, evalDuration, writeDuration
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default  | Optional | Description
-| startNode         | node    | null     | no       | The start node
-| weightProperty    | string  | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| delta             | float   | null     | yes      | The grade of concurrency to use.
-| write             | boolean | true     | yes      | Specifies if the result should be written back as a node property
-| writeProperty     | string  | 'sssp'   | yes      | The property name written back to the node sequence of the node in the path. The property contains the cost it takes to get from the start node to the specific node.
-| nodeQuery         | string  | null     | yes      | The label to load from the graph. If null, load all nodes
-| relationshipQuery | string  | null     | yes      | The relationship type to load from the graph. If null, load all nodes
-| direction         | string  | outgoing | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
+| Name                          | Type    | Default  | Optional | Description
+| startNode                     | node    | null     | no       | The start node
+| relationshipWeightProperty    | string  | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| delta                         | float   | null     | yes      | The grade of concurrency to use.
+| write                         | boolean | true     | yes      | Specifies if the result should be written back as a node property
+| writeProperty                 | string  | 'sssp'   | yes      | The property name written back to the node sequence of the node in the path. The property contains the cost it takes to get from the start node to the specific node.
+| nodeQuery                     | string  | null     | yes      | The label to load from the graph. If null, load all nodes
+| relationshipQuery             | string  | null     | yes      | The relationship type to load from the graph. If null, load all nodes
+| direction                     | string  | outgoing | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
 |===
 
 .Results
@@ -156,7 +156,7 @@ RETURN nodeCount, loadDuration, evalDuration, writeDuration
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.shortestPath.deltaStepping.stream(startNode:Node, weightProperty:String, delta: Float,
+CALL algo.shortestPath.deltaStepping.stream(startNode:Node, relationshipWeightProperty:String, delta: Float,
     {nodeQuery:'labelName', relationshipQuery:'relationshipName', defaultValue:1.0, direction:'OUTGOING'})
 YIELD nodeId, cost
 ----
@@ -164,14 +164,14 @@ YIELD nodeId, cost
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type   | Default  | Optional | Description
-| startNode         | node   | null     | no       | The start node
-| weightProperty    | string | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| delta             | float  | null     | yes      | The grade of concurrency to use.
-| nodeQuery         | string | null     | yes      | The label to load from the graph. If null, load all nodes
-| relationshipQuery | string | null     | yes      | The relationship type to load from the graph. If null, load all nodes
-| defaultValue      | float  | null     | yes      | The default value of the weight in case it is missing or invalid
-| direction         | string | outgoing | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
+| Name                          | Type   | Default  | Optional | Description
+| startNode                     | node   | null     | no       | The start node
+| relationshipWeightProperty    | string | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| delta                         | float  | null     | yes      | The grade of concurrency to use.
+| nodeQuery                     | string | null     | yes      | The label to load from the graph. If null, load all nodes
+| relationshipQuery             | string | null     | yes      | The relationship type to load from the graph. If null, load all nodes
+| defaultValue                  | float  | null     | yes      | The default value of the weight in case it is missing or invalid
+| direction                     | string | outgoing | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
 |===
 
 .Results
@@ -189,13 +189,13 @@ YIELD nodeId, cost
 The shortest path algorithms support the following graph types:
 
 * [x] directed, unweighted:
-** direction: 'OUTGOING' or INCOMING, weightProperty: null
+** direction: 'OUTGOING' or INCOMING, relationshipWeightProperty: null
 * [x] directed, weighted
-** direction: 'OUTGOING' or INCOMING, weightProperty: 'cost'
+** direction: 'OUTGOING' or INCOMING, relationshipWeightProperty: 'cost'
 * [x] undirected, unweighted
-** direction: 'BOTH', weightProperty: null
+** direction: 'BOTH', relationshipWeightProperty: null
 * [x] undirected, weighted
-** direction: 'BOTH', weightProperty: 'cost'
+** direction: 'BOTH', relationshipWeightProperty: 'cost'
 
 
 [[algorithms-single-source-shortest-path-imp]]

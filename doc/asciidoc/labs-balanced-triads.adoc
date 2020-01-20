@@ -61,10 +61,10 @@ YIELD nodeId, balanced, unbalanced
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name            | Type   | Default                | Optional | Description
-| weightProperty  | string | null                   | no       | The property name that contains weight. If weight is positive, algorithm treats the relationship as positive. With a negative weight, relationship is treated as negative. Must be numeric.
-| concurrency     | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| Name                          | Type   | Default                | Optional | Description
+| relationshipWeightProperty    | string | null                   | no       | The property name that contains weight. If weight is positive, algorithm treats the relationship as positive. With a negative weight, relationship is treated as negative. Must be numeric.
+| concurrency                   | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency               | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 
 .Results
@@ -166,7 +166,7 @@ CALL gds.alpha.balancedTriads.stream({
       projection: 'UNDIRECTED'
     }
   },
-  weightProperty: 'weight'
+  relationshipWeightProperty: 'weight'
 })
 YIELD nodeId, balanced, unbalanced
 RETURN gds.util.asNode(nodeId).name AS person,balanced,unbalanced
@@ -201,7 +201,7 @@ CALL gds.alpha.balancedTriads.write({
       projection: 'UNDIRECTED'
     }
   },
-  weightProperty: 'weight'
+  relationshipWeightProperty: 'weight'
 })
 YIELD balancedProperty, balancedTriadCount, unbalancedProperty, unbalancedTriadCount;
 ----

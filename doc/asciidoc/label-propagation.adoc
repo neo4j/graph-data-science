@@ -85,7 +85,7 @@ YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMilli
 | concurrency       | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| weightProperty    | string  | 'weight'               | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
+| relationshipWeightProperty    | string  | 'weight'               | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
 | seedProperty      | string  | n/a                    | yes      | Used to define initial set of labels (must be a number).
 | writeProperty     | string  | n/a                    | yes      | The property name written back to the partition of the graph in which the node resides.
 | graph             | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
@@ -112,7 +112,7 @@ YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMilli
 
 | maxIterations | int | The given maximum number of iterations to run.
 | writeProperty | string | The property name written back to.
-| weightProperty | string | The property name that contains weight.
+| relationshipWeightProperty | string | The property name that contains weight.
 |===
 
 .The following will run the algorithm and stream back results:
@@ -137,7 +137,7 @@ YIELD nodeId, communityId
 | maxIterations        | int    | 10                     | yes      | The maximum number of iterations to run.
 | concurrency       | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency   | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| weightProperty    | string | 'weight'               | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
+| relationshipWeightProperty    | string | 'weight'               | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
 | seedProperty      | string | n/a                    | yes      | Used to define initial set of labels (must be a number).
 | graph             | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
@@ -187,7 +187,7 @@ The configuration is the same as for the `write` mode.
 | maxIterations | int | The given maximum number of iterations to run.
 // TODO: stats mode should not have a writeProperty in the result
 | writeProperty | string | The property name written back to.
-| weightProperty | string | The property name that contains weight.
+| relationshipWeightProperty | string | The property name that contains weight.
 |===
 
 .The following will estimate the memory requirements for running the algorithm:
@@ -329,7 +329,7 @@ CALL gds.algo.labelPropagation.stream({
   nodeProjection: 'User',
   relationshipProjection: 'FOLLOW',
   relationshipProperties: 'weight',
-  weightProperty: 'weight'
+  relationshipWeightProperty: 'weight'
 })
 YIELD nodeId, communityId AS Community
 RETURN gds.util.asNode(nodeId).name AS Name, Community
@@ -359,7 +359,7 @@ CALL gds.algo.labelPropagation.write({
   relationshipProjection: 'FOLLOW',
   relationshipProperties: 'weight',
   writeProperty: 'community',
-  weightProperty: 'weight'
+  relationshipWeightProperty: 'weight'
 })
 YIELD ranIterations, communityCount
 ----

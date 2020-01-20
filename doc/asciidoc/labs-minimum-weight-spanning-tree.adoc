@@ -87,21 +87,21 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                  | Type      | Default   | Optional  | Description
-| startNodeId           | long      | null      | no        | The start node ID
-| weightProperty        | string    | null      | no        | The property name that contains weight. Must be numeric.
-| writeProperty         | string    | 'mst'     | yes       | The relationship type written back as result
-| weightWriteProperty   | string    | n/a       | no        | The weight property of the `writeProperty` relationship type written back
+| Name                          | Type      | Default   | Optional  | Description
+| startNodeId                   | long      | null      | no        | The start node ID
+| relationshipWeightProperty    | string    | null      | no        | The property name that contains weight. Must be numeric.
+| writeProperty                 | string    | 'mst'     | yes       | The relationship type written back as result
+| weightWriteProperty           | string    | n/a       | no        | The weight property of the `writeProperty` relationship type written back
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name               | Type | Description
-| effectiveNodeCount | int  | The number of visited nodes
-| createMillis         | int  | Milliseconds for loading data
-| computeMillis      | int  | Milliseconds for running the algorithm
-| writeMillis        | int  | Milliseconds for writing result data back
+| Name                  | Type | Description
+| effectiveNodeCount    | int  | The number of visited nodes
+| createMillis          | int  | Milliseconds for loading data
+| computeMillis         | int  | Milliseconds for running the algorithm
+| writeMillis           | int  | Milliseconds for writing result data back
 |===
 
 .The following will run the k-spanning tree algorithms and write back results:
@@ -120,12 +120,12 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                      | Type    | Default | Optional  | Description
-| k                         | int     | null    | no        | The result is a tree with `k` nodes and `k − 1` relationships
-| startNodeId               | int     | null    | no        | The start node ID
-| weightProperty            | string  | null    | no        | The property name that contains weight. Must be numeric.
-| writeProperty             | string  | 'MST'   | yes       | The relationship type written back as result
-| weightWriteProperty       | string  | n/a     | no        | The weight property of the `writeProperty` relationship type written back
+| Name                          | Type    | Default | Optional  | Description
+| k                             | int     | null    | no        | The result is a tree with `k` nodes and `k − 1` relationships
+| startNodeId                   | int     | null    | no        | The start node ID
+| relationshipWeightProperty    | string  | null    | no        | The property name that contains weight. Must be numeric.
+| writeProperty                 | string  | 'MST'   | yes       | The relationship type written back as result
+| weightWriteProperty           | string  | n/a     | no        | The weight property of the `writeProperty` relationship type written back
 |===
 
 .Results
@@ -133,7 +133,7 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 |===
 | Name               | Type | Description
 | effectiveNodeCount | int  | The number of visited nodes
-| createMillis         | int  | Milliseconds for loading data
+| createMillis       | int  | Milliseconds for loading data
 | computeMillis      | int  | Milliseconds for running the algorithm
 | writeMillis        | int  | Milliseconds for writing result data back
 |===
@@ -178,7 +178,7 @@ CALL gds.alpha.spanningTree.minimum.write({
       projection: 'UNDIRECTED'
     },
     startNodeId: id(n),
-    weightProperty: 'cost',
+    relationshipWeightProperty: 'cost',
     writeProperty: 'MINST',
     weightWriteProperty: 'writeCost'
   }
@@ -227,7 +227,7 @@ CALL algo.spanningTree.maximum.write({
       properties: 'cost'
     },
     startNodeId: id(n),
-    weightProperty: 'cost',
+    relationshipWeightProperty: 'cost',
     writeProperty: 'MAXST',
     weightWriteProperty: 'writeCost'
   }
@@ -263,7 +263,7 @@ CALL gds.alpha.spanningTree.kmin.write({
   },
   k: 3,
   startNodeId: id(n),
-  weightProperty: 'cost',
+  relationshipWeightProperty: 'cost',
   writeProperty:'kminst'
 })
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
@@ -306,7 +306,7 @@ CALL gds.alpha.spanningTree.kmax.write({
   },
   k: 3,
   startNodeId: id(n),
-  weightProperty: 'cost',
+  relationshipWeightProperty: 'cost',
   writeProperty:'kmaxst'
 })
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount

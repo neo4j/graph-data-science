@@ -60,7 +60,7 @@ YIELD startNodeId, targetNodeId, distance
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                | Type    | Default                | Optional | Description
-| weightProperty      | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| relationshipWeightProperty      | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | direction           | string  | both                   | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
 | concurrency         | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency     | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
@@ -105,7 +105,7 @@ CALL gds.alpha.allShortestPaths.stream({
       defaultValue: 1.0
     }
   },
-  weightProperty: 'cost'
+  relationshipWeightProperty: 'cost'
 })
 YIELD sourceNodeId, targetNodeId, distance
 WITH sourceNodeId, targetNodeId, distance
@@ -152,7 +152,7 @@ This is applicable to all other algorithms that use Cypher loading.
 CALL gds.alpha.allShortestPaths.stream({
   nodeQuery:'MATCH (n:Loc) RETURN id(n) as id',
   relationshipQuery:'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) as source, id(p) as target, r.cost as weight',
-  weightProperty: 'cost'
+  relationshipWeightProperty: 'cost'
 })
 YIELD sourceNodeId, targetNodeId, distance
 WITH sourceNodeId, targetNodeId, distance

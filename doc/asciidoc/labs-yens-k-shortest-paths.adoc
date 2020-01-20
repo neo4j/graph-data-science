@@ -66,15 +66,15 @@ YIELD resultCount, loadMillis, evalMillis, writeMillis
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                      | Type    | Default         | Optional | Description
-| startNode                 | node    | n/a             | no       | The start node
-| endNode                   | node    | n/a             | no       | The end node
-| k                         | int     | n/a             | no       | The number of paths to return
-| weightProperty            | string  | null            | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be of numeric type.
-| direction                 | string  | both            | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
-| maxDepth                  | int     | Integer.MAX     | yes      | The depth of the shortest paths traversal
-| writePropertyPrefix       | string  | 'PATH_'         | yes      | The relationship-type prefix written back to the graph
-| relationshipWriteProperty | string  | 'weight'        | yes      | The relationship property written back to the graph
+| Name                          | Type    | Default         | Optional | Description
+| startNode                     | node    | n/a             | no       | The start node
+| endNode                       | node    | n/a             | no       | The end node
+| k                             | int     | n/a             | no       | The number of paths to return
+| relationshipWeightProperty    | string  | null            | yes      | The property name that contains a relationship weight. If null, treats the graph as unweighted. Must be of numeric type.
+| direction                     | string  | both            | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
+| maxDepth                      | int     | Integer.MAX     | yes      | The depth of the shortest paths traversal
+| writePropertyPrefix           | string  | 'PATH_'         | yes      | The relationship-type prefix written back to the graph
+| relationshipWriteProperty     | string  | 'weight'        | yes      | The relationship property written back to the graph
 |===
 
 .Results
@@ -97,14 +97,14 @@ YIELD index, sourceNodeId, targetNodeId, nodeIds, costs, path
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                  | Type      | Default       | Optional | Description
-| startNode             | node      | null          | no       | The start node
-| endNode               | node      | null          | no       | The end node
-| k                     | int       | N/A           | no       | The number of paths to return
-| weightProperty        | string    | null          | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be of numeric type.
-| direction             | string    | both          | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
-| maxDepth              | int       | Integer.MAX   | yes      | The depth of the shortest paths traversal
-| path                  | boolean   | false         | yes      | Whether or not to include string representation of the path with the result
+| Name                          | Type      | Default       | Optional | Description
+| startNode                     | node      | null          | no       | The start node
+| endNode                       | node      | null          | no       | The end node
+| k                             | int       | N/A           | no       | The number of paths to return
+| relationshipweightProperty    | string    | null          | yes      | The relationship property name that contains weight. If null, treats the graph as unweighted. Must be of numeric type.
+| direction                     | string    | both          | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
+| maxDepth                      | int       | Integer.MAX   | yes      | The depth of the shortest paths traversal
+| path                          | boolean   | false         | yes      | Whether or not to include string representation of the path with the result
 |===
 
 .Results
@@ -159,7 +159,7 @@ CALL gds.alpha.kShortestPaths.stream({
   startNode: start,
   endNode: end,
   k: 3,
-  weightProperty: 'cost'
+  relationshipWeightProperty: 'cost'
 })
 YIELD index, nodeIds, costs
 RETURN [node IN gds.util.getNodesById(nodeIds) | node.name] AS places,
@@ -193,7 +193,7 @@ CALL gds.alpha.kShortestPaths.stream({
   startNode: start,
   endNode: end,
   k: 3,
-  weightProperty: 'cost',
+  relationshipWeightProperty: 'cost',
   path: true
 })
 YIELD path
@@ -218,7 +218,7 @@ CALL gds.alpha.kShortestPaths.write({
   startNode: start,
   endNode: end,
   k: 3,
-  weightProperty: 'cost'
+  relationshipWeightProperty: 'cost'
 })
 YIELD resultCount
 RETURN resultCount
@@ -257,7 +257,7 @@ CALL gds.alpha.kShortestPaths.write({
   startNode: start,
   endNode: end,
   k: 3,
-  weightProperty: 'cost',
+  relationshipWeightProperty: 'cost',
   writePropertyPrefix: 'cypher_'
 })
 YIELD resultCount
