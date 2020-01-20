@@ -63,12 +63,12 @@ image::triangle_count.png[]
 .The following will create a sample graph:
 [source, cypher]
 ----
-CREATE (alice:Person {id: "Alice"}),
-       (michael:Person {id: "Michael"}),
-       (karin:Person {id: "Karin"}),
-       (chris:Person {id: "Chris"}),
-       (will:Person {id: "Will"}),
-       (mark:Person {id: "Mark"}),
+CREATE (alice:Person {name: 'Alice'}),
+       (michael:Person {name: 'Michael'}),
+       (karin:Person {name: 'Karin'}),
+       (chris:Person {name: 'Chris'}),
+       (will:Person {name: 'Will'}),
+       (mark:Person {name: 'Mark'}),
        (michael)-[:KNOWS]->(karin),
        (michael)-[:KNOWS]->(chris),
        (will)-[:KNOWS]->(michael),
@@ -79,21 +79,29 @@ CREATE (alice:Person {id: "Alice"}),
        (chris)-[:KNOWS]->(karin)
 ----
 
-.The following will return a stream of triples, with `nodeId` for each triangle:
+.The following will return a stream of triples, with the name property for each node in each triangle:
 [source, cypher]
 ----
-CALL algo.triangle.stream('Person', 'KNOWS')
+CALL gds.alpha.triangle.stream({
+  nodeProjection: 'Person',
+  relationshipProjection: {
+    KNOWS: {
+      type: 'KNOWS',
+      projection: 'UNDIRECTED'
+    }
+  }
+})
 YIELD nodeA, nodeB, nodeC
-RETURN gds.util.asNode(nodeA).id AS nodeA, gds.util.asNode(nodeB).id AS nodeB, gds.util.asNode(nodeC).id AS nodeC
+RETURN gds.util.asNode(nodeA).name AS nodeA, gds.util.asNode(nodeB).name AS nodeB, gds.util.asNode(nodeC).name AS nodeC
 ----
 
 .Results
 [opts="header",cols="1,1,1"]
 |===
-| nodeA   | nodeB   | nodeC
-| Will    | Michael | Chris
-| Will    | Mark    | Michael
-| Michael | Karin   | Chris
+| nodeA   | nodeB | nodeC
+| Michael | Karin | Chris
+| Michael | Chris | Will
+| Michael | Will  | Mark
 |===
 
 We can see that there are `KNOWS` triangles containing "Will, Michael, and Chris", "Will, Mark, and Michael", and "Michael, Karin, and Chris".
@@ -102,30 +110,47 @@ This means that everybody in the triangle knows each other.
 .The following will count the number of triangles that a node is member of, and write it back. It will return the total triangle count and average clustering coefficient of the given graph:
 [source, cypher]
 ----
-CALL algo.triangleCount('Person', 'KNOWS', {
-  concurrency: 4, write: true, writeProperty: 'triangles', clusteringCoefficientProperty: 'coefficient'
-}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
+CALL gds.alpha.triangleCount.write({
+  nodeProjection: 'Person',
+  relationshipProjection: {
+    KNOWS: {
+      type: 'KNOWS',
+      projection: 'UNDIRECTED'
+    }
+  },
+  writeProperty: 'triangles'
+})
+YIELD nodeCount, triangleCount, averageClusteringCoefficient
 ----
 
 .The following will count the number of triangles that a node is member of, and return a stream with `nodeId` and `triangleCount`:
 [source, cypher]
 ----
-CALL algo.triangleCount.stream('Person', 'KNOWS', {concurrency: 4})
+CALL gds.alpha.triangleCount.stream({
+  nodeProjection: 'Person',
+  relationshipProjection: {
+    KNOWS: {
+      type: 'KNOWS',
+      projection: 'UNDIRECTED'
+    }
+  },
+  concurrency: 4
+})
 YIELD nodeId, triangles, coefficient
-RETURN gds.util.asNode(nodeId).id AS name, triangles, coefficient
+RETURN gds.util.asNode(nodeId).name AS name, triangles, coefficient
 ORDER BY coefficient DESC
 ----
 
 .Results
 [opts="header",cols="1,1,1"]
 |===
-| Name    | Triangles | Coefficient
-| Karin   | 1         | 1
-| Mark    | 1         | 1
-| Chris   | 2         | 0.6666666666666666
-| Will    | 2         | 0.6666666666666666
-| Michael | 3         | 0.3
-| Alice   | 0         | 0
+| name      | triangles | coefficient
+| "Karin"   | 1         | 1.0
+| "Mark"    | 1         | 1.0
+| "Chris"   | 2         | 0.6666666666666666
+| "Will"    | 2         | 0.6666666666666666
+| "Michael" | 3         | 0.3
+| "Alice"   | 0         | 0.0
 |===
 
 We learn that Michael is part of the most triangles, but it's Karin and Mark who are the best at introducing their friends - all of the people who know them, know each other!
@@ -141,9 +166,19 @@ We check if this holds true for Yelp's social network of friends:
 
 [source, cypher]
 ----
-CALL algo.triangleCount('User', 'FRIEND', {
-  concurrency: 4, write: true, writeProperty: 'triangles', clusteringCoefficientProperty: 'coefficient'
-}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
+CALL gds.alpha.triangleCount.write({
+  nodeProjection: 'Person',
+  relationshipProjection: {
+    FRIEND: {
+      type: 'FRIEND',
+      projection: 'UNDIRECTED'
+    }
+  },
+  concurrency: 4,
+  writeProperty: 'triangles',
+  clusteringCoefficientProperty: 'coefficient'
+})
+YIELD nodeCount, triangleCount, averageClusteringCoefficient
 ----
 
 Average clustering coefficient is 0.0523, which is really low for a social network.
@@ -162,11 +197,12 @@ include::projected-graph-model/cypher-projection.adoc[tag=explanation]
 
 [source, cypher]
 ----
-CALL algo.triangleCount(
-  'MATCH (p:Person) RETURN id(p) as id',
-  'MATCH (p1:Person)-[:KNOWS]->(p2:Person) RETURN id(p1) as source,id(p2) as target', {
-    concurrency: 4, write: true, writeProperty: 'triangle', graph: 'cypher', clusteringCoefficientProperty: 'coefficient'
-}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
+CALL gds.alpha.triangleCount.write({
+  nodeQuery: 'MATCH (p:Person) RETURN id(p) AS id',
+  relationshipQuery: 'MATCH (p1:Person)-[:KNOWS]-(p2:Person) RETURN id(p1) AS source, id(p2) AS target',
+  writeProperty: 'triangle',
+  clusteringCoefficientProperty: 'coefficient'
+}) YIELD nodeCount, triangleCount, averageClusteringCoefficient
 ----
 
 

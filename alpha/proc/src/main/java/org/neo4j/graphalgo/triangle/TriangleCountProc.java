@@ -97,7 +97,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
             .build();
 
         PagedAtomicIntegerArray triangles = algorithm.getTriangles();
-        String clusteringCoefficientProperty = config.clusterCoefficientProperty();
+        String clusteringCoefficientProperty = config.clusteringCoefficientProperty();
 
         try (ProgressTimer ignored = builder.timeWrite()) {
             if (clusteringCoefficientProperty != null) {
