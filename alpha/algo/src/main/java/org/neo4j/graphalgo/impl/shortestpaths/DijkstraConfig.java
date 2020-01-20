@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -37,7 +37,7 @@ import static org.neo4j.graphdb.Direction.OUTGOING;
 
 @ValueClass
 @Configuration("DijkstraConfigImpl")
-public interface DijkstraConfig extends AlgoBaseConfig, WeightConfig, WriteConfig {
+public interface DijkstraConfig extends AlgoBaseConfig, RelationshipWeightConfig, WriteConfig {
 
     String WRITE_PROPERTY_DEFAULT_VALUE = "sssp";
 

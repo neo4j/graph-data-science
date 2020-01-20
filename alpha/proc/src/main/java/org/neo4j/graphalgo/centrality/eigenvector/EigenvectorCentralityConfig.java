@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfig;
 import org.neo4j.graphalgo.newapi.SourceNodesConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 
 import java.util.Optional;
@@ -39,7 +39,7 @@ public interface EigenvectorCentralityConfig extends
     IterationsConfig,
     SourceNodesConfig,
     WriteConfig,
-    WeightConfig {
+    RelationshipWeightConfig {
 
     @Value.Default
     @Override

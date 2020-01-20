@@ -114,7 +114,7 @@ class DijkstraProcTest extends BaseProcTest {
         PathConsumer consumer = mock(PathConsumer.class);
         runQueryWithRowConsumer(
             "MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-            "CALL gds.alpha.shortestPath.stream({startNode: start, endNode: end, weightProperty: 'cost', relationshipProperties: 'cost'}) " +
+            "CALL gds.alpha.shortestPath.stream({startNode: start, endNode: end, relationshipWeightProperty: 'cost', relationshipProperties: 'cost'}) " +
             "YIELD nodeId, cost RETURN nodeId, cost",
             row -> consumer.accept((Long) row.getNumber("nodeId"), (Double) row.getNumber("cost"))
         );
@@ -129,7 +129,7 @@ class DijkstraProcTest extends BaseProcTest {
     void testDijkstra() {
         runQueryWithRowConsumer(
             "MATCH (start:Node {type:'start'}), (end:Node {type:'end'}) " +
-            "CALL gds.alpha.shortestPath.write({startNode: start, endNode: end, weightProperty: 'cost', writeProperty:'cost', relationshipProperties: 'cost'}) " +
+            "CALL gds.alpha.shortestPath.write({startNode: start, endNode: end, relationshipWeightProperty: 'cost', writeProperty:'cost', relationshipProperties: 'cost'}) " +
             "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
             "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost",
             row -> {

@@ -87,7 +87,7 @@ class YensKShortestPathsProcTest extends BaseProcTest {
             .addVariable("startNode", "a")
             .addVariable("endNode", "f")
             .addParameter("k", 42)
-            .addParameter("weightProperty", "cost")
+            .addParameter("relationshipWeightProperty", "cost")
             .yields("resultCount");
 
         String cypher = String.format("MATCH (a:Node{name:'a'}), (f:Node{name:'f'}) %s RETURN resultCount", algoCall);

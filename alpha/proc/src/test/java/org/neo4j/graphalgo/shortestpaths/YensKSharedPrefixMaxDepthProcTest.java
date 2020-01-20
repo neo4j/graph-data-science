@@ -72,7 +72,7 @@ class YensKSharedPrefixMaxDepthProcTest extends BaseProcTest {
             .addVariable("startNode", "from")
             .addVariable("endNode", "to")
             .addParameter("k", 2)
-            .addParameter("weightProperty", "cost")
+            .addParameter("relationshipWeightProperty", "cost")
             .addParameter("path", true)
             .addPlaceholder("maxDepth", "maxDepth")
             .yields("path");

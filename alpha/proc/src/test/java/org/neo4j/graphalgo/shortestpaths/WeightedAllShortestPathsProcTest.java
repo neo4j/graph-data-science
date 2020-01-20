@@ -160,7 +160,7 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
             .loadEverything()
             .algo("gds", "alpha", "allShortestPaths")
             .streamMode()
-            .addParameter("weightProperty", "cost")
+            .addParameter("relationshipWeightProperty", "cost")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {

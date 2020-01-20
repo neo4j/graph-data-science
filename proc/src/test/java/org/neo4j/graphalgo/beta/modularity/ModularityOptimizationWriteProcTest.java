@@ -62,7 +62,7 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcBase
             .loadEverything(Projection.UNDIRECTED)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
-            .addParameter("weightProperty", "weight")
+            .addParameter("relationshipWeightProperty", "weight")
             .addParameter("writeProperty", "community")
             .yields();
 

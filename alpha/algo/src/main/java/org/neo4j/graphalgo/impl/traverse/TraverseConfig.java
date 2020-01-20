@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Collections;
@@ -35,7 +35,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("TraverseConfigImpl")
-public interface TraverseConfig extends AlgoBaseConfig, WeightConfig {
+public interface TraverseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
     @Value.Default

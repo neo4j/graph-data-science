@@ -133,7 +133,7 @@ final class ShortestPathsProcTest extends BaseProcTest {
                               "WITH n CALL gds.alpha.shortestPaths.stream('shortestPathsGraph'," +
                               "{" +
                               "     startNode: n," +
-                              "     weightProperty: 'cost'" +
+                              "     relationshipWeightProperty: 'cost'" +
                               "}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
@@ -161,7 +161,7 @@ final class ShortestPathsProcTest extends BaseProcTest {
                                    "        'shortestPathsGraph', " +
                                    "        {" +
                                    "            startNode: n, " +
-                                   "            weightProperty: 'cost', " +
+                                   "            relationshipWeightProperty: 'cost', " +
                                    "            writeProperty: 'sp'" +
                                    "        })" +
                                    " YIELD nodeCount, loadMillis, evalMillis, writeMillis" +
@@ -195,7 +195,7 @@ final class ShortestPathsProcTest extends BaseProcTest {
         final Consumer mock = mock(Consumer.class);
 
         final String cypher = "MATCH(n:Node {name:'x'}) " +
-                              "WITH n CALL gds.alpha.shortestPaths.stream('shortestPathsGraph', {startNode: n, weightProperty: 'cost'}) " +
+                              "WITH n CALL gds.alpha.shortestPaths.stream('shortestPathsGraph', {startNode: n, relationshipWeightProperty: 'cost'}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
         runQueryWithRowConsumer(cypher, row -> {

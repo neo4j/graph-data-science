@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Pair;
@@ -56,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-public interface WeightConfigTest<CONFIG extends WeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
+public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
     RelationshipProjections MULTI_RELATIONSHIPS_PROJECTION = RelationshipProjections.builder()
         .putProjection(
@@ -83,14 +83,14 @@ public interface WeightConfigTest<CONFIG extends WeightConfig & AlgoBaseConfig, 
     default void testDefaultWeightPropertyIsNull() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.empty();
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
-        assertNull(config.weightProperty());
+        assertNull(config.relationshipWeightProperty());
     }
 
     @Test
     default void testWeightPropertyFromConfig() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("weightProperty", "weight"));
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("relationshipWeightProperty", "weight"));
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
-        assertEquals("weight", config.weightProperty());
+        assertEquals("weight", config.relationshipWeightProperty());
     }
 
     @ParameterizedTest
@@ -98,14 +98,14 @@ public interface WeightConfigTest<CONFIG extends WeightConfig & AlgoBaseConfig, 
     default void testEmptyWeightPropertyValues(String weightPropertyParameter) {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("weightProperty", weightPropertyParameter));
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
-        assertNull(config.weightProperty());
+        assertNull(config.relationshipWeightProperty());
     }
 
     @Test
     default void testWeightPropertyValidation() {
         List<String> relationshipProperties = Arrays.asList("a");
         Map<String, Object> tempConfig = MapUtil.map(
-            "weightProperty", "foo",
+            "relationshipWeightProperty", "foo",
             "relationshipProjection", MapUtil.map(
                 "A", MapUtil.map(
                     "properties", relationshipProperties
@@ -136,7 +136,7 @@ public interface WeightConfigTest<CONFIG extends WeightConfig & AlgoBaseConfig, 
 
         applyOnProcedure((proc) -> {
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
-                "weightProperty",
+                "relationshipWeightProperty",
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
@@ -161,7 +161,7 @@ public interface WeightConfigTest<CONFIG extends WeightConfig & AlgoBaseConfig, 
 
         CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map(
             "relationshipTypes", Collections.singletonList("*"),
-            "weightProperty", propertyName
+            "relationshipWeightProperty", propertyName
             )
         );
 
@@ -238,7 +238,7 @@ public interface WeightConfigTest<CONFIG extends WeightConfig & AlgoBaseConfig, 
 
         CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map(
             "relationshipTypes", Collections.singletonList("TYPE1"),
-            "weightProperty", "weight1"
+            "relationshipWeightProperty", "weight1"
         ));
         CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
 

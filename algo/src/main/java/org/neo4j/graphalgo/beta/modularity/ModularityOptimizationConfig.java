@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
 import org.neo4j.graphalgo.newapi.ToleranceConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphdb.Direction;
 
 public interface ModularityOptimizationConfig extends
@@ -35,7 +35,7 @@ public interface ModularityOptimizationConfig extends
     IterationsConfig,
     SeedConfig,
     ToleranceConfig,
-    WeightConfig {
+    RelationshipWeightConfig {
 
     Direction DEFAULT_DIRECTION = Direction.OUTGOING;
     int DEFAULT_ITERATIONS = 10;

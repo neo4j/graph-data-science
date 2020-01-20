@@ -86,7 +86,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
             .algo("gds.alpha.spanningTree")
             .writeMode()
             .addParameter("startNodeId", getStartNodeId())
-            .addParameter("weightProperty", "cost")
+            .addParameter("relationshipWeightProperty", "cost")
             .addParameter("weightWriteProperty", "cost")
             .yields("createMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
 
@@ -121,7 +121,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
             .writeMode()
             .addParameter("startNodeId", getStartNodeId())
             .addParameter("writeProperty", "MAX")
-            .addParameter("weightProperty", "cost")
+            .addParameter("relationshipWeightProperty", "cost")
             .addParameter("weightWriteProperty", "cost")
             .yields("createMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
 

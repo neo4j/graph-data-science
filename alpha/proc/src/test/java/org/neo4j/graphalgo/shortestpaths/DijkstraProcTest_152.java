@@ -131,7 +131,7 @@ class DijkstraProcTest_152 extends BaseProcTest {
         String cypher =
             "MATCH (from:Loc{name:'A'}), (to:Loc{name:'F'}) " +
             "CALL gds.alpha.shortestPath.stream({" +
-            "startNode: from, endNode: to, weightProperty: 'd'," +
+            "startNode: from, endNode: to, relationshipWeightProperty: 'd'," +
             "nodeProjection: 'Loc'," +
             "relationshipProjection: 'ROAD'," +
             "relationshipProperties: {" +

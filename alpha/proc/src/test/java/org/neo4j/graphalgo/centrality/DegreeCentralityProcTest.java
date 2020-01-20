@@ -118,7 +118,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
         final Map<Long, Double> actual = new HashMap<>();
         String query = queryBuilder(INCOMING)
             .streamMode()
-            .addParameter("weightProperty", "foo")
+            .addParameter("relationshipWeightProperty", "foo")
             .addParameter("direction", INCOMING)
             .yields("nodeId", "score");
         runQueryWithRowConsumer(
@@ -154,7 +154,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
         String query = queryBuilder(INCOMING)
             .writeMode()
             .addParameter("direction", INCOMING)
-            .addParameter("weightProperty", "foo")
+            .addParameter("relationshipWeightProperty", "foo")
             .yields("writeMillis", "write", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
                 assertTrue(row.getBoolean("write"));
@@ -188,7 +188,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
         String query = queryBuilder(BOTH)
             .streamMode()
             .addParameter("direction", BOTH)
-            .addParameter("weightProperty", "foo")
+            .addParameter("relationshipWeightProperty", "foo")
             .yields("nodeId", "score");
         runQueryWithRowConsumer(
             query,
@@ -217,7 +217,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
         String query = queryBuilder(BOTH)
             .writeMode()
             .addParameter("direction", BOTH)
-            .addParameter("weightProperty", "foo")
+            .addParameter("relationshipWeightProperty", "foo")
             .yields("writeMillis", "write", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
                 assertTrue(row.getBoolean("write"));
@@ -248,7 +248,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
         String query = queryBuilder(OUTGOING)
             .streamMode()
             .addParameter("direction", OUTGOING)
-            .addParameter("weightProperty", "foo")
+            .addParameter("relationshipWeightProperty", "foo")
             .yields("nodeId", "score");
         runQueryWithRowConsumer(query, row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
@@ -275,7 +275,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
         String query = queryBuilder(OUTGOING)
             .writeMode()
             .addParameter("direction", OUTGOING)
-            .addParameter("weightProperty", "foo")
+            .addParameter("relationshipWeightProperty", "foo")
             .yields("writeMillis", "write", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
                 assertTrue(row.getBoolean("write"));

@@ -90,7 +90,7 @@ public class LabelPropagationBenchmarkLdbc {
             graph,
             ImmutableLabelPropagationStreamConfig.builder()
                 .seedProperty(SEED_PROPERTY)
-                .weightProperty(WEIGHT_PROPERTY)
+                .relationshipWeightProperty(WEIGHT_PROPERTY)
                 .maxIterations(iterations)
                 .build(),
             Pools.DEFAULT,

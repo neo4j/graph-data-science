@@ -150,7 +150,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
         @Language("Cypher")
         String query = "CALL gds.labelPropagation.write(" +
                        graphSnippet +
-                       "        concurrency: $concurrency, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $writeProperty" +
+                       "        concurrency: $concurrency, seedProperty: $seedProperty, relationshipWeightProperty: $relationshipWeightProperty, writeProperty: $writeProperty" +
                        "    }" +
                        ")";
 
@@ -274,7 +274,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
     void shouldRunLabelPropagationWithIdenticalSeedAndWriteProperties(int concurrency, String graphSnippet, String desc) {
         String query = "CALL gds.labelPropagation.write(" +
                        graphSnippet +
-                       "        concurrency: $concurrency, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $seedProperty" +
+                       "        concurrency: $concurrency, seedProperty: $seedProperty, relationshipWeightProperty: $relationshipWeightProperty, writeProperty: $seedProperty" +
                        "    }" +
                        ")";
 
@@ -312,7 +312,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
     void shouldRunLabelPropagationWithoutInitialSeed(int concurrency, String graphSnippet, String desc) {
         String query = "CALL gds.labelPropagation.write(" +
                         graphSnippet +
-                       "        concurrency: $concurrency, weightProperty: $weightProperty, writeProperty: $writeProperty" +
+                       "        concurrency: $concurrency, relationshipWeightProperty: $relationshipWeightProperty, writeProperty: $writeProperty" +
                        "    }" +
                        ")";
 
@@ -355,7 +355,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
         return MapUtil.map(
             "concurrency", concurrency,
             "seedProperty", "seed",
-            "weightProperty", "weight",
+            "relationshipWeightProperty", "weight",
             "writeProperty", "community"
         );
     }

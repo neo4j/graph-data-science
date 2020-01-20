@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
-import org.neo4j.graphalgo.WeightConfigTest;
+import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -56,7 +56,7 @@ import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, PageRank>,
     IterationsConfigTest<CONFIG, PageRank>,
-    WeightConfigTest<CONFIG, PageRank>,
+    RelationshipWeightConfigTest<CONFIG, PageRank>,
     ToleranceConfigTest<CONFIG, PageRank>,
     MemoryEstimateTest<CONFIG, PageRank> {
 

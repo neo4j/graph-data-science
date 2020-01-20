@@ -225,7 +225,7 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     .explicitCreation("weightedLouvainGraph")
                     .algo("louvain")
                     .streamMode()
-                    .addParameter("weightProperty", "weight")
+                    .addParameter("relationshipWeightProperty", "weight")
                     .yields("nodeId", "communityId", "communityIds")
                     .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds")
                     .concat(" ORDER BY name ASC"),
@@ -252,7 +252,7 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     )
                     .algo("louvain")
                     .streamMode()
-                    .addParameter("weightProperty", "weight")
+                    .addParameter("relationshipWeightProperty", "weight")
                     .yields("nodeId", "communityId", "communityIds")
                     .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds")
                     .concat(" ORDER BY name ASC"),

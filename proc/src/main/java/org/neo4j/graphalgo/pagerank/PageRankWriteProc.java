@@ -91,7 +91,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
           return Stream.of(
               new WriteResult(
                   computeResult.config().writeProperty(),
-                  computeResult.config().weightProperty(),
+                  computeResult.config().relationshipWeightProperty(),
                   computeResult.config().maxIterations(),
                   0,
                   computeResult.createMillis(),
@@ -201,7 +201,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
         public WriteResult build() {
             return new WriteResult(
                 writeProperty,
-                config.weightProperty(),
+                config.relationshipWeightProperty(),
                 config.maxIterations(),
                 nodePropertiesWritten,
                 createMillis,

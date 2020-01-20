@@ -109,7 +109,7 @@ public class WccThresholdTest extends AlgoTestBase {
         WccStreamConfig wccConfig = ImmutableWccStreamConfig
             .builder()
             .threshold(threshold)
-            .weightProperty("cost")
+            .relationshipWeightProperty("cost")
             .implicitCreateConfig(createConfig)
             .build();
 

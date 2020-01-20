@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.graphdb.Node;
 
@@ -34,7 +34,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("ShortestPathsConfigImpl")
-public interface ShortestPathsConfig extends AlgoBaseConfig, WeightConfig, WriteConfig {
+public interface ShortestPathsConfig extends AlgoBaseConfig, RelationshipWeightConfig, WriteConfig {
 
     String DEFAULT_TARGET_PROPERTY = "sssp";
 

@@ -41,8 +41,8 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -179,8 +179,8 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
         Map.Entry<GraphCreateConfig, Graph> catalogEntry;
 
-        Optional<String> weightProperty = config instanceof WeightConfig ?
-            Optional.ofNullable(((WeightConfig) config).weightProperty()) : Optional.empty();
+        Optional<String> weightProperty = config instanceof RelationshipWeightConfig ?
+            Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty()) : Optional.empty();
 
         if (maybeGraphName.isPresent()) {
             catalogEntry = GraphCatalog
@@ -221,12 +221,12 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 ));
             }
         }
-        if (config instanceof WeightConfig) {
+        if (config instanceof RelationshipWeightConfig) {
             Set<String> properties = new HashSet<>();
             properties.addAll(graphCreateConfig.relationshipProjection().allProperties());
             properties.addAll(graphCreateConfig.nodeProjection().allProperties());
 
-            String weightProperty = ((WeightConfig) config).weightProperty();
+            String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
             if (weightProperty != null && !properties.contains(weightProperty)) {
                 throw new IllegalArgumentException(String.format(
                     "Weight property `%s` not found in graph with relationship properties: %s",

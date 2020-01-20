@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, DisjointSetStruct>,
     SeedConfigTest<CONFIG, DisjointSetStruct>,
-    WeightConfigTest<CONFIG, DisjointSetStruct>,
+    RelationshipWeightConfigTest<CONFIG, DisjointSetStruct>,
     MemoryEstimateTest<CONFIG, DisjointSetStruct> {
 
     @Override
@@ -104,7 +104,7 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTes
     void testThreshold() {
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             "threshold", 3.14,
-            "weightProperty", "threshold"
+            "relationshipWeightProperty", "threshold"
         )));
 
         applyOnProcedure(proc -> {
@@ -117,7 +117,7 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTes
     void testIntegerThreshold() {
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             "threshold", 3,
-            "weightProperty", "threshold"
+            "relationshipWeightProperty", "threshold"
         )));
 
         applyOnProcedure(proc -> {
@@ -171,7 +171,7 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTes
 
             assertTrue(exception
                 .getMessage()
-                .contains("Specifying a threshold requires `weightProperty` to be set")
+                .contains("Specifying a threshold requires `relationshipWeightProperty` to be set")
             );
         });
     }

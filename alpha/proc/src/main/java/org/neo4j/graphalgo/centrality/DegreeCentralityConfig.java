@@ -24,20 +24,20 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.graphdb.Direction;
 
 @Configuration("DegreeCentralityConfigImpl")
 @ValueClass
-public interface DegreeCentralityConfig extends AlgoBaseConfig, WeightConfig, WriteConfig {
+public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeightConfig, WriteConfig {
 
     String DEFAULT_SCORE_PROPERTY = "degree";
 
     @Configuration.Ignore
     @Value.Default
     default boolean isWeighted() {
-        return StringUtils.isNotEmpty(weightProperty());
+        return StringUtils.isNotEmpty(relationshipWeightProperty());
     }
 
     @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")

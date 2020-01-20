@@ -199,7 +199,7 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
 
             this.writeProperty = config.writeProperty();
             this.seedProperty = config.seedProperty();
-            this.weightProperty = config.weightProperty();
+            this.weightProperty = config.relationshipWeightProperty();
             this.maxIterations = config.maxIterations();
             this.maxLevels = config.maxLevels();
             this.tolerance = config.tolerance();

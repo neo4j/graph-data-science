@@ -71,7 +71,7 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
             .yields(
                 "writeProperty",
                 "seedProperty",
-                "weightProperty",
+                "relationshipWeightProperty",
                 "nodePropertiesWritten",
                 "relationshipPropertiesWritten",
                 "createMillis",
@@ -89,7 +89,7 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
             row -> {
                 assertEquals(WRITE_PROPERTY, row.getString("writeProperty"));
                 assertNull(row.getString("seedProperty"));
-                assertNull(row.getString("weightProperty"));
+                assertNull(row.getString("relationshipWeightProperty"));
 
                 assertEquals(10L, row.getNumber("nodePropertiesWritten"));
                 assertEquals(0L, row.getNumber("relationshipPropertiesWritten"));

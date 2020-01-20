@@ -66,7 +66,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
         String query = queryBuilder
             .writeMode()
             .addParameter("writeProperty", "pagerank")
-            .addParameter("weightProperty", "weight")
+            .addParameter("relationshipWeightProperty", "weight")
             .yields("writeMillis", "writeProperty");
 
         runQueryWithRowConsumer(

@@ -75,7 +75,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
                        "      defaultValue: 1.0" +
                        "    }" +
                        "  }," +
-                       "  weightProperty: 'cost'" +
+                       "  relationshipWeightProperty: 'cost'" +
                        "})" +
                        " YIELD sourceNodeId, targetNodeId, distance" +
                        " WITH sourceNodeId, targetNodeId, distance" +
@@ -112,7 +112,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
         String query = "CALL gds.alpha.allShortestPaths.stream({" +
                        "  nodeQuery:'MATCH (n:Loc) RETURN id(n) as id'," +
                        "  relationshipQuery:'MATCH (n:Loc)-[r]-(p:Loc) RETURN id(n) as source, id(p) as target, r.cost as weight'," +
-                       "  weightProperty: 'cost'" +
+                       "  relationshipWeightProperty: 'cost'" +
                        "})" +
                        " YIELD sourceNodeId, targetNodeId, distance" +
                        " WITH sourceNodeId, targetNodeId, distance" +

@@ -24,15 +24,13 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration("BalancedTriadsConfigImpl")
-public interface BalancedTriadsConfig extends TriangleConfig, WeightConfig {
+public interface BalancedTriadsConfig extends TriangleConfig {
 
     @Value.Default
     default String balancedProperty() {

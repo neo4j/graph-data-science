@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Optional;
@@ -35,7 +35,7 @@ import static org.neo4j.graphdb.Direction.OUTGOING;
 
 @ValueClass
 @Configuration("AllShortestPathsConfigImpl")
-public interface AllShortestPathsConfig extends AlgoBaseConfig, WeightConfig {
+public interface AllShortestPathsConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
     @Value.Default

@@ -141,7 +141,7 @@ class LouvainDocTest extends BaseProcTest {
             "          properties: ['weight']" +
             "       }" +
             "   }," +
-            "   weightProperty: 'weight'" +
+            "   relationshipWeightProperty: 'weight'" +
             "}) YIELD nodeId, communityId, communityIds " +
             "RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds " +
             "ORDER BY name ASC";

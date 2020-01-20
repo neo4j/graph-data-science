@@ -87,7 +87,7 @@ class BalancedTriadsProcTest extends TriangleBaseProcTest<BalancedTriads, Balanc
             .loadEverything(Projection.UNDIRECTED)
             .algo("gds", "alpha", "balancedTriads")
             .writeMode()
-            .addParameter("weightProperty", "w")
+            .addParameter("relationshipWeightProperty", "w")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
@@ -104,7 +104,7 @@ class BalancedTriadsProcTest extends TriangleBaseProcTest<BalancedTriads, Balanc
             .loadEverything(Projection.UNDIRECTED)
             .algo("gds", "alpha", "balancedTriads")
             .streamMode()
-            .addParameter("weightProperty", "w")
+            .addParameter("relationshipWeightProperty", "w")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {

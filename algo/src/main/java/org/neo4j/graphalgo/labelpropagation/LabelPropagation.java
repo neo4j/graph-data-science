@@ -76,7 +76,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         }
         this.nodeProperties = seedProperty;
 
-        NodeProperties weightProperty = graph.nodeProperties(config.weightProperty());
+        NodeProperties weightProperty = graph.nodeProperties(config.relationshipWeightProperty());
         if (weightProperty == null) {
             weightProperty = new NullPropertyMap(1.0);
         }

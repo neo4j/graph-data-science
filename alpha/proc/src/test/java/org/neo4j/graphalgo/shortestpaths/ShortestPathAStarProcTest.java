@@ -114,7 +114,7 @@ class ShortestPathAStarProcTest extends BaseProcTest {
                            .streamMode()
                            .addVariable("startNode", "start")
                            .addVariable("endNode", "end")
-                           .addParameter("weightProperty", "cost")
+                           .addParameter("relationshipWeightProperty", "cost")
                            .yields("nodeId", "cost")
                            .concat(" RETURN nodeId, cost");
         runQueryWithRowConsumer(query, row -> {

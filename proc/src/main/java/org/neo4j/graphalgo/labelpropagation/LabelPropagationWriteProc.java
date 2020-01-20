@@ -230,7 +230,7 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
             this.writeProperty = config.writeProperty();
             this.maxIterations = config.maxIterations();
             this.seedProperty = config.seedProperty();
-            this.weightProperty = config.weightProperty();
+            this.weightProperty = config.relationshipWeightProperty();
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.relationshipPropertiesWritten = relationshipPropertiesWritten;
             this.createMillis = createMillis;

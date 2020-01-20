@@ -116,7 +116,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                     "   nodeProjection: 'User'," +
                     "   relationshipProjection: 'FOLLOW'," +
                     "   relationshipProperties: 'weight'," +
-                    "   weightProperty: 'weight'" +
+                    "   relationshipWeightProperty: 'weight'" +
                     "})" +
                     "YIELD nodeId, communityId AS Community " +
                     "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
@@ -141,7 +141,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                     "   relationshipProjection: 'FOLLOW'," +
                     "   relationshipProperties: 'weight'," +
                     "   writeProperty: 'community'," +
-                    "   weightProperty: 'weight'" +
+                    "   relationshipWeightProperty: 'weight'" +
                     "})" +
                     "YIELD ranIterations, communityCount";
 

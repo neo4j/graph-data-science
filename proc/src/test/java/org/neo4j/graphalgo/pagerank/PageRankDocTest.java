@@ -139,7 +139,7 @@ class PageRankDocTest extends BaseProcTest {
             "  }," +
             "  maxIterations: 20, " +
             "  dampingFactor: 0.85," +
-            "  weightProperty: 'weight'" +
+            "  relationshipWeightProperty: 'weight'" +
             "}) " +
             "YIELD nodeId, score " +
             "RETURN gds.util.asNode(nodeId).name AS name, score " +
@@ -173,7 +173,7 @@ class PageRankDocTest extends BaseProcTest {
             "  maxIterations: 20, " +
             "  dampingFactor: 0.85, " +
             "  writeProperty: 'pagerank', " +
-            "  weightProperty: 'weight'" +
+            "  relationshipWeightProperty: 'weight'" +
             "})" +
             "YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
 

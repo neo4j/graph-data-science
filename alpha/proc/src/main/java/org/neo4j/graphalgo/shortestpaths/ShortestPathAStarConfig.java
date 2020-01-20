@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 
@@ -36,7 +36,7 @@ import static org.neo4j.graphdb.Direction.OUTGOING;
 @Configuration("ShortestPathAStarConfigImpl")
 public interface ShortestPathAStarConfig extends
     AlgoBaseConfig,
-    WeightConfig
+    RelationshipWeightConfig
 {
     @Value.Default
     default String propertyKeyLat() {

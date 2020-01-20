@@ -23,9 +23,9 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 
-public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, WeightConfig {
+public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, RelationshipWeightConfig {
 
     @Value.Default
     default boolean consecutiveIds() {
@@ -44,8 +44,8 @@ public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, WeightConfig 
 
     @Configuration.Ignore
     default void validate() {
-        if (threshold() > 0 && weightProperty() == null) {
-            throw new IllegalArgumentException("Specifying a threshold requires `weightProperty` to be set.");
+        if (threshold() > 0 && relationshipWeightProperty() == null) {
+            throw new IllegalArgumentException("Specifying a threshold requires `relationshipWeightProperty` to be set.");
         }
 
         if (isIncremental() && consecutiveIds()) {

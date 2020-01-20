@@ -68,7 +68,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
         final Map<Long, Double> actual = new HashMap<>();
         String query = queryBuilder
             .streamMode()
-            .addParameter("weightProperty", "equalWeight")
+            .addParameter("relationshipWeightProperty", "equalWeight")
             .yields("nodeId", "score");
 
         runQueryWithRowConsumer(query,
@@ -82,7 +82,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     void testWeightedPageRankFromLoadedGraphWithDirectionBoth(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .streamMode()
-            .addParameter("weightProperty", "equalWeight")
+            .addParameter("relationshipWeightProperty", "equalWeight")
             .addParameter("maxIterations", 1)
             .yields("nodeId", "score");
 
@@ -99,7 +99,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     void testWeightedPageRankThrowsIfWeightPropertyDoesNotExist(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .streamMode()
-            .addParameter("weightProperty", "does_not_exist")
+            .addParameter("relationshipWeightProperty", "does_not_exist")
             .yields("nodeId", "score");
 
         QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
@@ -116,7 +116,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     void testWeightedPageRankWithCachedWeights(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .streamMode()
-            .addParameter("weightProperty", "weight")
+            .addParameter("relationshipWeightProperty", "weight")
             .addParameter("cacheWeights", true)
             .yields("nodeId", "score");
 
@@ -148,7 +148,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
         final Map<Long, Double> actual = new HashMap<>();
         String query = queryBuilder
             .streamMode()
-            .addParameter("weightProperty", "weight")
+            .addParameter("relationshipWeightProperty", "weight")
             .yields("nodeId", "score");
 
         runQueryWithRowConsumer(query,

@@ -108,7 +108,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "           properties: 'score'" +
             "       }" +
             "   }," +
-            "   weightProperty: 'score'," +
+            "   relationshipWeightProperty: 'score'," +
             "   direction: '" + oldDirection + "' " +
             "})" +
             "YIELD nodeId, score " +
@@ -154,7 +154,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "           properties: 'score'" +
             "       }" +
             "   }," +
-            "   weightProperty: 'score'," +
+            "   relationshipWeightProperty: 'score'," +
             "   writeProperty: 'following'," +
             "   direction: '" + oldDirection + "' " +
             "})" +

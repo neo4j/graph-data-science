@@ -115,7 +115,7 @@ class WccDocTest extends BaseProcTest {
             .withRelationshipProperty("weight")
             .algo("wcc")
             .streamMode()
-            .addParameter("weightProperty", "weight")
+            .addParameter("relationshipWeightProperty", "weight")
             .addParameter("threshold", 1.0D)
             .yields("nodeId", "componentId");
 
@@ -146,7 +146,7 @@ class WccDocTest extends BaseProcTest {
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", "componentId")
-            .addParameter("weightProperty", "weight")
+            .addParameter("relationshipWeightProperty", "weight")
             .addParameter("threshold", 1.0D)
             .yields("nodePropertiesWritten", "componentCount", "writeProperty");
 
@@ -169,7 +169,7 @@ class WccDocTest extends BaseProcTest {
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", "componentId")
-            .addParameter("weightProperty", "weight")
+            .addParameter("relationshipWeightProperty", "weight")
             .addParameter("threshold", 1.0D)
             .yields("nodePropertiesWritten", "componentCount", "writeProperty");
 
@@ -196,7 +196,7 @@ class WccDocTest extends BaseProcTest {
             .algo("wcc")
             .streamMode()
             .addParameter("seedProperty", "componentId")
-            .addParameter("weightProperty", "weight")
+            .addParameter("relationshipWeightProperty", "weight")
             .addParameter("threshold", 1.0D)
             .yields("nodeId", "componentId");
 
@@ -228,7 +228,7 @@ class WccDocTest extends BaseProcTest {
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", "componentId")
-            .addParameter("weightProperty", "weight")
+            .addParameter("relationshipWeightProperty", "weight")
             .addParameter("threshold", 1.0D)
             .yields("nodePropertiesWritten", "componentCount", "writeProperty");
 
@@ -256,7 +256,7 @@ class WccDocTest extends BaseProcTest {
             .writeMode()
             .addParameter("seedProperty", "componentId")
             .addParameter("writeProperty", "componentId")
-            .addParameter("weightProperty", "weight")
+            .addParameter("relationshipWeightProperty", "weight")
             .addParameter("threshold", 1.0D)
             .yields("nodePropertiesWritten", "componentCount", "writeProperty");
 

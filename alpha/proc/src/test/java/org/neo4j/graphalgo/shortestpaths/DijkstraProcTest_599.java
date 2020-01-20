@@ -74,7 +74,7 @@ class DijkstraProcTest_599 extends BaseProcTest {
     void test599() {
         String totalCostCommand =
             "MATCH (startNode {VID: 1}), (endNode {VID: 4})\n" +
-            "CALL gds.alpha.shortestPath.write({startNode: startNode, endNode: endNode, weightProperty: 'WEIGHT', relationshipProperties: 'WEIGHT'})\n" +
+            "CALL gds.alpha.shortestPath.write({startNode: startNode, endNode: endNode, relationshipWeightProperty: 'WEIGHT', relationshipProperties: 'WEIGHT'})\n" +
             "YIELD nodeCount, totalCost, loadMillis, evalMillis, writeMillis\n" +
             "RETURN totalCost\n";
 
@@ -89,7 +89,7 @@ class DijkstraProcTest_599 extends BaseProcTest {
 
         String pathCommand =
             "MATCH (startNode {VID: 1}), (endNode {VID: 4})\n" +
-            "CALL gds.alpha.shortestPath.stream({startNode: startNode, endNode: endNode, weightProperty: 'WEIGHT', relationshipProperties: 'WEIGHT'})\n" +
+            "CALL gds.alpha.shortestPath.stream({startNode: startNode, endNode: endNode, relationshipWeightProperty: 'WEIGHT', relationshipProperties: 'WEIGHT'})\n" +
             "YIELD nodeId, cost\n" +
             "MATCH (n1) WHERE id(n1) = nodeId\n" +
             "RETURN n1.VID AS id, cost AS weight\n";

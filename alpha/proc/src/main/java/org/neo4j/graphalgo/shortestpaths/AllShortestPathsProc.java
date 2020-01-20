@@ -80,7 +80,7 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
                 AllocationTracker tracker,
                 Log log
             ) {
-                if (config.weightProperty() != null) {
+                if (config.relationshipWeightProperty() != null) {
                     return new WeightedAllShortestPaths(
                         graph,
                         Pools.DEFAULT,

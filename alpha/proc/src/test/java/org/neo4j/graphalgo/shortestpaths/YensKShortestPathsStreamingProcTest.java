@@ -89,7 +89,7 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
             .addVariable("startNode", "a")
             .addVariable("endNode", "d")
             .addParameter("k", 42)
-            .addParameter("weightProperty", "cost")
+            .addParameter("relationshipWeightProperty", "cost")
             .yields("index", "sourceNodeId", "targetNodeId", "nodeIds", "costs");
 
         String cypher = String.format(
@@ -125,7 +125,7 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
             .addVariable("startNode", "a")
             .addVariable("endNode", "d")
             .addParameter("k", 42)
-            .addParameter("weightProperty", "cost")
+            .addParameter("relationshipWeightProperty", "cost")
             .addParameter("path", true)
             .yields("index", "sourceNodeId", "targetNodeId", "nodeIds", "costs", "path");
 

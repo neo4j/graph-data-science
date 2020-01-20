@@ -150,7 +150,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
 
         public final String writeProperty;
         public final String seedProperty;
-        public final String weightProperty;
+        public final String relationshipWeightProperty;
         public final long nodePropertiesWritten;
         public final long relationshipPropertiesWritten;
         public final long createMillis;
@@ -184,7 +184,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
         ) {
             this.writeProperty = config.writeProperty();
             this.seedProperty = config.seedProperty();
-            this.weightProperty = config.weightProperty();
+            this.relationshipWeightProperty = config.relationshipWeightProperty();
             this.threshold = config.threshold();
             this.consecutiveIds = config.consecutiveIds();
 

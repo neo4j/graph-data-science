@@ -21,13 +21,13 @@
 package org.neo4j.graphalgo.spanningtree;
 
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 
 public interface SpanningTreeBaseConfig extends
     AlgoBaseConfig,
     WriteConfig,
-    WeightConfig
+    RelationshipWeightConfig
 {
     int startNodeId();
 }

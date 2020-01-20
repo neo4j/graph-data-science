@@ -71,7 +71,7 @@ class YensKShortestPathsRelationshipCostsProcTest extends BaseProcTest {
             .addVariable("startNode", "c")
             .addVariable("endNode", "a")
             .addParameter("k", 1)
-            .addParameter("weightProperty", "cost")
+            .addParameter("relationshipWeightProperty", "cost")
             .yields("resultCount");
 
         String cypher = String.format(

@@ -23,14 +23,14 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.SourceNodesConfig;
 import org.neo4j.graphalgo.newapi.ToleranceConfig;
-import org.neo4j.graphalgo.newapi.WeightConfig;
 import org.neo4j.graphdb.Direction;
 
 public interface PageRankBaseConfig extends
     AlgoBaseConfig,
-    WeightConfig,
+    RelationshipWeightConfig,
     ToleranceConfig,
     IterationsConfig,
     SourceNodesConfig {

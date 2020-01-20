@@ -52,7 +52,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcBas
             .loadEverything(Projection.UNDIRECTED)
             .algo("gds", "beta", "modularityOptimization")
             .streamMode()
-            .addParameter("weightProperty", "weight")
+            .addParameter("relationshipWeightProperty", "weight")
             .yields("nodeId", "community");
 
         long[] communities = new long[6];

@@ -37,7 +37,7 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
-import org.neo4j.graphalgo.WeightConfigTest;
+import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
@@ -60,7 +60,7 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Bas
     AlgoBaseProcTest<CONFIG, Louvain>,
     SeedConfigTest<CONFIG, Louvain>,
     IterationsConfigTest<CONFIG, Louvain>,
-    WeightConfigTest<CONFIG, Louvain>,
+    RelationshipWeightConfigTest<CONFIG, Louvain>,
     ToleranceConfigTest<CONFIG, Louvain>,
     MemoryEstimateTest<CONFIG, Louvain> {
 

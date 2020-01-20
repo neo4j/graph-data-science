@@ -22,10 +22,10 @@ package org.neo4j.graphalgo.newapi;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 
-public interface WeightConfig {
+public interface RelationshipWeightConfig {
 
     @Value.Default
-    default @Nullable String weightProperty() {
+    default @Nullable String relationshipWeightProperty() {
         return null;
     }
 }

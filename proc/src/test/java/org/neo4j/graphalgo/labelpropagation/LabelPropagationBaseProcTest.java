@@ -35,7 +35,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.WeightConfigTest;
+import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
@@ -56,7 +56,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
     AlgoBaseProcTest<CONFIG, LabelPropagation>,
     SeedConfigTest<CONFIG, LabelPropagation>,
     IterationsConfigTest<CONFIG, LabelPropagation>,
-    WeightConfigTest<CONFIG, LabelPropagation>,
+    RelationshipWeightConfigTest<CONFIG, LabelPropagation>,
     MemoryEstimateTest<CONFIG, LabelPropagation>
 {
     static final List<Long> RESULT = Arrays.asList(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);
