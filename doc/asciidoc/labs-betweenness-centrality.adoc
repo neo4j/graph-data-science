@@ -238,7 +238,7 @@ CALL gds.alpha.betweenness.stream({
   direction: 'OUTGOING'
 })
 YIELD nodeId, centrality
-RETURN algo.asNode(nodeId).name AS user, centrality
+RETURN gds.util.asNode(nodeId).name AS user, centrality
 ORDER BY centrality DESC
 ----
 
@@ -314,7 +314,7 @@ CALL gds.alpha.betweenness.sampled.stream({
   maxDepth: 1,
   direction: 'OUTGOING'
 }) YIELD nodeId, centrality
-RETURN algo.asNode(nodeId).name AS user, centrality
+RETURN gds.util.asNode(nodeId).name AS user, centrality
 ORDER BY centrality DESC
 ----
 
