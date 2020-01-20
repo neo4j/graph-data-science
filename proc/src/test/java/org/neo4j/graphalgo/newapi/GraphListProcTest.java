@@ -42,6 +42,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.helpers.collection.MapUtil.map;
@@ -326,5 +327,20 @@ class GraphListProcTest extends BaseProcTest {
                 String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
             );
         }
+    }
+
+    @Test
+    void testReverseProjectionForListing() {
+        runQuery("CREATE (a:Person), (b:Person), (a)-[:INTERACTS]->(b)");
+        runQuery(
+            "CALL gds.graph.create('incoming', 'Person', {" +
+            "  INTERACTS: {" +
+            "    projection: 'REVERSE'" +
+            "  }" +
+            "})"
+        );
+        runQueryWithRowConsumer("CALL gds.graph.list()", row -> {
+            assertEquals(2, row.getNumber("nodeCount").intValue());
+        });
     }
 }
