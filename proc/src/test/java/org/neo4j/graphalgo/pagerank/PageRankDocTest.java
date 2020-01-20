@@ -294,8 +294,7 @@ class PageRankDocTest extends BaseProcTest {
             "  nodeProjection: 'Page', " +
             "  relationshipProjection: 'LINKS'," +
             "  maxIterations: 20, " +
-            "  dampingFactor: 0.85, " +
-            "  writeProperty: 'pagerank'" +
+            "  dampingFactor: 0.85" +
             "})" +
             "YIELD ranIterations, dampingFactor";
         String r2 = runQuery(q2, Result::resultAsString);
