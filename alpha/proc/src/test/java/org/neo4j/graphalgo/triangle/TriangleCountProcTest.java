@@ -110,7 +110,7 @@ class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCou
             .loadEverything(Projection.UNDIRECTED)
             .algo("gds", "alpha", "triangleCount")
             .writeMode()
-            .addParameter("clusterCoefficientProperty", "c")
+            .addParameter("clusteringCoefficientProperty", "c")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
