@@ -41,12 +41,16 @@ class LabelPropagationStreamProcTest extends LabelPropagationBaseProcTest<LabelP
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#graphVariations")
-    void testStream(String graphSnippet, String testCaseName) {
-        String query = "CALL gds.labelPropagation.stream(" +
-                       graphSnippet +
-                       "    maxIterations: 10" +
-                       "}) YIELD nodeId, communityId";
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#gdsGraphVariations")
+    void testStream(
+        GdsCypher.QueryBuilder queryBuilder,
+        String desc
+    ) {
+
+        String query = queryBuilder
+            .algo("gds.labelPropagation")
+            .streamMode()
+            .yields();
 
         List<Long> actualCommunities = new ArrayList<>();
         runQueryWithRowConsumer(query, row -> {

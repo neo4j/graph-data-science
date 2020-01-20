@@ -207,7 +207,8 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
         public long writeMillis;
         public long maxIterations;
         public String seedProperty;
-        public String weightProperty;
+        public String nodeWeightProperty;
+        public String relationshipWeightProperty;
         public long postProcessingMillis;
         public long communityCount;
         public long ranIterations;
@@ -230,7 +231,8 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
             this.writeProperty = config.writeProperty();
             this.maxIterations = config.maxIterations();
             this.seedProperty = config.seedProperty();
-            this.weightProperty = config.relationshipWeightProperty();
+            this.nodeWeightProperty = config.nodeWeightProperty();
+            this.relationshipWeightProperty = config.relationshipWeightProperty();
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.relationshipPropertiesWritten = relationshipPropertiesWritten;
             this.createMillis = createMillis;

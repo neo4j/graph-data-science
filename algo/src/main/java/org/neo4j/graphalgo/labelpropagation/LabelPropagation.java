@@ -76,11 +76,11 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         }
         this.nodeProperties = seedProperty;
 
-        NodeProperties weightProperty = graph.nodeProperties(config.relationshipWeightProperty());
-        if (weightProperty == null) {
-            weightProperty = new NullPropertyMap(1.0);
+        NodeProperties nodeWeightProperty = graph.nodeProperties(config.nodeWeightProperty());
+        if (nodeWeightProperty == null) {
+            nodeWeightProperty = new NullPropertyMap(1.0);
         }
-        this.nodeWeights = weightProperty;
+        this.nodeWeights = nodeWeightProperty;
         maxLabelId = nodeProperties.getMaxPropertyValue().orElse(StatementConstants.NO_SUCH_LABEL);
     }
 

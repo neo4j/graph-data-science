@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
@@ -33,9 +32,9 @@ import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
@@ -56,12 +55,17 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
     AlgoBaseProcTest<CONFIG, LabelPropagation>,
     SeedConfigTest<CONFIG, LabelPropagation>,
     IterationsConfigTest<CONFIG, LabelPropagation>,
+    NodeWeightConfigTest<CONFIG, LabelPropagation>,
     RelationshipWeightConfigTest<CONFIG, LabelPropagation>,
     MemoryEstimateTest<CONFIG, LabelPropagation>
 {
+
     static final List<Long> RESULT = Arrays.asList(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);
     static final String TEST_GRAPH_NAME = "myGraph";
     static final String TEST_CYPHER_GRAPH_NAME = "myCypherGraph";
+
+    private static final String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.weight AS weight, n.seed AS seed";
+    private static final String relQuery = "MATCH (s)-[:X]->(t) RETURN id(s) AS source, id(t) AS target";
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -103,33 +107,36 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
         ));
     }
 
-    private static final String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.weight AS weight, n.seed AS seed";
-    private static final String relQuery = "MATCH (s)-[:X]->(t) RETURN id(s) AS source, id(t) AS target";
-
-    String createGraphQuery(Projection projection, String graphName) {
-        return String.format(
-            "CALL gds.graph.create(" +
-            "    '%s'," +
-            "    {" +
-            "      A: {" +
-            "        label: 'A | B'" +
-            "      }" +
-            "    }," +
-            "    {" +
-            "      TYPE: {" +
-            "        type: 'X', " +
-            "        projection: '%s'" +
-            "      }" +
-            "    }, {" +
-            "      nodeProperties: ['seed', 'weight', 'score']" +
-            "    }" +
-            ")", graphName, projection.name());
-    }
-
     @AfterEach
     void clearCommunities() {
         db.shutdown();
         GraphCatalog.removeAllLoadedGraphs();
+    }
+
+    static String graphCreateQuery(Projection projection, String graphName) {
+        return graphCreateQuery(projection).graphCreate(graphName).yields();
+    }
+
+    static GdsCypher.QueryBuilder graphCreateQuery(Projection projection) {
+        return GdsCypher
+            .call()
+            .implicitCreation(ImmutableGraphCreateFromStoreConfig
+                .builder()
+                .graphName("")
+                .nodeProjection(NodeProjections.fromObject(MapUtil.map("A", "A | B")))
+                .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed", "weight", "score")))
+                .relationshipProjection(RelationshipProjections.builder()
+                    .putProjection(
+                        RelationshipProjections.PROJECT_ALL,
+                        RelationshipProjection.builder()
+                            .type("X")
+                            .projection(projection)
+                            .build()
+                    )
+                    .build()
+                )
+                .build()
+             );
     }
 
     static Stream<Arguments> gdsGraphVariations() {
@@ -139,57 +146,8 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
                 "explicit graph"
             ),
             arguments(
-                GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
-                    .builder()
-                    .graphName("")
-                    .nodeProjection(NodeProjections.fromObject(MapUtil.map("A", "A | B")))
-                    .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed", "weight", "score")))
-                    .relationshipProjection(RelationshipProjections.builder()
-                        .putProjection(
-                            ElementIdentifier.of("TYPE"),
-                            RelationshipProjection.builder()
-                                .type("X")
-                                .projection(Projection.NATURAL)
-                                .build()
-                        )
-                        .build()
-                    )
-                    .build()
-                ),
+                graphCreateQuery(Projection.NATURAL),
                 "implicit graph"
-            )
-        );
-    }
-
-    static Stream<Arguments> graphVariations() {
-        return Stream.of(
-            arguments("'myGraph', {", "explicit huge graph"),
-            arguments("'myCypherGraph', {", "explicit cypher graph"),
-            arguments(
-                "{" +
-                "  nodeProjection: {" +
-                "    A: {" +
-                "      label: 'A | B'" +
-                "    }" +
-                "  }, " +
-                "  relationshipProjection: {" +
-                "    TYPE: {" +
-                "      type: 'X'" +
-                "    }" +
-                "  }," +
-                "  nodeProperties: ['seed', 'score', 'weight'],",
-                "implicit huge graph"
-            ),
-            arguments(
-                "{" +
-                "  nodeQuery: '" +
-                nodeQuery +
-                "', " +
-                "  relationshipQuery: '" +
-                relQuery +
-                "'," +
-                " nodeProperties: ['seed', 'score', 'weight'],",
-                "implicit cypher graph"
             )
         );
     }

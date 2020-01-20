@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.WriteConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -91,7 +92,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
             long communityCount = row.getNumber("communityCount").longValue();
             long createMillis = row.getNumber("createMillis").longValue();
             long computeMillis = row.getNumber("computeMillis").longValue();
-            long  writeMillis = row.getNumber("writeMillis").longValue();
+            long writeMillis = row.getNumber("writeMillis").longValue();
             boolean didConverge = row.getBoolean("didConverge");
             Map<String, Object> communityDistribution = (Map<String, Object>) row.get("communityDistribution");
             assertEquals(10, communityCount, "wrong community count");
@@ -100,21 +101,22 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
             assertTrue(computeMillis >= 0, "invalid computeTime");
             assertTrue(didConverge, "did not converge");
             assertNotNull(communityDistribution);
-            for (String key: Arrays.asList("min", "max", "mean", "p50", "p75", "p90", "p99", "p999", "p95")) {
+            for (String key : Arrays.asList("min", "max", "mean", "p50", "p75", "p90", "p99", "p999", "p95")) {
                 assertTrue(communityDistribution.containsKey(key));
             }
         });
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#graphVariations")
-    void respectsMaxIterations(String graphSnippet, String desc) {
-        String query = "CALL gds.labelPropagation.write(" +
-                       graphSnippet +
-                       "    maxIterations: 5, " +
-                       "    writeProperty: 'label'" +
-                       "  }" +
-                       ")";
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#gdsGraphVariations")
+    void respectsMaxIterations(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
+        @Language("Cypher") String query = queryBuilder
+            .algo("labelPropagation")
+            .writeMode()
+            .addParameter("writeProperty", "label")
+            .addParameter("maxIterations", 5)
+            .yields();
+
         runQueryWithRowConsumer(
             query,
             row -> {
@@ -139,22 +141,26 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
     }
 
     static Stream<Arguments> concurrenciesExplicitAndImplicitCreate() {
-        return TestSupport.crossArguments(() -> Stream.of(1, 4, 8).map(Arguments::of),
-            LabelPropagationBaseProcTest::graphVariations
+        return TestSupport.crossArguments(
+            () -> Stream.of(1, 4, 8).map(Arguments::of),
+            LabelPropagationBaseProcTest::gdsGraphVariations
         );
     }
 
     @ParameterizedTest(name = "concurrency = {0}, {2}")
-    @MethodSource("concurrenciesExplicitAndImplicitCreate")
-    void shouldRunLabelPropagationNatural(int concurrency, String graphSnippet, String desc) {
-        @Language("Cypher")
-        String query = "CALL gds.labelPropagation.write(" +
-                       graphSnippet +
-                       "        concurrency: $concurrency, seedProperty: $seedProperty, relationshipWeightProperty: $relationshipWeightProperty, writeProperty: $writeProperty" +
-                       "    }" +
-                       ")";
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#gdsGraphVariations")
+    void shouldRunLabelPropagationNatural(GdsCypher.QueryBuilder queryBuilder, String desc) {
 
-        runQueryWithRowConsumer(query, concurrencySeedWeightAndWriteParams(concurrency),
+        String query = queryBuilder
+            .algo("gds.labelPropagation")
+            .writeMode()
+            .addParameter("writeProperty", "community")
+            .addParameter("seedProperty", "seed")
+            .addParameter("nodeWeightProperty", "weight")
+            .yields();
+
+        runQueryWithRowConsumer(
+            query,
             row -> {
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
                 checkMillisSet(row);
@@ -188,10 +194,10 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
         String graphName = "myGraphUndirected";
         String writeProperty = "community";
 
-        runQuery(createGraphQuery(Projection.UNDIRECTED, graphName));
+        runQuery(graphCreateQuery(Projection.UNDIRECTED, graphName));
         @Language("Cypher")
         String query = "CALL gds.labelPropagation.write(" +
-                       "        $graph, {"+
+                       "        $graph, {" +
                        "         writeProperty: $writeProperty" +
                        "    }" +
                        ")";
@@ -218,7 +224,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
             }
         );
         String check = String.format("MATCH (a {id: 0}), (b {id: 1}) " +
-                       "RETURN a.%1$s AS a, b.%1$s AS b", writeProperty);
+                                     "RETURN a.%1$s AS a, b.%1$s AS b", writeProperty);
         runQueryWithRowConsumer(check, row -> {
             assertEquals(2, row.getNumber("a").intValue());
             assertEquals(7, row.getNumber("b").intValue());
@@ -227,18 +233,16 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
 
     @Test
     void shouldRunLabelPropagationReverse() {
-        String graphName = "myGraphUndirected";
         String writeProperty = "community";
 
-        runQuery(createGraphQuery(Projection.REVERSE, graphName));
-        @Language("Cypher")
-        String query = "CALL gds.labelPropagation.write(" +
-                       "        $graph, {" +
-                       "         writeProperty: $writeProperty, direction: 'INCOMING'" +
-                       "    }" +
-                       ")";
+        String query = graphCreateQuery(Projection.REVERSE)
+            .algo("gds.labelPropagation")
+            .writeMode()
+            .addParameter("writeProperty", writeProperty)
+            .addParameter("direction", Direction.INCOMING.name())
+            .yields();
 
-        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName, "writeProperty", writeProperty),
+        runQueryWithRowConsumer(query,
             row -> {
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
                 checkMillisSet(row);
@@ -271,14 +275,25 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
 
     @ParameterizedTest(name = "concurrency = {0}, {2}")
     @MethodSource("concurrenciesExplicitAndImplicitCreate")
-    void shouldRunLabelPropagationWithIdenticalSeedAndWriteProperties(int concurrency, String graphSnippet, String desc) {
-        String query = "CALL gds.labelPropagation.write(" +
-                       graphSnippet +
-                       "        concurrency: $concurrency, seedProperty: $seedProperty, relationshipWeightProperty: $relationshipWeightProperty, writeProperty: $seedProperty" +
-                       "    }" +
-                       ")";
+    void shouldRunLabelPropagationWithIdenticalSeedAndWriteProperties(
+        int concurrency,
+        GdsCypher.QueryBuilder queryBuilder,
+        String desc
+    ) {
 
-        runQueryWithRowConsumer(query, concurrencySeedWeightAndWriteParams(concurrency),
+        String query = queryBuilder
+            .algo("gds.labelPropagation")
+            .writeMode()
+            .addParameter("concurrency", concurrency)
+            .addParameter("writeProperty", "seed")
+            .addParameter("seedProperty", "seed")
+            .addParameter("nodeWeightProperty", "weight")
+            .yields();
+
+        System.out.println(query);
+
+        runQueryWithRowConsumer(
+            query,
             row -> {
                 assertEquals(2, row.getNumber("nodePropertiesWritten").intValue());
                 assertEquals("seed", row.getString("seedProperty"));
@@ -309,14 +324,22 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
 
     @ParameterizedTest(name = "concurrency = {0}, {2}")
     @MethodSource("concurrenciesExplicitAndImplicitCreate")
-    void shouldRunLabelPropagationWithoutInitialSeed(int concurrency, String graphSnippet, String desc) {
-        String query = "CALL gds.labelPropagation.write(" +
-                        graphSnippet +
-                       "        concurrency: $concurrency, relationshipWeightProperty: $relationshipWeightProperty, writeProperty: $writeProperty" +
-                       "    }" +
-                       ")";
+    void shouldRunLabelPropagationWithoutInitialSeed(
+        int concurrency,
+        GdsCypher.QueryBuilder queryBuilder,
+        String desc
+    ) {
 
-        runQueryWithRowConsumer(query, concurrencySeedWeightAndWriteParams(concurrency),
+        String query = queryBuilder
+            .algo("gds.labelPropagation")
+            .writeMode()
+            .addParameter("concurrency", concurrency)
+            .addParameter("writeProperty", "community")
+            .addParameter("nodeWeightProperty", "weight")
+            .yields();
+
+        runQueryWithRowConsumer(
+            query,
             row -> {
                 assertNull(row.getString("seedProperty"));
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
@@ -349,14 +372,5 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
             "bytesMin", 1720L,
             "bytesMax", 2232L
         )));
-    }
-
-    Map<String, Object> concurrencySeedWeightAndWriteParams(int concurrency) {
-        return MapUtil.map(
-            "concurrency", concurrency,
-            "seedProperty", "seed",
-            "relationshipWeightProperty", "weight",
-            "writeProperty", "community"
-        );
     }
 }
