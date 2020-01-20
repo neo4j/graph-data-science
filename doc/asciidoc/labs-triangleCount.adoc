@@ -63,13 +63,28 @@ image::triangle_count.png[]
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/triangle-count.cypher[tag=create-sample-graph]
+CREATE (alice:Person {id: "Alice"}),
+       (michael:Person {id: "Michael"}),
+       (karin:Person {id: "Karin"}),
+       (chris:Person {id: "Chris"}),
+       (will:Person {id: "Will"}),
+       (mark:Person {id: "Mark"}),
+       (michael)-[:KNOWS]->(karin),
+       (michael)-[:KNOWS]->(chris),
+       (will)-[:KNOWS]->(michael),
+       (mark)-[:KNOWS]->(michael),
+       (mark)-[:KNOWS]->(will),
+       (alice)-[:KNOWS]->(michael),
+       (will)-[:KNOWS]->(chris),
+       (chris)-[:KNOWS]->(karin)
 ----
 
 .The following will return a stream of triples, with `nodeId` for each triangle:
 [source, cypher]
 ----
-include::scripts/triangle-count.cypher[tag=stream-triples]
+CALL algo.triangle.stream('Person', 'KNOWS')
+YIELD nodeA, nodeB, nodeC
+RETURN gds.util.asNode(nodeA).id AS nodeA, gds.util.asNode(nodeB).id AS nodeB, gds.util.asNode(nodeC).id AS nodeC
 ----
 
 .Results
@@ -87,13 +102,18 @@ This means that everybody in the triangle knows each other.
 .The following will count the number of triangles that a node is member of, and write it back. It will return the total triangle count and average clustering coefficient of the given graph:
 [source, cypher]
 ----
-include::scripts/triangle-count.cypher[tag=triangle-write-sample-graph]
+CALL algo.triangleCount('Person', 'KNOWS', {
+  concurrency: 4, write: true, writeProperty: 'triangles', clusteringCoefficientProperty: 'coefficient'
+}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
 ----
 
 .The following will count the number of triangles that a node is member of, and return a stream with `nodeId` and `triangleCount`:
 [source, cypher]
 ----
-include::scripts/triangle-count.cypher[tag=triangle-stream-sample-graph]
+CALL algo.triangleCount.stream('Person', 'KNOWS', {concurrency: 4})
+YIELD nodeId, triangles, coefficient
+RETURN gds.util.asNode(nodeId).id AS name, triangles, coefficient
+ORDER BY coefficient DESC
 ----
 
 .Results
@@ -121,7 +141,9 @@ We check if this holds true for Yelp's social network of friends:
 
 [source, cypher]
 ----
-include::scripts/triangle-count.cypher[tag=triangle-write-yelp]
+CALL algo.triangleCount('User', 'FRIEND', {
+  concurrency: 4, write: true, writeProperty: 'triangles', clusteringCoefficientProperty: 'coefficient'
+}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
 ----
 
 Average clustering coefficient is 0.0523, which is really low for a social network.
@@ -140,7 +162,11 @@ include::projected-graph-model/cypher-projection.adoc[tag=explanation]
 
 [source, cypher]
 ----
-include::scripts/triangle-count.cypher[tag=cypher-loading]
+CALL algo.triangleCount(
+  'MATCH (p:Person) RETURN id(p) as id',
+  'MATCH (p1:Person)-[:KNOWS]->(p2:Person) RETURN id(p1) as source,id(p2) as target', {
+    concurrency: 4, write: true, writeProperty: 'triangle', graph: 'cypher', clusteringCoefficientProperty: 'coefficient'
+}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
 ----
 
 
@@ -150,7 +176,7 @@ include::scripts/triangle-count.cypher[tag=cypher-loading]
 .The following will return a stream of triples with `nodeId` for each triangle:
 [source, cypher]
 ----
-CALL algo.triangle.stream(label:String, relationship:String, {concurrency:4})
+CALL algo.triangle.stream(label:String, relationship:String, {concurrency: 4})
 YIELD nodeA, nodeB, nodeC
 ----
 
@@ -176,7 +202,7 @@ YIELD nodeA, nodeB, nodeC
 .The following will count the number of triangles that a node is a member of, and return a stream with `nodeId` and `triangleCount`:
 [source, cypher]
 ----
-CALL algo.triangleCount.stream(label:String, relationship:String, {concurrency:4})
+CALL algo.triangleCount.stream(label:String, relationship:String, {concurrency: 4})
 YIELD nodeId, triangles
 ----
 
