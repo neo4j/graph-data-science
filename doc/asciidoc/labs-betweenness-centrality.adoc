@@ -153,7 +153,6 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMil
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type   | Default                | Optional | Description
-| Name             | Type   | Default                | Optional | Description
 | direction        | string | OUTGOING               | yes      | The relationship direction to load from the graph. If 'BOTH', treats the relationships as undirected.
 | writeProperty    | string | 'centrality'           | yes      | The property name written back to.
 | strategy         | string | 'random'               | yes      | The node selection strategy.
