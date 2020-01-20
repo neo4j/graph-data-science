@@ -1,7 +1,25 @@
+// tag::create-sample-graph[]
+CREATE (a:Loc {name: 'A'}),
+       (b:Loc {name: 'B'}),
+       (c:Loc {name: 'C'}),
+       (d:Loc {name: 'D'}),
+       (e:Loc {name: 'E'}),
+       (f:Loc {name: 'F'}),
+       (a)-[:ROAD {cost: 50}]->(b),
+       (a)-[:ROAD {cost: 50}]->(c),
+       (a)-[:ROAD {cost: 100}]->(d),
+       (b)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 80}]->(e),
+       (d)-[:ROAD {cost: 30}]->(e),
+       (d)-[:ROAD {cost: 80}]->(f),
+       (e)-[:ROAD {cost: 40}]->(f);
+//end::create-sample-graph[]
+
 // tag::single-pair-stream-sample-graph[]
 
 MATCH (start:Loc{name:'A'}), (end:Loc{name:'F'})
-CALL algo.shortestPath.stream(start, end, 'cost') 
+CALL algo.shortestPath.stream(start, end, 'cost')
 YIELD nodeId, cost
 RETURN gds.util.asNode(nodeId).name AS name, cost
 
@@ -16,27 +34,6 @@ YIELD writeMillis,loadMillis,nodeCount, totalCost
 RETURN writeMillis,loadMillis,nodeCount,totalCost
 
 // end::single-pair-write-sample-graph[]
-
-
-// tag::delta-stream-sample-graph[]
-
-MATCH (n:Loc {name:'A'})
-CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0)
-YIELD nodeId, distance
-
-RETURN gds.util.asNode(nodeId).name AS destination, distance
-
-// end::delta-stream-sample-graph[]
-
-
-// tag::delta-write-sample-graph[]
-
-MATCH (n:Loc {name:'A'})
-CALL algo.shortestPath.deltaStepping(n, 'cost', 3.0, {defaultValue:1.0, write:true, writeProperty:'sssp'})
-YIELD nodeCount, loadDuration, evalDuration, writeDuration 
-RETURN nodeCount, loadDuration, evalDuration, writeDuration
-
-// end::delta-write-sample-graph[]
 
 // tag::cypher-loading[]
 
