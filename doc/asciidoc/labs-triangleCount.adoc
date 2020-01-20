@@ -61,44 +61,40 @@ For more information, see http://i11www.iti.kit.edu/extra/publications/sw-fclt-0
 .The following will return a stream of triples with `nodeId` for each triangle:
 [source, cypher]
 ----
-CALL algo.triangle.stream(label:String, relationship:String, {concurrency: 4})
+CALL gds.alpha.triangle.stream(configuration: MAP)
 YIELD nodeA, nodeB, nodeC
 ----
 
-.Parameters
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name             | Type   | Default                | Optional | Description
-| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string | null                   | yes      | The relationship type to load from the graph. If null, load all nodes.
-| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| Name            | Type   | Default                | Optional | Description
+| concurrency     | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name  | Type | Description
-| nodeA | int  | The ID of node in the given triangle.
-| nodeB | int  | The ID of node in the given triangle.
-| nodeC | int  | The ID of node in the given triangle.
+| nodeA | long | The ID of node in the given triangle.
+| nodeB | long | The ID of node in the given triangle.
+| nodeC | long | The ID of node in the given triangle.
 |===
 
 .The following will count the number of triangles that a node is a member of, and return a stream with `nodeId` and `triangleCount`:
 [source, cypher]
 ----
-CALL algo.triangleCount.stream(label:String, relationship:String, {concurrency: 4})
+CALL gds.alpha.triangleCount.stream(configuration: MAP)
 YIELD nodeId, triangles
 ----
 
-.Parameters
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name             | Type   | Default                | Optional | Description
-| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
-| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| Name            | Type   | Default                | Optional | Description
+| concurrency     | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 
 .Results
@@ -112,8 +108,7 @@ YIELD nodeId, triangles
 .The following will count the number of triangles that a node is a member of, and write it back. It will return the total triangle count and average clustering coefficient of the given graph:
 [source, cypher]
 ----
-CALL algo.triangleCount(label:String, relationship:String,
-    {concurrency:4, write:true, writeProperty:'triangles', clusteringCoefficientProperty:'coefficient'})
+CALL gds.alpha.triangleCount.write(configuration: MAP)
 YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
 ----
 
@@ -121,12 +116,9 @@ YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageC
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                          | Type    | Default                | Optional | Description
-| label                         | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship                  | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
-| concurrency                   | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| write                         | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
 | writeProperty                 | string  | 'triangles'            | yes      | The property name the number of triangles a node is member of is written to.
 | clusteringCoefficientProperty | string  | 'coefficient'          | yes      | The property name clustering coefficient of the node is written to.
 |===
@@ -134,31 +126,26 @@ YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageC
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                         | Type  | Description
-| loadMillis    | int  | Milliseconds for loading data.
-| computeMillis | int  | Milliseconds for running the algorithm.
-| writeMillis   | int  | Milliseconds for writing result data back.
-| postProcessingMillis    | int  | Milliseconds for computing percentiles and community count.
-
-| nodeCount | int | The number of nodes considered.
-| triangleCount | int  | The number of triangles found.
-| averageClusteringCoefficient | float  | The average clustering coefficient of the given graph.
-
-| p1                   | double  | The 1 percentile of number of triangles.
-| p5                   | double  | The 5 percentile of number of triangles.
-| p10                   | double  | The 10 percentile of number of triangles.
-| p25                   | double  | The 25 percentile of number of triangles.
-| p50                   | double  | The 50 percentile of number of triangles.
-| p75                   | double  | The 75 percentile of number of triangles.
-| p90                   | double  | The 90 percentile of number of triangles.
-| p95                   | double  | The 95 percentile of number of triangles.
-| p99                   | double  | The 99 percentile of number of triangles.
-| p100                  | double  | The 100 percentile of number of triangles.
-
-| write | boolean | Specifies if the result was written back as a node property.
-| writeProperty | string | The property name the number of triangles a node is member of is written to.
+| Name                          | Type   | Description
+| loadMillis                    | int    | Milliseconds for loading data.
+| computeMillis                 | int    | Milliseconds for running the algorithm.
+| writeMillis                   | int    | Milliseconds for writing result data back.
+| postProcessingMillis          | int    | Milliseconds for computing percentiles and community count.
+| nodeCount                     | int    | The number of nodes considered.
+| triangleCount                 | int    | The number of triangles found.
+| averageClusteringCoefficient  | float  | The average clustering coefficient of the given graph.
+| p1                            | double | The 1 percentile of number of triangles.
+| p5                            | double | The 5 percentile of number of triangles.
+| p10                           | double | The 10 percentile of number of triangles.
+| p25                           | double | The 25 percentile of number of triangles.
+| p50                           | double | The 50 percentile of number of triangles.
+| p75                           | double | The 75 percentile of number of triangles.
+| p90                           | double | The 90 percentile of number of triangles.
+| p95                           | double | The 95 percentile of number of triangles.
+| p99                           | double | The 99 percentile of number of triangles.
+| p100                          | double | The 100 percentile of number of triangles.
+| writeProperty                 | string | The property name the number of triangles a node is member of is written to.
 | clusteringCoefficientProperty | string | The property name clustering coefficient of the node is written to.
-
 |===
 
 
@@ -321,15 +308,13 @@ The Triangle Count algorithms support the following graph type:
 * [x] undirected, unweighted
 
 
-ifndef::env-docs[]
-== References
-
-* [1] https://www.infoq.com/articles/apache-spark-graphx
-* [2] http://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf
-* [3] http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
-* [4] https://en.wikipedia.org/wiki/Clustering_coefficient
-* [5] https://pdfs.semanticscholar.org/110b/55a017f52abfedca220036ea129d84b7cadc.pdf
-* [6] http://www.pnas.org/content/99/9/5825.full.pdf
-* [7] https://bmcbioinformatics.biomedcentral.com/track/pdf/10.1186/1471-2105-6-270?site=bmcbioinformatics.biomedcentral.com
-endif::env-docs[]
+//== References
+//
+//* [1] https://www.infoq.com/articles/apache-spark-graphx
+//* [2] http://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf
+//* [3] http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
+//* [4] https://en.wikipedia.org/wiki/Clustering_coefficient
+//* [5] https://pdfs.semanticscholar.org/110b/55a017f52abfedca220036ea129d84b7cadc.pdf
+//* [6] http://www.pnas.org/content/99/9/5825.full.pdf
+//* [7] https://bmcbioinformatics.biomedcentral.com/track/pdf/10.1186/1471-2105-6-270?site=bmcbioinformatics.biomedcentral.com
 
