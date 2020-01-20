@@ -88,7 +88,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "   direction: '" + oldDirection + "' " +
             "})" +
             "YIELD nodeId, score " +
-            "RETURN gds.util.asNode(nodeId).id AS name, score AS followers " +
+            "RETURN gds.util.asNode(nodeId).name AS name, score AS followers " +
             "ORDER BY followers DESC";
         String actual = runQuery(query, Result::resultAsString);
 
@@ -112,7 +112,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "   direction: '" + oldDirection + "' " +
             "})" +
             "YIELD nodeId, score " +
-            "RETURN gds.util.asNode(nodeId).id AS name, score AS weightedFollowers " +
+            "RETURN gds.util.asNode(nodeId).name AS name, score AS weightedFollowers " +
             "ORDER BY weightedFollowers DESC";
         String actual = runQuery(query, Result::resultAsString);
 
