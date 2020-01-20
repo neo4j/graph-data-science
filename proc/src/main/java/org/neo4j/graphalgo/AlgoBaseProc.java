@@ -41,6 +41,7 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.newapi.NodeWeightConfig;
 import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
@@ -200,7 +201,13 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             validateConfig(createConfig, config);
             ModernGraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
 
-            return loader.load(createConfig.getGraphImpl());
+            Graph loadedGraph = loader.load(createConfig.getGraphImpl());
+
+            if (weightProperty.isPresent()) {
+                return loadedGraph;
+            } else {
+                return loadedGraph.withoutProperties();
+            }
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
@@ -234,14 +241,12 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             }
         }
         if (config instanceof RelationshipWeightConfig) {
-            Set<String> properties = new HashSet<>();
-            properties.addAll(graphCreateConfig.relationshipProjection().allProperties());
-            properties.addAll(graphCreateConfig.nodeProjection().allProperties());
+            Set<String> properties = new HashSet<>(graphCreateConfig.relationshipProjection().allProperties());
 
             String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
             if (weightProperty != null && !properties.contains(weightProperty)) {
                 throw new IllegalArgumentException(String.format(
-                    "Weight property `%s` not found in graph with relationship properties: %s",
+                    "Relationship weight property `%s` not found in graph with relationship properties: %s",
                     weightProperty,
                     properties
                 ));
