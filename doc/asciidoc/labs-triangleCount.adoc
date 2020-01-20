@@ -19,9 +19,9 @@ This section includes:
 * <<algorithms-triangle-count-clustering-coefficient-context, History and explanation>>
 * <<algorithms-triangle-count-clustering-coefficient-usecase, Use-cases - when to use the Triangle Counting / Clustering Coefficient algorithm>>
 * <<algorithms-triangle-count-clustering-coefficient-sample, Triangle Counting / Clustering Coefficient algorithm sample>>
+* <<algorithms-triangle-count-clustering-coefficient-syntax, Syntax>>
 * <<algorithms-triangle-count-clustering-coefficient-example, Example usage>>
 * <<algorithms-triangle-count-clustering-coefficient-cp, Cypher projection>>
-* <<algorithms-triangle-count-clustering-coefficient-syntax, Syntax>>
 * <<algorithms-triangle-count-clustering-coefficient-support, Graph type support>>
 
 
