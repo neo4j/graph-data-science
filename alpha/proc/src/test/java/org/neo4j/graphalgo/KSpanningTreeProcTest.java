@@ -76,7 +76,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
             .addParameter("startNodeId", id("a"))
             .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
-            .addParameter("weightProperty", "w")
+            .addParameter("relationshipWeightProperty", "w")
             .yields("createMillis", "computeMillis", "writeMillis");
 
         runQueryWithRowConsumer(query, row -> {
@@ -109,7 +109,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
             .addParameter("startNodeId", id("a"))
             .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
-            .addParameter("weightProperty", "w")
+            .addParameter("relationshipWeightProperty", "w")
             .yields("createMillis", "computeMillis", "writeMillis");
 
         runQueryWithRowConsumer(query, row -> {

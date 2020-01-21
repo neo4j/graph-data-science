@@ -192,7 +192,10 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             : GraphCreateFromCypherConfig.emptyWithName("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graphLoader(graphCreateConfig).load(graphFactory)));
+            GraphCatalog.set(
+                graphCreateConfig,
+                graphLoader(graphCreateConfig).build(graphFactory).build().graphs()
+            );
 
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnLoadedGraph = proc.compute(
@@ -245,7 +248,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             : GraphCreateFromCypherConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graphLoader(graphCreateConfig).load(graphFactory)));
+            GraphCatalog.set(graphCreateConfig, graphLoader(graphCreateConfig).build(graphFactory).build().graphs());
 
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap);

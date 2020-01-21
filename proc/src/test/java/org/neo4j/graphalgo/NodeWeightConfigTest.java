@@ -94,6 +94,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
 
     @Test
     default void testNodeWeightPropertyValidation() {
+        graphDb().execute("CREATE (:A {a: 1})").resultAsString();
         Map<String, Object> tempConfig = MapUtil.map(
             "nodeWeightProperty", "foo",
             "nodeProjection", MapUtil.map(
@@ -119,10 +120,10 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
     default void shouldFailWithInvalidNodeWeightProperty() {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
-        Graph graph = graphLoader(graphCreateConfig)
-            .load(HugeGraphFactory.class);
+        GraphsByRelationshipType graphs = graphLoader(graphCreateConfig)
+            .build(HugeGraphFactory.class).build().graphs();
 
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
+        GraphCatalog.set(graphCreateConfig, graphs);
 
         applyOnProcedure((proc) -> {
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(

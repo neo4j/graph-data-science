@@ -111,7 +111,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
     void shouldStreamWithCypherProjection() {
         String query = "CALL gds.alpha.allShortestPaths.stream({" +
                        "  nodeQuery:'MATCH (n:Loc) RETURN id(n) as id'," +
-                       "  relationshipQuery:'MATCH (n:Loc)-[r]-(p:Loc) RETURN id(n) as source, id(p) as target, r.cost as weight'," +
+                       "  relationshipQuery:'MATCH (n:Loc)-[r]-(p:Loc) RETURN id(n) as source, id(p) as target, r.cost as cost'," +
                        "  relationshipWeightProperty: 'cost'" +
                        "})" +
                        " YIELD sourceNodeId, targetNodeId, distance" +
