@@ -139,10 +139,12 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
     default void shouldFailWithInvalidRelationshipWeightProperty() {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
-        Graph graph = graphLoader(graphCreateConfig)
-            .load(HugeGraphFactory.class);
+        GraphsByRelationshipType graphs = graphLoader(graphCreateConfig)
+            .build(HugeGraphFactory.class)
+            .build()
+            .graphs();
 
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
+        GraphCatalog.set(graphCreateConfig, graphs);
 
         applyOnProcedure((proc) -> {
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(map(

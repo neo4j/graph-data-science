@@ -41,17 +41,18 @@ import static org.neo4j.graphalgo.api.GraphFactory.ANY_REL_TYPE;
 
 public interface GraphsByRelationshipType {
 
-    static GraphsByRelationshipType of(Graph graph) {
-        return new NoRelationshipType(graph);
+    static GraphsByRelationshipType of(String relType, Optional<String> relProperty, Graph graph) {
+        Map<String, Map<String, Graph>> mapping = Collections.singletonMap(
+            "relType",
+            Collections.singletonMap(
+                relProperty.orElse(""),
+                graph
+            )
+        );
+        return GraphsByRelationshipType.of(mapping);
     }
 
     static GraphsByRelationshipType of(Map<String, Map<String, Graph>> graphs) {
-        if (graphs.size() == 1) {
-            Map<String, ? extends Graph> byProperty = Iterables.single(graphs.values());
-            if (byProperty.size() == 1) {
-                return of(Iterables.single(byProperty.values()));
-            }
-        }
         return new MultipleRelationshipTypes(graphs);
     }
 
@@ -76,55 +77,6 @@ public interface GraphsByRelationshipType {
     long relationshipCount();
 
     Set<String> availableRelationshipTypes();
-
-    final class NoRelationshipType implements GraphsByRelationshipType {
-
-        private final Graph graph;
-
-        private NoRelationshipType(Graph graph) {
-            this.graph = graph;
-        }
-
-        @Override
-        public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
-            return graph;
-        }
-
-        @Override
-        public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
-            return maybeRelationshipProperty.isPresent() ? graph : graph.withoutProperties();
-        }
-
-        @Override
-        public Graph getUnion() {
-            return graph;
-        }
-
-        @Override
-        public void canRelease(boolean canRelease) {
-            graph.canRelease(canRelease);
-        }
-
-        @Override
-        public String getGraphType() {
-            return graph.getType();
-        }
-
-        @Override
-        public long nodeCount() {
-            return graph.nodeCount();
-        }
-
-        @Override
-        public long relationshipCount() {
-            return graph.relationshipCount();
-        }
-
-        @Override
-        public Set<String> availableRelationshipTypes() {
-            return Collections.emptySet();
-        }
-    }
 
     final class MultipleRelationshipTypes implements GraphsByRelationshipType {
 

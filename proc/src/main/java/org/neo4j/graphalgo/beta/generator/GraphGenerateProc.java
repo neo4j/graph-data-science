@@ -102,7 +102,7 @@ public final class GraphGenerateProc extends BaseProc {
                 );
                 graphFromType = GraphsByRelationshipType.of(mapping);
             } else {
-                graphFromType = GraphsByRelationshipType.of(graph);
+                graphFromType = GraphsByRelationshipType.of(DUMMY_RELATIONSHIP_NAME, Optional.empty(), graph);
             }
 
             stats.nodes = graphFromType.nodeCount();

@@ -51,12 +51,24 @@ public final class GraphCatalog extends GraphFactory {
 
     @Override
     public ImportResult build() {
-        GraphsByRelationshipType graphs = GraphsByRelationshipType.of(get(
+        String relationshipType = setup.relationshipType();
+        Optional<String> maybeRelationshipProperty = setup
+            .relationshipPropertyMappings()
+            .head()
+            .map(PropertyMapping::propertyKey);
+
+        Graph graph = get(
             setup.username(),
             setup.name(),
-            setup.relationshipType(),
-            setup.relationshipPropertyMappings().head().map(PropertyMapping::propertyKey)
-        ));
+            relationshipType,
+            maybeRelationshipProperty
+        );
+
+        GraphsByRelationshipType graphs = GraphsByRelationshipType.of(
+            relationshipType,
+            maybeRelationshipProperty,
+            graph
+        );
 
         return ImportResult.of(dimensions, graphs);
     }
