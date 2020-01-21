@@ -24,7 +24,6 @@ This section includes:
 * <<algorithms-random-walk-syntax, Syntax>>
 * <<algorithms-random-walk-sample, Random Walk algorithm sample>>
 * <<algorithms-random-walk-cp, Cypher projection>>
-* <<algorithms-random-walk-support, Graph type support>>
 
 
 [[algorithms-random-walk-context]]
