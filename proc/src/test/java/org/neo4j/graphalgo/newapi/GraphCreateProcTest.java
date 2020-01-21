@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
@@ -50,6 +51,8 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.PROJECTION_KEY;
@@ -627,6 +630,70 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
+    @ParameterizedTest(name = "aggregation={0}")
+    @MethodSource("relationshipAggregationTypes")
+    void relationshipProjectionPropertyAggregationsCypherVsStandard(String aggregation) {
+
+        runQuery(
+            " CREATE (p:Person)-[:KNOWS]->(k:Person)," +
+            " (p)-[:KNOWS {weight: 1}]->(m:Person)," +
+            " (m)-[:KNOWS {weight: 2}]->(m)," +
+            " (p)-[:KNOWS {weight: 3}]->(p)," +
+            " (p)-[:KNOWS {weight: 4}]->(k)," +
+            " (p)-[:KNOWS {weight: -2}]->(k)," +
+            " (p)-[:KNOWS {weight: 5}]->(k)"
+        );
+
+        String standard = "standard";
+        String cypher = "cypher";
+
+        Map<String, Object> properties = map(
+            "weight",
+            map("property", "weight", AGGREGATION_KEY, aggregation)
+        );
+
+        Map<String, Object> relProjection = map(
+            "KNOWS",
+            map(PROJECTION_KEY, "NATURAL", PROPERTIES_KEY, properties)
+        );
+
+        NodeAndRelCounts standardNodeAndRelCounts = new NodeAndRelCounts(
+            "CALL gds.graph.create($name, '*', $relProjection)",
+            map(
+                "name", standard,
+                "relProjection", relProjection
+            )
+        ).run();
+
+
+        NodeAndRelCounts cypherNodeAndRelCounts = new NodeAndRelCounts(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
+            map(
+                "name", cypher,
+                "nodeQuery", ALL_NODES_QUERY,
+                "relationshipQuery", "MATCH (a)-[r:KNOWS]->(b) RETURN id(a) AS source, id(b) AS target, r.weight AS weight",
+                "relationshipProperties", properties
+            )
+        ).run();
+
+        assertEquals(standardNodeAndRelCounts.getNodeCount(), cypherNodeAndRelCounts.getNodeCount());
+
+        int relationshipCountCypher = cypherNodeAndRelCounts.getRelationshipCount();
+        int relationshipsStandard = standardNodeAndRelCounts.getRelationshipCount();
+
+        assertTrue(relationshipsStandard > 0);
+        assertTrue(relationshipCountCypher > 0);
+        assertEquals(
+            relationshipsStandard,
+            relationshipCountCypher,
+            String.format(
+                "Expected %d relationships using `gds.graph.create` to be equal to %d relationships when using `gds.graph.create.cypher`",
+                relationshipsStandard,
+                relationshipCountCypher
+            )
+        );
+    }
+
     @Test
     void failsOnInvalidNeoType() {
         String name = "g";
@@ -816,5 +883,39 @@ class GraphCreateProcTest extends BaseProcTest {
 
     static Stream<String> invalidGraphNames() {
         return Stream.of("", "   ", "           ", "\r\n\t", null);
+    }
+
+    private class NodeAndRelCounts {
+        private final String query;
+        private final Map<String, Object> queryParams;
+        private final AtomicInteger nodeCount;
+        private final AtomicInteger relationshipCount;
+
+        NodeAndRelCounts(String query, Map<String, Object> queryParams) {
+            this.query = query;
+            this.queryParams = queryParams;
+            nodeCount = new AtomicInteger();
+            relationshipCount = new AtomicInteger();
+        }
+
+        int getNodeCount() {
+            return nodeCount.get();
+        }
+
+        int getRelationshipCount() {
+            return relationshipCount.get();
+        }
+
+        NodeAndRelCounts run() {
+            runQueryWithRowConsumer(
+                query,
+                queryParams,
+                row -> {
+                    nodeCount.set(row.getNumber("nodeCount").intValue());
+                    relationshipCount.set(row.getNumber("relationshipCount").intValue());
+                }
+            );
+            return this;
+        }
     }
 }
