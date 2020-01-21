@@ -24,8 +24,10 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.Aggregation;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @DataClass
 @Value.Immutable(singleton = true)
@@ -111,9 +113,24 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
     @Override
     public RelationshipProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
         PropertyMappings newMappings = properties().mergeWith(mappings);
-        if (newMappings == properties()) {
+        if (newMappings.equals(properties())) {
             return RelationshipProjection.copyOf(this);
         }
+
+        List<PropertyMapping> updatedPropertyMappings = newMappings.mappings().stream().map(propertyMapping -> {
+            if (propertyMapping.deduplicationStrategy() == DeduplicationStrategy.DEFAULT) {
+                return PropertyMapping.of(
+                    propertyMapping.propertyKey(),
+                    propertyMapping.neoPropertyKey(),
+                    propertyMapping.defaultValue(),
+                    aggregation()
+                );
+            }
+            return propertyMapping;
+
+        }).collect(Collectors.toList());
+
+        newMappings = PropertyMappings.of(updatedPropertyMappings);
         return RelationshipProjection.copyOf(this).withProperties(newMappings);
     }
 

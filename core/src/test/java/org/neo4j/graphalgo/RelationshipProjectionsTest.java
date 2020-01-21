@@ -132,6 +132,46 @@ class RelationshipProjectionsTest {
     }
 
     @Test
+    void shouldPropagateAggregationToProperty() {
+        Map<String, Object> projection = map(
+            "MY_TYPE", map(
+                "type", "T",
+                "projection", "NATURAL",
+                "aggregation", "SINGLE"
+                /*, // TODO: Make it work when the properties are passed with the projection instead of added "externally"
+                "properties", map(
+                    "weight",
+                    map("property", "weight")
+                )*/
+            )
+        );
+
+        RelationshipProjections actual = RelationshipProjections.fromObject(projection)
+            .addPropertyMappings(PropertyMappings.fromObject(map(
+                "weight",
+                map("property", "weight")
+            )));
+
+        RelationshipProjections expected = RelationshipProjections.builder().projections(
+            singletonMap(
+                ElementIdentifier.of("MY_TYPE"),
+                RelationshipProjection
+                    .builder()
+                    .type("T")
+                    .aggregation(SINGLE)
+                    .properties(PropertyMappings.of(
+                        PropertyMapping.of("weight", SINGLE)
+                    ))
+                    .build()
+            )).build();
+
+        assertThat(
+            actual,
+            equalTo(expected)
+        );
+    }
+
+    @Test
     void shouldNotAllowCombiningStarWithStandard() {
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,

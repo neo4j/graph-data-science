@@ -372,7 +372,8 @@ class GdsCypherTest {
                             "aggregation: \"MAX\"" +
                         "}, " +
                         "global: {" +
-                            "property: \"RelProp\"" +
+                            "property: \"RelProp\", " +
+                            "aggregation: \"SINGLE\"" +
                         "}" +
                     "}" +
                 "}" +
