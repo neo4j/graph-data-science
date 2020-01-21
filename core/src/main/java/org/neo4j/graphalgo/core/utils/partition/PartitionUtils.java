@@ -51,6 +51,10 @@ public final class PartitionUtils {
         return tasks;
     }
 
+    public static List<Partition> degreePartition(Graph graph, long batchSize) {
+        return degreePartition(graph.nodeIterator(), graph, Direction.OUTGOING, batchSize);
+    }
+
     public static List<Partition> degreePartition(Graph graph, Direction direction, long batchSize) {
         return degreePartition(graph.nodeIterator(), graph, direction, batchSize);
     }

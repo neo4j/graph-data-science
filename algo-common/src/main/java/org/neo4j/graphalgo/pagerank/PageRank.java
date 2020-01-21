@@ -216,11 +216,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
             return;
         }
 
-        List<Partition> partitions = PartitionUtils.degreePartition(
-            graph,
-            graph.getLoadDirection(),
-            adjustBatchSize(batchSize)
-        );
+        List<Partition> partitions = PartitionUtils.degreePartition(graph, adjustBatchSize(batchSize));
 
         ExecutorService executor = ParallelUtil.canRunInParallel(this.executor)
                 ? this.executor : null;

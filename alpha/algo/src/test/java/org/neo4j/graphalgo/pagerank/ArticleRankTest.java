@@ -26,11 +26,13 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.newapi.CypherConfigBuilder;
+import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.graphalgo.results.CentralityResult;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
+import org.neo4j.logging.NullLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -123,18 +125,29 @@ final class ArticleRankTest extends AlgoTestBase {
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(
                 db,
-                () -> new GraphLoader(db)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType(
-                        "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                () -> ImmutableModernGraphLoader.builder()
+                    .api(db)
+                    .log(NullLog.getInstance())
+                    .createConfig(new CypherConfigBuilder()
+                        .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
+                        .relationshipQuery(
+                            "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                        .build())
+                    .legacyMode(false)
+                    .build()
                     .load(graphFactory)
             );
         } else {
-            graph = new GraphLoader(db)
-                    .withLabel(label)
-                    .withRelationshipType("TYPE1")
-                    .withDirection(Direction.OUTGOING)
-                    .load(graphFactory);
+            graph = ImmutableModernGraphLoader.builder()
+                .api(db)
+                .log(NullLog.getInstance())
+                .createConfig(new StoreConfigBuilder()
+                    .addNodeLabel(label.name())
+                    .addRelationshipType("TYPE1")
+                    .build())
+                .legacyMode(false)
+                .build()
+                .load(graphFactory);
         }
 
         final CentralityResult rankResult = LabsPageRankAlgorithmType.ARTICLE_RANK

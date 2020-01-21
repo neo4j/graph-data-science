@@ -57,12 +57,6 @@ public interface PageRankBaseConfig extends
         return false;
     }
 
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return Direction.OUTGOING;
-    }
-
     default PageRank.Config toOldConfig() {
         return new PageRank.Config(
             maxIterations(),

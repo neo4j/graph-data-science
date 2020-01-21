@@ -60,10 +60,10 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0.0) {
-                int degree = degrees.degree(nodeId, direction);
+                int degree = degrees.degree(nodeId);
                 if (degree > 0) {
                     sumOfWeights = aggregatedDegrees.get(nodeId);
-                    rels.forEachRelationship(nodeId, direction, DEFAULT_WEIGHT, this);
+                    rels.forEachRelationship(nodeId, DEFAULT_WEIGHT, this);
                 }
             }
         }

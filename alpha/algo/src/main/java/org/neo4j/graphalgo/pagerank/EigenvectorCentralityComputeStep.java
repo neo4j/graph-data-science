@@ -61,10 +61,10 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             double delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0.0) {
-                int degree = degrees.degree(nodeId, direction);
+                int degree = degrees.degree(nodeId);
                 if (degree > 0) {
                     srcRankDelta = (float) delta;
-                    rels.forEachRelationship(nodeId, direction, this);
+                    rels.forEachRelationship(nodeId, this);
                 }
             }
         }

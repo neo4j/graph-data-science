@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
@@ -53,8 +52,6 @@ public abstract class BaseComputeStep implements ComputeStep {
 
     private final double alpha;
     final double dampingFactor;
-
-    final Direction direction;
 
     double[] pageRank;
     double[] deltas;
@@ -102,7 +99,6 @@ public abstract class BaseComputeStep implements ComputeStep {
         this.sourceNodeIds = sourceNodeIds;
         this.relationshipIterator = graph.concurrentCopy();
         this.degrees = graph;
-        this.direction = graph.getLoadDirection();
         this.tracker = tracker;
         this.partitionSize = partitionSize;
         this.startNode = startNode;
