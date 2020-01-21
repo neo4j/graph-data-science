@@ -191,7 +191,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         nodeProjectionsWithIdentifier.forEach(tempNP::put);
 
         if (tempNP.isEmpty() && loadAnyLabel.orElse(null) != null) {
-            tempNP.put("*", NodeProjection.fromString("*"));
+            tempNP.put("*", NodeProjection.empty());
         }
 
         // Relationship projections
@@ -204,7 +204,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
 
         if (tempRP.isEmpty() && loadAnyRelationshipType.orElse(false)) {
-            tempRP.put("*", RelationshipProjection.of("*", Projection.NATURAL, DeduplicationStrategy.DEFAULT));
+            tempRP.put("*", RelationshipProjection.empty());
         }
 
         NodeProjections np = NodeProjections.of(tempNP.entrySet().stream().collect(Collectors.toMap(

@@ -168,13 +168,10 @@ class GraphCreateConfigFromStoreTest {
                 new StoreConfigBuilder().loadAnyLabel(true).loadAnyRelationshipType(true).build(),
                 ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
                     .nodeProjection(NodeProjections.builder()
-                        .putProjection(PROJECT_ALL, NodeProjection.of("*", PropertyMappings.of()))
+                        .putProjection(PROJECT_ALL, NodeProjection.empty())
                         .build())
                     .relationshipProjection(RelationshipProjections.builder()
-                        .putProjection(
-                            PROJECT_ALL,
-                            RelationshipProjection.of("*", Projection.NATURAL, DeduplicationStrategy.DEFAULT)
-                        )
+                        .putProjection(PROJECT_ALL, RelationshipProjection.empty())
                         .build())
                     .build()
             ),
