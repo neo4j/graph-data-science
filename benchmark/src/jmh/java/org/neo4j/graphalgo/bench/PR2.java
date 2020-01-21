@@ -19,13 +19,16 @@
 package org.neo4j.graphalgo.bench;
 
 import com.carrotsearch.hppc.LongArrayList;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
+import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
+import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -34,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.StreamSupport;
 
 public final class PR2 extends BaseMain {
@@ -46,15 +48,16 @@ public final class PR2 extends BaseMain {
     Iterable<String> run(String graphToLoad, final Log log) throws Throwable {
         GraphDatabaseAPI db = LdbcDownloader.openDb(graphToLoad);
 
-        GraphLoader graphLoader = new GraphLoader(db)
-                .withExecutorService(Pools.DEFAULT)
-                .withLog(log)
-                .withLogInterval(500, TimeUnit.MILLISECONDS)
-                .withAllocationTracker(AllocationTracker.create())
-                .withDirection(Direction.OUTGOING)
-                .sorted()
-                .undirected();
-
+        ModernGraphLoader graphLoader = ImmutableModernGraphLoader.builder()
+            .api(db)
+            .log(log)
+            .tracker(AllocationTracker.create())
+            .createConfig(new StoreConfigBuilder()
+                .loadAnyLabel(true)
+                .loadAnyRelationshipType(true)
+                .globalProjection(Projection.UNDIRECTED)
+                .build())
+            .build();
 
         System.gc();
 

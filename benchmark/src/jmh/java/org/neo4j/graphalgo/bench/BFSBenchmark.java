@@ -18,14 +18,17 @@
  */
 package org.neo4j.graphalgo.bench;
 
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.traverse.Traverse;
+import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.logging.NullLog;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -70,12 +73,16 @@ public class BFSBenchmark extends BaseBenchmark {
                 .newCompleteGraphBuilder()
                 .createCompleteGraph(TRIANGLE_COUNT, connectedness);
 
-        g = new GraphLoader(db)
-                .withLabel(LABEL)
-                .withRelationshipType(RELATIONSHIP)
-                .sorted()
-                .undirected()
-                .load(HugeGraphFactory.class);
+        g = ImmutableModernGraphLoader.builder()
+            .api(db)
+            .log(NullLog.getInstance())
+            .createConfig(new StoreConfigBuilder()
+                .addNodeLabel(LABEL)
+                .addRelationshipType(RELATIONSHIP)
+                .globalProjection(Projection.UNDIRECTED)
+                .build())
+            .build()
+            .load(HugeGraphFactory.class);
     }
 
     @TearDown

@@ -20,19 +20,20 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
+import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.graphalgo.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.results.CentralityResult;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.NullLog;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -96,10 +97,17 @@ public class WeightedPageRankBenchmarkLdbc {
         tx.success();
         tx.close();
 
-        grph = new GraphLoader(db, Pools.DEFAULT)
-                .withDirection(Direction.OUTGOING)
-                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .load(HugeGraphFactory.class);
+        grph = ImmutableModernGraphLoader.builder()
+            .api(db)
+            .log(NullLog.getInstance())
+            .createConfig(new StoreConfigBuilder()
+                .loadAnyLabel(true)
+                .loadAnyRelationshipType(true)
+                .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+                .build()
+            )
+            .build()
+            .load(HugeGraphFactory.class);
 
         batchSize = parallel ? 10_000 : 2_000_000_000;
     }

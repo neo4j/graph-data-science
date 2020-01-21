@@ -20,14 +20,16 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphalgo.labelpropagation.ImmutableLabelPropagationStreamConfig;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagation;
+import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.NullLog;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -66,16 +68,20 @@ public class LabelPropagationBenchmarkLdbc {
     @Setup
     public void setup() throws IOException {
         db = LdbcDownloader.openDb("L10:8G");
-        graph = new GraphLoader(db)
-                .withAnyLabel()
-                .withAnyRelationshipType()
-                .withRelationshipProperties(PropertyMapping.of("weight", 1.0D))
-                .withOptionalNodeProperties(
-                        PropertyMapping.of(WEIGHT_PROPERTY, WEIGHT_PROPERTY, 1.0),
-                        PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, 0.0)
-                )
-                .withExecutorService(Pools.DEFAULT)
-                .load(HugeGraphFactory.class);
+        graph = ImmutableModernGraphLoader.builder()
+            .api(db)
+            .log(NullLog.getInstance())
+            .createConfig(new StoreConfigBuilder()
+                .loadAnyLabel(true)
+                .loadAnyRelationshipType(true)
+                .addNodeProperties(
+                    PropertyMapping.of(WEIGHT_PROPERTY, WEIGHT_PROPERTY, 1.0),
+                    PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, 0.0))
+                .addRelationshipProperty(PropertyMapping.of("weight", 1.0D))
+                .build()
+            )
+            .build()
+            .load(HugeGraphFactory.class);
     }
 
     @TearDown
