@@ -52,6 +52,12 @@ public interface GraphSetup {
     Optional<String> relationshipQuery();
 
     /**
+     * Temporary flag to indicate that the graph needs to be loaded with legacy behaviour.
+     */
+    @Deprecated
+    boolean legacyMode();
+
+    /**
      * @deprecated There is no global direction anymore
      */
     @Deprecated

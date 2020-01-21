@@ -55,6 +55,8 @@ public class ModernGraphSetup implements GraphSetup {
     // the executor service for parallel execution. null means single threaded evaluation.
     private final ExecutorService executor;
 
+    private final boolean legacyMode;
+
     /**
      * @param executor  the executor. null means single threaded evaluation
      */
@@ -64,7 +66,8 @@ public class ModernGraphSetup implements GraphSetup {
         Log log,
         AllocationTracker tracker,
         TerminationFlag terminationFlag,
-        GraphCreateConfig createConfig
+        GraphCreateConfig createConfig,
+        boolean legacyMode
     ) {
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
@@ -72,6 +75,12 @@ public class ModernGraphSetup implements GraphSetup {
         this.tracker = tracker;
         this.terminationFlag = terminationFlag;
         this.createConfig = createConfig;
+        this.legacyMode = legacyMode;
+    }
+
+    @Override
+    public boolean legacyMode() {
+        return legacyMode;
     }
 
     @Override
