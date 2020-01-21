@@ -21,9 +21,9 @@ This section includes:
 * <<algorithms-random-walk-context, History and explanation>>
 * <<algorithms-random-walk-usecase, Use-cases - when to use the Random Walk algorithm>>
 * <<algorithms-random-walk-limitations, Constraints - when not to use the Random Walk algorithm>>
+* <<algorithms-random-walk-syntax, Syntax>>
 * <<algorithms-random-walk-sample, Random Walk algorithm sample>>
 * <<algorithms-random-walk-cp, Cypher projection>>
-* <<algorithms-random-walk-syntax, Syntax>>
 * <<algorithms-random-walk-support, Graph type support>>
 
 
@@ -71,6 +71,41 @@ The constraints of <<algorithms-pagerank-usage,PageRank>> also apply to Random W
 * Sinks can occur when a network of links form an infinite cycle.
 
 
+[[algorithms-random-walk-syntax]]
+== Syntax
+
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+CALL algo.randomWalk.stream(configuration: MAP)
+YIELD startNodeId, nodeIds, path
+----
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default                | Optional | Description
+| start             | object  | null                   | yes      | Starting points: null - whole graph, "Label" - nodes with that label, node-id - that node, list of node-ids - these nodes.
+| steps             | int     | 10                     | yes      | Length of paths returned, in case of error only path of lenght 1 is returned.
+| walks             | int     | 1                      | yes      | Number of paths returned.
+| direction         | string  | 'BOTH'                 | yes      | Direction of relationships to follow.
+| mode              | string  | random                 | yes      | Strategy for choosing the next relationship, modes: random and node2vec.
+| inOut             | float   | 1.0                    | yes      | Parameter for node2vec.
+| return            | float   | 1.0                    | yes      | Parameter for node2vec.
+| path              | boolean | false                  | yes      | If the more expensive operation of creating a path from node-ids should be performed and returned in results.
+| concurrency       | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+|===
+
+.Results
+[opts="header"]
+|===
+| Name        | Type         | Description
+| startNodeId | long         | Node ID starting the path.
+| nodeIds     | list of long | List of Node ID forming a path.
+| path        | Path         | Optional Path (with virtual relationships).
+|===
+
 
 [[algorithms-random-walk-sample]]
 == Random Walk algorithm sample
@@ -82,43 +117,53 @@ image::pagerank.png[]
 .The following will create a sample graph:
 [source, cypher]
 ----
-CREATE  (home:Page {name: 'Home'}),
-        (about:Page {name: 'About'}),
-        (product:Page {name: 'Product'}),
-        (links:Page {name: 'Links'}),
-        (a:Page {name: 'Site A'}),
-        (b:Page {name: 'Site B'}),
-        (c:Page {name: 'Site C'}),
-        (d:Page {name: 'Site D'}),
+CREATE (home:Page {name: 'Home'}),
+       (about:Page {name: 'About'}),
+       (product:Page {name: 'Product'}),
+       (links:Page {name: 'Links'}),
+       (a:Page {name: 'Site A'}),
+       (b:Page {name: 'Site B'}),
+       (c:Page {name: 'Site C'}),
+       (d:Page {name: 'Site D'}),
 
-        (home)-[:LINKS]->(about),
-        (about)-[:LINKS]->(home),
-        (product)-[:LINKS]->(home),
-        (home)-[:LINKS]->(product),
-        (links)-[:LINKS]->(home),
-        (home)-[:LINKS]->(links),
-        (links)-[:LINKS]->(a),
-        (a)-[:LINKS]->(home),
-        (links)-[:LINKS]->(b),
-        (b)-[:LINKS]->(home),
-        (links)-[:LINKS]->(c),
-        (c)-[:LINKS]->(home),
-        (links)-[:LINKS]->(d),
-        (d)-[:LINKS]->(home)
+       (home)-[:LINKS]->(about),
+       (about)-[:LINKS]->(home),
+       (product)-[:LINKS]->(home),
+       (home)-[:LINKS]->(product),
+       (links)-[:LINKS]->(home),
+       (home)-[:LINKS]->(links),
+       (links)-[:LINKS]->(a),
+       (a)-[:LINKS]->(home),
+       (links)-[:LINKS]->(b),
+       (b)-[:LINKS]->(home),
+       (links)-[:LINKS]->(c),
+       (c)-[:LINKS]->(home),
+       (links)-[:LINKS]->(d),
+       (d)-[:LINKS]->(home)
 ----
 
 .The following will run the algorithm starting from the Home page and returning a 1 random walk, of path length 3:
 [source, cypher]
 ----
-MATCH (home:Page {name: "Home"})
-CALL gds.alpha.randomWalk.stream(id(home), 3, 1)
+MATCH (home:Page {name: 'Home'})
+CALL gds.alpha.randomWalk.stream({
+  relationshipProjection: {
+    LINKS: {
+      type: 'LINKS',
+      projection: 'UNDIRECTED'
+    }
+  },
+  start: id(home),
+  steps: 3,
+  walks: 1
+})
 YIELD nodeIds
 UNWIND nodeIds AS nodeId
 RETURN gds.util.asNode(nodeId).name AS page
 ----
 
 .Results
-[opts="header",cols="1"]
+[opts="header", cols="1"]
 |===
 | page
 |"Home"
@@ -135,73 +180,16 @@ include::projected-graph-model/cypher-projection.adoc[tag=explanation]
 
 [source, cypher]
 ----
-MATCH (home:Page {name: "Home"})
-CALL algo.randomWalk.stream(id(home), 5, 1, {
-  nodeQuery: "MATCH (p:Page) RETURN id(p) AS id",
-  relationshipQuery: "MATCH (p1:Page)-[:LINKS]->(p2:Page) RETURN id(p1) AS source, id(p2) AS target"
+MATCH (home:Page {name: 'Home'})
+CALL gds.alpha.randomWalk.stream({
+  nodeQuery: 'MATCH (p:Page) RETURN id(p) AS id',
+  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page) RETURN id(p1) AS source, id(p2) AS target',
+  start: id(home),
+  steps: 5,
+  walks: 1
 })
 YIELD nodeIds
 UNWIND nodeIds AS nodeId
 RETURN gds.util.asNode(nodeId).name AS page
 ----
-
-
-[[algorithms-random-walk-syntax]]
-== Syntax
-
-.The following will run the algorithm and stream results:
-[source, cypher]
-----
-CALL algo.randomWalk.stream(start:Object, steps: 100, walks: 10000, {
-  graph:'huge',
-  nodeQuery:'label or query',
-  relationshipQuery:' type or query',
-  direction:"IN/OUT/BOTH",
-  mode:"node2vec"/"random",
-  inOut: 1.0,
-  return: 1.0,
-  path:false,
-  concurrency:4
-})
-YIELD nodes, path
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type   | Default                 | Optional | Description
-| start             | object  | null                   | yes      | Starting points: null - whole graph, "Label" - nodes with that label, node-id - that node, list of node-ids - these nodes.
-| steps             | int     | 10                     | yes      | Length of paths returned, in case of error only path of lenght 1 is returned.
-| walks             | int     | 1                      | yes      | Number of paths returned.
-| graph             | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-| nodeQuery         | string  | null                   | yes      | The label or node-query to load from the graph. If null, load all nodes.
-| relationshipQuery | string  | null                   | yes      | The relationship type or query to load from the graph. If null, load all relationships.
-| direction         | string  | 'BOTH'                 | yes      | Direction of relationships to follow.
-| mode              | string  | random                 | yes      | Strategy for choosing the next relationship, modes: random and node2vec.
-| inOut             | float   | 1.0                    | yes      | Parameter for node2vec.
-| return            | float   | 1.0                    | yes      | Parameter for node2vec.
-| path              | boolean | false                  | yes      | If the more expensive operation of creating a path from node-ids should be performed and returned in results.
-| concurrency       | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-|===
-
-.Results
-[opts="header"]
-|===
-| Name  | Type  | Description
-| startNodeId  | long  | Node ID starting the path.
-| nodeIds  | list of long  | List of Node ID forming a path.
-| path | Path | Optional Path (with virtual relationships).
-|===
-
-
-[[algorithms-random-walk-support]]
-== Graph type support
-
-The Random Walk algorithm supports the following graph types:
-
-* [x] directed, unweighted
-
-* [ ] undirected, unweighted
-
 
