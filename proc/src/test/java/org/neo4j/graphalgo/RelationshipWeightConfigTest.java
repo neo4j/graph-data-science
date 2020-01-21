@@ -53,6 +53,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
@@ -113,7 +114,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
     @Test
     default void testRelationshipWeightPropertyValidation() {
-        graphDb().execute("CREATE ()-[:A {a: 1}]->()").resultAsString();
+        runQuery(graphDb(), "CREATE ()-[:A {a: 1}]->()");
         List<String> relationshipProperties = Arrays.asList("a");
         Map<String, Object> tempConfig = map(
             "relationshipWeightProperty", "foo",
@@ -246,8 +247,8 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
     @Test
     default void testRunUnweightedOnWeightedImplicitlyLoadedGraph() {
-        graphDb().execute("MATCH (n) DETACH DELETE n").resultAsString();
-        graphDb().execute(CREATE_QUERY).resultAsString();
+        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
+        runQuery(graphDb(), CREATE_QUERY);
 
         CypherMapWrapper weightConfig = CypherMapWrapper.create(map(
             "relationshipProjection", "*",
@@ -295,7 +296,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             ke.printStackTrace();
         }
 
-        db.execute(CREATE_QUERY);
+        runQuery(db, CREATE_QUERY);
 
         GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName(graphName)

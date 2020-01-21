@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -58,7 +59,7 @@ class LabelPropagationDocTest extends BaseProcTest {
             "CREATE (michael)-[:FOLLOW {weight: 1}]->(bridget)" +
             "CREATE (charles)-[:FOLLOW {weight: 1}]->(doug)";
 
-        db.execute(createGraph);
+        runQuery(createGraph);
         registerProcedures(LabelPropagationWriteProc.class, LabelPropagationStreamProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
     }
@@ -91,7 +92,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                                 "+-----------------------+\n" +
                                 "6 rows\n";
 
-        assertEquals(expectedString, db.execute(q1).resultAsString());
+        assertEquals(expectedString, runQuery(q1, Result::resultAsString));
 
         expectedString = "+--------------------------------+\n" +
                          "| ranIterations | communityCount |\n" +
@@ -107,7 +108,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                     "})" +
                     "YIELD ranIterations, communityCount";
 
-        assertEquals(expectedString, db.execute(q2).resultAsString());
+        assertEquals(expectedString, runQuery(q2, Result::resultAsString));
     }
 
     @Test
@@ -134,7 +135,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                                 "+-----------------------+\n" +
                                 "6 rows\n";
 
-        assertEquals(expectedString, db.execute(q1).resultAsString());
+        assertEquals(expectedString, runQuery(q1, Result::resultAsString));
 
         String q2 = "CALL gds.labelPropagation.write({" +
                     "   nodeProjection: 'User'," +
@@ -152,7 +153,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                          "+--------------------------------+\n" +
                          "1 row\n";
 
-        assertEquals(expectedString, db.execute(q2).resultAsString());
+        assertEquals(expectedString, runQuery(q2, Result::resultAsString));
     }
 
     @Test
@@ -179,7 +180,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                                 "+-----------------------+\n" +
                                 "6 rows\n";
 
-        assertEquals(expectedString, db.execute(q1).resultAsString());
+        assertEquals(expectedString, runQuery(q1, Result::resultAsString));
 
         String q2 = "CALL gds.labelPropagation.write({" +
                     "   nodeProjection: 'User'," +
@@ -197,7 +198,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                          "+--------------------------------+\n" +
                          "1 row\n";
 
-        assertEquals(expectedString, db.execute(q2).resultAsString());
+        assertEquals(expectedString, runQuery(q2, Result::resultAsString));
     }
 
     // Queries from the named graph and Cypher projection example in label-propagation.adoc
@@ -205,7 +206,7 @@ class LabelPropagationDocTest extends BaseProcTest {
     @Test
     void namedGraphAndCypherProjection() {
         String loadGraph = "CALL  gds.graph.create('myGraph', 'User', 'FOLLOW')";
-        db.execute(loadGraph);
+        runQuery(loadGraph);
 
         String q1 = "CALL gds.labelPropagation.stream('myGraph', {})" +
                     "YIELD nodeId, communityId AS Community " +
@@ -224,7 +225,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                                 "+-----------------------+\n" +
                                 "6 rows\n";
 
-        assertEquals(expectedString, db.execute(q1).resultAsString());
+        assertEquals(expectedString, runQuery(q1, Result::resultAsString));
 
         String q2 = "CALL gds.labelPropagation.stream({" +
                     "  nodeQuery: 'MATCH (p:User) RETURN id(p) AS id'," +
@@ -235,6 +236,6 @@ class LabelPropagationDocTest extends BaseProcTest {
                     "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
                     "ORDER BY Community, Name";
 
-        assertEquals(expectedString, db.execute(q2).resultAsString());
+        assertEquals(expectedString, runQuery(q2, Result::resultAsString));
     }
 }

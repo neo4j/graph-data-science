@@ -44,6 +44,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 public interface SeedConfigTest<CONFIG extends SeedConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
@@ -71,7 +72,7 @@ public interface SeedConfigTest<CONFIG extends SeedConfig & AlgoBaseConfig, RESU
 
     @Test
     default void testSeedPropertyValidation() {
-        graphDb().execute("CREATE (:A {a: 1, b:2, c:3})").resultAsString();
+        runQuery(graphDb(), "CREATE (:A {a: 1, b:2, c:3})");
         List<String> nodeProperties = Arrays.asList("a", "b", "c");
         Map<String, Object> tempConfig = MapUtil.map(
             "seedProperty", "foo",

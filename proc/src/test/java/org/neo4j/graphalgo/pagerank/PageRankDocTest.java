@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -62,7 +63,7 @@ class PageRankDocTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase(builder ->
                 builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
-        db.execute(createGraph);
+        runQuery(createGraph);
         registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
     }
@@ -102,7 +103,7 @@ class PageRankDocTest extends BaseProcTest {
                                 "+--------------------------------+\n" +
                                 "8 rows\n";
 
-        assertEquals(expectedString, db.execute(q1).resultAsString());
+        assertEquals(expectedString, runQuery(q1, Result::resultAsString));
 
         String q2 =
             "CALL gds.pageRank.write({" +
@@ -113,7 +114,7 @@ class PageRankDocTest extends BaseProcTest {
             "  writeProperty: 'pagerank'" +
             "})" +
             "YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
-        String r2 = db.execute(q2).resultAsString();
+        String r2 = runQuery(q2, Result::resultAsString);
 
         expectedString = "+-------------------------------------------------------------------+\n" +
                          "| writtenProperties | ranIterations | dampingFactor | writeProperty |\n" +
@@ -159,7 +160,7 @@ class PageRankDocTest extends BaseProcTest {
                                 "+---------------------------------+\n" +
                                 "8 rows\n";
 
-        assertEquals(expectedString, db.execute(q1).resultAsString());
+        assertEquals(expectedString, runQuery(q1, Result::resultAsString));
 
 
         String q2 =
@@ -184,7 +185,7 @@ class PageRankDocTest extends BaseProcTest {
                          "+-------------------------------------------------------------------+\n" +
                          "1 row\n";
 
-        assertEquals(expectedString, db.execute(q2).resultAsString());
+        assertEquals(expectedString, runQuery(q2, Result::resultAsString));
     }
 
     @Test
@@ -216,7 +217,7 @@ class PageRankDocTest extends BaseProcTest {
                                 "+---------------------------------+\n" +
                                 "8 rows\n";
 
-        assertEquals(expectedString, db.execute(q1).resultAsString());
+        assertEquals(expectedString, runQuery(q1, Result::resultAsString));
 
         String q2 =
             "MATCH (siteA:Page {name: 'Site A'})" +
@@ -237,7 +238,7 @@ class PageRankDocTest extends BaseProcTest {
                          "+-------------------------------------------------------------------+\n" +
                          "1 row\n";
 
-        assertEquals(expectedString, db.execute(q2).resultAsString());
+        assertEquals(expectedString, runQuery(q2, Result::resultAsString));
     }
 
     // Queries from the named graph and Cypher projection example in pagerank.adoc
@@ -245,7 +246,7 @@ class PageRankDocTest extends BaseProcTest {
     @Test
     void namedGraphAndCypherProjection() {
         String loadGraph = "CALL gds.graph.create('myGraph', ['Page'], ['LINKS'])";
-        db.execute(loadGraph);
+        runQuery(loadGraph);
 
         String q1 =
             "CALL gds.pageRank.stream('myGraph')" +
@@ -253,7 +254,7 @@ class PageRankDocTest extends BaseProcTest {
             "RETURN gds.util.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC ";
 
-        String namedQueryResult = db.execute(q1).resultAsString();
+        String namedQueryResult = runQuery(q1, Result::resultAsString);
 
         String expectedString = "+--------------------------------+\n" +
                                 "| name      | score              |\n" +
@@ -283,7 +284,7 @@ class PageRankDocTest extends BaseProcTest {
             "RETURN gds.util.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC";
 
-        assertEquals(namedQueryResult, db.execute(q2).resultAsString());
+        assertEquals(namedQueryResult, runQuery(q2, Result::resultAsString));
     }
 
     @Test
@@ -297,7 +298,7 @@ class PageRankDocTest extends BaseProcTest {
             "  writeProperty: 'pagerank'" +
             "})" +
             "YIELD ranIterations, dampingFactor";
-        String r2 = db.execute(q2).resultAsString();
+        String r2 = runQuery(q2, Result::resultAsString);
 
         String expectedString = "+-------------------------------+\n" +
                                 "| ranIterations | dampingFactor |\n" +
@@ -319,7 +320,7 @@ class PageRankDocTest extends BaseProcTest {
             "  concurrency: 1"+
             "})" +
             "YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory";
-        String r2 = db.execute(q2).resultAsString();
+        String r2 = runQuery(q2, Result::resultAsString);
 
         String expectedString = "+----------------------------------------------------------------------+\n" +
                                 "| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory |\n" +

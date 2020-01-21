@@ -226,7 +226,7 @@ class GraphLoadProcTest extends BaseProcTest {
                 ", (c: Node { foo: 44, bar: 13.39 })" +
                 ", (d: Node { foo: 45 })";
 
-        testLocalDb.execute(testGraph);
+        runQuery(testLocalDb, testGraph, Collections.emptyMap());
 
         String loadQueryTemplate = "CALL algo.graph.load(" +
                            "    'fooGraph', '%s', '%s', {" +
@@ -332,7 +332,7 @@ class GraphLoadProcTest extends BaseProcTest {
                 ", (a)-[:TYPE_2 { weight: 44.3, cost: 3 }]->(b)" +
                 ", (a)-[:TYPE_2 { weight: 45.4, cost: 4 }]->(b)";
 
-        testLocalDb.execute(testGraph);
+        runQuery(testLocalDb, testGraph, Collections.emptyMap());
 
         String loadQuery = "CALL algo.graph.load(" +
                            "    'aggGraph', 'Node', 'TYPE_1', {" +

@@ -52,6 +52,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
@@ -94,7 +95,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
 
     @Test
     default void testNodeWeightPropertyValidation() {
-        graphDb().execute("CREATE (:A {a: 1})").resultAsString();
+        runQuery(graphDb(), "CREATE (:A {a: 1})");
         Map<String, Object> tempConfig = MapUtil.map(
             "nodeWeightProperty", "foo",
             "nodeProjection", MapUtil.map(
@@ -187,7 +188,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
                              ", (b: Label { weight2: 1.0 })" +
                              ", (c: Label { weight1: 0.0 })";
 
-        db.execute(createQuery);
+        runQuery(db, createQuery);
 
         GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName(graphName)

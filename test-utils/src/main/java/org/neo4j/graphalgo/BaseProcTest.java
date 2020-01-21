@@ -140,12 +140,12 @@ public class BaseProcTest {
         QueryRunner.runQueryWithRowConsumer(db, username, query, params, check);
     }
 
-    protected void runQuery(
-        String username,
-        String query,
-        Map<String, Object> params
-    ) {
+    protected void runQuery(String username, String query, Map<String, Object> params) {
         QueryRunner.runQuery(db, username, query, params);
+    }
+
+    protected void runQuery(GraphDatabaseAPI db, String query, Map<String, Object> params) {
+        QueryRunner.runQuery(db, query, params);
     }
 
     protected void runQuery(String query) {
@@ -161,6 +161,10 @@ public class BaseProcTest {
     }
 
     protected <T> T runQuery(String query, Map<String, Object> params, Function<Result, T> resultFunction) {
+        return runQuery(db, query, params, resultFunction);
+    }
+
+    protected <T> T runQuery(GraphDatabaseAPI db, String query, Map<String, Object> params, Function<Result, T> resultFunction) {
         return QueryRunner.runQuery(db, query, params, resultFunction);
     }
 

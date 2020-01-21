@@ -29,8 +29,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Collections.emptyMap;
@@ -251,11 +253,14 @@ class GraphListProcTest extends BaseProcTest {
             runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
         }
 
-        List<String> actualNames = db
-            .execute("CALL gds.graph.list(" + argument + ")")
-            .<String>columnAs("graphName")
-            .stream()
-            .collect(toList());
+        List<String> actualNames = runQuery(
+            db,
+            "CALL gds.graph.list(" + argument + ")",
+            Collections.emptyMap(),
+            result -> result.<String>columnAs("graphName")
+                .stream()
+                .collect(toList())
+        );
 
         assertThat(actualNames, containsInAnyOrder(names));
     }
@@ -274,11 +279,14 @@ class GraphListProcTest extends BaseProcTest {
         }
 
         String name = names[0];
-        List<String> actualNames = db
-            .execute("CALL gds.graph.list($name)", map("name", name))
-            .<String>columnAs("graphName")
-            .stream()
-            .collect(toList());
+        List<String> actualNames = runQuery(
+            db,
+            "CALL gds.graph.list($name)",
+            map("name", name),
+            result -> result.<String>columnAs("graphName")
+                .stream()
+                .collect(toList())
+        );
 
         assertThat(actualNames.size(), is(1));
         assertThat(actualNames, contains(name));
@@ -286,11 +294,7 @@ class GraphListProcTest extends BaseProcTest {
 
     @Test
     void returnEmptyStreamWhenNoGraphsAreLoaded() {
-        long numberOfRows = db
-            .execute("CALL gds.graph.list()")
-            .stream()
-            .count();
-
+        long numberOfRows = runQuery("CALL gds.graph.list()", Result::stream).count();
         assertThat(numberOfRows, is(0L));
     }
 
@@ -302,10 +306,12 @@ class GraphListProcTest extends BaseProcTest {
             runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
         }
 
-        long numberOfRows = db
-            .execute("CALL gds.graph.list($argument)", map("argument", argument))
-            .stream()
-            .count();
+        long numberOfRows = runQuery(
+            db,
+            "CALL gds.graph.list($argument)",
+            map("argument", argument),
+            result -> result.stream().count()
+        );
 
         assertThat(numberOfRows, is(0L));
     }

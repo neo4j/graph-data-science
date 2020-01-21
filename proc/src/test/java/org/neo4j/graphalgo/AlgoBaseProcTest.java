@@ -58,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.core.utils.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.newapi.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
@@ -260,7 +261,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
     @Test
     default void testRunOnEmptyGraph() {
-        graphDb().execute("MATCH (n) DETACH DELETE n");
+        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
 
         applyOnProcedure((proc) -> {
             getWriteAndStreamProcedures(proc)
