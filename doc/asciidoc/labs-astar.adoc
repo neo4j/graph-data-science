@@ -28,7 +28,6 @@ This section includes:
 [[algorithms-a_star-context]]
 == History and explanation
 
-// tag::explanation[]
 The A* algorithm was first described in 1968 by Peter Hart, Nils Nilsson, and Bertram Raphael.
 For more information, see https://ieeexplore.ieee.org/document/4082128/[A Formal Basis for the Heuristic Determination of Minimum Cost Paths].
 
@@ -43,15 +42,12 @@ In A*, we split the path cost into two parts:
 The A* algorithm balances `g(n)` and `h(n)` as it iterates the graph, thereby ensuring that at each iteration it chooses the node with the lowest overall cost `f(n) = g(n) + h(n)`.
 
 In our implementation, geospatial distance is used as heurestic.
-// end::explanation[]
 
 
 [[algorithms-a_star-usecase]]
 == Use-cases - when to use the A* algorithm
 
-// tag::use-case[]
 * The A* algorithm can be used to find shortest paths between single pairs of locations, where GPS coordinates are known.
-// end::use-case[]
 
 
 [[algorithms-a_star-sample]]
@@ -60,26 +56,36 @@ In our implementation, geospatial distance is used as heurestic.
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/astar.cypher[tag=create-sample-graph]
+CREATE (a:Station {name: "King's Cross St. Pancras", latitude: 51.5308, longitude: -0.1238}),
+       (b:Station {name: "Euston",                   latitude: 51.5282, longitude: -0.1337}),
+       (c:Station {name: "Camden Town",              latitude: 51.5392, longitude: -0.1426}),
+       (d:Station {name: "Mornington Crescent",      latitude: 51.5342, longitude: -0.1387}),
+       (e:Station {name: "Kentish Town",             latitude: 51.5507, longitude: -0.1402}),
+       (a)-[:CONNECTION{time:2}]->(b),
+       (b)-[:CONNECTION{time:3}]->(c),
+       (b)-[:CONNECTION{time:2}]->(d),
+       (d)-[:CONNECTION{time:2}]->(c),
+       (c)-[:CONNECTION{time:2}]->(e)
 ----
 
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-include::scripts/astar.cypher[tag=stream-sample-graph]
+MATCH (start:Station {name: "King's Cross St. Pancras"}), (end:Station {name: "Kentish Town"})
+CALL gds.alpha.shortestPath.astar.stream(start, end, 'time', 'latitude', 'longitude', {defaultValue: 1.0})
+YIELD nodeId, cost
+RETURN gds.util.asNode(nodeId).name as station, cost
 ----
 
-// tag::stream-sample-graph-result[]
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name                     | Cost
-| King's Cross St. Pancras | 0
-| Euston                   | 2
-| Camden Town              | 5
-| Kentish Town             | 7
+| Name                       | Cost
+| "King's Cross St. Pancras" | 0
+| "Euston"                   | 2
+| "Camden Town"              | 5
+| "Kentish Town"             | 7
 |===
-// end::stream-sample-graph-result[]
 
 
 [[algorithms-a_star-cp]]
@@ -87,11 +93,15 @@ include::scripts/astar.cypher[tag=stream-sample-graph]
 
 include::projected-graph-model/cypher-projection.adoc[tag=explanation]
 
-.Set `graph:'cypher'` in the config:
-
 [source, cypher]
 ----
-include::scripts/astar.cypher[tag=cypher-loading]
+MATCH (start:Station {name: "King's Cross St. Pancras"}), (end:Station {name: "Kentish Town"})
+CALL gds.alpha.shortestPath.astar.stream(start, end, 'time', 'latitude', 'longitude', {
+  nodeQuery: 'MATCH (p:Station) RETURN id(p) AS id',
+  relationshipQuery: 'MATCH (p1:Station)-[r:CONNECTION]->(p2:Station) RETURN id(p1) AS source, id(p2) AS target, r.time AS weight'
+})
+YIELD nodeId, cost
+RETURN nodeId,cost
 ----
 
 
@@ -101,8 +111,17 @@ include::scripts/astar.cypher[tag=cypher-loading]
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.shortestPath.astar.stream((startNode:Node, endNode:Node, relationshipWeightProperty:String, propertyKeyLat:String, propertyKeyLon:String,
-    {nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'BOTH', defaultValue:1.0})
+CALL gds.alpha.shortestPath.astar.stream(
+  startNode:Node,
+  endNode:Node,
+  relationshipWeightProperty:String,
+  propertyKeyLat:String,
+  propertyKeyLon:String, {
+     nodeQuery:String,
+     relationshipQuery:String,
+     direction:'BOTH',
+     defaultValue:1.0
+})
 YIELD nodeId, cost
 ----
 
@@ -130,63 +149,6 @@ YIELD nodeId, cost
 |===
 
 
-[[algorithms-a_star-support]]
-== Graph type support
-
-The Shortest Path algorithms support the following graph types:
-
-* [x] directed, unweighted:
-** direction: 'OUTGOING' or INCOMING, relationshipWeightProperty: null
-* [x] directed, weighted
-** direction: 'OUTGOING' or INCOMING, relationshipWeightProperty: 'cost'
-* [x] undirected, unweighted
-** direction: 'BOTH', relationshipWeightProperty: null
-* [x] undirected, weighted
-** direction: 'BOTH', relationshipWeightProperty: 'cost'
-
-
-[[algorithms-a_star-imp]]
-== Implementations
-
-`algo.shortestPath.astar.stream()`
-
-* Implementation of A* heuristic function is for geospatial distances.
-
 // == References
 //
-// // tag::references[]
-//
 // * [1]https://ieeexplore.ieee.org/document/4082128/[A Formal Basis for the Heuristic Determination of Minimum Cost Paths]
-//
-// // end::references[]
-
-ifdef::implementation[]
-// tag::implementation[]
-
-
-== Implementation details
-
-:leveloffset: +1
-
-
-## Progress
-
-- [x] implement procedure
-- [x] tests
-- [x] relationship case tests
-- [x] simple benchmark
-- [] benchmark on bigger graphs
-- [] parallelization
-- [] evaluation
-- [] documentation
-
-
-== Details
-
-
-=== algo.shortestPath.astar.stream()
-
-- implementation of A* heuristic function is for geospatial distances.
-
-// end::implementation[]
-endif::implementation[]
