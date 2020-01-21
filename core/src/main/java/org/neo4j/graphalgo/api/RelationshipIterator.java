@@ -63,6 +63,14 @@ public interface RelationshipIterator extends RelationshipPredicate {
         forEachRelationship(nodeId, Direction.OUTGOING, consumer);
     }
 
+    default void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
+        forEachOutgoing(nodeId, consumer);
+    }
+
+    default void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
+        forEachRelationship(nodeId, Direction.OUTGOING, fallbackValue, consumer);
+    }
+
     /**
      * @return a copy of this iterator that reuses new cursors internally,
      *         so that iterations happen independent from other iterations.
