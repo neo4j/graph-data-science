@@ -64,7 +64,7 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.algo.labelPropagation.write(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.write(graphNameOrConfig: STRING|MAP, configuration: MAP})
 YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
 
@@ -120,7 +120,7 @@ YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMilli
 .The following will run the algorithm and stream back results:
 [source,cypher]
 ----
-CALL algo.labelPropagation.stream(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.stream(graphNameOrConfig: STRING|MAP, configuration: MAP})
 YIELD nodeId, communityId
 ----
 
@@ -156,7 +156,7 @@ YIELD nodeId, communityId
 .The following will run the algorithm and returns the result in form of statistical and measurement values:
 [source, cypher]
 ----
-CALL gds.algo.labelPropagation.stats(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.stats(graphNameOrConfig: STRING|MAP, configuration: MAP})
 YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
 
@@ -194,7 +194,7 @@ The configuration is the same as for the `write` mode.
 .The following will estimate the memory requirements for running the algorithm:
 [source,cypher]
 ----
-CALL algo.labelPropagation.<mode>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.<mode>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
 YIELD nodes, relationships, bytesMin, bytesMax, requiredMemory, mapView
 ----
 
@@ -271,7 +271,7 @@ In addition, each relationship has a weight property.
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.algo.labelPropagation.stream({
+CALL gds.labelPropagation.stream({
   nodeProjection: 'User',
   relationshipProjection: 'FOLLOW'
 })
@@ -296,7 +296,7 @@ ORDER BY Community, Name
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.algo.labelPropagation.write({
+CALL gds.labelPropagation.write({
   nodeProjection: 'User',
   relationshipProjection: 'FOLLOW',
   writeProperty: 'community'
@@ -326,7 +326,7 @@ taking the given relationship or node weights into concern when forming the comm
 .The following will run the algorithm on a graph with weighted relationships and stream results:
 [source, cypher]
 ----
-CALL gds.algo.labelPropagation.stream({
+CALL gds.labelPropagation.stream({
   nodeProjection: 'User',
   relationshipProjection: 'FOLLOW',
   relationshipWeightProperty: 'weight'
@@ -354,7 +354,7 @@ Using the weighted relationships, `Alice` and `Charles` are now in the same comm
 .The following will load the graph, run the algorithm on a weighted graph and write back results:
 [source, cypher]
 ----
-CALL gds.algo.labelPropagation.write({
+CALL gds.labelPropagation.write({
   nodeProjection: 'User',
   relationshipProjection: 'FOLLOW',
   relationshipProperties: 'weight',
@@ -391,7 +391,7 @@ Using this preliminary set of labels, it then sequentially updates each node's l
 .The following will run the algorithm with pre-defined labels:
 [source, cypher]
 ----
-CALL gds.algo.labelPropagation.stream({
+CALL gds.labelPropagation.stream({
   nodeProjection: 'User',
   relationshipProjection: 'FOLLOW',
   nodeProperties: 'seed_label',
@@ -419,7 +419,7 @@ As we can see, the communities are based on the `seed_label` property, concretel
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.algo.labelPropagation.write({
+CALL gds.labelPropagation.write({
   nodeProjection: 'User',
   relationshipProjection: 'FOLLOW',
   nodeProperties: 'seed_label',
@@ -447,9 +447,9 @@ See <<projected-graph-model, Projected Graph Model>> for more details.
 .Using a named graph:
 [source,cypher]
 ----
-CALL algo.beta.graph.create('myGraph', 'User', 'FOLLOW');
+CALL gds.graph.create('myGraph', ['User'], ['FOLLOW']);
 
-CALL gds.algo.labelPropagation.stream('myGraph', {})
+CALL gds.labelPropagation.stream('myGraph', {})
 YIELD nodeId, communityId AS Community
 RETURN gds.util.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
@@ -472,7 +472,7 @@ As we can see, the results are identical to the results in the <<algorithms-labe
 .Set `graph:'cypher'` in the config:
 [source, cypher]
 ----
-CALL gds.algo.labelPropagation.stream({
+CALL gds.labelPropagation.stream({
   nodeQuery: 'MATCH (p:User) RETURN id(p) AS id',
   relationshipQuery: 'MATCH (p1:User)-[f:FOLLOW]->(p2:User)
     RETURN id(p1) AS source, id(p2) AS target',
