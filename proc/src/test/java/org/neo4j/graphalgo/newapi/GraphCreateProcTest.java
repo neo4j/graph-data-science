@@ -28,19 +28,21 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
@@ -657,16 +659,17 @@ class GraphCreateProcTest extends BaseProcTest {
             map(PROJECTION_KEY, "NATURAL", PROPERTIES_KEY, properties)
         );
 
-        NodeAndRelCounts standardNodeAndRelCounts = new NodeAndRelCounts(
+        NodeAndRelCounts standardNodeAndRelCounts = NodeAndRelCounts.run(
+            db,
             "CALL gds.graph.create($name, '*', $relProjection)",
             map(
                 "name", standard,
                 "relProjection", relProjection
             )
-        ).run();
+        );
 
-
-        NodeAndRelCounts cypherNodeAndRelCounts = new NodeAndRelCounts(
+        NodeAndRelCounts cypherNodeAndRelCounts = NodeAndRelCounts.run(
+            db,
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
             map(
                 "name", cypher,
@@ -674,12 +677,12 @@ class GraphCreateProcTest extends BaseProcTest {
                 "relationshipQuery", "MATCH (a)-[r:KNOWS]->(b) RETURN id(a) AS source, id(b) AS target, r.weight AS weight",
                 "relationshipProperties", properties
             )
-        ).run();
+        );
 
-        assertEquals(standardNodeAndRelCounts.getNodeCount(), cypherNodeAndRelCounts.getNodeCount());
+        assertEquals(standardNodeAndRelCounts.nodeCount(), cypherNodeAndRelCounts.nodeCount());
 
-        int relationshipCountCypher = cypherNodeAndRelCounts.getRelationshipCount();
-        int relationshipsStandard = standardNodeAndRelCounts.getRelationshipCount();
+        int relationshipCountCypher = cypherNodeAndRelCounts.relationshipCount();
+        int relationshipsStandard = standardNodeAndRelCounts.relationshipCount();
 
         assertTrue(relationshipsStandard > 0);
         assertTrue(relationshipCountCypher > 0);
@@ -885,37 +888,24 @@ class GraphCreateProcTest extends BaseProcTest {
         return Stream.of("", "   ", "           ", "\r\n\t", null);
     }
 
-    private class NodeAndRelCounts {
-        private final String query;
-        private final Map<String, Object> queryParams;
-        private final AtomicInteger nodeCount;
-        private final AtomicInteger relationshipCount;
+    @ValueClass
+    interface NodeAndRelCounts {
 
-        NodeAndRelCounts(String query, Map<String, Object> queryParams) {
-            this.query = query;
-            this.queryParams = queryParams;
-            nodeCount = new AtomicInteger();
-            relationshipCount = new AtomicInteger();
-        }
+        int nodeCount();
+        int relationshipCount();
 
-        int getNodeCount() {
-            return nodeCount.get();
-        }
-
-        int getRelationshipCount() {
-            return relationshipCount.get();
-        }
-
-        NodeAndRelCounts run() {
-            runQueryWithRowConsumer(
+        static NodeAndRelCounts run(GraphDatabaseAPI db, String query, Map<String, Object> queryParams) {
+            final ImmutableNodeAndRelCounts.Builder countsBuilder = ImmutableNodeAndRelCounts.builder();
+            QueryRunner.runQueryWithRowConsumer(
+                db,
                 query,
                 queryParams,
                 row -> {
-                    nodeCount.set(row.getNumber("nodeCount").intValue());
-                    relationshipCount.set(row.getNumber("relationshipCount").intValue());
+                    countsBuilder.nodeCount(row.getNumber("nodeCount").intValue());
+                    countsBuilder.relationshipCount(row.getNumber("relationshipCount").intValue());
                 }
             );
-            return this;
+            return countsBuilder.build();
         }
     }
 }
