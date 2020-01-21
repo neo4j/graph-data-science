@@ -28,21 +28,19 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.Projection;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
@@ -659,30 +657,40 @@ class GraphCreateProcTest extends BaseProcTest {
             map(PROJECTION_KEY, "NATURAL", PROPERTIES_KEY, properties)
         );
 
-        NodeAndRelCounts standardNodeAndRelCounts = NodeAndRelCounts.run(
-            db,
+        AtomicInteger standardNodeCount = new AtomicInteger();
+        AtomicInteger standardRelCount = new AtomicInteger();
+        runQueryWithRowConsumer(
             "CALL gds.graph.create($name, '*', $relProjection)",
             map(
                 "name", standard,
                 "relProjection", relProjection
-            )
+            ),
+            row -> {
+                standardNodeCount.set(row.getNumber("nodeCount").intValue());
+                standardRelCount.set(row.getNumber("relationshipCount").intValue());
+            }
         );
 
-        NodeAndRelCounts cypherNodeAndRelCounts = NodeAndRelCounts.run(
-            db,
+        AtomicInteger cypherNodeCount = new AtomicInteger();
+        AtomicInteger cypherRelCount = new AtomicInteger();
+        runQueryWithRowConsumer(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
             map(
                 "name", cypher,
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", "MATCH (a)-[r:KNOWS]->(b) RETURN id(a) AS source, id(b) AS target, r.weight AS weight",
                 "relationshipProperties", properties
-            )
+            ),
+            row -> {
+                cypherNodeCount.set(row.getNumber("nodeCount").intValue());
+                cypherRelCount.set(row.getNumber("relationshipCount").intValue());
+            }
         );
 
-        assertEquals(standardNodeAndRelCounts.nodeCount(), cypherNodeAndRelCounts.nodeCount());
+        assertEquals(standardNodeCount.get(), cypherNodeCount.get());
 
-        int relationshipCountCypher = cypherNodeAndRelCounts.relationshipCount();
-        int relationshipsStandard = standardNodeAndRelCounts.relationshipCount();
+        int relationshipCountCypher = standardRelCount.get();
+        int relationshipsStandard = cypherRelCount.get();
 
         assertTrue(relationshipsStandard > 0);
         assertTrue(relationshipCountCypher > 0);
@@ -886,26 +894,5 @@ class GraphCreateProcTest extends BaseProcTest {
 
     static Stream<String> invalidGraphNames() {
         return Stream.of("", "   ", "           ", "\r\n\t", null);
-    }
-
-    @ValueClass
-    interface NodeAndRelCounts {
-
-        int nodeCount();
-        int relationshipCount();
-
-        static NodeAndRelCounts run(GraphDatabaseAPI db, String query, Map<String, Object> queryParams) {
-            final ImmutableNodeAndRelCounts.Builder countsBuilder = ImmutableNodeAndRelCounts.builder();
-            QueryRunner.runQueryWithRowConsumer(
-                db,
-                query,
-                queryParams,
-                row -> {
-                    countsBuilder.nodeCount(row.getNumber("nodeCount").intValue());
-                    countsBuilder.relationshipCount(row.getNumber("relationshipCount").intValue());
-                }
-            );
-            return countsBuilder.build();
-        }
     }
 }
