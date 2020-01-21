@@ -94,26 +94,25 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
 
     @Test
     default void testNodeWeightPropertyValidation() {
-        List<String> nodeProperties = Arrays.asList("a");
         Map<String, Object> tempConfig = MapUtil.map(
             "nodeWeightProperty", "foo",
             "nodeProjection", MapUtil.map(
                 "A", MapUtil.map(
-                    "properties", nodeProperties
+                    "properties", Arrays.asList("a")
                 )
             )
         );
 
         Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
 
-        applyOnProcedure(proc -> {
-            IllegalArgumentException e = assertThrows(
-                IllegalArgumentException.class,
-                () -> proc.compute(config, Collections.emptyMap())
-            );
-            assertThat(e.getMessage(), containsString("foo"));
-            assertThat(e.getMessage(), containsString("[a]"));
-        });
+        IllegalArgumentException e = assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+                applyOnProcedure(proc -> proc.compute(config, Collections.emptyMap()));
+            }
+        );
+        assertThat(e.getMessage(), containsString("foo"));
+        assertThat(e.getMessage(), containsString("[a]"));
     }
 
     @Test

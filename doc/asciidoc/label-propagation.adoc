@@ -85,8 +85,8 @@ YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMilli
 | concurrency                   | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| nodeWeightProperty            | string  | null                   | yes      | The property name of node that contain weight. Must be numeric.
-| relationshipWeightProperty    | string  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
+| nodeWeightProperty            | string  | null                   | yes      | The name of the node property that represents weight.
+| relationshipWeightProperty    | string  | null                   | yes      | The name of the relationship property that represents weight.
 | seedProperty                  | string  | n/a                    | yes      | Used to define initial set of labels (must be a number).
 | writeProperty                 | string  | n/a                    | yes      | The property name written back to the partition of the graph in which the node resides.
 | graph                         | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
