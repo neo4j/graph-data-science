@@ -79,6 +79,7 @@ class ShortestPathAStarDocTest extends BaseProcTest {
                        "   }," +
                        "   startNode: start," +
                        "   endNode: end," +
+                       "   relationshipWeightProperty: 'time'," +
                        "   propertyKeyLat: 'latitude'," +
                        "   propertyKeyLon: 'longitude'" +
                        "})" +
@@ -105,7 +106,7 @@ class ShortestPathAStarDocTest extends BaseProcTest {
         String query = " MATCH (start:Station {name: \"King's Cross St. Pancras\"}), (end:Station {name: \"Kentish Town\"})" +
                        " CALL gds.alpha.shortestPath.astar.stream({" +
                        "  nodeQuery: 'MATCH (p:Station) RETURN id(p) AS id'," +
-                       "  relationshipQuery: 'MATCH (p1:Station)-[r:CONNECTION]->(p2:Station) RETURN id(p1) AS source, id(p2) AS target, r.time AS weight'," +
+                       "  relationshipQuery: 'MATCH (p1:Station)-[r:CONNECTION]->(p2:Station) RETURN id(p1) AS source, id(p2) AS target, r.time AS time'," +
                        "  startNode: start," +
                        "  endNode: end," +
                        "  relationshipWeightProperty: 'time'," +
