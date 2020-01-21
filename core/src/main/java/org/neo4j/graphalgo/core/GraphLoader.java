@@ -116,7 +116,7 @@ public class GraphLoader implements SharedGraphLoader {
             .withBatchSize(config.getBatchSize())
             .withDeduplicationStrategy(config.getDeduplicationStrategy())
             .withParams(config.getParams())
-            .withLoadedGraph(config.getGraphImpl() == GraphCatalog.class);
+            .withLoadedGraph(false);
     }
 
     public GraphLoader init(Log log, String username) {

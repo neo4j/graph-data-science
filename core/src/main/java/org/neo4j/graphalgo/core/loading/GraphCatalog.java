@@ -20,15 +20,8 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -38,54 +31,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public final class GraphCatalog extends GraphFactory {
+public final class GraphCatalog {
 
     private static final ConcurrentHashMap<String, UserCatalog> userGraphCatalogs = new ConcurrentHashMap<>();
 
-    public GraphCatalog(
-        final GraphDatabaseAPI api,
-        final GraphSetup setup
-    ) {
-        super(api, setup);
-    }
-
-    @Override
-    public ImportResult build() {
-        Graph graph = get(
-            setup.username(),
-            setup.name(),
-            setup.relationshipType(),
-            setup
-                .relationshipPropertyMappings()
-                .head()
-                .map(PropertyMapping::propertyKey)
-        );
-
-        GraphsByRelationshipType graphs = GraphsByRelationshipType.of(graph);
-        return ImportResult.of(dimensions, graphs);
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation(GraphSetup setup, GraphDimensions dimensions) {
-        return memoryEstimation();
-    }
-
-    public MemoryEstimation memoryEstimation() {
-        Graph graph = get(
-            setup.username(),
-            setup.name(),
-            setup.relationshipType(),
-            setup.relationshipPropertyMappings().head().map(PropertyMapping::propertyKey)
-        );
-
-        GraphDimensions estimateDimensions = ImmutableGraphDimensions.builder()
-            .from(dimensions)
-            .nodeCount(graph.nodeCount())
-            .maxRelCount(graph.relationshipCount())
-            .build();
-
-        return HugeGraphFactory.getMemoryEstimation(setup, estimateDimensions);
-    }
+    private GraphCatalog() { }
 
     public static void set(GraphCreateConfig config, GraphsByRelationshipType graph) {
         graph.canRelease(false);
@@ -134,10 +84,6 @@ public final class GraphCatalog extends GraphFactory {
 
     public static @Nullable String getType(String username, String graphName) {
         return getUserCatalog(username).getType(graphName);
-    }
-
-    public static Map<String, Graph> getLoadedGraphsByName(String username) {
-        return getUserCatalog(username).getLoadedGraphsByName();
     }
 
     private static UserCatalog getUserCatalog(String username) {
@@ -246,13 +192,6 @@ public final class GraphCatalog extends GraphFactory {
             if (graphName == null) return null;
             GraphsByRelationshipType graph = graphsByName.get(graphName).graph();
             return graph == null ? null : graph.getGraphType();
-        }
-
-        Map<String, Graph> getLoadedGraphsByName() {
-            return graphsByName.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
-                e -> e.getValue().getGraph()
-            ));
         }
 
         Map<GraphCreateConfig, Graph> getLoadedGraphs() {

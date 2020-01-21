@@ -101,7 +101,7 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
             .withBatchSize(getBatchSize())
             .withDeduplicationStrategy(getDeduplicationStrategy())
             .withParams(getParams())
-            .withLoadedGraph(getGraphImpl() == GraphCatalog.class);
+            .withLoadedGraph(false);
     }
 
     private double getAlgoSpecificDefaultWeightValue() {
