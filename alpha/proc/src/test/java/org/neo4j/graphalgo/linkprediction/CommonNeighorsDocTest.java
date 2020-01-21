@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -36,7 +35,7 @@ class CommonNeighorsDocTest extends BaseProcTest {
     String NL = System.lineSeparator();
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         String createGraph = "CREATE " +
                              " (zhen:Person {name: 'Zhen'})," +
                              " (praveena:Person {name: 'Praveena'})," +
