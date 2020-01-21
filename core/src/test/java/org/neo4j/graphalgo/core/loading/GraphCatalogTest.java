@@ -129,12 +129,7 @@ class GraphCatalogTest {
 
         GraphCatalog.set(graphCreateConfig, importedGraphs);
 
-        Graph filteredGraph = GraphCatalog.filterLoadedGraphs(
-            "",
-            "myGraph",
-            relTypes,
-            relProperty
-        ).values().iterator().next();
+        Graph filteredGraph = GraphCatalog.get("", "myGraph").graph().getGraph(relTypes, relProperty);
 
         assertGraphEquals(
             fromGdl(

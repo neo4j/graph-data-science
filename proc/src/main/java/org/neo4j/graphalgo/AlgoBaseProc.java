@@ -29,6 +29,9 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphWithConfig;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.ImmutableGraphWithConfig;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -49,9 +52,10 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.helpers.collection.Pair;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -178,39 +182,29 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         CONFIG config = configAndName.first();
         Optional<String> maybeGraphName = configAndName.other();
 
-        Map.Entry<GraphCreateConfig, Graph> catalogEntry;
-
         Optional<String> weightProperty = config instanceof RelationshipWeightConfig ?
             Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty()) : Optional.empty();
 
+        GraphWithConfig graphCandidate;
+        List<String> relationshipTypes;
+
         if (maybeGraphName.isPresent()) {
-            catalogEntry = GraphCatalog
-                .filterLoadedGraphs(getUsername(), maybeGraphName.get(), config.relationshipTypes(), weightProperty)
-                .entrySet()
-                .stream()
-                .filter(e -> e.getKey().graphName().equals(maybeGraphName.get()))
-                .findFirst().orElseThrow(
-                    () -> new NoSuchElementException(String.format("Cannot find graph with name %s", maybeGraphName.get()))
-                );
+            graphCandidate = GraphCatalog.get(getUsername(), maybeGraphName.get());
+            relationshipTypes = config.relationshipTypes();
 
-            validateConfig(catalogEntry.getKey(), config);
-
-            return catalogEntry.getValue();
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-            validateConfig(createConfig, config);
             ModernGraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
+            GraphsByRelationshipType loadedGraph = loader.build(createConfig.getGraphImpl()).build().graphs();
 
-            Graph loadedGraph = loader.load(createConfig.getGraphImpl());
-
-            if (weightProperty.isPresent()) {
-                return loadedGraph;
-            } else {
-                return loadedGraph.withoutProperties();
-            }
+            graphCandidate = ImmutableGraphWithConfig.of(loadedGraph, createConfig);
+            relationshipTypes = Collections.singletonList(RelationshipProjections.PROJECT_ALL.name);
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
+
+        validateConfig(graphCandidate.config(), config);
+        return graphCandidate.graph().getGraph(relationshipTypes, weightProperty);
     }
 
     private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {

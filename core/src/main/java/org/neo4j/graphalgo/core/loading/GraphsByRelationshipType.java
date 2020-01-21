@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -173,7 +174,14 @@ public interface GraphsByRelationshipType {
                 }
             }).collect(Collectors.toList());
 
-            return UnionGraph.of(filteredGraphs);
+            if (filteredGraphs.isEmpty()) {
+                throw new NoSuchElementException(String.format(
+                    "Cannot find graph for relationship types: %s and relationship properties %s",
+                    relationshipTypes, maybeRelationshipProperty.orElse("<NOT DEFINED>")
+                ));
+            } else {
+                return UnionGraph.of(filteredGraphs);
+            }
         }
 
         @Override

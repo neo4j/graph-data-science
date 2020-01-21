@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
@@ -31,9 +30,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -157,13 +155,11 @@ public final class GraphCatalog extends GraphFactory {
         ));
     }
 
-    public static Map<GraphCreateConfig, Graph> filterLoadedGraphs(
+    public static GraphWithConfig get(
         String username,
-        String graphName,
-        List<String> relType,
-        Optional<String> propertyName
+        String graphName
     ) {
-        return getUserCatalog(username).filterLoadedGraphs(graphName, relType, propertyName);
+        return getUserCatalog(username).get(graphName);
     }
 
     private static class UserCatalog {
@@ -184,6 +180,14 @@ public final class GraphCatalog extends GraphFactory {
                 ));
             }
             graph.canRelease(false);
+        }
+
+        GraphWithConfig get(String graphName) {
+            if (graphsByName.containsKey(graphName)) {
+                return graphsByName.get(graphName);
+            } else {
+                throw new NoSuchElementException(String.format("Cannot find graph with name %s", graphName));
+            }
         }
 
         @Deprecated
@@ -251,24 +255,6 @@ public final class GraphCatalog extends GraphFactory {
             return graphsByName.values().stream().collect(Collectors.toMap(
                 GraphWithConfig::config, GraphWithConfig::getGraph
             ));
-        }
-
-        Map<GraphCreateConfig, Graph> filterLoadedGraphs(
-            String graphName,
-            List<String> relTypes,
-            Optional<String> propertyName
-        ) {
-            Map<GraphCreateConfig, Graph> filteredGraphs = new HashMap<>();
-            if (StringUtils.isBlank(graphName)) {
-                graphsByName.values().forEach(gwc ->
-                    filteredGraphs.put(gwc.config(), gwc.graph().getGraph(relTypes, propertyName))
-                );
-            } else {
-                GraphWithConfig graphWithConfig = graphsByName.get(graphName);
-                filteredGraphs.put(graphWithConfig.config(), graphWithConfig.graph().getGraph(relTypes, propertyName));
-            }
-
-            return filteredGraphs;
         }
     }
 
