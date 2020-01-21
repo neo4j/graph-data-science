@@ -137,20 +137,15 @@ class RelationshipProjectionsTest {
             "MY_TYPE", map(
                 "type", "T",
                 "projection", "NATURAL",
-                "aggregation", "SINGLE"
-                /*, // TODO: Make it work when the properties are passed with the projection instead of added "externally"
+                "aggregation", "SINGLE",
                 "properties", map(
                     "weight",
                     map("property", "weight")
-                )*/
+                )
             )
         );
 
-        RelationshipProjections actual = RelationshipProjections.fromObject(projection)
-            .addPropertyMappings(PropertyMappings.fromObject(map(
-                "weight",
-                map("property", "weight")
-            )));
+        RelationshipProjections actual = RelationshipProjections.fromObject(projection);
 
         RelationshipProjections expected = RelationshipProjections.builder().projections(
             singletonMap(

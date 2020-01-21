@@ -27,7 +27,10 @@ import org.neo4j.graphalgo.core.Aggregation;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyMap;
 
 @DataClass
 @Value.Immutable(singleton = true)
@@ -65,9 +68,23 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         }
         if (map.containsKey(AGGREGATION_KEY)) {
             builder.aggregation(Aggregation.valueOf(nonEmptyString(map, AGGREGATION_KEY)));
+            Aggregation aggregation = Aggregation.valueOf(nonEmptyString(map, AGGREGATION_KEY));
+            builder.aggregation(aggregation);
+            return create(map, aggregation, properties -> builder.properties(properties).build());
         }
         return create(map, properties -> builder.properties(properties).build());
     }
+
+    private static RelationshipProjection create(
+        Map<String, Object> config,
+        Aggregation defaultAggregation,
+        Function<PropertyMappings, RelationshipProjection> constructor
+    ) {
+        Object properties = config.getOrDefault(PROPERTIES_KEY, emptyMap());
+        PropertyMappings propertyMappings = PropertyMappings.fromObject(properties, defaultAggregation);
+        return constructor.apply(propertyMappings);
+    }
+
 
     public static RelationshipProjection fromString(@Nullable String type) {
         return RelationshipProjection.builder().type(type).build();
@@ -112,13 +129,13 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     @Override
     public RelationshipProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
-        PropertyMappings newMappings = properties().mergeWith(mappings);
+        PropertyMappings newMappings = properties().mergeWith(mappings.withDefaultAggregation(aggregation()));
         if (newMappings.equals(properties())) {
             return RelationshipProjection.copyOf(this);
         }
 
         List<PropertyMapping> updatedPropertyMappings = newMappings.mappings().stream().map(propertyMapping -> {
-            if (propertyMapping.deduplicationStrategy() == DeduplicationStrategy.DEFAULT) {
+            if (propertyMapping.aggregation() == Aggregation.DEFAULT) {
                 return PropertyMapping.of(
                     propertyMapping.propertyKey(),
                     propertyMapping.neoPropertyKey(),
