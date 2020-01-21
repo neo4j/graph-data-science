@@ -31,19 +31,23 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
+import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.newapi.CypherConfigBuilder;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
+import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 
@@ -85,22 +89,28 @@ final class LabelPropagationTest extends AlgoTestBase {
     }
 
     Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
-        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT)
-                .withDirection(Direction.OUTGOING)
-                .withDefaultConcurrency();
+        GraphCreateConfig createConfig;
 
         if (graphImpl == CypherGraphFactory.class) {
-            graphLoader
-                    .withLabel("MATCH (u:User) RETURN id(u) AS id")
-                    .withRelationshipType("MATCH (u1:User)-[rel:FOLLOW]->(u2:User) \n" +
-                                          "RETURN id(u1) AS source, id(u2) AS target")
-                    .withName("cypher");
+            createConfig = new CypherConfigBuilder()
+                .nodeQuery("MATCH (u:User) RETURN id(u) AS id")
+                .relationshipQuery("MATCH (u1:User)-[rel:FOLLOW]->(u2:User) \n" +
+                                   "RETURN id(u1) AS source, id(u2) AS target")
+                .build();
         } else {
-            graphLoader
-                    .withLabel("User")
-                    .withRelationshipType("FOLLOW")
-                    .withName(graphImpl.getSimpleName());
+            createConfig = new StoreConfigBuilder()
+                .addNodeLabel("User")
+                .addRelationshipType("FOLLOW")
+                .build();
         }
+
+        ModernGraphLoader graphLoader = ImmutableModernGraphLoader.builder()
+            .api(db)
+            .log(NullLog.getInstance())
+            .createConfig(createConfig)
+            .legacyMode(false)
+            .build();
+
         return QueryRunner.runInTransaction(db, () -> graphLoader.load(graphImpl));
     }
 
@@ -118,16 +128,18 @@ final class LabelPropagationTest extends AlgoTestBase {
         assertArrayEquals(new long[]{1, 1, 3, 4, 4, 1}, labels.toArray(), "Incorrect result assuming initial labels are neo4j id");
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void shouldWorkWithSeedOnExplicitlyLoadedGraph(Class<? extends GraphFactory> graphImpl) {
-
-        Graph graph = new GraphLoader(db, Pools.DEFAULT)
-            .withDirection(Direction.OUTGOING)
-            .withDefaultConcurrency()
-            .withLabel("User")
-            .withRelationshipType("FOLLOW")
-            .withOptionalNodeProperties(PropertyMapping.of("seedId", 0.0))
-            .withName(graphImpl.getSimpleName()).load(graphImpl);
+    @Test
+    void shouldWorkWithSeedOnExplicitlyLoadedGraph() {
+        Graph graph = ImmutableModernGraphLoader.builder()
+            .api(db)
+            .log(NullLog.getInstance())
+            .createConfig(new StoreConfigBuilder()
+                .addNodeLabel("User")
+                .addRelationshipType("FOLLOW")
+                .addNodeProperty(PropertyMapping.of("seedId", 0.0))
+                .build())
+            .build()
+            .load(HugeGraphFactory.class);
 
         LabelPropagation lp = new LabelPropagation(
             graph,

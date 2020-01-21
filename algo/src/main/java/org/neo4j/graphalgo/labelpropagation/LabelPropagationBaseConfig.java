@@ -20,13 +20,11 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfig;
 import org.neo4j.graphalgo.newapi.NodeWeightConfig;
 import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
-import org.neo4j.graphdb.Direction;
 
 public interface LabelPropagationBaseConfig extends
     AlgoBaseConfig,
@@ -39,11 +37,5 @@ public interface LabelPropagationBaseConfig extends
     @Override
     default int maxIterations() {
         return 10;
-    }
-
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return Direction.OUTGOING;
     }
 }

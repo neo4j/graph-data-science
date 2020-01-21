@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.WriteConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -239,7 +238,6 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
             .algo("gds.labelPropagation")
             .writeMode()
             .addParameter("writeProperty", writeProperty)
-            .addParameter("direction", Direction.INCOMING.name())
             .yields();
 
         runQueryWithRowConsumer(query,
