@@ -84,7 +84,7 @@ class BalancedTriadsDocTest extends BaseProcTest {
                        "      projection: 'UNDIRECTED'" +
                        "    }" +
                        "  }," +
-                       "  weightProperty: 'weight'" +
+                       "  relationshipWeightProperty: 'weight'" +
                        "})" +
                        " YIELD nodeId, balanced, unbalanced" +
                        " RETURN gds.util.asNode(nodeId).name AS person,balanced,unbalanced" +
@@ -119,7 +119,7 @@ class BalancedTriadsDocTest extends BaseProcTest {
                        "      projection: 'UNDIRECTED'" +
                        "    }" +
                        "  }," +
-                       "  weightProperty: 'weight'" +
+                       "  relationshipWeightProperty: 'weight'" +
                        "})" +
                        " YIELD balancedProperty, balancedTriadCount, unbalancedProperty, unbalancedTriadCount;";
 

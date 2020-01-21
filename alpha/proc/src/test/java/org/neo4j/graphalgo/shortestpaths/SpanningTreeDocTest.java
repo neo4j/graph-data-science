@@ -81,7 +81,7 @@ class SpanningTreeDocTest extends BaseProcTest {
                        "     }" +
                        "   }," +
                        "   startNodeId: id(n)," +
-                       "   weightProperty: 'cost'," +
+                       "   relationshipWeightProperty: 'cost'," +
                        "   weightWriteProperty: 'writeCost'," +
                        "   writeProperty: 'MINST'" +
                        " })" +
@@ -124,7 +124,7 @@ class SpanningTreeDocTest extends BaseProcTest {
                        "     }" +
                        "   }," +
                        "   startNodeId: id(n)," +
-                       "   weightProperty: 'cost'," +
+                       "   relationshipWeightProperty: 'cost'," +
                        "   weightWriteProperty: 'writeCost'," + // -> the weight of the `writeProperty` relationship
                        "   writeProperty: 'MAXST'" + // -> type of the new relationship
                        " })" +
