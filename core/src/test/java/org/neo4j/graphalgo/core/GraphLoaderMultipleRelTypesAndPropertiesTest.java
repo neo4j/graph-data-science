@@ -544,7 +544,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesTest
     void multiplePropertiesWithDeduplication_SINGLE(Class<? extends GraphFactory> graphFactory) {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(
+        runQuery(db,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node) " +

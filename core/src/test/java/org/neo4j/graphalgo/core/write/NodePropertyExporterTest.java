@@ -37,6 +37,8 @@ import java.util.concurrent.ExecutorService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 
 class NodePropertyExporterTest {
 
@@ -47,15 +49,16 @@ class NodePropertyExporterTest {
         DB = (GraphDatabaseAPI) new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
                 .newGraphDatabase();
-        DB.execute("CREATE " +
-                   "(n1:Node1 {prop1: 1})," +
-                   "(n2:Node2 {prop2: 2})," +
-                   "(n3:Node3 {prop3: 3})" +
-                   "CREATE " +
-                   "(n1)-[:REL1 {prop1: 1}]->(n2)," +
-                   "(n1)-[:REL2 {prop2: 2}]->(n3)," +
-                   "(n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)," +
-                   "(n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3);");
+        runQuery(DB, "CREATE " +
+                     "(n1:Node1 {prop1: 1})," +
+                     "(n2:Node2 {prop2: 2})," +
+                     "(n3:Node3 {prop3: 3})" +
+                     "CREATE " +
+                     "(n1)-[:REL1 {prop1: 1}]->(n2)," +
+                     "(n1)-[:REL2 {prop2: 2}]->(n3)," +
+                     "(n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)," +
+                     "(n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3);"
+        );
     }
 
     @AfterAll
@@ -83,11 +86,10 @@ class NodePropertyExporterTest {
                 () -> exporter.write("foo", 42.0, new DoublePropertyTranslator()));
         assertEquals(Status.Transaction.Terminated, exception.status());
 
-        DB.execute("MATCH (n) WHERE n.foo IS NOT NULL RETURN COUNT(*) AS count").accept(row -> {
+        runQueryWithRowConsumer(DB, "MATCH (n) WHERE n.foo IS NOT NULL RETURN COUNT(*) AS count", row -> {
             Number count = row.getNumber("count");
             assertNotNull(count);
             assertEquals(0, count.intValue());
-            return false;
         });
     }
 

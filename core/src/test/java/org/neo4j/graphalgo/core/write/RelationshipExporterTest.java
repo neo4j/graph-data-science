@@ -111,7 +111,7 @@ class RelationshipExporterTest {
     private RelationshipExporter setupExportTest(boolean includeProperties) {
         // create graph to export
         GraphDatabaseAPI fromDb = TestDatabaseCreator.createTestDatabase();
-        fromDb.execute(NODE_QUERY_PART + RELS_QUERY_PART);
+        runQuery(fromDb, NODE_QUERY_PART + RELS_QUERY_PART);
         GraphLoader loader = new GraphLoader(fromDb)
             .withAnyLabel()
             .withRelationshipType("BARFOO");
