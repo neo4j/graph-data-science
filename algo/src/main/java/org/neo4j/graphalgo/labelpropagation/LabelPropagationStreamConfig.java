@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("LouvainStreamConfigImpl")
+@Configuration("LabelPropagationStreamConfigImpl")
 public interface LabelPropagationStreamConfig extends LabelPropagationBaseConfig {
 
     static LabelPropagationStreamConfig of(
@@ -36,7 +36,7 @@ public interface LabelPropagationStreamConfig extends LabelPropagationBaseConfig
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new LouvainStreamConfigImpl(
+        return new LabelPropagationStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
