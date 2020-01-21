@@ -24,6 +24,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AbstractProjections;
 import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -31,6 +33,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -61,6 +64,77 @@ class GraphCreateConfigFromCypherTest {
             Arguments.of(GraphCreateFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.of()),
             Arguments.of(GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.of())
         );
+    }
+
+    static Stream<Arguments> configs() {
+        return Stream.of(
+            Arguments.arguments(
+                new CypherConfigBuilder()
+                    .loadAnyLabel(true)
+                    .loadAnyRelationshipType(true)
+                    .build(),
+                ImmutableGraphCreateFromCypherConfig.builder().username("").graphName("")
+                    .nodeQuery(ALL_NODES_QUERY)
+                    .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
+                    .nodeProjection(NodeProjections.empty())
+                    .relationshipProjection(RelationshipProjections.empty())
+                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProperties(PropertyMappings.of())
+                    .build()
+            ),
+            Arguments.arguments(
+                new CypherConfigBuilder().userName("foo").graphName("bar")
+                    .loadAnyLabel(true)
+                    .loadAnyRelationshipType(true)
+                    .build(),
+                ImmutableGraphCreateFromCypherConfig.builder().username("foo").graphName("bar")
+                    .nodeQuery(ALL_NODES_QUERY)
+                    .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
+                    .nodeProjection(NodeProjections.empty())
+                    .relationshipProjection(RelationshipProjections.empty())
+                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProperties(PropertyMappings.of())
+                    .build()
+            ),
+            Arguments.arguments(
+                new CypherConfigBuilder().userName("foo").graphName("bar")
+                    .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")
+                    .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
+                    .loadAnyRelationshipType(true)
+                    .build(),
+                ImmutableGraphCreateFromCypherConfig.builder().username("foo").graphName("bar")
+                    .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")
+                    .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
+                    .nodeProjection(NodeProjections.empty())
+                    .relationshipProjection(RelationshipProjections.empty())
+                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProperties(PropertyMappings.of())
+                    .build()
+            ),
+            Arguments.arguments(
+                new CypherConfigBuilder().userName("foo").graphName("bar")
+                    .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")
+                    .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
+                    .addNodeProperty(PropertyMapping.of("nProp", 23.0D))
+                    .addRelationshipProperty(PropertyMapping.of("rProp", 42.0D))
+                    .loadAnyRelationshipType(true)
+                    .build(),
+                ImmutableGraphCreateFromCypherConfig.builder().username("foo").graphName("bar")
+                    .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")
+                    .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
+                    .nodeProjection(NodeProjections.empty())
+                    .relationshipProjection(RelationshipProjections.empty())
+                    .nodeProperties(PropertyMappings.of(PropertyMapping.of("nProp", 23.0D)))
+                    .relationshipProperties(PropertyMappings.of(PropertyMapping.of("rProp", 42.0D)))
+                    .build()
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("configs")
+    void testCypherConfigBuilder(GraphCreateFromCypherConfig actual, GraphCreateFromCypherConfig expected) {
+        assertEquals(expected, actual);
     }
 
 }

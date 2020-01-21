@@ -23,11 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -162,6 +162,8 @@ class GraphCreateConfigFromStoreTest {
                 ImmutableGraphCreateFromStoreConfig.builder().username("foo").graphName("bar")
                     .nodeProjection(NodeProjections.empty())
                     .relationshipProjection(RelationshipProjections.empty())
+                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProperties(PropertyMappings.of())
                     .build()
             ),
             Arguments.arguments(
@@ -173,6 +175,8 @@ class GraphCreateConfigFromStoreTest {
                     .relationshipProjection(RelationshipProjections.builder()
                         .putProjection(PROJECT_ALL, RelationshipProjection.empty())
                         .build())
+                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProperties(PropertyMappings.of())
                     .build()
             ),
             Arguments.arguments(
@@ -187,6 +191,8 @@ class GraphCreateConfigFromStoreTest {
                             RelationshipProjection.of("BAR", Projection.NATURAL, DeduplicationStrategy.DEFAULT)
                         )
                         .build())
+                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProperties(PropertyMappings.of())
                     .build()
             ),
             Arguments.arguments(
@@ -201,6 +207,8 @@ class GraphCreateConfigFromStoreTest {
                             RelationshipProjection.of("BAR", Projection.NATURAL, DeduplicationStrategy.DEFAULT)
                         )
                         .build())
+                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProperties(PropertyMappings.of())
                     .build()
             ),
             Arguments.arguments(
@@ -215,6 +223,37 @@ class GraphCreateConfigFromStoreTest {
                             RelationshipProjection.of("BAR", Projection.UNDIRECTED, DeduplicationStrategy.DEFAULT)
                         )
                         .build())
+                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProperties(PropertyMappings.of())
+                    .build()
+            ),
+            Arguments.arguments(
+                new StoreConfigBuilder()
+                    .addNodeLabel("Foo")
+                    .addRelationshipType("BAR")
+                    .nodeProperties(Collections.singletonList(PropertyMapping.of("nProp", 23.0D)))
+                    .relationshipProperties(Collections.singletonList(PropertyMapping.of("rProp", 42.0D)))
+                    .build(),
+                ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
+                    .nodeProjection(NodeProjections.builder()
+                        .putProjection(
+                            ElementIdentifier.of("Foo"),
+                            NodeProjection.builder()
+                                .label("Foo")
+                                .addProperty(PropertyMapping.of("nProp", 23.0D))
+                                .build())
+                        .build())
+                    .relationshipProjection(RelationshipProjections.builder()
+                        .putProjection(
+                            ElementIdentifier.of("BAR"),
+                            RelationshipProjection.builder()
+                                .type("BAR")
+                                .addProperty(PropertyMapping.of("rProp", 42.0D))
+                                .build()
+                        )
+                        .build())
+                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProperties(PropertyMappings.of())
                     .build()
             )
         );

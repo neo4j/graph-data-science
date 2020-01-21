@@ -227,6 +227,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(PropertyMappings.of(relationshipProperties))
             .concurrency(concurrency.orElse(Pools.DEFAULT_CONCURRENCY))
-            .build();
+            .build()
+            .withNormalizedPropertyMappings();
     }
 }
