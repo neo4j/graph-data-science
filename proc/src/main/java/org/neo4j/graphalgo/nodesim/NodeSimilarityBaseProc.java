@@ -23,12 +23,15 @@ import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -53,7 +56,7 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
         return new NodeSimilarityFactory<>();
     }
 
-    public Stream<NodeSimilarityWriteProc.NodeSimilarityWriteResult> write(
+    public Stream<WriteResult> write(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, CONFIG> computationResult
     ) {
         CONFIG config = computationResult.config();
@@ -64,7 +67,7 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
             .build();
         if (computationResult.isGraphEmpty()) {
             return Stream.of(
-                new NodeSimilarityWriteProc.NodeSimilarityWriteResult(
+                new WriteResult(
                     writeConfig,
                     computationResult.createMillis(),
                     0,
@@ -84,7 +87,7 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
         SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
         Graph similarityGraph = similarityGraphResult.similarityGraph();
 
-        NodeSimilarityWriteProc.WriteResultBuilder resultBuilder = new NodeSimilarityWriteProc.WriteResultBuilder(
+        WriteResultBuilder resultBuilder = new WriteResultBuilder(
             writeConfig);
         resultBuilder
             .withNodesCompared(similarityGraphResult.comparedNodes())
@@ -144,5 +147,110 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
             return true;
         });
         return histogram;
+    }
+
+    public static class WriteResult {
+        public final long loadMillis;
+        public final long computeMillis;
+        public final long writeMillis;
+        public final long postProcessingMillis;
+
+        public final long nodesCompared;
+        public final long relationshipsWritten;
+        public final String writeRelationshipType;
+        public final String writeProperty;
+
+        public final Map<String, Object> similarityDistribution;
+
+        WriteResult(
+            NodeSimilarityWriteConfig config,
+            long loadMillis,
+            long computeMillis,
+            long writeMillis,
+            long postProcessingMillis,
+            long nodesCompared,
+            long relationshipsWritten,
+            Map<String, Object> similarityDistribution
+        ) {
+            this.loadMillis = loadMillis;
+            this.computeMillis = computeMillis;
+            this.writeMillis = writeMillis;
+            this.postProcessingMillis = postProcessingMillis;
+            this.nodesCompared = nodesCompared;
+            this.relationshipsWritten = relationshipsWritten;
+            this.writeRelationshipType = config.writeRelationshipType();
+            this.writeProperty = config.writeProperty();
+            this.similarityDistribution = similarityDistribution;
+        }
+    }
+
+    static class WriteResultBuilder extends AbstractResultBuilder<NodeSimilarityWriteConfig, WriteResult> {
+
+        private final NodeSimilarityWriteConfig config;
+        private long nodesCompared = 0L;
+
+        private long postProcessingMillis = -1L;
+
+        private Optional<DoubleHistogram> maybeHistogram = Optional.empty();
+
+        WriteResultBuilder(NodeSimilarityWriteConfig config) {
+            super(config);
+            this.config = config;
+        }
+
+        public WriteResultBuilder withNodesCompared(long nodesCompared) {
+            this.nodesCompared = nodesCompared;
+            return this;
+        }
+
+        WriteResultBuilder withHistogram(DoubleHistogram histogram) {
+            this.maybeHistogram = Optional.of(histogram);
+            return this;
+        }
+
+        void setPostProcessingMillis(long postProcessingMillis) {
+            this.postProcessingMillis = postProcessingMillis;
+        }
+
+        ProgressTimer timePostProcessing() {
+            return ProgressTimer.start(this::setPostProcessingMillis);
+        }
+
+        private Map<String, Object> distribution() {
+            if (maybeHistogram.isPresent()) {
+                DoubleHistogram definitelyHistogram = maybeHistogram.get();
+                return MapUtil.map(
+                    "min", definitelyHistogram.getMinValue(),
+                    "max", definitelyHistogram.getMaxValue(),
+                    "mean", definitelyHistogram.getMean(),
+                    "stdDev", definitelyHistogram.getStdDeviation(),
+                    "p1", definitelyHistogram.getValueAtPercentile(1),
+                    "p5", definitelyHistogram.getValueAtPercentile(5),
+                    "p10", definitelyHistogram.getValueAtPercentile(10),
+                    "p25", definitelyHistogram.getValueAtPercentile(25),
+                    "p50", definitelyHistogram.getValueAtPercentile(50),
+                    "p75", definitelyHistogram.getValueAtPercentile(75),
+                    "p90", definitelyHistogram.getValueAtPercentile(90),
+                    "p95", definitelyHistogram.getValueAtPercentile(95),
+                    "p99", definitelyHistogram.getValueAtPercentile(99),
+                    "p100", definitelyHistogram.getValueAtPercentile(100)
+                );
+            }
+            return Collections.emptyMap();
+        }
+
+        @Override
+        public WriteResult build() {
+            return new WriteResult(
+                config,
+                createMillis,
+                computeMillis,
+                writeMillis,
+                postProcessingMillis,
+                nodesCompared,
+                relationshipsWritten,
+                distribution()
+            );
+        }
     }
 }

@@ -21,12 +21,9 @@ package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -90,104 +87,5 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
         CypherMapWrapper config
     ) {
         return LabelPropagationWriteConfig.of(username, graphName, maybeImplicitCreate, config);
-    }
-
-    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<LabelPropagationWriteConfig, WriteResult> {
-
-        private final LabelPropagationWriteConfig config;
-
-        private long ranIterations;
-        private boolean didConverge;
-
-        WriteResultBuilder(
-            LabelPropagationWriteConfig config,
-            long nodeCount,
-            ProcedureCallContext context,
-            AllocationTracker tracker
-        ) {
-            super(
-                config,
-                nodeCount,
-                context,
-                tracker
-            );
-            this.config = config;
-        }
-
-        LabelPropagationWriteProc.WriteResultBuilder ranIterations(long iterations) {
-            this.ranIterations = iterations;
-            return this;
-        }
-
-        LabelPropagationWriteProc.WriteResultBuilder didConverge(boolean didConverge) {
-            this.didConverge = didConverge;
-            return this;
-        }
-
-        @Override
-        protected LabelPropagationWriteProc.WriteResult buildResult() {
-            return new LabelPropagationWriteProc.WriteResult(
-                config,
-                nodePropertiesWritten,
-                0L,
-                createMillis,
-                computeMillis,
-                writeMillis,
-                postProcessingDuration,
-                maybeCommunityCount.orElse(-1L),
-                ranIterations,
-                didConverge,
-                communityHistogramOrNull()
-            );
-        }
-    }
-
-    public static class WriteResult {
-
-        public String writeProperty;
-        public long nodePropertiesWritten;
-        public long relationshipPropertiesWritten;
-        public long createMillis;
-        public long computeMillis;
-        public long writeMillis;
-        public long maxIterations;
-        public String seedProperty;
-        public String nodeWeightProperty;
-        public String relationshipWeightProperty;
-        public long postProcessingMillis;
-        public long communityCount;
-        public long ranIterations;
-        public boolean didConverge;
-        public Map<String, Object> communityDistribution;
-
-        WriteResult(
-            LabelPropagationWriteConfig config,
-            long nodePropertiesWritten,
-            long relationshipPropertiesWritten,
-            long createMillis,
-            long computeMillis,
-            long writeMillis,
-            long postProcessingMillis,
-            long communityCount,
-            long ranIterations,
-            boolean didConverge,
-            Map<String, Object> communityDistribution
-        ) {
-            this.writeProperty = config.writeProperty();
-            this.maxIterations = config.maxIterations();
-            this.seedProperty = config.seedProperty();
-            this.nodeWeightProperty = config.nodeWeightProperty();
-            this.relationshipWeightProperty = config.relationshipWeightProperty();
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.relationshipPropertiesWritten = relationshipPropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.communityCount = communityCount;
-            this.ranIterations = ranIterations;
-            this.didConverge = didConverge;
-            this.communityDistribution = communityDistribution;
-        }
     }
 }

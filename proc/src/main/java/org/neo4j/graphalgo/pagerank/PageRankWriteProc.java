@@ -19,11 +19,9 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -73,82 +71,6 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
         CypherMapWrapper config
     ) {
         return PageRankWriteConfig.of(username, graphName, maybeImplicitCreate, config);
-    }
-
-    public static final class WriteResult {
-
-        public String writeProperty;
-        public @Nullable String relationshipWeightProperty;
-        public long nodePropertiesWritten;
-        public long relationshipPropertiesWritten;
-        public long createMillis;
-        public long computeMillis;
-        public long writeMillis;
-        public long maxIterations;
-        public long ranIterations;
-        public double dampingFactor;
-        public boolean didConverge;
-
-        WriteResult(
-            String writeProperty,
-            @Nullable String relationshipWeightProperty,
-            long maxIterations,
-            long nodePropertiesWritten,
-            long createMillis,
-            long computeMillis,
-            long writeMillis,
-            long ranIterations,
-            double dampingFactor,
-            boolean didConverge
-        ) {
-            this.relationshipPropertiesWritten = 0;
-            this.writeProperty = writeProperty;
-            this.relationshipWeightProperty = relationshipWeightProperty;
-            this.maxIterations = maxIterations;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.ranIterations = ranIterations;
-            this.didConverge = didConverge;
-            this.dampingFactor = dampingFactor;
-        }
-    }
-
-    public static class WriteResultBuilder extends AbstractResultBuilder<PageRankWriteConfig, WriteResult> {
-
-        private long ranIterations;
-        private boolean didConverge;
-
-        WriteResultBuilder(PageRankWriteConfig config) {
-            super(config);
-        }
-
-        WriteResultBuilder withRanIterations(long ranIterations) {
-            this.ranIterations = ranIterations;
-            return this;
-        }
-
-        WriteResultBuilder withDidConverge(boolean didConverge) {
-            this.didConverge = didConverge;
-            return this;
-        }
-
-        @Override
-        public WriteResult build() {
-            return new WriteResult(
-                writeProperty,
-                config.relationshipWeightProperty(),
-                config.maxIterations(),
-                nodePropertiesWritten,
-                createMillis,
-                computeMillis,
-                writeMillis,
-                ranIterations,
-                config.dampingFactor(),
-                didConverge
-            );
-        }
     }
 
     static final class ScoresTranslator implements PropertyTranslator.OfDouble<PageRank> {

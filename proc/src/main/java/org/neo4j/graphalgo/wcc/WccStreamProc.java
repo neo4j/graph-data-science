@@ -63,7 +63,7 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
 
     @Procedure(value = "gds.wcc.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<WccWriteProc.WriteResult> stats(
+    public Stream<WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

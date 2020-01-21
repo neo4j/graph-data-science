@@ -60,7 +60,7 @@ public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
 
     @Procedure(value = "gds.pageRank.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<PageRankWriteProc.WriteResult> stats(
+    public Stream<WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

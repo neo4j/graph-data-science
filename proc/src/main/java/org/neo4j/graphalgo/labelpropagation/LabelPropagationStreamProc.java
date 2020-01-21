@@ -62,7 +62,7 @@ public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPr
 
     @Procedure(value = "gds.labelPropagation.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<LabelPropagationWriteProc.WriteResult> stats(
+    public Stream<WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

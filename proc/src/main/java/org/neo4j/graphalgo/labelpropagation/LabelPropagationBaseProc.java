@@ -21,7 +21,11 @@ package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBaseConfig> extends AlgoBaseProc<LabelPropagation, LabelPropagation, CONFIG> {
@@ -39,7 +43,7 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
         return false;
     }
 
-    protected Stream<LabelPropagationWriteProc.WriteResult> write(
+    protected Stream<WriteResult> write(
         ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult
     ) {
         log.debug("Writing results");
@@ -54,7 +58,7 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
         Graph graph = computationResult.graph();
         LabelPropagation result = computationResult.result();
 
-        LabelPropagationWriteProc.WriteResultBuilder builder = new LabelPropagationWriteProc.WriteResultBuilder(
+        WriteResultBuilder builder = new WriteResultBuilder(
             writeConfig,
             graph.nodeCount(),
             callContext,
@@ -74,5 +78,104 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
             }
         }
         return Stream.of(builder.build());
+    }
+
+    public static class WriteResult {
+
+        public String writeProperty;
+        public long nodePropertiesWritten;
+        public long relationshipPropertiesWritten;
+        public long createMillis;
+        public long computeMillis;
+        public long writeMillis;
+        public long maxIterations;
+        public String seedProperty;
+        public String nodeWeightProperty;
+        public String relationshipWeightProperty;
+        public long postProcessingMillis;
+        public long communityCount;
+        public long ranIterations;
+        public boolean didConverge;
+        public Map<String, Object> communityDistribution;
+
+        WriteResult(
+            LabelPropagationWriteConfig config,
+            long nodePropertiesWritten,
+            long relationshipPropertiesWritten,
+            long createMillis,
+            long computeMillis,
+            long writeMillis,
+            long postProcessingMillis,
+            long communityCount,
+            long ranIterations,
+            boolean didConverge,
+            Map<String, Object> communityDistribution
+        ) {
+            this.writeProperty = config.writeProperty();
+            this.maxIterations = config.maxIterations();
+            this.seedProperty = config.seedProperty();
+            this.nodeWeightProperty = config.nodeWeightProperty();
+            this.relationshipWeightProperty = config.relationshipWeightProperty();
+            this.nodePropertiesWritten = nodePropertiesWritten;
+            this.relationshipPropertiesWritten = relationshipPropertiesWritten;
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.writeMillis = writeMillis;
+            this.postProcessingMillis = postProcessingMillis;
+            this.communityCount = communityCount;
+            this.ranIterations = ranIterations;
+            this.didConverge = didConverge;
+            this.communityDistribution = communityDistribution;
+        }
+    }
+
+    static class WriteResultBuilder extends AbstractCommunityResultBuilder<LabelPropagationWriteConfig, WriteResult> {
+
+        private final LabelPropagationWriteConfig config;
+
+        private long ranIterations;
+        private boolean didConverge;
+
+        WriteResultBuilder(
+            LabelPropagationWriteConfig config,
+            long nodeCount,
+            ProcedureCallContext context,
+            AllocationTracker tracker
+        ) {
+            super(
+                config,
+                nodeCount,
+                context,
+                tracker
+            );
+            this.config = config;
+        }
+
+        WriteResultBuilder ranIterations(long iterations) {
+            this.ranIterations = iterations;
+            return this;
+        }
+
+        WriteResultBuilder didConverge(boolean didConverge) {
+            this.didConverge = didConverge;
+            return this;
+        }
+
+        @Override
+        protected WriteResult buildResult() {
+            return new WriteResult(
+                config,
+                nodePropertiesWritten,
+                0L,
+                createMillis,
+                computeMillis,
+                writeMillis,
+                postProcessingDuration,
+                maybeCommunityCount.orElse(-1L),
+                ranIterations,
+                didConverge,
+                communityHistogramOrNull()
+            );
+        }
     }
 }

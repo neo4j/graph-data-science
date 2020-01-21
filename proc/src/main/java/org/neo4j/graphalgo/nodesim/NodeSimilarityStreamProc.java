@@ -72,7 +72,7 @@ public class NodeSimilarityStreamProc extends NodeSimilarityBaseProc<NodeSimilar
 
     @Procedure(name = "gds.nodeSimilarity.stats", mode = Mode.WRITE)
     @Description(STATS_DESCRIPTION)
-    public Stream<NodeSimilarityWriteProc.NodeSimilarityWriteResult> stats(
+    public Stream<WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
