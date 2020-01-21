@@ -93,17 +93,14 @@ public final class GraphGenerateProc extends BaseProc {
 
             HugeGraph graph = generator.generate();
 
-            GraphsByRelationshipType graphFromType;
-
-            if (generator.shouldGenerateRelationshipProperty()) {
-                Map<String, Map<String, Graph>> mapping = Collections.singletonMap(
-                    DUMMY_RELATIONSHIP_NAME,
-                    Collections.singletonMap(generator.getMaybePropertyProducer().get().getPropertyName(), graph)
-                );
-                graphFromType = GraphsByRelationshipType.of(mapping);
-            } else {
-                graphFromType = GraphsByRelationshipType.of(DUMMY_RELATIONSHIP_NAME, Optional.empty(), graph);
-            }
+            Map<String, Map<String, Graph>> mapping = Collections.singletonMap(
+                DUMMY_RELATIONSHIP_NAME,
+                Collections.singletonMap(
+                    generator.getMaybePropertyProducer().map(RelationshipPropertyProducer::getPropertyName).orElse("PROPERTY"),
+                    graph
+                )
+            );
+            GraphsByRelationshipType graphFromType = GraphsByRelationshipType.of(mapping);
 
             stats.nodes = graphFromType.nodeCount();
             stats.relationships = graphFromType.relationshipCount();

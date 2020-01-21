@@ -102,7 +102,7 @@ public interface SeedConfigTest<CONFIG extends SeedConfig & AlgoBaseConfig, RESU
         Graph graph = graphLoader(graphCreateConfig)
             .load(HugeGraphFactory.class);
 
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of("*", Optional.empty(), graph));
+        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
 
         applyOnProcedure((proc) -> {
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(

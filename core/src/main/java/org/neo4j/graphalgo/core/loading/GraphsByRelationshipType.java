@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -39,165 +40,140 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.api.GraphFactory.ANY_REL_TYPE;
 
-public interface GraphsByRelationshipType {
+public final class GraphsByRelationshipType {
 
-    static GraphsByRelationshipType of(String relType, Optional<String> relProperty, Graph graph) {
+    @TestOnly
+    public static GraphsByRelationshipType of(Graph graph) {
         Map<String, Map<String, Graph>> mapping = Collections.singletonMap(
-            "relType",
+            "RELATIONSHIP_TYPE",
             Collections.singletonMap(
-                relProperty.orElse(""),
+                "PROPERTY",
                 graph
             )
         );
         return GraphsByRelationshipType.of(mapping);
     }
 
-    static GraphsByRelationshipType of(Map<String, Map<String, Graph>> graphs) {
-        return new MultipleRelationshipTypes(graphs);
+    public static GraphsByRelationshipType of(Map<String, Map<String, Graph>> graphs) {
+        return new GraphsByRelationshipType(graphs);
+    }
+
+    private final Map<String, Map<String, Graph>> graphs;
+
+    private GraphsByRelationshipType(Map<String, Map<String, Graph>> graphs) {
+        this.graphs = graphs;
     }
 
     @Deprecated
-    default Graph getGraph(String relationshipType) {
+    public Graph getGraph(String relationshipType) {
         return getGraph(relationshipType, Optional.empty());
     }
 
     @Deprecated
-    Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty);
+    public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
+        Set<String> types = ProjectionParser.parse(relationshipType);
 
-    Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty);
+        ArrayList<String> relationshipTypes = new ArrayList<>(types);
+        if (types.isEmpty()) {
+            relationshipTypes.add("*");
+        }
+        return getGraph(relationshipTypes, maybeRelationshipProperty);
+    }
 
-    Graph getUnion();
-
-    String getGraphType();
-
-    void canRelease(boolean canRelease);
-
-    long nodeCount();
-
-    long relationshipCount();
-
-    Set<String> availableRelationshipTypes();
-
-    final class MultipleRelationshipTypes implements GraphsByRelationshipType {
-
-        private final Map<String, Map<String, Graph>> graphs;
-
-        private MultipleRelationshipTypes(Map<String, Map<String, Graph>> graphs) {
-            this.graphs = graphs;
+    public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+        if (relationshipTypes.isEmpty()) {
+            throw new IllegalArgumentException(String.format("The parameter %s should not be empty. Use `*` to load all relationship types.",
+                ProcedureConstants.RELATIONSHIP_TYPES
+            ));
         }
 
-        @Override
-        public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
-            Set<String> types = ProjectionParser.parse(relationshipType);
+        Map<String, Map<String, Graph>> graphsWithRelTypes = relationshipTypes.contains("*") ?
+            graphs :
+            graphs.entrySet()
+                .stream()
+                .filter(entry -> relationshipTypes.contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            ArrayList<String> relationshipTypes = new ArrayList<>(types);
-            if (types.isEmpty()) {
-                relationshipTypes.add("*");
-            }
-            return getGraph(relationshipTypes, maybeRelationshipProperty);
-        }
-
-        @Override
-        public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
-            if (relationshipTypes.isEmpty()) {
-                throw new IllegalArgumentException(String.format("The parameter %s should not be empty. Use `*` to load all relationship types.",
-                    ProcedureConstants.RELATIONSHIP_TYPES
-                ));
-            }
-
-            Map<String, Map<String, Graph>> graphsWithRelTypes = relationshipTypes.contains("*") ?
-                graphs :
-                graphs.entrySet()
-                    .stream()
-                    .filter(entry -> relationshipTypes.contains(entry.getKey()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-            List<Graph> filteredGraphs = graphsWithRelTypes.values().stream().map(graphsByProperty -> {
-                if (maybeRelationshipProperty.isPresent()) {
-                    return getExistingByProperty(maybeRelationshipProperty.get(), graphsByProperty);
-                } else {
-                    if (graphsByProperty.containsKey(ANY_REL_TYPE)) {
-                        return graphsByProperty.get(ANY_REL_TYPE);
-                    } else {
-                        return graphsByProperty
-                            .get(graphsByProperty.keySet().iterator().next())
-                            .withoutProperties();
-                    }
-                }
-            }).collect(Collectors.toList());
-
-            if (filteredGraphs.isEmpty()) {
-                throw new NoSuchElementException(String.format(
-                    "Cannot find graph for relationship types: %s and relationship properties %s",
-                    relationshipTypes, maybeRelationshipProperty.orElse("<NOT DEFINED>")
-                ));
+        List<Graph> filteredGraphs = graphsWithRelTypes.values().stream().map(graphsByProperty -> {
+            if (maybeRelationshipProperty.isPresent()) {
+                return getExistingByProperty(maybeRelationshipProperty.get(), graphsByProperty);
             } else {
-                return UnionGraph.of(filteredGraphs);
-            }
-        }
-
-        @Override
-        public Graph getUnion() {
-            Collection<Graph> graphParts = new ArrayList<>();
-            forEach(graphParts::add);
-            return UnionGraph.of(graphParts);
-        }
-
-        private Map<String, ? extends Graph> getExistingByType(String singleType) {
-            return getExisting(singleType, "type", graphs);
-        }
-
-        private Graph getExistingByProperty(String property, Map<String, ? extends Graph> graphs) {
-            return getExisting(property, "property", graphs);
-        }
-
-        private <T> T getExisting(String key, String type, Map<String, ? extends T> graphs) {
-            T graph = graphs.get(key);
-            if (graph == null) {
-                throw new IllegalArgumentException(String.format("No graph was loaded for %s %s", type, key));
-            }
-            return graph;
-        }
-
-        @Override
-        public void canRelease(boolean canRelease) {
-            forEach(g -> g.canRelease(canRelease));
-        }
-
-        @Override
-        public String getGraphType() {
-            return HugeGraph.TYPE;
-        }
-
-        @Override
-        public long nodeCount() {
-            return graphs
-                    .values().stream()
-                    .flatMap(g -> g.values().stream())
-                    .mapToLong(Graph::nodeCount)
-                    .findFirst()
-                    .orElse(0);
-        }
-
-        @Override
-        public long relationshipCount() {
-            return graphs
-                    .values().stream()
-                    .mapToLong(g -> g.values().stream().mapToLong(Graph::relationshipCount).max().orElse(0L))
-                    .sum();
-        }
-
-        @Override
-        public Set<String> availableRelationshipTypes() {
-            return graphs.keySet();
-        }
-
-        private void forEach(Consumer<? super Graph> action) {
-            for (Map<String, ? extends Graph> graphsByProperty : graphs.values()) {
-                for (Graph graph : graphsByProperty.values()) {
-                    action.accept(graph);
+                if (graphsByProperty.containsKey(ANY_REL_TYPE)) {
+                    return graphsByProperty.get(ANY_REL_TYPE);
+                } else {
+                    return graphsByProperty
+                        .get(graphsByProperty.keySet().iterator().next())
+                        .withoutProperties();
                 }
+            }
+        }).collect(Collectors.toList());
+
+        if (filteredGraphs.isEmpty()) {
+            throw new NoSuchElementException(String.format(
+                "Cannot find graph for relationship types: %s and relationship properties %s",
+                relationshipTypes, maybeRelationshipProperty.orElse("<NOT DEFINED>")
+            ));
+        } else {
+            return UnionGraph.of(filteredGraphs);
+        }
+    }
+
+    public Graph getUnion() {
+        Collection<Graph> graphParts = new ArrayList<>();
+        forEach(graphParts::add);
+        return UnionGraph.of(graphParts);
+    }
+
+    private Map<String, ? extends Graph> getExistingByType(String singleType) {
+        return getExisting(singleType, "type", graphs);
+    }
+
+    private Graph getExistingByProperty(String property, Map<String, ? extends Graph> graphs) {
+        return getExisting(property, "property", graphs);
+    }
+
+    private <T> T getExisting(String key, String type, Map<String, ? extends T> graphs) {
+        T graph = graphs.get(key);
+        if (graph == null) {
+            throw new IllegalArgumentException(String.format("No graph was loaded for %s %s", type, key));
+        }
+        return graph;
+    }
+
+    public void canRelease(boolean canRelease) {
+        forEach(g -> g.canRelease(canRelease));
+    }
+
+    public String getGraphType() {
+        return HugeGraph.TYPE;
+    }
+
+    public long nodeCount() {
+        return graphs
+                .values().stream()
+                .flatMap(g -> g.values().stream())
+                .mapToLong(Graph::nodeCount)
+                .findFirst()
+                .orElse(0);
+    }
+
+    public long relationshipCount() {
+        return graphs
+                .values().stream()
+                .mapToLong(g -> g.values().stream().mapToLong(Graph::relationshipCount).max().orElse(0L))
+                .sum();
+    }
+
+    public Set<String> availableRelationshipTypes() {
+        return graphs.keySet();
+    }
+
+    private void forEach(Consumer<? super Graph> action) {
+        for (Map<String, ? extends Graph> graphsByProperty : graphs.values()) {
+            for (Graph graph : graphsByProperty.values()) {
+                action.accept(graph);
             }
         }
     }
 }
+
