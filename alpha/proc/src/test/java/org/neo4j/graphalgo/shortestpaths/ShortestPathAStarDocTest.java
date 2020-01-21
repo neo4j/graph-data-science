@@ -108,7 +108,7 @@ class ShortestPathAStarDocTest extends BaseProcTest {
                        "  relationshipQuery: 'MATCH (p1:Station)-[r:CONNECTION]->(p2:Station) RETURN id(p1) AS source, id(p2) AS target, r.time AS weight'," +
                        "  startNode: start," +
                        "  endNode: end," +
-                       "  weightProperty: 'time'," +
+                       "  relationshipWeightProperty: 'time'," +
                        "  propertyKeyLat: 'latitude'," +
                        "  propertyKeyLat: 'longitude'" +
                        " })" +

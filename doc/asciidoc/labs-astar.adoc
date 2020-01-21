@@ -61,16 +61,16 @@ YIELD nodeId, cost
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type   | Default  | Optional | Description
-| startNode         | node   | null     | no       | The start node
-| endNode           | node   | null     | no       | The end node
-| weightProperty    | string | null     | yes      | The property name that contains weight
-| propertyKeyLat    | string | null     | no       | The property name that contains latitude coordinate
-| propertyKeyLon    | string | null     | no       | The property name that contains longitude coordinate
-| nodeQuery         | string | null     | yes      | The label to load from the graph. If null, load all nodes
-| relationshipQuery | string | null     | yes      | The relationship type to load from the graph. If null, load all nodes
-| defaultValue      | float  | null     | yes      | The default value of the weight in case it is missing or invalid
-| direction         | string | outgoing | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
+| Name                          | Type   | Default  | Optional | Description
+| startNode                     | node   | null     | no       | The start node
+| endNode                       | node   | null     | no       | The end node
+| relationshipWeightProperty    | string | null     | yes      | The property name that contains weight
+| propertyKeyLat                | string | null     | no       | The property name that contains latitude coordinate
+| propertyKeyLon                | string | null     | no       | The property name that contains longitude coordinate
+| nodeQuery                     | string | null     | yes      | The label to load from the graph. If null, load all nodes
+| relationshipQuery             | string | null     | yes      | The relationship type to load from the graph. If null, load all nodes
+| defaultValue                  | float  | null     | yes      | The default value of the weight in case it is missing or invalid
+| direction                     | string | outgoing | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
 |===
 
 .Results
@@ -147,7 +147,7 @@ CALL gds.alpha.shortestPath.astar.stream({
   relationshipQuery: 'MATCH (p1:Station)-[r:CONNECTION]->(p2:Station) RETURN id(p1) AS source, id(p2) AS target, r.time AS weight',
   startNode: start,
   endNode: end,
-  weightProperty: 'time',
+  relationshipWeightProperty: 'time',
   propertyKeyLat: 'latitude',
   propertyKeyLat: 'longitude'
 })
