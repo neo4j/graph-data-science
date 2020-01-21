@@ -136,7 +136,7 @@ public final class GraphCatalog {
             if (graphsByName.containsKey(graphName)) {
                 return graphsByName.get(graphName);
             } else {
-                throw new NoSuchElementException(String.format("Cannot find graph with name %s", graphName));
+                throw new NoSuchElementException(String.format("Cannot find graph with name '%s'.", graphName));
             }
         }
 

@@ -79,14 +79,15 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
                 .build()
         )
         .build();
+
     String CREATE_QUERY = "CREATE" +
-                      "  (a: Label)" +
-                      ", (b: Label)" +
-                      ", (c: Label)" +
-                      ", (a)-[:TYPE { weight1: 0.0, weight2: 1.0 }]->(b)" +
-                      ", (a)-[:TYPE { weight2: 1.0 }]->(c)" +
-                      ", (b)-[:TYPE { weight1: 0.0 }]->(c)" +
-                      ", (c)-[:TYPE1 { weight1: 0.0 }]->(a)";
+                          "  (a: Label)" +
+                          ", (b: Label)" +
+                          ", (c: Label)" +
+                          ", (a)-[:TYPE { weight1: 0.0, weight2: 1.0 }]->(b)" +
+                          ", (a)-[:TYPE { weight2: 1.0 }]->(c)" +
+                          ", (b)-[:TYPE { weight1: 0.0 }]->(c)" +
+                          ", (c)-[:TYPE1 { weight1: 0.0 }]->(a)";
 
     @Test
     default void testDefaultRelationshipWeightPropertyIsNull() {

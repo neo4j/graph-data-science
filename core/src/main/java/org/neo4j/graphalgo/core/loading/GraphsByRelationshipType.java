@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
-import org.neo4j.helpers.collection.Iterables;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,10 +76,10 @@ public final class GraphsByRelationshipType {
         if (types.isEmpty()) {
             relationshipTypes.add("*");
         }
-        return getGraph(relationshipTypes, maybeRelationshipProperty);
+        return getGraphProjection(relationshipTypes, maybeRelationshipProperty);
     }
 
-    public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    public Graph getGraphProjection(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         if (relationshipTypes.isEmpty()) {
             throw new IllegalArgumentException(String.format("The parameter %s should not be empty. Use `*` to load all relationship types.",
                 ProcedureConstants.RELATIONSHIP_TYPES
@@ -110,7 +109,7 @@ public final class GraphsByRelationshipType {
 
         if (filteredGraphs.isEmpty()) {
             throw new NoSuchElementException(String.format(
-                "Cannot find graph for relationship types: %s and relationship properties %s",
+                "Cannot find graphs for relationship types: '%s' and relationship properties '%s'.",
                 relationshipTypes, maybeRelationshipProperty.orElse("<NOT DEFINED>")
             ));
         } else {

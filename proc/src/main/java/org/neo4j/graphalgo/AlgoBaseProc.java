@@ -52,7 +52,6 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.helpers.collection.Pair;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -182,8 +181,9 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         CONFIG config = configAndName.first();
         Optional<String> maybeGraphName = configAndName.other();
 
-        Optional<String> weightProperty = config instanceof RelationshipWeightConfig ?
-            Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty()) : Optional.empty();
+        Optional<String> weightProperty = config instanceof RelationshipWeightConfig
+            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
+            : Optional.empty();
 
         GraphWithConfig graphCandidate;
         List<String> relationshipTypes;
@@ -198,13 +198,13 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             GraphsByRelationshipType loadedGraph = loader.build(createConfig.getGraphImpl()).build().graphs();
 
             graphCandidate = ImmutableGraphWithConfig.of(loadedGraph, createConfig);
-            relationshipTypes = Collections.singletonList(RelationshipProjections.PROJECT_ALL.name);
+            relationshipTypes = config.relationshipTypes();
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
 
         validateConfig(graphCandidate.config(), config);
-        return graphCandidate.graph().getGraph(relationshipTypes, weightProperty);
+        return graphCandidate.graph().getGraphProjection(relationshipTypes, weightProperty);
     }
 
     private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
