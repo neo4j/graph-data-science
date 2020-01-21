@@ -43,8 +43,8 @@ The library contains a function to calculate closeness between two nodes.
 [source, cypher]
 ----
 RETURN gds.alpha.linkprediction.preferentialAttachment(node1:Node, node2:Node, {
-    relationshipQuery: null,
-    direction: "BOTH"
+    relationshipQuery:STRING,
+    direction:STRING
 })
 ----
 
