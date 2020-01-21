@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.IsFiniteFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -78,7 +79,7 @@ class CosineDocTest extends BaseProcTest {
                 builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
             }
         );
-        db.execute(createGraph);
+        runQuery(createGraph);
         registerProcedures(CosineProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
     }
@@ -97,7 +98,7 @@ class CosineDocTest extends BaseProcTest {
                                 "+--------------------+\n" +
                                 "1 row\n";
 
-        assertEquals(expectedString, db.execute("RETURN gds.alpha.similarity.cosine([3,8,7,5,2,9], [10,8,6,6,4,5]) AS similarity").resultAsString());
+        assertEquals(expectedString, runQuery("RETURN gds.alpha.similarity.cosine([3,8,7,5,2,9], [10,8,6,6,4,5]) AS similarity", Result::resultAsString));
     }
 
     @Test
@@ -116,7 +117,7 @@ class CosineDocTest extends BaseProcTest {
                                 "+-----------------------------------------+\n" +
                                 "1 row\n";
 
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -139,7 +140,7 @@ class CosineDocTest extends BaseProcTest {
                                 "+---------------------------------------------+\n" +
                                 "4 rows\n";
 
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -170,7 +171,7 @@ class CosineDocTest extends BaseProcTest {
                                 "+----------------------------------------------+\n" +
                                 "10 rows\n";
 
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
     
     @Test
@@ -204,7 +205,7 @@ class CosineDocTest extends BaseProcTest {
                                 "+----------------------------------------------+\n" +
                                 "8 rows\n";
 
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -234,7 +235,7 @@ class CosineDocTest extends BaseProcTest {
                                 "+----------------------------------------------+\n" +
                                 "5 rows\n";
 
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -260,7 +261,7 @@ class CosineDocTest extends BaseProcTest {
                                 "+----------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
         
         String controlQuery = "MATCH (p:Person {name: \"Praveena\"})-[:SIMILAR]->(other)," +
                               "       (other)-[:LIKES]->(cuisine)" +
@@ -275,7 +276,7 @@ class CosineDocTest extends BaseProcTest {
                          "+------------+\n" +
                          "2 rows\n";
 
-        assertEquals(expectedString, db.execute(controlQuery).resultAsString());
+        assertEquals(expectedString, runQuery(controlQuery, Result::resultAsString));
     }
     
     @Test
@@ -304,7 +305,7 @@ class CosineDocTest extends BaseProcTest {
                                 "+---------------------------------------------+\n" +
                                 "2 rows\n";
 
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
         
     }
 
@@ -358,7 +359,7 @@ class CosineDocTest extends BaseProcTest {
                                 "+--------------------------------------------------+\n" +
                                 "21 rows\n";
 
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -382,7 +383,7 @@ class CosineDocTest extends BaseProcTest {
                                 "+----------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
 
     }
 
