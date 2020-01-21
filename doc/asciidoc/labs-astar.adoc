@@ -18,11 +18,9 @@ This section includes:
 
 * <<algorithms-a_star-context, History and explanation>>
 * <<algorithms-a_star-usecase, Use-cases - when to use the A* algorithm>>
+* <<algorithms-a_star-syntax, Syntax>>
 * <<algorithms-a_star-sample, A* algorithm sample>>
 * <<algorithms-a_star-cp, Cypher projection>>
-* <<algorithms-a_star-syntax, Syntax>>
-* <<algorithms-a_star-support, Graph type support>>
-* <<algorithms-a_star-imp, Implementations>>
 
 
 [[algorithms-a_star-context]]
