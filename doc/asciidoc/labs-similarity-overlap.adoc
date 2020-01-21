@@ -358,7 +358,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-CALL algo.similarity.overlap.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.alpha.similarity.overlap.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD item1, item2, count1, count2, similarity
 ----
 

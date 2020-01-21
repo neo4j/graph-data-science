@@ -107,13 +107,13 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 .The following will run the k-spanning tree algorithms and write back results:
 [source, cypher]
 ----
-CALL algo.spanningTree.kmin.write(configuration: MAP)
+CALL gds.alpha.spanningTree.kmin.write(configuration: MAP)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
 [source, cypher]
 ----
-CALL algo.spanningTree.kmax.write(configuration: MAP)
+CALL gds.alpha.spanningTree.kmax.write(configuration: MAP)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
@@ -219,7 +219,7 @@ Maximum weighted tree spanning algorithm is similar to the minimum one, except t
 [source, cypher]
 ----
 MATCH (n:Place{id: 'D'})
-CALL algo.spanningTree.maximum.write({
+CALL gds.alpha.spanningTree.maximum.write({
   nodeProjection: 'Place',
   relationshipProjection: {
     LINK: {
