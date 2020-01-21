@@ -24,32 +24,29 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
-import static org.neo4j.graphalgo.TestSupport.crossArguments;
-import static org.neo4j.graphalgo.TestSupport.toArguments;
 
 class WccTest extends AlgoTestBase {
 
@@ -87,22 +84,21 @@ class WccTest extends AlgoTestBase {
         return SET_SIZE;
     }
 
-    static Stream<Arguments> allTypesWithoutCypherAndDirections() {
-        return crossArguments(
-            toArguments(TestSupport::allTypesWithoutCypher),
-            toArguments(() -> Arrays.stream(Direction.values()))
-        );
-    }
-
-    @ParameterizedTest(name = "factory = {0}, direction = {1}")
-    @MethodSource("allTypesWithoutCypherAndDirections")
-    void shouldComputeComponents(Class<? extends GraphFactory> graphFactory, Direction direction) {
-        Graph graph = new GraphLoader(db)
-            .withExecutorService(Pools.DEFAULT)
-            .withAnyLabel()
-            .withRelationshipType(RELATIONSHIP_TYPE)
-            .withDirection(direction)
-            .load(graphFactory);
+    @ParameterizedTest(name = "projection = {1}")
+    @EnumSource(Projection.class)
+    void shouldComputeComponents(Projection projection) {
+        Graph graph = ImmutableModernGraphLoader.builder()
+            .api(db)
+            .log(NullLog.getInstance())
+            .createConfig(new StoreConfigBuilder()
+                .loadAnyLabel(true)
+                .addRelationshipType(RELATIONSHIP_TYPE.name())
+                .globalProjection(projection)
+                .build()
+            )
+            .legacyMode(false)
+            .build()
+            .load(HugeGraphFactory.class);
 
         DisjointSetStruct result = run(graph);
 
