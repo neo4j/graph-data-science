@@ -45,7 +45,7 @@ Eigenvector Centrality can be used in many of the https://arxiv.org/pdf/1407.510
 [source, cypher]
 ----
 CALL gds.alpha.eigenvector.write(configuration: MAP)
-YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
+YIELD nodes, iterations, dampingFactor, writeProperty, write, loadMillis, computeMillis, writeMillis
 ----
 
 .Configuration
@@ -58,7 +58,7 @@ YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 | weightProperty   | string     | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | normalization    | string     | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
 | maxIterations    | int        | 20                     | yes      | The maximum number of iterations of EigenvectorCentrality to run.
-| sourceNodes      | list<node> | empty list             | yes      | A list f nodes to start the computation from.
+| sourceNodes      | list<node> | empty list             | yes      | A list of nodes to start the computation from.
 |===
 
 .Results
@@ -66,7 +66,10 @@ YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 |===
 | Name          | Type    | Description
 | nodes         | int     | The number of nodes considered.
+| iterations    | int     | The number of iterations run.
+| dampingFactor | float   | The damping factor used.
 | writeProperty | string  | The property name written back to.
+| write         | boolean | Specifies if the result was written back as node property.
 | loadMillis    | int     | Milliseconds for loading data.
 | computeMillis | int     | Milliseconds for running the algorithm.
 | writeMillis   | int     | Milliseconds for writing result data back.
