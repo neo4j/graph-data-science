@@ -63,7 +63,7 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.pageRank.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.pageRank.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD nodes, maxIterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
 ----
 
@@ -105,7 +105,7 @@ YIELD nodes, maxIterations, loadMillis, computeMillis, writeMillis, dampingFacto
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.pageRank.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.pageRank.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD node, score
 ----
 
@@ -158,7 +158,7 @@ The configuration is the same as for the `write` mode.
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher]
 ----
-CALL algo.labelPropagation.<mode>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.pageRank.<mode>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory, mapView
 ----
 
@@ -453,7 +453,7 @@ See <<projected-graph-model, Projected Graph Model>> for more details.
 .Using a named graph:
 [source, cypher]
 ----
-CALL algo.beta.graph.create('myGraph', ['Page'], ['LINKS']);
+CALL gds.graph.create('myGraph', ['Page'], ['LINKS']);
 
 CALL gds.pageRank.stream('myGraph')
 YIELD nodeId, score
