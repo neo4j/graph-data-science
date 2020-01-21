@@ -19,13 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
-import org.neo4j.graphalgo.core.ModernGraphLoader;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 
 import java.util.function.Consumer;
 
@@ -48,17 +43,5 @@ public class AlgoTestBase {
 
     protected void runQuery(GraphDatabaseAPI passedInDatabase, String query, Consumer<Result.ResultRow> check) {
         QueryRunner.runQueryWithRowConsumer(passedInDatabase, query, check);
-    }
-
-    protected ModernGraphLoader initLoader(GraphCreateConfig graphCreateConfig) {
-        return initLoader(graphCreateConfig, NullLog.getInstance());
-    }
-
-    protected ModernGraphLoader initLoader(GraphCreateConfig graphCreateConfig, Log log) {
-        return ImmutableModernGraphLoader.builder()
-            .api(db)
-            .createConfig(graphCreateConfig)
-            .log(log)
-            .build();
     }
 }
