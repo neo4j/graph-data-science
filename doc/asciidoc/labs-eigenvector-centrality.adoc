@@ -20,28 +20,87 @@ This section includes:
 
 * <<algorithms-eigenvector-context, History and explanation>>
 * <<algorithms-eigenvector-usecase, Use-cases - when to use the Eigenvector Centrality algorithm>>
-* <<algorithms-eigenvector-sample, Eigenvector Centrality algorithm sample>>
-* <<algorithms-eigenvector-hgp, Huge graph projection>>
-* <<algorithms-eigenvector-cp, Cypher projection>>
 * <<algorithms-eigenvector-syntax, Syntax>>
+* <<algorithms-eigenvector-sample, Eigenvector Centrality algorithm sample>>
+* <<algorithms-eigenvector-cp, Cypher projection>>
 * <<algorithms-eigenvector-support, Graph type support>>
 
 
 [[algorithms-eigenvector-context]]
 == History and explanation
 
-// tag::explanation[]
 Eigenvector Centrality was proposed by Phillip Bonacich, in his 1986 paper http://www.leonidzhukov.net/hse/2014/socialnetworks/papers/Bonacich-Centrality.pdf[Power and Centrality: A Family of Measures^].
 It was the first of the centrality measures that considered the transitive importance of a node in a graph, rather than only considering its direct importance.
-// end::explanation[]
 
 
 [[algorithms-eigenvector-usecase]]
 == Use-cases - when to use the Eigenvector Centrality algorithm
 
-// tag::use-case[]
 Eigenvector Centrality can be used in many of the https://arxiv.org/pdf/1407.5107.pdf[same use cases as the PageRank algorithm].
-// end::use-case[]
+
+[[algorithms-eigenvector-syntax]]
+== Syntax
+
+.The following will run the algorithm and write back results:
+[source, cypher]
+----
+CALL gds.alpha.eigenvector.write(configuration: MAP)
+YIELD nodes, iterations, dampingFactor, writeProperty, write, loadMillis, computeMillis, writeMillis
+----
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name             | Type       | Default                | Optional | Description
+| concurrency      | int        | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency  | int        | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int        | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| weightProperty   | string     | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| normalization    | string     | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
+| maxIterations    | int        | 20                     | yes      | The maximum number of iterations of EigenvectorCentrality to run.
+| sourceNodes      | list<node> | empty list             | yes      | A list of nodes to start the computation from.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type    | Description
+| nodes         | int     | The number of nodes considered.
+| iterations    | int     | The number of iterations run.
+| dampingFactor | float   | The damping factor used.
+| writeProperty | string  | The property name written back to.
+| write         | boolean | Specifies if the result was written back as node property.
+| loadMillis    | int     | Milliseconds for loading data.
+| computeMillis | int     | Milliseconds for running the algorithm.
+| writeMillis   | int     | Milliseconds for writing result data back.
+|===
+
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+CALL gds.alpha.eigenvector.stream(configuration: MAP)
+YIELD node, score
+----
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name             | Type       | Default                | Optional | Description
+| concurrency      | int        | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency  | int        | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| weightProperty   | string     | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| normalization    | string     | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
+| maxIterations    | int        | 20                     | yes      | The maximum number of iterations of EigenvectorCentrality to run.
+| sourceNodes      | list<node> | empty list             | yes      | A list f nodes to start the computation from.
+|===
+
+.Results
+[opts="header"]
+|===
+| Name  | Type  | Description
+| nodeId  | long  | Node ID
+| score | float | Eigenvector Centrality weight
+|===
 
 [[algorithms-eigenvector-sample]]
 == Eigenvector Centrality algorithm sample
@@ -53,41 +112,76 @@ image::pagerank.png[]
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/eigenvector-centrality.cypher[tag=create-sample-graph]
+CREATE (home:Page {name:'Home'}),
+       (about:Page {name:'About'}),
+       (product:Page {name:'Product'}),
+       (links:Page {name:'Links'}),
+       (a:Page {name:'Site A'}),
+       (b:Page {name:'Site B'}),
+       (c:Page {name:'Site C'}),
+       (d:Page {name:'Site D'}),
+       (home)-[:LINKS]->(about),
+       (about)-[:LINKS]->(home),
+       (product)-[:LINKS]->(home),
+       (home)-[:LINKS]->(product),
+       (links)-[:LINKS]->(home),
+       (home)-[:LINKS]->(links),
+       (links)-[:LINKS]->(a),
+       (a)-[:LINKS]->(home),
+       (links)-[:LINKS]->(b),
+       (b)-[:LINKS]->(home),
+       (links)-[:LINKS]->(c),
+       (c)-[:LINKS]->(home),
+       (links)-[:LINKS]->(d),
+       (d)-[:LINKS]->(home)
 ----
 
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-include::scripts/eigenvector-centrality.cypher[tag=stream-sample-graph]
+CALL gds.alpha.eigenvector.stream({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS'
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS page, score
+ORDER BY score DESC
 ----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| page    | score
+| Home    | 31.4586636
+| About   | 14.4039280
+| Product | 14.4039280
+| Links   | 14.4039280
+| Site A  | 6.57243168
+| Site B  | 6.57243168
+| Site C  | 6.57243168
+| Site D  | 6.57243168
+|===
+
+As we might expect, the _Home_ page has the highest Eigenvector Centrality because it has incoming links from all other pages.
+We can also see that it's not only the number of incoming links that is important, but also the importance of the pages behind those links.
 
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-include::scripts/eigenvector-centrality.cypher[tag=write-sample-graph]
+CALL gds.alpha.eigenvector.write({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  writeProperty: 'eigenvector'
+})
+YIELD nodes, iterations, dampingFactor, writeProperty
 ----
 
-// tag::stream-sample-graph-result[]
 .Results
-[opts="header",cols="1,1"]
+[opts="header"]
 |===
-| Name    | Eigenvector Centrality
-| Home    | 31.45819
-| About   | 14.40379
-| Product | 14.40379
-| Links   | 14.40379
-| Site A  | 6.572370000000001
-| Site C  | 6.572370000000001
-| Site D  | 6.572370000000001
-| Site B  | 6.572370000000001
+| nodes | iterations | dampingFactor | writeProperty
+| 0     | 20         | 1.0           | "eigenvector"
 |===
-// end::stream-sample-graph-result[]
-
-// tag::stream-sample-graph-explanation[]
-As we might expect, the _Home_ page has the highest Eigenvector Centrality because it has incoming links from all other pages.
-We can also see that it's not only the number of incoming links that is important, but also the importance of the pages behind those links.
-// end::stream-sample-graph-explanation[]
 
 By default, the scores returned by the Eigenvector Centrality are not normalized.
 We can specify a normalization using the `normalization` parameter.
@@ -100,37 +194,30 @@ The algorithm supports the following options:
 .The following will run the algorithm and stream results using `max` normalization:
 [source, cypher]
 ----
-include::scripts/eigenvector-centrality.cypher[tag=stream-sample-graph-max-norm]
+CALL gds.alpha.eigenvector.stream({
+  nodeProjection: 'Page',
+  relationshipProjection: 'LINKS',
+  normalization: 'max'
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS page,score
+ORDER BY score DESC
 ----
 
-// tag::stream-sample-graph-max-norm-result[]
 .Results
 [opts="header",cols="1,1"]
 |===
 | Name    | Eigenvector Centrality
 | Home    | 1.0
-| About   | 0.45787090738532643
-| Product | 0.45787090738532643
-| Links   | 0.45787090738532643
-| Site A  | 0.2089239717860437
-| Site C  | 0.2089239717860437
-| Site D  | 0.2089239717860437
-| Site B  | 0.2089239717860437
+| About   | 0.4578684012627926
+| Product | 0.4578684012627926
+| Links   | 0.4578684012627926
+| Site A  | 0.2089227868044046
+| Site B  | 0.2089227868044046
+| Site C  | 0.2089227868044046
+| Site D  | 0.2089227868044046
 
 |===
-// end::stream-sample-graph-max-norm-result[]
-
-[[algorithms-eigenvector-hgp]]
-== Huge graph projection
-
-include::huge-projection.adoc[tag=explanation]
-
-.Set `graph:'huge'` in the config:
-
-[source, cypher]
-----
-include::scripts/eigenvector-centrality.cypher[tag=huge-projection]
-----
 
 
 [[algorithms-eigenvector-cp]]
@@ -138,83 +225,17 @@ include::scripts/eigenvector-centrality.cypher[tag=huge-projection]
 
 include::projected-graph-model/cypher-projection.adoc[tag=explanation]
 
-.Set `graph:'cypher'` in the config:
+.Use `nodeQuery` and `relationshipQuery` in the config:
 
 [source, cypher]
 ----
-include::scripts/eigenvector-centrality.cypher[tag=cypher-loading]
+CALL gds.alpha.eigenvector.write({
+  nodeQuery: 'MATCH (p:Page) RETURN id(p) as id',
+  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page) RETURN id(p1) as source, id(p2) as target',
+  maxIterations: 5
+})
+YIELD nodes, iterations, dampingFactor, writeProperty
 ----
-
-
-[[algorithms-eigenvector-syntax]]
-== Syntax
-
-.The following will run the algorithm and write back results:
-[source, cypher]
-----
-CALL algo.eigenvector(label:String, relationship:String,
-    {write: true, writeProperty:'eigenvector', concurrency:4})
-YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type    | Default                | Optional | Description
-| label            | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
-| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| weightProperty   | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue     | float   | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
-| write            | boolean | true                   | yes      | Specify if the result should be written back as a node property.
-| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-| normalization    | string  | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name          | Type    | Description
-| nodes         | int     | The number of nodes considered.
-| writeProperty | string  | The property name written back to.
-| write         | boolean | Specifies if the result was written back as node property.
-| loadMillis    | int     | Milliseconds for loading data.
-| computeMillis | int     | Milliseconds for running the algorithm.
-| writeMillis   | int     | Milliseconds for writing result data back.
-|===
-
-.The following will run the algorithm and stream results:
-[source, cypher]
-----
-CALL algo.eigenvector.stream(label:String, relationship:String,
-    {concurrency:4})
-YIELD node, score
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type   | Default                | Optional | Description
-| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string | null                   | yes      | The relationship type to load from the graph. If null, load all nodes.
-| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| weightProperty   | string | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue     | float  | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
-| graph            | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-| normalization    | string | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
-|===
-
-.Results
-[opts="header"]
-|===
-| Name  | Type  | Description
-| nodeId  | long  | Node ID
-| score | float | Eigenvector Centrality weight
-|===
-
 
 [[algorithms-eigenvector-support]]
 == Graph type support
