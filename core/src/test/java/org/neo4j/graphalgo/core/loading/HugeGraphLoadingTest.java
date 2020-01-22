@@ -22,7 +22,10 @@ package org.neo4j.graphalgo.core.loading;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -33,8 +36,13 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 final class HugeGraphLoadingTest {
 
@@ -149,5 +157,49 @@ final class HugeGraphLoadingTest {
                 .load(HugeGraphFactory.class);
 
         assertEquals(2, graph.relationshipCount());
+    }
+
+    @Test
+    void testMultipleRelationshipProjectionsOnTheSameType() {
+        String storeQuery = "CREATE" +
+                            "  (a:Node {id: 0})" +
+                            ", (b:Node {id: 1})" +
+                            ", (a)-[:TYPE]->(b)";
+        db.execute(storeQuery);
+
+        GraphsByRelationshipType graphsByRelationshipType = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel(true)
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_NATURAL",
+                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL)
+            )
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_REVERSE",
+                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE)
+            )
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_UNDIRECTED",
+                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.UNDIRECTED)
+            )
+            .addNodeProperty(PropertyMapping.of("id", 42.0))
+            .legacyMode(false)
+            .build()
+            .graphs();
+
+        Graph natural = graphsByRelationshipType.getGraphProjection("TYPE_NATURAL");
+        assertGraphEquals(fromGdl("({id: 0})-->({id: 1})"), natural);
+
+        Graph reverse = graphsByRelationshipType.getGraphProjection("TYPE_REVERSE");
+        assertGraphEquals(fromGdl("({id: 1})-->({id: 0})"), reverse);
+
+        Graph undirected = graphsByRelationshipType.getGraphProjection("TYPE_UNDIRECTED");
+        assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), undirected);
+
+        Graph both = graphsByRelationshipType.getGraphProjection(Arrays.asList("TYPE_NATURAL", "TYPE_REVERSE"), Optional.empty());
+        assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), both);
+
+        Graph union = graphsByRelationshipType.getUnion();
+        assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b), (a)<--(b), (a)-->(b)"), union);
     }
 }

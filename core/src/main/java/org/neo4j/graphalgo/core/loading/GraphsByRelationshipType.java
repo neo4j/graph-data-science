@@ -79,6 +79,10 @@ public final class GraphsByRelationshipType {
         return getGraphProjection(relationshipTypes, maybeRelationshipProperty);
     }
 
+    public Graph getGraphProjection(String relationshipType) {
+        return getGraphProjection(Collections.singletonList(relationshipType), Optional.empty());
+    }
+
     public Graph getGraphProjection(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         if (relationshipTypes.isEmpty()) {
             throw new IllegalArgumentException(String.format("The parameter %s should not be empty. Use `*` to load all relationship types.",
