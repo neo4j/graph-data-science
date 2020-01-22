@@ -76,7 +76,7 @@ The constraints of <<algorithms-pagerank-usage,PageRank>> also apply to Random W
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.randomWalk.stream(configuration: MAP)
+CALL gds.alpha.randomWalk.stream(configuration: MAP)
 YIELD startNodeId, nodeIds, path
 ----
 
