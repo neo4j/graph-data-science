@@ -76,7 +76,7 @@ public class PageRankBenchmarkLdbc {
             .loadAnyLabel(true)
             .loadAnyRelationshipType(true)
             .build()
-            .load(HugeGraphFactory.class);
+            .graph();
         batchSize = parallel ? 10_000 : 2_000_000_000;
     }
 

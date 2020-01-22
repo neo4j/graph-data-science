@@ -92,7 +92,7 @@ class WccTest extends AlgoTestBase {
             .globalProjection(projection)
             .legacyMode(false)
             .build()
-            .load(HugeGraphFactory.class);
+            .graph();
 
         DisjointSetStruct result = run(graph);
 

@@ -95,6 +95,7 @@ final class GraphLoaderBuilders {
 
         return ImmutableModernGraphLoader.of(
             api,
+            HugeGraphFactory.class,
             executorService.orElse(Pools.DEFAULT),
             tracker.orElse(AllocationTracker.EMPTY),
             terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
@@ -146,6 +147,7 @@ final class GraphLoaderBuilders {
 
         return ImmutableModernGraphLoader.of(
             api,
+            CypherGraphFactory.class,
             executorService.orElse(Pools.DEFAULT),
             tracker.orElse(AllocationTracker.EMPTY),
             terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),

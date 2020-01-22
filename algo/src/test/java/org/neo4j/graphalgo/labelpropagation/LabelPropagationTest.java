@@ -129,7 +129,7 @@ final class LabelPropagationTest extends AlgoTestBase {
             .addRelationshipType("FOLLOW")
             .addNodeProperty(PropertyMapping.of("seedId", 0.0))
             .build()
-            .load(HugeGraphFactory.class);
+            .graph();
 
         LabelPropagation lp = new LabelPropagation(
             graph,

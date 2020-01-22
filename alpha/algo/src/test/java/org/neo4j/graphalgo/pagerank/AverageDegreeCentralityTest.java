@@ -125,7 +125,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                 .legacyMode(false)
                 .build()
-                .load(graphFactory)
+                .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -134,7 +134,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .addRelationshipType("TYPE1")
                 .legacyMode(false)
                 .build()
-                .load(graphFactory);
+                .graph();
         }
 
         AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);
@@ -155,7 +155,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .relationshipQuery("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
                 .legacyMode(false)
                 .build()
-                .load(graphFactory)
+                .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -165,7 +165,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .globalProjection(Projection.REVERSE)
                 .legacyMode(false)
                 .build()
-                .load(graphFactory);
+                .graph();
         }
 
         AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);

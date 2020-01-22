@@ -78,7 +78,7 @@ public class ExportRelationshipsBenchmark extends BaseBenchmark {
             .loadAnyLabel(true)
             .loadAnyRelationshipType(true)
             .build()
-            .load(HugeGraphFactory.class);
+            .graph();
 
         this.exporter = RelationshipExporter.of(db, graph, OUTGOING, TerminationFlag.RUNNING_TRUE).build();
     }

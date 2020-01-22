@@ -113,7 +113,7 @@ public class WeightedPageRankBenchmark extends  BaseBenchmark {
             .loadAnyRelationshipType(true)
             .addRelationshipProperty(PropertyMapping.of("weight", 0.0))
             .build()
-            .load(HugeGraphFactory.class);
+            .graph();
 
         try {
             final PageRank.Config algoConfig = new PageRank.Config(iterations, 0.85, PageRank.DEFAULT_TOLERANCE);

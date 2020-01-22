@@ -83,7 +83,7 @@ public class AllShortestPathsComparisionBenchmark extends BaseBenchmark {
             .loadAnyRelationshipType(true)
             .addRelationshipProperty(PropertyMapping.of("cost", 1.0))
             .build()
-            .load(HugeGraphFactory.class);
+            .graph();
     }
 
     @TearDown

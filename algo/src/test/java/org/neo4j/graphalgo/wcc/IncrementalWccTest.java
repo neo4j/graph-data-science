@@ -87,7 +87,7 @@ class IncrementalWccTest extends AlgoTestBase {
             .addNodeProperty(PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L))
             .legacyMode(false)
             .build()
-            .load(HugeGraphFactory.class);
+            .graph();
 
         WccStreamConfig config = ImmutableWccStreamConfig.builder()
             .concurrency(Pools.DEFAULT_CONCURRENCY)

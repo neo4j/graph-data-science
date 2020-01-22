@@ -138,7 +138,7 @@ final class PageRankTest extends AlgoTestBase {
                     ))
                     .legacyMode(false)
                     .build()
-                    .load(graphImpl)
+                    .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -147,7 +147,7 @@ final class PageRankTest extends AlgoTestBase {
                 .addRelationshipType(RELATIONSHIP_TYPE)
                 .legacyMode(false)
                 .build()
-                .load(graphImpl);
+                .graph();
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
@@ -198,7 +198,7 @@ final class PageRankTest extends AlgoTestBase {
                     ))
                     .legacyMode(false)
                     .build()
-                    .load(graphImpl)
+                    .graph()
             );
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
                     .create(graph, DEFAULT_CONFIG, LongStream.empty())
@@ -212,7 +212,7 @@ final class PageRankTest extends AlgoTestBase {
                 .globalProjection(Projection.REVERSE)
                 .legacyMode(false)
                 .build()
-                .load(graphImpl);
+                .graph();
 
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
                     .create(graph, DEFAULT_CONFIG, LongStream.empty())
@@ -246,7 +246,7 @@ final class PageRankTest extends AlgoTestBase {
                 ))
                 .legacyMode(false)
                 .build()
-                .load(graphImpl)
+                .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -255,7 +255,7 @@ final class PageRankTest extends AlgoTestBase {
                 .addRelationshipType(RELATIONSHIP_TYPE)
                 .legacyMode(false)
                 .build()
-                .load(graphImpl);
+                .graph();
         }
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization

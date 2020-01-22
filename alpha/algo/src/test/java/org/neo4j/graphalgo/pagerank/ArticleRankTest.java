@@ -127,7 +127,7 @@ final class ArticleRankTest extends AlgoTestBase {
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                 .legacyMode(false)
                 .build()
-                .load(graphFactory)
+                .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -136,7 +136,7 @@ final class ArticleRankTest extends AlgoTestBase {
                 .addRelationshipType("TYPE1")
                 .legacyMode(false)
                 .build()
-                .load(graphFactory);
+                .graph();
         }
 
         final CentralityResult rankResult = LabsPageRankAlgorithmType.ARTICLE_RANK

@@ -101,7 +101,7 @@ public class WeightedPageRankBenchmarkLdbc {
             .loadAnyRelationshipType(true)
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
             .build()
-            .load(HugeGraphFactory.class);
+            .graph();
 
         batchSize = parallel ? 10_000 : 2_000_000_000;
     }

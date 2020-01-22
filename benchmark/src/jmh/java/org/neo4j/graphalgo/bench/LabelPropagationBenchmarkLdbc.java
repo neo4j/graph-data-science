@@ -76,7 +76,7 @@ public class LabelPropagationBenchmarkLdbc {
             )
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0D))
             .build()
-            .load(HugeGraphFactory.class);
+            .graph();
     }
 
     @TearDown

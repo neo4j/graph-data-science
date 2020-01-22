@@ -73,7 +73,7 @@ public class MsBfsBenchmarkLdbc {
             .loadAnyLabel(true)
             .loadAnyRelationshipType(true)
             .build()
-            .load(HugeGraphFactory.class);
+            .graph();
     }
 
     @TearDown

@@ -92,7 +92,7 @@ public class TriangleCountBenchmark {
                 .addRelationshipType(RELATIONSHIP)
                 .globalProjection(Projection.UNDIRECTED)
                 .build()
-                .load(HugeGraphFactory.class);
+                .graph();
         }
 
         concurrency = parallel ? Pools.DEFAULT_CONCURRENCY : 1;

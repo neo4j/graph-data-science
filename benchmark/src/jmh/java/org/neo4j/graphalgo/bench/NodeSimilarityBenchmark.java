@@ -103,7 +103,7 @@ public class NodeSimilarityBenchmark {
             .loadAnyLabel(true)
             .loadAnyRelationshipType(true)
             .build()
-            .load(HugeGraphFactory.class);
+            .graph();
     }
 
     @TearDown
