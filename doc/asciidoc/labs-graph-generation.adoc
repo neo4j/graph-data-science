@@ -20,7 +20,7 @@ The graph generation is parameterized by three dimensions:
 
  * node count - the number of nodes in the generated graph
  * average degree - describes the average out-degree of the generated nodes
- * relationship distribution function - the probablity distribution method used to connect generated nodes
+ * relationship distribution function - the probability distribution method used to connect generated nodes
 
 
 [[labs-graph-generation-syntax]]
@@ -29,29 +29,29 @@ The graph generation is parameterized by three dimensions:
 .The following describes the API for running the algorithm
 [source, cypher]
 ----
-CALL algo.beta.graph.generate(name: String, nodeCount: Integer, averageDegree: Integer, {
+CALL gds.beta.graph.generate(graphName: String, nodeCount: Integer, averageDegree: Integer, {
   relationshipDistribution: String,
   relationshipProperty: Map
 })
-YIELD name, nodes, relationships, generateMillis, averageDegree, relationshipDistribution, relationshipProperty
+YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegree, relationshipDistribution, relationshipProperty
 ----
 
 .Parameters
 [opts="header",cols="1m,1,1m,1,4"]
 |===
-| Name                  | Type    | Default | Optional | Description
-| name                  | string  | null    | no       | The name under which the generated graph is stored.
-| nodeCount             | integer | null    | no       | The number of generated nodes.
-| averageDistribution   | integer | null    | no       | The average out-degree of generated nodes.
-| config                | map     | {}      | yes      | Additional configuration, see below.
+| Name                | Type    | Default | Optional | Description
+| graphName           | string  | null    | no       | The name under which the generated graph is stored.
+| nodeCount           | integer | null    | no       | The number of generated nodes.
+| averageDistribution | integer | null    | no       | The average out-degree of generated nodes.
+| config              | map     | {}      | yes      | Additional configuration, see below.
 |===
 
 .Configuration
 [opts="header",cols="1m,1,1m,1,4"]
 |===
 | Name                      | Type      | Default  | Optional | Description
-| relationshipDistribution  | string    | UNIFORM  | yes      | The probablity distribution method used to connect generated nodes. For more information see <<labs-graph-generation-distribution>>.
-| relationshipSeed  | long    | null  | yes      | The seed used for generating relationships.
+| relationshipDistribution  | string    | UNIFORM  | yes      | The probability distribution method used to connect generated nodes. For more information see <<labs-graph-generation-distribution>>.
+| relationshipSeed          | long      | null     | yes      | The seed used for generating relationships.
 | relationshipProperty      | map       | {}       | yes      | Describes the method used to generate a relationship property. By default no relationship property is generated. For more information see <<labs-graph-generation-relationship-property>>.
 |===
 
@@ -59,13 +59,13 @@ YIELD name, nodes, relationships, generateMillis, averageDegree, relationshipDis
 [opts="header",cols="1m,1,6"]
 |===
 | Name                      | Type       | Description
-| name                      | string     | The name under wich the stored graph was stored.
+| name                      | string     | The name under which the stored graph was stored.
 | nodes                     | int        | The number of nodes in the graph.
 | relationships             | int        | The number of relationships in the graph.
 | generateMillis            | int        | Milliseconds for generating the graph.
+| relationshipSeed          | long       | The seed used for generating relationships.
 | averageDegree             | double     | The average out degree of the generated nodes.
-| relationshipDistribution  | string     | The probablity distribution method used to connect generated nodes.
-| relationshipSeed  | long    | null  | yes      | The seed used for generating relationships.
+| relationshipDistribution  | string     | The probability distribution method used to connect generated nodes.
 | relationshipProperty      | string     | The configuration of the generated relationship property.
 |===
 
