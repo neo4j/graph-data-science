@@ -41,6 +41,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
@@ -161,11 +162,10 @@ final class HugeGraphLoadingTest {
 
     @Test
     void testMultipleRelationshipProjectionsOnTheSameType() {
-        String storeQuery = "CREATE" +
-                            "  (a:Node {id: 0})" +
-                            ", (b:Node {id: 1})" +
-                            ", (a)-[:TYPE]->(b)";
-        db.execute(storeQuery);
+        runQuery(db, "CREATE" +
+                     "  (a:Node {id: 0})" +
+                     ", (b:Node {id: 1})" +
+                     ", (a)-[:TYPE]->(b)");
 
         GraphsByRelationshipType graphsByRelationshipType = new StoreLoaderBuilder()
             .api(db)
