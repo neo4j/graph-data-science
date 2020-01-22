@@ -76,6 +76,7 @@ class GraphGeneratorTest {
         }
         Graph graph = relImporter.buildGraph();
         assertGraphEquals(EXPECTED_UNWEIGHTED, graph);
+        assertEquals(nodeCount, graph.relationshipCount());
     }
 
     @ParameterizedTest(name = "{0}")
