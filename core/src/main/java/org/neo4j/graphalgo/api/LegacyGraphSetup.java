@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -154,6 +155,11 @@ public final class LegacyGraphSetup implements GraphSetup {
     @Override
     public @NotNull String relationshipType() {
         return relationshipType;
+    }
+
+    @Override
+    public @NotNull RelationshipProjections relationshipProjections() {
+        throw new UnsupportedOperationException("Relationship projections are not available in legacy mode");
     }
 
     @Override

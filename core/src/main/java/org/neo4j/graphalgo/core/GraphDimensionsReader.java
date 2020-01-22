@@ -22,8 +22,11 @@ package org.neo4j.graphalgo.core;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.apache.commons.lang3.StringUtils;
+import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
@@ -37,6 +40,7 @@ import org.neo4j.kernel.impl.newapi.InternalReadOps;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -68,11 +72,26 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         RelationshipTypeMappings.Builder mappingsBuilder = new RelationshipTypeMappings.Builder();
         if (readTokens && !loadAnyRelationshipType()) {
-            Set<String> types = ProjectionParser.parse(setup.relationshipType());
-            for (String typeName : types) {
-                int typeId = tokenRead.relationshipType(typeName);
-                RelationshipTypeMapping typeMapping = RelationshipTypeMapping.of(typeName, typeId);
-                mappingsBuilder.addMapping(typeMapping);
+            if (setup.legacyMode()) {
+                Set<String> types = ProjectionParser.parse(setup.relationshipType());
+                for (String typeName : types) {
+                    int typeId = tokenRead.relationshipType(typeName);
+                    RelationshipTypeMapping typeMapping = RelationshipTypeMapping.of(typeName, typeId);
+                    mappingsBuilder.addMapping(typeMapping);
+                }
+            } else {
+                for (Map.Entry<ElementIdentifier, RelationshipProjection> entry : setup.relationshipProjections().projections().entrySet()) {
+                    RelationshipProjection relationshipProjection = entry.getValue();
+                    relationshipProjection.type().orElseThrow(IllegalArgumentException::new);
+
+                    String elementIdentifier = entry.getKey().name;
+                    String typeName = relationshipProjection.type().get();
+                    Projection projection = relationshipProjection.projection();
+                    int typeId = tokenRead.relationshipType(typeName);
+
+                    RelationshipTypeMapping typeMapping = RelationshipTypeMapping.of(elementIdentifier, typeName, projection, typeId);
+                    mappingsBuilder.addMapping(typeMapping);
+                }
             }
         }
         RelationshipTypeMappings relationshipTypeMappings = mappingsBuilder.build();

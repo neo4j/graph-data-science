@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -109,6 +110,11 @@ public class ModernGraphSetup implements GraphSetup {
     @Override
     public @NotNull String relationshipType() {
         return createConfig.relationshipProjection().typeFilter();
+    }
+
+    @Override
+    public @NotNull RelationshipProjections relationshipProjections() {
+        return createConfig.relationshipProjection();
     }
 
     @Override

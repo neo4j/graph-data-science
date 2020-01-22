@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
@@ -191,7 +192,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        mapping -> createBuildersForRelationshipType(tracker)
+                        mapping -> createBuildersForRelationshipType(mapping, tracker)
                 ));
 
         ScanningRelationshipsImporter scanningImporter = new ScanningRelationshipsImporter(
@@ -208,7 +209,7 @@ public final class HugeGraphFactory extends GraphFactory {
         ObjectLongMap<RelationshipTypeMapping> relationshipCounts = scanningImporter.call(setup.log());
 
         return allBuilders.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey().typeName(),
+                entry -> entry.getKey().elementIdentifier(),
                 entry -> {
                     Pair<RelationshipsBuilder, RelationshipsBuilder> builders = entry.getValue();
                     RelationshipsBuilder outgoingRelationshipsBuilder = builders.getOne();
@@ -290,7 +291,10 @@ public final class HugeGraphFactory extends GraphFactory {
                 }));
     }
 
-    private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuildersForRelationshipType(AllocationTracker tracker) {
+    private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuildersForRelationshipType(
+        RelationshipTypeMapping relationshipTypeMapping,
+        AllocationTracker tracker
+    ) {
         RelationshipsBuilder outgoingRelationshipsBuilder = null;
         RelationshipsBuilder incomingRelationshipsBuilder = null;
 
@@ -311,26 +315,45 @@ public final class HugeGraphFactory extends GraphFactory {
             deduplicationStrategies = new DeduplicationStrategy[]{deduplicationStrategy};
         }
 
-        if (setup.loadAsUndirected()) {
-            outgoingRelationshipsBuilder = new RelationshipsBuilder(
+        if (setup.legacyMode()) {
+            if (setup.loadAsUndirected()) {
+                outgoingRelationshipsBuilder = new RelationshipsBuilder(
                     deduplicationStrategies,
                     tracker,
-                    setup.relationshipPropertyMappings().numberOfMappings());
-        } else {
-            if (setup.loadOutgoing()) {
-                outgoingRelationshipsBuilder = new RelationshipsBuilder(
+                    setup.relationshipPropertyMappings().numberOfMappings()
+                );
+            } else {
+                if (setup.loadOutgoing()) {
+                    outgoingRelationshipsBuilder = new RelationshipsBuilder(
                         deduplicationStrategies,
                         tracker,
-                        setup.relationshipPropertyMappings().numberOfMappings());
+                        setup.relationshipPropertyMappings().numberOfMappings()
+                    );
+                }
+                if (setup.loadIncoming()) {
+                    incomingRelationshipsBuilder = new RelationshipsBuilder(
+                        deduplicationStrategies,
+                        tracker,
+                        setup.relationshipPropertyMappings().numberOfMappings()
+                    );
+                }
             }
-            if (setup.loadIncoming()) {
+        } else {
+            if (relationshipTypeMapping.projection() == Projection.NATURAL || relationshipTypeMapping.projection() == Projection.UNDIRECTED) {
+                outgoingRelationshipsBuilder = new RelationshipsBuilder(
+                    deduplicationStrategies,
+                    tracker,
+                    setup.relationshipPropertyMappings().numberOfMappings()
+                );
+            }
+            if (relationshipTypeMapping.projection() == Projection.REVERSE) {
                 incomingRelationshipsBuilder = new RelationshipsBuilder(
-                        deduplicationStrategies,
-                        tracker,
-                        setup.relationshipPropertyMappings().numberOfMappings());
+                    deduplicationStrategies,
+                    tracker,
+                    setup.relationshipPropertyMappings().numberOfMappings()
+                );
             }
         }
-
         return Tuples.pair(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
     }
 

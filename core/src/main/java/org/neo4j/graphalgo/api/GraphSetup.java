@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -46,6 +47,8 @@ public interface GraphSetup {
     @NotNull String nodeLabel();
 
     @NotNull String relationshipType();
+
+    @NotNull RelationshipProjections relationshipProjections();
 
     Optional<String> nodeQuery();
 

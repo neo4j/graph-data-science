@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.eclipse.collections.api.tuple.Pair;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
@@ -133,10 +134,14 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 weightProperties,
                 defaultWeights);
 
+        AdjacencyBuilder otherBuilder = setup.legacyMode()
+            ? setup.loadAsUndirected() ? outBuilder : inBuilder
+            : mapping.projection() == Projection.UNDIRECTED ? outBuilder : inBuilder;
+
         RelationshipImporter importer = new RelationshipImporter(
             setup.tracker(),
-                outBuilder,
-                setup.loadAsUndirected() ? outBuilder : inBuilder
+            outBuilder,
+            otherBuilder
         );
 
         return new SingleTypeRelationshipImporter.Builder(mapping, importer, relationshipCounter);

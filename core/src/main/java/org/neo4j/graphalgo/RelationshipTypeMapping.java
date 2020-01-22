@@ -25,22 +25,40 @@ import java.util.Objects;
 
 public abstract class RelationshipTypeMapping {
 
+    private final String elementIdentifier;
+
     private final String typeName;
 
+    private final Projection projection;
+
     public static RelationshipTypeMapping of(String typeName, int typeId) {
-        return new Resolved(typeName, typeId);
+        return new Resolved(typeName, typeName, null, typeId);
+    }
+
+    public static RelationshipTypeMapping of(String elementIdentifier, String typeName, Projection projection, int typeId) {
+        return new Resolved(elementIdentifier, typeName, projection, typeId);
     }
 
     public static RelationshipTypeMapping all() {
         return ALL;
     }
 
-    private RelationshipTypeMapping(String typeName) {
+    private RelationshipTypeMapping(String elementIdentifier, String typeName, Projection projection) {
+        this.elementIdentifier = elementIdentifier;
         this.typeName = typeName;
+        this.projection = projection;
+    }
+
+    public final String elementIdentifier() {
+        return elementIdentifier;
     }
 
     public final String typeName() {
         return typeName;
+    }
+
+    public final Projection projection() {
+        return projection;
     }
 
     public abstract int typeId();
@@ -51,8 +69,8 @@ public abstract class RelationshipTypeMapping {
 
         private final int typeId;
 
-        Resolved(String typeName, int typeId) {
-            super(typeName);
+        Resolved(String elementIdentifier, String typeName, Projection projection, int typeId) {
+            super(elementIdentifier, typeName, projection);
             this.typeId = typeId;
         }
 
@@ -67,7 +85,7 @@ public abstract class RelationshipTypeMapping {
         }
     }
 
-    private static final RelationshipTypeMapping ALL = new RelationshipTypeMapping("") {
+    private static final RelationshipTypeMapping ALL = new RelationshipTypeMapping("", "", null) {
 
         @Override
         public int typeId() {
@@ -86,7 +104,8 @@ public abstract class RelationshipTypeMapping {
         if (o == null || getClass() != o.getClass()) return false;
         RelationshipTypeMapping that = (RelationshipTypeMapping) o;
         return typeId() == that.typeId() &&
-               typeName.equals(that.typeName);
+               typeName.equals(that.typeName) &&
+               elementIdentifier.equals(that.elementIdentifier);
     }
 
     @Override
@@ -97,7 +116,9 @@ public abstract class RelationshipTypeMapping {
     @Override
     public String toString() {
         return "RelationshipTypeMapping{" +
-               "typeName='" + typeName + '\'' +
+               "elementIdentifier='" + elementIdentifier + '\'' +
+               ", typeName='" + typeName + '\'' +
+               ", projection='" + projection + '\'' +
                ", typeId=" + typeId() +
                '}';
     }
