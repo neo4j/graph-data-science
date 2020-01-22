@@ -59,13 +59,13 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
         LabelPropagation result = computationResult.result();
 
         WriteResultBuilder builder = new WriteResultBuilder(
-            writeConfig,
             graph.nodeCount(),
             callContext,
             computationResult.tracker()
         );
         builder.withCreateMillis(computationResult.createMillis());
         builder.withComputeMillis(computationResult.computeMillis());
+        builder.withConfig(config);
 
         if (!computationResult.isGraphEmpty()) {
             builder
@@ -82,24 +82,19 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
 
     public static class WriteResult {
 
-        public String writeProperty;
         public long nodePropertiesWritten;
         public long relationshipPropertiesWritten;
         public long createMillis;
         public long computeMillis;
         public long writeMillis;
-        public long maxIterations;
-        public String seedProperty;
-        public String nodeWeightProperty;
-        public String relationshipWeightProperty;
         public long postProcessingMillis;
         public long communityCount;
         public long ranIterations;
         public boolean didConverge;
         public Map<String, Object> communityDistribution;
+        public Map<String, Object> configuration;
 
         WriteResult(
-            LabelPropagationWriteConfig config,
             long nodePropertiesWritten,
             long relationshipPropertiesWritten,
             long createMillis,
@@ -109,13 +104,9 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
             long communityCount,
             long ranIterations,
             boolean didConverge,
-            Map<String, Object> communityDistribution
+            Map<String, Object> communityDistribution,
+            Map<String, Object> configuration
         ) {
-            this.writeProperty = config.writeProperty();
-            this.maxIterations = config.maxIterations();
-            this.seedProperty = config.seedProperty();
-            this.nodeWeightProperty = config.nodeWeightProperty();
-            this.relationshipWeightProperty = config.relationshipWeightProperty();
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.relationshipPropertiesWritten = relationshipPropertiesWritten;
             this.createMillis = createMillis;
@@ -126,29 +117,25 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
             this.communityDistribution = communityDistribution;
+            this.configuration = configuration;
         }
     }
 
-    static class WriteResultBuilder extends AbstractCommunityResultBuilder<LabelPropagationWriteConfig, WriteResult> {
-
-        private final LabelPropagationWriteConfig config;
+    static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
 
         private long ranIterations;
         private boolean didConverge;
 
         WriteResultBuilder(
-            LabelPropagationWriteConfig config,
             long nodeCount,
             ProcedureCallContext context,
             AllocationTracker tracker
         ) {
             super(
-                config,
                 nodeCount,
                 context,
                 tracker
             );
-            this.config = config;
         }
 
         WriteResultBuilder ranIterations(long iterations) {
@@ -164,7 +151,6 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
         @Override
         protected WriteResult buildResult() {
             return new WriteResult(
-                config,
                 nodePropertiesWritten,
                 0L,
                 createMillis,
@@ -174,7 +160,8 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
                 maybeCommunityCount.orElse(-1L),
                 ranIterations,
                 didConverge,
-                communityHistogramOrNull()
+                communityHistogramOrNull(),
+                config.toMap()
             );
         }
     }

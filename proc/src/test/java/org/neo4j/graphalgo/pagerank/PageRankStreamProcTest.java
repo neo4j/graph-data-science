@@ -164,14 +164,14 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
         String query = queryBuilder
             .statsMode()
             .addParameter("tolerance", 0.0001)
-            .yields("ranIterations", "didConverge", "maxIterations", "dampingFactor");
+            .yields("ranIterations", "didConverge", "configuration");
 
         runQueryWithRowConsumer(
             query,
             row -> {
                 assertEquals(20, row.getNumber("ranIterations").longValue());
-                assertEquals(20, row.getNumber("maxIterations").longValue());
-                assertEquals(0.85D, row.getNumber("dampingFactor").doubleValue());
+                assertUserInput(row, "maxIterations", 20);
+                assertUserInput(row, "dampingFactor", 0.85D);
                 assertFalse(row.getBoolean("didConverge"));
             }
         );

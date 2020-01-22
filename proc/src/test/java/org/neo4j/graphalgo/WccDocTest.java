@@ -95,13 +95,13 @@ class WccDocTest extends BaseProcTest {
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", "componentId")
-            .yields("nodePropertiesWritten", "componentCount", "writeProperty");
+            .yields("nodePropertiesWritten", "componentCount");
 
-        String expected = "+--------------------------------------------------------+\n" +
-                          "| nodePropertiesWritten | componentCount | writeProperty |\n" +
-                          "+--------------------------------------------------------+\n" +
-                          "| 6                     | 2              | \"componentId\" |\n" +
-                          "+--------------------------------------------------------+\n" +
+        String expected = "+----------------------------------------+\n" +
+                          "| nodePropertiesWritten | componentCount |\n" +
+                          "+----------------------------------------+\n" +
+                          "| 6                     | 2              |\n" +
+                          "+----------------------------------------+\n" +
                           "1 row\n";
 
         assertEquals(expected, runQuery(query, Result::resultAsString));
@@ -148,13 +148,13 @@ class WccDocTest extends BaseProcTest {
             .addParameter("writeProperty", "componentId")
             .addParameter("relationshipWeightProperty", "weight")
             .addParameter("threshold", 1.0D)
-            .yields("nodePropertiesWritten", "componentCount", "writeProperty");
+            .yields("nodePropertiesWritten", "componentCount");
 
-        String expected = "+--------------------------------------------------------+\n" +
-                          "| nodePropertiesWritten | componentCount | writeProperty |\n" +
-                          "+--------------------------------------------------------+\n" +
-                          "| 6                     | 3              | \"componentId\" |\n" +
-                          "+--------------------------------------------------------+\n" +
+        String expected = "+----------------------------------------+\n" +
+                          "| nodePropertiesWritten | componentCount |\n" +
+                          "+----------------------------------------+\n" +
+                          "| 6                     | 3              |\n" +
+                          "+----------------------------------------+\n" +
                           "1 row\n";
 
         assertEquals(expected, runQuery(query, Result::resultAsString));
@@ -171,13 +171,13 @@ class WccDocTest extends BaseProcTest {
             .addParameter("writeProperty", "componentId")
             .addParameter("relationshipWeightProperty", "weight")
             .addParameter("threshold", 1.0D)
-            .yields("nodePropertiesWritten", "componentCount", "writeProperty");
+            .yields("nodePropertiesWritten", "componentCount");
 
-        String expected = "+--------------------------------------------------------+\n" +
-                          "| nodePropertiesWritten | componentCount | writeProperty |\n" +
-                          "+--------------------------------------------------------+\n" +
-                          "| 6                     | 3              | \"componentId\" |\n" +
-                          "+--------------------------------------------------------+\n" +
+        String expected = "+----------------------------------------+\n" +
+                          "| nodePropertiesWritten | componentCount |\n" +
+                          "+----------------------------------------+\n" +
+                          "| 6                     | 3              |\n" +
+                          "+----------------------------------------+\n" +
                           "1 row\n";
 
         assertEquals(expected, runQuery(initQuery, Result::resultAsString));
@@ -230,13 +230,13 @@ class WccDocTest extends BaseProcTest {
             .addParameter("writeProperty", "componentId")
             .addParameter("relationshipWeightProperty", "weight")
             .addParameter("threshold", 1.0D)
-            .yields("nodePropertiesWritten", "componentCount", "writeProperty");
+            .yields("nodePropertiesWritten", "componentCount");
 
-        String expected = "+--------------------------------------------------------+\n" +
-                          "| nodePropertiesWritten | componentCount | writeProperty |\n" +
-                          "+--------------------------------------------------------+\n" +
-                          "| 6                     | 3              | \"componentId\" |\n" +
-                          "+--------------------------------------------------------+\n" +
+        String expected = "+----------------------------------------+\n" +
+                          "| nodePropertiesWritten | componentCount |\n" +
+                          "+----------------------------------------+\n" +
+                          "| 6                     | 3              |\n" +
+                          "+----------------------------------------+\n" +
                           "1 row\n";
 
         assertEquals(expected, runQuery(initQuery, Result::resultAsString));
@@ -258,15 +258,15 @@ class WccDocTest extends BaseProcTest {
             .addParameter("writeProperty", "componentId")
             .addParameter("relationshipWeightProperty", "weight")
             .addParameter("threshold", 1.0D)
-            .yields("nodePropertiesWritten", "componentCount", "writeProperty");
+            .yields("nodePropertiesWritten", "componentCount");
 
         System.out.println(query);
 
-        expected = "+--------------------------------------------------------+\n" +
-                   "| nodePropertiesWritten | componentCount | writeProperty |\n" +
-                   "+--------------------------------------------------------+\n" +
-                   "| 1                     | 3              | \"componentId\" |\n" +
-                   "+--------------------------------------------------------+\n" +
+        expected = "+----------------------------------------+\n" +
+                   "| nodePropertiesWritten | componentCount |\n" +
+                   "+----------------------------------------+\n" +
+                   "| 1                     | 3              |\n" +
+                   "+----------------------------------------+\n" +
                    "1 row\n";
 
         assertEquals(expected, runQuery(query, Result::resultAsString));

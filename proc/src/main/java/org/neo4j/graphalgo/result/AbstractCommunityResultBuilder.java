@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
-import org.neo4j.graphalgo.newapi.WriteConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
@@ -34,7 +33,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.LongUnaryOperator;
 
-public abstract class AbstractCommunityResultBuilder<CONFIG extends WriteConfig, WRITE_RESULT> extends AbstractResultBuilder<CONFIG, WRITE_RESULT> {
+public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
 
     private static final long EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT = 4L;
 
@@ -64,12 +63,10 @@ public abstract class AbstractCommunityResultBuilder<CONFIG extends WriteConfig,
     private OptionalLong maybeExpectedCommunityCount = OptionalLong.empty();
 
     protected AbstractCommunityResultBuilder(
-        CONFIG config,
         long nodeCount,
         ProcedureCallContext callContext,
         AllocationTracker tracker
     ) {
-        super(config);
         this.buildHistogram = callContext
             .outputFields()
             .anyMatch(s -> s.equalsIgnoreCase("communityDistribution") || s.equalsIgnoreCase("componentDistribution"));
@@ -82,12 +79,12 @@ public abstract class AbstractCommunityResultBuilder<CONFIG extends WriteConfig,
 
     protected abstract WRITE_RESULT buildResult();
 
-    public AbstractCommunityResultBuilder<CONFIG, WRITE_RESULT> withExpectedNumberOfCommunities(long expectedNumberOfCommunities) {
+    public AbstractCommunityResultBuilder<WRITE_RESULT> withExpectedNumberOfCommunities(long expectedNumberOfCommunities) {
         this.maybeExpectedCommunityCount = OptionalLong.of(expectedNumberOfCommunities);
         return this;
     }
 
-    public AbstractCommunityResultBuilder<CONFIG, WRITE_RESULT> withCommunityFunction(LongUnaryOperator communityFunction) {
+    public AbstractCommunityResultBuilder<WRITE_RESULT> withCommunityFunction(LongUnaryOperator communityFunction) {
         this.communityFunction = communityFunction;
         return this;
     }

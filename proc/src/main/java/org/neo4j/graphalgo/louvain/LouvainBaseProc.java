@@ -60,10 +60,10 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
         if (computeResult.isGraphEmpty()) {
             return Stream.of(
                 new WriteResult(
-                    writeConfig,
                     0, computeResult.createMillis(),
                     0, 0, 0, 0, 0, 0,
-                    new double[0], Collections.emptyMap()
+                    new double[0], Collections.emptyMap(),
+                    config.toMap()
                 )
             );
         }
@@ -72,7 +72,6 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
         Louvain louvain = computeResult.algorithm();
 
         WriteResultBuilder builder = new WriteResultBuilder(
-            writeConfig,
             graph.nodeCount(),
             callContext,
             computeResult.tracker()
@@ -84,7 +83,8 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
             .withLevels(louvain.levels())
             .withModularity(louvain.modularities()[louvain.levels() - 1])
             .withModularities(louvain.modularities())
-            .withCommunityFunction(louvain::getCommunity);
+            .withCommunityFunction(louvain::getCommunity)
+            .withConfig(config);
 
         if (write && !writeConfig.writeProperty().isEmpty()) {
             writeNodeProperties(builder, computeResult);
@@ -96,27 +96,20 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
 
     public static final class WriteResult {
 
-        public String writeProperty;
-        public String seedProperty;
-        public String relationshipWeightProperty;
         public long nodePropertiesWritten;
         public long relationshipPropertiesWritten;
         public long createMillis;
         public long computeMillis;
         public long writeMillis;
         public long postProcessingMillis;
-        public long maxIterations;
-        public long maxLevels;
-        public double tolerance;
         public long ranLevels;
         public long communityCount;
-        public boolean includeIntermediateCommunities;
         public double modularity;
         public List<Double> modularities;
         public Map<String, Object> communityDistribution;
+        public Map<String, Object> configuration;
 
         WriteResult(
-            LouvainWriteConfig config,
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
@@ -126,17 +119,11 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
             long communityCount,
             double modularity,
             double[] modularities,
-            Map<String, Object> communityDistribution
+            Map<String, Object> communityDistribution,
+            Map<String, Object> configuration
+
         ) {
             this.relationshipPropertiesWritten = 0;
-
-            this.writeProperty = config.writeProperty();
-            this.seedProperty = config.seedProperty();
-            this.relationshipWeightProperty = config.relationshipWeightProperty();
-            this.maxIterations = config.maxIterations();
-            this.maxLevels = config.maxLevels();
-            this.tolerance = config.tolerance();
-            this.includeIntermediateCommunities = config.includeIntermediateCommunities();
 
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
@@ -148,23 +135,22 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
             this.modularity = modularity;
             this.modularities = Arrays.stream(modularities).boxed().collect(Collectors.toList());
             this.communityDistribution = communityDistribution;
+            this.configuration = configuration;
         }
     }
 
-    static class WriteResultBuilder extends AbstractCommunityResultBuilder<LouvainWriteConfig, WriteResult> {
+    static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
 
         private long levels = -1;
         private double[] modularities = new double[]{};
         private double modularity = -1;
 
         WriteResultBuilder(
-            LouvainWriteConfig config,
             long nodeCount,
             ProcedureCallContext context,
             AllocationTracker tracker
         ) {
             super(
-                config,
                 nodeCount,
                 context,
                 tracker
@@ -189,8 +175,7 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
         @Override
         protected WriteResult buildResult() {
             return new WriteResult(
-                config,
-                nodePropertiesWritten,  // should be nodePropertiesWritten
+                nodePropertiesWritten,
                 createMillis,
                 computeMillis,
                 writeMillis,
@@ -199,7 +184,8 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
                 maybeCommunityCount.orElse(-1L),
                 modularity,
                 modularities,
-                communityHistogramOrNull()
+                communityHistogramOrNull(),
+                config.toMap()
             );
         }
     }

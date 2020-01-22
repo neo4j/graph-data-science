@@ -69,9 +69,6 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields(
-                "writeProperty",
-                "seedProperty",
-                "relationshipWeightProperty",
                 "nodePropertiesWritten",
                 "relationshipPropertiesWritten",
                 "createMillis",
@@ -79,17 +76,16 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
                 "writeMillis",
                 "postProcessingMillis",
                 "componentCount",
-                "threshold",
-                "consecutiveIds",
-                "componentDistribution"
+                "componentDistribution",
+                "configuration"
             );
 
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertEquals(WRITE_PROPERTY, row.getString("writeProperty"));
-                assertNull(row.getString("seedProperty"));
-                assertNull(row.getString("relationshipWeightProperty"));
+                assertUserInput(row, "writeProperty", WRITE_PROPERTY);
+                assertUserInput(row, "seedProperty", null);
+                assertUserInput(row, "relationshipWeightProperty", null);
 
                 assertEquals(10L, row.getNumber("nodePropertiesWritten"));
                 assertEquals(0L, row.getNumber("relationshipPropertiesWritten"));
@@ -100,8 +96,8 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
                 assertNotEquals(-1L, row.getNumber("postProcessingMillis"));
 
                 assertEquals(3L, row.getNumber("componentCount"));
-                assertEquals(0D, row.getNumber("threshold"));
-                assertEquals(false, row.getBoolean("consecutiveIds"));
+                assertUserInput(row, "threshold", 0D);
+                assertUserInput(row, "consecutiveIds", false);
 
                 assertEquals(MapUtil.map(
                     "p99", 7L,

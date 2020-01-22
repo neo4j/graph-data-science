@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
@@ -66,16 +67,19 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
     }
 
     private Stream<WriteResult> write(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult) {
-        ModularityOptimizationWriteConfig config = computationResult.config();
         ModularityOptimization result = computationResult.result();
         Graph graph = computationResult.graph();
 
-        AbstractCommunityResultBuilder<ModularityOptimizationWriteConfig, WriteResult> builder = new WriteResultBuilder(config, graph.nodeCount(), callContext, computationResult.tracker())
-            .withCommunityProperty(config.writeProperty())
+        AbstractResultBuilder<WriteResult> builder = new WriteResultBuilder(
+            graph.nodeCount(),
+            callContext,
+            computationResult.tracker()
+        )
             .withModularity(result.getModularity())
             .withRanIterations(result.getIterations())
             .withDidConverge(result.didConverge())
-            .withCommunityFunction(result::getCommunityId);
+            .withCommunityFunction(result::getCommunityId)
+            .withConfig(computationResult.config());
 
         if (graph.isEmpty()) {
             graph.release();
@@ -119,13 +123,12 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
         public final long writeMillis;
         public final long postProcessingMillis;
         public final long nodes;
-        public final String communityProperty;
-        public final String writeProperty;
         public boolean didConverge;
         public long ranIterations;
         public double modularity;
         public final long communityCount;
         public final Map<String, Object> communityDistribution;
+        public final Map<String, Object> configuration;
 
         WriteResult(
             long loadMillis,
@@ -133,42 +136,38 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
             long postProcessingMillis,
             long writeMillis,
             long nodes,
-            String communityProperty,
-            String writeProperty,
             boolean didConverge,
             long ranIterations,
             double modularity,
             long communityCount,
-            Map<String, Object> communityDistribution
+            Map<String, Object> communityDistribution,
+            Map<String, Object> configuration
         ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.nodes = nodes;
-            this.communityProperty = communityProperty;
-            this.writeProperty = writeProperty;
             this.didConverge = didConverge;
             this.ranIterations = ranIterations;
             this.modularity = modularity;
             this.communityCount = communityCount;
             this.communityDistribution = communityDistribution;
+            this.configuration = configuration;
         }
     }
 
-    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<ModularityOptimizationWriteConfig, WriteResult> {
-        private String communityProperty;
+    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
         private long ranIterations;
         private boolean didConverge;
         private double modularity;
 
         WriteResultBuilder(
-            ModularityOptimizationWriteConfig config,
             long nodeCount,
             ProcedureCallContext context,
             AllocationTracker tracker
         ) {
-            super(config, nodeCount, context, tracker);
+            super(nodeCount, context, tracker);
         }
 
         WriteResultBuilder withRanIterations(long ranIterations) {
@@ -178,11 +177,6 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
 
         WriteResultBuilder withDidConverge(boolean didConverge) {
             this.didConverge = didConverge;
-            return this;
-        }
-
-        WriteResultBuilder withCommunityProperty(String communityProperty) {
-            this.communityProperty = communityProperty;
             return this;
         }
 
@@ -199,13 +193,12 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
                 postProcessingDuration,
                 writeMillis,
                 nodePropertiesWritten,
-                communityProperty,
-                writeProperty,
                 didConverge,
                 ranIterations,
                 modularity,
                 maybeCommunityCount.orElse(0),
-                communityHistogramOrNull()
+                communityHistogramOrNull(),
+                config.toMap()
             );
         }
     }

@@ -118,6 +118,7 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
     }
 
     @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
+    @Configuration.ToMapValue("org.neo4j.graphalgo.core.utils.Directions#toString")
     @Value.Default
     default Direction direction() {
         return Direction.OUTGOING;

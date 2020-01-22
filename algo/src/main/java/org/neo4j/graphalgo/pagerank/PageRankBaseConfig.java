@@ -57,6 +57,7 @@ public interface PageRankBaseConfig extends
         return false;
     }
 
+    @Configuration.Ignore
     default PageRank.Config toOldConfig() {
         return new PageRank.Config(
             maxIterations(),

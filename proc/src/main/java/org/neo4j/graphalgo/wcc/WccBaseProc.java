@@ -53,19 +53,13 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
         ComputationResult<Wcc, DisjointSetStruct, CONFIG> computeResult
     ) {
         CONFIG config = computeResult.config();
-        boolean write = config instanceof WccWriteConfig;
-        WccWriteConfig writeConfig = ImmutableWccWriteConfig.builder()
-            .writeProperty("stats does not support a write property")
-            .from(config)
-            .build();
 
         if (computeResult.isGraphEmpty()) {
-            return Stream.of(WccBaseProc.WriteResult.empty(writeConfig, computeResult.createMillis()));
+            return Stream.of(WccBaseProc.WriteResult.empty(config.toMap(), computeResult.createMillis()));
         } else {
             Graph graph = computeResult.graph();
 
             WriteResultBuilder builder = new WriteResultBuilder(
-                writeConfig,
                 graph.nodeCount(),
                 callContext,
                 computeResult.tracker()
@@ -75,8 +69,9 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
             builder.withCreateMillis(computeResult.createMillis());
             builder.withComputeMillis(computeResult.computeMillis());
             builder.withCommunityFunction(dss::setIdOf);
+            builder.withConfig(config);
 
-            if (write && !writeConfig.writeProperty().isEmpty()) {
+            if (config instanceof WccWriteConfig) {
                 writeNodeProperties(builder, computeResult);
                 graph.releaseProperties();
             }
@@ -122,9 +117,6 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
 
     public static final class WriteResult {
 
-        public final String writeProperty;
-        public final String seedProperty;
-        public final String relationshipWeightProperty;
         public final long nodePropertiesWritten;
         public final long relationshipPropertiesWritten;
         public final long createMillis;
@@ -132,35 +124,29 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
         public final long writeMillis;
         public final long postProcessingMillis;
         public final long componentCount;
-        public final double threshold;
-        public final boolean consecutiveIds;
         public final Map<String, Object> componentDistribution;
+        public final Map<String, Object> configuration;
 
-        static WriteResult empty(WccWriteConfig config, long createMillis) {
+        static WriteResult empty(Map<String, Object> configuration, long createMillis) {
             return new WriteResult(
-                config,
                 0,
                 createMillis,
                 0, 0, 0, 0,
-                Collections.emptyMap()
+                Collections.emptyMap(),
+                configuration
             );
         }
 
         WriteResult(
-            WccWriteConfig config,
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
             long writeMillis,
             long postProcessingMillis,
             long componentCount,
-            Map<String, Object> componentDistribution
+            Map<String, Object> componentDistribution,
+            Map<String, Object> configuration
         ) {
-            this.writeProperty = config.writeProperty();
-            this.seedProperty = config.seedProperty();
-            this.relationshipWeightProperty = config.relationshipWeightProperty();
-            this.threshold = config.threshold();
-            this.consecutiveIds = config.consecutiveIds();
 
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.relationshipPropertiesWritten = 0L;
@@ -170,39 +156,35 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
             this.postProcessingMillis = postProcessingMillis;
             this.componentCount = componentCount;
             this.componentDistribution = componentDistribution;
+            this.configuration = configuration;
         }
     }
 
-    static class WriteResultBuilder extends AbstractCommunityResultBuilder<WccWriteConfig, WriteResult> {
-
-        private final WccWriteConfig config;
+    static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
 
         WriteResultBuilder(
-            WccWriteConfig config,
             long nodeCount,
             ProcedureCallContext context,
             AllocationTracker tracker
         ) {
             super(
-                config,
                 nodeCount,
                 context,
                 tracker
             );
-            this.config = config;
         }
 
         @Override
         protected WriteResult buildResult() {
             return new WriteResult(
-                config,
                 nodePropertiesWritten,  // should be nodePropertiesWritten
                 createMillis,
                 computeMillis,
                 writeMillis,
                 postProcessingDuration,
                 maybeCommunityCount.orElse(-1L),
-                communityHistogramOrNull()
+                communityHistogramOrNull(),
+                config.toMap()
             );
         }
     }

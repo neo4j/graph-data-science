@@ -49,11 +49,11 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
         String query = queryBuilder
             .writeMode()
             .addPlaceholder("writeProperty", "writeProp")
-            .yields("writeMillis", "writeProperty");
+            .yields("writeMillis", "configuration");
 
         runQueryWithRowConsumer(query, MapUtil.map("writeProp", writeProperty),
             row -> {
-                assertEquals(writeProperty, row.getString("writeProperty"));
+                assertUserInput(row, "writeProperty", writeProperty);
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
         );
@@ -67,12 +67,12 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
             .writeMode()
             .addParameter("writeProperty", "pagerank")
             .addParameter("relationshipWeightProperty", "weight")
-            .yields("writeMillis", "writeProperty");
+            .yields("writeMillis", "configuration");
 
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertEquals("pagerank", row.getString("writeProperty"));
+                assertUserInput(row, "writeProperty", "pagerank");
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
         );
@@ -85,7 +85,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
         String query = queryBuilder
             .writeMode()
             .addParameter("writeProperty", "pagerank")
-            .yields("writeMillis", "writeProperty");
+            .yields("writeMillis");
 
         runQueryWithRowConsumer(
             query,
@@ -140,13 +140,13 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
             .writeMode()
             .addParameter("writeProperty", "writeProp")
             .addParameter("tolerance", 0.0001)
-            .yields("ranIterations", "didConverge", "maxIterations");
+            .yields("ranIterations", "didConverge", "configuration");
 
         runQueryWithRowConsumer(
             query,
             row -> {
                 assertEquals(20, row.getNumber("ranIterations").longValue());
-                assertEquals(20, row.getNumber("maxIterations").longValue());
+                assertUserInput(row, "maxIterations", 20);
                 assertFalse(row.getBoolean("didConverge"));
             }
         );

@@ -358,4 +358,13 @@ public class BaseProcTest {
         result.close();
     }
 
+    protected void assertUserInput(Result.ResultRow row, String key, Object expected) {
+        Map<String, Object> configMap = extractUserInput(row);
+        assertTrue(configMap.containsKey(key), String.format("Key %s is not present in config", key));
+        assertEquals(expected, configMap.get(key));
+    }
+
+    private Map<String, Object> extractUserInput(Result.ResultRow row) {
+        return ((Map<String, Object>) row.get("configuration"));
+    }
 }

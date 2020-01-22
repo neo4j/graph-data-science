@@ -113,14 +113,14 @@ class PageRankDocTest extends BaseProcTest {
             "  dampingFactor: 0.85, " +
             "  writeProperty: 'pagerank'" +
             "})" +
-            "YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
+            "YIELD nodePropertiesWritten AS writtenProperties, ranIterations";
         String r2 = runQuery(q2, Result::resultAsString);
 
-        expectedString = "+-------------------------------------------------------------------+\n" +
-                         "| writtenProperties | ranIterations | dampingFactor | writeProperty |\n" +
-                         "+-------------------------------------------------------------------+\n" +
-                         "| 8                 | 20            | 0.85          | \"pagerank\"    |\n" +
-                         "+-------------------------------------------------------------------+\n" +
+        expectedString = "+-----------------------------------+\n" +
+                         "| writtenProperties | ranIterations |\n" +
+                         "+-----------------------------------+\n" +
+                         "| 8                 | 20            |\n" +
+                         "+-----------------------------------+\n" +
                          "1 row\n";
 
         assertEquals(expectedString, r2);
@@ -176,13 +176,13 @@ class PageRankDocTest extends BaseProcTest {
             "  writeProperty: 'pagerank', " +
             "  relationshipWeightProperty: 'weight'" +
             "})" +
-            "YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
+            "YIELD nodePropertiesWritten AS writtenProperties, ranIterations";
 
-        expectedString = "+-------------------------------------------------------------------+\n" +
-                         "| writtenProperties | ranIterations | dampingFactor | writeProperty |\n" +
-                         "+-------------------------------------------------------------------+\n" +
-                         "| 8                 | 20            | 0.85          | \"pagerank\"    |\n" +
-                         "+-------------------------------------------------------------------+\n" +
+        expectedString = "+-----------------------------------+\n" +
+                         "| writtenProperties | ranIterations |\n" +
+                         "+-----------------------------------+\n" +
+                         "| 8                 | 20            |\n" +
+                         "+-----------------------------------+\n" +
                          "1 row\n";
 
         assertEquals(expectedString, runQuery(q2, Result::resultAsString));
@@ -228,14 +228,14 @@ class PageRankDocTest extends BaseProcTest {
             "   dampingFactor: 0.85, " +
             "   writeProperty: 'pagerank', " +
             "   sourceNodes: [siteA]})" +
-            "YIELD nodePropertiesWritten, ranIterations, dampingFactor, writeProperty " +
-            "RETURN nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty";
+            "YIELD nodePropertiesWritten, ranIterations " +
+            "RETURN nodePropertiesWritten AS writtenProperties, ranIterations";
 
-        expectedString = "+-------------------------------------------------------------------+\n" +
-                         "| writtenProperties | ranIterations | dampingFactor | writeProperty |\n" +
-                         "+-------------------------------------------------------------------+\n" +
-                         "| 8                 | 20            | 0.85          | \"pagerank\"    |\n" +
-                         "+-------------------------------------------------------------------+\n" +
+        expectedString = "+-----------------------------------+\n" +
+                         "| writtenProperties | ranIterations |\n" +
+                         "+-----------------------------------+\n" +
+                         "| 8                 | 20            |\n" +
+                         "+-----------------------------------+\n" +
                          "1 row\n";
 
         assertEquals(expectedString, runQuery(q2, Result::resultAsString));
@@ -296,14 +296,14 @@ class PageRankDocTest extends BaseProcTest {
             "  maxIterations: 20, " +
             "  dampingFactor: 0.85" +
             "})" +
-            "YIELD ranIterations, dampingFactor";
+            "YIELD ranIterations";
         String r2 = runQuery(q2, Result::resultAsString);
 
-        String expectedString = "+-------------------------------+\n" +
-                                "| ranIterations | dampingFactor |\n" +
-                                "+-------------------------------+\n" +
-                                "| 20            | 0.85          |\n" +
-                                "+-------------------------------+\n" +
+        String expectedString = "+---------------+\n" +
+                                "| ranIterations |\n" +
+                                "+---------------+\n" +
+                                "| 20            |\n" +
+                                "+---------------+\n" +
                                 "1 row\n";
 
         assertEquals(expectedString, r2);

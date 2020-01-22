@@ -107,13 +107,13 @@ class NodeSimilarityDocTest extends BaseProcTest {
                        "  writeRelationshipType: 'SIMILAR',\n" +
                        "  writeProperty: 'score'\n" +
                        "})\n" +
-                       "YIELD nodesCompared, relationshipsWritten, writeProperty, writeRelationshipType;\n";
+                       "YIELD nodesCompared, relationshipsWritten;\n";
 
-        String expectedString = "+------------------------------------------------------------------------------+\n" +
-                                "| nodesCompared | relationshipsWritten | writeProperty | writeRelationshipType |\n" +
-                                "+------------------------------------------------------------------------------+\n" +
-                                "| 4             | 10                   | \"score\"       | \"SIMILAR\"             |\n" +
-                                "+------------------------------------------------------------------------------+\n" +
+        String expectedString = "+--------------------------------------+\n" +
+                                "| nodesCompared | relationshipsWritten |\n" +
+                                "+--------------------------------------+\n" +
+                                "| 4             | 10                   |\n" +
+                                "+--------------------------------------+\n" +
                                 "1 row\n";
 
         assertEquals(expectedString, runQuery(query, Result::resultAsString));

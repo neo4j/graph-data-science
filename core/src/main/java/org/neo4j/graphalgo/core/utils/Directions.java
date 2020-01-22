@@ -88,4 +88,8 @@ public class Directions {
                 return defaultDirection;
         }
     }
+
+    public static String toString(Direction direction) {
+        return direction.name();
+    }
 }

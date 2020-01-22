@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -66,18 +67,18 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
     private Stream<WriteResult> write(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> compute) {
         K1ColoringWriteConfig config = compute.config();
         K1Coloring result = compute.algorithm();
-        WriteResultBuilder builder = new WriteResultBuilder(config);
+        WriteResultBuilder builder = new WriteResultBuilder();
 
         if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
             builder.withColorCount(result.usedColors().cardinality());
         }
 
         builder
-            .withWriteProperty(config.writeProperty())
             .withRanIterations(result.ranIterations())
             .withDidConverge(result.didConverge())
             .withCreateMillis(compute.createMillis())
-            .withComputeMillis(compute.computeMillis());
+            .withComputeMillis(compute.computeMillis())
+            .withConfig(config);
 
         writeNodeProperties(builder, compute);
         return Stream.of(builder.build());
@@ -98,16 +99,11 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         return HugeLongArray.Translator.INSTANCE;
     }
 
-    public static class WriteResultBuilder extends AbstractResultBuilder<K1ColoringWriteConfig, WriteResult> {
+    public static class WriteResultBuilder extends AbstractResultBuilder<WriteResult> {
 
         private long colorCount = -1L;
         private long ranIterations;
         private boolean didConverge;
-        private String writeProperty;
-
-        WriteResultBuilder(K1ColoringWriteConfig config) {
-            super(config);
-        }
 
         WriteResultBuilder withColorCount(long colorCount) {
             this.colorCount = colorCount;
@@ -124,11 +120,6 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             return this;
         }
 
-        WriteResultBuilder withWriteProperty(String writeProperty) {
-            this.writeProperty = writeProperty;
-            return this;
-        }
-
         @Override
         public WriteResult build() {
             return new WriteResult(
@@ -140,9 +131,10 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
                 ranIterations,
                 true,
                 didConverge,
-                writeProperty
+                config.toMap()
             );
         }
+
     }
 
     public static class WriteResult {
@@ -167,9 +159,10 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         public final long colorCount;
         public final long ranIterations;
         public final boolean didConverge;
-        public final String writeProperty;
 
         public final boolean write;
+
+        public Map<String, Object> configuration;
 
         WriteResult(
             long loadMillis,
@@ -180,7 +173,7 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             long ranIterations,
             boolean write,
             boolean didConverge,
-            String writeProperty
+            Map<String, Object> configuration
         ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
@@ -190,7 +183,7 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             this.ranIterations = ranIterations;
             this.write = write;
             this.didConverge = didConverge;
-            this.writeProperty = writeProperty;
+            this.configuration = configuration;
         }
     }
 

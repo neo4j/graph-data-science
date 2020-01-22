@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.WriteConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphdb.Result;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -294,8 +295,8 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
             query,
             row -> {
                 assertEquals(2, row.getNumber("nodePropertiesWritten").intValue());
-                assertEquals("seed", row.getString("seedProperty"));
-                assertEquals("seed", row.getString("writeProperty"));
+                assertUserInput(row, "seedProperty", "seed");
+                assertUserInput(row, "writeProperty", "seed");
                 checkMillisSet(row);
                 assertEquals(
                     MapUtil.map(
@@ -339,7 +340,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertNull(row.getString("seedProperty"));
+                assertUserInput(row, "seedProperty", null);
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
                 checkMillisSet(row);
             }

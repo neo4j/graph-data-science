@@ -44,8 +44,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @Test
     void countCommunitySizesOverHugeCommunities() {
-        AbstractCommunityResultBuilder<WccWriteConfig, Void> builder = builder(
-            DEFAULT_CONFIG,
+        AbstractCommunityResultBuilder<Void> builder = builder(
             42,
             new ProcedureCallContext(new String[]{"communityCount", "communityDistribution"}, false),
             (maybeCommunityCount, maybeHistogram) -> {
@@ -68,8 +67,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @Test
     void countCommunitySizesOverPresizedHugeCommunities() {
-        AbstractCommunityResultBuilder<WccWriteConfig, Void> builder = builder(
-            DEFAULT_CONFIG,
+        AbstractCommunityResultBuilder<Void> builder = builder(
             42,
             new ProcedureCallContext(new String[]{"communityCount", "communityDistribution"}, false),
             (maybeCommunityCount, maybeHistogram) -> {
@@ -92,8 +90,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @Test
     void countCommunitySizesOverIntegerCommunities() {
-        AbstractCommunityResultBuilder<WccWriteConfig, Void> builder = builder(
-            DEFAULT_CONFIG,
+        AbstractCommunityResultBuilder<Void> builder = builder(
             42,
             new ProcedureCallContext(new String[]{"communityCount", "communityDistribution"}, false),
             (maybeCommunityCount, maybeHistogram) -> {
@@ -115,8 +112,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @Test
     void countCommunitySizesOverLongCommunities() {
-        AbstractCommunityResultBuilder<WccWriteConfig, Void> builder = builder(
-            DEFAULT_CONFIG,
+        AbstractCommunityResultBuilder<Void> builder = builder(
             42,
             new ProcedureCallContext(new String[]{"communityCount", "communityDistribution"}, false),
             (maybeCommunityCount, maybeHistogram) -> {
@@ -139,8 +135,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @Test
     void doNotGenerateCommunityCountOrHistogram() {
-        AbstractCommunityResultBuilder<WccWriteConfig, Void> builder = builder(
-            DEFAULT_CONFIG,
+        AbstractCommunityResultBuilder<Void> builder = builder(
             42,
             new ProcedureCallContext(new String[]{}, false),
             (maybeCommunityCount, maybeHistogram) -> {
@@ -154,8 +149,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @Test
     void doNotGenerateHistogram() {
-        AbstractCommunityResultBuilder<WccWriteConfig, Void> builder = builder(
-            DEFAULT_CONFIG,
+        AbstractCommunityResultBuilder<Void> builder = builder(
             42,
             new ProcedureCallContext(new String[]{"communityCount"}, false),
             (maybeCommunityCount, maybeHistogram) -> {
@@ -183,14 +177,12 @@ final class AbstractCommunityResultBuilderTest {
     }
 
 
-    private AbstractCommunityResultBuilder<WccWriteConfig, Void> builder(
-        WccWriteConfig config,
+    private AbstractCommunityResultBuilder<Void> builder(
         long nodeCount,
         ProcedureCallContext context,
         BiConsumer<OptionalLong, Optional<Histogram>> check
     ) {
-        return new AbstractCommunityResultBuilder<WccWriteConfig, Void>(
-            config,
+        return new AbstractCommunityResultBuilder<Void>(
             nodeCount,
             context,
             AllocationTracker.EMPTY

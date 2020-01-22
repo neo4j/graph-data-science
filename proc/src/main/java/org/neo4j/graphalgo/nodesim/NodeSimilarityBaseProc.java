@@ -68,14 +68,14 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
         if (computationResult.isGraphEmpty()) {
             return Stream.of(
                 new WriteResult(
-                    writeConfig,
                     computationResult.createMillis(),
                     0,
                     0,
                     0,
                     0,
                     0,
-                    Collections.emptyMap()
+                    Collections.emptyMap(),
+                    config.toMap()
                 )
             );
         }
@@ -87,13 +87,13 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
         SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
         Graph similarityGraph = similarityGraphResult.similarityGraph();
 
-        WriteResultBuilder resultBuilder = new WriteResultBuilder(
-            writeConfig);
+        WriteResultBuilder resultBuilder = new WriteResultBuilder();
         resultBuilder
             .withNodesCompared(similarityGraphResult.comparedNodes())
             .withRelationshipsWritten(similarityGraphResult.similarityGraph().relationshipCount());
         resultBuilder.withCreateMillis(computationResult.createMillis());
         resultBuilder.withComputeMillis(computationResult.computeMillis());
+        resultBuilder.withConfig(config);
 
         boolean shouldComputeHistogram = callContext
             .outputFields()
@@ -157,20 +157,19 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
 
         public final long nodesCompared;
         public final long relationshipsWritten;
-        public final String writeRelationshipType;
-        public final String writeProperty;
 
         public final Map<String, Object> similarityDistribution;
+        public final Map<String, Object> configuration;
 
         WriteResult(
-            NodeSimilarityWriteConfig config,
             long loadMillis,
             long computeMillis,
             long writeMillis,
             long postProcessingMillis,
             long nodesCompared,
             long relationshipsWritten,
-            Map<String, Object> similarityDistribution
+            Map<String, Object> similarityDistribution,
+            Map<String, Object> configuration
         ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
@@ -178,25 +177,18 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
             this.postProcessingMillis = postProcessingMillis;
             this.nodesCompared = nodesCompared;
             this.relationshipsWritten = relationshipsWritten;
-            this.writeRelationshipType = config.writeRelationshipType();
-            this.writeProperty = config.writeProperty();
             this.similarityDistribution = similarityDistribution;
+            this.configuration = configuration;
         }
     }
 
-    static class WriteResultBuilder extends AbstractResultBuilder<NodeSimilarityWriteConfig, WriteResult> {
+    static class WriteResultBuilder extends AbstractResultBuilder<WriteResult> {
 
-        private final NodeSimilarityWriteConfig config;
         private long nodesCompared = 0L;
 
         private long postProcessingMillis = -1L;
 
         private Optional<DoubleHistogram> maybeHistogram = Optional.empty();
-
-        WriteResultBuilder(NodeSimilarityWriteConfig config) {
-            super(config);
-            this.config = config;
-        }
 
         public WriteResultBuilder withNodesCompared(long nodesCompared) {
             this.nodesCompared = nodesCompared;
@@ -242,14 +234,14 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
         @Override
         public WriteResult build() {
             return new WriteResult(
-                config,
                 createMillis,
                 computeMillis,
                 writeMillis,
                 postProcessingMillis,
                 nodesCompared,
                 relationshipsWritten,
-                distribution()
+                distribution(),
+                config.toMap()
             );
         }
     }

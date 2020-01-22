@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoBaseProc<PageRank, PageRank, CONFIG> {
@@ -54,28 +55,26 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
         if (computeResult.isGraphEmpty()) {
             return Stream.of(
                 new PageRankWriteProc.WriteResult(
-                    writeConfig.writeProperty(),
-                    writeConfig.relationshipWeightProperty(),
-                    writeConfig.maxIterations(),
                     0,
                     computeResult.createMillis(),
                     0,
                     0,
                     0,
-                    computeResult.config().dampingFactor(),
-                    false
+                    false,
+                    config.toMap()
                 )
             );
         } else {
             Graph graph = computeResult.graph();
             PageRank pageRank = computeResult.algorithm();
 
-            WriteResultBuilder builder = new WriteResultBuilder(writeConfig);
+            WriteResultBuilder builder = new WriteResultBuilder();
 
             builder.withCreateMillis(computeResult.createMillis());
             builder.withComputeMillis(computeResult.computeMillis());
             builder.withRanIterations(pageRank.iterations());
             builder.withDidConverge(pageRank.didConverge());
+            builder.withConfig(config);
 
             if (write && !writeConfig.writeProperty().isEmpty()) {
                 writeNodeProperties(builder, computeResult);
@@ -88,52 +87,39 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
 
     public static final class WriteResult {
 
-        public String writeProperty;
-        public @Nullable String relationshipWeightProperty;
         public long nodePropertiesWritten;
         public long relationshipPropertiesWritten;
         public long createMillis;
         public long computeMillis;
         public long writeMillis;
-        public long maxIterations;
         public long ranIterations;
-        public double dampingFactor;
         public boolean didConverge;
+        public Map<String, Object> configuration;
 
         WriteResult(
-            String writeProperty,
-            @Nullable String relationshipWeightProperty,
-            long maxIterations,
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
             long writeMillis,
             long ranIterations,
-            double dampingFactor,
-            boolean didConverge
+            boolean didConverge,
+            Map<String, Object> configuration
         ) {
             this.relationshipPropertiesWritten = 0;
-            this.writeProperty = writeProperty;
-            this.relationshipWeightProperty = relationshipWeightProperty;
-            this.maxIterations = maxIterations;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
-            this.dampingFactor = dampingFactor;
+            this.configuration = configuration;
         }
     }
 
-    static class WriteResultBuilder extends AbstractResultBuilder<PageRankWriteConfig, WriteResult> {
+    static class WriteResultBuilder extends AbstractResultBuilder<WriteResult> {
 
         private long ranIterations;
         private boolean didConverge;
-
-        WriteResultBuilder(PageRankWriteConfig config) {
-            super(config);
-        }
 
         WriteResultBuilder withRanIterations(long ranIterations) {
             this.ranIterations = ranIterations;
@@ -148,16 +134,13 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
         @Override
         public WriteResult build() {
             return new WriteResult(
-                writeProperty,
-                config.relationshipWeightProperty(),
-                config.maxIterations(),
                 nodePropertiesWritten,
                 createMillis,
                 computeMillis,
                 writeMillis,
                 ranIterations,
-                config.dampingFactor(),
-                didConverge
+                didConverge,
+                config.toMap()
             );
         }
     }

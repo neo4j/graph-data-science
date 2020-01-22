@@ -19,46 +19,44 @@
  */
 package org.neo4j.graphalgo.result;
 
-import org.neo4j.graphalgo.newapi.WriteConfig;
+import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 
-public abstract class AbstractResultBuilder<CONFIG extends WriteConfig, WRITE_RESULT> {
-
-    protected final CONFIG config;
-    protected final String writeProperty;
+public abstract class AbstractResultBuilder<WRITE_RESULT> {
 
     protected long createMillis = -1;
     protected long computeMillis = -1;
     protected long writeMillis = -1;
     protected long nodePropertiesWritten;
     protected long relationshipsWritten;
+    protected AlgoBaseConfig config;
 
-    protected AbstractResultBuilder(CONFIG config) {
-        this.config = config;
-        this.writeProperty = config.writeProperty();
-    }
-
-    public AbstractResultBuilder<CONFIG, WRITE_RESULT> withCreateMillis(long createMillis) {
+    public AbstractResultBuilder<WRITE_RESULT> withCreateMillis(long createMillis) {
         this.createMillis = createMillis;
         return this;
     }
 
-    public AbstractResultBuilder<CONFIG, WRITE_RESULT> withComputeMillis(long computeMillis) {
+    public AbstractResultBuilder<WRITE_RESULT> withComputeMillis(long computeMillis) {
         this.computeMillis = computeMillis;
         return this;
     }
 
-    public AbstractResultBuilder<CONFIG, WRITE_RESULT> withWriteMillis(long writeMillis) {
+    public AbstractResultBuilder<WRITE_RESULT> withWriteMillis(long writeMillis) {
         this.writeMillis = writeMillis;
         return this;
     }
 
-    public AbstractResultBuilder<CONFIG, WRITE_RESULT> withNodePropertiesWritten(long nodePropertiesWritten) {
+    public AbstractResultBuilder<WRITE_RESULT> withNodePropertiesWritten(long nodePropertiesWritten) {
         this.nodePropertiesWritten = nodePropertiesWritten;
         return this;
     }
 
-    public AbstractResultBuilder<CONFIG, WRITE_RESULT> withRelationshipsWritten(long relationshipPropertiesWritten) {
+    public AbstractResultBuilder<WRITE_RESULT> withRelationshipsWritten(long relationshipPropertiesWritten) {
         this.relationshipsWritten = relationshipPropertiesWritten;
+        return this;
+    }
+
+    public AbstractResultBuilder<WRITE_RESULT> withConfig(AlgoBaseConfig config) {
+        this.config = config;
         return this;
     }
 

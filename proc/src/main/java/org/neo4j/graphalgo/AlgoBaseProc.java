@@ -325,7 +325,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     protected void writeNodeProperties(
-        AbstractResultBuilder<?, ?> writeBuilder,
+        AbstractResultBuilder<?> writeBuilder,
         ComputationResult<A, RESULT, CONFIG> computationResult
     ) {
         PropertyTranslator<RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);

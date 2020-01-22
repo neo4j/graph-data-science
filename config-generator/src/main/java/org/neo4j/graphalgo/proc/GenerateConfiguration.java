@@ -31,6 +31,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
 import org.neo4j.graphalgo.annotation.Configuration.Parameter;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -560,30 +561,44 @@ final class GenerateConfiguration {
     }
 
     private void injectToMapCode(ConfigParser.Spec config, MethodSpec.Builder builder) {
-        Map<String, String> mapPairs = config
+        List<ConfigParser.Member> configMembers = config
             .members()
             .stream()
             .filter(ConfigParser.Member::isMapParameter)
-            .collect(Collectors.toMap(ConfigParser.Member::lookupKey, ConfigParser.Member::methodName));
+            .collect(Collectors.toList());
 
-        switch (mapPairs.size()) {
+        switch (configMembers.size()) {
             case 0:
                 builder.addStatement("return $T.emptyMap()", Collections.class);
             case 1:
-                Map.Entry<String, String> singleEntry = mapPairs.entrySet().iterator().next();
-                String parameter = singleEntry.getKey();
-                String getter = singleEntry.getValue();
+                ConfigParser.Member singleConfigMember = configMembers.iterator().next();
+                String parameter = singleConfigMember.lookupKey();
                 builder.addStatement(
-                    "return $T.singletonMap($S, $N())",
+                    "return $T.singletonMap($S, $L)",
                     Collections.class,
                     parameter,
-                    getter
+                    getMapValueCode(singleConfigMember)
                 );
             default:
                 builder.addStatement("$T<$T, Object> map = new $T<>()", Map.class, String.class, LinkedHashMap.class);
-                mapPairs.forEach((key, value) -> builder.addStatement("map.put($S, $N())", key, value));
+                configMembers.forEach(configMember -> builder.addStatement(
+                    "map.put($S, $L)",
+                    configMember.lookupKey(),
+                    getMapValueCode(configMember)
+                ));
                 builder.addStatement("return map");
         }
+    }
+
+    @NotNull
+    private CodeBlock getMapValueCode(ConfigParser.Member configMember) {
+        String getter = configMember.methodName();
+        Configuration.ToMapValue toMapValue = configMember.method().getAnnotation(Configuration.ToMapValue.class);
+        return (toMapValue == null) ? CodeBlock.of("$N()", getter) : CodeBlock.of(
+            "$L($N())",
+            toMapValue.value().replaceAll("#", "."),
+            getter
+        );
     }
 
     private CodeBlock collectKeysCode(ConfigParser.Spec config) {
