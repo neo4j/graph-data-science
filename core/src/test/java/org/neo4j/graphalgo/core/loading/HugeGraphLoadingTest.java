@@ -169,7 +169,7 @@ final class HugeGraphLoadingTest {
 
         GraphsByRelationshipType graphsByRelationshipType = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel(true)
+            .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_NATURAL",
                 RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL)
@@ -183,7 +183,6 @@ final class HugeGraphLoadingTest {
                 RelationshipProjection.empty().withType("TYPE").withProjection(Projection.UNDIRECTED)
             )
             .addNodeProperty(PropertyMapping.of("id", 42.0))
-            .legacyMode(false)
             .build()
             .graphs();
 
