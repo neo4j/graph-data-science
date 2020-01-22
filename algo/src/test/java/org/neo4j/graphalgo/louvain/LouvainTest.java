@@ -26,18 +26,22 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.CypherLoaderBuilder;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.QueryRunner;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -46,9 +50,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
@@ -66,7 +67,6 @@ import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
-import static org.neo4j.graphdb.Direction.BOTH;
 
 class LouvainTest extends AlgoTestBase {
 
@@ -78,8 +78,6 @@ class LouvainTest extends AlgoTestBase {
             .includeIntermediateCommunities(true)
             .concurrency(1);
     }
-
-    private Direction direction;
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -140,12 +138,11 @@ class LouvainTest extends AlgoTestBase {
 
     @AllGraphTypesTest
     void unweightedLouvain(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER);
+        Graph graph = loadGraph(graphImpl, DB_CYPHER).withoutProperties();
 
         Louvain algorithm = new Louvain(
             graph,
-
-            defaultConfigBuilder().direction(direction).build(),
+            defaultConfigBuilder().build(),
             Pools.DEFAULT,
             NullLog.getInstance(),
             AllocationTracker.EMPTY
@@ -181,7 +178,7 @@ class LouvainTest extends AlgoTestBase {
 
         Louvain algorithm = new Louvain(
             graph,
-            defaultConfigBuilder().direction(direction).build(),
+            defaultConfigBuilder().build(),
             Pools.DEFAULT,
             NullLog.getInstance(),
             AllocationTracker.EMPTY
@@ -219,7 +216,7 @@ class LouvainTest extends AlgoTestBase {
 
         Louvain algorithm = new Louvain(
             graph,
-            defaultConfigBuilder().seedProperty("seed").direction(direction).build(),
+            defaultConfigBuilder().seedProperty("seed").build(),
             Pools.DEFAULT,
             NullLog.getInstance(),
             AllocationTracker.EMPTY
@@ -257,7 +254,6 @@ class LouvainTest extends AlgoTestBase {
                 .maxIterations(10)
                 .tolerance(2.0)
                 .includeIntermediateCommunities(false)
-                .direction(direction)
                 .concurrency(1)
                 .build(),
             Pools.DEFAULT,
@@ -281,7 +277,6 @@ class LouvainTest extends AlgoTestBase {
                 .maxIterations(10)
                 .tolerance(TOLERANCE_DEFAULT)
                 .includeIntermediateCommunities(false)
-                .direction(direction)
                 .concurrency(1)
                 .build(),
             Pools.DEFAULT,
@@ -307,7 +302,6 @@ class LouvainTest extends AlgoTestBase {
             .maxIterations(10)
             .tolerance(TOLERANCE_DEFAULT)
             .includeIntermediateCommunities(false)
-            .direction(Direction.OUTGOING)
             .concurrency(1)
             .build();
 
@@ -329,7 +323,7 @@ class LouvainTest extends AlgoTestBase {
         assertTerminates((terminationFlag) -> {
             new Louvain(
                 graph,
-                defaultConfigBuilder().direction(BOTH).concurrency(2).build(),
+                defaultConfigBuilder().concurrency(2).build(),
                 Pools.DEFAULT,
                 NullLog.getInstance(),
                 AllocationTracker.EMPTY
@@ -337,7 +331,7 @@ class LouvainTest extends AlgoTestBase {
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(terminationFlag)
                 .compute();
-        }, 1000, 1000);
+        }, 500, 1000);
     }
 
     @Test
@@ -348,7 +342,7 @@ class LouvainTest extends AlgoTestBase {
 
         Louvain louvain = new Louvain(
             graph,
-            defaultConfigBuilder().direction(BOTH).build(),
+            defaultConfigBuilder().build(),
             Pools.DEFAULT,
             log,
             AllocationTracker.EMPTY
@@ -382,34 +376,69 @@ class LouvainTest extends AlgoTestBase {
         String... nodeProperties
     ) {
         runQuery(cypher);
-        GraphLoader loader = new GraphLoader(db)
-            .withOptionalNodeProperties(
-                Arrays.stream(nodeProperties)
-                    .map(p -> PropertyMapping.of(p, -1))
-                    .toArray(PropertyMapping[]::new)
-            );
-        if (loadRelWeight) {
-            loader.withRelationshipProperties(PropertyMapping.of("weight", 1.0));
-        }
+
+        String nodeStatement = "MATCH (u:Node) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2";
+        String relStatement = "MATCH (u1:Node)-[rel]-(u2:Node) RETURN id(u1) AS source, id(u2) AS target";
+        relStatement += loadRelWeight
+            ? ", rel.weight as weight"
+            : "";
+        String relQuery = relStatement;
+
+        PropertyMapping[] nodePropertyMappings = Arrays.stream(nodeProperties)
+            .map(p -> PropertyMapping.of(p, -1))
+            .toArray(PropertyMapping[]::new);
+
+        PropertyMapping relWeightProperty = PropertyMapping.of("weight", 1.0);
+
         if (graphImpl == CypherGraphFactory.class) {
-            direction = Direction.OUTGOING;
-            String nodeStatement = "MATCH (u:Node) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2";
-            String relStatement = "MATCH (u1:Node)-[rel]-(u2:Node) RETURN id(u1) AS source, id(u2) AS target";
-            relStatement += loadRelWeight
-                ? ", rel.weight as weight"
-                : "";
-            loader
-                .withNodeStatement(nodeStatement)
-                .withRelationshipStatement(relStatement)
-                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
-                .undirected();
+            return QueryRunner.runInTransaction(db, () -> new CypherLoaderBuilder()
+                .api(db)
+                .nodeQuery(nodeStatement)
+                .relationshipQuery(relQuery)
+                .addNodeProperties(nodePropertyMappings)
+                .addRelationshipProperty(relWeightProperty)
+                .legacyMode(false)
+                .build()
+                .graph()
+            );
         } else {
-            direction = BOTH;
-            loader
-                .withAnyRelationshipType()
-                .withLabel("Node");
+            return new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel("Node")
+                .putRelationshipProjectionsWithIdentifier(
+                    "TYPE_OUT",
+                    RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL))
+                .putRelationshipProjectionsWithIdentifier(
+                    "TYPE_IN",
+                    RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE))
+                .addNodeProperties(nodePropertyMappings)
+                .addRelationshipProperty(relWeightProperty)
+                .legacyMode(false)
+                .build()
+                .graph();
         }
-        loader.withDirection(direction);
-        return QueryRunner.runInTransaction(db, () -> loader.load(graphImpl));
+
+//        GraphLoader loader = new GraphLoader(db)
+//            .withOptionalNodeProperties(
+//                nodePropertyMappings
+//            );
+//        if (loadRelWeight) {
+//            loader.withRelationshipProperties(relWeightProperty);
+//        }
+//        if (graphImpl == CypherGraphFactory.class) {
+//            direction = Direction.OUTGOING;
+//            loader
+//                .withNodeStatement(nodeStatement)
+//                .withRelationshipStatement(relStatement)
+//                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
+//                .undirected();
+//        } else {
+//            direction = BOTH;
+//            loader
+//                .withAnyRelationshipType()
+//                .withLabel("Node");
+//        }
+//        loader.withDirection(direction);
+//        return QueryRunner.runInTransaction(db, () -> loader.load(graphImpl));
     }
 }
