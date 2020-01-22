@@ -85,7 +85,7 @@ public abstract class RelationshipTypeMapping {
         }
     }
 
-    private static final RelationshipTypeMapping ALL = new RelationshipTypeMapping("", "", null) {
+    private static final RelationshipTypeMapping ALL = new RelationshipTypeMapping("", "", Projection.NATURAL) {
 
         @Override
         public int typeId() {

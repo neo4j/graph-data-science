@@ -43,7 +43,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -53,7 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
@@ -121,12 +119,14 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
     default void shouldFailWithInvalidNodeWeightProperty() {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
-        GraphsByRelationshipType graphs = graphLoader(graphCreateConfig)
-            .build(HugeGraphFactory.class).build().graphs();
-
-        GraphCatalog.set(graphCreateConfig, graphs);
 
         applyOnProcedure((proc) -> {
+            GraphsByRelationshipType graphs = graphLoader(graphCreateConfig, proc.legacyMode())
+                .build(HugeGraphFactory.class)
+                .build()
+                .graphs();
+            GraphCatalog.set(graphCreateConfig, graphs);
+
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
                 "nodeWeightProperty",
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
@@ -149,16 +149,11 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
     @CsvSource(value = {"weight1, 0.0", "weight2, 1.0"})
     default void testFilteringOnNodePropertiesOnLoadedGraph(String propertyName, double expectedWeight) {
         String graphName = "foo";
-        loadExplicitGraphWithNodeWeights(graphName, MULTI_PROPERTY_NODE_PROJECTION);
-
-        CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map(
-            "nodeWeightProperty", propertyName
-            )
-        );
-
-        CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
-
         applyOnProcedure((proc) -> {
+            loadExplicitGraphWithNodeWeights(graphName, MULTI_PROPERTY_NODE_PROJECTION, proc.legacyMode());
+
+            CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", propertyName));
+            CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
             CONFIG config = proc.newConfig(Optional.of(graphName), algoConfig);
             Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(graphName));
 
@@ -171,7 +166,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
         });
     }
 
-    default void loadExplicitGraphWithNodeWeights(String graphName, NodeProjections nodeProjections) {
+    default void loadExplicitGraphWithNodeWeights(String graphName, NodeProjections nodeProjections, boolean legacyMode) {
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
 
         try {
@@ -196,7 +191,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
             .relationshipProjection(RelationshipProjections.empty())
             .build();
 
-        GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig)
+        GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig, legacyMode)
             .build(HugeGraphFactory.class)
             .build()
             .graphs();

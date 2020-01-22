@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
@@ -195,7 +194,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         applyOnProcedure((proc) -> {
             GraphCatalog.set(
                 graphCreateConfig,
-                graphLoader(graphCreateConfig).build(graphFactory).build().graphs()
+                graphLoader(graphCreateConfig, proc.legacyMode()).build(graphFactory).build().graphs()
             );
 
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
@@ -249,8 +248,10 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             : GraphCreateFromCypherConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphCatalog.set(graphCreateConfig, graphLoader(graphCreateConfig).build(graphFactory).build().graphs());
-
+            GraphCatalog.set(
+                graphCreateConfig,
+                graphLoader(graphCreateConfig, proc.legacyMode()).build(graphFactory).build().graphs()
+            );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap);
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(loadedGraphName, configMap);
@@ -422,17 +423,18 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     }
 
     @NotNull
-    default ModernGraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
-        return graphLoader(graphDb(), graphCreateConfig);
+    default ModernGraphLoader graphLoader(GraphCreateConfig graphCreateConfig, boolean legacyMode) {
+        return graphLoader(graphDb(), graphCreateConfig, legacyMode);
     }
 
     @NotNull
-    default ModernGraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateConfig graphCreateConfig) {
+    default ModernGraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateConfig graphCreateConfig, boolean legacyMode) {
         return ImmutableModernGraphLoader
             .builder()
             .api(db)
             .username("")
             .log(new TestLog())
+            .legacyMode(legacyMode)
             .createConfig(graphCreateConfig).build();
     }
 

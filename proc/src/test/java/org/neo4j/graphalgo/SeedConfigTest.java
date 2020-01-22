@@ -100,12 +100,11 @@ public interface SeedConfigTest<CONFIG extends SeedConfig & AlgoBaseConfig, RESU
     default void shouldFailWithInvalidSeedProperty() {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
-        Graph graph = graphLoader(graphCreateConfig)
-            .load(HugeGraphFactory.class);
-
-        GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
 
         applyOnProcedure((proc) -> {
+            Graph graph = graphLoader(graphCreateConfig, proc.legacyMode()).load(HugeGraphFactory.class);
+
+            GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
                 "seedProperty",
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"

@@ -21,10 +21,8 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
@@ -81,8 +79,10 @@ class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
             .relationshipProjection(RelationshipProjections.empty())
             .build();
 
-        GraphsByRelationshipType graphs = graphLoader(createGraphConfig).build(HugeGraphFactory.class).build().graphs();
-        GraphCatalog.set(createGraphConfig, graphs);
+        GraphCatalog.set(
+            createGraphConfig,
+            graphLoader(createGraphConfig, false).build(HugeGraphFactory.class).build().graphs()
+        );
 
         String query = GdsCypher.call()
             .explicitCreation("testGraph")
