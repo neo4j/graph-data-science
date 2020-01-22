@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -41,6 +42,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -54,6 +56,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.PROJECTION_KEY;
@@ -579,6 +582,82 @@ class GraphCreateProcTest extends BaseProcTest {
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
+            singletonList(map(
+                "graphName", name,
+                NODE_PROJECTION_KEY, isA(Map.class),
+                RELATIONSHIP_PROJECTION_KEY, expectedRelProjection,
+                "nodeCount", nodeCount,
+                "relationshipCount", relCount,
+                "createMillis", instanceOf(Long.class)
+            ))
+        );
+    }
+
+    @Test
+    void relationshipProjectionPropertyThrowsAnExceptionWhenNoneIsCombinedWithNotNone() {
+        String name = "g";
+        Map<String, Object> inlinedProps = map(
+            "weight",
+            map("property", "weight", AGGREGATION_KEY, "NONE", "defaultValue", Double.NaN)
+        );
+        Map<String, Object> relProjection = map(
+            "B",
+            map("type", "REL", PROJECTION_KEY, "NATURAL", AGGREGATION_KEY, "NONE", PROPERTIES_KEY, inlinedProps)
+        );
+        Map<String, Object> extraProps = map(
+            "foo",
+            map("property", "weight", AGGREGATION_KEY, "MAX")
+        );
+
+        QueryExecutionException thrownException = assertThrows(QueryExecutionException.class, () ->
+            runQuery(
+                "CALL gds.graph.create($name, '*', $relProjection, {relationshipProperties: $extraProps})",
+                map("name", name, "relProjection", relProjection, "extraProps", extraProps)
+            )
+        );
+
+        assertEquals(
+            "Failed to invoke procedure `gds.graph.create`: Caused by: java.lang.IllegalArgumentException: " +
+            "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations.",
+            thrownException.getLocalizedMessage());
+    }
+
+    @ParameterizedTest(name = "aggregation={0}")
+    @MethodSource("relationshipAggregationTypes")
+    void relationshipProjectionPropertyPropagateAggregations(String aggregation) {
+
+        String extraPropAggregation = Optional.of(aggregation)
+            .filter(a -> a.equals("NONE"))
+            .orElse("MAX");
+
+        String name = "g";
+        Map<String, Object> inlinedProps = map(
+            "weight",
+            map("property", "weight", "defaultValue", Double.NaN)
+        );
+        Map<String, Object> relProjection = map(
+            "B",
+            map("type", "REL", PROJECTION_KEY, "NATURAL", AGGREGATION_KEY, aggregation, PROPERTIES_KEY, inlinedProps)
+        );
+        Map<String, Object> extraProps = map(
+            "foo",
+            map("property", "weight", AGGREGATION_KEY, extraPropAggregation)
+        );
+
+        Map<String, Object> expectedProperties = map(
+            "weight",
+            map("property", "weight", AGGREGATION_KEY, aggregation, "defaultValue", Double.NaN),
+            "foo",
+            map("property", "weight", AGGREGATION_KEY, extraPropAggregation, "defaultValue", Double.NaN)
+        );
+        Map<String, Object> expectedRelProjection = map(
+            "B",
+            map("type", "REL", PROJECTION_KEY, "NATURAL", AGGREGATION_KEY, aggregation, PROPERTIES_KEY, expectedProperties)
+        );
+
+        assertCypherResult(
+            "CALL gds.graph.create($name, '*', $relProjection, {relationshipProperties: $extraProps})",
+            map("name", name, "relProjection", relProjection, "extraProps", extraProps),
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
