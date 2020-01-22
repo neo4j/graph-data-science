@@ -19,28 +19,17 @@
  */
 package org.neo4j.graphalgo.newapi;
 
-import org.immutables.builder.Builder;
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
-import org.neo4j.graphalgo.core.utils.Pools;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -161,73 +150,5 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             username,
             config
         );
-    }
-
-    /**
-     * Factory method that defines the generation of {@link StoreConfigBuilder}.
-     * Use the builder to construct the input for that input.
-     */
-    @Builder.Factory
-    static GraphCreateFromStoreConfig storeConfig(
-        Optional<String> userName,
-        Optional<String> graphName,
-        List<String> nodeLabels,
-        List<String> relationshipTypes,
-        List<NodeProjection> nodeProjections,
-        List<RelationshipProjection> relationshipProjections,
-        Map<String, NodeProjection> nodeProjectionsWithIdentifier,
-        Map<String, RelationshipProjection> relationshipProjectionsWithIdentifier,
-        List<PropertyMapping> nodeProperties,
-        List<PropertyMapping> relationshipProperties,
-        Optional<Integer> concurrency,
-        Optional<Boolean> loadAnyLabel,
-        Optional<Boolean> loadAnyRelationshipType,
-        Optional<Projection> globalProjection
-    ) {
-        // Node projections
-        Map<String, NodeProjection> tempNP = new HashMap<>();
-        nodeLabels.forEach(label -> tempNP.put(label, NodeProjection.of(label, PropertyMappings.of())));
-        nodeProjections.forEach(np -> tempNP.put(np.label().orElse("*"), np));
-        nodeProjectionsWithIdentifier.forEach(tempNP::put);
-
-        if (tempNP.isEmpty() && loadAnyLabel.orElse(null) != null) {
-            tempNP.put("*", NodeProjection.empty());
-        }
-
-        // Relationship projections
-        Map<String, RelationshipProjection> tempRP = new HashMap<>();
-        relationshipTypes.forEach(relType -> tempRP.put(
-            relType,
-            RelationshipProjection.of(relType, Projection.NATURAL, DeduplicationStrategy.DEFAULT)
-        ));
-        relationshipProjections.forEach(rp -> tempRP.put(rp.type().orElse("*"), rp));
-        relationshipProjectionsWithIdentifier.forEach(tempRP::put);
-
-        if (tempRP.isEmpty() && loadAnyRelationshipType.orElse(false)) {
-            tempRP.put("*", RelationshipProjection.empty());
-        }
-
-        NodeProjections np = NodeProjections.of(tempNP.entrySet().stream().collect(Collectors.toMap(
-            e -> ElementIdentifier.of(e.getKey()),
-            Map.Entry::getValue
-        )));
-
-        RelationshipProjections rp = RelationshipProjections.of(tempRP.entrySet().stream().collect(Collectors.toMap(
-            e -> ElementIdentifier.of(e.getKey()),
-            e -> globalProjection.isPresent()
-                ? RelationshipProjection.copyOf(e.getValue()).withProjection(globalProjection.get())
-                : e.getValue()
-        )));
-
-        return ImmutableGraphCreateFromStoreConfig.builder()
-            .username(userName.orElse(""))
-            .graphName(graphName.orElse(""))
-            .nodeProjection(np)
-            .relationshipProjection(rp)
-            .nodeProperties(PropertyMappings.of(nodeProperties))
-            .relationshipProperties(PropertyMappings.of(relationshipProperties))
-            .concurrency(concurrency.orElse(Pools.DEFAULT_CONCURRENCY))
-            .build()
-            .withNormalizedPropertyMappings();
     }
 }

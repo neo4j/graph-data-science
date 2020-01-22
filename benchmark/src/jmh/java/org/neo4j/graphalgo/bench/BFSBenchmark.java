@@ -19,6 +19,7 @@
 package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.StoreConfigBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
@@ -26,7 +27,6 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.traverse.Traverse;
-import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.NullLog;
 import org.openjdk.jmh.annotations.Benchmark;

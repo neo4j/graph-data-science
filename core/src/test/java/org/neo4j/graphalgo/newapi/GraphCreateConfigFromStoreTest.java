@@ -20,14 +20,10 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -35,7 +31,6 @@ import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -43,7 +38,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 
 class GraphCreateConfigFromStoreTest {
 
@@ -153,115 +147,5 @@ class GraphCreateConfigFromStoreTest {
         assertTrue(allProperties.contains("foo"));
         assertTrue(allProperties.contains("bar"));
         assertEquals(0, graphCreateConfig.relationshipProperties().numberOfMappings());
-    }
-
-    static Stream<Arguments> configs() {
-        return Stream.of(
-            Arguments.arguments(
-                new StoreConfigBuilder().userName("foo").graphName("bar").build(),
-                ImmutableGraphCreateFromStoreConfig.builder().username("foo").graphName("bar")
-                    .nodeProjection(NodeProjections.empty())
-                    .relationshipProjection(RelationshipProjections.empty())
-                    .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of())
-                    .build()
-            ),
-            Arguments.arguments(
-                new StoreConfigBuilder().loadAnyLabel(true).loadAnyRelationshipType(true).build(),
-                ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
-                    .nodeProjection(NodeProjections.builder()
-                        .putProjection(PROJECT_ALL, NodeProjection.empty())
-                        .build())
-                    .relationshipProjection(RelationshipProjections.builder()
-                        .putProjection(PROJECT_ALL, RelationshipProjection.empty())
-                        .build())
-                    .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of())
-                    .build()
-            ),
-            Arguments.arguments(
-                new StoreConfigBuilder().addNodeLabel("Foo").addRelationshipType("BAR").build(),
-                ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
-                    .nodeProjection(NodeProjections.builder()
-                        .putProjection(ElementIdentifier.of("Foo"), NodeProjection.of("Foo", PropertyMappings.of()))
-                        .build())
-                    .relationshipProjection(RelationshipProjections.builder()
-                        .putProjection(
-                            ElementIdentifier.of("BAR"),
-                            RelationshipProjection.of("BAR", Projection.NATURAL, DeduplicationStrategy.DEFAULT)
-                        )
-                        .build())
-                    .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of())
-                    .build()
-            ),
-            Arguments.arguments(
-                new StoreConfigBuilder().addNodeProjection(NodeProjection.fromString("Foo")).addRelationshipType("BAR").build(),
-                ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
-                    .nodeProjection(NodeProjections.builder()
-                        .putProjection(ElementIdentifier.of("Foo"), NodeProjection.of("Foo", PropertyMappings.of()))
-                        .build())
-                    .relationshipProjection(RelationshipProjections.builder()
-                        .putProjection(
-                            ElementIdentifier.of("BAR"),
-                            RelationshipProjection.of("BAR", Projection.NATURAL, DeduplicationStrategy.DEFAULT)
-                        )
-                        .build())
-                    .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of())
-                    .build()
-            ),
-            Arguments.arguments(
-                new StoreConfigBuilder().addNodeLabel("Foo").addRelationshipType("BAR").globalProjection(Projection.UNDIRECTED).build(),
-                ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
-                    .nodeProjection(NodeProjections.builder()
-                        .putProjection(ElementIdentifier.of("Foo"), NodeProjection.of("Foo", PropertyMappings.of()))
-                        .build())
-                    .relationshipProjection(RelationshipProjections.builder()
-                        .putProjection(
-                            ElementIdentifier.of("BAR"),
-                            RelationshipProjection.of("BAR", Projection.UNDIRECTED, DeduplicationStrategy.DEFAULT)
-                        )
-                        .build())
-                    .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of())
-                    .build()
-            ),
-            Arguments.arguments(
-                new StoreConfigBuilder()
-                    .addNodeLabel("Foo")
-                    .addRelationshipType("BAR")
-                    .nodeProperties(Collections.singletonList(PropertyMapping.of("nProp", 23.0D)))
-                    .relationshipProperties(Collections.singletonList(PropertyMapping.of("rProp", 42.0D)))
-                    .build(),
-                ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
-                    .nodeProjection(NodeProjections.builder()
-                        .putProjection(
-                            ElementIdentifier.of("Foo"),
-                            NodeProjection.builder()
-                                .label("Foo")
-                                .addProperty(PropertyMapping.of("nProp", 23.0D))
-                                .build())
-                        .build())
-                    .relationshipProjection(RelationshipProjections.builder()
-                        .putProjection(
-                            ElementIdentifier.of("BAR"),
-                            RelationshipProjection.builder()
-                                .type("BAR")
-                                .addProperty(PropertyMapping.of("rProp", 42.0D))
-                                .build()
-                        )
-                        .build())
-                    .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of())
-                    .build()
-            )
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("configs")
-    void testStoreConfigBuilder(GraphCreateFromStoreConfig actual, GraphCreateFromStoreConfig expected) {
-        assertEquals(expected, actual);
     }
 }

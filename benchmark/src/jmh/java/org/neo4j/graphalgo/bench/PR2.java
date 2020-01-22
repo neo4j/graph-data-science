@@ -20,6 +20,7 @@ package org.neo4j.graphalgo.bench;
 
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.StoreConfigBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
@@ -28,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
-import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;

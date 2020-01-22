@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.bench;
 
+import org.neo4j.graphalgo.StoreConfigBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
@@ -27,7 +28,6 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
-import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.logging.NullLog;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;

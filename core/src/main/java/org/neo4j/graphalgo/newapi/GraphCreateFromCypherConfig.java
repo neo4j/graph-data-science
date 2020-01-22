@@ -20,13 +20,11 @@
 
 package org.neo4j.graphalgo.newapi;
 
-import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -36,10 +34,6 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.utils.Pools;
-
-import java.util.List;
-import java.util.Optional;
 
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
@@ -162,40 +156,5 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         if (config.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
             throw new IllegalArgumentException(String.format("Invalid key: %s", RELATIONSHIP_PROJECTION_KEY));
         }
-    }
-
-    /**
-     * Factory method that defines the generation of {@link CypherConfigBuilder}.
-     * Use the builder to construct the input for that input.
-     */
-    @Builder.Factory
-    static GraphCreateFromCypherConfig cypherConfig(
-        Optional<String> userName,
-        Optional<String> graphName,
-        Optional<String> nodeQuery,
-        Optional<String> relationshipQuery,
-        List<PropertyMapping> nodeProperties,
-        List<PropertyMapping> relationshipProperties,
-        Optional<Boolean> loadAnyLabel,
-        Optional<Boolean> loadAnyRelationshipType,
-        Optional<Integer> concurrency
-    ) {
-        if (!nodeQuery.isPresent() && !loadAnyLabel.orElse(false)) {
-            throw new IllegalArgumentException("Missing nodeQuery or loadAnyLabel(true).");
-        }
-
-        if (!relationshipQuery.isPresent() && !loadAnyRelationshipType.orElse(false)) {
-            throw new IllegalArgumentException("Missing relationshipQuery or loadAnyRelationshipType(true).");
-        }
-
-        return ImmutableGraphCreateFromCypherConfig.builder()
-            .username(userName.orElse(""))
-            .graphName(graphName.orElse(""))
-            .nodeQuery(nodeQuery.orElse(ALL_NODES_QUERY))
-            .relationshipQuery(relationshipQuery.orElse(ALL_RELATIONSHIPS_QUERY))
-            .nodeProperties(PropertyMappings.of(nodeProperties))
-            .relationshipProperties(PropertyMappings.of(relationshipProperties))
-            .concurrency(concurrency.orElse(Pools.DEFAULT_CONCURRENCY))
-            .build();
     }
 }

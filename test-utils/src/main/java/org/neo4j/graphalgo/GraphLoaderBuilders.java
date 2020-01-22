@@ -68,7 +68,7 @@ final class GraphLoaderBuilders {
         Optional<Boolean> loadAnyRelationshipType,
         Optional<Projection> globalProjection) {
 
-        GraphCreateFromStoreConfig createConfig = GraphCreateFromStoreConfig.storeConfig(
+        GraphCreateFromStoreConfig createConfig = GraphCreateConfigBuilders.storeConfig(
             userName,
             graphName,
             nodeLabels,
@@ -97,6 +97,7 @@ final class GraphLoaderBuilders {
         );
     }
 
+    @Builder.Factory
     static ModernGraphLoader cypherLoader(
         // GraphLoader parameters
         GraphDatabaseAPI api,
@@ -117,7 +118,7 @@ final class GraphLoaderBuilders {
         Optional<Boolean> loadAnyRelationshipType,
         Optional<Integer> concurrency
     ) {
-        GraphCreateFromCypherConfig createConfig = GraphCreateFromCypherConfig.cypherConfig(
+        GraphCreateFromCypherConfig createConfig = GraphCreateConfigBuilders.cypherConfig(
             userName,
             graphName,
             nodeQuery,

@@ -19,6 +19,7 @@
 package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreConfigBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
@@ -27,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
 import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
-import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;

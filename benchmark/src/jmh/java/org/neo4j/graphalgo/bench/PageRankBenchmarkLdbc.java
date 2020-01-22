@@ -18,13 +18,13 @@
  */
 package org.neo4j.graphalgo.bench;
 
+import org.neo4j.graphalgo.StoreConfigBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
-import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.graphalgo.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.results.CentralityResult;

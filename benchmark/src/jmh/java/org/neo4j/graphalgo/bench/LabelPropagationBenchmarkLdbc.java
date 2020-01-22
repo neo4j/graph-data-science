@@ -19,6 +19,7 @@
 package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreConfigBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -27,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphalgo.labelpropagation.ImmutableLabelPropagationStreamConfig;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagation;
-import org.neo4j.graphalgo.newapi.StoreConfigBuilder;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.NullLog;
 import org.openjdk.jmh.annotations.Benchmark;
