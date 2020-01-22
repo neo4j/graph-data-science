@@ -146,6 +146,7 @@ public class GraphGenerator {
         private final RelationshipImporter.Imports imports;
         private final RelationshipsBatchBuffer relationshipBuffer;
         private final IdMap idMap;
+        private final Direction direction;
         private final boolean undirected;
         private final boolean loadRelationshipProperty;
         private final ExecutorService executorService;
@@ -163,6 +164,7 @@ public class GraphGenerator {
             DeduplicationStrategy deduplicationStrategy,
             ExecutorService executorService, AllocationTracker tracker
         ) {
+            this.direction = direction;
             this.undirected = undirected;
             this.loadRelationshipProperty = loadRelationshipProperty;
             this.executorService = executorService;
@@ -305,7 +307,7 @@ public class GraphGenerator {
             RelationshipImporter.PropertyReader propertyReader = loadRelationshipProperty ? RelationshipImporter.preLoadedPropertyReader() : null;
 
             long newImportedInOut = imports.importRels(relationshipBuffer, propertyReader);
-            importedRelationships += RawValues.getHead(newImportedInOut) / 2;
+            importedRelationships += direction == Direction.BOTH ? RawValues.getHead(newImportedInOut) / 2 : RawValues.getHead(newImportedInOut);
             relationshipBuffer.reset();
         }
 
