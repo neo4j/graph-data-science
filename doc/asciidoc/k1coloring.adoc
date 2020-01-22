@@ -44,88 +44,84 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL algo.beta.k1coloring(label: STRING, relationship: STRING, {
-  write: BOOLEAN,
+CALL gds.beta.k1coloring.write(graphName: STRING, {
   writeProperty: STRING
   // additional configuration
 })
-YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
+YIELD nodes, colorCount, ranIterations, didConverge, writeProperty, loadMillis, computeMillis, writeMillis
 ----
 
 .Parameters
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name         | Type    | Default | Optional | Description
-| node label   | string  | null    | yes      | The node label to load from the graph. If `null`, load all nodes.
-| relationship | string  | null    | yes      | The relationship type to load from the graph. If `null`, load all relationships.
-| config       | map     | {}      | yes      | Additional configuration, see below.
+| Name      | Type    | Default | Optional | Description
+| graphName | string  | null    | yes      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the config map must contain configuration for creating a graph.
+| config    | map     | {}      | yes      | Additional configuration, see below.
 |===
 
 .Configuration
-[opts="header",cols="1m,1,1,1,4"]
+[opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default                   | Optional | Description
-| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency   | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency  | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for writing the result.
-| write             | boolean | `true`                    | yes      | Specifies if the result should be written back as a node property.
-| writeProperty     | string  |                           | yes      | The property name written back the ID of the partition particular node belongs to.
-| graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with node label and relationship type parameters. Use `'cypher'` for describing the subset using Cypher queries for nodes and relationships.
-| iterations        | int     | 10                        | yes      | The maximum number of iterations the algorithms runs with.
-| batchSize         | int     | 10_000                    | yes      | Controls the the number of relationships each parallel thread processes.
+| Name                   | Type    | Default                | Optional | Description
+| nodeProjection         | string  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
+| relationshipProjection | string  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
+| concurrency            | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency        | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| maxIterations          | int     | 20                     | yes      | The maximum number of iterations of K1 Coloring to run.
+| writeProperty          | string  | n/a                    | no       | The node property that stores the color.
 |===
 
 .Results
-[opts="header",cols="1m,1,6"]
+[opts="header",cols="1,1,6"]
 |===
-| Name                 | Type    | Description
-| loadMillis           | int     | Milliseconds for loading data.
-| computeMillis        | int     | Milliseconds for running the algorithm.
-| writeMillis          | int     | Milliseconds for writing result data back.
-| nodes                | int     | The number of nodes considered.
-| ranIterations        | int     | The actual number of iterations the algorithm ran.
-| didConverge          | boolean | An indicator of whether the algorithm found a correct coloring.
-| colorCount           | int     | The number of colors used.
-| write                | boolean | Specifies if the result was written back as a node property.
-| writeProperty        | string  | The property name written back to.
+| Name          | Type    | Description
+| nodes         | int     | The number of nodes considered.
+| ranIterations | int     | The actual number of iterations the algorithm ran.
+| didConverge   | boolean | An indicator of whether the algorithm found a correct coloring.
+| colorCount    | int     | The number of colors used.
+| writeProperty | string  | The node property that stores the color.
+| write         | boolean | Specifies if the result was written back as a node property.
+| loadMillis    | int     | Milliseconds for loading data.
+| computeMillis | int     | Milliseconds for running the algorithm.
+| writeMillis   | int     | Milliseconds for writing result data back to Neo4j.
 |===
 
 [[algorithms-k1coloring-syntax-stream]]
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.beta.k1coloring.stream(label: STRING, relationship: STRING, {
-  // configuration
+CALL gds.beta.k1coloring.stream(graphName: STRING, {
+  // additional configuration
 })
 YIELD nodeId, color
 ----
 
 .Parameters
-[opts="header",cols="1,1,1,1,4"]
+[opts="header",cols="1,1,1m,1,4"]
 |===
-| Name              | Type    | Default        | Optional | Description
-| node label        | string  | `null`         | yes      | The node label to load from the graph. If null, load all nodes.
-| relationship type | string  | `null`         | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config            | map     | `{}`           | yes      | Additional configuration, see below.
+| Name      | Type    | Default | Optional | Description
+| graphName | string  | null    | yes      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the config map must contain configuration for creating a graph.
+| config    | map     | {}      | yes      | Additional configuration, see below.
 |===
 
 .Configuration
-[opts="header",cols="1m,1,1,1,4"]
+[opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default                   | Optional | Description
-| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency   | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
-| graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with node label and relationship type parameters. Use `'cypher'` for describing the subset using Cypher queries for nodes and relationships.
-| iterations        | int     | 10                        | yes      | The maximum number of iterations the algorithms runs with.
-| batchSize         | int     | 10_000                    | yes      | Controls the the number of relationships each parallel thread processes.
+| Name                   | Type    | Default                | Optional | Description
+| nodeProjection         | string  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
+| relationshipProjection | string  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
+| concurrency            | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency        | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| maxIterations          | int     | 20                     | yes      | The maximum number of iterations of K1 Coloring to run.
 |===
 
 .Results
-[opts="header",cols="1m,1,6"]
+[opts="header",cols="1,1,6"]
 |===
-| Name   | Type | Description
-| nodeId | int  | Node ID
-| color  | int  | Color ID
+| Name          | Type    | Description
+| nodeId        | int     | The ID of the Node
+| color         | int     | The color of the Node
 |===
 
 
@@ -136,15 +132,15 @@ Consider the graph created by the following Cypher statement:
 
 [source, cypher]
 ----
-CREATE (nAlice:User {name: 'Alice'})
-CREATE (nBridget:User {name: 'Bridget'})
-CREATE (nCharles:User {name: 'Charles'})
-CREATE (nDoug:User {name: 'Doug'})
+CREATE (alice:User {name: 'Alice'}),
+       (bridget:User {name: 'Bridget'}),
+       (charles:User {name: 'Charles'}),
+       (doug:User {name: 'Doug'}),
 
-CREATE (nAlice)-[:LINK]->(nBridget)
-CREATE (nAlice)-[:LINK]->(nCharles)
-CREATE (nAlice)-[:LINK]->(nDoug)
-CREATE (nBridget)-[:LINK]->(nCharles)
+       (alice)-[:LINK]->(bridget),
+       (alice)-[:LINK]->(charles),
+       (alice)-[:LINK]->(doug),
+       (bridget)-[:LINK]->(charles)
 ----
 
 This graph has a super node with name "Alice" that connects to all other nodes.
@@ -161,18 +157,18 @@ See <<projected-graph-model, Projected Graph Model>> for more details.
 .Using a named graph:
 [source, cypher]
 ----
-CALL algo.graph.load('myGraph', 'User', 'LINK');
+CALL gds.graph.create('myGraph', 'User', 'LINK');
 
-CALL algo.beta.k1coloring.stream(null, null, {graph: 'myGraph'})
+CALL gds.beta.k1coloring.stream('myGraph')
 YIELD nodeId, color
-RETURN gds.util.asNode(nodeId).name AS Name, color AS Color
-ORDER BY Name;
+RETURN gds.util.asNode(nodeId).name AS name, color
+ORDER BY name
 ----
 
 .Results
 [opts="header",cols="1m,1m"]
 |===
-| Name      | Color
+| name      | color
 | "Alice"   | 2
 | "Bridget" | 1
 | "Charles" | 0
@@ -182,21 +178,19 @@ ORDER BY Name;
 .Using a Cypher projection:
 [source, cypher]
 ----
-CALL algo.beta.k1coloring.stream(
-  'MATCH (u:User) RETURN id(u) AS id',
-  'MATCH (u1:User)-[:LINK]->(u2:User)
-   RETURN id(u1) AS source, id(u2) AS target',
-   {graph:'cypher'}
-)
+CALL gds.beta.k1coloring.stream({
+  nodeQuery: 'MATCH (n:User) RETURN id(n) AS id',
+  relationshipQuery: 'MATCH (s:User)-[:LINK]->(t:User) RETURN id(s) AS source, id(t) AS target'
+})
 YIELD nodeId, color
-RETURN gds.util.asNode(nodeId).name AS Name, color AS Color
-ORDER BY Name
+RETURN gds.util.asNode(nodeId).name AS name, color
+ORDER BY name
 ----
 
 .Results
 [opts="header",cols="1m,1m"]
 |===
-| Name      | Color
+| name      | color
 | "Alice"   | 2
 | "Bridget" | 1
 | "Charles" | 0
