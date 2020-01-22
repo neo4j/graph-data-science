@@ -73,15 +73,8 @@ public abstract class PropertyMapping {
                 )
             );
         } else if (stringOrMap instanceof Map) {
-            Map relPropertyMap = (Map) stringOrMap;
-
-            final Object propertyNameValue = relPropertyMap.get(PROPERTY_KEY);
-            if (propertyNameValue == null) {
-                throw new IllegalArgumentException(String.format(
-                    "Expected a '%s', but no such entry found for '%s'.",
-                    PROPERTY_KEY, PROPERTY_KEY
-                ));
-            }
+            Map<String, Object> relPropertyMap = (Map) stringOrMap;
+            Object propertyNameValue = relPropertyMap.getOrDefault(PROPERTY_KEY, propertyKey);
             if (!(propertyNameValue instanceof String)) {
                 throw new IllegalArgumentException(String.format(
                     "Expected the value of '%s' to be of type String, but was '%s'.",

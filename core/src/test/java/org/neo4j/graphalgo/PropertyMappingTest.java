@@ -40,7 +40,9 @@ class PropertyMappingTest {
 
     @Test
     void testFromObjectWithMap() {
-        PropertyMapping propertyMapping = PropertyMapping.fromObject("transaction_count", MapUtil.map(
+        PropertyMapping propertyMapping = PropertyMapping.fromObject(
+            "transaction_count",
+            MapUtil.map(
                 "property", "usd",
                 "aggregation", "MIN",
                 "defaultValue", 42.0
@@ -52,23 +54,25 @@ class PropertyMappingTest {
     }
 
     @Test
+    void testFromObjectMapWithDefaultPropertyKey() {
+        PropertyMapping propertyMapping = PropertyMapping.fromObject(
+            "transaction_count",
+            MapUtil.map(
+                "aggregation", "MIN",
+                "defaultValue", 42.0
+        ));
+        assertEquals(propertyMapping.propertyKey(), "transaction_count");
+        assertEquals(propertyMapping.neoPropertyKey(), "transaction_count");
+        assertEquals(propertyMapping.deduplicationStrategy(), DeduplicationStrategy.MIN);
+        assertEquals(propertyMapping.defaultValue(), 42.0);
+    }
+
+    @Test
     void failsOnWrongKeyType() {
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class, () -> PropertyMapping.fromObject("transaction_count", MapUtil.map(
                         "property", 42
                 )));
         assertThat(ex.getMessage(), containsString("Expected the value of 'property' to be of type String, but was 'Integer'."));
-    }
-
-    @Test
-    void failsOnMissingPropertyKey() {
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class, () -> PropertyMapping.fromObject("transaction_count", MapUtil.map(
-                        "foo", "bar"
-                )));
-
-        assertThat(
-                ex.getMessage(),
-                containsString("Expected a 'property', but no such entry found for 'property'."));
     }
 }

@@ -802,6 +802,46 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
+    void shouldDefaultProperty() {
+        String graphCreateQuery =
+            "CALL gds.graph.create(" +
+            "   'testGraph', " +
+            "   '*', " +
+            "   {" +
+            "       REL: {" +
+            "           projection: 'NATURAL'," +
+            "           properties: {" +
+            "               weight: {" +
+            "                   aggregation: 'SINGLE'" +
+            "               }" +
+            "           }" +
+            "       }" +
+            "   }" +
+            ");";
+
+        assertCypherResult(graphCreateQuery, singletonList(map(
+            "graphName", "testGraph",
+            NODE_PROJECTION_KEY, isA(Map.class),
+            RELATIONSHIP_PROJECTION_KEY, map(
+                "REL", map(
+                    "type", "REL",
+                    PROJECTION_KEY, "NATURAL",
+                    AGGREGATION_KEY, "DEFAULT",
+                    PROPERTIES_KEY,  map(
+                    "weight", map(
+                        "property", "weight",
+                            AGGREGATION_KEY, "SINGLE",
+                            "defaultValue", Double.NaN)
+                ))
+            ),
+            "nodeCount", nodeCount,
+            "relationshipCount", relCount,
+            "createMillis", instanceOf(Long.class)
+        )));
+    }
+
+
+    @Test
     void failsOnInvalidNeoType() {
         String name = "g";
         Map relProjection = map("REL", map("type", "INVALID"));
