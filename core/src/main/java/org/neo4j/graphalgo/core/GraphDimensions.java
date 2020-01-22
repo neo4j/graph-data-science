@@ -26,6 +26,9 @@ import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
+import java.util.Collections;
+import java.util.Map;
+
 @ValueClass
 public interface GraphDimensions {
 
@@ -39,7 +42,12 @@ public interface GraphDimensions {
     @Value.Default
     default long maxRelCount() {
         return 0L;
-    };
+    }
+
+    @Value.Default
+    default Map<String, Long> relationshipCounts() {
+        return Collections.emptyMap();
+    }
 
     @Nullable
     LongSet nodeLabelIds();
@@ -47,7 +55,7 @@ public interface GraphDimensions {
     @Value.Default
     default ResolvedPropertyMappings nodeProperties() {
         return ResolvedPropertyMappings.empty();
-    };
+    }
 
     @Value.Default
     default ResolvedPropertyMappings relationshipProperties() {

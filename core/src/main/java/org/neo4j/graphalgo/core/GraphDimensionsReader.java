@@ -42,6 +42,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
@@ -102,21 +103,25 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         long nodeCount = nodeLabelIds.stream().mapToLong(dataRead::countsForNode).sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
         // TODO: this will double count relationships between distinct labels
-        long maxRelCount = relationshipTypeMappings
+        Map<String, Long> relationshipCounts = relationshipTypeMappings
             .stream()
             .filter(RelationshipTypeMapping::doesExist)
-            .flatMapToLong(relationshipTypeMapping -> nodeLabelIds.stream()
-                .mapToLong(nodeLabelId -> maxRelCountForLabelAndType(
-                    dataRead,
-                    nodeLabelId,
-                    relationshipTypeMapping.typeId()
-                ))
-            ).sum();
+            .collect(Collectors.toMap(
+                RelationshipTypeMapping::elementIdentifier,
+                relationshipTypeMapping -> nodeLabelIds.stream()
+                    .mapToLong(nodeLabelId -> maxRelCountForLabelAndType(
+                        dataRead,
+                        nodeLabelId,
+                        relationshipTypeMapping.typeId()
+                    )).sum()
+            ));
+        long maxRelCount = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
 
         return ImmutableGraphDimensions.builder()
                 .nodeCount(nodeCount)
                 .highestNeoId(allNodesCount)
                 .maxRelCount(maxRelCount)
+                .relationshipCounts(relationshipCounts)
                 .nodeLabelIds(nodeLabelIds.longSet())
                 .nodeProperties(nodeProperties)
                 .relationshipTypeMappings(relationshipTypeMappings)

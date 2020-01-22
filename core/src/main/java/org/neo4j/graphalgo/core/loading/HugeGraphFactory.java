@@ -135,11 +135,19 @@ public final class HugeGraphFactory extends GraphFactory {
         long relOperations = LOAD_DEGREES ? dimensions.maxRelCount() : 0L;
 
         // batching for undirected double the amount of rels imported
-        if (setup.loadIncoming() || setup.loadAsUndirected()) {
+        if (setup.legacyMode() && (setup.loadIncoming() || setup.loadAsUndirected())) {
             relOperations += dimensions.maxRelCount();
         }
-        if (setup.loadOutgoing() || setup.loadAsUndirected()) {
+        if (setup.legacyMode() && (setup.loadOutgoing() || setup.loadAsUndirected())) {
             relOperations += dimensions.maxRelCount();
+        }
+        if (!setup.legacyMode()) {
+            relOperations = setup.relationshipProjections().projections().entrySet().stream().map(entry -> {
+                Long relCount = dimensions.relationshipCounts().getOrDefault(entry.getKey().name, 0L);
+                return entry.getValue().projection() == Projection.UNDIRECTED
+                    ? relCount * 2
+                    : relCount;
+            }).mapToLong(Long::longValue).sum();
         }
 
         return new ApproximatedImportProgress(
