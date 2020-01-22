@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
@@ -131,7 +132,8 @@ final class GraphLoaderBuilders {
         List<PropertyMapping> relationshipProperties,
         Optional<Boolean> loadAnyLabel,
         Optional<Boolean> loadAnyRelationshipType,
-        Optional<Integer> concurrency
+        Optional<Integer> concurrency,
+        Optional<DeduplicationStrategy> globalDeduplicationStrategy
     ) {
         GraphCreateFromCypherConfig createConfig = GraphCreateConfigBuilders.cypherConfig(
             userName,
@@ -142,7 +144,8 @@ final class GraphLoaderBuilders {
             relationshipProperties,
             loadAnyLabel,
             loadAnyRelationshipType,
-            concurrency
+            concurrency,
+            globalDeduplicationStrategy
         );
 
         return ImmutableModernGraphLoader.of(

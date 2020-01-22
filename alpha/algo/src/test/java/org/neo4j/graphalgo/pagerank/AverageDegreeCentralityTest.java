@@ -30,10 +30,8 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -180,22 +178,23 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = runInTransaction(
-                db,
-                () -> new GraphLoader(db)
-                .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                .withRelationshipType(
-                    "MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
-                .withDeduplicationStrategy(DeduplicationStrategy.SINGLE)
-                .load(graphFactory)
+            graph = runInTransaction(db, () -> new CypherLoaderBuilder()
+                .api(db)
+                .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
+                .relationshipQuery("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
+                .globalDeduplicationStrategy(DeduplicationStrategy.SINGLE)
+                .legacyMode(false)
+                .build()
+                .graph()
             );
         } else {
-            graph = new GraphLoader(db)
-                    .withLabel(label)
-                    .withRelationshipType("TYPE1")
-                    .withDirection(Direction.OUTGOING)
-                    .undirected()
-                    .load(graphFactory);
+            graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel(label.name())
+                .addRelationshipType("TYPE1")
+                .globalProjection(Projection.UNDIRECTED)
+                .build()
+                .graph();
         }
 
         AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);

@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
@@ -123,7 +124,8 @@ final class GraphCreateConfigBuilders {
         List<PropertyMapping> relationshipProperties,
         Optional<Boolean> loadAnyLabel,
         Optional<Boolean> loadAnyRelationshipType,
-        Optional<Integer> concurrency
+        Optional<Integer> concurrency,
+        Optional<DeduplicationStrategy> globalDeduplicationStrategy
     ) {
         if (!nodeQuery.isPresent() && !loadAnyLabel.orElse(false)) {
             throw new IllegalArgumentException("Missing nodeQuery or loadAnyLabel(true).");
@@ -133,11 +135,26 @@ final class GraphCreateConfigBuilders {
             throw new IllegalArgumentException("Missing relationshipQuery or loadAnyRelationshipType(true).");
         }
 
+        // TODO: This is a temporary hack to allow setting a global deduplication strategy for Cypher
+        //       loading in tests. Remove this as soon as projections and queries can be specified in conjunction.
+        RelationshipProjections relationshipProjections;
+        if (globalDeduplicationStrategy.isPresent()) {
+            relationshipProjections = RelationshipProjections.builder()
+                .putProjection(
+                    PROJECT_ALL,
+                    RelationshipProjection.of("*", Projection.NATURAL, globalDeduplicationStrategy.get())
+                )
+                .build();
+        } else {
+            relationshipProjections = RelationshipProjections.empty();
+        }
+
         return ImmutableGraphCreateFromCypherConfig.builder()
             .username(userName.orElse(""))
             .graphName(graphName.orElse(""))
             .nodeQuery(nodeQuery.orElse(ALL_NODES_QUERY))
             .relationshipQuery(relationshipQuery.orElse(ALL_RELATIONSHIPS_QUERY))
+            .relationshipProjection(relationshipProjections)
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(PropertyMappings.of(relationshipProperties))
             .concurrency(concurrency.orElse(Pools.DEFAULT_CONCURRENCY))
