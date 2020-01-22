@@ -20,9 +20,8 @@ package org.neo4j.graphalgo.bench;
 
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.Projection;
-import org.neo4j.graphalgo.StoreConfigBuilder;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -48,15 +47,13 @@ public final class PR2 extends BaseMain {
     Iterable<String> run(String graphToLoad, final Log log) throws Throwable {
         GraphDatabaseAPI db = LdbcDownloader.openDb(graphToLoad);
 
-        ModernGraphLoader graphLoader = ImmutableModernGraphLoader.builder()
+        ModernGraphLoader graphLoader = new StoreLoaderBuilder()
             .api(db)
             .log(log)
             .tracker(AllocationTracker.create())
-            .createConfig(new StoreConfigBuilder()
-                .loadAnyLabel(true)
-                .loadAnyRelationshipType(true)
-                .globalProjection(Projection.UNDIRECTED)
-                .build())
+            .loadAnyLabel(true)
+            .loadAnyRelationshipType(true)
+            .globalProjection(Projection.UNDIRECTED)
             .build();
 
         System.gc();

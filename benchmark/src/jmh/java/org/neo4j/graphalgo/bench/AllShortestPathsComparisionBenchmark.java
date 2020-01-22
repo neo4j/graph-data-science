@@ -19,10 +19,9 @@
 package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.StoreConfigBuilder;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -77,14 +76,12 @@ public class AllShortestPathsComparisionBenchmark extends BaseBenchmark {
         params.put("head", lines.get(0).getId());
         params.put("delta", 2.5);
 
-        graph = ImmutableModernGraphLoader.builder()
+        graph = new StoreLoaderBuilder()
             .api(db)
             .log(NullLog.getInstance())
-            .createConfig(new StoreConfigBuilder()
-                .loadAnyLabel(true)
-                .loadAnyRelationshipType(true)
-                .addRelationshipProperty(PropertyMapping.of("cost", 1.0))
-                .build())
+            .loadAnyLabel(true)
+            .loadAnyRelationshipType(true)
+            .addRelationshipProperty(PropertyMapping.of("cost", 1.0))
             .build()
             .load(HugeGraphFactory.class);
     }

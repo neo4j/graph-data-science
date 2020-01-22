@@ -27,12 +27,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Projection;
-import org.neo4j.graphalgo.StoreConfigBuilder;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -41,7 +40,6 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 
@@ -87,15 +85,11 @@ class WccTest extends AlgoTestBase {
     @ParameterizedTest(name = "projection = {1}")
     @EnumSource(Projection.class)
     void shouldComputeComponents(Projection projection) {
-        Graph graph = ImmutableModernGraphLoader.builder()
+        Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .log(NullLog.getInstance())
-            .createConfig(new StoreConfigBuilder()
-                .loadAnyLabel(true)
-                .addRelationshipType(RELATIONSHIP_TYPE.name())
-                .globalProjection(projection)
-                .build()
-            )
+            .loadAnyLabel(true)
+            .addRelationshipType(RELATIONSHIP_TYPE.name())
+            .globalProjection(projection)
             .legacyMode(false)
             .build()
             .load(HugeGraphFactory.class);

@@ -27,17 +27,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.CypherConfigBuilder;
+import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.QueryRunner;
-import org.neo4j.graphalgo.StoreConfigBuilder;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -46,8 +45,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 
@@ -89,27 +86,23 @@ final class LabelPropagationTest extends AlgoTestBase {
     }
 
     Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
-        GraphCreateConfig createConfig;
-
+        ModernGraphLoader graphLoader;
         if (graphImpl == CypherGraphFactory.class) {
-            createConfig = new CypherConfigBuilder()
+            graphLoader = new CypherLoaderBuilder()
+                .api(db)
                 .nodeQuery("MATCH (u:User) RETURN id(u) AS id")
                 .relationshipQuery("MATCH (u1:User)-[rel:FOLLOW]->(u2:User) \n" +
                                    "RETURN id(u1) AS source, id(u2) AS target")
+                .legacyMode(false)
                 .build();
         } else {
-            createConfig = new StoreConfigBuilder()
+            graphLoader = new StoreLoaderBuilder()
+                .api(db)
                 .addNodeLabel("User")
                 .addRelationshipType("FOLLOW")
+                .legacyMode(false)
                 .build();
         }
-
-        ModernGraphLoader graphLoader = ImmutableModernGraphLoader.builder()
-            .api(db)
-            .log(NullLog.getInstance())
-            .createConfig(createConfig)
-            .legacyMode(false)
-            .build();
 
         return QueryRunner.runInTransaction(db, () -> graphLoader.load(graphImpl));
     }
@@ -130,14 +123,11 @@ final class LabelPropagationTest extends AlgoTestBase {
 
     @Test
     void shouldWorkWithSeedOnExplicitlyLoadedGraph() {
-        Graph graph = ImmutableModernGraphLoader.builder()
+        Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .log(NullLog.getInstance())
-            .createConfig(new StoreConfigBuilder()
-                .addNodeLabel("User")
-                .addRelationshipType("FOLLOW")
-                .addNodeProperty(PropertyMapping.of("seedId", 0.0))
-                .build())
+            .addNodeLabel("User")
+            .addRelationshipType("FOLLOW")
+            .addNodeProperty(PropertyMapping.of("seedId", 0.0))
             .build()
             .load(HugeGraphFactory.class);
 

@@ -24,6 +24,9 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
+import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
@@ -42,6 +45,11 @@ final class GraphLoaderBuilders {
 
     private GraphLoaderBuilders() { }
 
+    /**
+     * Factory method that defines the generation of a {@link ModernGraphLoader}
+     * using a {@link GraphCreateFromStoreConfig}. Use {@link StoreLoaderBuilder}
+     * to create the input for that method in a convenient way.
+     */
     @Builder.Factory
     static ModernGraphLoader storeLoader(
         // GraphLoader parameters
@@ -87,6 +95,7 @@ final class GraphLoaderBuilders {
 
         return ImmutableModernGraphLoader.of(
             api,
+            executorService.orElse(Pools.DEFAULT),
             tracker.orElse(AllocationTracker.EMPTY),
             terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
             params,
@@ -97,6 +106,11 @@ final class GraphLoaderBuilders {
         );
     }
 
+    /**
+     * Factory method that defines the generation of a {@link ModernGraphLoader}
+     * using a {@link GraphCreateFromCypherConfig}. Use {@link CypherLoaderBuilder}
+     * to create the input for that method in a convenient way.
+     */
     @Builder.Factory
     static ModernGraphLoader cypherLoader(
         // GraphLoader parameters
@@ -132,6 +146,7 @@ final class GraphLoaderBuilders {
 
         return ImmutableModernGraphLoader.of(
             api,
+            executorService.orElse(Pools.DEFAULT),
             tracker.orElse(AllocationTracker.EMPTY),
             terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
             params,

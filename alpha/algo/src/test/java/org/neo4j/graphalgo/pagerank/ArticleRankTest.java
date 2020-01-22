@@ -22,17 +22,15 @@ package org.neo4j.graphalgo.pagerank;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.CypherConfigBuilder;
-import org.neo4j.graphalgo.StoreConfigBuilder;
+import org.neo4j.graphalgo.CypherLoaderBuilder;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.results.CentralityResult;
 import org.neo4j.graphdb.Label;
-import org.neo4j.logging.NullLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -123,28 +121,19 @@ final class ArticleRankTest extends AlgoTestBase {
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = runInTransaction(
-                db,
-                () -> ImmutableModernGraphLoader.builder()
-                    .api(db)
-                    .log(NullLog.getInstance())
-                    .createConfig(new CypherConfigBuilder()
-                        .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
-                        .relationshipQuery(
-                            "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                        .build())
-                    .legacyMode(false)
-                    .build()
-                    .load(graphFactory)
+            graph = runInTransaction(db, () -> new CypherLoaderBuilder()
+                .api(db)
+                .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
+                .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                .legacyMode(false)
+                .build()
+                .load(graphFactory)
             );
         } else {
-            graph = ImmutableModernGraphLoader.builder()
+            graph = new StoreLoaderBuilder()
                 .api(db)
-                .log(NullLog.getInstance())
-                .createConfig(new StoreConfigBuilder()
-                    .addNodeLabel(label.name())
-                    .addRelationshipType("TYPE1")
-                    .build())
+                .addNodeLabel(label.name())
+                .addRelationshipType("TYPE1")
                 .legacyMode(false)
                 .build()
                 .load(graphFactory);

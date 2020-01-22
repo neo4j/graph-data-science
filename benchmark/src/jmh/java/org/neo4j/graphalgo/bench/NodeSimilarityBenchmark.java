@@ -20,11 +20,10 @@
 
 package org.neo4j.graphalgo.bench;
 
-import org.neo4j.graphalgo.StoreConfigBuilder;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -38,7 +37,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.NullLog;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -100,14 +98,10 @@ public class NodeSimilarityBenchmark {
 
         createGraph(db, scaleFactor);
 
-        this.graph = ImmutableModernGraphLoader.builder()
+        this.graph = new StoreLoaderBuilder()
             .api(db)
-            .log(NullLog.getInstance())
-            .createConfig(new StoreConfigBuilder()
-                .loadAnyLabel(true)
-                .loadAnyRelationshipType(true)
-                .build()
-            )
+            .loadAnyLabel(true)
+            .loadAnyRelationshipType(true)
             .build()
             .load(HugeGraphFactory.class);
     }

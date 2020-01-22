@@ -20,10 +20,9 @@
 
 package org.neo4j.graphalgo.bench;
 
-import org.neo4j.graphalgo.StoreConfigBuilder;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -73,13 +72,11 @@ public class ExportRelationshipsBenchmark extends BaseBenchmark {
 
         createGraph(db, scaleFactor);
 
-        this.graph = ImmutableModernGraphLoader.builder()
+        this.graph = new StoreLoaderBuilder()
             .api(db)
             .log(NullLog.getInstance())
-            .createConfig(new StoreConfigBuilder()
-                .loadAnyLabel(true)
-                .loadAnyRelationshipType(true)
-                .build())
+            .loadAnyLabel(true)
+            .loadAnyRelationshipType(true)
             .build()
             .load(HugeGraphFactory.class);
 

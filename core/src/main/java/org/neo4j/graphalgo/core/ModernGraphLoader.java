@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService;
 @ValueClass
 public interface ModernGraphLoader extends SharedGraphLoader {
 
+    @Value.Default
     default ExecutorService executorService() {
         return Pools.DEFAULT;
     }

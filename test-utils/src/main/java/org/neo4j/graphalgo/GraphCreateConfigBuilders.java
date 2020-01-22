@@ -45,7 +45,6 @@ final class GraphCreateConfigBuilders {
 
     /**
      * Factory method that defines the generation of {@link StoreConfigBuilder}.
-     * Use the builder to construct the input for that input.
      */
     @Builder.Factory
     static GraphCreateFromStoreConfig storeConfig(
@@ -112,8 +111,7 @@ final class GraphCreateConfigBuilders {
     }
 
     /**
-     * Factory method that defines the generation of {@link CypherConfigBuilder}.
-     * Use the builder to construct the input for that input.
+     * Factory method that defines the generation of {@link StoreConfigBuilder}.
      */
     @Builder.Factory
     static GraphCreateFromCypherConfig cypherConfig(

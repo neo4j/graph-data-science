@@ -25,11 +25,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.StoreConfigBuilder;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -37,7 +36,6 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.logging.NullLog;
 
 import java.util.stream.LongStream;
 
@@ -82,15 +80,11 @@ class IncrementalWccTest extends AlgoTestBase {
 
     @Test
     void shouldComputeComponentsFromSeedProperty() {
-        Graph graph = ImmutableModernGraphLoader.builder()
+        Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .log(NullLog.getInstance())
-            .createConfig(new StoreConfigBuilder()
-                .loadAnyLabel(true)
-                .addRelationshipType(RELATIONSHIP_TYPE.name())
-                .addNodeProperty(PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L))
-                .build()
-            )
+            .loadAnyLabel(true)
+            .addRelationshipType(RELATIONSHIP_TYPE.name())
+            .addNodeProperty(PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L))
             .legacyMode(false)
             .build()
             .load(HugeGraphFactory.class);
