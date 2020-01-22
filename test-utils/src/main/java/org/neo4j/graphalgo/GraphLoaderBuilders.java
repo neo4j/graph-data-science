@@ -1,0 +1,144 @@
+/*
+ * Copyright (c) 2017-2020 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.neo4j.graphalgo;
+
+import org.immutables.builder.Builder;
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
+import org.neo4j.graphalgo.core.ModernGraphLoader;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.Log;
+import org.neo4j.logging.NullLog;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+
+@Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
+final class GraphLoaderBuilders {
+
+    private GraphLoaderBuilders() { }
+
+    @Builder.Factory
+    static ModernGraphLoader storeLoader(
+        // GraphLoader parameters
+        GraphDatabaseAPI api,
+        Optional<ExecutorService> executorService,
+        Optional<AllocationTracker> tracker,
+        Optional<TerminationFlag> terminationFlag,
+        Optional<Log> log,
+        Optional<String> userName,
+        Optional<Boolean> legacyMode,
+        Map<String, Object> params,
+        // CreateConfig parameters
+        Optional<String> graphName,
+        List<String> nodeLabels,
+        List<String> relationshipTypes,
+        List<NodeProjection> nodeProjections,
+        List<RelationshipProjection> relationshipProjections,
+        Map<String, NodeProjection> nodeProjectionsWithIdentifier,
+        Map<String, RelationshipProjection> relationshipProjectionsWithIdentifier,
+        List<PropertyMapping> nodeProperties,
+        List<PropertyMapping> relationshipProperties,
+        Optional<Integer> concurrency,
+        Optional<Boolean> loadAnyLabel,
+        Optional<Boolean> loadAnyRelationshipType,
+        Optional<Projection> globalProjection) {
+
+        GraphCreateFromStoreConfig createConfig = GraphCreateFromStoreConfig.storeConfig(
+            userName,
+            graphName,
+            nodeLabels,
+            relationshipTypes,
+            nodeProjections,
+            relationshipProjections,
+            nodeProjectionsWithIdentifier,
+            relationshipProjectionsWithIdentifier,
+            nodeProperties,
+            relationshipProperties,
+            concurrency,
+            loadAnyLabel,
+            loadAnyRelationshipType,
+            globalProjection
+        );
+
+        return ImmutableModernGraphLoader.of(
+            api,
+            tracker.orElse(AllocationTracker.EMPTY),
+            terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
+            params,
+            userName.orElse(""),
+            log.orElse(NullLog.getInstance()),
+            legacyMode.orElse(false),
+            createConfig
+        );
+    }
+
+    static ModernGraphLoader cypherLoader(
+        // GraphLoader parameters
+        GraphDatabaseAPI api,
+        Optional<ExecutorService> executorService,
+        Optional<AllocationTracker> tracker,
+        Optional<TerminationFlag> terminationFlag,
+        Optional<Log> log,
+        Optional<String> userName,
+        Optional<Boolean> legacyMode,
+        Map<String, Object> params,
+        // CreateConfig parameters
+        Optional<String> graphName,
+        Optional<String> nodeQuery,
+        Optional<String> relationshipQuery,
+        List<PropertyMapping> nodeProperties,
+        List<PropertyMapping> relationshipProperties,
+        Optional<Boolean> loadAnyLabel,
+        Optional<Boolean> loadAnyRelationshipType,
+        Optional<Integer> concurrency
+    ) {
+        GraphCreateFromCypherConfig createConfig = GraphCreateFromCypherConfig.cypherConfig(
+            userName,
+            graphName,
+            nodeQuery,
+            relationshipQuery,
+            nodeProperties,
+            relationshipProperties,
+            loadAnyLabel,
+            loadAnyRelationshipType,
+            concurrency
+        );
+
+        return ImmutableModernGraphLoader.of(
+            api,
+            tracker.orElse(AllocationTracker.EMPTY),
+            terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
+            params,
+            userName.orElse(""),
+            log.orElse(NullLog.getInstance()),
+            legacyMode.orElse(false),
+            createConfig
+        );
+    }
+
+}
