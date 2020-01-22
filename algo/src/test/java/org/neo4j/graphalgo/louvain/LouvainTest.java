@@ -397,7 +397,6 @@ class LouvainTest extends AlgoTestBase {
                 .relationshipQuery(relQuery)
                 .addNodeProperties(nodePropertyMappings)
                 .addRelationshipProperty(relWeightProperty)
-                .legacyMode(false)
                 .build()
                 .graph()
             );
@@ -413,7 +412,6 @@ class LouvainTest extends AlgoTestBase {
                     RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE))
                 .addNodeProperties(nodePropertyMappings)
                 .addRelationshipProperty(relWeightProperty)
-                .legacyMode(false)
                 .build()
                 .graph();
         }
