@@ -60,8 +60,8 @@ final class GraphCreateConfigBuilders {
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relationshipProperties,
         Optional<Integer> concurrency,
-        Optional<Boolean> loadAnyLabel,
-        Optional<Boolean> loadAnyRelationshipType,
+        @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
+        @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Projection> globalProjection
     ) {
         // Node projections
@@ -70,7 +70,7 @@ final class GraphCreateConfigBuilders {
         nodeProjections.forEach(np -> tempNP.put(np.label().orElse("*"), np));
         nodeProjectionsWithIdentifier.forEach(tempNP::put);
 
-        if (tempNP.isEmpty() && loadAnyLabel.orElse(null) != null) {
+        if (tempNP.isEmpty() && anyLabel == AnyLabel.LOAD) {
             tempNP.put("*", NodeProjection.empty());
         }
 
@@ -83,7 +83,7 @@ final class GraphCreateConfigBuilders {
         relationshipProjections.forEach(rp -> tempRP.put(rp.type().orElse("*"), rp));
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
 
-        if (tempRP.isEmpty() && loadAnyRelationshipType.orElse(false)) {
+        if (tempRP.isEmpty() && anyRelationshipType == AnyRelationshipType.LOAD) {
             tempRP.put("*", RelationshipProjection.empty());
         }
 
@@ -122,17 +122,17 @@ final class GraphCreateConfigBuilders {
         Optional<String> relationshipQuery,
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relationshipProperties,
-        Optional<Boolean> loadAnyLabel,
-        Optional<Boolean> loadAnyRelationshipType,
+        @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
+        @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
         Optional<DeduplicationStrategy> globalDeduplicationStrategy
     ) {
-        if (!nodeQuery.isPresent() && !loadAnyLabel.orElse(false)) {
-            throw new IllegalArgumentException("Missing nodeQuery or loadAnyLabel(true).");
+        if (!(nodeQuery.isPresent() || anyLabel == AnyLabel.LOAD)) {
+            throw new IllegalArgumentException("Missing nodeQuery or loadAnyLabel().");
         }
 
-        if (!relationshipQuery.isPresent() && !loadAnyRelationshipType.orElse(false)) {
-            throw new IllegalArgumentException("Missing relationshipQuery or loadAnyRelationshipType(true).");
+        if (!(relationshipQuery.isPresent() || anyRelationshipType == AnyRelationshipType.LOAD)) {
+            throw new IllegalArgumentException("Missing relationshipQuery or loadAnyRelationshipType().");
         }
 
         // TODO: This is a temporary hack to allow setting a global deduplication strategy for Cypher
@@ -161,4 +161,11 @@ final class GraphCreateConfigBuilders {
             .build();
     }
 
+    enum AnyLabel {
+        PROJECTION, LOAD
+    }
+
+    enum AnyRelationshipType {
+        PROJECTION, LOAD
+    }
 }

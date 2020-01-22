@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.graphalgo.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.results.CentralityResult;
@@ -109,8 +108,8 @@ public class WeightedPageRankBenchmark extends  BaseBenchmark {
     public CentralityResult run() {
         final Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel(true)
-            .loadAnyRelationshipType(true)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
             .addRelationshipProperty(PropertyMapping.of("weight", 0.0))
             .build()
             .graph();

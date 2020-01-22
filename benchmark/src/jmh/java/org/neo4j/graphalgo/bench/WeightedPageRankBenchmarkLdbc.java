@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
@@ -30,7 +29,6 @@ import org.neo4j.graphalgo.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.results.CentralityResult;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -76,7 +74,7 @@ public class WeightedPageRankBenchmarkLdbc {
     private int batchSize;
 
     @Setup
-    public void setup() throws KernelException, IOException {
+    public void setup() throws IOException {
         db = LdbcDownloader.openDb(graphId);
 
         Transaction tx = db.beginTx();
@@ -97,8 +95,8 @@ public class WeightedPageRankBenchmarkLdbc {
 
         grph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel(true)
-            .loadAnyRelationshipType(true)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
             .build()
             .graph();
@@ -114,7 +112,7 @@ public class WeightedPageRankBenchmarkLdbc {
     }
 
     @Benchmark
-    public CentralityResult run() throws Exception {
+    public CentralityResult run() {
         return PageRankAlgorithmType.WEIGHTED
                 .create(
                         grph,

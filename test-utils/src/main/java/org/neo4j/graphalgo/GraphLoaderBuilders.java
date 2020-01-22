@@ -60,7 +60,7 @@ final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        Optional<Boolean> legacyMode,
+        @Builder.Switch(defaultName = "MODERN") Mode mode,
         Map<String, Object> params,
         // CreateConfig parameters
         Optional<String> graphName,
@@ -73,8 +73,8 @@ final class GraphLoaderBuilders {
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relationshipProperties,
         Optional<Integer> concurrency,
-        Optional<Boolean> loadAnyLabel,
-        Optional<Boolean> loadAnyRelationshipType,
+        @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
+        @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Projection> globalProjection) {
 
         GraphCreateFromStoreConfig createConfig = GraphCreateConfigBuilders.storeConfig(
@@ -89,8 +89,8 @@ final class GraphLoaderBuilders {
             nodeProperties,
             relationshipProperties,
             concurrency,
-            loadAnyLabel,
-            loadAnyRelationshipType,
+            anyLabel,
+            anyRelationshipType,
             globalProjection
         );
 
@@ -103,7 +103,7 @@ final class GraphLoaderBuilders {
             params,
             userName.orElse(""),
             log.orElse(NullLog.getInstance()),
-            legacyMode.orElse(false),
+            mode == Mode.LEGACY,
             createConfig
         );
     }
@@ -122,7 +122,7 @@ final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        Optional<Boolean> legacyMode,
+        @Builder.Switch(defaultName = "MODERN") Mode mode,
         Map<String, Object> params,
         // CreateConfig parameters
         Optional<String> graphName,
@@ -130,8 +130,8 @@ final class GraphLoaderBuilders {
         Optional<String> relationshipQuery,
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relationshipProperties,
-        Optional<Boolean> loadAnyLabel,
-        Optional<Boolean> loadAnyRelationshipType,
+        @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
+        @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
         Optional<DeduplicationStrategy> globalDeduplicationStrategy
     ) {
@@ -142,8 +142,8 @@ final class GraphLoaderBuilders {
             relationshipQuery,
             nodeProperties,
             relationshipProperties,
-            loadAnyLabel,
-            loadAnyRelationshipType,
+            anyLabel,
+            anyRelationshipType,
             concurrency,
             globalDeduplicationStrategy
         );
@@ -157,9 +157,12 @@ final class GraphLoaderBuilders {
             params,
             userName.orElse(""),
             log.orElse(NullLog.getInstance()),
-            legacyMode.orElse(false),
+            mode == Mode.LEGACY,
             createConfig
         );
     }
 
+    enum Mode {
+        MODERN, LEGACY
+    }
 }

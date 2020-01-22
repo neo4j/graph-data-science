@@ -51,7 +51,7 @@ class GraphCreateConfigBuildersTest {
                     .build()
             ),
             Arguments.arguments(
-                new StoreConfigBuilder().loadAnyLabel(true).loadAnyRelationshipType(true).build(),
+                new StoreConfigBuilder().loadAnyLabel().loadAnyRelationshipType().build(),
                 ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
                     .nodeProjection(NodeProjections.builder()
                         .putProjection(PROJECT_ALL, NodeProjection.empty())
@@ -153,8 +153,8 @@ class GraphCreateConfigBuildersTest {
         return Stream.of(
             Arguments.arguments(
                 new CypherConfigBuilder()
-                    .loadAnyLabel(true)
-                    .loadAnyRelationshipType(true)
+                    .loadAnyLabel()
+                    .loadAnyRelationshipType()
                     .build(),
                 ImmutableGraphCreateFromCypherConfig.builder().username("").graphName("")
                     .nodeQuery(ALL_NODES_QUERY)
@@ -167,8 +167,8 @@ class GraphCreateConfigBuildersTest {
             ),
             Arguments.arguments(
                 new CypherConfigBuilder().userName("foo").graphName("bar")
-                    .loadAnyLabel(true)
-                    .loadAnyRelationshipType(true)
+                    .loadAnyLabel()
+                    .loadAnyRelationshipType()
                     .build(),
                 ImmutableGraphCreateFromCypherConfig.builder().username("foo").graphName("bar")
                     .nodeQuery(ALL_NODES_QUERY)
@@ -183,7 +183,7 @@ class GraphCreateConfigBuildersTest {
                 new CypherConfigBuilder().userName("foo").graphName("bar")
                     .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")
                     .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
-                    .loadAnyRelationshipType(true)
+                    .loadAnyRelationshipType()
                     .build(),
                 ImmutableGraphCreateFromCypherConfig.builder().username("foo").graphName("bar")
                     .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")
@@ -200,7 +200,7 @@ class GraphCreateConfigBuildersTest {
                     .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
                     .addNodeProperty(PropertyMapping.of("nProp", 23.0D))
                     .addRelationshipProperty(PropertyMapping.of("rProp", 42.0D))
-                    .loadAnyRelationshipType(true)
+                    .loadAnyRelationshipType()
                     .build(),
                 ImmutableGraphCreateFromCypherConfig.builder().username("foo").graphName("bar")
                     .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")

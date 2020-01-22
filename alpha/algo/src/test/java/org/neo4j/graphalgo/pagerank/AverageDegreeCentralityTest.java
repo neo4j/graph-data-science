@@ -121,7 +121,6 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                .legacyMode(false)
                 .build()
                 .graph()
             );
@@ -130,7 +129,6 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .api(db)
                 .addNodeLabel(label.name())
                 .addRelationshipType("TYPE1")
-                .legacyMode(false)
                 .build()
                 .graph();
         }
@@ -151,7 +149,6 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
-                .legacyMode(false)
                 .build()
                 .graph()
             );
@@ -161,7 +158,6 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .addNodeLabel(label.name())
                 .addRelationshipType("TYPE1")
                 .globalProjection(Projection.REVERSE)
-                .legacyMode(false)
                 .build()
                 .graph();
         }
@@ -183,7 +179,6 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
                 .globalDeduplicationStrategy(DeduplicationStrategy.SINGLE)
-                .legacyMode(false)
                 .build()
                 .graph()
             );

@@ -51,8 +51,8 @@ public final class PR2 extends BaseMain {
             .api(db)
             .log(log)
             .tracker(AllocationTracker.create())
-            .loadAnyLabel(true)
-            .loadAnyRelationshipType(true)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
             .globalProjection(Projection.UNDIRECTED)
             .build();
 

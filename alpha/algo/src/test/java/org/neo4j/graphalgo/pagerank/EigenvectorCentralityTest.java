@@ -125,7 +125,6 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                .legacyMode(false)
                 .build()
                 .graph()
             );
@@ -134,7 +133,6 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
                 .api(db)
                 .addNodeLabel(label.name())
                 .addRelationshipType("TYPE1")
-                .legacyMode(false)
                 .build()
                 .graph();
         }

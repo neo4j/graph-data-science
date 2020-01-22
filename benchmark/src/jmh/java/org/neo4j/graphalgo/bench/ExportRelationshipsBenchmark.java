@@ -23,7 +23,6 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
@@ -75,8 +74,8 @@ public class ExportRelationshipsBenchmark extends BaseBenchmark {
         this.graph = new StoreLoaderBuilder()
             .api(db)
             .log(NullLog.getInstance())
-            .loadAnyLabel(true)
-            .loadAnyRelationshipType(true)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
             .build()
             .graph();
 

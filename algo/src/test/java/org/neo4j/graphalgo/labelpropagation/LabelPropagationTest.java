@@ -39,7 +39,6 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -93,14 +92,12 @@ final class LabelPropagationTest extends AlgoTestBase {
                 .nodeQuery("MATCH (u:User) RETURN id(u) AS id")
                 .relationshipQuery("MATCH (u1:User)-[rel:FOLLOW]->(u2:User) \n" +
                                    "RETURN id(u1) AS source, id(u2) AS target")
-                .legacyMode(false)
                 .build();
         } else {
             graphLoader = new StoreLoaderBuilder()
                 .api(db)
                 .addNodeLabel("User")
                 .addRelationshipType("FOLLOW")
-                .legacyMode(false)
                 .build();
         }
 

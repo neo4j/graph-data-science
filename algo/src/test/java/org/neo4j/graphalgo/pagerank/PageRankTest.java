@@ -136,7 +136,6 @@ final class PageRankTest extends AlgoTestBase {
                         RELATIONSHIP_TYPE,
                         LABEL.name()
                     ))
-                    .legacyMode(false)
                     .build()
                     .graph()
             );
@@ -145,7 +144,6 @@ final class PageRankTest extends AlgoTestBase {
                 .api(db)
                 .addNodeLabel(LABEL.name())
                 .addRelationshipType(RELATIONSHIP_TYPE)
-                .legacyMode(false)
                 .build()
                 .graph();
         }
@@ -196,7 +194,6 @@ final class PageRankTest extends AlgoTestBase {
                         RELATIONSHIP_TYPE,
                         LABEL.name()
                     ))
-                    .legacyMode(false)
                     .build()
                     .graph()
             );
@@ -210,7 +207,6 @@ final class PageRankTest extends AlgoTestBase {
                 .addNodeLabel(LABEL.name())
                 .addRelationshipType(RELATIONSHIP_TYPE)
                 .globalProjection(Projection.REVERSE)
-                .legacyMode(false)
                 .build()
                 .graph();
 
@@ -244,7 +240,6 @@ final class PageRankTest extends AlgoTestBase {
                     RELATIONSHIP_TYPE,
                     LABEL.name()
                 ))
-                .legacyMode(false)
                 .build()
                 .graph()
             );
@@ -253,7 +248,6 @@ final class PageRankTest extends AlgoTestBase {
                 .api(db)
                 .addNodeLabel(LABEL.name())
                 .addRelationshipType(RELATIONSHIP_TYPE)
-                .legacyMode(false)
                 .build()
                 .graph();
         }
