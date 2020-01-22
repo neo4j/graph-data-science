@@ -82,7 +82,7 @@ class ShortestPathDeltaSteppingDocTest extends BaseProcTest {
                        "    }" +
                        "  }," +
                        "  startNode: n," +
-                       "  weightProperty: 'cost'," +
+                       "  relationshipWeightProperty: 'cost'," +
                        "  delta: 3.0" +
                        "})" +
                        " YIELD nodeId, distance" +
@@ -116,7 +116,7 @@ class ShortestPathDeltaSteppingDocTest extends BaseProcTest {
                        "    }" +
                        "  }," +
                        "  startNode: n," +
-                       "  weightProperty: 'cost'," +
+                       "  relationshipWeightProperty: 'cost'," +
                        "  delta: 3.0," +
                        "  writeProperty: 'sssp'" +
                        "})" +
@@ -141,7 +141,7 @@ class ShortestPathDeltaSteppingDocTest extends BaseProcTest {
                        "  nodeQuery:'MATCH(n:Loc) WHERE not n.name = \"c\" RETURN id(n) as id'," +
                        "  relationshipQuery:'MATCH(n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) as source, id(m) as target, r.cost as weight'," +
                        "  startNode: start," +
-                       "  weightProperty: 'weight'," +
+                       "  relationshipWeightProperty: 'weight'," +
                        "  delta: 3.0," +
                        "  writeProperty: 'sssp'" +
                        "})" +
