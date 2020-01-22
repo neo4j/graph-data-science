@@ -85,7 +85,7 @@ class ShortestPathDocTest extends BaseProcTest {
                        "    }," +
                        "    startNode: start," +
                        "    endNode: end," +
-                       "    weightProperty: 'cost'" +
+                       "    relationshipWeightProperty: 'cost'" +
                        "})" +
                        " YIELD nodeId, cost" +
                        " RETURN gds.util.asNode(nodeId).name AS name, cost";
@@ -130,7 +130,7 @@ class ShortestPathDocTest extends BaseProcTest {
                        "  }," +
                        "  startNode: start," +
                        "  endNode: end," +
-                       "  weightProperty: 'cost'," +
+                       "  relationshipWeightProperty: 'cost'," +
                        "  writeProperty: 'sssp'" +
                        "})" +
                        " YIELD nodeCount, totalCost" +
@@ -155,7 +155,7 @@ class ShortestPathDocTest extends BaseProcTest {
                        "  relationshipQuery:'MATCH(n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) AS source, id(m) AS target, r.cost AS weight'," +
                        "  startNode: start," +
                        "  endNode: end," +
-                       "  weightProperty: 'weight'," +
+                       "  relationshipWeightProperty: 'weight'," +
                        "  writeProperty: 'sssp'" +
                        "})" +
                        " YIELD nodeCount, totalCost" +
