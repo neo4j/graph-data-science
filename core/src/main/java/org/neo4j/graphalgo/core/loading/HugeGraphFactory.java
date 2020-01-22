@@ -226,6 +226,25 @@ public final class HugeGraphFactory extends GraphFactory {
 
                     long relationshipCount = relationshipCounts.getOrDefault(entry.getKey(), 0L);
 
+                    // In non-legacy mode, the factory loads at most one adjacency list per projection.
+                    // We store that adjacency list always in the outgoing adjacency list.
+                    // Algorithms that run in non-legacy mode default to Direction.OUTGOING when accessing
+                    // the graph internals (via relationship iterations or degree access).
+                    if (!setup.legacyMode()) {
+                        if (outgoingRelationshipsBuilder != null && incomingRelationshipsBuilder != null) {
+                            throw new IllegalStateException("GraphSetup is set to non-legacy mode, but loads two adjacency lists.");
+                        }
+
+                        if (inAdjacencyList != null) {
+                            outAdjacencyList = inAdjacencyList;
+                            inAdjacencyList = null;
+                            outAdjacencyOffsets = inAdjacencyOffsets;
+                            inAdjacencyOffsets = null;
+                            outgoingRelationshipsBuilder = incomingRelationshipsBuilder;
+                            incomingRelationshipsBuilder = null;
+                        }
+                    }
+
                     if (!dimensions.relationshipProperties().hasMappings()) {
                         HugeGraph graph = HugeGraph.create(
                                 tracker,
@@ -240,6 +259,13 @@ public final class HugeGraphFactory extends GraphFactory {
                         );
                         return Collections.singletonMap(ANY_REL_TYPE, graph);
                     } else {
+                        AdjacencyList finalOutAdjacencyList = outAdjacencyList;
+                        AdjacencyOffsets finalOutAdjacencyOffsets = outAdjacencyOffsets;
+                        AdjacencyList finalInAdjacencyList = inAdjacencyList;
+                        AdjacencyOffsets finalInAdjacencyOffsets = inAdjacencyOffsets;
+                        RelationshipsBuilder finalOutgoingRelationshipsBuilder = outgoingRelationshipsBuilder;
+                        RelationshipsBuilder finalIncomingRelationshipsBuilder = incomingRelationshipsBuilder;
+
                         return dimensions.relationshipProperties().enumerate().map(propertyEntry -> {
                             int weightIndex = propertyEntry.getOne();
                             ResolvedPropertyMapping property = propertyEntry.getTwo();
@@ -247,12 +273,12 @@ public final class HugeGraphFactory extends GraphFactory {
                                     tracker,
                                     idsAndProperties.hugeIdMap,
                                     idsAndProperties.properties,
-                                    incomingRelationshipsBuilder,
-                                    outgoingRelationshipsBuilder,
-                                    outAdjacencyList,
-                                    outAdjacencyOffsets,
-                                    inAdjacencyList,
-                                    inAdjacencyOffsets,
+                                    finalIncomingRelationshipsBuilder,
+                                    finalOutgoingRelationshipsBuilder,
+                                    finalOutAdjacencyList,
+                                    finalOutAdjacencyOffsets,
+                                    finalInAdjacencyList,
+                                    finalInAdjacencyOffsets,
                                     weightIndex,
                                     property,
                                     relationshipCount,

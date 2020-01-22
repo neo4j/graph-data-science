@@ -119,7 +119,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         ranIterations = 0L;
         didConverge = false;
 
-        List<StepRunner> stepRunners = stepRunners(config.direction());
+        List<StepRunner> stepRunners = stepRunners();
 
         long currentIteration = 0L;
         while (currentIteration < config.maxIterations()) {
@@ -147,7 +147,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         return me();
     }
 
-    private List<StepRunner> stepRunners(Direction direction) {
+    private List<StepRunner> stepRunners() {
         long nodeCount = graph.nodeCount();
         long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, this.batchSize);
 
@@ -167,7 +167,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
                 iter,
                 labels,
                 getProgressLogger(),
-                direction,
                 maxLabelId
             );
             StepRunner task = new StepRunner(initStep);

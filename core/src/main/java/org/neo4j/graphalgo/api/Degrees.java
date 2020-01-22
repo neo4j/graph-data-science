@@ -28,4 +28,8 @@ import org.neo4j.graphdb.Direction;
 public interface Degrees {
 
     int degree(long nodeId, Direction direction);
+
+    default int degree(long nodeId) {
+        return degree(nodeId, Direction.OUTGOING);
+    }
 }

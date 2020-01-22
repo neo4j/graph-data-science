@@ -33,4 +33,9 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
         }
         return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
     }
+
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
 }

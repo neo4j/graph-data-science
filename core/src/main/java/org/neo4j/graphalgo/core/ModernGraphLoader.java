@@ -62,6 +62,11 @@ public interface ModernGraphLoader extends SharedGraphLoader {
 
     Log log();
 
+    @Value.Default
+    default boolean legacyMode() {
+        return true;
+    }
+
     GraphCreateConfig createConfig();
 
     @Override
@@ -73,7 +78,8 @@ public interface ModernGraphLoader extends SharedGraphLoader {
             log(),
             tracker(),
             terminationFlag(),
-            createConfig()
+            createConfig(),
+            legacyMode()
         );
     }
 }

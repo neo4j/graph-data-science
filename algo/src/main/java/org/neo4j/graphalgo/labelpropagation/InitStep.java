@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
 
 final class InitStep implements Step {
 
@@ -35,7 +34,6 @@ final class InitStep implements Step {
     private final Graph graph;
     private final NodeProperties nodeWeights;
     private final ProgressLogger progressLogger;
-    private final Direction direction;
     private final long maxLabelId;
 
     InitStep(
@@ -45,7 +43,6 @@ final class InitStep implements Step {
             PrimitiveLongIterable nodes,
             HugeLongArray existingLabels,
             ProgressLogger progressLogger,
-            Direction direction,
             long maxLabelId) {
         this.nodeProperties = nodeProperties;
         this.existingLabels = existingLabels;
@@ -53,7 +50,6 @@ final class InitStep implements Step {
         this.graph = graph;
         this.nodeWeights = nodeWeights;
         this.progressLogger = progressLogger;
-        this.direction = direction;
         this.maxLabelId = maxLabelId;
     }
 
@@ -86,7 +82,6 @@ final class InitStep implements Step {
                 graph,
                 nodeWeights,
                 progressLogger,
-                direction,
                 existingLabels,
                 nodes
         );

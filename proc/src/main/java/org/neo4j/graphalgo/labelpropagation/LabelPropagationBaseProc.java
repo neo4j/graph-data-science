@@ -30,4 +30,9 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
     protected LabelPropagationFactory<CONFIG> algorithmFactory(LabelPropagationBaseConfig config) {
         return new LabelPropagationFactory<>(config);
     }
+
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
 }

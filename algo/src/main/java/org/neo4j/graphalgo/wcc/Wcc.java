@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +47,6 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
 
     private final WccBaseConfig config;
     private final NodeProperties initialComponents;
-    private final Direction computeDirection;
     private final ExecutorService executor;
     private final AllocationTracker tracker;
     private final long nodeCount;
@@ -76,10 +74,6 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         this.initialComponents = config.isIncremental()
             ? graph.nodeProperties(config.seedProperty())
             : null;
-        this.computeDirection = graph.getLoadDirection() == Direction.BOTH
-            ? Direction.OUTGOING
-            : graph.getLoadDirection();
-
         this.executor = executor;
         this.tracker = tracker;
         this.nodeCount = graph.nodeCount();
@@ -173,7 +167,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         }
 
         void compute(final long node) {
-            rels.forEachRelationship(node, computeDirection, this);
+            rels.forEachRelationship(node, this);
         }
 
         @Override
@@ -194,7 +188,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
 
         @Override
         void compute(final long node) {
-            rels.forEachRelationship(node, computeDirection, Wcc.defaultWeight(threshold), this);
+            rels.forEachRelationship(node, Wcc.defaultWeight(threshold), this);
         }
 
         @Override

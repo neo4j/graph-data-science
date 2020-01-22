@@ -37,6 +37,11 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
         return new WccFactory<>();
     }
 
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
+
     static class ConsecutivePropertyTranslator implements PropertyTranslator.OfLong<DisjointSetStruct> {
 
         // Magic number to estimate the number of communities that need to be mapped into consecutive space

@@ -124,6 +124,11 @@ public final class LegacyGraphSetup implements GraphSetup {
     }
 
     @Override
+    public boolean legacyMode() {
+        return true;
+    }
+
+    @Override
     public int concurrency() {
         if (!loadConcurrent()) {
             return 1;
