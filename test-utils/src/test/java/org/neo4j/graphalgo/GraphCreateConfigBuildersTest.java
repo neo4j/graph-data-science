@@ -115,6 +115,31 @@ class GraphCreateConfigBuildersTest {
                 new StoreConfigBuilder()
                     .addNodeLabel("Foo")
                     .addRelationshipType("BAR")
+                    .addRelationshipProjection(RelationshipProjection.empty().withType("BAZ").withProjection(Projection.NATURAL))
+                    .globalProjection(Projection.UNDIRECTED)
+                    .build(),
+                ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
+                    .nodeProjection(NodeProjections.builder()
+                        .putProjection(ElementIdentifier.of("Foo"), NodeProjection.of("Foo", PropertyMappings.of()))
+                        .build())
+                    .relationshipProjection(RelationshipProjections.builder()
+                        .putProjection(
+                            ElementIdentifier.of("BAR"),
+                            RelationshipProjection.of("BAR", Projection.UNDIRECTED, DeduplicationStrategy.DEFAULT)
+                        )
+                        .putProjection(
+                            ElementIdentifier.of("BAZ"),
+                            RelationshipProjection.of("BAZ", Projection.NATURAL, DeduplicationStrategy.DEFAULT)
+                        )
+                        .build())
+                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProperties(PropertyMappings.of())
+                    .build()
+            ),
+            Arguments.arguments(
+                new StoreConfigBuilder()
+                    .addNodeLabel("Foo")
+                    .addRelationshipType("BAR")
                     .nodeProperties(Collections.singletonList(PropertyMapping.of("nProp", 23.0D)))
                     .relationshipProperties(Collections.singletonList(PropertyMapping.of("rProp", 42.0D)))
                     .build(),

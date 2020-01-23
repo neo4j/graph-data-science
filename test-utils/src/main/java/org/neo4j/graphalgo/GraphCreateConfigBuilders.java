@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -65,7 +65,7 @@ final class GraphCreateConfigBuilders {
         Optional<Projection> globalProjection
     ) {
         // Node projections
-        Map<String, NodeProjection> tempNP = new HashMap<>();
+        Map<String, NodeProjection> tempNP = new LinkedHashMap<>();
         nodeLabels.forEach(label -> tempNP.put(label, NodeProjection.of(label, PropertyMappings.of())));
         nodeProjections.forEach(np -> tempNP.put(np.label().orElse("*"), np));
         nodeProjectionsWithIdentifier.forEach(tempNP::put);
@@ -75,10 +75,11 @@ final class GraphCreateConfigBuilders {
         }
 
         // Relationship projections
-        Map<String, RelationshipProjection> tempRP = new HashMap<>();
+        Map<String, RelationshipProjection> tempRP = new LinkedHashMap<>();
+        Projection projection = globalProjection.orElse(Projection.NATURAL);
         relationshipTypes.forEach(relType -> tempRP.put(
             relType,
-            RelationshipProjection.of(relType, Projection.NATURAL, DeduplicationStrategy.DEFAULT)
+            RelationshipProjection.of(relType, projection, DeduplicationStrategy.DEFAULT)
         ));
         relationshipProjections.forEach(rp -> tempRP.put(rp.type().orElse("*"), rp));
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
@@ -94,9 +95,7 @@ final class GraphCreateConfigBuilders {
 
         RelationshipProjections rp = RelationshipProjections.of(tempRP.entrySet().stream().collect(Collectors.toMap(
             e -> ElementIdentifier.of(e.getKey()),
-            e -> globalProjection.isPresent()
-                ? RelationshipProjection.copyOf(e.getValue()).withProjection(globalProjection.get())
-                : e.getValue()
+            Map.Entry::getValue
         )));
 
         return ImmutableGraphCreateFromStoreConfig.builder()
