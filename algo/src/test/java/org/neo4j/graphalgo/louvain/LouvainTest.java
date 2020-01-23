@@ -370,7 +370,7 @@ class LouvainTest extends AlgoTestBase {
     }
 
     private Graph loadGraph(
-        Class<? extends GraphFactory> graphImpl,
+        Class<? extends GraphFactory> factoryType,
         String cypher,
         boolean loadRelWeight,
         String... nodeProperties
@@ -390,7 +390,7 @@ class LouvainTest extends AlgoTestBase {
 
         PropertyMapping relWeightProperty = PropertyMapping.of("weight", 1.0);
 
-        if (graphImpl == CypherGraphFactory.class) {
+        if (factoryType == CypherGraphFactory.class) {
             return QueryRunner.runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(nodeStatement)
@@ -398,7 +398,7 @@ class LouvainTest extends AlgoTestBase {
                 .addNodeProperties(nodePropertyMappings)
                 .addRelationshipProperty(relWeightProperty)
                 .build()
-                .graph()
+                .graph(factoryType)
             );
         } else {
             return new StoreLoaderBuilder()
@@ -413,30 +413,7 @@ class LouvainTest extends AlgoTestBase {
                 .addNodeProperties(nodePropertyMappings)
                 .addRelationshipProperty(relWeightProperty)
                 .build()
-                .graph();
+                .graph(factoryType);
         }
-
-//        GraphLoader loader = new GraphLoader(db)
-//            .withOptionalNodeProperties(
-//                nodePropertyMappings
-//            );
-//        if (loadRelWeight) {
-//            loader.withRelationshipProperties(relWeightProperty);
-//        }
-//        if (graphImpl == CypherGraphFactory.class) {
-//            direction = Direction.OUTGOING;
-//            loader
-//                .withNodeStatement(nodeStatement)
-//                .withRelationshipStatement(relStatement)
-//                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
-//                .undirected();
-//        } else {
-//            direction = BOTH;
-//            loader
-//                .withAnyRelationshipType()
-//                .withLabel("Node");
-//        }
-//        loader.withDirection(direction);
-//        return QueryRunner.runInTransaction(db, () -> loader.load(graphImpl));
     }
 }
