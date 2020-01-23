@@ -35,7 +35,6 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFact
     public K1Coloring build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
         return new K1Coloring(
             graph,
-            configuration.direction(),
             configuration.maxIterations(),
             configuration.batchSize(),
             configuration.concurrency(),

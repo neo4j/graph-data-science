@@ -22,12 +22,10 @@ package org.neo4j.graphalgo.beta.k1coloring;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
 
 final class ValidationStep implements Runnable {
 
     private final RelationshipIterator graph;
-    private final Direction direction;
     private final HugeLongArray colors;
     private final BitSet currentNodesToColor;
     private final BitSet nextNodesToColor;
@@ -36,7 +34,6 @@ final class ValidationStep implements Runnable {
 
     ValidationStep(
         RelationshipIterator graph,
-        Direction direction,
         HugeLongArray colors,
         BitSet currentNodesToColor,
         BitSet nextNodesToColor,
@@ -45,7 +42,6 @@ final class ValidationStep implements Runnable {
         long batchSize
     ) {
         this.graph = graph;
-        this.direction = direction;
         this.colors = colors;
         this.currentNodesToColor = currentNodesToColor;
         this.nextNodesToColor = nextNodesToColor;
@@ -57,7 +53,7 @@ final class ValidationStep implements Runnable {
     public void run() {
         for (long nodeId = offset; nodeId <= batchEnd; nodeId++) {
             if (currentNodesToColor.get(nodeId)) {
-                graph.forEachRelationship(nodeId, direction, (source, target) -> {
+                graph.forEachRelationship(nodeId, (source, target) -> {
                     if (
                         source != target &&
                         colors.get(source) == colors.get(target) &&

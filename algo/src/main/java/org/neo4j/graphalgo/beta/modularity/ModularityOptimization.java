@@ -72,7 +72,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private HugeLongArray colors;
     private HugeLongArray currentCommunities;
     private HugeLongArray nextCommunities;
-    private HugeLongArray reverseSeedCommunityMapping ;
+    private HugeLongArray reverseSeedCommunityMapping;
     private HugeDoubleArray cumulativeNodeWeights;
     private HugeDoubleArray nodeCommunityInfluences;
     private HugeAtomicDoubleArray communityWeights;
@@ -107,7 +107,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             Integer.MAX_VALUE
         );
 
-        if(maxIterations < 1) {
+        if (maxIterations < 1) {
             throw new IllegalArgumentException(String.format(
                 "Need to run at least one iteration, but got %d",
                 maxIterations
@@ -117,15 +117,22 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     @Override
     public ModularityOptimization compute() {
-        try (ProgressTimer timer = ProgressTimer.start(millis -> log.info("Modularity Optimization - Initialization finished after %dms", millis))) {
+        try (ProgressTimer timer = ProgressTimer.start(millis -> log.info(
+            "Modularity Optimization - Initialization finished after %dms",
+            millis
+        ))) {
             computeColoring();
             initSeeding();
             init();
         }
 
-        for(iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
+        for (iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
             boolean hasConverged;
-            try (ProgressTimer timer = ProgressTimer.start(millis -> log.info("Modularity Optimization - Iteration %d finished after %dms", iterationCounter + 1,  millis))) {
+            try (ProgressTimer timer = ProgressTimer.start(millis -> log.info(
+                "Modularity Optimization - Iteration %d finished after %dms",
+                iterationCounter + 1,
+                millis
+            ))) {
                 nodeCommunityInfluences.fill(0.0);
 
                 long currentColor = colorsUsed.nextSetBit(0);
@@ -135,7 +142,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                     currentColor = colorsUsed.nextSetBit(currentColor + 1);
                 }
 
-                 hasConverged = !updateModularity();
+                hasConverged = !updateModularity();
             }
 
             if (hasConverged) {
@@ -152,7 +159,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private void computeColoring() {
         K1Coloring coloring = new K1Coloring(
             graph,
-            direction,
             5,
             (int) batchSize,
             concurrency,
@@ -181,9 +187,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             long seedCommunity = (long) seedProperty.nodeProperty(nodeId, -1);
             seedCommunity = seedCommunity >= 0 ? seedCommunity : graph.toOriginalNodeId(nodeId) + maxSeedCommunity;
-            if (communityMapping.getOrDefault(seedCommunity, -1) < 0 ) {
+            if (communityMapping.getOrDefault(seedCommunity, -1) < 0) {
                 communityMapping.addTo(seedCommunity, ++nextAvailableInternalCommunityId);
-            };
+            }
 
             currentCommunities.set(nodeId, communityMapping.getOrDefault(seedCommunity, -1));
         }
@@ -219,7 +225,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                         return true;
                     });
 
-                    communityWeights.update(currentCommunities.get(nodeId), acc -> acc + cumulativeWeight.doubleValue());
+                    communityWeights.update(
+                        currentCommunities.get(nodeId),
+                        acc -> acc + cumulativeWeight.doubleValue()
+                    );
 
                     cumulativeNodeWeights.set(nodeId, cumulativeWeight.doubleValue());
 
@@ -326,7 +335,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     public long getCommunityId(long nodeId) {
-        if(seedProperty == null || reverseSeedCommunityMapping == null) {
+        if (seedProperty == null || reverseSeedCommunityMapping == null) {
             return currentCommunities.get(nodeId);
         }
         return reverseSeedCommunityMapping.get(currentCommunities.get(nodeId));

@@ -24,22 +24,26 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.QueryRunner;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.ModernGraphLoader;
+import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphdb.Direction;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -50,6 +54,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 class K1ColoringTest extends AlgoTestBase {
 
@@ -78,24 +84,26 @@ class K1ColoringTest extends AlgoTestBase {
 
         Graph graph;
 
-        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT)
-            .withDirection(Direction.OUTGOING)
-            .withDefaultConcurrency();
-
-
+        ModernGraphLoader graphLoader;
         if (graphImpl == CypherGraphFactory.class) {
-            graphLoader
-                .withLabel("MATCH (n) RETURN id(n) AS id")
-                .withRelationshipType("MATCH (m)-->(n) \n" +
-                                      "RETURN id(m) AS source, id(n) AS target")
-                .withName("cypher");
+            graphLoader = new CypherLoaderBuilder()
+                .api(db)
+                .graphName("cypher")
+                .nodeQuery(ALL_NODES_QUERY)
+                .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
+                .build();
+        } else {
+            graphLoader = new StoreLoaderBuilder()
+                .api(db)
+                .loadAnyLabel()
+                .loadAnyRelationshipType()
+                .build();
         }
 
         graph = QueryRunner.runInTransaction(db, () -> graphLoader.load(graphImpl));
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,
-            Direction.OUTGOING,
             1000,
             DEFAULT_BATCH_SIZE,
             1,
@@ -114,19 +122,32 @@ class K1ColoringTest extends AlgoTestBase {
 
     @Test
     void testParallelK1Coloring() {
-        RandomGraphGenerator generator = new RandomGraphGenerator(
+        long seed = 42L;
+
+        RandomGraphGenerator outGenerator = new RandomGraphGenerator(
             100_000,
             5,
             RelationshipDistribution.POWER_LAW,
+            seed,
             Optional.empty(),
             AllocationTracker.EMPTY
         );
 
-        Graph graph = generator.generate();
+        RandomGraphGenerator inGenerator = new RandomGraphGenerator(
+            100_000,
+            5,
+            RelationshipDistribution.POWER_LAW,
+            seed,
+            Optional.empty(),
+            AllocationTracker.EMPTY
+        );
+
+        Graph naturalGraph = outGenerator.generate(Direction.OUTGOING, false);
+        Graph reverseGraph = inGenerator.generate(Direction.INCOMING, false);
+        Graph graph = UnionGraph.of(Arrays.asList(naturalGraph, reverseGraph));
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,
-            Direction.BOTH,
             100,
             DEFAULT_BATCH_SIZE,
             8,
@@ -140,7 +161,7 @@ class K1ColoringTest extends AlgoTestBase {
         Set<Long> colorsUsed = new HashSet<>(100);
         MutableLong conflicts = new MutableLong(0);
         graph.forEachNode((nodeId) -> {
-            graph.forEachRelationship(nodeId, Direction.BOTH, (source, target) -> {
+            graph.forEachRelationship(nodeId, (source, target) -> {
                 if (source != target && colors.get(source) == colors.get(target)) {
                     conflicts.increment();
                 }
@@ -160,21 +181,21 @@ class K1ColoringTest extends AlgoTestBase {
         long nodeCount = 100_000L;
         int concurrency = 1;
 
-        assertMemoryEstimation(nodeCount, concurrency, 825272);
+        assertMemoryEstimation(nodeCount, concurrency, 825256);
     }
 
     @Test
     void shouldComputeMemoryEstimation4Threads() {
         long nodeCount = 100_000L;
         int concurrency = 4;
-        assertMemoryEstimation(nodeCount, concurrency, 863072);
+        assertMemoryEstimation(nodeCount, concurrency, 863032);
     }
 
     @Test
     void shouldComputeMemoryEstimation42Threads() {
         long nodeCount = 100_000L;
         int concurrency = 42;
-        assertMemoryEstimation(nodeCount, concurrency, 1341872);
+        assertMemoryEstimation(nodeCount, concurrency, 1341528);
     }
 
     @Test
@@ -187,11 +208,10 @@ class K1ColoringTest extends AlgoTestBase {
             AllocationTracker.EMPTY
         );
 
-        Graph graph = generator.generate();
+        Graph graph = generator.generate(Direction.OUTGOING, false);
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,
-            Direction.BOTH,
             100,
             DEFAULT_BATCH_SIZE,
             8,

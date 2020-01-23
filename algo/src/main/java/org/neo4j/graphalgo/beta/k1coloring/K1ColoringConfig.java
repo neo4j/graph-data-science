@@ -21,26 +21,17 @@
 package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfig;
-import org.neo4j.graphdb.Direction;
 
 interface K1ColoringConfig extends AlgoBaseConfig, IterationsConfig {
-    Direction DEFAULT_DIRECTION = Direction.OUTGOING;
     int DEFAULT_ITERATIONS = 10;
 
     @Override
     @Value.Default
     default int maxIterations() {
         return DEFAULT_ITERATIONS;
-    }
-
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return DEFAULT_DIRECTION;
     }
 
     @Value.Default

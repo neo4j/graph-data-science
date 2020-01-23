@@ -22,14 +22,12 @@ package org.neo4j.graphalgo.beta.k1coloring;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
 
 public final class ColoringStep implements Runnable {
 
     public static final int INITIAL_FORBIDDEN_COLORS = 1000;
     
     private final RelationshipIterator graph;
-    private final Direction direction;
     private final HugeLongArray colors;
     private final BitSet nodesToColor;
     private final BitSet forbiddenColors;
@@ -39,7 +37,6 @@ public final class ColoringStep implements Runnable {
 
     public ColoringStep(
         RelationshipIterator graph,
-        Direction direction,
         HugeLongArray colors,
         BitSet nodesToColor,
         long nodeCount,
@@ -47,7 +44,6 @@ public final class ColoringStep implements Runnable {
         long batchSize
     ) {
         this.graph = graph;
-        this.direction = direction;
         this.colors = colors;
         this.nodesToColor = nodesToColor;
         this.offset = offset;
@@ -62,7 +58,7 @@ public final class ColoringStep implements Runnable {
             if (nodesToColor.get(nodeId)) {
                 resetForbiddenColors();
 
-                graph.forEachRelationship(nodeId, direction, (s, target) -> {
+                graph.forEachRelationship(nodeId, (s, target) -> {
                     if (s != target) {
                         forbiddenColors.set(colors.get(target));
                     }

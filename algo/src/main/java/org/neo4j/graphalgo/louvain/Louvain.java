@@ -182,7 +182,8 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             Direction.OUTGOING,
             rootGraph.isUndirected(),
             true,
-            DeduplicationStrategy.SUM
+            DeduplicationStrategy.SUM,
+            false
         );
 
         workingGraph.forEachNode((nodeId) -> {

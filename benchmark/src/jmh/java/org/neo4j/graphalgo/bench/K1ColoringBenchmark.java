@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.beta.k1coloring.ColoringStep;
 import org.neo4j.graphalgo.beta.k1coloring.K1Coloring;
+import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -45,6 +46,7 @@ import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -65,7 +67,12 @@ public class K1ColoringBenchmark {
 
     @Setup
     public void setup() {
-        graph = new RandomGraphGenerator(1_000_000, 50, RelationshipDistribution.POWER_LAW, Optional.empty(), AllocationTracker.EMPTY).generate();
+        graph = UnionGraph.of(Arrays.asList(
+            new RandomGraphGenerator(1_000_000, 50, RelationshipDistribution.POWER_LAW, 42L, Optional.empty(), AllocationTracker.EMPTY)
+                .generate(Direction.OUTGOING, false),
+            new RandomGraphGenerator(1_000_000, 50, RelationshipDistribution.POWER_LAW, 42L, Optional.empty(), AllocationTracker.EMPTY)
+                .generate(Direction.INCOMING, false)
+        ));
     }
 
     @TearDown
@@ -101,7 +108,6 @@ public class K1ColoringBenchmark {
     public void coloringStep(Blackhole blackhole) {
         ColoringStep coloringStep = new ColoringStep(
             graph,
-            Direction.BOTH,
             colors,
             nodesToColor,
             graph.nodeCount(),
@@ -115,7 +121,6 @@ public class K1ColoringBenchmark {
     private K1Coloring initAlgo(int maxIterations) {
         return new K1Coloring(
             graph,
-            Direction.BOTH,
             maxIterations,
             DEFAULT_BATCH_SIZE,
             4,

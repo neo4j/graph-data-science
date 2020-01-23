@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
-import org.neo4j.graphdb.Direction;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -70,7 +69,6 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
     private final int minBatchSize;
     private final int concurrency;
 
-    private final Direction direction;
     private final long maxIterations;
 
     private BitSet nodesToColor;
@@ -82,7 +80,6 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
 
     public K1Coloring(
         Graph graph,
-        Direction direction,
         long maxIterations,
         int minBatchSize,
         int concurrency,
@@ -96,7 +93,6 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
         this.tracker = tracker;
 
         this.nodeCount = graph.nodeCount();
-        this.direction = direction;
         this.maxIterations = maxIterations;
 
         this.nodesToColor = new BitSet(nodeCount);
@@ -172,20 +168,14 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
             Integer.MAX_VALUE
         );
 
-        if (direction == Direction.BOTH) {
-            adjustedBatchSize *= 2;
-        }
-
         List<Partition> degreePartitions = PartitionUtils.degreePartition(
             new SetBitsIterable(nodesToColor).primitiveLongIterator(),
             graph,
-            direction,
             adjustedBatchSize
         );
 
         List<ColoringStep> steps = degreePartitions.stream().map(partition -> new ColoringStep(
             graph.concurrentCopy(),
-            direction,
             colors,
             nodesToColor,
             nodeCount,
@@ -204,7 +194,6 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
 
         List<ValidationStep> steps = partitions.stream().map(partition -> new ValidationStep(
             graph.concurrentCopy(),
-            direction,
             colors,
             nodesToColor,
             nextNodesToColor,
