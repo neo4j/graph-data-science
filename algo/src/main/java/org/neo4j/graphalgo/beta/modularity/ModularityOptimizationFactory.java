@@ -69,7 +69,6 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
     public ModularityOptimization build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
         return new ModularityOptimization(
             graph,
-            configuration.direction(),
             configuration.maxIterations(),
             configuration.tolerance(),
             graph.nodeProperties(configuration.seedProperty()),

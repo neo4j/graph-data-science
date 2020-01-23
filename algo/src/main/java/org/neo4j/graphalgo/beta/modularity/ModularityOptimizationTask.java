@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
 
 final class ModularityOptimizationTask implements Runnable {
 
@@ -38,7 +37,6 @@ final class ModularityOptimizationTask implements Runnable {
     private final long batchEnd;
     private final long color;
     private final double totalNodeWeight;
-    private final Direction direction;
     private final HugeLongArray colors;
     private final HugeLongArray currentCommunities;
     private final HugeLongArray nextCommunities;
@@ -53,7 +51,6 @@ final class ModularityOptimizationTask implements Runnable {
         long batchEnd,
         long color,
         double totalNodeWeight,
-        Direction direction,
         HugeLongArray colors,
         HugeLongArray currentCommunities,
         HugeLongArray nextCommunities,
@@ -75,7 +72,6 @@ final class ModularityOptimizationTask implements Runnable {
         this.cumulativeNodeWeights = cumulativeNodeWeights;
         this.nodeCommunityInfluences = nodeCommunityInfluences;
         this.colors = colors;
-        this.direction = direction;
     }
 
     @Override
@@ -88,7 +84,7 @@ final class ModularityOptimizationTask implements Runnable {
             }
 
             long currentCommunity = currentCommunities.get(nodeId);
-            final int degree = graph.degree(nodeId, direction);
+            final int degree = graph.degree(nodeId);
 
             LongDoubleMap communityInfluences;
             if (degree < 50) {
@@ -100,7 +96,7 @@ final class ModularityOptimizationTask implements Runnable {
             MutableDouble selfWeight = new MutableDouble(0.0D);
 
             // calculate influence of this node w.r.t its neighbours communities
-            localGraph.forEachRelationship(nodeId, direction, 1.0D, (s, t, w) -> {
+            localGraph.forEachRelationship(nodeId, 1.0D, (s, t, w) -> {
                 if (s == t) {
                     selfWeight.add(w);
                 }

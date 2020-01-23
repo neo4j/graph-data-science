@@ -30,4 +30,9 @@ public abstract class ModularityOptimizationBaseProc<T extends ModularityOptimiz
     protected AlgorithmFactory<ModularityOptimization, T> algorithmFactory(T config) {
         return new ModularityOptimizationFactory<>();
     }
+
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
 }

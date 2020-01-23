@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
@@ -58,7 +57,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final long batchSize;
     private final double tolerance;
     private final Graph graph;
-    private final Direction direction;
     private final NodeProperties seedProperty;
     private final ExecutorService executor;
     private final AllocationTracker tracker;
@@ -80,7 +78,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     public ModularityOptimization(
         final Graph graph,
-        Direction direction,
         int maxIterations,
         double tolerance,
         NodeProperties seedProperty,
@@ -92,7 +89,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     ) {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
-        this.direction = direction;
         this.maxIterations = maxIterations;
         this.tolerance = tolerance;
         this.seedProperty = seedProperty;
@@ -220,7 +216,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
                     MutableDouble cumulativeWeight = new MutableDouble(0.0D);
 
-                    graphCopy.get().forEachRelationship(nodeId, direction, 1.0, (s, t, w) -> {
+                    graphCopy.get().forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                         cumulativeWeight.add(w);
                         return true;
                     });
@@ -275,7 +271,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                     Math.min(i + batchSize, nodeCount),
                     currentColor,
                     totalNodeWeight,
-                    direction,
                     colors,
                     currentCommunities,
                     nextCommunities,

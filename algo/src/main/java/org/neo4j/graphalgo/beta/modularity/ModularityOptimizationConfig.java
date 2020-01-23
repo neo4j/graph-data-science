@@ -21,14 +21,12 @@
 package org.neo4j.graphalgo.beta.modularity;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.IterationsConfig;
+import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.SeedConfig;
 import org.neo4j.graphalgo.newapi.ToleranceConfig;
-import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
-import org.neo4j.graphdb.Direction;
 
 public interface ModularityOptimizationConfig extends
     AlgoBaseConfig,
@@ -37,7 +35,6 @@ public interface ModularityOptimizationConfig extends
     ToleranceConfig,
     RelationshipWeightConfig {
 
-    Direction DEFAULT_DIRECTION = Direction.OUTGOING;
     int DEFAULT_ITERATIONS = 10;
 
     @Value.Default
@@ -50,12 +47,6 @@ public interface ModularityOptimizationConfig extends
     @Value.Default
     default int maxIterations() {
         return DEFAULT_ITERATIONS;
-    }
-
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return DEFAULT_DIRECTION;
     }
 
     @Value.Default

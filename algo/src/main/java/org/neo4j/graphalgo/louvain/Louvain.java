@@ -143,7 +143,6 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
     private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodeProperties seed) {
         ModularityOptimization modularityOptimization = new ModularityOptimization(
             louvainGraph,
-            Direction.OUTGOING,
             10,
             config.tolerance(),
             seed,
