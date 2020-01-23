@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.linkprediction;
+package org.neo4j.graphalgo.similarity;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -50,7 +49,7 @@ class JaccardFuncDocTest extends BaseProcTest {
         ", (praveena)-[:LIKES]->(indian) "+
         ", (praveena)-[:LIKES]->(portuguese) "+
 
-        ",  (zhen)-[:LIKES]->(french) "+
+        ", (zhen)-[:LIKES]->(french) "+
         ", (zhen)-[:LIKES]->(indian) "+
 
         ", (michael)-[:LIKES]->(french) "+
