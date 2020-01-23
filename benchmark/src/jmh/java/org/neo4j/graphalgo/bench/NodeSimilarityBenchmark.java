@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.nodesim.ImmutableNodeSimilarityStreamConfig;
@@ -102,7 +103,7 @@ public class NodeSimilarityBenchmark {
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .build()
-            .graph();
+            .graph(HugeGraphFactory.class);
     }
 
     @TearDown

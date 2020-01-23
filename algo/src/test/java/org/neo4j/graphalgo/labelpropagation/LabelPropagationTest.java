@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -126,7 +127,7 @@ final class LabelPropagationTest extends AlgoTestBase {
             .addRelationshipType("FOLLOW")
             .addNodeProperty(PropertyMapping.of("seedId", 0.0))
             .build()
-            .graph();
+            .graph(HugeGraphFactory.class);
 
         LabelPropagation lp = new LabelPropagation(
             graph,

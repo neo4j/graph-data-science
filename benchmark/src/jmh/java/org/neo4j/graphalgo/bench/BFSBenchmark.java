@@ -77,7 +77,7 @@ public class BFSBenchmark extends BaseBenchmark {
             .addRelationshipType(RELATIONSHIP)
             .globalProjection(Projection.UNDIRECTED)
             .build()
-            .graph();
+            .graph(HugeGraphFactory.class);
     }
 
     @TearDown

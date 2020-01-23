@@ -123,9 +123,7 @@ class GraphCatalogTest {
             .log(new TestLog())
             .createConfig(graphCreateConfig)
             .build()
-            .build(HugeGraphFactory.class)
-            .build()
-            .graphs();
+            .graphs(HugeGraphFactory.class);
 
         GraphCatalog.set(graphCreateConfig, importedGraphs);
 

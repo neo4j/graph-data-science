@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
@@ -75,7 +76,7 @@ public class LabelPropagationBenchmarkLdbc {
             )
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0D))
             .build()
-            .graph();
+            .graph(HugeGraphFactory.class);
     }
 
     @TearDown

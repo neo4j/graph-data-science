@@ -108,7 +108,7 @@ final class PageRankTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void testOnOutgoingRelationships(Class<? extends GraphFactory> graphImpl) {
+    void testOnOutgoingRelationships(Class<? extends GraphFactory> factoryType) {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, () -> {
@@ -125,7 +125,7 @@ final class PageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(db, () ->
                 new CypherLoaderBuilder()
                     .api(db)
@@ -137,7 +137,7 @@ final class PageRankTest extends AlgoTestBase {
                         LABEL.name()
                     ))
                     .build()
-                    .graph()
+                    .graph(factoryType)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -145,7 +145,7 @@ final class PageRankTest extends AlgoTestBase {
                 .addNodeLabel(LABEL.name())
                 .addRelationshipType(RELATIONSHIP_TYPE)
                 .build()
-                .graph();
+                .graph(factoryType);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
@@ -165,7 +165,7 @@ final class PageRankTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void testOnIncomingRelationships(Class<? extends GraphFactory> graphImpl) {
+    void testOnIncomingRelationships(Class<? extends GraphFactory> factoryType) {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, () -> {
@@ -183,7 +183,7 @@ final class PageRankTest extends AlgoTestBase {
 
         final Graph graph;
         final CentralityResult rankResult;
-        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(db, () ->
                 new CypherLoaderBuilder()
                     .api(db)
@@ -195,7 +195,7 @@ final class PageRankTest extends AlgoTestBase {
                         LABEL.name()
                     ))
                     .build()
-                    .graph()
+                    .graph(factoryType)
             );
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
                     .create(graph, DEFAULT_CONFIG, LongStream.empty())
@@ -208,7 +208,7 @@ final class PageRankTest extends AlgoTestBase {
                 .addRelationshipType(RELATIONSHIP_TYPE)
                 .globalProjection(Projection.REVERSE)
                 .build()
-                .graph();
+                .graph(factoryType);
 
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
                     .create(graph, DEFAULT_CONFIG, LongStream.empty())
@@ -228,9 +228,9 @@ final class PageRankTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void correctPartitionBoundariesForAllNodes(Class<? extends GraphFactory> graphImpl) {
+    void correctPartitionBoundariesForAllNodes(Class<? extends GraphFactory> factoryType) {
         final Graph graph;
-        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(String.format("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
@@ -241,7 +241,7 @@ final class PageRankTest extends AlgoTestBase {
                     LABEL.name()
                 ))
                 .build()
-                .graph()
+                .graph(factoryType)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -249,7 +249,7 @@ final class PageRankTest extends AlgoTestBase {
                 .addNodeLabel(LABEL.name())
                 .addRelationshipType(RELATIONSHIP_TYPE)
                 .build()
-                .graph();
+                .graph(factoryType);
         }
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization

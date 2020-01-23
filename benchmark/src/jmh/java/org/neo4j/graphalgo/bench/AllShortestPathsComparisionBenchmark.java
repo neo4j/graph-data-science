@@ -22,6 +22,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
@@ -82,7 +83,7 @@ public class AllShortestPathsComparisionBenchmark extends BaseBenchmark {
             .loadAnyRelationshipType()
             .addRelationshipProperty(PropertyMapping.of("cost", 1.0))
             .build()
-            .graph();
+            .graph(HugeGraphFactory.class);
     }
 
     @TearDown

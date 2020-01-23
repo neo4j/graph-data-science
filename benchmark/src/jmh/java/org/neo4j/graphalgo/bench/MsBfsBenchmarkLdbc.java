@@ -20,6 +20,7 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
@@ -72,7 +73,7 @@ public class MsBfsBenchmarkLdbc {
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .build()
-            .graph();
+            .graph(HugeGraphFactory.class);
     }
 
     @TearDown

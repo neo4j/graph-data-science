@@ -102,7 +102,7 @@ final class ArticleRankTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void test(Class<? extends GraphFactory> graphFactory) {
+    void test(Class<? extends GraphFactory> factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -120,13 +120,13 @@ final class ArticleRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                 .build()
-                .graph()
+                .graph(factoryType)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -134,7 +134,7 @@ final class ArticleRankTest extends AlgoTestBase {
                 .addNodeLabel(label.name())
                 .addRelationshipType("TYPE1")
                 .build()
-                .graph();
+                .graph(factoryType);
         }
 
         final CentralityResult rankResult = LabsPageRankAlgorithmType.ARTICLE_RANK

@@ -25,8 +25,6 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -96,7 +94,6 @@ final class GraphLoaderBuilders {
 
         return ImmutableModernGraphLoader.of(
             api,
-            HugeGraphFactory.class,
             executorService.orElse(Pools.DEFAULT),
             tracker.orElse(AllocationTracker.EMPTY),
             terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
@@ -150,7 +147,6 @@ final class GraphLoaderBuilders {
 
         return ImmutableModernGraphLoader.of(
             api,
-            CypherGraphFactory.class,
             executorService.orElse(Pools.DEFAULT),
             tracker.orElse(AllocationTracker.EMPTY),
             terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),

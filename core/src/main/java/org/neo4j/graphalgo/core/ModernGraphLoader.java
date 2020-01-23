@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -39,11 +38,6 @@ import java.util.concurrent.ExecutorService;
 
 @ValueClass
 public interface ModernGraphLoader extends SharedGraphLoader {
-
-    @Value.Default
-    default @Nullable Class<? extends GraphFactory> factoryType() {
-        return null;
-    };
 
     @Value.Default
     default ExecutorService executorService() {
@@ -79,20 +73,12 @@ public interface ModernGraphLoader extends SharedGraphLoader {
 
     GraphCreateConfig createConfig();
 
-    default Graph graph() {
-        if (factoryType() != null) {
-            return load(factoryType());
-        } else {
-            throw new IllegalStateException("factoryType has not been set");
-        }
+    default Graph graph(Class<? extends GraphFactory> factoryType) {
+        return load(factoryType);
     }
 
-    default GraphsByRelationshipType graphs() {
-        if (factoryType() != null) {
-            return build(factoryType()).build().graphs();
-        } else {
-            throw new IllegalStateException("factoryType has not been set");
-        }
+    default GraphsByRelationshipType graphs(Class<? extends GraphFactory> factoryType) {
+        return build(factoryType).build().graphs();
     }
 
     @Override

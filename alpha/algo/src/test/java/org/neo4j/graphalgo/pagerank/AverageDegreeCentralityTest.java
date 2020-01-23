@@ -112,17 +112,17 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void averageOutgoingCentrality(Class<? extends GraphFactory> graphFactory) {
+    void averageOutgoingCentrality(Class<? extends GraphFactory> factoryType) {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                 .build()
-                .graph()
+                .graph(factoryType)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -130,7 +130,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .addNodeLabel(label.name())
                 .addRelationshipType("TYPE1")
                 .build()
-                .graph();
+                .graph(factoryType);
         }
 
         AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);
@@ -140,17 +140,17 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void averageIncomingCentrality(Class<? extends GraphFactory> graphFactory) {
+    void averageIncomingCentrality(Class<? extends GraphFactory> factoryType) {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
                 .build()
-                .graph()
+                .graph(factoryType)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -159,7 +159,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .addRelationshipType("TYPE1")
                 .globalProjection(Projection.REVERSE)
                 .build()
-                .graph();
+                .graph(factoryType);
         }
 
         AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);
@@ -169,18 +169,18 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void totalCentrality(Class<? extends GraphFactory> graphFactory) {
+    void totalCentrality(Class<? extends GraphFactory> factoryType) {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
                 .globalDeduplicationStrategy(DeduplicationStrategy.SINGLE)
                 .build()
-                .graph()
+                .graph(factoryType)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -189,7 +189,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .addRelationshipType("TYPE1")
                 .globalProjection(Projection.UNDIRECTED)
                 .build()
-                .graph();
+                .graph(factoryType);
         }
 
         AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);
