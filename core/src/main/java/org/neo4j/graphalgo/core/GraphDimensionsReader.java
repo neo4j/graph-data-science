@@ -27,8 +27,8 @@ import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipTypeMapping;
-import org.neo4j.graphalgo.RelationshipTypeMappings;
+import org.neo4j.graphalgo.RelationshipProjectionMapping;
+import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
@@ -71,13 +71,13 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .forEach(nodeLabelIds.ids::add);
         }
 
-        RelationshipTypeMappings.Builder mappingsBuilder = new RelationshipTypeMappings.Builder();
+        RelationshipProjectionMappings.Builder mappingsBuilder = new RelationshipProjectionMappings.Builder();
         if (readTokens && !loadAnyRelationshipType()) {
             if (setup.legacyMode()) {
                 Set<String> types = ProjectionParser.parse(setup.relationshipType());
                 for (String typeName : types) {
                     int typeId = tokenRead.relationshipType(typeName);
-                    RelationshipTypeMapping typeMapping = RelationshipTypeMapping.of(typeName, typeId);
+                    RelationshipProjectionMapping typeMapping = RelationshipProjectionMapping.of(typeName, typeId);
                     mappingsBuilder.addMapping(typeMapping);
                 }
             } else {
@@ -90,12 +90,12 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                     Projection projection = relationshipProjection.projection();
                     int typeId = tokenRead.relationshipType(typeName);
 
-                    RelationshipTypeMapping typeMapping = RelationshipTypeMapping.of(elementIdentifier, typeName, projection, typeId);
+                    RelationshipProjectionMapping typeMapping = RelationshipProjectionMapping.of(elementIdentifier, typeName, projection, typeId);
                     mappingsBuilder.addMapping(typeMapping);
                 }
             }
         }
-        RelationshipTypeMappings relationshipTypeMappings = mappingsBuilder.build();
+        RelationshipProjectionMappings relationshipProjectionMappings = mappingsBuilder.build();
 
         ResolvedPropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings());
         ResolvedPropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
@@ -103,16 +103,16 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         long nodeCount = nodeLabelIds.stream().mapToLong(dataRead::countsForNode).sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
         // TODO: this will double count relationships between distinct labels
-        Map<String, Long> relationshipCounts = relationshipTypeMappings
+        Map<String, Long> relationshipCounts = relationshipProjectionMappings
             .stream()
-            .filter(RelationshipTypeMapping::doesExist)
+            .filter(RelationshipProjectionMapping::doesExist)
             .collect(Collectors.toMap(
-                RelationshipTypeMapping::elementIdentifier,
-                relationshipTypeMapping -> nodeLabelIds.stream()
+                RelationshipProjectionMapping::elementIdentifier,
+                relationshipProjectionMapping -> nodeLabelIds.stream()
                     .mapToLong(nodeLabelId -> maxRelCountForLabelAndType(
                         dataRead,
                         nodeLabelId,
-                        relationshipTypeMapping.typeId()
+                        relationshipProjectionMapping.typeId()
                     )).sum()
             ));
         long maxRelCount = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
@@ -124,7 +124,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .relationshipCounts(relationshipCounts)
                 .nodeLabelIds(nodeLabelIds.longSet())
                 .nodeProperties(nodeProperties)
-                .relationshipTypeMappings(relationshipTypeMappings)
+                .relationshipProjectionMappings(relationshipProjectionMappings)
                 .relationshipProperties(relProperties)
                 .build();
     }

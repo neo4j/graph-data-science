@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.apache.commons.compress.utils.Sets;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
-import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
 
@@ -95,9 +95,9 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     public boolean visit(Result.ResultRow row) throws RuntimeException {
         rows++;
 
-        RelationshipTypeMapping relationshipType = isAnyRelTypeQuery
-            ? RelationshipTypeMapping.all()
-            : RelationshipTypeMapping.of(row.getString(TYPE_COLUMN), -1);
+        RelationshipProjectionMapping relationshipType = isAnyRelTypeQuery
+            ? RelationshipProjectionMapping.all()
+            : RelationshipProjectionMapping.of(row.getString(TYPE_COLUMN), -1);
 
         String relationshipTypeName = relationshipType.typeName();
 

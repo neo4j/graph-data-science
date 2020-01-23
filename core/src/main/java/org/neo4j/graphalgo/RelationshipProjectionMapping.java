@@ -23,7 +23,7 @@ import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.Objects;
 
-public abstract class RelationshipTypeMapping {
+public abstract class RelationshipProjectionMapping {
 
     private final String elementIdentifier;
 
@@ -31,19 +31,19 @@ public abstract class RelationshipTypeMapping {
 
     private final Projection projection;
 
-    public static RelationshipTypeMapping of(String typeName, int typeId) {
+    public static RelationshipProjectionMapping of(String typeName, int typeId) {
         return new Resolved(typeName, typeName, null, typeId);
     }
 
-    public static RelationshipTypeMapping of(String elementIdentifier, String typeName, Projection projection, int typeId) {
+    public static RelationshipProjectionMapping of(String elementIdentifier, String typeName, Projection projection, int typeId) {
         return new Resolved(elementIdentifier, typeName, projection, typeId);
     }
 
-    public static RelationshipTypeMapping all() {
+    public static RelationshipProjectionMapping all() {
         return ALL;
     }
 
-    private RelationshipTypeMapping(String elementIdentifier, String typeName, Projection projection) {
+    private RelationshipProjectionMapping(String elementIdentifier, String typeName, Projection projection) {
         this.elementIdentifier = elementIdentifier;
         this.typeName = typeName;
         this.projection = projection;
@@ -65,7 +65,7 @@ public abstract class RelationshipTypeMapping {
 
     public abstract boolean doesExist();
 
-    private static class Resolved extends RelationshipTypeMapping {
+    private static class Resolved extends RelationshipProjectionMapping {
 
         private final int typeId;
 
@@ -85,7 +85,7 @@ public abstract class RelationshipTypeMapping {
         }
     }
 
-    private static final RelationshipTypeMapping ALL = new RelationshipTypeMapping("", "", Projection.NATURAL) {
+    private static final RelationshipProjectionMapping ALL = new RelationshipProjectionMapping("", "", Projection.NATURAL) {
 
         @Override
         public int typeId() {
@@ -102,20 +102,21 @@ public abstract class RelationshipTypeMapping {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RelationshipTypeMapping that = (RelationshipTypeMapping) o;
+        RelationshipProjectionMapping that = (RelationshipProjectionMapping) o;
         return typeId() == that.typeId() &&
                typeName.equals(that.typeName) &&
-               elementIdentifier.equals(that.elementIdentifier);
+               elementIdentifier.equals(that.elementIdentifier) &&
+               projection == that.projection;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(typeName, typeId());
+        return Objects.hash(typeName, typeId(), elementIdentifier, projection);
     }
 
     @Override
     public String toString() {
-        return "RelationshipTypeMapping{" +
+        return "RelationshipProjectionMapping{" +
                "elementIdentifier='" + elementIdentifier + '\'' +
                ", typeName='" + typeName + '\'' +
                ", projection='" + projection + '\'' +

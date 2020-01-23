@@ -20,7 +20,7 @@
 
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -52,10 +52,10 @@ public final class GraphDimensionsValidation {
 
     private static void checkValidRelationshipTypePredicate(GraphDimensions dimensions, GraphSetup setup) {
         if (isNotEmpty(setup.relationshipType())) {
-            String missingTypes = dimensions.relationshipTypeMappings()
+            String missingTypes = dimensions.relationshipProjectionMappings()
                 .stream()
                 .filter(m -> !m.doesExist())
-                .map(RelationshipTypeMapping::typeName)
+                .map(RelationshipProjectionMapping::typeName)
                 .collect(joining("', '"));
             if (!missingTypes.isEmpty()) {
                 throw new IllegalArgumentException(String.format(

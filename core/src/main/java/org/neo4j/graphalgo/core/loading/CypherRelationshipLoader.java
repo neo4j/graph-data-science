@@ -26,8 +26,8 @@ import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipTypeMapping;
-import org.neo4j.graphalgo.RelationshipTypeMappings;
+import org.neo4j.graphalgo.RelationshipProjectionMapping;
+import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -61,7 +61,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     private final boolean hasExplicitPropertyMappings;
     private final DeduplicationStrategy globalDeduplicationStrategy;
     private final double globalDefaultPropertyValue;
-    private final Map<RelationshipTypeMapping, LongAdder> relationshipCounters;
+    private final Map<RelationshipProjectionMapping, LongAdder> relationshipCounters;
 
     // Property mappings are either defined upfront in
     // the procedure configuration or during load time
@@ -175,7 +175,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         boolean isAnyRelTypeQuery = !allColumns.contains(RelationshipRowVisitor.TYPE_COLUMN);
 
         if (isAnyRelTypeQuery) {
-            loaderContext.getOrCreateImporterBuilder(RelationshipTypeMapping.all());
+            loaderContext.getOrCreateImporterBuilder(RelationshipProjectionMapping.all());
         }
 
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
@@ -205,11 +205,12 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
         ParallelUtil.run(flushTasks, setup.executor());
 
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
+        ObjectLongMap<RelationshipProjectionMapping> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
         this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
 
         resultDimensions = ImmutableGraphDimensions.builder().from(resultDimensions)
-            .relationshipTypeMappings(RelationshipTypeMappings.of(relationshipCounters.keys().toArray(RelationshipTypeMapping.class)))
+            .relationshipProjectionMappings(RelationshipProjectionMappings.of(relationshipCounters.keys().toArray(
+                RelationshipProjectionMapping.class)))
             .build();
 
         return ImmutableCypherRelationshipLoader.LoadResult.builder()
@@ -223,7 +224,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         return RelationshipRowVisitor.RESERVED_COLUMNS;
     }
 
-    Map<RelationshipTypeMapping, RelationshipsBuilder> allBuilders() {
+    Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders() {
         return loaderContext.allBuilders;
     }
 
@@ -245,8 +246,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     class Context {
 
-        private final Map<RelationshipTypeMapping, SingleTypeRelationshipImporter.Builder.WithImporter> importerBuildersByType;
-        private final Map<RelationshipTypeMapping, RelationshipsBuilder> allBuilders;
+        private final Map<RelationshipProjectionMapping, SingleTypeRelationshipImporter.Builder.WithImporter> importerBuildersByType;
+        private final Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders;
 
         private final int pageSize;
         private final int numberOfPages;
@@ -261,12 +262,12 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         }
 
         synchronized SingleTypeRelationshipImporter.Builder.WithImporter getOrCreateImporterBuilder(
-            RelationshipTypeMapping relationshipTypeMapping
+            RelationshipProjectionMapping relationshipProjectionMapping
         ) {
-            return importerBuildersByType.computeIfAbsent(relationshipTypeMapping, this::createImporter);
+            return importerBuildersByType.computeIfAbsent(relationshipProjectionMapping, this::createImporter);
         }
 
-        private SingleTypeRelationshipImporter.Builder.WithImporter createImporter(RelationshipTypeMapping typeMapping) {
+        private SingleTypeRelationshipImporter.Builder.WithImporter createImporter(RelationshipProjectionMapping typeMapping) {
             RelationshipsBuilder builder = new RelationshipsBuilder(
                 deduplicationStrategies,
                 setup.tracker(),
@@ -296,7 +297,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         private SingleTypeRelationshipImporter.Builder createImporterBuilder(
             int pageSize,
             int numberOfPages,
-            RelationshipTypeMapping mapping,
+            RelationshipProjectionMapping mapping,
             RelationshipsBuilder relationshipsBuilder,
             AllocationTracker tracker
         ) {
@@ -325,6 +326,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     interface LoadResult {
         GraphDimensions dimensions();
 
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounts();
+        ObjectLongMap<RelationshipProjectionMapping> relationshipCounts();
     }
 }

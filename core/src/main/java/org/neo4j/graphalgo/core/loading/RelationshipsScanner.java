@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.Projection;
-import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.RawValues;
@@ -58,11 +58,11 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                             loadWeights
                         );
                     } else {
-                        RelationshipTypeMapping relationshipTypeMapping = relImporter.mapping();
+                        RelationshipProjectionMapping relationshipProjectionMapping = relImporter.mapping();
                         return relImporter.loadImporter(
-                            relationshipTypeMapping.projection() == Projection.UNDIRECTED,
-                            relationshipTypeMapping.projection() == Projection.NATURAL,
-                            relationshipTypeMapping.projection() == Projection.REVERSE,
+                            relationshipProjectionMapping.projection() == Projection.UNDIRECTED,
+                            relationshipProjectionMapping.projection() == Projection.NATURAL,
+                            relationshipProjectionMapping.projection() == Projection.REVERSE,
                             loadWeights
                         );
                     }

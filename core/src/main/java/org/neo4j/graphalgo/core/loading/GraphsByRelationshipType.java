@@ -79,8 +79,8 @@ public final class GraphsByRelationshipType {
         return getGraphProjection(relationshipTypes, maybeRelationshipProperty);
     }
 
-    public Graph getGraphProjection(String relationshipType) {
-        return getGraphProjection(Collections.singletonList(relationshipType), Optional.empty());
+    public Graph getGraphProjection(String relationshipProjection) {
+        return getGraphProjection(Collections.singletonList(relationshipProjection), Optional.empty());
     }
 
     public Graph getGraphProjection(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {

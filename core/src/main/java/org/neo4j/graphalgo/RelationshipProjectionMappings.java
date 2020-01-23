@@ -26,29 +26,29 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public final class RelationshipTypeMappings implements Iterable<RelationshipTypeMapping> {
+public final class RelationshipProjectionMappings implements Iterable<RelationshipProjectionMapping> {
 
-    private static final RelationshipTypeMappings ALL = new RelationshipTypeMappings(RelationshipTypeMapping.all());
+    private static final RelationshipProjectionMappings ALL = new RelationshipProjectionMappings(RelationshipProjectionMapping.all());
 
-    private final RelationshipTypeMapping[] mappings;
+    private final RelationshipProjectionMapping[] mappings;
 
-    public static RelationshipTypeMappings of(RelationshipTypeMapping... mappings) {
+    public static RelationshipProjectionMappings of(RelationshipProjectionMapping... mappings) {
         if (mappings == null || mappings.length == 0) {
             return ALL;
         }
-        return new RelationshipTypeMappings(mappings);
+        return new RelationshipProjectionMappings(mappings);
     }
 
-    private RelationshipTypeMappings(RelationshipTypeMapping... mappings) {
+    private RelationshipProjectionMappings(RelationshipProjectionMapping... mappings) {
         this.mappings = mappings;
     }
 
-    public Stream<RelationshipTypeMapping> stream() {
+    public Stream<RelationshipProjectionMapping> stream() {
         return Arrays.stream(mappings);
     }
 
     @Override
-    public Iterator<RelationshipTypeMapping> iterator() {
+    public Iterator<RelationshipProjectionMapping> iterator() {
         return stream().iterator();
     }
 
@@ -57,18 +57,18 @@ public final class RelationshipTypeMappings implements Iterable<RelationshipType
     }
 
     public static final class Builder {
-        private final List<RelationshipTypeMapping> mappings;
+        private final List<RelationshipProjectionMapping> mappings;
 
         public Builder() {
             mappings = new ArrayList<>();
         }
 
-        public void addMapping(RelationshipTypeMapping mapping) {
+        public void addMapping(RelationshipProjectionMapping mapping) {
             mappings.add(Objects.requireNonNull(mapping, "mapping"));
         }
 
-        public RelationshipTypeMappings build() {
-            RelationshipTypeMapping[] mappings = this.mappings.toArray(new RelationshipTypeMapping[0]);
+        public RelationshipProjectionMappings build() {
+            RelationshipProjectionMapping[] mappings = this.mappings.toArray(new RelationshipProjectionMapping[0]);
             return of(mappings);
         }
     }

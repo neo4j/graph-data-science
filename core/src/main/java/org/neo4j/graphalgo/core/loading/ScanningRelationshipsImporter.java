@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.graphalgo.Projection;
-import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -39,14 +39,14 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 
-final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipRecord, ObjectLongMap<RelationshipTypeMapping>> {
+final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipRecord, ObjectLongMap<RelationshipProjectionMapping>> {
 
     private final GraphSetup setup;
     private final ImportProgress progress;
     private final AllocationTracker tracker;
     private final IdMapping idMap;
-    private final Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders;
-    private final Map<RelationshipTypeMapping, LongAdder> allRelationshipCounters;
+    private final Map<RelationshipProjectionMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders;
+    private final Map<RelationshipProjectionMapping, LongAdder> allRelationshipCounters;
 
     ScanningRelationshipsImporter(
             GraphSetup setup,
@@ -55,7 +55,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             ImportProgress progress,
             AllocationTracker tracker,
             IdMapping idMap,
-            Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders,
+            Map<RelationshipProjectionMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders,
             ExecutorService threadPool,
             int concurrency) {
         super(
@@ -108,8 +108,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private SingleTypeRelationshipImporter.Builder createImporterBuilder(
             int pageSize,
             int numberOfPages,
-            Map.Entry<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> entry) {
-        RelationshipTypeMapping mapping = entry.getKey();
+            Map.Entry<RelationshipProjectionMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> entry) {
+        RelationshipProjectionMapping mapping = entry.getKey();
         RelationshipsBuilder outRelationshipsBuilder = entry.getValue().getOne();
         RelationshipsBuilder inRelationshipsBuilder = entry.getValue().getTwo();
 
@@ -148,8 +148,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     }
 
     @Override
-    ObjectLongMap<RelationshipTypeMapping> build() {
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounters = new ObjectLongHashMap<>(allRelationshipCounters.size());
+    ObjectLongMap<RelationshipProjectionMapping> build() {
+        ObjectLongMap<RelationshipProjectionMapping> relationshipCounters = new ObjectLongHashMap<>(allRelationshipCounters.size());
         allRelationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
         return relationshipCounters;
     }

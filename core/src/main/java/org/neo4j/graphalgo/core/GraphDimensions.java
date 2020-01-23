@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.RelationshipTypeMappings;
+import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
@@ -63,5 +63,5 @@ public interface GraphDimensions {
     }
 
     @Nullable
-    RelationshipTypeMappings relationshipTypeMappings();
+    RelationshipProjectionMappings relationshipProjectionMappings();
 }

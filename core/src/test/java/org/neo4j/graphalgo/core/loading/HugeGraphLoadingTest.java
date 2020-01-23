@@ -172,15 +172,15 @@ final class HugeGraphLoadingTest {
             .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_NATURAL",
-                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL)
+                RelationshipProjection.of("TYPE", Projection.NATURAL)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_REVERSE",
-                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE)
+                RelationshipProjection.of("TYPE", Projection.REVERSE)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_UNDIRECTED",
-                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.UNDIRECTED)
+                RelationshipProjection.of("TYPE", Projection.UNDIRECTED)
             )
             .addNodeProperty(PropertyMapping.of("id", 42.0))
             .build()

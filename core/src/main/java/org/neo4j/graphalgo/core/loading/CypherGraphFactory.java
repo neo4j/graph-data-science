@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -134,7 +134,7 @@ public class CypherGraphFactory extends GraphFactory {
         CypherRelationshipLoader.LoadResult result = relationshipLoader.load();
 
         GraphDimensions resultDimensions = result.dimensions();
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = result.relationshipCounts();
+        ObjectLongMap<RelationshipProjectionMapping> relationshipCounts = result.relationshipCounts();
 
         Map<String, Map<String, Graph>> graphs = relationshipLoader
             .allBuilders()
@@ -144,14 +144,14 @@ public class CypherGraphFactory extends GraphFactory {
                 entry -> entry.getKey().typeName(),
                 entry -> {
 
-                    RelationshipTypeMapping relationshipTypeMapping = entry.getKey();
+                    RelationshipProjectionMapping relationshipProjectionMapping = entry.getKey();
                     RelationshipsBuilder relationshipsBuilder = entry.getValue();
 
                     if (relationshipsBuilder == null) {
                         throw new IllegalStateException(
                             String.format(
                                 "RelationshipsBuilder must not be `null` for relationship type `%s`.",
-                                relationshipTypeMapping.typeName()
+                                relationshipProjectionMapping.typeName()
                             )
                         );
                     }
@@ -159,7 +159,7 @@ public class CypherGraphFactory extends GraphFactory {
                     AdjacencyList adjacencyList = relationshipsBuilder.adjacency.build();
                     AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets;
 
-                    long relationshipCount = relationshipCounts.getOrDefault(relationshipTypeMapping, 0L);
+                    long relationshipCount = relationshipCounts.getOrDefault(relationshipProjectionMapping, 0L);
 
                     if (!resultDimensions.relationshipProperties().hasMappings()) {
                         HugeGraph graph = HugeGraph.create(

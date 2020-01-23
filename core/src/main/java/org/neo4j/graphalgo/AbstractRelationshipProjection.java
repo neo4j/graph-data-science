@@ -88,6 +88,10 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         ));
     }
 
+    public static RelationshipProjection of(String type, Projection projection) {
+        return RelationshipProjection.builder().type(type).projection(projection).build();
+    }
+
     public boolean hasMappings() {
         return properties().hasMappings();
     }

@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.Projection;
-import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -135,13 +135,14 @@ public final class HugeGraphFactory extends GraphFactory {
         long relOperations = LOAD_DEGREES ? dimensions.maxRelCount() : 0L;
 
         // batching for undirected double the amount of rels imported
-        if (setup.legacyMode() && (setup.loadIncoming() || setup.loadAsUndirected())) {
-            relOperations += dimensions.maxRelCount();
-        }
-        if (setup.legacyMode() && (setup.loadOutgoing() || setup.loadAsUndirected())) {
-            relOperations += dimensions.maxRelCount();
-        }
-        if (!setup.legacyMode()) {
+        if (setup.legacyMode()){
+            if (setup.loadIncoming() || setup.loadAsUndirected()) {
+                relOperations += dimensions.maxRelCount();
+            }
+            if (setup.loadOutgoing() || setup.loadAsUndirected()) {
+                relOperations += dimensions.maxRelCount();
+            }
+        } else {
             relOperations = setup.relationshipProjections().projections().entrySet().stream().map(entry -> {
                 Long relCount = dimensions.relationshipCounts().getOrDefault(entry.getKey().name, 0L);
                 return entry.getValue().projection() == Projection.UNDIRECTED
@@ -195,8 +196,8 @@ public final class HugeGraphFactory extends GraphFactory {
             AllocationTracker tracker,
             IdsAndProperties idsAndProperties,
             int concurrency) {
-        Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders = dimensions
-                .relationshipTypeMappings()
+        Map<RelationshipProjectionMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders = dimensions
+                .relationshipProjectionMappings()
                 .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
@@ -214,7 +215,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 threadPool,
                 concurrency
         );
-        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = scanningImporter.call(setup.log());
+        ObjectLongMap<RelationshipProjectionMapping> relationshipCounts = scanningImporter.call(setup.log());
 
         return allBuilders.entrySet().stream().collect(Collectors.toMap(
                 entry -> entry.getKey().elementIdentifier(),
@@ -300,7 +301,7 @@ public final class HugeGraphFactory extends GraphFactory {
     }
 
     private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuildersForRelationshipType(
-        RelationshipTypeMapping relationshipTypeMapping,
+        RelationshipProjectionMapping relationshipProjectionMapping,
         AllocationTracker tracker
     ) {
         RelationshipsBuilder outgoingRelationshipsBuilder = null;
@@ -347,14 +348,14 @@ public final class HugeGraphFactory extends GraphFactory {
                 }
             }
         } else {
-            if (relationshipTypeMapping.projection() == Projection.NATURAL || relationshipTypeMapping.projection() == Projection.UNDIRECTED) {
+            if (relationshipProjectionMapping.projection() == Projection.NATURAL || relationshipProjectionMapping.projection() == Projection.UNDIRECTED) {
                 outgoingRelationshipsBuilder = new RelationshipsBuilder(
                     deduplicationStrategies,
                     tracker,
                     setup.relationshipPropertyMappings().numberOfMappings()
                 );
             }
-            if (relationshipTypeMapping.projection() == Projection.REVERSE) {
+            if (relationshipProjectionMapping.projection() == Projection.REVERSE) {
                 incomingRelationshipsBuilder = new RelationshipsBuilder(
                     deduplicationStrategies,
                     tracker,

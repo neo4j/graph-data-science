@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
@@ -52,12 +52,12 @@ final class SingleTypeRelationshipImporter {
 
     static class Builder {
 
-        private final RelationshipTypeMapping mapping;
+        private final RelationshipProjectionMapping mapping;
         private final RelationshipImporter importer;
         private final LongAdder relationshipCounter;
 
         Builder(
-                RelationshipTypeMapping mapping,
+                RelationshipProjectionMapping mapping,
                 RelationshipImporter importer,
                 LongAdder relationshipCounter) {
             this.mapping = mapping;
@@ -65,7 +65,7 @@ final class SingleTypeRelationshipImporter {
             this.relationshipCounter = relationshipCounter;
         }
 
-        RelationshipTypeMapping mapping() {
+        RelationshipProjectionMapping mapping() {
             return mapping;
         }
 
