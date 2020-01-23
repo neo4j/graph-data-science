@@ -87,7 +87,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                     RelationshipProjection relationshipProjection = entry.getValue();
 
                     if (!relationshipProjection.type().isPresent()) {
-                        mappingsBuilder.addMapping(RelationshipTypeMapping.all());
+                        mappingsBuilder.addMapping(RelationshipProjectionMapping.all());
                     } else {
                         String elementIdentifier = entry.getKey().name;
                         String typeName = relationshipProjection.type().get();
