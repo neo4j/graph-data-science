@@ -120,13 +120,13 @@ CALL gds.alpha.shortestPath.astar.stream({
   propertyKeyLon: 'longitude'
 })
 YIELD nodeId, cost
-RETURN gds.util.asNode(nodeId).name as station, cost
+RETURN gds.util.asNode(nodeId).name AS station, cost
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name                       | Cost
+| station                    | cost
 | "King's Cross St. Pancras" | 0
 | "Euston"                   | 2
 | "Camden Town"              | 5
@@ -152,13 +152,13 @@ CALL gds.alpha.shortestPath.astar.stream({
   propertyKeyLat: 'longitude'
 })
 YIELD nodeId, cost
-RETURN gds.util.asNode(nodeId).name as station,cost
+RETURN gds.util.asNode(nodeId).name AS station, cost
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name                       | Cost
+| station                    | cost
 | "King's Cross St. Pancras" | 0
 | "Euston"                   | 2
 | "Camden Town"              | 5

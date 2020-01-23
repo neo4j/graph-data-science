@@ -84,7 +84,7 @@ class ShortestPathAStarDocTest extends BaseProcTest {
                        "   propertyKeyLon: 'longitude'" +
                        "})" +
                        " YIELD nodeId, cost" +
-                       " RETURN gds.util.asNode(nodeId).name as station, cost";
+                       " RETURN gds.util.asNode(nodeId).name AS station, cost";
 
         String actual = runQuery(query, Result::resultAsString);
         String expected = "+-----------------------------------+" + NL +
@@ -114,7 +114,7 @@ class ShortestPathAStarDocTest extends BaseProcTest {
                        "  propertyKeyLat: 'longitude'" +
                        " })" +
                        " YIELD nodeId, cost" +
-                       " RETURN gds.util.asNode(nodeId).name as station,cost";
+                       " RETURN gds.util.asNode(nodeId).name AS station, cost";
 
         String actual = runQuery(query, Result::resultAsString);
         String expected = "+-----------------------------------+" + NL +
