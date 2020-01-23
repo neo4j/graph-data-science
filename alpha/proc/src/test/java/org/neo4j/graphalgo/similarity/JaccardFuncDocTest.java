@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -39,7 +40,7 @@ class JaccardFuncDocTest extends BaseProcTest {
         ", (indian:Cuisine {name:'Indian'}) " +
         ", (lebanese:Cuisine {name:'Lebanese'}) " +
         ", (portuguese:Cuisine {name:'Portuguese'}) " +
-        " " +
+
         ", (zhen:Person {name: 'Zhen'}) " +
         ", (praveena:Person {name: 'Praveena'}) " +
         ", (michael:Person {name: 'Michael'}) " +
@@ -70,7 +71,7 @@ class JaccardFuncDocTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
         registerFunctions(SimilaritiesFunc.class);
     }
 
@@ -89,7 +90,7 @@ class JaccardFuncDocTest extends BaseProcTest {
                                 "| 0.4        |" + NL +
                                 "+------------+" + NL +
                                 "1 row" + NL;
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -108,7 +109,7 @@ class JaccardFuncDocTest extends BaseProcTest {
                                 "| \"Karin\" | \"Arya\" | 0.6666666666666666 |" + NL +
                                 "+---------------------------------------+" + NL +
                                 "1 row" + NL;
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 
     @Test
@@ -132,6 +133,6 @@ class JaccardFuncDocTest extends BaseProcTest {
                                 "| \"Karin\" | \"Zhen\"     | 0.0                |" + NL +
                                 "+-------------------------------------------+" + NL +
                                 "4 rows" + NL;
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
 }
