@@ -23,15 +23,21 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -72,6 +78,32 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
+    @Procedure(name = "gds.graph.create.estimate", mode = Mode.READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> createEstimate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeProjection") @Nullable Object nodeProjection,
+        @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        validateGraphName(getUsername(), graphName);
+
+        // input
+        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
+        GraphCreateConfig config = GraphCreateFromStoreConfig.of(
+            getUsername(),
+            graphName,
+            nodeProjection,
+            relationshipProjection,
+            cypherConfig
+        );
+        validateConfig(cypherConfig, config);
+
+        // computation
+        // result
+        return estimateGraph(config, HugeGraphFactory.class);
+    }
+
     @Procedure(name = "gds.graph.create.cypher", mode = Mode.READ)
     @Description("Creates a named graph in the catalog for use by algorithms.")
     public Stream<GraphCreateResult> create(
@@ -102,6 +134,32 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
+    @Procedure(name = "gds.graph.create.cypher.estimate", mode = Mode.READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> createCypherEstimate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeQuery") String nodeQuery,
+        @Name(value = "relationshipQuery") String relationshipQuery,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        validateGraphName(getUsername(), graphName);
+
+        // input
+        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
+        GraphCreateConfig config = GraphCreateFromCypherConfig.of(
+            getUsername(),
+            graphName,
+            nodeQuery,
+            relationshipQuery,
+            cypherConfig
+        );
+        validateConfig(cypherConfig, config);
+
+        // computation
+        // result
+        return estimateGraph(config, CypherGraphFactory.class);
+    }
+
     private GraphCreateResult createGraph(GraphCreateConfig config, Class<? extends GraphFactory> factoryClazz) {
         GraphCreateResult.Builder builder = new GraphCreateResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
@@ -124,6 +182,29 @@ public class GraphCreateProc extends CatalogProc {
         }
 
         return builder.build();
+    }
+
+    private Stream<MemoryEstimateResult> estimateGraph(GraphCreateConfig config, Class<? extends GraphFactory> factoryClazz) {
+        ModernGraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+        GraphFactory graphFactory = loader.build(factoryClazz);
+        GraphDimensions dimensions = graphFactory.dimensions();;
+
+        MemoryTree memoryTree = estimate(loader.toSetup(), graphFactory, config).estimate(dimensions, config.concurrency());
+
+        return Stream.of(new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
+    }
+
+    public MemoryEstimation estimate(GraphSetup setup, GraphFactory factory, GraphCreateConfig config) {
+        if (config.nodeCount() <= -1) {
+            return factory.memoryEstimation();
+        }
+        GraphDimensions estimateDimensions = ImmutableGraphDimensions.builder()
+            .from(factory.dimensions())
+            .nodeCount(config.nodeCount())
+            .highestNeoId(config.nodeCount())
+            .maxRelCount(Math.max(config.relationshipCount(), 0))
+            .build();
+        return factory.memoryEstimation(setup, estimateDimensions);
     }
 
     public static class GraphCreateResult {

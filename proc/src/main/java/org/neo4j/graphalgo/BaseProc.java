@@ -39,6 +39,8 @@ import java.util.regex.Pattern;
 
 public abstract class BaseProc {
 
+    protected static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
+
     @Context
     public GraphDatabaseAPI api;
 
