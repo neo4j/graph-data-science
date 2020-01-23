@@ -18,17 +18,3 @@ dependencies {
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 }
-
-shadowJar {
-    baseName = "neo4j-labs-graph-data-science"
-    classifier = "standalone"
-    minimize()
-    exclude 'META-INF/versions/**/*'
-    from licenseFile
-    from generateLicensesFiles
-}
-
-task shadowCopy(type: Copy) {
-    from(shadowJar)
-    into distributionDir
-}

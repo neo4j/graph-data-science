@@ -33,25 +33,3 @@ publishing {
         }
     }
 }
-
-shadowJar {
-    baseName = "neo4j-graph-data-science-product"
-    classifier = "standalone"
-    minimize()
-    exclude 'META-INF/versions/**/*'
-    from licenseFile
-    from generateLicensesFiles
-}
-
-task shadowCopy(type: Copy) {
-    from(shadowJar)
-    into distributionDir
-}
-
-task distZip(type: Zip) {
-    description 'Create a ZIP archive of the main distribution JAR.'
-    baseName = shadowJar.baseName
-    classifier = shadowJar.classifier
-    from shadowJar
-    destinationDir file(distributionDir)
-}
