@@ -806,7 +806,15 @@ class GraphCreateProcTest extends BaseProcTest {
         String graphCreateQuery =
             "CALL gds.graph.create(" +
             "   'testGraph', " +
-            "   '*', " +
+            "   {" +
+            "       A: {" +
+            "           properties: {" +
+            "               age: {" +
+            "                   defaultValue: 1" +
+            "               }" +
+            "           }" +
+            "       }" +
+            "   }, " +
             "   {" +
             "       REL: {" +
             "           projection: 'NATURAL'," +
@@ -821,7 +829,18 @@ class GraphCreateProcTest extends BaseProcTest {
 
         assertCypherResult(graphCreateQuery, singletonList(map(
             "graphName", "testGraph",
-            NODE_PROJECTION_KEY, isA(Map.class),
+            NODE_PROJECTION_KEY, map(
+                "A", map(
+                    "label", "A",
+                    "properties", map(
+                        "age", map(
+                            "defaultValue", 1.0,
+                            "property", "age"
+                        )
+                    )
+
+                )
+            ),
             RELATIONSHIP_PROJECTION_KEY, map(
                 "REL", map(
                     "type", "REL",
