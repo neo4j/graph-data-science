@@ -42,7 +42,7 @@ public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, RelationshipW
         return seedProperty() != null;
     }
 
-    @Configuration.Ignore
+    @Value.Check
     default void validate() {
         if (threshold() > 0 && relationshipWeightProperty() == null) {
             throw new IllegalArgumentException("Specifying a threshold requires `relationshipWeightProperty` to be set.");

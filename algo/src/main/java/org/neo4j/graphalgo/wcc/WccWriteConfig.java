@@ -37,15 +37,11 @@ public interface WccWriteConfig extends WccBaseConfig, WriteConfig {
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        WccWriteConfigImpl wccWriteConfig = new WccWriteConfigImpl(
+        return new WccWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
             userInput
         );
-
-        wccWriteConfig.validate();
-
-        return wccWriteConfig;
     }
 }
