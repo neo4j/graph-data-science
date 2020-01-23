@@ -65,7 +65,6 @@ class ShortestPathAStarDocTest extends BaseProcTest {
 
     @Test
     void shouldStream() {
-        // TODO: runs weighted, even it is not specified
         @Language("Cypher")
         String query = " MATCH (start:Station {name: 'King\\'s Cross St. Pancras'}), (end:Station {name: 'Kentish Town'})" +
                        " CALL gds.alpha.shortestPath.astar.stream({" +
