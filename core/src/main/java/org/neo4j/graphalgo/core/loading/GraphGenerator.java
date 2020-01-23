@@ -35,7 +35,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
-public class GraphGenerator {
+public final class GraphGenerator {
+
+    private GraphGenerator() {}
 
     public static NodeImporter createNodeImporter(
         long maxOriginalId,
@@ -57,13 +59,32 @@ public class GraphGenerator {
         DeduplicationStrategy deduplicationStrategy
     ) {
         return createRelImporter(
+            nodeImporter,
+            direction,
+            undirected,
+            loadRelationshipProperty,
+            deduplicationStrategy,
+            true
+        );
+    }
+
+    public static RelImporter createRelImporter(
+        NodeImporter nodeImporter,
+        Direction direction,
+        boolean undirected,
+        boolean loadRelationshipProperty,
+        DeduplicationStrategy deduplicationStrategy,
+        boolean legacyMode
+    ) {
+        return createRelImporter(
             nodeImporter.idMap(),
             direction,
             undirected,
             loadRelationshipProperty,
             deduplicationStrategy,
             nodeImporter.executorService,
-            nodeImporter.tracker
+            nodeImporter.tracker,
+            legacyMode
         );
     }
 
@@ -73,7 +94,30 @@ public class GraphGenerator {
         boolean undirected,
         boolean loadRelationshipProperty,
         DeduplicationStrategy deduplicationStrategy,
-        ExecutorService executorService, AllocationTracker tracker
+        ExecutorService executorService,
+        AllocationTracker tracker
+    ) {
+        return createRelImporter(
+            idMap,
+            direction,
+            undirected,
+            loadRelationshipProperty,
+            deduplicationStrategy,
+            executorService,
+            tracker,
+            true
+        );
+    }
+
+    public static RelImporter createRelImporter(
+        IdMap idMap,
+        Direction direction,
+        boolean undirected,
+        boolean loadRelationshipProperty,
+        DeduplicationStrategy deduplicationStrategy,
+        ExecutorService executorService,
+        AllocationTracker tracker,
+        boolean legacyMode
     ) {
         return new RelImporter(
             idMap,
@@ -82,7 +126,8 @@ public class GraphGenerator {
             loadRelationshipProperty,
             deduplicationStrategy,
             executorService,
-            tracker
+            tracker,
+            legacyMode
         );
     }
 
@@ -151,7 +196,10 @@ public class GraphGenerator {
         private final boolean loadRelationshipProperty;
         private final ExecutorService executorService;
         private final AllocationTracker tracker;
+        private final boolean legacyMode;
+
         private long importedRelationships = 0;
+
 
         boolean loadOutgoing;
         boolean loadIncoming;
@@ -162,7 +210,9 @@ public class GraphGenerator {
             boolean undirected,
             boolean loadRelationshipProperty,
             DeduplicationStrategy deduplicationStrategy,
-            ExecutorService executorService, AllocationTracker tracker
+            ExecutorService executorService,
+            AllocationTracker tracker,
+            boolean legacyMode
         ) {
             this.direction = direction;
             this.undirected = undirected;
@@ -170,6 +220,7 @@ public class GraphGenerator {
             this.executorService = executorService;
             this.tracker = tracker;
             this.idMap = idMap;
+            this.legacyMode = legacyMode;
 
             if (undirected && direction != Direction.OUTGOING) {
                 throw new IllegalArgumentException(String.format(
@@ -177,6 +228,10 @@ public class GraphGenerator {
                     Direction.OUTGOING,
                     direction
                 ));
+            }
+
+            if (!legacyMode && direction == Direction.BOTH) {
+                throw new IllegalArgumentException("Direction.BOTH is invalid in non-legacy mode.");
             }
 
             ImportSizing importSizing = ImportSizing.of(1, idMap.nodeCount());
@@ -285,22 +340,52 @@ public class GraphGenerator {
             flushBuffer();
             Relationships relationships = buildRelationships();
 
-            return HugeGraph.create(
-                tracker,
-                idMap,
-                Collections.emptyMap(),
-                relationships.relationshipCount(),
-                relationships.inAdjacency(),
-                relationships.outAdjacency(),
-                relationships.inOffsets(),
-                relationships.outOffsets(),
-                Optional.empty(),
-                loadRelationshipProperty && loadIncoming ? Optional.of(relationships.inRelProperties()) : Optional.empty(),
-                loadRelationshipProperty && loadOutgoing ? Optional.of(relationships.outRelProperties()) : Optional.empty(),
-                loadRelationshipProperty && loadIncoming ? Optional.of(relationships.inRelPropertyOffsets()) : Optional.empty(),
-                loadRelationshipProperty && loadOutgoing ? Optional.of(relationships.outRelPropertyOffsets()) : Optional.empty(),
-                undirected
-            );
+            if (legacyMode) {
+                return HugeGraph.create(
+                    tracker,
+                    idMap,
+                    Collections.emptyMap(),
+                    relationships.relationshipCount(),
+                    relationships.inAdjacency(),
+                    relationships.outAdjacency(),
+                    relationships.inOffsets(),
+                    relationships.outOffsets(),
+                    Optional.empty(),
+                    loadRelationshipProperty && loadIncoming ? Optional.of(relationships.inRelProperties()) : Optional.empty(),
+                    loadRelationshipProperty && loadOutgoing ? Optional.of(relationships.outRelProperties()) : Optional.empty(),
+                    loadRelationshipProperty && loadIncoming ? Optional.of(relationships.inRelPropertyOffsets()) : Optional.empty(),
+                    loadRelationshipProperty && loadOutgoing ? Optional.of(relationships.outRelPropertyOffsets()) : Optional.empty(),
+                    undirected
+                );
+            } else {
+                // In non-legacy mode we load either outgoing or incoming or undirected.
+                // The corresponding adjacency list is always stored in the outgoing
+                // adjacency list of the resulting graph.
+                return HugeGraph.create(
+                    tracker,
+                    idMap,
+                    Collections.emptyMap(),
+                    relationships.relationshipCount(),
+                    null,
+                    loadOutgoing ? relationships.outAdjacency() : relationships.inAdjacency(),
+                    null,
+                    loadOutgoing ? relationships.outOffsets() : relationships.inOffsets(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    loadRelationshipProperty ?
+                        loadOutgoing
+                            ? Optional.of(relationships.outRelProperties())
+                            : Optional.of(relationships.inRelProperties())
+                        : Optional.empty(),
+                    Optional.empty(),
+                    loadRelationshipProperty ?
+                        loadOutgoing
+                            ? Optional.of(relationships.outRelPropertyOffsets())
+                            : Optional.of(relationships.inRelPropertyOffsets())
+                        : Optional.empty(),
+                    undirected
+                );
+            }
         }
 
         private void flushBuffer() {
