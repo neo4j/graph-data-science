@@ -184,7 +184,7 @@ final class HugeGraphLoadingTest {
             )
             .addNodeProperty(PropertyMapping.of("id", 42.0))
             .build()
-            .graphs();
+            .graphs(HugeGraphFactory.class);
 
         Graph natural = graphsByRelationshipType.getGraphProjection("TYPE_NATURAL");
         assertGraphEquals(fromGdl("({id: 0})-->({id: 1})"), natural);
