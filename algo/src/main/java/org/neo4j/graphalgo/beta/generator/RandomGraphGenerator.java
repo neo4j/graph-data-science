@@ -90,6 +90,10 @@ public final class RandomGraphGenerator {
     }
 
     public HugeGraph generate() {
+        return generate(Direction.BOTH, true);
+    }
+
+    public HugeGraph generate(Direction direction, boolean legacyMode) {
         GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
             nodeCount,
             Pools.DEFAULT,
@@ -100,10 +104,11 @@ public final class RandomGraphGenerator {
 
         GraphGenerator.RelImporter relationshipsImporter = GraphGenerator.createRelImporter(
             nodeImporter,
-            Direction.BOTH,
+            direction,
             false,
             maybePropertyProducer.isPresent(),
-            DeduplicationStrategy.NONE
+            DeduplicationStrategy.NONE,
+            legacyMode
         );
 
         generateRelationships(relationshipsImporter);
