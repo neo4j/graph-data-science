@@ -55,8 +55,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -557,6 +560,39 @@ final class GenerateConfiguration {
         return Optional.of(builder.build());
     }
 
+    private List<CodeBlock> toMapCode(ConfigParser.Spec config) {
+        Map<String, String> mapPairs = config
+            .members()
+            .stream()
+            .filter(ConfigParser.Member::isMapParameter)
+            .collect(Collectors.toMap(member -> member.lookupKey(), ConfigParser.Member::methodName));
+
+        switch (mapPairs.size()) {
+            case 0:
+                return Collections.singletonList(CodeBlock.of("return $T.emptyMap()", Collections.class));
+            case 1:
+                Map.Entry<String, String> singleEntry = mapPairs.entrySet().iterator().next();
+                String parameter = singleEntry.getKey();
+                String getter = singleEntry.getValue();
+                return Collections.singletonList(CodeBlock.of(
+                    "return $T.singletonMap($S, $N())",
+                    Collections.class,
+                    parameter,
+                    getter
+                ));
+            default:
+                List<CodeBlock> blocks = new LinkedList<>();
+                blocks.add(CodeBlock.of("$T<$T, Object> map = new $T<>()", Map.class, String.class, HashMap.class));
+                mapPairs.entrySet()
+                    .stream()
+                    .map(entry -> CodeBlock.of("$S, $N()", entry.getKey(), entry.getValue()))
+                    .map(pair -> CodeBlock.of("map.put($L)", pair))
+                    .forEach(blocks::add);
+                blocks.add(CodeBlock.of("return map"));
+                return blocks;
+        }
+    }
+
     private CodeBlock collectKeysCode(ConfigParser.Spec config) {
         Collection<String> configKeys = config
             .members()
@@ -593,13 +629,16 @@ final class GenerateConfiguration {
         NameAllocator names,
         ConfigParser.Member member
     ) {
-        if (member.isConfigValue() || member.collectsKeys()) {
+        if (member.isConfigValue() || member.collectsKeys() || member.toMap()) {
             MethodSpec.Builder builder = MethodSpec
                 .overriding(member.method())
                 .returns(member.typeSpecWithAnnotation(Nullable.class));
             if (member.collectsKeys()) {
                 builder.addStatement(collectKeysCode(config));
-            } else {
+            } else if (member.toMap()) {
+                toMapCode(config).forEach(builder::addStatement);
+            }
+            else {
                 builder.addStatement("return this.$N", names.get(member));
             }
             return Optional.of(builder.build());

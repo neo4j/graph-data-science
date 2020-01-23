@@ -67,4 +67,10 @@ public @interface Configuration {
     @Retention(RetentionPolicy.CLASS)
     @interface CollectKeys {
     }
+
+    @Documented
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.CLASS)
+    @interface ToMap {
+    }
 }

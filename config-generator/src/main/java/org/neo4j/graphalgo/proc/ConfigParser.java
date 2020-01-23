@@ -24,6 +24,7 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration.CollectKeys;
+import org.neo4j.graphalgo.annotation.Configuration.ToMap;
 import org.neo4j.graphalgo.annotation.Configuration.Ignore;
 import org.neo4j.graphalgo.annotation.Configuration.Key;
 import org.neo4j.graphalgo.annotation.Configuration.Parameter;
@@ -45,6 +46,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -148,6 +150,24 @@ final class ConfigParser {
 
             memberBuilder.collectsKeys(true);
         }
+
+        if (isAnnotationPresent(method, ToMap.class)) {
+            TypeElement mapType = elementUtils.getTypeElement(Map.class.getTypeName());
+            TypeMirror stringType = elementUtils.getTypeElement(String.class.getTypeName()).asType();
+            TypeMirror objectType = elementUtils.getTypeElement(Object.class.getTypeName()).asType();
+            DeclaredType mapOfStringToObjectType = typeUtils.getDeclaredType(mapType, stringType, objectType);
+
+            if (!typeUtils.isSameType(method.getReturnType(), mapOfStringToObjectType)) {
+                messager.printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Method must return Map<String, Object>",
+                    method
+                );
+            }
+
+            memberBuilder.toMap(true);
+        }
+
         if (isAnnotationPresent(method, Value.Check.class)) {
             if (method.getReturnType().getKind() == TypeKind.VOID) {
                 memberBuilder.validates(true);
@@ -207,6 +227,11 @@ final class ConfigParser {
         }
 
         @Value.Default
+        public boolean toMap() {
+            return false;
+        }
+
+        @Value.Default
         public boolean validates() {
             return false;
         }
@@ -217,7 +242,7 @@ final class ConfigParser {
         }
 
         final boolean isConfigValue() {
-            return !collectsKeys() && !validates() && !normalizes();
+            return !collectsKeys() && !toMap() && !validates() && !normalizes();
         }
 
         final boolean isMapParameter() {
@@ -263,6 +288,13 @@ final class ConfigParser {
                 throw new InvalidMemberException(String.format(
                     "Cannot combine @%s with @%s",
                     CollectKeys.class.getSimpleName(),
+                    Value.Check.class.getSimpleName()
+                ));
+            }
+            if (toMap() && (validates() || normalizes())) {
+                throw new InvalidMemberException(String.format(
+                    "Cannot combine @%s with @%s",
+                    ToMap.class.getSimpleName(),
                     Value.Check.class.getSimpleName()
                 ));
             }
