@@ -86,10 +86,8 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
         Result result = runLoadingQuery(offset, batchSize);
 
+        Collection<String> propertyColumns = getPropertyColumns(result);
         if (!hasExplicitPropertyMappings && !initializedFromResult) {
-            // init from columns
-            Collection<String> propertyColumns = getPropertyColumns(result);
-
             PropertyMappings propertyMappings = PropertyMappings.of(propertyColumns
                 .stream()
                 .map(propertyColumn -> PropertyMapping.of(
@@ -101,6 +99,9 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
                 .toArray(PropertyMapping[]::new));
 
             initImporter(propertyMappings);
+            initializedFromResult = true;
+        } else if (!initializedFromResult) {
+            validateProperties(propertyColumns, outerDimensions.nodeProperties(), "Node");
             initializedFromResult = true;
         }
 

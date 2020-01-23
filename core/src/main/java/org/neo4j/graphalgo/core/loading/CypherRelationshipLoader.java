@@ -146,10 +146,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         // If the user specifies property mappings, we use those.
         // Otherwise, we create new property mappings from the result columns.
         // We do that only once, as each batch has the same columns.
+        Collection<String> propertyColumns = getPropertyColumns(queryResult);
         if (!hasExplicitPropertyMappings && !initializedFromResult) {
-
-            Collection<String> propertyColumns = getPropertyColumns(queryResult);
-
             List<ResolvedPropertyMapping> propertyMappings = propertyColumns
                 .stream()
                 .map(propertyColumn -> PropertyMapping.of(
@@ -168,6 +166,9 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             resultDimensions = initFromDimension(innerDimensions);
 
+            initializedFromResult = true;
+        } else if (!initializedFromResult) {
+            validateProperties(propertyColumns, outerDimensions.relationshipProperties(), "Relationship");
             initializedFromResult = true;
         }
 

@@ -401,12 +401,12 @@ class GraphCreateProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { nodeProperties: $nodeProperties })",
-            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "nodeProperties", nodeProperties),
+            map("name", name, "nodeQuery", "RETURN 0 AS id, 1 AS age", "relationshipQuery", "RETURN 0 AS source, 0 AS target", "nodeProperties", nodeProperties),
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, expectedNodeProjection,
                 RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
-                "nodeCount", nodeCount,
+                "nodeCount", 1L,
                 "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
@@ -543,12 +543,12 @@ class GraphCreateProcTest extends BaseProcTest {
         // TODO: check property values on graph
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
-            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "relationshipProperties", relationshipProperties),
+            map("name", name, "nodeQuery", "RETURN 0 AS id", "relationshipQuery", "RETURN 0 AS source, 0 AS target, 3 AS weight", "relationshipProperties", relationshipProperties),
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, expectedRelProjection,
-                "nodeCount", nodeCount,
+                "nodeCount", 1L,
                 "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
@@ -714,12 +714,12 @@ class GraphCreateProcTest extends BaseProcTest {
         // TODO: check property values on graph
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
-            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "relationshipProperties", relationshipProperties),
+            map("name", name, "nodeQuery", "RETURN 0 AS id", "relationshipQuery", "RETURN 0 AS source, 0 AS target, 1 AS weight", "relationshipProperties", relationshipProperties),
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, expectedRelProjections,
-                "nodeCount", nodeCount,
+                "nodeCount", 1L,
                 "relationshipCount", relCount,
                 "createMillis", instanceOf(Long.class)
             ))
@@ -840,6 +840,35 @@ class GraphCreateProcTest extends BaseProcTest {
         )));
     }
 
+    @Test
+    void failsOnMismatchOfCypherRelationshipProperty() {
+        String query =
+            "CALL gds.graph.create.cypher(" +
+            "   'cypherGraph', " +
+            "   'RETURN 1 AS id', " +
+            "   'RETURN 0 AS source, 1 AS target, 2 AS weight, 3 AS bazz', " +
+            "   { " +
+            "       relationshipProperties: ['foo', 'bar', 'weight'] " +
+            "   }" +
+            ")";
+
+        assertError(query, "Relationship properties not found: 'foo', 'bar'. Available properties from the relationship query are: 'weight', 'bazz'");
+    }
+
+    @Test
+    void failsOnMismatchOfCypherNodeProperty() {
+        String query =
+            "CALL gds.graph.create.cypher(" +
+            "   'cypherGraph', " +
+            "   'RETURN 1 AS id, 2 AS weight, 3 AS bazz', " +
+            "   'RETURN 0 AS source, 1 AS target', " +
+            "   { " +
+            "       nodeProperties: ['foo', 'bar', 'weight'] " +
+            "   }" +
+            ")";
+
+        assertError(query, "Node properties not found: 'foo', 'bar'. Available properties from the node query are: 'weight', 'bazz'");
+    }
 
     @Test
     void failsOnInvalidNeoType() {

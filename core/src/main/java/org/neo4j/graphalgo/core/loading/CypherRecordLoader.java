@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.ResolvedPropertyMapping;
+import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
@@ -29,6 +31,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -70,6 +73,28 @@ abstract class CypherRecordLoader<R> {
             int batchSize,
             int bufferSize
     );
+
+    void validateProperties(
+        Collection<String> propertyColumns,
+        ResolvedPropertyMappings resolvedPropertyMappings,
+        String elementType
+    ) {
+        List<String> invalidNodeProperties = resolvedPropertyMappings
+            .mappings().stream()
+            .map(ResolvedPropertyMapping::neoPropertyKey)
+            .filter(k -> !propertyColumns.contains(k))
+            .collect(Collectors.toList());
+
+        if (!invalidNodeProperties.isEmpty()) {
+            throw new IllegalArgumentException(String.format(
+                "%s properties not found: '%s'. Available properties from the %s query are: '%s'",
+                elementType,
+                String.join("', '", invalidNodeProperties),
+                elementType.toLowerCase(),
+                String.join("', '", propertyColumns)
+            ));
+        }
+    }
 
     abstract void updateCounts(BatchLoadResult result);
 

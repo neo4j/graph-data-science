@@ -83,17 +83,17 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
             "  (a:A {id: 0, seed: 42}) " +
             ", (b:B {id: 1, seed: 42}) " +
 
-            ", (a)-[:X]->(:A {id: 2,  weight: 1.0, score: 1.0, seed: 1}) " +
-            ", (a)-[:X]->(:A {id: 3,  weight: 2.0, score: 2.0, seed: 1}) " +
-            ", (a)-[:X]->(:A {id: 4,  weight: 1.0, score: 1.0, seed: 1}) " +
-            ", (a)-[:X]->(:A {id: 5,  weight: 1.0, score: 1.0, seed: 1}) " +
-            ", (a)-[:X]->(:A {id: 6,  weight: 8.0, score: 8.0, seed: 2}) " +
+            ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
+            ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
+            ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
+            ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
+            ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
 
-            ", (b)-[:X]->(:B {id: 7,  weight: 1.0, score: 1.0, seed: 1}) " +
-            ", (b)-[:X]->(:B {id: 8,  weight: 2.0, score: 2.0, seed: 1}) " +
-            ", (b)-[:X]->(:B {id: 9,  weight: 1.0, score: 1.0, seed: 1}) " +
-            ", (b)-[:X]->(:B {id: 10, weight: 1.0, score: 1.0, seed: 1}) " +
-            ", (b)-[:X]->(:B {id: 11, weight: 8.0, score: 8.0, seed: 2})";
+            ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
+            ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
+            ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
+            ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
+            ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
 
         registerProcedures(LabelPropagationStreamProc.class, LabelPropagationWriteProc.class, GraphCreateProc.class);
         runQuery(cypher);
@@ -101,7 +101,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
         // Create explicit graphs with both projection variants
         runQuery(graphCreateQuery(Projection.NATURAL, TEST_GRAPH_NAME));
         runQuery(String.format(
-            "CALL gds.graph.create.cypher('%s', '%s', '%s', {nodeProperties: ['seed', 'score', 'weight']})",
+            "CALL gds.graph.create.cypher('%s', '%s', '%s', {nodeProperties: ['seed', 'weight']})",
             TEST_CYPHER_GRAPH_NAME,
             nodeQuery,
             relQuery
@@ -125,7 +125,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
                 .builder()
                 .graphName("")
                 .nodeProjection(NodeProjections.fromObject(MapUtil.map("A", "A | B")))
-                .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed", "weight", "score")))
+                .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed", "weight")))
                 .relationshipProjection(RelationshipProjections.builder()
                     .putProjection(
                         RelationshipProjections.PROJECT_ALL,
