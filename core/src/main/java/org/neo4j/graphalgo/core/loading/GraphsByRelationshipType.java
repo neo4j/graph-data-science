@@ -106,7 +106,7 @@ public final class GraphsByRelationshipType {
                 } else {
                     return graphsByProperty
                         .get(graphsByProperty.keySet().iterator().next())
-                        .withoutProperties();
+                        .withoutRelationshipProperties();
                 }
             }
         }).collect(Collectors.toList());

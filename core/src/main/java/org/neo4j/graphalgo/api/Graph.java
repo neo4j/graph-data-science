@@ -101,7 +101,7 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
 
     RelationshipIntersect intersection();
 
-    default Graph withoutProperties() {
+    default Graph withoutRelationshipProperties() {
         return this;
     };
 }
