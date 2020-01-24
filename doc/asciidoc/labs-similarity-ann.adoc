@@ -231,8 +231,8 @@ We'd probably want to filter those out, which we can do by passing in the `simil
 .Results
 [opts="header"]
 |===
-| `nodes` | `similarityPairs` | `write` | `writeRelationshipType` | `writeProperty` | `min`             | `max`            | `mean`           | `p95`
-| 5       |13                 |true     |SIMILAR                  | score           |0.19999980926513672|0.6666669845581055|0.3512822664701022|0.6666669845581055
+| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min               | max              | mean             | p95
+| 5     |13               |true   |SIMILAR                | score         |0.19999980926513672|0.6666669845581055|0.3512822664701022|0.6666669845581055
 |===
 
 
@@ -252,7 +252,7 @@ We then could write a query to find out what types of cuisine that other people 
 .Results
 [opts="header"]
 |===
-| `cuisine` | count
+| cuisine   | count
 | Italian   | 2
 | French    | 1
 | Lebanese  | 1
