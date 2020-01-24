@@ -262,6 +262,8 @@ public abstract class GdsCypher {
     public interface QueryBuilder {
         ParametersBuildStage graphCreate(String graphName);
 
+        ParametersBuildStage graphCreateCypher(String graphName);
+
         ModeBuildStage algo(Iterable<String> namespace, String algoName);
 
         default ModeBuildStage algo(String algoName) {
@@ -504,15 +506,23 @@ public abstract class GdsCypher {
 
         @Override
         public StagedBuilder graphCreate(String graphName) {
-            return createGraph(graphName, "gds", "graph");
+            return createGraph(graphName, "gds", "graph", "create");
+        }
+
+        @Override
+        public StagedBuilder graphCreateCypher(String graphName) {
+            return createGraph(graphName, "gds", "graph", "create", "cypher");
         }
 
         private StagedBuilder createGraph(String graphName, String... namespace) {
+            int algoNameIndex = namespace.length - 1;
+            String[] algoNameSpace = Arrays.copyOfRange(namespace, 0, algoNameIndex);
+            String algoName = namespace[algoNameIndex];
             graphCreateBuilder().graphName(graphName);
             builder
                 .explicitGraphName(Optional.empty())
-                .algoNamespace(Arrays.asList(namespace))
-                .algoName("create")
+                .algoNamespace(Arrays.asList(algoNameSpace))
+                .algoName(algoName)
                 .executionMode(InternalExecutionMode.GRAPH_CREATE);
             return this;
         }
