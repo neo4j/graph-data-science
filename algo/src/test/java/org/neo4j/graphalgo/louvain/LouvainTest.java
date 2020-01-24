@@ -138,7 +138,7 @@ class LouvainTest extends AlgoTestBase {
 
     @AllGraphTypesTest
     void unweightedLouvain(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER).withoutProperties();
+        Graph graph = loadGraph(graphImpl, DB_CYPHER).withoutRelationshipProperties();
 
         Louvain algorithm = new Louvain(
             graph,
