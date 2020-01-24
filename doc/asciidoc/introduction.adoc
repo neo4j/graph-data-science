@@ -6,7 +6,8 @@
 This chapter provides an introduction to the available graph algorithms, and instructions for installation and use.
 --
 
-This library provides efficiently implemented, parallel versions of common graph algorithms for Neo4j 3.x, exposed as Cypher procedures.
+This library provides efficiently implemented, parallel versions of common graph algorithms for Neo4j, exposed as Cypher procedures.
+
 
 [[introduction-algorithms]]
 == Algorithms
@@ -22,20 +23,7 @@ Due to the exponential growth of possible paths with increasing distance, many o
 Fortunately, optimized algorithms exist that utilize certain structures of the graph, memoize already explored parts, and parallelize operations.
 Whenever possible, we've applied these optimizations.
 
-The Neo4j Graph Algorithms library contains the following algorithms, grouped by category:
-
-.Centrality algorithms:
-Determines the importance of distinct nodes in a network.
-
-* <<algorithms-pagerank, PageRank>>
-
-.Community detection algorithms:
-
-Evaluate how a group is clustered or partitioned, as well as its tendency to strengthen or break apart.
-
-* <<algorithms-louvain, Louvain>>
-* <<algorithms-label-propagation, Label Propagation>>
-* <<algorithms-wcc, Weakly Connected Components>>
+The Neo4j Graph Data Science library contains a large number of algorithms, which are detailed in the <<algorithms, Algorithms>> chapter.
 
 
 == Installation
