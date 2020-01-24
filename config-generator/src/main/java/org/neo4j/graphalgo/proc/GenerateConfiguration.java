@@ -55,9 +55,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -560,36 +559,30 @@ final class GenerateConfiguration {
         return Optional.of(builder.build());
     }
 
-    private List<CodeBlock> toMapCode(ConfigParser.Spec config) {
+    private void injectToMapCode(ConfigParser.Spec config, MethodSpec.Builder builder) {
         Map<String, String> mapPairs = config
             .members()
             .stream()
             .filter(ConfigParser.Member::isMapParameter)
-            .collect(Collectors.toMap(member -> member.lookupKey(), ConfigParser.Member::methodName));
+            .collect(Collectors.toMap(ConfigParser.Member::lookupKey, ConfigParser.Member::methodName));
 
         switch (mapPairs.size()) {
             case 0:
-                return Collections.singletonList(CodeBlock.of("return $T.emptyMap()", Collections.class));
+                builder.addStatement("return $T.emptyMap()", Collections.class);
             case 1:
                 Map.Entry<String, String> singleEntry = mapPairs.entrySet().iterator().next();
                 String parameter = singleEntry.getKey();
                 String getter = singleEntry.getValue();
-                return Collections.singletonList(CodeBlock.of(
+                builder.addStatement(
                     "return $T.singletonMap($S, $N())",
                     Collections.class,
                     parameter,
                     getter
-                ));
+                );
             default:
-                List<CodeBlock> blocks = new LinkedList<>();
-                blocks.add(CodeBlock.of("$T<$T, Object> map = new $T<>()", Map.class, String.class, HashMap.class));
-                mapPairs.entrySet()
-                    .stream()
-                    .map(entry -> CodeBlock.of("$S, $N()", entry.getKey(), entry.getValue()))
-                    .map(pair -> CodeBlock.of("map.put($L)", pair))
-                    .forEach(blocks::add);
-                blocks.add(CodeBlock.of("return map"));
-                return blocks;
+                builder.addStatement("$T<$T, Object> map = new $T<>()", Map.class, String.class, LinkedHashMap.class);
+                mapPairs.forEach((key, value) -> builder.addStatement("map.put($S, $N())", key, value));
+                builder.addStatement("return map");
         }
     }
 
@@ -636,7 +629,7 @@ final class GenerateConfiguration {
             if (member.collectsKeys()) {
                 builder.addStatement(collectKeysCode(config));
             } else if (member.toMap()) {
-                toMapCode(config).forEach(builder::addStatement);
+                injectToMapCode(config, builder);
             }
             else {
                 builder.addStatement("return this.$N", names.get(member));
