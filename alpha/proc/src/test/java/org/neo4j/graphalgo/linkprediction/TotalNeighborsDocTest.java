@@ -53,7 +53,7 @@ class TotalNeighborsDocTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
-        db.execute(DB_CYPHER);
+        runQuery(DB_CYPHER);
         registerFunctions(LinkPredictionFunc.class);
     }
 
@@ -76,7 +76,7 @@ class TotalNeighborsDocTest extends BaseProcTest {
                                 "+-------+" + NL +
                                 "1 row" + NL;
 
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
 
     @Test
@@ -93,7 +93,7 @@ class TotalNeighborsDocTest extends BaseProcTest {
                                 "+-------+" + NL +
                                 "1 row" + NL;
 
-        assertEquals(expectedString, db.execute(query).resultAsString());
+        runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
 }
 
