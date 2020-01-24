@@ -378,11 +378,7 @@ class LouvainTest extends AlgoTestBase {
         runQuery(cypher);
 
         String nodeStatement = "MATCH (u:Node) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2";
-        String relStatement = "MATCH (u1:Node)-[rel]-(u2:Node) RETURN id(u1) AS source, id(u2) AS target";
-        relStatement += loadRelWeight
-            ? ", rel.weight as weight"
-            : "";
-        String relQuery = relStatement;
+        String relStatement = "MATCH (u1:Node)-[rel]-(u2:Node) RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight";
 
         PropertyMapping[] nodePropertyMappings = Arrays.stream(nodeProperties)
             .map(p -> PropertyMapping.of(p, -1))
@@ -394,7 +390,7 @@ class LouvainTest extends AlgoTestBase {
             return QueryRunner.runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(nodeStatement)
-                .relationshipQuery(relQuery)
+                .relationshipQuery(relStatement)
                 .addNodeProperties(nodePropertyMappings)
                 .addRelationshipProperty(relWeightProperty)
                 .build()
