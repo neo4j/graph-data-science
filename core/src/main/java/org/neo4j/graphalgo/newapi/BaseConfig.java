@@ -51,8 +51,7 @@ public interface BaseConfig {
 
     @Configuration.ToMap
     @Value.Auxiliary
-    @Value.Default
-    @Value.Parameter(false)
+    @Value.Derived
     default Map<String, Object> toMap() {
         return Collections.emptyMap();
     };
