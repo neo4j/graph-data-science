@@ -614,7 +614,7 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public HugeGraph withoutProperties() {
+    public HugeGraph withoutRelationshipProperties() {
         if (!hasRelationshipProperty()) {
             return this;
         } else {

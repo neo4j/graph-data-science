@@ -218,7 +218,7 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public Graph withoutProperties() {
-        return UnionGraph.of(graphs.stream().map(Graph::withoutProperties).collect(Collectors.toList()));
+    public Graph withoutRelationshipProperties() {
+        return UnionGraph.of(graphs.stream().map(Graph::withoutRelationshipProperties).collect(Collectors.toList()));
     }
 }

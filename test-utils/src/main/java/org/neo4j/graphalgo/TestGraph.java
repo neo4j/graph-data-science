@@ -236,7 +236,7 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public Graph withoutProperties() {
+    public Graph withoutRelationshipProperties() {
         return this;
     }
 
