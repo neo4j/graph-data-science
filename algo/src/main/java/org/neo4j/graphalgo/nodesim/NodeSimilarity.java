@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -138,10 +137,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private void prepare() {
-        if (config.direction() == Direction.BOTH) {
-            throw new IllegalArgumentException(
-                "Direction BOTH is not supported by the NodeSimilarity algorithm.");
-        }
+        // TODO: check if this is relevant when having a UnionGraph(NATURAL, REVERSE)
+//        if (config.direction() == Direction.BOTH) {
+//            throw new IllegalArgumentException(
+//                "Direction BOTH is not supported by the NodeSimilarity algorithm.");
+//        }
 
         progressLogger.log("Start :: NodeSimilarity#prepare");
 
@@ -150,7 +150,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         DegreeComputer degreeComputer = new DegreeComputer();
         VectorComputer vectorComputer = new VectorComputer();
         vectors.setAll(node -> {
-            graph.forEachRelationship(node, config.direction(), degreeComputer);
+            graph.forEachRelationship(node, degreeComputer);
             int degree = degreeComputer.degree;
             degreeComputer.reset();
             vectorComputer.reset(degree);
@@ -158,7 +158,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                 nodesToCompare++;
                 nodeFilter.set(node);
 
-                graph.forEachRelationship(node, config.direction(), vectorComputer);
+                graph.forEachRelationship(node, vectorComputer);
                 return vectorComputer.targetIds.buffer;
             }
             return null;
