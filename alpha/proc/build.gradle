@@ -1,7 +1,5 @@
 description = 'Neo4j Graph Data Science :: Alpha Procedures'
 
-apply plugin: 'com.github.johnrengelman.shadow'
-
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')

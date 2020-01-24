@@ -1,7 +1,4 @@
 description = 'Neo4j Graph Data Science :: Procedures'
-
-apply plugin: 'com.github.johnrengelman.shadow'
-
 dependencies {
     annotationProcessor project(':annotations')
 
@@ -24,12 +21,4 @@ dependencies {
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from(javadoc.destinationDir)
-}
-
-publishing {
-    publications {
-        algo(MavenPublication) {
-            project.shadow.component(it)
-        }
-    }
 }
