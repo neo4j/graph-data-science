@@ -21,47 +21,31 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
-public class K1ColoringFactory extends AlgorithmFactory<K1Coloring, ProcedureConfiguration> {
-
-    public static final int DEFAULT_ITERATIONS = 10;
-    public static final Direction DEFAULT_DIRECTION = Direction.OUTGOING;
+public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFactory<K1Coloring, T> {
 
     @Override
-    public K1Coloring build(
-        final Graph graph,
-        final ProcedureConfiguration configuration,
-        final AllocationTracker tracker,
-        final Log log
-    ) {
-        int concurrency = configuration.concurrency();
-        int batchSize = configuration.getBatchSize();
-
-        int maxIterations = configuration.getIterations(DEFAULT_ITERATIONS);
-        Direction direction = configuration.getDirection(DEFAULT_DIRECTION);
-
+    public K1Coloring build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
         return new K1Coloring(
             graph,
-            direction,
-            maxIterations,
-            batchSize,
-            concurrency,
+            configuration.direction(),
+            configuration.maxIterations(),
+            configuration.batchSize(),
+            configuration.concurrency(),
             Pools.DEFAULT,
             tracker
         );
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(ProcedureConfiguration config) {
+    public MemoryEstimation memoryEstimation(T config) {
         return MemoryEstimations.builder(K1Coloring.class)
             .perNode("colors", HugeLongArray::memoryEstimation)
             .perNode("nodesToColor", MemoryUsage::sizeOfBitset)
