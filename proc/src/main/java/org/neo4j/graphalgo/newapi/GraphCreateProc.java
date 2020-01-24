@@ -48,6 +48,8 @@ import java.util.stream.Stream;
 
 public class GraphCreateProc extends CatalogProc {
 
+    private static final String NO_GRAPH_NAME = "";
+
     @Procedure(name = "gds.graph.create", mode = Mode.READ)
     @Description("Creates a named graph in the catalog for use by algorithms.")
     public Stream<GraphCreateResult> create(
@@ -81,26 +83,19 @@ public class GraphCreateProc extends CatalogProc {
     @Procedure(name = "gds.graph.create.estimate", mode = Mode.READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> createEstimate(
-        @Name(value = "graphName") String graphName,
         @Name(value = "nodeProjection") @Nullable Object nodeProjection,
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        validateGraphName(getUsername(), graphName);
-
-        // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateConfig config = GraphCreateFromStoreConfig.of(
             getUsername(),
-            graphName,
+            NO_GRAPH_NAME,
             nodeProjection,
             relationshipProjection,
             cypherConfig
         );
         validateConfig(cypherConfig, config);
-
-        // computation
-        // result
         return estimateGraph(config, HugeGraphFactory.class);
     }
 
@@ -137,26 +132,20 @@ public class GraphCreateProc extends CatalogProc {
     @Procedure(name = "gds.graph.create.cypher.estimate", mode = Mode.READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> createCypherEstimate(
-        @Name(value = "graphName") String graphName,
         @Name(value = "nodeQuery") String nodeQuery,
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        validateGraphName(getUsername(), graphName);
-
-        // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateConfig config = GraphCreateFromCypherConfig.of(
             getUsername(),
-            graphName,
+            NO_GRAPH_NAME,
             nodeQuery,
             relationshipQuery,
             cypherConfig
         );
         validateConfig(cypherConfig, config);
 
-        // computation
-        // result
         return estimateGraph(config, CypherGraphFactory.class);
     }
 

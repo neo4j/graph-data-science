@@ -740,13 +740,12 @@ class GraphCreateProcTest extends BaseProcTest {
         registerProcedures(localDb, GraphCreateProc.class);
         runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
 
-        String name = "g";
         Map<String, Object> relProjection = map(
             "B",
             map("type", "REL")
         );
-        String query = "CALL gds.graph.create.estimate($name, '*', $relProjection)";
-        runQueryWithRowConsumer(localDb, query, map("name", name, "relProjection", relProjection),
+        String query = "CALL gds.graph.create.estimate('*', $relProjection)";
+        runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
             row -> {
                 assertEquals(303520, row.getNumber("bytesMin").longValue());
                 assertEquals(303520, row.getNumber("bytesMax").longValue());
@@ -760,14 +759,13 @@ class GraphCreateProcTest extends BaseProcTest {
         registerProcedures(localDb, GraphCreateProc.class);
         runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
 
-        String name = "g";
         Map<String, Object> relProjection = map(
             "B",
             map("type", "REL", "properties", "weight")
         );
-        String query = "CALL gds.graph.create.estimate($name, '*', $relProjection)";
+        String query = "CALL gds.graph.create.estimate('*', $relProjection)";
 
-        runQueryWithRowConsumer(localDb, query, map("name", name, "relProjection", relProjection),
+        runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
             row -> {
                 assertEquals(573952, row.getNumber("bytesMin").longValue());
                 assertEquals(573952, row.getNumber("bytesMax").longValue());
@@ -781,13 +779,12 @@ class GraphCreateProcTest extends BaseProcTest {
         registerProcedures(localDb, GraphCreateProc.class);
         runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
 
-        String name = "g";
         String nodeQuery = "MATCH (n) RETURN id(n) AS id";
         String relationshipQuery = "MATCH (n)-[:REL]->(m) RETURN id(n) AS source, id(m) AS target";
-        String query = "CALL gds.graph.create.cypher.estimate($name, $nodeQuery, $relationshipQuery)";
+        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery)";
         runQueryWithRowConsumer(localDb,
             query,
-            map("name", name, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
+            map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
             row -> {
                 assertEquals(303520, row.getNumber("bytesMin").longValue());
                 assertEquals(303520, row.getNumber("bytesMax").longValue());
@@ -801,13 +798,12 @@ class GraphCreateProcTest extends BaseProcTest {
         registerProcedures(localDb, GraphCreateProc.class);
         runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
 
-        String name = "g";
         String nodeQuery = "MATCH (n) RETURN id(n) AS id";
         String relationshipQuery = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
-        String query = "CALL gds.graph.create.cypher.estimate($name, $nodeQuery, $relationshipQuery, {relationshipProperties: 'weight'})";
+        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery, {relationshipProperties: 'weight'})";
         runQueryWithRowConsumer(localDb,
             query,
-            map("name", name, "nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
+            map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
             row -> {
                 assertEquals(573952, row.getNumber("bytesMin").longValue());
                 assertEquals(573952, row.getNumber("bytesMax").longValue());
