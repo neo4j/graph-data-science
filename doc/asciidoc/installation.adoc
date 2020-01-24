@@ -1,0 +1,84 @@
+[[installation]]
+= Installation
+
+[abstract]
+--
+This chapter provides instructions for installation and basic usage of the Neo4j Graph Data Science library.
+--
+
+The Neo4j Graph Data Science (GDS) library is delivered as a plugin to the Neo4j Graph Database.
+The plugin needs to be installed into the database and whitelisted in the Neo4j configuration.
+There are two main ways of achieving this, which we will detail in this chapter.
+
+
+== Neo4j Desktop
+
+The most convenient way of installing the GDS library is through the https://neo4j.com/docs/operations-manual/current/installation/neo4j-desktop/index.html[Neo4j Desktop^] plugin called Neo4j Graph Data Science.
+The plugin can be found in the 'Plugins' tab of a database.
+
+image::neo4j-desktop.jpg[width=500]
+
+The installer will download a the GDS library and install it in the 'plugins' directory of the database.
+It will also add the following entry to the settings file:
+
+----
+dbms.security.procedures.unrestricted=gds.*
+----
+
+This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
+
+
+== Neo4j Server
+
+If we are using a standalone Neo4j Server, the library will need to be installed and configured manually.
+
+1. Download `neo4j-graph-data-science-[version]-standalone.jar` from the https://neo4j.com/download-center/[Neo4j Download Center] and copy it into the `$NEO4J_HOME/plugins` directory.
+
+
+2. Add the following to your `$NEO4J_HOME/conf/neo4j.conf` file:
++
+----
+dbms.security.procedures.unrestricted=gds.*
+----
+This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
++
+
+3. Restart Neo4j
+
+
+=== Verifying installation
+
+To verify your installation, the library version can be printed by calling the `gds.version()` function:
+
+[source, cypher]
+----
+RETURN gds.version()
+----
+
+To list all installed algorithms, run the `gds.list()` procedure:
+
+[source, cypher]
+----
+CALL gds.list()
+----
+
+
+== Usage
+
+These algorithms are exposed as Neo4j procedures.
+They can be called directly from Cypher in your Neo4j Browser, from cypher-shell, or from your client code.
+
+For most algorithms there are two procedures:
+
+* `algo.<name>` - this procedure writes results back to the graph as node-properties, and reports statistics.
+* `algo.<name>.stream` - this procedure returns a stream of data.
+For example, node-ids and computed values.
++
+For large graphs, the streaming procedure might return millions, or even billions of results.
+In this case it may be more convenient to store the results of the algorithm, and then use them with later queries.
+
+The execution of any algorithm can be canceled by terminating the cypher transaction that is executing the procedure call.
+For more on how transactions are used, see <<transaction-handling, Transaction Handling>>.
+
+include::system-requirements.adoc[leveloffset=2]
+

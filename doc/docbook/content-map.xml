@@ -8,6 +8,10 @@
             <?dbhtml filename="introduction/index.html"?>
         </d:tocentry>
 
+        <d:tocentry linkend="installation">
+            <?dbhtml filename="installation/index.html"?>
+        </d:tocentry>
+
         <d:tocentry linkend="projected-graph-model">
             <?dbhtml filename="projected-graph-model/index.html"?>
             <d:tocentry linkend="label-relationship-type-projection">

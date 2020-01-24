@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This chapter provides an introduction to the available graph algorithms, and instructions for installation and use.
+This chapter provides an introduction to graph algorithms.
 --
 
 This library provides efficiently implemented, parallel versions of common graph algorithms for Neo4j, exposed as Cypher procedures.
@@ -24,69 +24,3 @@ Fortunately, optimized algorithms exist that utilize certain structures of the g
 Whenever possible, we've applied these optimizations.
 
 The Neo4j Graph Data Science library contains a large number of algorithms, which are detailed in the <<algorithms, Algorithms>> chapter.
-
-
-== Installation
-
-
-=== Neo4j Desktop
-
-If we are using the https://neo4j.com/docs/operations-manual/current/installation/neo4j-desktop/index.html[Neo4j Desktop^], the library can be installed from the 'Plugins' tab of a database.
-
-image::neo4j-desktop.jpg[width=500]
-
-The installer will download a copy of the graph algorithms library and place it in the 'plugins' directory of the database.
-It will also add the following entry to the settings file:
-
-----
-dbms.security.procedures.unrestricted=algo.*
-----
-
-
-=== Neo4j Server
-
-If we are using a standalone Neo4j Server, the library will need to be installed and configured manually.
-
-. Download `neo4j-graph-algorithms-[version]-standalone.jar` from the https://neo4j.com/download-center/[Neo4j Download Center] and copy it into the `$NEO4J_HOME/plugins` directory.
-  We can work out which release to download by referring to the https://github.com/neo4j-contrib/neo4j-graph-algorithms/blob/master/versions.json[versions file^].
-
-
-. Add the following to your `$NEO4J_HOME/conf/neo4j.conf` file:
-+
-----
-dbms.security.procedures.unrestricted=algo.*
-----
-We need to give the library unrestricted access because the algorithms use the lower level Kernel API to read from, and to write to Neo4j.
-
-+
-. Restart Neo4j
-
-
-=== Verifying installation
-
-Once we've installed the library, to see a list of all the algorithms, run the following query:
-
-----
-CALL algo.list()
-----
-
-
-== Usage
-
-These algorithms are exposed as Neo4j procedures.
-They can be called directly from Cypher in your Neo4j Browser, from cypher-shell, or from your client code.
-
-For most algorithms there are two procedures:
-
-* `algo.<name>` - this procedure writes results back to the graph as node-properties, and reports statistics.
-* `algo.<name>.stream` - this procedure returns a stream of data.
-For example, node-ids and computed values.
-+
-For large graphs, the streaming procedure might return millions, or even billions of results.
-In this case it may be more convenient to store the results of the algorithm, and then use them with later queries.
-
-The execution of any algorithm can be canceled by terminating the cypher transaction that is executing the procedure call.
-For more on how transactions are used, see <<transaction-handling, Transaction Handling>>.
-
-include::system-requirements.adoc[leveloffset=2]
-

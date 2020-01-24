@@ -26,10 +26,11 @@ This is the manual for Neo4j Graph Data Science Library version {docs-version}.
 
 The manual covers the following areas:
 
-* <<introduction>> -- An introduction to Neo4j Graph Data Science Library.
+* <<introduction>> -- An introduction to Neo4j Graph Data Science library.
+* <<installation>> -- Instructions for how to install and use the Neo4j Graph Data Science library.
 * <<projected-graph-model>> -- A detailed guide to the projected graph model.
 * <<yelp-example>> -- An illustration of how to use graph algorithms on a social network of friends.
-* <<procedures>> -- A list of Neo4j Graph Data Science Library procedures.
+* <<procedures>> -- A list of Neo4j Graph Data Science library procedures.
 * <<algorithms-centrality>> -- A detailed guide to each of the centrality algorithms, including use-cases and examples.
 * <<algorithms-community>> -- A detailed guide to each of the community detection algorithms, including use-cases and examples.
 * <<algorithms-graph-similarity>> -- A detailed guide to each of the similarity detection algorithms, including use-cases and examples.
@@ -50,6 +51,8 @@ Download it for free at https://neo4j.com/graph-algorithms-book/[neo4j.com/graph
 ====
 
 include::introduction.adoc[leveloffset=+1]
+
+include::installation.adoc[leveloffset=+1]
 
 include::projected-graph-model.adoc[leveloffset=+1]
 
