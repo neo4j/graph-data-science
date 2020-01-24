@@ -42,6 +42,12 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
         return new LouvainFactory<>();
     }
 
+
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
+
     protected Stream<WriteResult> write(
         ComputationResult<Louvain, Louvain, CONFIG> computeResult
     ) {

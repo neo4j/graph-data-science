@@ -56,10 +56,4 @@ public interface LouvainBaseConfig extends
     default boolean includeIntermediateCommunities() {
         return false;
     }
-
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return Direction.OUTGOING;
-    }
 }
