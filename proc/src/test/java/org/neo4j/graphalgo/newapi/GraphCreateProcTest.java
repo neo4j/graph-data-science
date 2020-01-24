@@ -55,8 +55,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.PROJECTION_KEY;
@@ -802,7 +802,46 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldDefaultProperty() {
+    void shouldDefaultRelationshipProjectionProperty() {
+        String graphCreateQuery =
+            "CALL gds.graph.create(" +
+            "   'testGraph', " +
+            "   '*'," +
+            "   {" +
+            "       REL: {" +
+            "           projection: 'NATURAL'," +
+            "           properties: {" +
+            "               weight: {" +
+            "                   aggregation: 'SINGLE'" +
+            "               }" +
+            "           }" +
+            "       }" +
+            "   }" +
+            ");";
+
+        assertCypherResult(graphCreateQuery, singletonList(map(
+            "graphName", "testGraph",
+            NODE_PROJECTION_KEY, isA(Map.class),
+            RELATIONSHIP_PROJECTION_KEY, map(
+                "REL", map(
+                    "type", "REL",
+                    PROJECTION_KEY, "NATURAL",
+                    AGGREGATION_KEY, "DEFAULT",
+                    PROPERTIES_KEY,  map(
+                    "weight", map(
+                        "property", "weight",
+                            AGGREGATION_KEY, "SINGLE",
+                            "defaultValue", Double.NaN)
+                ))
+            ),
+            "nodeCount", nodeCount,
+            "relationshipCount", relCount,
+            "createMillis", instanceOf(Long.class)
+        )));
+    }
+
+    @Test
+    void shouldDefaultNodeProjectionProperty() {
         String graphCreateQuery =
             "CALL gds.graph.create(" +
             "   'testGraph', " +
@@ -815,16 +854,7 @@ class GraphCreateProcTest extends BaseProcTest {
             "           }" +
             "       }" +
             "   }, " +
-            "   {" +
-            "       REL: {" +
-            "           projection: 'NATURAL'," +
-            "           properties: {" +
-            "               weight: {" +
-            "                   aggregation: 'SINGLE'" +
-            "               }" +
-            "           }" +
-            "       }" +
-            "   }" +
+            "   '*'" +
             ");";
 
         assertCypherResult(graphCreateQuery, singletonList(map(
@@ -841,18 +871,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
                 )
             ),
-            RELATIONSHIP_PROJECTION_KEY, map(
-                "REL", map(
-                    "type", "REL",
-                    PROJECTION_KEY, "NATURAL",
-                    AGGREGATION_KEY, "DEFAULT",
-                    PROPERTIES_KEY,  map(
-                    "weight", map(
-                        "property", "weight",
-                            AGGREGATION_KEY, "SINGLE",
-                            "defaultValue", Double.NaN)
-                ))
-            ),
+            RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
             "nodeCount", nodeCount,
             "relationshipCount", relCount,
             "createMillis", instanceOf(Long.class)
