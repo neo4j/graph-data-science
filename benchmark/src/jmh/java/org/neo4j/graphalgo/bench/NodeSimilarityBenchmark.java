@@ -92,7 +92,6 @@ public class NodeSimilarityBenchmark {
             .topN(topN)
             .topK(topK)
             .concurrency(concurrency)
-            .direction(Direction.OUTGOING)
             .build();
         db = TestDatabaseCreator.createTestDatabase();
 
