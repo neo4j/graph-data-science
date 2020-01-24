@@ -64,6 +64,7 @@ class ConfigurationProcessorTest {
         "Conversions",
         "ConvertingParameters",
         "CollectingKeys",
+        "ToMap",
         "Validation"
     })
     void positiveTest(String className) {
