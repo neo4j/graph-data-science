@@ -27,6 +27,7 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 public interface BaseConfig {
     @Configuration.Parameter
@@ -46,5 +47,13 @@ public interface BaseConfig {
     @Value.Parameter(false)
     default Collection<String> configKeys() {
         return Collections.emptyList();
+    };
+
+    @Configuration.ToMap
+    @Value.Auxiliary
+    @Value.Default
+    @Value.Parameter(false)
+    default Map<String, Object> toMap() {
+        return Collections.emptyMap();
     };
 }
