@@ -33,6 +33,25 @@ public interface RelationshipProjectionMapping {
         .exists(true)
         .build();
 
+//    public static RelationshipProjectionMapping all() {
+//        return all(Projection.NATURAL);
+//    }
+//
+//    public static RelationshipProjectionMapping all(Projection projection) {
+//        return new RelationshipProjectionMapping("", "", projection) {
+//
+//            @Override
+//            public int typeId() {
+//                return StatementConstants.ANY_RELATIONSHIP_TYPE;
+//            }
+//
+//            @Override
+//            public boolean doesExist() {
+//                return true;
+//            }
+//        };
+//    }
+
     String elementIdentifier();
 
     String typeName();
