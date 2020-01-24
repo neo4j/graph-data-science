@@ -27,11 +27,16 @@ import java.util.Map;
 @Configuration("ToMapConfig")
 public interface ToMap {
 
+    public static String add42(double d) {
+        return String.format("%d42", d);
+    }
+
     @Configuration.Parameter
     int foo();
 
     long bar();
 
+    @Configuration.ToMapValue("positive.ToMap.add42")
     double baz();
 
     @Configuration.ToMap

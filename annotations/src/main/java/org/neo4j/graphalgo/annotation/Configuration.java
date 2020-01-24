@@ -52,6 +52,13 @@ public @interface Configuration {
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
+    @interface ToMapValue {
+        String value();
+    }
+
+    @Documented
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.CLASS)
     @interface Ignore {
     }
 
