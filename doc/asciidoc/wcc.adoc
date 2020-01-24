@@ -52,11 +52,6 @@ CALL gds.wcc.write(
 )
 YIELD
   // general write return columns
-  relationshipWeightProperty: string,
-  defaultValue: float,
-  seedProperty: string,
-  threshold: float,
-  consecutiveIds: boolean,
   componentCount: integer,
   componentDistribution: map
 ----
@@ -102,13 +97,9 @@ YIELD
 | postProcessingMillis          | int     | Milliseconds for computing component count and distribution statistics.
 | nodePropertiesWritten         | int     | The number of node properties written.
 | relationshipPropertiesWritten | int     | The number of relationship properties written.
-| writeProperty                 | string  | The value of `writeProperty` used to run the algorithm.
-| relationshipWeightProperty    | string  | The value of `relationshipWeightProperty` used to run the algorithm.
-| seedProperty                  | string  | The value of `seedProperty` used to run the algorithm.
-| threshold                     | float   | The value of `threshold` used to run the algorithm.
-| consecutiveIds                | boolean | The value of `consecutiveIds` used to run the algorithm.
 | componentCount                | int     | The number of computed components.
 | componentDistribution         | map     | Statistical information about the component sizes.
+| configuration                 | map     | The configuration used for running the algorithm.
 |===
 
 [[algorithms-wcc-syntax-stream]]
@@ -225,14 +216,14 @@ CALL gds.wcc.write({
   relationshipProjection: ["LINK"],
   writeProperty: "componentId"
 })
-YIELD nodePropertiesWritten, componentCount, writeProperty;
+YIELD nodePropertiesWritten, componentCount;
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m"]
+[opts="header",cols="1m,1m"]
 |===
-| nodePropertiesWritten | componentCount    | writeProperty
-| 6                     | 2                 | "componentId"
+| nodePropertiesWritten | componentCount
+| 6                     | 2
 |===
 
 As we can see from the results, the nodes connected to one another are calculated by the algorithm as belonging to the same connected component.
@@ -286,14 +277,14 @@ CALL gds.wcc.write({
   relationshipWeightProperty: "weight",
   threshold: 1.0
 })
-YIELD nodePropertiesWritten, componentCount, writeProperty;
+YIELD nodePropertiesWritten, componentCount;
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m"]
+[opts="header",cols="1m,1m"]
 |===
-| nodePropertiesWritten | componentCount    | writeProperty
-| 6                     | 3                 | "componentId"
+| nodePropertiesWritten | componentCount
+| 6                     | 3
 |===
 
 As we can see from the results, the node named 'Bridget' is now in its own component, due to its relationship weight being less than the configured threshold and thus ignored.
@@ -333,14 +324,14 @@ CALL gds.wcc.write({
   relationshipWeightProperty: "weight",
   threshold: 1.0
 })
-YIELD nodePropertiesWritten, componentCount, writeProperty;
+YIELD nodePropertiesWritten, componentCount;
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m"]
+[opts="header",cols="1m,1m"]
 |===
-| nodePropertiesWritten | componentCount    | writeProperty
-| 6                     | 3                 | "componentId"
+| nodePropertiesWritten | componentCount
+| 6                     | 3
 |===
 
 .The following will create a new node in the Neo4j graph, with no component ID:
@@ -396,14 +387,14 @@ CALL gds.wcc.write({
   relationshipWeightProperty: "weight",
   threshold: 1.0
 })
-YIELD nodePropertiesWritten, componentCount, writeProperty;
+YIELD nodePropertiesWritten, componentCount;
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m"]
+[opts="header",cols="1m,1m"]
 |===
-| nodePropertiesWritten | componentCount    | writeProperty
-| 7                     | 3                 | "componentId"
+| nodePropertiesWritten | componentCount
+| 7                     | 3
 |===
 
 [NOTE]

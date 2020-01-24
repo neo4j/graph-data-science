@@ -87,19 +87,7 @@ YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 | levels                            | int           | The number of supersteps the algorithm actually ran.
 | modularity                        | float         | The final modularity score.
 | modularities                      | list of int   | The final modularity scores for each level.
-| includeIntermediateCommunitie     | boolean       | Indicates whether all intermediate communities where written or only the final one.
-| p1                                | int           | The 1 percentile of community size.
-| p5                                | int           | The 5 percentile of community size.
-| p10                               | int           | The 10 percentile of community size.
-| p25                               | int           | The 25 percentile of community size.
-| p50                               | int           | The 50 percentile of community size.
-| p75                               | int           | The 75 percentile of community size.
-| p90                               | int           | The 90 percentile of community size.
-| p95                               | int           | The 95 percentile of community size.
-| p99                               | int           | The 99 percentile of community size.
-| p100                              | int           | The 100 percentile of community size.
-| write                             | boolean       | Specifies if the result was written back as a node property.
-| writeProperty                     | string        | The property name written back to.
+| configuration                     | map           | The configuration used for running the algorithm.
 |===
 
 

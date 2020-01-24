@@ -100,13 +100,12 @@ YIELD nodesCompared, relationships, writeRelationshipType, writeProperty
 | Name                   | Type   | Description
 | nodesCompared          | int    | The number of nodes compared.
 | relationships          | int    | The number of relationships created.
-| writeRelationshipType  | string | The relationship type used to represent a similarity score.
-| writeProperty          | string | The relationship property that stores the similarity score.
 | loadMillis             | int    | Milliseconds for loading data.
 | computeMillis          | int    | Milliseconds for running the algorithm.
 | writeMillis            | int    | Milliseconds for writing result data back to Neo4j.
 | postProcessingMillis   | int    | Milliseconds for computing percentiles.
 | similarityDistribution | map    | Min, max, mean, stdDev and percentile distribution of the computed similarity results.
+| configuration          | map    | The configuration used for running the algorithm.
 |===
 
 [[algorithms-node-similarity-syntax-stream]]
@@ -244,14 +243,14 @@ CALL gds.nodeSimilarity.write({
   writeRelationshipType: 'SIMILAR',
   writeProperty: 'score'
 })
-YIELD nodesCompared, relationships, writeProperty, writeRelationshipType;
+YIELD nodesCompared, relationships;
 ----
 
 .Results
 [opts="header"]
 |===
-| nodesCompared | relationships | writeProperty | writeRelationshipType
-| 4             | 10            | "score"       | "SIMILAR"
+| nodesCompared | relationships
+| 4             | 10
 |===
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.

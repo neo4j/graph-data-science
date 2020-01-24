@@ -110,11 +110,8 @@ YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMilli
 | didConverge | boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
 
 | communityDistribution    | map  | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
+| configuration | map     | The configuration used for running the algorithm.
 
-| maxIterations | int | The given maximum number of iterations to run.
-| writeProperty | string | The property name written back to.
-| nodeWeightProperty | string | The node property name that contains weight.
-| relationshipWeightProperty | string | The relationship property name that contains weight.
 |===
 
 .The following will run the algorithm and stream back results:
@@ -184,11 +181,7 @@ The configuration is the same as for the `write` mode.
 | ranIterations                 | int       | The number of iterations that were executed.
 | didConverge                   | boolean   | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
 | communityDistribution         | map       | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
-| maxIterations                 | int       | The given maximum number of iterations to run.
-// TODO: stats mode should not have a writeProperty in the result
-| writeProperty                 | string    | The property name written back to.
-| nodeWeightProperty            | string    | The node property name that contains weight.
-| relationshipWeightProperty    | string    | The relationship property name that contains weight.
+| configuration                 | map       | The configuration used for running the algorithm.
 |===
 
 .The following will estimate the memory requirements for running the algorithm:

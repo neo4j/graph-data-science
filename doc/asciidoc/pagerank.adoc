@@ -64,7 +64,7 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 [source, cypher]
 ----
 CALL gds.pageRank.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
-YIELD nodes, maxIterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
+YIELD nodes, createMillis, computeMillis, writeMillis, configuration
 ----
 
 .Parameters
@@ -94,12 +94,10 @@ YIELD nodes, maxIterations, loadMillis, computeMillis, writeMillis, dampingFacto
 |===
 | Name          | Type    | Description
 | ranIterations | int     | The number of iterations run.
-| dampingFactor | float   | The damping factor used.
-| maxIterations | int     | The given maximum number of iterations.
-| writeProperty | string  | The property name written back to.
 | createMillis  | int     | Milliseconds for creating the graph.
 | computeMillis | int     | Milliseconds for running the algorithm.
 | writeMillis   | int     | Milliseconds for writing result data back.
+| configuration | map     | The configuration used for running the algorithm.
 |===
 
 .The following will run the algorithm and stream results:
@@ -262,14 +260,14 @@ CALL gds.pageRank.write({
   dampingFactor: 0.85,
   writeProperty: 'pagerank'
 })
-YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty
+YIELD nodePropertiesWritten AS writtenProperties, ranIterations
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m"]
+[opts="header",cols="1m,1m"]
 |===
-| writtenProperties | ranIterations | dampingFactor | writeProperty
-| 8                 | 20            | 0.85          | "pagerank"
+| writtenProperties | ranIterations
+| 8                 | 20
 |===
 
 [[algorithms-pagerank-examples-weighted]]
@@ -325,14 +323,14 @@ CALL gds.pageRank.write({
   writeProperty: 'pagerank',
   relationshipWeightProperty: 'weight'
 })
-YIELD nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty
+YIELD nodePropertiesWritten AS writtenProperties, ranIterations
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m"]
+[opts="header",cols="1m,1m"]
 |===
-| writtenProperties | ranIterations | dampingFactor | writeProperty
-| 8                 | 20            | 0.85          | "pagerank"
+| writtenProperties | ranIterations
+| 8                 | 20
 |===
 
 
@@ -388,15 +386,15 @@ CALL gds.pageRank.write({
   writeProperty: 'pagerank',
   sourceNodes: [siteA]
 })
-YIELD nodePropertiesWritten, ranIterations, dampingFactor, writeProperty
-RETURN nodePropertiesWritten AS writtenProperties, ranIterations, dampingFactor, writeProperty
+YIELD nodePropertiesWritten, ranIterations
+RETURN nodePropertiesWritten AS writtenProperties, ranIterations
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m"]
+[opts="header",cols="1m,1m"]
 |===
-| writtenProperties | ranIterations | dampingFactor | writeProperty
-| 8                 | 20            | 0.85          | "pagerank"
+| writtenProperties | ranIterations
+| 8                 | 20
 |===
 
 [[algorithms-pagerank-examples-memory-estimation]]
@@ -433,14 +431,14 @@ CALL gds.pageRank.stats({
   dampingFactor: 0.85,
   writeProperty: 'pagerank'
 })
-YIELD ranIterations, dampingFactor
+YIELD ranIterations
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header",cols="1"]
 |===
-| ranIterations | dampingFactor
-| 20            | 0.85
+| ranIterations
+| 20
 |===
 
 [[algorithms-pagerank-examples-projection]]
