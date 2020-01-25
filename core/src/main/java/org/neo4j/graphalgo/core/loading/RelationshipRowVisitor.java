@@ -96,7 +96,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         rows++;
 
         RelationshipProjectionMapping relationshipType = isAnyRelTypeQuery
-            ? RelationshipProjectionMapping.all()
+            ? RelationshipProjectionMapping.ALL
             : RelationshipProjectionMapping.of(row.getString(TYPE_COLUMN), -1);
 
         String relationshipTypeName = relationshipType.typeName();
