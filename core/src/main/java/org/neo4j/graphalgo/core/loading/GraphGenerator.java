@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.huge.AdjacencyList;
+import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.RawValues;
@@ -340,52 +342,60 @@ public final class GraphGenerator {
             flushBuffer();
             Relationships relationships = buildRelationships();
 
+            AdjacencyList inAdjacencyList = null;
+            AdjacencyList outAdjacencyList = null;
+            AdjacencyOffsets inAdjacencyOffsets = null;
+            AdjacencyOffsets outAdjacencyOffsets = null;
+            Optional<AdjacencyList> inProperties = Optional.empty();
+            Optional<AdjacencyList> outProperties = Optional.empty();
+            Optional<AdjacencyOffsets> inPropertyOffsets = Optional.empty();
+            Optional<AdjacencyOffsets> outPropertyOffsets = Optional.empty();
+
             if (legacyMode) {
-                return HugeGraph.create(
-                    tracker,
-                    idMap,
-                    Collections.emptyMap(),
-                    relationships.relationshipCount(),
-                    relationships.inAdjacency(),
-                    relationships.outAdjacency(),
-                    relationships.inOffsets(),
-                    relationships.outOffsets(),
-                    Optional.empty(),
-                    loadRelationshipProperty && loadIncoming ? Optional.of(relationships.inRelProperties()) : Optional.empty(),
-                    loadRelationshipProperty && loadOutgoing ? Optional.of(relationships.outRelProperties()) : Optional.empty(),
-                    loadRelationshipProperty && loadIncoming ? Optional.of(relationships.inRelPropertyOffsets()) : Optional.empty(),
-                    loadRelationshipProperty && loadOutgoing ? Optional.of(relationships.outRelPropertyOffsets()) : Optional.empty(),
-                    undirected
-                );
+                inAdjacencyList = relationships.inAdjacency();
+                outAdjacencyList = relationships.outAdjacency();
+                inAdjacencyOffsets = relationships.inOffsets();
+                outAdjacencyOffsets = relationships.outOffsets();
+
+                if (loadRelationshipProperty) {
+                    inProperties = loadIncoming ? Optional.of(relationships.inRelProperties()) : Optional.empty();
+                    outProperties = loadOutgoing ? Optional.of(relationships.outRelProperties()) : Optional.empty();
+                    inPropertyOffsets = loadIncoming ? Optional.of(relationships.inRelPropertyOffsets()) : Optional.empty();
+                    outPropertyOffsets = loadOutgoing ? Optional.of(relationships.outRelPropertyOffsets()) : Optional.empty();
+                }
             } else {
                 // In non-legacy mode we load either outgoing or incoming or undirected.
                 // The corresponding adjacency list is always stored in the outgoing
                 // adjacency list of the resulting graph.
-                return HugeGraph.create(
-                    tracker,
-                    idMap,
-                    Collections.emptyMap(),
-                    relationships.relationshipCount(),
-                    null,
-                    loadOutgoing ? relationships.outAdjacency() : relationships.inAdjacency(),
-                    null,
-                    loadOutgoing ? relationships.outOffsets() : relationships.inOffsets(),
-                    Optional.empty(),
-                    Optional.empty(),
-                    loadRelationshipProperty ?
-                        loadOutgoing
-                            ? Optional.of(relationships.outRelProperties())
-                            : Optional.of(relationships.inRelProperties())
-                        : Optional.empty(),
-                    Optional.empty(),
-                    loadRelationshipProperty ?
-                        loadOutgoing
-                            ? Optional.of(relationships.outRelPropertyOffsets())
-                            : Optional.of(relationships.inRelPropertyOffsets())
-                        : Optional.empty(),
-                    undirected
-                );
+                outAdjacencyList = loadOutgoing ? relationships.outAdjacency() : relationships.inAdjacency();
+                outAdjacencyOffsets = loadOutgoing ? relationships.outOffsets() : relationships.inOffsets();
+
+                if (loadRelationshipProperty) {
+                    outProperties = loadOutgoing
+                        ? Optional.of(relationships.outRelProperties())
+                        : Optional.of(relationships.inRelProperties());
+                    outPropertyOffsets = loadOutgoing
+                        ? Optional.of(relationships.outRelPropertyOffsets())
+                        : Optional.of(relationships.inRelPropertyOffsets());
+                }
             }
+
+            return HugeGraph.create(
+                tracker,
+                idMap,
+                Collections.emptyMap(),
+                relationships.relationshipCount(),
+                inAdjacencyList,
+                outAdjacencyList,
+                inAdjacencyOffsets,
+                outAdjacencyOffsets,
+                Optional.empty(),
+                inProperties,
+                outProperties,
+                inPropertyOffsets,
+                outPropertyOffsets,
+                undirected
+            );
         }
 
         private void flushBuffer() {
