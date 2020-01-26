@@ -62,7 +62,8 @@ final class GraphCreateConfigBuilders {
         Optional<Integer> concurrency,
         @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
-        Optional<Projection> globalProjection
+        Optional<Projection> globalProjection,
+        Optional<DeduplicationStrategy> globalDeduplicationStrategy
     ) {
         // Node projections
         Map<String, NodeProjection> tempNP = new LinkedHashMap<>();
@@ -77,16 +78,23 @@ final class GraphCreateConfigBuilders {
         // Relationship projections
         Map<String, RelationshipProjection> tempRP = new LinkedHashMap<>();
         Projection projection = globalProjection.orElse(Projection.NATURAL);
+        DeduplicationStrategy globalAggregation = globalDeduplicationStrategy.orElse(DeduplicationStrategy.DEFAULT);
+
         relationshipTypes.forEach(relType -> tempRP.put(
             relType,
-            RelationshipProjection.of(relType, projection, DeduplicationStrategy.DEFAULT)
+            RelationshipProjection.of(relType, projection, globalAggregation)
         ));
         relationshipProjections.forEach(rp -> tempRP.put(rp.type().orElse("*"), rp));
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
 
         if (tempRP.isEmpty() && anyRelationshipType == AnyRelationshipType.LOAD) {
-            tempRP.put("*", RelationshipProjection.empty());
+            tempRP.put("*", RelationshipProjection.empty().withAggregation(globalAggregation));
         }
+
+        PropertyMappings relationshipPropertyMappings = PropertyMappings.builder()
+            .addAllMappings(relationshipProperties)
+            .withGlobalDeduplicationStrategy(globalAggregation)
+            .build();
 
         NodeProjections np = NodeProjections.of(tempNP.entrySet().stream().collect(Collectors.toMap(
             e -> ElementIdentifier.of(e.getKey()),
@@ -104,7 +112,7 @@ final class GraphCreateConfigBuilders {
             .nodeProjection(np)
             .relationshipProjection(rp)
             .nodeProperties(PropertyMappings.of(nodeProperties))
-            .relationshipProperties(PropertyMappings.of(relationshipProperties))
+            .relationshipProperties(relationshipPropertyMappings)
             .concurrency(concurrency.orElse(Pools.DEFAULT_CONCURRENCY))
             .build()
             .withNormalizedPropertyMappings();

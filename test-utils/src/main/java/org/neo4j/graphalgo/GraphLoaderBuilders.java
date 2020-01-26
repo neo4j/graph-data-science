@@ -73,7 +73,8 @@ final class GraphLoaderBuilders {
         Optional<Integer> concurrency,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
-        Optional<Projection> globalProjection) {
+        Optional<Projection> globalProjection,
+        Optional<DeduplicationStrategy> globalDeduplicationStrategy) {
 
         GraphCreateFromStoreConfig createConfig = GraphCreateConfigBuilders.storeConfig(
             userName,
@@ -89,7 +90,8 @@ final class GraphLoaderBuilders {
             concurrency,
             anyLabel,
             anyRelationshipType,
-            globalProjection
+            globalProjection,
+            globalDeduplicationStrategy
         );
 
         return ImmutableModernGraphLoader.of(

@@ -121,12 +121,6 @@ public final class TestGraphLoader {
     }
 
     private <T extends GraphFactory> ModernGraphLoader loader(Class<T> graphFactory) {
-        maybeDeduplicationStrategy.ifPresent(deduplicationStrategy ->
-            relProperties = PropertyMappings
-                .builder()
-                .from(relProperties)
-                .withGlobalDeduplicationStrategy(deduplicationStrategy)
-                .build());
         return graphFactory.isAssignableFrom(CypherGraphFactory.class) ? cypherLoader() : storeLoader();
     }
 
@@ -195,6 +189,7 @@ public final class TestGraphLoader {
                 RelationshipProjection.empty().withAggregation(maybeDeduplicationStrategy.orElse(DEFAULT))
             );
         }
+        storeLoaderBuilder.globalDeduplicationStrategy(maybeDeduplicationStrategy.orElse(SINGLE));
         if (addNodePropertiesToLoader) storeLoaderBuilder.nodeProperties(nodeProperties);
         if (addRelationshipPropertiesToLoader) storeLoaderBuilder.relationshipProperties(relProperties);
         return storeLoaderBuilder.build();
