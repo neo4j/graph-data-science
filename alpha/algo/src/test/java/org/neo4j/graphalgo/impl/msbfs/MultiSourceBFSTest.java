@@ -55,7 +55,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
-import static org.neo4j.graphdb.Direction.OUTGOING;
 
 final class MultiSourceBFSTest extends AlgoTestBase {
 
@@ -98,7 +97,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             MultiSourceBFS msbfs = new MultiSourceBFS(
                     graph,
                     graph,
-                    OUTGOING,
                     (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
                     AllocationTracker.EMPTY,
                     0, 1
@@ -123,7 +121,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             MultiSourceBFS msbfs = new MultiSourceBFS(
                     graph,
                     graph,
-                    OUTGOING,
                     (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
                     AllocationTracker.EMPTY
             );
@@ -166,7 +163,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                     MultiSourceBFS msbfs = new MultiSourceBFS(
                             graph,
                             graph,
-                            OUTGOING,
                             (i, d, s) -> {
                                 String message = String.format(
                                         "The node(%d) was traversed multiple times at depth %d",
@@ -192,7 +188,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                     MultiSourceBFS msbfs = new MultiSourceBFS(
                             graph,
                             graph,
-                            OUTGOING,
                             (i, d, s) -> {
                                 assertEquals(1, d);
                                 synchronized (seen) {
@@ -225,7 +220,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                     MultiSourceBFS msbfs = new MultiSourceBFS(
                             graph,
                             graph,
-                            OUTGOING,
                             (i, d, s) -> {
                                 int prev = state[0];
                                 if (i < prev) {
@@ -286,7 +280,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         MultiSourceBFS msbfs = new MultiSourceBFS(
                 new DirectIdMapping(nodeCount),
                 iter,
-                Direction.OUTGOING,
                 (nodeId, depth, sourceNodeIds) -> {
                     assertEquals(1, depth);
                     synchronized (seen) {

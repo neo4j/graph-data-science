@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.FormattedLog;
 import org.neo4j.logging.Level;
@@ -93,7 +92,6 @@ public class MsBfsBenchmarkLdbc {
         MultiSourceBFS msbfs = new MultiSourceBFS(
                 grph,
                 grph,
-                Direction.OUTGOING,
                 (i, d, s) -> {
                     tpt.add(s.size());
                     long ll = lastLog.get();

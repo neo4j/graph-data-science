@@ -44,6 +44,11 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream<WeightedAllShortestPaths.Result>, AllShortestPathsConfig> {
 
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
+
     @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ)
     public Stream<WeightedAllShortestPaths.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -84,8 +89,7 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
                     return new WeightedAllShortestPaths(
                         graph,
                         Pools.DEFAULT,
-                        configuration.concurrency(),
-                        config.resolvedDirection()
+                        configuration.concurrency()
                     )
                         .withProgressLogger(ProgressLogger.wrap(log, "WeightedAllShortestPaths)"))
                         .withTerminationFlag(TerminationFlag.wrap(transaction));
@@ -94,8 +98,7 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
                         graph,
                         tracker,
                         configuration.concurrency(),
-                        Pools.DEFAULT,
-                        config.resolvedDirection()
+                        Pools.DEFAULT
                     )
                         .withProgressLogger(ProgressLogger.wrap(log, "AllShortestPaths(MultiSource)"))
                         .withTerminationFlag(TerminationFlag.wrap(transaction));

@@ -21,16 +21,16 @@ package org.neo4j.graphalgo.impl;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CostEvaluator;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.QueryRunner;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
@@ -403,37 +403,37 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
         db.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testWeighted(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = new GraphLoader(db, Pools.DEFAULT)
-                .withLabel("Node")
-                .withRelationshipType("LINK")
-                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .withDirection(Direction.OUTGOING)
-                .withDefaultConcurrency()
-                .load(graphImpl);
+    @Test
+    void testWeighted() {
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node")
+            .addRelationshipType("LINK")
+            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+            .build()
+            .load(HugeGraphFactory.class);
         List<Result> expected = calculateExpected(graph, true);
         WeightedAllShortestPaths shortestPaths = new WeightedAllShortestPaths(
                 graph,
                 Pools.DEFAULT,
-                Pools.DEFAULT_CONCURRENCY, Direction.OUTGOING);
+                Pools.DEFAULT_CONCURRENCY);
         compare(shortestPaths, expected);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMsbfs(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = new GraphLoader(db, Pools.DEFAULT)
-                .withLabel("Node")
-                .withRelationshipType("LINK")
-                .withDirection(Direction.OUTGOING)
-                .withDefaultConcurrency()
-                .load(graphImpl);
+    @Test
+    void testMsbfs() {
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node")
+            .addRelationshipType("LINK")
+            .build()
+            .load(HugeGraphFactory.class);
         List<Result> expectedNonWeighted = calculateExpected(graph, false);
         MSBFSAllShortestPaths shortestPaths = new MSBFSAllShortestPaths(
                 graph,
                 AllocationTracker.EMPTY,
                 Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT, Direction.OUTGOING);
+                Pools.DEFAULT);
         compare(shortestPaths, expectedNonWeighted);
     }
 

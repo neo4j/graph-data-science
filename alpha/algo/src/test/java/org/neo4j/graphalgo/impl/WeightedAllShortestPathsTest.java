@@ -23,16 +23,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -88,11 +86,13 @@ class WeightedAllShortestPathsTest {
         }
 
         try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("load took " + t + "ms"))) {
-            graph = new GraphLoader(db)
-                    .withLabel(LABEL)
-                    .withRelationshipType(RELATIONSHIP)
-                    .withRelationshipProperties(PropertyMapping.of(PROPERTY, 1.0))
-                    .load(HugeGraphFactory.class);
+            graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel(LABEL)
+                .addRelationshipType(RELATIONSHIP)
+                .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
+                .build()
+                .load(HugeGraphFactory.class);
         }
     }
 
@@ -106,7 +106,7 @@ class WeightedAllShortestPathsTest {
 
         final ResultConsumer mock = mock(ResultConsumer.class);
 
-        new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4, Direction.OUTGOING)
+        new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4)
                 .compute()
                 .peek(System.out::println)
                 .forEach(r -> {
@@ -126,15 +126,15 @@ class WeightedAllShortestPathsTest {
 
     @Test
     void shouldThrowIfGraphHasNoRelationshipProperty() {
-
-        Graph graph = new GraphLoader(db)
-                .withLabel(Label.label(LABEL))
-                .withRelationshipType(RELATIONSHIP)
-                .withDirection(Direction.OUTGOING)
-                .load(HugeGraphFactory.class);
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(LABEL)
+            .addRelationshipType(RELATIONSHIP)
+            .build()
+            .load(HugeGraphFactory.class);
 
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
-            new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4, Direction.OUTGOING);
+            new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4);
         });
 
         assertTrue(exception.getMessage().contains("not supported"));

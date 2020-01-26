@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
 
 import java.util.AbstractCollection;
 import java.util.Arrays;
@@ -88,7 +87,6 @@ public final class MultiSourceBFS implements Runnable {
 
     private final IdMapping nodeIds;
     private final RelationshipIterator relationships;
-    private final Direction direction;
     private final BfsConsumer perNodeAction;
     private final long[] startNodes;
     private int sourceNodeCount;
@@ -98,13 +96,11 @@ public final class MultiSourceBFS implements Runnable {
     public MultiSourceBFS(
             IdMapping nodeIds,
             RelationshipIterator relationships,
-            Direction direction,
             BfsConsumer perNodeAction,
             AllocationTracker tracker,
             long... startNodes) {
         this.nodeIds = nodeIds;
         this.relationships = relationships;
-        this.direction = direction;
         this.perNodeAction = perNodeAction;
         this.startNodes = (startNodes != null && startNodes.length > 0) ? startNodes : null;
         if (this.startNodes != null) {
@@ -119,7 +115,6 @@ public final class MultiSourceBFS implements Runnable {
     private MultiSourceBFS(
             IdMapping nodeIds,
             RelationshipIterator relationships,
-            Direction direction,
             BfsConsumer perNodeAction,
             long nodeCount,
             ThreadLocal<HugeLongArray> visits,
@@ -129,7 +124,6 @@ public final class MultiSourceBFS implements Runnable {
         assert startNodes != null && startNodes.length > 0;
         this.nodeIds = nodeIds;
         this.relationships = relationships;
-        this.direction = direction;
         this.perNodeAction = perNodeAction;
         this.startNodes = startNodes;
         this.nodeCount = nodeCount;
@@ -141,7 +135,6 @@ public final class MultiSourceBFS implements Runnable {
     private MultiSourceBFS(
             IdMapping nodeIds,
             RelationshipIterator relationships,
-            Direction direction,
             BfsConsumer perNodeAction,
             long nodeCount,
             long nodeOffset,
@@ -151,7 +144,6 @@ public final class MultiSourceBFS implements Runnable {
             ThreadLocal<HugeLongArray> seens) {
         this.nodeIds = nodeIds;
         this.relationships = relationships;
-        this.direction = direction;
         this.perNodeAction = perNodeAction;
         this.startNodes = null;
         this.nodeCount = nodeCount;
@@ -295,7 +287,6 @@ public final class MultiSourceBFS implements Runnable {
     private void prepareNextVisit(long nodeVisit, long nodeId, HugeLongArray nextSet) {
         relationships.forEachRelationship(
                 nodeId,
-                direction,
                 (src, tgt) -> {
                     nextSet.or(tgt, nodeVisit);
                     return true;
@@ -344,7 +335,6 @@ public final class MultiSourceBFS implements Runnable {
                     return new MultiSourceBFS(
                             nodeIds,
                             relationships.concurrentCopy(),
-                            direction,
                             perNodeAction,
                             sourceLength,
                             from,
@@ -364,7 +354,6 @@ public final class MultiSourceBFS implements Runnable {
                 return new MultiSourceBFS(
                         nodeIds,
                         relationships.concurrentCopy(),
-                        direction,
                         perNodeAction,
                         nodeCount,
                         visits,
