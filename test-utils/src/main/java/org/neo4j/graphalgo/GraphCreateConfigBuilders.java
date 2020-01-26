@@ -137,6 +137,7 @@ final class GraphCreateConfigBuilders {
         // TODO: This is a temporary hack to allow setting a global deduplication strategy for Cypher
         //       loading in tests. Remove this as soon as projections and queries can be specified in conjunction.
         RelationshipProjections relationshipProjections;
+        PropertyMappings relationshipPropertyMappings;
         if (globalDeduplicationStrategy.isPresent()) {
             relationshipProjections = RelationshipProjections.builder()
                 .putProjection(
@@ -144,8 +145,13 @@ final class GraphCreateConfigBuilders {
                     RelationshipProjection.of("*", Projection.NATURAL, globalDeduplicationStrategy.get())
                 )
                 .build();
+            relationshipPropertyMappings = PropertyMappings.builder()
+                .addAllMappings(relationshipProperties)
+                .withGlobalDeduplicationStrategy(globalDeduplicationStrategy.get())
+                .build();
         } else {
             relationshipProjections = RelationshipProjections.empty();
+            relationshipPropertyMappings = PropertyMappings.of(relationshipProperties);
         }
 
         return ImmutableGraphCreateFromCypherConfig.builder()
@@ -155,7 +161,7 @@ final class GraphCreateConfigBuilders {
             .relationshipQuery(relationshipQuery.orElse(ALL_RELATIONSHIPS_QUERY))
             .relationshipProjection(relationshipProjections)
             .nodeProperties(PropertyMappings.of(nodeProperties))
-            .relationshipProperties(PropertyMappings.of(relationshipProperties))
+            .relationshipProperties(relationshipPropertyMappings)
             .concurrency(concurrency.orElse(Pools.DEFAULT_CONCURRENCY))
             .build();
     }

@@ -184,11 +184,12 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
             propertyMappings.forEach(this::addOptionalMapping);
         }
 
-        public void setGlobalDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
+        public Builder withGlobalDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
             this.deduplicationStrategy = Objects.requireNonNull(
                 deduplicationStrategy,
                 "deduplicationStrategy must not be empty"
             );
+            return this;
         }
 
         @Override

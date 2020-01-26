@@ -235,6 +235,24 @@ class GraphCreateConfigBuildersTest {
                     .nodeProperties(PropertyMappings.of(PropertyMapping.of("nProp", 23.0D)))
                     .relationshipProperties(PropertyMappings.of(PropertyMapping.of("rProp", 42.0D)))
                     .build()
+            ),
+            Arguments.arguments(
+                new CypherConfigBuilder()
+                    .loadAnyLabel()
+                    .loadAnyRelationshipType()
+                    .addRelationshipProperty(PropertyMapping.of("foo", 42.0D))
+                    .globalDeduplicationStrategy(DeduplicationStrategy.MAX)
+                    .build(),
+                ImmutableGraphCreateFromCypherConfig.builder().username("").graphName("")
+                    .nodeQuery(ALL_NODES_QUERY)
+                    .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
+                    .nodeProjection(NodeProjections.empty())
+                    .relationshipProjection(RelationshipProjections.builder()
+                        .putProjection(PROJECT_ALL, RelationshipProjection.of("*", Projection.NATURAL, DeduplicationStrategy.MAX))
+                        .build())
+                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProperties(PropertyMappings.of(PropertyMapping.of("foo", 42.0D, DeduplicationStrategy.MAX)))
+                    .build()
             )
         );
     }
