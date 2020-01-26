@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
@@ -35,6 +35,11 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.Projection.NATURAL;
+import static org.neo4j.graphalgo.Projection.REVERSE;
+import static org.neo4j.graphalgo.core.DeduplicationStrategy.DEFAULT;
+import static org.neo4j.graphalgo.core.DeduplicationStrategy.SINGLE;
 
 public final class TestGraphLoader {
 
@@ -115,46 +120,84 @@ public final class TestGraphLoader {
         }
     }
 
-    private <T extends GraphFactory> GraphLoader loader(Class<T> graphFactory) {
-        GraphLoader graphLoader = new GraphLoader(db).withDirection(direction);
+    private <T extends GraphFactory> ModernGraphLoader loader(Class<T> graphFactory) {
+        maybeDeduplicationStrategy.ifPresent(deduplicationStrategy ->
+            relProperties = PropertyMappings
+                .builder()
+                .from(relProperties)
+                .withGlobalDeduplicationStrategy(deduplicationStrategy)
+                .build());
+        return graphFactory.isAssignableFrom(CypherGraphFactory.class) ? cypherLoader() : storeLoader();
+    }
 
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s";
-            String labelString = maybeLabel
-                .map(s -> ProjectionParser
-                    .parse(s)
-                    .stream()
-                    .map(l -> "n:" + l)
-                    .collect(Collectors.joining(" OR ", "WHERE ", "")))
-                .orElse("");
-            nodeProperties = getUniquePropertyMappings(nodeProperties);
-            String nodePropertiesString = getPropertiesString(nodeProperties, "n");
+    private ModernGraphLoader cypherLoader() {
+        CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder().api(db);
 
-            String nodeQuery = String.format(nodeQueryTemplate, labelString, nodePropertiesString);
-            graphLoader.withLabel(nodeQuery);
+        String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s";
+        String labelString = maybeLabel
+            .map(s -> ProjectionParser
+                .parse(s)
+                .stream()
+                .map(l -> "n:" + l)
+                .collect(Collectors.joining(" OR ", "WHERE ", "")))
+            .orElse("");
+        nodeProperties = getUniquePropertyMappings(nodeProperties);
+        String nodePropertiesString = getPropertiesString(nodeProperties, "n");
 
-            String relationshipQueryTemplate = maybeRelType.isPresent()
-                ? "MATCH (n)-[r%s]->(m) RETURN type(r) AS type, id(n) AS source, id(m) AS target%s"
-                : "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s";
+        cypherLoaderBuilder.nodeQuery(String.format(nodeQueryTemplate, labelString, nodePropertiesString));
 
-            String relTypeString = maybeRelType.map(s -> ":" + s).orElse("");
-            relProperties = getUniquePropertyMappings(relProperties);
-            String relPropertiesString = getPropertiesString(relProperties, "r");
+        String relationshipQueryTemplate = maybeRelType.isPresent()
+            ? "MATCH (n)-[r%s]->(m) RETURN type(r) AS type, id(n) AS source, id(m) AS target%s"
+            : "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s";
 
-            graphLoader.withRelationshipType(String.format(
-                relationshipQueryTemplate,
-                relTypeString,
-                relPropertiesString
-            ));
+        String relTypeString = maybeRelType.map(s -> ":" + s).orElse("");
+        relProperties = getUniquePropertyMappings(relProperties);
+        String relPropertiesString = getPropertiesString(relProperties, "r");
+
+        cypherLoaderBuilder.relationshipQuery(String.format(
+            relationshipQueryTemplate,
+            relTypeString,
+            relPropertiesString
+        ));
+
+        cypherLoaderBuilder.globalDeduplicationStrategy(maybeDeduplicationStrategy.orElse(SINGLE));
+        if (addNodePropertiesToLoader) cypherLoaderBuilder.nodeProperties(nodeProperties);
+        if (addRelationshipPropertiesToLoader) cypherLoaderBuilder.relationshipProperties(relProperties);
+
+        return cypherLoaderBuilder.build();
+    }
+
+    private ModernGraphLoader storeLoader() {
+        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().api(db);
+        if (maybeLabel.isPresent()) {
+            storeLoaderBuilder.addNodeLabel(maybeLabel.get());
         } else {
-            maybeLabel.ifPresent(graphLoader::withLabel);
-            maybeRelType.ifPresent(graphLoader::withRelationshipType);
+            storeLoaderBuilder.loadAnyLabel();
         }
-        graphLoader.withDeduplicationStrategy(maybeDeduplicationStrategy.orElse(DeduplicationStrategy.SINGLE));
-        if (addNodePropertiesToLoader) graphLoader.withOptionalNodeProperties(nodeProperties);
-        if (addRelationshipPropertiesToLoader) graphLoader.withRelationshipProperties(relProperties);
-
-        return graphLoader;
+        if (maybeRelType.isPresent()) {
+            ProjectionParser.parse(maybeRelType.get())
+                .forEach(relType -> {
+                    RelationshipProjection template = RelationshipProjection.empty()
+                        .withType(relType)
+                        .withAggregation(maybeDeduplicationStrategy.orElse(SINGLE));
+                    if (direction == Direction.OUTGOING) {
+                        storeLoaderBuilder.addRelationshipProjection(template.withProjection(NATURAL));
+                    } else if (direction == Direction.INCOMING) {
+                        storeLoaderBuilder.addRelationshipProjection(template.withProjection(REVERSE));
+                    } else {
+                        storeLoaderBuilder.addRelationshipProjection(template.withProjection(NATURAL));
+                        storeLoaderBuilder.addRelationshipProjection(template.withProjection(REVERSE));
+                    }
+                });
+        } else {
+            storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(
+                "*",
+                RelationshipProjection.empty().withAggregation(maybeDeduplicationStrategy.orElse(DEFAULT))
+            );
+        }
+        if (addNodePropertiesToLoader) storeLoaderBuilder.nodeProperties(nodeProperties);
+        if (addRelationshipPropertiesToLoader) storeLoaderBuilder.relationshipProperties(relProperties);
+        return storeLoaderBuilder.build();
     }
 
     private PropertyMappings getUniquePropertyMappings(PropertyMappings propertyMappings) {
