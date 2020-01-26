@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.AdjacencyBuilder;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
@@ -160,7 +160,7 @@ public class HugeRelationshipsBuilder {
 
         static RelationshipsBuilder createRelationshipsBuilder() {
             return new RelationshipsBuilder(
-                    new DeduplicationStrategy[]{DeduplicationStrategy.NONE},
+                    new Aggregation[]{Aggregation.NONE},
                     AllocationTracker.EMPTY,
                     0);
         }

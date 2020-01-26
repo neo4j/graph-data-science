@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimization;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphGenerator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -181,7 +181,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             Direction.OUTGOING,
             rootGraph.isUndirected(),
             true,
-            DeduplicationStrategy.SUM,
+            Aggregation.SUM,
             false
         );
 

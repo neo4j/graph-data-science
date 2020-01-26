@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.apache.lucene.util.LongsRef;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 
 import java.util.Arrays;
@@ -48,13 +48,13 @@ final class AdjacencyCompression {
         into.length = array.uncompress(into.longs);
     }
 
-    static int applyDeltaEncoding(LongsRef data, DeduplicationStrategy deduplicationStrategy) {
+    static int applyDeltaEncoding(LongsRef data, Aggregation aggregation) {
         Arrays.sort(data.longs, 0, data.length);
-        return data.length = applyDelta(data.longs, data.length, deduplicationStrategy);
+        return data.length = applyDelta(data.longs, data.length, aggregation);
     }
 
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
-    static int applyDeltaEncoding(LongsRef data, long[][] weights, DeduplicationStrategy[] deduplicationStrategies, boolean noDeduplication) {
+    static int applyDeltaEncoding(LongsRef data, long[][] weights, Aggregation[] aggregations, boolean noAggregation) {
         int[] order = IndirectSort.mergesort(0, data.length, new AscendingLongComparator(data.longs));
 
         long[] sortedValues = new long[data.length];
@@ -67,8 +67,8 @@ final class AdjacencyCompression {
                 weights,
                 sortedWeights,
                 data.length,
-                deduplicationStrategies,
-                noDeduplication
+                aggregations,
+                noAggregation
         );
 
         System.arraycopy(sortedValues, 0, data.longs, 0, data.length);
@@ -98,13 +98,13 @@ final class AdjacencyCompression {
     }
     //@formatter:on
 
-    private static int applyDelta(long[] values, int length, DeduplicationStrategy deduplicationStrategy) {
+    private static int applyDelta(long[] values, int length, Aggregation aggregation) {
         long value = values[0], delta;
         int in = 1, out = 1;
         for (; in < length; ++in) {
             delta = values[in] - value;
             value = values[in];
-            if (delta > 0L || deduplicationStrategy == DeduplicationStrategy.NONE) {
+            if (delta > 0L || aggregation == Aggregation.NONE) {
                 values[out++] = delta;
             }
         }
@@ -115,7 +115,7 @@ final class AdjacencyCompression {
      * Applies delta encoding to the given {@code values}.
      * Weights are not encoded, {@code outRelProperties} contains weights according to {@code order}.
      *
-     * @param noDeduplication Is true iff all deduplication strategies are none
+     * @param noAggregation Is true iff all aggregations are none
      */
     private static int applyDelta(
             int[] order,
@@ -124,8 +124,8 @@ final class AdjacencyCompression {
             long[][] weights,
             long[][] outWeights,
             int length,
-            DeduplicationStrategy[] deduplicationStrategies,
-            boolean noDeduplication) {
+            Aggregation[] aggregations,
+            boolean noAggregation) {
         int firstSortIdx = order[0];
         long value = values[firstSortIdx];
         long delta;
@@ -141,19 +141,19 @@ final class AdjacencyCompression {
             delta = values[sortIdx] - value;
             value = values[sortIdx];
 
-            if (delta > 0L || noDeduplication) {
+            if (delta > 0L || noAggregation) {
                 for (int i = 0; i < weights.length; i++) {
                     outWeights[i][out] = weights[i][sortIdx];
                 }
                 outValues[out++] = delta;
             } else {
                 for (int i = 0; i < weights.length; i++) {
-                    DeduplicationStrategy deduplicationStrategy = deduplicationStrategies[i];
+                    Aggregation aggregation = aggregations[i];
                     int existingIdx = out - 1;
                     long[] outWeight = outWeights[i];
                     double existingWeight = Double.longBitsToDouble(outWeight[existingIdx]);
                     double newWeight = Double.longBitsToDouble(weights[i][sortIdx]);
-                    newWeight = deduplicationStrategy.merge(existingWeight, newWeight);
+                    newWeight = aggregation.merge(existingWeight, newWeight);
                     outWeight[existingIdx] = Double.doubleToLongBits(newWeight);
                 }
             }

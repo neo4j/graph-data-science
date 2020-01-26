@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.DataClass;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -138,12 +138,12 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
     @Value.Check
     void checkForAggregationMixing() {
         long noneStrategyCount = stream()
-            .filter(d -> d.deduplicationStrategy() == DeduplicationStrategy.NONE)
+            .filter(d -> d.aggregation() == Aggregation.NONE)
             .count();
 
         if (noneStrategyCount > 0 && noneStrategyCount < numberOfMappings()) {
             throw new IllegalArgumentException(
-                "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations.");
+                "Conflicting relationship property aggregations, it is not allowed to mix `NONE` with aggregations.");
         }
     }
 
@@ -154,10 +154,10 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
     @AccessibleFields
     public static final class Builder extends PropertyMappings.Builder {
 
-        private DeduplicationStrategy deduplicationStrategy;
+        private Aggregation aggregation;
 
         Builder() {
-            deduplicationStrategy = DeduplicationStrategy.DEFAULT;
+            aggregation = Aggregation.DEFAULT;
         }
 
         void addMappings(Stream<? extends PropertyMapping> propertyMappings) {
@@ -184,19 +184,19 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
             propertyMappings.forEach(this::addOptionalMapping);
         }
 
-        public Builder withGlobalDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
-            this.deduplicationStrategy = Objects.requireNonNull(
-                deduplicationStrategy,
-                "deduplicationStrategy must not be empty"
+        public Builder withDefaultAggregation(Aggregation aggregation) {
+            this.aggregation = Objects.requireNonNull(
+                aggregation,
+                "aggregation must not be empty"
             );
             return this;
         }
 
         @Override
         public PropertyMappings build() {
-            if (deduplicationStrategy != DeduplicationStrategy.DEFAULT && mappings != null) {
+            if (aggregation != Aggregation.DEFAULT && mappings != null) {
                 for (ListIterator<PropertyMapping> iter = mappings.listIterator(); iter.hasNext(); ) {
-                    PropertyMapping mapping = iter.next().setNonDefaultAggregation(deduplicationStrategy);
+                    PropertyMapping mapping = iter.next().setNonDefaultAggregation(aggregation);
                     iter.set(mapping);
                 }
             }

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -31,7 +31,7 @@ public class RelationshipsBuilder {
 
     private static final AdjacencyListBuilder[] EMPTY_WEIGHTS = new AdjacencyListBuilder[0];
 
-    private final DeduplicationStrategy[] deduplicationStrategies;
+    private final Aggregation[] aggregations;
     final AdjacencyListBuilder adjacency;
     final AdjacencyListBuilder[] weights;
 
@@ -39,17 +39,17 @@ public class RelationshipsBuilder {
     AdjacencyOffsets[] globalWeightOffsets;
 
     public RelationshipsBuilder(
-        DeduplicationStrategy[] deduplicationStrategies,
+        Aggregation[] aggregations,
         AllocationTracker tracker,
         int numberOfRelationshipProperties
     ) {
-        if (Arrays.stream(deduplicationStrategies).anyMatch(d -> d == DeduplicationStrategy.DEFAULT)) {
+        if (Arrays.stream(aggregations).anyMatch(d -> d == Aggregation.DEFAULT)) {
             throw new IllegalArgumentException(String.format(
-                "Needs an explicit deduplicateRelationshipsStrategy, but got %s",
-                Arrays.toString(deduplicationStrategies)
+                "Needs an explicit aggregation, but got %s",
+                Arrays.toString(aggregations)
             ));
         }
-        this.deduplicationStrategies = deduplicationStrategies;
+        this.aggregations = aggregations;
         adjacency = AdjacencyListBuilder.newBuilder(tracker);
         if (numberOfRelationshipProperties > 0) {
             weights = new AdjacencyListBuilder[numberOfRelationshipProperties];
@@ -65,7 +65,7 @@ public class RelationshipsBuilder {
             long[] adjacencyOffsets,
             long[][] weightOffsets) {
         return new ThreadLocalRelationshipsBuilder(
-                deduplicationStrategies,
+            aggregations,
                 adjacency.newAllocator(),
                 Arrays.stream(weights)
                         .map(AdjacencyListBuilder::newAllocator)

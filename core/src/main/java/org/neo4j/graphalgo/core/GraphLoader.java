@@ -70,7 +70,7 @@ public class GraphLoader implements SharedGraphLoader {
     private final Map<String, Object> params = new HashMap<>();
     private int batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
 
-    private DeduplicationStrategy deduplicationStrategy = DeduplicationStrategy.DEFAULT;
+    private Aggregation aggregation = Aggregation.DEFAULT;
 
     private Log log = NullLog.getInstance();
     private long logMillis = -1;
@@ -113,7 +113,7 @@ public class GraphLoader implements SharedGraphLoader {
             .withOptionalRelationshipType(relationshipType)
             .withConcurrency(config.getReadConcurrency())
             .withBatchSize(config.getBatchSize())
-            .withDeduplicationStrategy(config.getDeduplicationStrategy())
+            .withDefaultAggregation(config.getAggregation())
             .withParams(config.getParams())
             .withLoadedGraph(false);
     }
@@ -401,14 +401,14 @@ public class GraphLoader implements SharedGraphLoader {
     }
 
     /**
-     * Defines the default strategy for relationship deduplication.
+     * Defines the default strategy for relationship aggregation.
      *
-     * If set, this overrides the deduplication strategy for all {@link PropertyMapping}s where the deduplication strategy is not set.
+     * If set, this overrides the aggregation for all {@link PropertyMapping}s where the aggregation is not set.
      *
-     * @param deduplicationStrategy strategy for handling duplicate relationships unless not explicitly specified in the property mappings
+     * @param aggregation strategy for handling duplicate relationships unless not explicitly specified in the property mappings
      */
-    public GraphLoader withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
-        this.deduplicationStrategy = deduplicationStrategy;
+    public GraphLoader withDefaultAggregation(Aggregation aggregation) {
+        this.aggregation = aggregation;
         return this;
     }
 
@@ -422,7 +422,7 @@ public class GraphLoader implements SharedGraphLoader {
     }
 
     public GraphSetup toSetup() {
-        this.relPropertyMappings.withGlobalDeduplicationStrategy(deduplicationStrategy);
+        this.relPropertyMappings.withDefaultAggregation(aggregation);
         return new LegacyGraphSetup(
             username,
             label,
@@ -432,7 +432,7 @@ public class GraphLoader implements SharedGraphLoader {
             executorService,
             concurrency,
             batchSize,
-            deduplicationStrategy,
+            aggregation,
             log,
             logMillis,
             undirected,

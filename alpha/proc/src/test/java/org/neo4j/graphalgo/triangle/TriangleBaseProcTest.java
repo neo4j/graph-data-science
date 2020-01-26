@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 
@@ -93,7 +93,7 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
         RelationshipProjections invalidRelationshipProjections = RelationshipProjections.builder()
             .putProjection(
                 ElementIdentifier.of("TYPE"),
-                RelationshipProjection.of("TYPE", Projection.NATURAL, DeduplicationStrategy.DEFAULT)
+                RelationshipProjection.of("TYPE", Projection.NATURAL, Aggregation.DEFAULT)
             )
             .build();
 

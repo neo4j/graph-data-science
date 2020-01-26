@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphdb.Label;
@@ -108,7 +108,7 @@ final class ShortestPathsProcTest extends BaseProcTest {
                 RelationshipProjection.of(
                     "TYPE",
                     Projection.UNDIRECTED,
-                    DeduplicationStrategy.DEFAULT
+                    Aggregation.DEFAULT
                 )
             )
             .withRelationshipProperty(PropertyMapping.of("cost", 1.0d))

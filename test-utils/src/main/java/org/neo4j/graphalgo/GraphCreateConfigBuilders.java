@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
@@ -63,7 +63,7 @@ final class GraphCreateConfigBuilders {
         @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Projection> globalProjection,
-        Optional<DeduplicationStrategy> globalDeduplicationStrategy
+        Optional<Aggregation> globalAggregation
     ) {
         // Node projections
         Map<String, NodeProjection> tempNP = new LinkedHashMap<>();
@@ -78,22 +78,22 @@ final class GraphCreateConfigBuilders {
         // Relationship projections
         Map<String, RelationshipProjection> tempRP = new LinkedHashMap<>();
         Projection projection = globalProjection.orElse(Projection.NATURAL);
-        DeduplicationStrategy globalAggregation = globalDeduplicationStrategy.orElse(DeduplicationStrategy.DEFAULT);
+        Aggregation aggregation = globalAggregation.orElse(Aggregation.DEFAULT);
 
         relationshipTypes.forEach(relType -> tempRP.put(
             relType,
-            RelationshipProjection.of(relType, projection, globalAggregation)
+            RelationshipProjection.of(relType, projection, aggregation)
         ));
         relationshipProjections.forEach(rp -> tempRP.put(rp.type().orElse("*"), rp));
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
 
         if (tempRP.isEmpty() && anyRelationshipType == AnyRelationshipType.LOAD) {
-            tempRP.put("*", RelationshipProjection.empty().withAggregation(globalAggregation));
+            tempRP.put("*", RelationshipProjection.empty().withAggregation(aggregation));
         }
 
         PropertyMappings relationshipPropertyMappings = PropertyMappings.builder()
             .addAllMappings(relationshipProperties)
-            .withGlobalDeduplicationStrategy(globalAggregation)
+            .withDefaultAggregation(aggregation)
             .build();
 
         NodeProjections np = NodeProjections.of(tempNP.entrySet().stream().collect(Collectors.toMap(
@@ -132,7 +132,7 @@ final class GraphCreateConfigBuilders {
         @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
-        Optional<DeduplicationStrategy> globalDeduplicationStrategy
+        Optional<Aggregation> globalAggregation
     ) {
         if (!(nodeQuery.isPresent() || anyLabel == AnyLabel.LOAD)) {
             throw new IllegalArgumentException("Missing nodeQuery or loadAnyLabel().");
@@ -142,20 +142,21 @@ final class GraphCreateConfigBuilders {
             throw new IllegalArgumentException("Missing relationshipQuery or loadAnyRelationshipType().");
         }
 
-        // TODO: This is a temporary hack to allow setting a global deduplication strategy for Cypher
+        // TODO: This is a temporary hack to allow setting a global aggregation for Cypher
         //       loading in tests. Remove this as soon as projections and queries can be specified in conjunction.
         RelationshipProjections relationshipProjections;
         PropertyMappings relationshipPropertyMappings;
-        if (globalDeduplicationStrategy.isPresent()) {
+        if (globalAggregation.isPresent()) {
+            Aggregation aggregation = globalAggregation.get();
             relationshipProjections = RelationshipProjections.builder()
                 .putProjection(
                     PROJECT_ALL,
-                    RelationshipProjection.of("*", Projection.NATURAL, globalDeduplicationStrategy.get())
+                    RelationshipProjection.of("*", Projection.NATURAL, aggregation)
                 )
                 .build();
             relationshipPropertyMappings = PropertyMappings.builder()
                 .addAllMappings(relationshipProperties)
-                .withGlobalDeduplicationStrategy(globalDeduplicationStrategy.get())
+                .withDefaultAggregation(aggregation)
                 .build();
         } else {
             relationshipProjections = RelationshipProjections.empty();

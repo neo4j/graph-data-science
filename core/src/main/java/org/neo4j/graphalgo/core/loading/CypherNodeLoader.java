@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -96,7 +96,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
                     propertyColumn,
                     propertyColumn,
                     DEFAULT_FALLBACK_VALUE,
-                    DeduplicationStrategy.DEFAULT
+                    Aggregation.DEFAULT
                 ))
                 .toArray(PropertyMapping[]::new));
 

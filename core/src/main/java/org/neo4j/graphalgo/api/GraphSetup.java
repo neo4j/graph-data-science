@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.api;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -103,10 +103,10 @@ public interface GraphSetup {
     PropertyMappings relationshipPropertyMappings();
 
     /**
-     * @deprecated There is no global relationship deduplication strategy anymore
+     * @deprecated There is no global relationship aggregation strategy anymore
      */
     @Deprecated
-    DeduplicationStrategy deduplicationStrategy();
+    Aggregation aggregation();
 
     Map<String, Object> params();
 

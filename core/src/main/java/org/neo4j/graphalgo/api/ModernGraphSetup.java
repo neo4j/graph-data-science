@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
@@ -258,18 +258,18 @@ public class ModernGraphSetup implements GraphSetup {
     }
 
     /**
-     * @deprecated There is no global relationship deduplication strategy anymore
+     * @deprecated There is no global relationship aggregation strategy anymore
      */
     @Deprecated
     @Override
-    public DeduplicationStrategy deduplicationStrategy() {
+    public Aggregation aggregation() {
         return createConfig
             .relationshipProjection()
             .allFilters()
             .stream()
             .map(RelationshipProjection::aggregation)
             .findFirst()
-            .orElse(DeduplicationStrategy.DEFAULT);
+            .orElse(Aggregation.DEFAULT);
     }
 
     @Override

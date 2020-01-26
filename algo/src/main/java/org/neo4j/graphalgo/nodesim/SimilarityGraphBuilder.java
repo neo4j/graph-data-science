@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.nodesim;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -98,7 +98,7 @@ class SimilarityGraphBuilder {
             Direction.OUTGOING,
             baseGraph.isUndirected(),
             true,
-            DeduplicationStrategy.NONE,
+            Aggregation.NONE,
             executorService,
             tracker
         );

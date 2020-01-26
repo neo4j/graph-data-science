@@ -38,7 +38,7 @@ import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
@@ -101,7 +101,7 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Bas
                     RelationshipProjection.of(
                         "TYPE",
                         Projection.UNDIRECTED,
-                        DeduplicationStrategy.DEFAULT
+                        Aggregation.DEFAULT
                     )
                 )
                 .graphCreate("myGraph")

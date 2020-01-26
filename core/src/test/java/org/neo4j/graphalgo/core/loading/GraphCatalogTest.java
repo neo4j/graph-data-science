@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
@@ -75,31 +75,31 @@ class GraphCatalogTest {
         RelationshipProjection t1Mapping = RelationshipProjection.builder()
             .type("T1")
             .projection(Projection.NATURAL)
-            .aggregation(DeduplicationStrategy.NONE)
+            .aggregation(Aggregation.NONE)
             .properties(
                 PropertyMappings.builder()
-                    .addMapping("property1", "property1", 42D, DeduplicationStrategy.NONE)
-                    .addMapping("property2", "property2", 1337D, DeduplicationStrategy.NONE)
+                    .addMapping("property1", "property1", 42D, Aggregation.NONE)
+                    .addMapping("property2", "property2", 1337D, Aggregation.NONE)
                     .build()
             ).build();
 
         RelationshipProjection t2Mapping = RelationshipProjection.builder()
             .type("T2")
             .projection(Projection.NATURAL)
-            .aggregation(DeduplicationStrategy.NONE)
+            .aggregation(Aggregation.NONE)
             .properties(
                 PropertyMappings.builder()
-                    .addMapping("property1", "property1", 42D, DeduplicationStrategy.NONE)
+                    .addMapping("property1", "property1", 42D, Aggregation.NONE)
                     .build()
             ).build();
 
         RelationshipProjection t3Mapping = RelationshipProjection.builder()
             .type("T3")
             .projection(Projection.NATURAL)
-            .aggregation(DeduplicationStrategy.NONE)
+            .aggregation(Aggregation.NONE)
             .properties(
                 PropertyMappings.builder()
-                    .addMapping("property2", "property2", 42D, DeduplicationStrategy.NONE)
+                    .addMapping("property2", "property2", 42D, Aggregation.NONE)
                     .build()
             ).build();
 

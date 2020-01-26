@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.beta.generator;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.GraphGenerator;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -107,7 +107,7 @@ public final class RandomGraphGenerator {
             direction,
             false,
             maybePropertyProducer.isPresent(),
-            DeduplicationStrategy.NONE,
+            Aggregation.NONE,
             legacyMode
         );
 

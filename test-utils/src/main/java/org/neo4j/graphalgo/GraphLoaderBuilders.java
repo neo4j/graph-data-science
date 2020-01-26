@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -74,7 +74,7 @@ final class GraphLoaderBuilders {
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Projection> globalProjection,
-        Optional<DeduplicationStrategy> globalDeduplicationStrategy) {
+        Optional<Aggregation> globalAggregation) {
 
         GraphCreateFromStoreConfig createConfig = GraphCreateConfigBuilders.storeConfig(
             userName,
@@ -91,7 +91,7 @@ final class GraphLoaderBuilders {
             anyLabel,
             anyRelationshipType,
             globalProjection,
-            globalDeduplicationStrategy
+            globalAggregation
         );
 
         return ImmutableModernGraphLoader.of(
@@ -132,7 +132,7 @@ final class GraphLoaderBuilders {
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
-        Optional<DeduplicationStrategy> globalDeduplicationStrategy
+        Optional<Aggregation> globalAggregation
     ) {
         GraphCreateFromCypherConfig createConfig = GraphCreateConfigBuilders.cypherConfig(
             userName,
@@ -144,7 +144,7 @@ final class GraphLoaderBuilders {
             anyLabel,
             anyRelationshipType,
             concurrency,
-            globalDeduplicationStrategy
+            globalAggregation
         );
 
         return ImmutableModernGraphLoader.of(

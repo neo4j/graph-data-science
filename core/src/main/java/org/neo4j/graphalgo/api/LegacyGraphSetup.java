@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.api;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -71,7 +71,7 @@ public final class LegacyGraphSetup implements GraphSetup {
 
     private final PropertyMappings nodePropertyMappings;
     private final PropertyMappings relationshipPropertyMappings;
-    private final DeduplicationStrategy deduplicationStrategy;
+    private final Aggregation aggregation;
 
     /**
      * main ctor
@@ -80,7 +80,7 @@ public final class LegacyGraphSetup implements GraphSetup {
      * @param relationshipType      the relation type identifier. null for any relationship
      * @param executor              the executor. null means single threaded evaluation
      * @param batchSize             batch size for parallel loading
-     * @param deduplicationStrategy strategy for handling relationship duplicates
+     * @param aggregation strategy for handling relationship duplicates
      */
     public LegacyGraphSetup(
         String username,
@@ -91,7 +91,7 @@ public final class LegacyGraphSetup implements GraphSetup {
         ExecutorService executor,
         int concurrency,
         int batchSize,
-        DeduplicationStrategy deduplicationStrategy,
+        Aggregation aggregation,
         Log log,
         long logMillis,
         boolean loadAsUndirected,
@@ -113,7 +113,7 @@ public final class LegacyGraphSetup implements GraphSetup {
         this.executor = executor;
         this.concurrency = concurrency;
         this.batchSize = batchSize;
-        this.deduplicationStrategy = deduplicationStrategy;
+        this.aggregation = aggregation;
         this.log = log;
         this.logMillis = logMillis;
         this.loadAsUndirected = loadAsUndirected;
@@ -238,8 +238,8 @@ public final class LegacyGraphSetup implements GraphSetup {
     }
 
     @Override
-    public DeduplicationStrategy deduplicationStrategy() {
-        return deduplicationStrategy;
+    public Aggregation aggregation() {
+        return aggregation;
     }
 
     private boolean loadConcurrent() {

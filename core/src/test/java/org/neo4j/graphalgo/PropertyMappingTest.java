@@ -21,7 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,7 +35,7 @@ class PropertyMappingTest {
         PropertyMapping propertyMapping = PropertyMapping.fromObject("foo", "bar");
         assertEquals(propertyMapping.propertyKey(), "foo");
         assertEquals(propertyMapping.neoPropertyKey(), "bar");
-        assertEquals(propertyMapping.deduplicationStrategy(), DeduplicationStrategy.DEFAULT);
+        assertEquals(propertyMapping.aggregation(), Aggregation.DEFAULT);
     }
 
     @Test
@@ -47,7 +47,7 @@ class PropertyMappingTest {
         ));
         assertEquals(propertyMapping.propertyKey(), "transaction_count");
         assertEquals(propertyMapping.neoPropertyKey(), "usd");
-        assertEquals(propertyMapping.deduplicationStrategy(), DeduplicationStrategy.MIN);
+        assertEquals(propertyMapping.aggregation(), Aggregation.MIN);
         assertEquals(propertyMapping.defaultValue(), 42.0);
     }
 

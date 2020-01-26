@@ -23,7 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.stream.Streams;
 
 import java.util.Collection;
@@ -143,8 +143,8 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         return projections().values();
     }
 
-    public RelationshipProjections addAggregation(DeduplicationStrategy aggregation) {
-        if (aggregation == DeduplicationStrategy.DEFAULT) {
+    public RelationshipProjections addAggregation(Aggregation aggregation) {
+        if (aggregation == Aggregation.DEFAULT) {
             return RelationshipProjections.copyOf(this);
         }
         return modifyProjections(p -> p.withAggregation(aggregation));

@@ -126,7 +126,7 @@ class GraphLoaderDirectionalityTest {
     }
 
     @AllGraphTypesTest
-    void loadOutgoingWithoutDeduplication(Class<? extends GraphFactory> graphImpl) {
+    void loadOutgoingWithoutAggregation(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_OUTGOING, Direction.OUTGOING);
 
         assertEquals(4L, graph.nodeCount());
@@ -137,8 +137,8 @@ class GraphLoaderDirectionalityTest {
     }
 
     @AllGraphTypesTest
-    void loadUndirectedWithDeduplication(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadUndirectedGraph(graphImpl, DeduplicationStrategy.SINGLE);
+    void loadUndirectedWithAggregation(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadUndirectedGraph(graphImpl, Aggregation.SINGLE);
 
         assertEquals(4L, graph.nodeCount());
         assertOutRelationships(graph, 0, 0, 1);
@@ -148,8 +148,8 @@ class GraphLoaderDirectionalityTest {
     }
 
     @AllGraphTypesTest
-    void loadUndirectedWithoutDeduplication(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadUndirectedGraph(graphImpl, DeduplicationStrategy.NONE);
+    void loadUndirectedWithoutAggregation(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadUndirectedGraph(graphImpl, Aggregation.NONE);
 
         assertEquals(4L, graph.nodeCount());
         assertOutRelationships(graph, 0, 0, 0, 1);
@@ -222,7 +222,7 @@ class GraphLoaderDirectionalityTest {
                 graphImpl,
                 RELATIONSHIP_QUERY_UNDIRECTED,
                 Direction.BOTH,
-                DeduplicationStrategy.SINGLE,
+                Aggregation.SINGLE,
                 true);
 
         assertEquals(2L, graph.nodeCount());
@@ -236,7 +236,7 @@ class GraphLoaderDirectionalityTest {
                 graphImpl,
                 RELATIONSHIP_QUERY_UNDIRECTED,
                 Direction.BOTH,
-                DeduplicationStrategy.SINGLE,
+                Aggregation.SINGLE,
                 true);
 
         assertEquals(4L, graph.nodeCount());
@@ -250,14 +250,15 @@ class GraphLoaderDirectionalityTest {
             Class<? extends GraphFactory> graphImpl,
             String relationshipQuery,
             Direction direction) {
-        return loadGraph(DB_CYPHER, graphImpl, relationshipQuery, direction, DeduplicationStrategy.SINGLE, false);
+        return loadGraph(DB_CYPHER, graphImpl, relationshipQuery, direction, Aggregation.SINGLE, false);
     }
 
     private Graph loadUndirectedGraph(
             Class<? extends GraphFactory> graphImpl,
-            DeduplicationStrategy deduplicationStrategy) {
+            Aggregation aggregation
+    ) {
         return loadGraph(DB_CYPHER, graphImpl,
-                GraphLoaderDirectionalityTest.RELATIONSHIP_QUERY_UNDIRECTED, Direction.BOTH, deduplicationStrategy, true);
+                GraphLoaderDirectionalityTest.RELATIONSHIP_QUERY_UNDIRECTED, Direction.BOTH, aggregation, true);
     }
 
     private Graph loadGraph(
@@ -265,7 +266,7 @@ class GraphLoaderDirectionalityTest {
             Class<? extends GraphFactory> graphImpl,
             String relationshipQuery,
             Direction direction,
-            DeduplicationStrategy deduplicationStrategy,
+            Aggregation aggregation,
             boolean undirected) {
         runQuery(db, dbQuery);
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
@@ -288,7 +289,7 @@ class GraphLoaderDirectionalityTest {
             db,
             () -> graphLoader
                 .withDirection(direction)
-                .withDeduplicationStrategy(deduplicationStrategy)
+                .withDefaultAggregation(aggregation)
                 .load(graphImpl)
         );
     }

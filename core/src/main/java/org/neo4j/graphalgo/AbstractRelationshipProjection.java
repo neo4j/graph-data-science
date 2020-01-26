@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Map;
 import java.util.Optional;
@@ -39,8 +39,8 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
     }
 
     @Value.Default
-    public DeduplicationStrategy aggregation() {
-        return DeduplicationStrategy.DEFAULT;
+    public Aggregation aggregation() {
+        return Aggregation.DEFAULT;
     }
 
     @Value.Default
@@ -62,7 +62,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
             builder.projection(Projection.of(nonEmptyString(map, PROJECTION_KEY)));
         }
         if (map.containsKey(AGGREGATION_KEY)) {
-            builder.aggregation(DeduplicationStrategy.valueOf(nonEmptyString(map, AGGREGATION_KEY)));
+            builder.aggregation(Aggregation.valueOf(nonEmptyString(map, AGGREGATION_KEY)));
         }
         return create(map, properties -> builder.properties(properties).build());
     }

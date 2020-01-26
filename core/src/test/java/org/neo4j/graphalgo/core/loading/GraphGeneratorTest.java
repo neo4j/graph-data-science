@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -36,8 +36,8 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class GraphGeneratorTest {
 
-    public static final Graph EXPECTED_WITH_DEDUPLICATION = fromGdl("(a)-[{w: 0.0}]->(b)-[{w: 2.0}]->(c)-[{w: 4.0}]->(d)-[{w: 6.0}]->(a)");
-    public static final Graph EXPECTED_WITHOUT_DEDUPLICATION = fromGdl(
+    public static final Graph EXPECTED_WITH_AGGREGATION = fromGdl("(a)-[{w: 0.0}]->(b)-[{w: 2.0}]->(c)-[{w: 4.0}]->(d)-[{w: 6.0}]->(a)");
+    public static final Graph EXPECTED_WITHOUT_AGGREGATION = fromGdl(
         "(a)-[{w: 0.0}]->(b)" +
         "(a)-[{w: 0.0}]->(b)" +
         "(b)-[{w: 1.0}]->(c)" +
@@ -68,7 +68,7 @@ class GraphGeneratorTest {
             direction,
             false,
             false,
-            DeduplicationStrategy.SUM
+            Aggregation.SUM
         );
 
         for (int i = 0; i < nodeCount; i++) {
@@ -81,31 +81,31 @@ class GraphGeneratorTest {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = Direction.class)
-    void weightedWithDeduplication(Direction direction) {
-        Graph graph = generateGraph(direction, false, DeduplicationStrategy.SUM);
-        assertGraphEquals(EXPECTED_WITH_DEDUPLICATION, graph);
+    void weightedWithAggregation(Direction direction) {
+        Graph graph = generateGraph(direction, false, Aggregation.SUM);
+        assertGraphEquals(EXPECTED_WITH_AGGREGATION, graph);
         assertEquals(direction, graph.getLoadDirection());
     }
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = Direction.class)
-    void weightedWithoutDeduplication(Direction direction) {
-        Graph graph = generateGraph(direction, false, DeduplicationStrategy.NONE);
-        assertGraphEquals(EXPECTED_WITHOUT_DEDUPLICATION, graph);
+    void weightedWithoutAggregation(Direction direction) {
+        Graph graph = generateGraph(direction, false, Aggregation.NONE);
+        assertGraphEquals(EXPECTED_WITHOUT_AGGREGATION, graph);
         assertEquals(direction, graph.getLoadDirection());
     }
 
     @Test
-    void undirectedWithDeduplication() {
-        Graph graph = generateGraph(Direction.OUTGOING, true, DeduplicationStrategy.SUM);
-        assertGraphEquals(EXPECTED_WITH_DEDUPLICATION, graph);
+    void undirectedWithAggregation() {
+        Graph graph = generateGraph(Direction.OUTGOING, true, Aggregation.SUM);
+        assertGraphEquals(EXPECTED_WITH_AGGREGATION, graph);
         assertEquals(Direction.OUTGOING, graph.getLoadDirection());
     }
 
     @Test
-    void undirectedWithoutDeduplication() {
-        Graph graph = generateGraph(Direction.OUTGOING, true, DeduplicationStrategy.NONE);
-        assertGraphEquals(EXPECTED_WITHOUT_DEDUPLICATION, graph);
+    void undirectedWithoutAggregation() {
+        Graph graph = generateGraph(Direction.OUTGOING, true, Aggregation.NONE);
+        assertGraphEquals(EXPECTED_WITHOUT_AGGREGATION, graph);
         assertEquals(Direction.OUTGOING, graph.getLoadDirection());
     }
 
@@ -113,12 +113,12 @@ class GraphGeneratorTest {
     void shouldFailOnIncomingWithUndirected() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> generateGraph(Direction.INCOMING, true, DeduplicationStrategy.SUM)
+            () -> generateGraph(Direction.INCOMING, true, Aggregation.SUM)
         );
         assertTrue(exception.getMessage().contains("Direction must be OUTGOING if graph is undirected"));
     }
 
-    private Graph generateGraph(Direction outgoing, boolean undirected, DeduplicationStrategy  deduplicationStrategy) {
+    private Graph generateGraph(Direction outgoing, boolean undirected, Aggregation aggregation) {
         int nodeCount = 4;
 
         GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
@@ -136,7 +136,7 @@ class GraphGeneratorTest {
             outgoing,
             undirected,
             true,
-            deduplicationStrategy
+            aggregation
         );
 
         for (int i = 0; i < nodeCount; i++) {

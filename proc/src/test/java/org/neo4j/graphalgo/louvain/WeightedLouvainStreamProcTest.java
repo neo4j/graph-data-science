@@ -32,8 +32,8 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Result;
 
@@ -99,7 +99,7 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     RelationshipProjection.of(
                         "LINK",
                         Projection.UNDIRECTED,
-                        DeduplicationStrategy.NONE
+                        Aggregation.NONE
                     )
                 )
                 .withRelationshipProperty(PropertyMapping.of("weight", 0.0d))
@@ -113,7 +113,7 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     RelationshipProjection.of(
                         "LINK",
                         Projection.UNDIRECTED,
-                        DeduplicationStrategy.NONE
+                        Aggregation.NONE
                     )
                 )
                 .graphCreate("unweightedGraph")
@@ -176,7 +176,7 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                                     RelationshipProjection.builder()
                                         .type("LINK")
                                         .projection(Projection.UNDIRECTED)
-                                        .aggregation(DeduplicationStrategy.NONE)
+                                        .aggregation(Aggregation.NONE)
                                         .build()
                                 ).build()
                             ).build()
@@ -201,7 +201,7 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                                     RelationshipProjection.builder()
                                         .type("LINK")
                                         .projection(Projection.UNDIRECTED)
-                                        .aggregation(DeduplicationStrategy.NONE)
+                                        .aggregation(Aggregation.NONE)
                                         .addProperty(PropertyMapping.of("weight", 0.0d))
                                         .build()
                                 ).build()
@@ -244,7 +244,7 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                                     RelationshipProjection.builder()
                                         .type("LINK")
                                         .projection(Projection.UNDIRECTED)
-                                        .aggregation(DeduplicationStrategy.NONE)
+                                        .aggregation(Aggregation.NONE)
                                         .addProperty(PropertyMapping.of("weight", 0.0d))
                                         .build()
                                 ).build()

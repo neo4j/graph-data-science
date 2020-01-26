@@ -21,7 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 
 import java.util.Collections;
@@ -62,13 +62,13 @@ class PropertyMappingsTest {
         PropertyMapping totalUsdMapping = mappingIterator.next();
         assertEquals(totalUsdMapping.propertyKey(), "total_usd");
         assertEquals(totalUsdMapping.neoPropertyKey(), "usd");
-        assertEquals(totalUsdMapping.deduplicationStrategy(), DeduplicationStrategy.MIN);
+        assertEquals(totalUsdMapping.aggregation(), Aggregation.MIN);
         assertEquals(totalUsdMapping.defaultValue(), 42.0);
 
         PropertyMapping transactionCountMapping = mappingIterator.next();
         assertEquals(transactionCountMapping.propertyKey(), "transaction_count");
         assertEquals(transactionCountMapping.neoPropertyKey(), "usd");
-        assertEquals(transactionCountMapping.deduplicationStrategy(), DeduplicationStrategy.SUM);
+        assertEquals(transactionCountMapping.aggregation(), Aggregation.SUM);
         assertEquals(transactionCountMapping.defaultValue(), HugeGraph.NO_PROPERTY_VALUE);
     }
 

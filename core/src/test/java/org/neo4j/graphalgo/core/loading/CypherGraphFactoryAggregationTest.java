@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -39,7 +39,7 @@ import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 
-class CypherGraphFactoryDeduplicationTest {
+class CypherGraphFactoryAggregationTest {
 
     public static final String DB_CYPHER = "MERGE (n1 {id: 1})" +
                                            "MERGE (n2 {id: 2}) " +
@@ -76,7 +76,7 @@ class CypherGraphFactoryDeduplicationTest {
             () -> new GraphLoader(db)
                 .withLabel(nodes)
                 .withRelationshipType(rels)
-                .withDeduplicationStrategy(DeduplicationStrategy.SINGLE)
+                .withDefaultAggregation(Aggregation.SINGLE)
                 .load(CypherGraphFactory.class)
         );
 
@@ -96,7 +96,7 @@ class CypherGraphFactoryDeduplicationTest {
                 .withLabel(nodes)
                 .withRelationshipType(rels)
                 .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .withDeduplicationStrategy(DeduplicationStrategy.SINGLE)
+                .withDefaultAggregation(Aggregation.SINGLE)
                 .load(CypherGraphFactory.class)
         );
 
@@ -108,7 +108,7 @@ class CypherGraphFactoryDeduplicationTest {
     @ParameterizedTest
     @CsvSource({"SUM, 14.0", "MAX, 10.0", "MIN, 4.0"})
     void testLoadCypherDuplicateRelationshipsWithWeightsAggregation(
-        DeduplicationStrategy deduplicationStrategy,
+        Aggregation aggregation,
         double expectedWeight
     ) {
         String nodes = "MATCH (n) RETURN id(n) AS id";
@@ -120,7 +120,7 @@ class CypherGraphFactoryDeduplicationTest {
                 .withLabel(nodes)
                 .withRelationshipType(rels)
                 .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .withDeduplicationStrategy(deduplicationStrategy)
+                .withDefaultAggregation(aggregation)
                 .load(CypherGraphFactory.class)
         );
 

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -58,14 +58,14 @@ public final class GraphGenerator {
         Direction direction,
         boolean undirected,
         boolean loadRelationshipProperty,
-        DeduplicationStrategy deduplicationStrategy
+        Aggregation aggregation
     ) {
         return createRelImporter(
             nodeImporter,
             direction,
             undirected,
             loadRelationshipProperty,
-            deduplicationStrategy,
+            aggregation,
             true
         );
     }
@@ -75,7 +75,7 @@ public final class GraphGenerator {
         Direction direction,
         boolean undirected,
         boolean loadRelationshipProperty,
-        DeduplicationStrategy deduplicationStrategy,
+        Aggregation aggregation,
         boolean legacyMode
     ) {
         return createRelImporter(
@@ -83,7 +83,7 @@ public final class GraphGenerator {
             direction,
             undirected,
             loadRelationshipProperty,
-            deduplicationStrategy,
+            aggregation,
             nodeImporter.executorService,
             nodeImporter.tracker,
             legacyMode
@@ -95,7 +95,7 @@ public final class GraphGenerator {
         Direction direction,
         boolean undirected,
         boolean loadRelationshipProperty,
-        DeduplicationStrategy deduplicationStrategy,
+        Aggregation aggregation,
         ExecutorService executorService,
         AllocationTracker tracker
     ) {
@@ -104,7 +104,7 @@ public final class GraphGenerator {
             direction,
             undirected,
             loadRelationshipProperty,
-            deduplicationStrategy,
+            aggregation,
             executorService,
             tracker,
             true
@@ -116,7 +116,7 @@ public final class GraphGenerator {
         Direction direction,
         boolean undirected,
         boolean loadRelationshipProperty,
-        DeduplicationStrategy deduplicationStrategy,
+        Aggregation aggregation,
         ExecutorService executorService,
         AllocationTracker tracker,
         boolean legacyMode
@@ -126,7 +126,7 @@ public final class GraphGenerator {
             direction,
             undirected,
             loadRelationshipProperty,
-            deduplicationStrategy,
+            aggregation,
             executorService,
             tracker,
             legacyMode
@@ -211,7 +211,7 @@ public final class GraphGenerator {
             Direction direction,
             boolean undirected,
             boolean loadRelationshipProperty,
-            DeduplicationStrategy deduplicationStrategy,
+            Aggregation aggregation,
             ExecutorService executorService,
             AllocationTracker tracker,
             boolean legacyMode
@@ -249,7 +249,7 @@ public final class GraphGenerator {
 
             if (loadOutgoing) {
                 this.outRelationshipsBuilder = new RelationshipsBuilder(
-                    new DeduplicationStrategy[]{deduplicationStrategy},
+                    new Aggregation[]{aggregation},
                     tracker,
                     loadRelationshipProperty ? 1 : 0
                 );
@@ -267,7 +267,7 @@ public final class GraphGenerator {
 
             if (loadIncoming || undirected) {
                 this.inRelationshipsBuilder = new RelationshipsBuilder(
-                    new DeduplicationStrategy[]{deduplicationStrategy},
+                    new Aggregation[]{aggregation},
                     tracker,
                     loadRelationshipProperty ? 1 : 0
                 );

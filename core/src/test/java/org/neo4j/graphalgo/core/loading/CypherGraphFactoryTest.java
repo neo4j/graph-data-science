@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
@@ -142,7 +142,7 @@ class CypherGraphFactoryTest {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
 
-        loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.NONE, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE, parallel);
     }
 
     @ParameterizedTest(name = "parallel={0}")
@@ -152,7 +152,7 @@ class CypherGraphFactoryTest {
         String nodeStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
 
-        loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.NONE, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE, parallel);
     }
 
     @ParameterizedTest(name = "parallel={0}")
@@ -162,7 +162,7 @@ class CypherGraphFactoryTest {
         String pagingQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
 
-        loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.NONE, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE, parallel);
     }
 
     @ParameterizedTest(name = "parallel={0}")
@@ -175,7 +175,7 @@ class CypherGraphFactoryTest {
             "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
 
-        loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.SUM, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SUM, parallel);
     }
 
     @ParameterizedTest(name = "parallel={0}")
@@ -186,7 +186,7 @@ class CypherGraphFactoryTest {
         String pagingRelQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
         String relStatement = String.format(pagingRelQuery, parallel ? SKIP_LIMIT : "");
 
-        loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.NONE, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE, parallel);
     }
 
     @ParameterizedTest(name = "parallel={0}")
@@ -196,7 +196,7 @@ class CypherGraphFactoryTest {
         String pagingQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
 
-        loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.NONE, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE, parallel);
     }
 
     @ParameterizedTest(name = "parallel={0}")
@@ -209,7 +209,7 @@ class CypherGraphFactoryTest {
             "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
 
-        loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.SUM, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SUM, parallel);
     }
 
     @ParameterizedTest(name = "parallel={0}")
@@ -222,7 +222,7 @@ class CypherGraphFactoryTest {
             "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop AS weight ";
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
 
-        loadAndTestGraph(nodeStatement, relStatement, DeduplicationStrategy.SINGLE, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SINGLE, parallel);
     }
 
     @Test
@@ -275,7 +275,7 @@ class CypherGraphFactoryTest {
         GraphsByRelationshipType graphs = TestGraphLoader
             .from(db)
             .withRelationshipProperties(PropertyMappings.of(prop1, prop2, prop3), false)
-            .withDeduplicationStrategy(DeduplicationStrategy.DEFAULT)
+            .withDefaultAggregation(Aggregation.DEFAULT)
             .buildGraphs(CypherGraphFactory.class);
 
         String expectedGraph =
@@ -302,12 +302,12 @@ class CypherGraphFactoryTest {
     private void loadAndTestGraph(
         String nodeStatement,
         String relStatement,
-        DeduplicationStrategy strategy,
+        Aggregation strategy,
         boolean parallel
     ) {
         GraphLoader loader = new GraphLoader(db)
             .withBatchSize(1000)
-            .withDeduplicationStrategy(strategy)
+            .withDefaultAggregation(strategy)
             .withRelationshipProperties(PropertyMapping.of("weight", 0D))
             .withLabel(nodeStatement)
             .withRelationshipType(relStatement);

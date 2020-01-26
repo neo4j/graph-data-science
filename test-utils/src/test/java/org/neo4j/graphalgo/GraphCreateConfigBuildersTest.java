@@ -23,7 +23,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromCypherConfig;
@@ -72,7 +72,7 @@ class GraphCreateConfigBuildersTest {
                     .relationshipProjection(RelationshipProjections.builder()
                         .putProjection(
                             ElementIdentifier.of("BAR"),
-                            RelationshipProjection.of("BAR", Projection.NATURAL, DeduplicationStrategy.DEFAULT)
+                            RelationshipProjection.of("BAR", Projection.NATURAL, Aggregation.DEFAULT)
                         )
                         .build())
                     .nodeProperties(PropertyMappings.of())
@@ -88,7 +88,7 @@ class GraphCreateConfigBuildersTest {
                     .relationshipProjection(RelationshipProjections.builder()
                         .putProjection(
                             ElementIdentifier.of("BAR"),
-                            RelationshipProjection.of("BAR", Projection.NATURAL, DeduplicationStrategy.DEFAULT)
+                            RelationshipProjection.of("BAR", Projection.NATURAL, Aggregation.DEFAULT)
                         )
                         .build())
                     .nodeProperties(PropertyMappings.of())
@@ -104,7 +104,7 @@ class GraphCreateConfigBuildersTest {
                     .relationshipProjection(RelationshipProjections.builder()
                         .putProjection(
                             ElementIdentifier.of("BAR"),
-                            RelationshipProjection.of("BAR", Projection.UNDIRECTED, DeduplicationStrategy.DEFAULT)
+                            RelationshipProjection.of("BAR", Projection.UNDIRECTED, Aggregation.DEFAULT)
                         )
                         .build())
                     .nodeProperties(PropertyMappings.of())
@@ -125,11 +125,11 @@ class GraphCreateConfigBuildersTest {
                     .relationshipProjection(RelationshipProjections.builder()
                         .putProjection(
                             ElementIdentifier.of("BAR"),
-                            RelationshipProjection.of("BAR", Projection.UNDIRECTED, DeduplicationStrategy.DEFAULT)
+                            RelationshipProjection.of("BAR", Projection.UNDIRECTED, Aggregation.DEFAULT)
                         )
                         .putProjection(
                             ElementIdentifier.of("BAZ"),
-                            RelationshipProjection.of("BAZ", Projection.NATURAL, DeduplicationStrategy.DEFAULT)
+                            RelationshipProjection.of("BAZ", Projection.NATURAL, Aggregation.DEFAULT)
                         )
                         .build())
                     .nodeProperties(PropertyMappings.of())
@@ -241,17 +241,17 @@ class GraphCreateConfigBuildersTest {
                     .loadAnyLabel()
                     .loadAnyRelationshipType()
                     .addRelationshipProperty(PropertyMapping.of("foo", 42.0D))
-                    .globalDeduplicationStrategy(DeduplicationStrategy.MAX)
+                    .globalAggregation(Aggregation.MAX)
                     .build(),
                 ImmutableGraphCreateFromCypherConfig.builder().username("").graphName("")
                     .nodeQuery(ALL_NODES_QUERY)
                     .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
                     .nodeProjection(NodeProjections.empty())
                     .relationshipProjection(RelationshipProjections.builder()
-                        .putProjection(PROJECT_ALL, RelationshipProjection.of("*", Projection.NATURAL, DeduplicationStrategy.MAX))
+                        .putProjection(PROJECT_ALL, RelationshipProjection.of("*", Projection.NATURAL, Aggregation.MAX))
                         .build())
                     .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of(PropertyMapping.of("foo", 42.0D, DeduplicationStrategy.MAX)))
+                    .relationshipProperties(PropertyMappings.of(PropertyMapping.of("foo", 42.0D, Aggregation.MAX)))
                     .build()
             )
         );

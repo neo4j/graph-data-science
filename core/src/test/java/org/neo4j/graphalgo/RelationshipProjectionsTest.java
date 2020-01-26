@@ -24,7 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -42,7 +42,7 @@ import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.PROJECTION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.SINGLE;
+import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 class RelationshipProjectionsTest {
@@ -97,7 +97,7 @@ class RelationshipProjectionsTest {
                 .builder()
                 .type("T")
                 .projection(Projection.NATURAL)
-                .aggregation(DeduplicationStrategy.DEFAULT)
+                .aggregation(Aggregation.DEFAULT)
                 .properties(PropertyMappings.of())
                 .build()
         )).build();
@@ -119,7 +119,7 @@ class RelationshipProjectionsTest {
             RelationshipProjection
                 .builder()
                 .type((String) null)
-                .aggregation(DeduplicationStrategy.DEFAULT)
+                .aggregation(Aggregation.DEFAULT)
                 .properties(PropertyMappings.of())
                 .build()
         )).build();

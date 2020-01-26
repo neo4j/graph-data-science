@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.apache.lucene.util.LongsRef;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -32,24 +32,24 @@ import static org.neo4j.graphalgo.core.loading.AdjacencyCompression.writeDegree;
 class ThreadLocalRelationshipsBuilder {
 
     private final ReentrantLock lock;
-    private final DeduplicationStrategy[] deduplicationStrategies;
+    private final Aggregation[] aggregations;
     private final AdjacencyListBuilder.Allocator adjacencyAllocator;
     private final AdjacencyListBuilder.Allocator[] propertiesAllocators;
     private final long[] adjacencyOffsets;
     private final long[][] weightOffsets;
-    private final boolean noDeduplication;
+    private final boolean noAggregation;
 
     ThreadLocalRelationshipsBuilder(
-            DeduplicationStrategy[] deduplicationStrategies,
+            Aggregation[] aggregations,
             AdjacencyListBuilder.Allocator adjacencyAllocator,
             final AdjacencyListBuilder.Allocator[] propertiesAllocators,
             long[] adjacencyOffsets,
             final long[][] weightOffsets) {
-        if (deduplicationStrategies.length == 0) {
-            throw new IllegalArgumentException("Needs at least one deduplication strategy");
+        if (aggregations.length == 0) {
+            throw new IllegalArgumentException("Needs at least one aggregation");
         }
-        this.deduplicationStrategies = deduplicationStrategies;
-        this.noDeduplication = Arrays.stream(deduplicationStrategies).allMatch(d -> d == DeduplicationStrategy.NONE);
+        this.aggregations = aggregations;
+        this.noAggregation = Arrays.stream(aggregations).allMatch(d -> d == Aggregation.NONE);
         this.adjacencyAllocator = adjacencyAllocator;
         this.propertiesAllocators = propertiesAllocators;
         this.adjacencyOffsets = adjacencyOffsets;
@@ -93,7 +93,7 @@ class ThreadLocalRelationshipsBuilder {
             int localId) {
         byte[] storage = array.storage();
         AdjacencyCompression.copyFrom(buffer, array);
-        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, deduplicationStrategies[0]);
+        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, aggregations[0]);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
         long address = copyIds(storage, requiredBytes, degree);
         adjacencyOffsets[localId] = address;
@@ -108,7 +108,7 @@ class ThreadLocalRelationshipsBuilder {
         byte[] storage = array.storage();
         long[][] weights = array.weights();
         AdjacencyCompression.copyFrom(buffer, array);
-        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, weights, deduplicationStrategies, noDeduplication);
+        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, weights, aggregations, noAggregation);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
 
         adjacencyOffsets[localId] = copyIds(storage, requiredBytes, degree);

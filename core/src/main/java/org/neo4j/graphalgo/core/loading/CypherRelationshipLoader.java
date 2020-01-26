@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.NONE;
+import static org.neo4j.graphalgo.core.Aggregation.NONE;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 @Value.Enclosing
@@ -59,7 +59,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     private final Context loaderContext;
     private final GraphDimensions outerDimensions;
     private final boolean hasExplicitPropertyMappings;
-    private final DeduplicationStrategy globalDeduplicationStrategy;
+    private final Aggregation globalAggregation;
     private final double globalDefaultPropertyValue;
     private final Map<RelationshipProjectionMapping, LongAdder> relationshipCounters;
 
@@ -71,7 +71,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     private boolean importWeights;
     private int[] propertyKeyIds;
     private double[] propertyDefaultValues;
-    private DeduplicationStrategy[] deduplicationStrategies;
+    private Aggregation[] aggregations;
     private boolean initializedFromResult;
 
     private GraphDimensions resultDimensions;
@@ -91,9 +91,9 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
         this.hasExplicitPropertyMappings = dimensions.relationshipProperties().hasMappings();
 
-        this.globalDeduplicationStrategy = setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
+        this.globalAggregation = setup.aggregation() == Aggregation.DEFAULT
             ? NONE
-            : setup.deduplicationStrategy();
+            : setup.aggregation();
         this.globalDefaultPropertyValue = setup.relationshipDefaultPropertyValue().orElse(DEFAULT_FALLBACK_VALUE);
 
         this.resultDimensions = initFromDimension(dimensions);
@@ -124,7 +124,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                     mapping.propertyKey(),
                     mapping.neoPropertyKey(),
                     mapping.defaultValue(),
-                    mapping.deduplicationStrategy()
+                    mapping.aggregation()
                 ))
                 .map(mapping -> mapping.resolveWith(propertyKeyIdsByName.get(mapping.neoPropertyKey())))
                 .collect(Collectors.toList())))
@@ -133,7 +133,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         importWeights = newDimensions.relationshipProperties().atLeastOneExists();
         propertyKeyIds = newDimensions.relationshipProperties().allPropertyKeyIds();
         propertyDefaultValues = newDimensions.relationshipProperties().allDefaultWeights();
-        deduplicationStrategies = getDeduplicationStrategies(newDimensions);
+        aggregations = getAggregations(newDimensions);
 
         return newDimensions;
     }
@@ -157,7 +157,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                     propertyColumn,
                     propertyColumn,
                     globalDefaultPropertyValue,
-                    globalDeduplicationStrategy
+                    globalAggregation
                 ))
                 .map(mapping -> mapping.resolveWith(NO_SUCH_PROPERTY_KEY))
                 .collect(Collectors.toList());
@@ -228,20 +228,20 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         return loaderContext.allBuilders;
     }
 
-    private DeduplicationStrategy[] getDeduplicationStrategies(GraphDimensions dimensions) {
-        DeduplicationStrategy[] deduplicationStrategies = dimensions
+    private Aggregation[] getAggregations(GraphDimensions dimensions) {
+        Aggregation[] aggregations = dimensions
             .relationshipProperties()
             .stream()
-            .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
+            .map(property -> property.aggregation() == Aggregation.DEFAULT
                 ? NONE
-                : property.deduplicationStrategy()
+                : property.aggregation()
             )
-            .toArray(DeduplicationStrategy[]::new);
+            .toArray(Aggregation[]::new);
         // TODO: backwards compat code
-        if (deduplicationStrategies.length == 0) {
-            deduplicationStrategies = new DeduplicationStrategy[]{globalDeduplicationStrategy};
+        if (aggregations.length == 0) {
+            aggregations = new Aggregation[]{globalAggregation};
         }
-        return deduplicationStrategies;
+        return aggregations;
     }
 
     class Context {
@@ -269,7 +269,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
         private SingleTypeRelationshipImporter.Builder.WithImporter createImporter(RelationshipProjectionMapping typeMapping) {
             RelationshipsBuilder builder = new RelationshipsBuilder(
-                deduplicationStrategies,
+                aggregations,
                 setup.tracker(),
                 propertyKeyIds.length
             );

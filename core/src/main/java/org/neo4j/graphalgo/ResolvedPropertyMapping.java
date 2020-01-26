@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.kernel.api.StatementConstants;
 
 @ValueClass
@@ -38,7 +38,7 @@ public abstract class ResolvedPropertyMapping {
 
     public abstract double defaultValue();
 
-    public abstract DeduplicationStrategy deduplicationStrategy();
+    public abstract Aggregation aggregation();
 
     /**
      * Property identifier from Neo4j token store

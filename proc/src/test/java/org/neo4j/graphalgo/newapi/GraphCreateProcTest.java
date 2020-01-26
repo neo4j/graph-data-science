@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -97,7 +97,7 @@ class GraphCreateProcTest extends BaseProcTest {
             "REL", map(
                 TYPE_KEY, "REL",
                 PROJECTION_KEY, Projection.NATURAL.name(),
-                AGGREGATION_KEY, DeduplicationStrategy.DEFAULT.name(),
+                AGGREGATION_KEY, Aggregation.DEFAULT.name(),
                 PROPERTIES_KEY, emptyMap()
             )
         );
@@ -130,7 +130,7 @@ class GraphCreateProcTest extends BaseProcTest {
             "*", map(
                 TYPE_KEY, "*",
                 PROJECTION_KEY, Projection.NATURAL.name(),
-                AGGREGATION_KEY, DeduplicationStrategy.DEFAULT.name(),
+                AGGREGATION_KEY, Aggregation.DEFAULT.name(),
                 PROPERTIES_KEY, emptyMap()
             )
         );
@@ -165,7 +165,7 @@ class GraphCreateProcTest extends BaseProcTest {
             "REL", map(
                 TYPE_KEY, "REL",
                 PROJECTION_KEY, Projection.NATURAL.name(),
-                AGGREGATION_KEY, DeduplicationStrategy.DEFAULT.name(),
+                AGGREGATION_KEY, Aggregation.DEFAULT.name(),
                 PROPERTIES_KEY, emptyMap()
             )
         );
@@ -458,7 +458,7 @@ class GraphCreateProcTest extends BaseProcTest {
         Map<String, Object> expectedRelProjection = MapUtil.genericMap(
             new HashMap<>(relProjection),
             AGGREGATION_KEY,
-            DeduplicationStrategy.DEFAULT.name()
+            Aggregation.DEFAULT.name()
         );
 
         Map<String, Object> relProjections = map("B", relProjection);

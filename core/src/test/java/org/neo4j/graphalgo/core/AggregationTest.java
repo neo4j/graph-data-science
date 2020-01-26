@@ -26,13 +26,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class DeduplicationStrategyTest {
+class AggregationTest {
 
     private static final double[] inputs = new double[]{0.5, 1.4};
 
     @ParameterizedTest
     @CsvSource({"MAX, 1.4", "MIN, 0.5", "SINGLE, 0.5", "SUM, 1.9"})
-    void testSuccessfulDuplateRelationshipStrategies(DeduplicationStrategy strategy, double expected) {
+    void testSuccessfulDuplateRelationshipStrategies(Aggregation strategy, double expected) {
         assertEquals(expected, strategy.merge(inputs[0], inputs[1]));
     }
 
@@ -40,8 +40,8 @@ class DeduplicationStrategyTest {
     void testFailingDuplicateRelationshipStrategies() {
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
-                () -> DeduplicationStrategy.NONE.merge(42, 42));
-        String expected = "Multiple relationships between the same pair of nodes are not expected. Try using SKIP or some other duplicate relationships strategy.";
+                () -> Aggregation.NONE.merge(42, 42));
+        String expected = "Multiple relationships between the same pair of nodes are not expected. Try using SKIP or some other aggregation.";
         assertEquals(expected, exception.getMessage());
     }
 
@@ -49,8 +49,8 @@ class DeduplicationStrategyTest {
     void testFailingDefaultDuplicateRelationshipStrategies() {
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
-                () -> DeduplicationStrategy.DEFAULT.merge(42, 42));
-        String expected = "This should never be used as a deduplication strategy, just as a placeholder for the default strategy of a given loader.";
+                () -> Aggregation.DEFAULT.merge(42, 42));
+        String expected = "This should never be used as a valid aggregation, just as a placeholder for the default aggregation of a given loader.";
         assertEquals(expected, exception.getMessage());
     }
 }

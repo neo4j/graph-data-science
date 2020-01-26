@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -110,7 +110,7 @@ class DijkstraProcTest_152 extends BaseProcTest {
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withOptionalLabel("Loc")
                 .withAnyRelationshipType()
-                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
+                .withDefaultAggregation(Aggregation.NONE)
                 .withRelationshipProperties(PropertyMapping.of("d", 0))
                 .load(HugeGraphFactory.class);
 

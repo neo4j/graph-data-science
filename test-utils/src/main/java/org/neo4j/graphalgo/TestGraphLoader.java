@@ -24,7 +24,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
@@ -38,8 +38,8 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.Projection.NATURAL;
 import static org.neo4j.graphalgo.Projection.REVERSE;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.DEFAULT;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.SINGLE;
+import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
+import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
 
 public final class TestGraphLoader {
 
@@ -54,7 +54,7 @@ public final class TestGraphLoader {
     private boolean addRelationshipPropertiesToLoader;
 
     private Direction direction = Direction.OUTGOING;
-    private Optional<DeduplicationStrategy> maybeDeduplicationStrategy = Optional.empty();
+    private Optional<Aggregation> maybeAggregation = Optional.empty();
 
     public static TestGraphLoader from(@NotNull GraphDatabaseAPI db) {
         return new TestGraphLoader(db);
@@ -103,8 +103,8 @@ public final class TestGraphLoader {
         return this;
     }
 
-    public TestGraphLoader withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
-        this.maybeDeduplicationStrategy = Optional.of(deduplicationStrategy);
+    public TestGraphLoader withDefaultAggregation(Aggregation aggregation) {
+        this.maybeAggregation = Optional.of(aggregation);
         return this;
     }
 
@@ -154,7 +154,7 @@ public final class TestGraphLoader {
             relPropertiesString
         ));
 
-        cypherLoaderBuilder.globalDeduplicationStrategy(maybeDeduplicationStrategy.orElse(SINGLE));
+        cypherLoaderBuilder.globalAggregation(maybeAggregation.orElse(SINGLE));
         if (addNodePropertiesToLoader) cypherLoaderBuilder.nodeProperties(nodeProperties);
         if (addRelationshipPropertiesToLoader) cypherLoaderBuilder.relationshipProperties(relProperties);
 
@@ -173,7 +173,7 @@ public final class TestGraphLoader {
                 .forEach(relType -> {
                     RelationshipProjection template = RelationshipProjection.empty()
                         .withType(relType)
-                        .withAggregation(maybeDeduplicationStrategy.orElse(SINGLE));
+                        .withAggregation(maybeAggregation.orElse(SINGLE));
                     if (direction == Direction.OUTGOING) {
                         storeLoaderBuilder.addRelationshipProjection(template.withProjection(NATURAL));
                     } else if (direction == Direction.INCOMING) {
@@ -186,10 +186,10 @@ public final class TestGraphLoader {
         } else {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(
                 "*",
-                RelationshipProjection.empty().withAggregation(maybeDeduplicationStrategy.orElse(DEFAULT))
+                RelationshipProjection.empty().withAggregation(maybeAggregation.orElse(DEFAULT))
             );
         }
-        storeLoaderBuilder.globalDeduplicationStrategy(maybeDeduplicationStrategy.orElse(SINGLE));
+        storeLoaderBuilder.globalAggregation(maybeAggregation.orElse(SINGLE));
         if (addNodePropertiesToLoader) storeLoaderBuilder.nodeProperties(nodeProperties);
         if (addRelationshipPropertiesToLoader) storeLoaderBuilder.relationshipProperties(relProperties);
         return storeLoaderBuilder.build();
@@ -202,7 +202,7 @@ public final class TestGraphLoader {
                 mapping.propertyKey(),
                 addSuffix(mapping.neoPropertyKey(), mutableInt.getAndIncrement()),
                 mapping.defaultValue(),
-                mapping.deduplicationStrategy()
+                mapping.aggregation()
             ))
             .toArray(PropertyMapping[]::new)
         );

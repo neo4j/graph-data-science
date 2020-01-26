@@ -24,7 +24,7 @@ import org.immutables.value.Value;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.cypher.v3_5.CypherPrinter;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
@@ -53,7 +53,7 @@ import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.Projection.NATURAL;
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_VALUE_KEY;
 import static org.neo4j.graphalgo.PropertyMapping.PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.DEFAULT;
+import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE, depluralize = true, deepImmutablesDetection = true)
 public abstract class GdsCypher {
@@ -166,29 +166,29 @@ public abstract class GdsCypher {
         default ImplicitCreationBuildStage withNodeProperty(
             String propertyKey,
             double defaultValue,
-            DeduplicationStrategy deduplicationStrategy
+            Aggregation aggregation
         ) {
-            return withNodeProperty(PropertyMapping.of(propertyKey, defaultValue, deduplicationStrategy));
+            return withNodeProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
         }
 
         default ImplicitCreationBuildStage withNodeProperty(
             String propertyKey,
-            DeduplicationStrategy deduplicationStrategy
+            Aggregation aggregation
         ) {
-            return withNodeProperty(PropertyMapping.of(propertyKey, deduplicationStrategy));
+            return withNodeProperty(PropertyMapping.of(propertyKey, aggregation));
         }
 
         default ImplicitCreationBuildStage withNodeProperty(
             String propertyKey,
             String neoPropertyKey,
             double defaultValue,
-            DeduplicationStrategy deduplicationStrategy
+            Aggregation aggregation
         ) {
             return withNodeProperty(PropertyMapping.of(
                 propertyKey,
                 neoPropertyKey,
                 defaultValue,
-                deduplicationStrategy
+                aggregation
             ));
         }
 
@@ -224,29 +224,29 @@ public abstract class GdsCypher {
         default ImplicitCreationBuildStage withRelationshipProperty(
             String propertyKey,
             double defaultValue,
-            DeduplicationStrategy deduplicationStrategy
+            Aggregation aggregation
         ) {
-            return withRelationshipProperty(PropertyMapping.of(propertyKey, defaultValue, deduplicationStrategy));
+            return withRelationshipProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
         }
 
         default ImplicitCreationBuildStage withRelationshipProperty(
             String propertyKey,
-            DeduplicationStrategy deduplicationStrategy
+            Aggregation aggregation
         ) {
-            return withRelationshipProperty(PropertyMapping.of(propertyKey, deduplicationStrategy));
+            return withRelationshipProperty(PropertyMapping.of(propertyKey, aggregation));
         }
 
         default ImplicitCreationBuildStage withRelationshipProperty(
             String propertyKey,
             String neoPropertyKey,
             double defaultValue,
-            DeduplicationStrategy deduplicationStrategy
+            Aggregation aggregation
         ) {
             return withRelationshipProperty(PropertyMapping.of(
                 propertyKey,
                 neoPropertyKey,
                 defaultValue,
-                deduplicationStrategy
+                aggregation
             ));
         }
 
@@ -829,9 +829,9 @@ public abstract class GdsCypher {
         if (Double.compare(defaultValue, PropertyMapping.DEFAULT_FALLBACK_VALUE) != 0) {
             value.put(DEFAULT_VALUE_KEY, defaultValue);
         }
-        DeduplicationStrategy deduplicationStrategy = propertyMapping.deduplicationStrategy();
-        if (includeAggregation && deduplicationStrategy != DEFAULT) {
-            value.put(AGGREGATION_KEY, deduplicationStrategy.name());
+        Aggregation aggregation = propertyMapping.aggregation();
+        if (includeAggregation && aggregation != DEFAULT) {
+            value.put(AGGREGATION_KEY, aggregation.name());
         }
         if (allowStringShortcut && value.size() == 1 && propertyKey.equals(propertyMapping.neoPropertyKey())) {
             return MinimalObject.string(propertyKey);

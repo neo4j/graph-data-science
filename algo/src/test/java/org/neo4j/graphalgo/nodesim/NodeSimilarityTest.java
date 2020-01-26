@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -621,7 +621,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
-            .withDeduplicationStrategy(DeduplicationStrategy.NONE)
+            .withDefaultAggregation(Aggregation.NONE)
             .withDirection(loadDirection)
             .load(HugeGraphFactory.class);
 

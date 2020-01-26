@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 
 import java.util.AbstractMap;
@@ -58,8 +58,8 @@ public abstract class PropertyMapping {
     }
 
     @Value.Default
-    public DeduplicationStrategy deduplicationStrategy() {
-        return DeduplicationStrategy.DEFAULT;
+    public Aggregation aggregation() {
+        return Aggregation.DEFAULT;
     }
 
     public static PropertyMapping fromObject(String propertyKey, Object stringOrMap) {
@@ -91,11 +91,11 @@ public abstract class PropertyMapping {
             String neoPropertyKey = (String) propertyNameValue;
 
             final Object aggregationValue = relPropertyMap.get(RelationshipProjection.AGGREGATION_KEY);
-            DeduplicationStrategy deduplicationStrategy;
+            Aggregation aggregation;
             if (aggregationValue == null) {
-                deduplicationStrategy = DeduplicationStrategy.DEFAULT;
+                aggregation = Aggregation.DEFAULT;
             } else if (aggregationValue instanceof String) {
-                deduplicationStrategy = DeduplicationStrategy.lookup(((String) aggregationValue).toUpperCase());
+                aggregation = Aggregation.lookup(((String) aggregationValue).toUpperCase());
             } else {
                 throw new IllegalStateException(String.format(
                     "Expected the value of '%s' to be of type String, but was '%s'",
@@ -120,7 +120,7 @@ public abstract class PropertyMapping {
                 propertyKey,
                 neoPropertyKey,
                 defaultProperty,
-                deduplicationStrategy
+                aggregation
             );
         } else {
             throw new IllegalStateException(String.format(
@@ -144,16 +144,16 @@ public abstract class PropertyMapping {
         value.put(PROPERTY_KEY, neoPropertyKey());
         value.put(DEFAULT_VALUE_KEY, defaultValue());
         if (includeAggregation) {
-            value.put(RelationshipProjection.AGGREGATION_KEY, deduplicationStrategy().name());
+            value.put(RelationshipProjection.AGGREGATION_KEY, aggregation().name());
         }
         return new AbstractMap.SimpleImmutableEntry<>(propertyKey(), value);
     }
 
-    public PropertyMapping setNonDefaultAggregation(DeduplicationStrategy deduplicationStrategy) {
-        if (deduplicationStrategy == DeduplicationStrategy.DEFAULT || deduplicationStrategy() != DeduplicationStrategy.DEFAULT) {
+    public PropertyMapping setNonDefaultAggregation(Aggregation aggregation) {
+        if (aggregation == Aggregation.DEFAULT || aggregation() != Aggregation.DEFAULT) {
             return this;
         }
-        return ((ImmutablePropertyMapping) this).withDeduplicationStrategy(deduplicationStrategy);
+        return ((ImmutablePropertyMapping) this).withAggregation(aggregation);
     }
 
     public final ResolvedPropertyMapping resolveWith(int propertyKeyId) {
@@ -165,7 +165,7 @@ public abstract class PropertyMapping {
             .neoPropertyKey(neoPropertyKey)
             .propertyKeyId(propertyKeyId)
             .defaultValue(defaultValue())
-            .deduplicationStrategy(deduplicationStrategy())
+            .aggregation(aggregation())
             .build();
     }
 
@@ -192,24 +192,24 @@ public abstract class PropertyMapping {
     public static PropertyMapping of(
         String propertyKey,
         double defaultValue,
-        DeduplicationStrategy deduplicationStrategy
+        Aggregation aggregation
     ) {
         return ImmutablePropertyMapping
             .builder()
             .propertyKey(propertyKey)
             .defaultValue(defaultValue)
-            .deduplicationStrategy(deduplicationStrategy)
+            .aggregation(aggregation)
             .build();
     }
 
     public static PropertyMapping of(
         String propertyKey,
-        DeduplicationStrategy deduplicationStrategy
+        Aggregation aggregation
     ) {
         return ImmutablePropertyMapping
             .builder()
             .propertyKey(propertyKey)
-            .deduplicationStrategy(deduplicationStrategy)
+            .aggregation(aggregation)
             .build();
     }
 
@@ -217,9 +217,9 @@ public abstract class PropertyMapping {
         String propertyKey,
         String neoPropertyKey,
         double defaultValue,
-        DeduplicationStrategy deduplicationStrategy
+        Aggregation aggregation
     ) {
-        return ImmutablePropertyMapping.of(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
+        return ImmutablePropertyMapping.of(propertyKey, neoPropertyKey, defaultValue, aggregation);
     }
 
     public static PropertyMapping of(ResolvedPropertyMapping resolvedPropertyMapping) {
@@ -227,7 +227,7 @@ public abstract class PropertyMapping {
             resolvedPropertyMapping.propertyKey(),
             resolvedPropertyMapping.neoPropertyKey(),
             resolvedPropertyMapping.defaultValue(),
-            resolvedPropertyMapping.deduplicationStrategy()
+            resolvedPropertyMapping.aggregation()
         );
     }
 }

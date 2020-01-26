@@ -50,12 +50,12 @@ import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.DEFAULT;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.MAX;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.MIN;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.NONE;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.SINGLE;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.SUM;
+import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
+import static org.neo4j.graphalgo.core.Aggregation.MAX;
+import static org.neo4j.graphalgo.core.Aggregation.MIN;
+import static org.neo4j.graphalgo.core.Aggregation.NONE;
+import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
+import static org.neo4j.graphalgo.core.Aggregation.SUM;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 import static org.neo4j.helpers.collection.Iterables.asSet;
 
@@ -87,7 +87,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesTest
     void parallelRelationshipsWithoutProperties(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
-            .withDeduplicationStrategy(DeduplicationStrategy.NONE)
+            .withDefaultAggregation(Aggregation.NONE)
             .buildGraph(graphFactory);
 
         Graph expected = fromGdl(
@@ -107,7 +107,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     void parallelRelationships(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-            .withDeduplicationStrategy(NONE)
+            .withDefaultAggregation(NONE)
             .buildGraph(graphFactory);
 
         Graph expected = fromGdl(
@@ -133,13 +133,13 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @ParameterizedTest
     @MethodSource("deduplicateWithWeightsParams")
-    void parallelRelationshipsWithDeduplication(
+    void parallelRelationshipsWithAggregation(
         Class<? extends GraphFactory> graphFactory,
-        DeduplicationStrategy deduplicationStrategy,
+        Aggregation aggregation,
         double expectedWeight
     ) {
         Graph graph = TestGraphLoader.from(db)
-            .withDeduplicationStrategy(deduplicationStrategy)
+            .withDefaultAggregation(aggregation)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .buildGraph(graphFactory);
 
@@ -156,9 +156,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void parallelRelationshipsWithDeduplication_SINGLE(Class<? extends GraphFactory> graphFactory) {
+    void parallelRelationshipsWithAggregation_SINGLE(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
-            .withDeduplicationStrategy(SINGLE)
+            .withDefaultAggregation(SINGLE)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .buildGraph(graphFactory);
 
@@ -230,9 +230,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
         GraphsByRelationshipType graphs = TestGraphLoader.from(localDb)
             .withRelationshipProperties(
-                PropertyMapping.of("agg1", "p1", 1.0, DeduplicationStrategy.NONE),
-                PropertyMapping.of("agg2", "p2", 2.0, DeduplicationStrategy.NONE),
-                PropertyMapping.of("agg3", "p3", 2.0, DeduplicationStrategy.NONE)
+                PropertyMapping.of("agg1", "p1", 1.0, Aggregation.NONE),
+                PropertyMapping.of("agg2", "p2", 2.0, Aggregation.NONE),
+                PropertyMapping.of("agg3", "p3", 2.0, Aggregation.NONE)
             )
             .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
@@ -313,7 +313,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void multiplePropertiesWithIncompatibleDeduplicationStrategies(Class<? extends GraphFactory> graphFactory) {
+    void multiplePropertiesWithIncompatibleAggregations(Class<? extends GraphFactory> graphFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -331,7 +331,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
             TestGraphLoader.from(localDb)
                 .withRelationshipProperties(
-                    PropertyMapping.of("p1", "p1", 1.0, DeduplicationStrategy.NONE),
+                    PropertyMapping.of("p1", "p1", 1.0, Aggregation.NONE),
                     PropertyMapping.of("p2", "p2", 2.0, SUM)
                 )
                 .withDirection(OUTGOING)
@@ -341,12 +341,12 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         assertThat(
             ex.getMessage(),
             containsString(
-                "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations.")
+                "Conflicting relationship property aggregations, it is not allowed to mix `NONE` with aggregations.")
         );
     }
 
     @AllGraphTypesTest
-    void singlePropertyWithDeduplications(Class<? extends GraphFactory> graphFactory) {
+    void singlePropertyWithAggregations(Class<? extends GraphFactory> graphFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -382,7 +382,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         assertGraphEquals(expectedP2Graph, p2Graph);
     }
 
-    static Stream<Arguments> globalAndLocalDeduplicationArguments() {
+    static Stream<Arguments> globalAndLocalAggregationsArguments() {
         return Stream.of(
             Arguments.of(MAX, DEFAULT, DEFAULT, 44, 46, 1339, 1341),
             Arguments.of(MIN, DEFAULT, MAX, 42, 45, 1339, 1341),
@@ -390,7 +390,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         );
     }
 
-    static Stream<Arguments> localDeduplicationArguments() {
+    static Stream<Arguments> localAggregationArguments() {
         return Stream.of(
             Arguments.of(MIN, 42, 45, 1337, 1340),
             Arguments.of(MAX, 44, 46, 1339, 1341),
@@ -398,20 +398,20 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         );
     }
 
-    static Stream<Arguments> graphImplWithGlobalAndLocalDeduplicationArguments() {
+    static Stream<Arguments> graphImplWithGlobalAndLocalAggregationArguments() {
         return crossArguments(
             toArguments(TestSupport::allTypes),
-            GraphLoaderMultipleRelTypesAndPropertiesTest::globalAndLocalDeduplicationArguments
+            GraphLoaderMultipleRelTypesAndPropertiesTest::globalAndLocalAggregationsArguments
         );
     }
 
     @ParameterizedTest
-    @MethodSource("graphImplWithGlobalAndLocalDeduplicationArguments")
-    void multiplePropertiesWithGlobalAndLocalDeduplicationStrategy(
+    @MethodSource("graphImplWithGlobalAndLocalAggregationArguments")
+    void multiplePropertiesWithGlobalAndLocalAggregations(
         Class<? extends GraphFactory> graphFactory,
-        DeduplicationStrategy globalDeduplicationStrategy,
-        DeduplicationStrategy localDeduplicationStrategy1,
-        DeduplicationStrategy localDeduplicationStrategy2,
+        Aggregation globalAggregation,
+        Aggregation localAggregation1,
+        Aggregation localAggregation2,
         double expectedNodeAP1,
         double expectedNodeBP1,
         double expectedNodeAP2,
@@ -428,10 +428,10 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                    " (b)-[:REL {p1: 46, p2: 1341}]->(b)");
 
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
-            .withDeduplicationStrategy(globalDeduplicationStrategy)
+            .withDefaultAggregation(globalAggregation)
             .withRelationshipProperties(
-                PropertyMapping.of("p1", "p1", 1.0, localDeduplicationStrategy1),
-                PropertyMapping.of("p2", "p2", 2.0, localDeduplicationStrategy2)
+                PropertyMapping.of("p1", "p1", 1.0, localAggregation1),
+                PropertyMapping.of("p2", "p2", 2.0, localAggregation2)
             )
             .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
@@ -470,7 +470,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
         GraphsByRelationshipType graphs = TestGraphLoader.from(localDb)
             .withRelationshipType("REL_1 | REL_2 | REL_3")
-            .withDeduplicationStrategy(MAX)
+            .withDefaultAggregation(MAX)
             .withRelationshipProperties(
                 PropertyMapping.of("agg", "p1", 1.0, MAX)
             )
@@ -487,18 +487,18 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         assertGraphEquals(expectedGraph, graph);
     }
 
-    static Stream<Arguments> graphImplWithLocalDeduplicationArguments() {
+    static Stream<Arguments> graphImplWithLocalAggregationArguments() {
         return crossArguments(
             toArguments(TestSupport::allTypes),
-            GraphLoaderMultipleRelTypesAndPropertiesTest::localDeduplicationArguments
+            GraphLoaderMultipleRelTypesAndPropertiesTest::localAggregationArguments
         );
     }
 
     @ParameterizedTest
-    @MethodSource("graphImplWithLocalDeduplicationArguments")
-    void multiplePropertiesWithDeduplication(
+    @MethodSource("graphImplWithLocalAggregationArguments")
+    void multiplePropertiesWithAggregation(
         Class<? extends GraphFactory> graphFactory,
-        DeduplicationStrategy deduplicationStrategy,
+        Aggregation aggregation,
         double expectedNodeAP1,
         double expectedNodeBP1,
         double expectedNodeAP2,
@@ -516,8 +516,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (b)-[:REL {p1: 46, p2: 1341}]->(b)");
         GraphsByRelationshipType graphs = TestGraphLoader.from(localDb)
             .withRelationshipProperties(
-                PropertyMapping.of("p1", "p1", 1.0, deduplicationStrategy),
-                PropertyMapping.of("p2", "p2", 2.0, deduplicationStrategy)
+                PropertyMapping.of("p1", "p1", 1.0, aggregation),
+                PropertyMapping.of("p2", "p2", 2.0, aggregation)
             )
             .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
@@ -542,7 +542,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void multiplePropertiesWithDeduplication_SINGLE(Class<? extends GraphFactory> graphFactory) {
+    void multiplePropertiesWithAggregation_SINGLE(Class<? extends GraphFactory> graphFactory) {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(db,
             "CREATE" +

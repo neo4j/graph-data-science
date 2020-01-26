@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
@@ -307,41 +307,41 @@ public final class HugeGraphFactory extends GraphFactory {
         RelationshipsBuilder outgoingRelationshipsBuilder = null;
         RelationshipsBuilder incomingRelationshipsBuilder = null;
 
-        DeduplicationStrategy[] deduplicationStrategies = dimensions
+        Aggregation[] aggregations = dimensions
                 .relationshipProperties()
                 .stream()
-                .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
-                        ? DeduplicationStrategy.SINGLE
-                        : property.deduplicationStrategy()
+                .map(property -> property.aggregation() == Aggregation.DEFAULT
+                        ? Aggregation.SINGLE
+                        : property.aggregation()
                 )
-                .toArray(DeduplicationStrategy[]::new);
+                .toArray(Aggregation[]::new);
         // TODO: backwards compat code
-        if (deduplicationStrategies.length == 0) {
-            DeduplicationStrategy deduplicationStrategy =
-                setup.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
-                            ? DeduplicationStrategy.SINGLE
-                            : setup.deduplicationStrategy();
-            deduplicationStrategies = new DeduplicationStrategy[]{deduplicationStrategy};
+        if (aggregations.length == 0) {
+            Aggregation aggregation =
+                setup.aggregation() == Aggregation.DEFAULT
+                            ? Aggregation.SINGLE
+                            : setup.aggregation();
+            aggregations = new Aggregation[]{aggregation};
         }
 
         if (setup.legacyMode()) {
             if (setup.loadAsUndirected()) {
                 outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                    deduplicationStrategies,
+                    aggregations,
                     tracker,
                     setup.relationshipPropertyMappings().numberOfMappings()
                 );
             } else {
                 if (setup.loadOutgoing()) {
                     outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                        deduplicationStrategies,
+                        aggregations,
                         tracker,
                         setup.relationshipPropertyMappings().numberOfMappings()
                     );
                 }
                 if (setup.loadIncoming()) {
                     incomingRelationshipsBuilder = new RelationshipsBuilder(
-                        deduplicationStrategies,
+                        aggregations,
                         tracker,
                         setup.relationshipPropertyMappings().numberOfMappings()
                     );
@@ -350,14 +350,14 @@ public final class HugeGraphFactory extends GraphFactory {
         } else {
             if (relationshipProjectionMapping.projection() == Projection.NATURAL || relationshipProjectionMapping.projection() == Projection.UNDIRECTED) {
                 outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                    deduplicationStrategies,
+                    aggregations,
                     tracker,
                     setup.relationshipPropertyMappings().numberOfMappings()
                 );
             }
             if (relationshipProjectionMapping.projection() == Projection.REVERSE) {
                 incomingRelationshipsBuilder = new RelationshipsBuilder(
-                    deduplicationStrategies,
+                    aggregations,
                     tracker,
                     setup.relationshipPropertyMappings().numberOfMappings()
                 );

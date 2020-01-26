@@ -425,7 +425,7 @@ class GraphLoadProcTest extends BaseProcTest {
         });
         Throwable rootCause = ExceptionUtil.rootCause(exMissingProperty);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("Deduplication strategy `FOOBAR` is not supported."));
+        assertThat(rootCause.getMessage(), containsString("Aggregation `FOOBAR` is not supported."));
     }
 
     @Disabled

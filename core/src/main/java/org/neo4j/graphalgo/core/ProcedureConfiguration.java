@@ -99,7 +99,7 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
             .withOptionalRelationshipType(relationship)
             .withConcurrency(getReadConcurrency())
             .withBatchSize(getBatchSize())
-            .withDeduplicationStrategy(getDeduplicationStrategy())
+            .withDefaultAggregation(getAggregation())
             .withParams(getParams())
             .withLoadedGraph(false);
     }
@@ -553,9 +553,9 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
         return configurationMap.getChecked("params", Collections.emptyMap(), Map.class);
     }
 
-    public DeduplicationStrategy getDeduplicationStrategy() {
+    public Aggregation getAggregation() {
         String strategy = configurationMap.get("duplicateRelationships", null);
-        return strategy != null ? DeduplicationStrategy.lookup(strategy.toUpperCase()) : DeduplicationStrategy.DEFAULT;
+        return strategy != null ? Aggregation.lookup(strategy.toUpperCase()) : Aggregation.DEFAULT;
     }
 
     @Override

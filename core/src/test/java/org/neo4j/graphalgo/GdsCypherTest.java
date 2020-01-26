@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Direction;
@@ -147,8 +147,8 @@ class GdsCypherTest {
         RelationshipProjection barRel = RelationshipProjection.builder()
             .type("Bar")
             .projection(Projection.UNDIRECTED)
-            .aggregation(DeduplicationStrategy.SINGLE)
-            .addProperty("relProp", "RelationshipPropertyName", 1337, DeduplicationStrategy.MAX)
+            .aggregation(Aggregation.SINGLE)
+            .addProperty("relProp", "RelationshipPropertyName", 1337, Aggregation.MAX)
             .build();
 
         GraphCreateConfig configFromBuilder = ImmutableGraphCreateFromStoreConfig

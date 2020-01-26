@@ -22,19 +22,19 @@ package org.neo4j.graphalgo.core;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public enum DeduplicationStrategy {
+public enum Aggregation {
     DEFAULT {
         public double merge(double runningTotal, double value) {
             throw new UnsupportedOperationException(
-                    "This should never be used as a deduplication strategy, " +
-                    "just as a placeholder for the default strategy of a given loader.");
+                    "This should never be used as a valid aggregation, " +
+                    "just as a placeholder for the default aggregation of a given loader.");
         }
     },
     NONE {
         public double merge(double runningTotal, double value) {
             throw new UnsupportedOperationException(
                     "Multiple relationships between the same pair of nodes are not expected. " +
-                    "Try using SKIP or some other duplicate relationships strategy.");
+                    "Try using SKIP or some other aggregation.");
         }
     },
     SINGLE {
@@ -60,19 +60,19 @@ public enum DeduplicationStrategy {
 
     public abstract double merge(double runningTotal, double value);
 
-    public static DeduplicationStrategy lookup(String name) {
+    public static Aggregation lookup(String name) {
         if (name.equalsIgnoreCase("SKIP")) {
             name = SINGLE.name();
         }
         try {
-            return DeduplicationStrategy.valueOf(name.toUpperCase());
+            return Aggregation.valueOf(name.toUpperCase());
         } catch (IllegalArgumentException e) {
             String availableStrategies = Arrays
-                    .stream(DeduplicationStrategy.values())
-                    .map(DeduplicationStrategy::name)
+                    .stream(Aggregation.values())
+                    .map(Aggregation::name)
                     .collect(Collectors.joining(", "));
             throw new IllegalArgumentException(String.format(
-                    "Deduplication strategy `%s` is not supported. Must be one of: %s.",
+                    "Aggregation `%s` is not supported. Must be one of: %s.",
                     name,
                     availableStrategies));
         }
