@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.betweenness;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
 
 public interface BaseBetweennessCentralityConfig extends WriteConfig {
@@ -33,12 +34,15 @@ public interface BaseBetweennessCentralityConfig extends WriteConfig {
 
     @Value.Check
     default void validate() {
-        implicitCreateConfig().ifPresent(gcc -> {
-            if (gcc.relationshipProjection().projections().size() > 1) {
-                throw new IllegalArgumentException(
-                    "Betweenness Centrality does not support multiple relationship projections.");
-            }
-        });
+        implicitCreateConfig().ifPresent(this::validate);
+    }
+
+    @Configuration.Ignore
+    default void validate(GraphCreateConfig graphCreateConfig) {
+        if (graphCreateConfig.relationshipProjection().projections().size() > 1) {
+            throw new IllegalArgumentException(
+                "Betweenness Centrality does not support multiple relationship projections.");
+        }
     }
 
     @Configuration.Ignore
