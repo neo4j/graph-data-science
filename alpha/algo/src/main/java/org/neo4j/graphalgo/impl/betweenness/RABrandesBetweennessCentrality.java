@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,18 +77,27 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
     private final int expectedNodeCount;
     private final ExecutorService executorService;
     private final int concurrency;
+    private final double divisor;
     private SelectionStrategy selectionStrategy;
-    private Direction direction = Direction.OUTGOING;
-    private double divisor = 1.0;
 
     private int maxDepth = Integer.MAX_VALUE;
 
-    /**
-     * @param graph the graph iface
-     * @param executorService the executor service
-     * @param concurrency desired number of threads to spawn
-     */
-    public RABrandesBetweennessCentrality(Graph graph, ExecutorService executorService, int concurrency, SelectionStrategy selectionStrategy) {
+    public RABrandesBetweennessCentrality(
+        Graph graph,
+        ExecutorService executorService,
+        int concurrency,
+        SelectionStrategy selectionStrategy
+    ) {
+        this(graph, executorService, concurrency, selectionStrategy, false);
+    }
+
+    public RABrandesBetweennessCentrality(
+        Graph graph,
+        ExecutorService executorService,
+        int concurrency,
+        SelectionStrategy selectionStrategy,
+        boolean undirected
+    ) {
         this.graph = graph;
         this.executorService = executorService;
         this.concurrency = concurrency;
@@ -97,19 +105,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
         this.centrality = new AtomicDoubleArray(nodeCount);
         this.selectionStrategy = selectionStrategy;
         this.expectedNodeCount = selectionStrategy.size();
-    }
-
-    /**
-     * set traversal direction. Use OUTGOING for undirected.
-     * @param direction
-     * @return
-     */
-    public RABrandesBetweennessCentrality withDirection(Direction direction) {
-        if (direction == Direction.BOTH) {
-            this.direction = Direction.OUTGOING;
-            this.divisor = 2.0;
-        }
-        return this;
+        this.divisor = undirected ? 2.0 : 1.0;
     }
 
     /**
@@ -240,7 +236,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
                         continue;
                     }
                     pivots.push(node);
-                    localRelationshipIterator.forEachRelationship(node, direction, (source, targetId) -> {
+                    localRelationshipIterator.forEachRelationship(node, (source, targetId) -> {
                         // This will break for very large graphs
                         int target = (int) targetId;
 

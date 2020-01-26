@@ -60,34 +60,17 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
     private Direction direction = Direction.OUTGOING;
     private double divisor = 1.0;
 
-    /**
-     * constructs a parallel centrality solver
-     *
-     * @param graph           the graph iface
-     * @param executorService the executor service
-     * @param concurrency     desired number of threads to spawn
-     */
     public BetweennessCentrality(Graph graph, ExecutorService executorService, int concurrency) {
+        this(graph, executorService, concurrency, false);
+    }
+
+    public BetweennessCentrality(Graph graph, ExecutorService executorService, int concurrency, boolean undirected) {
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.centrality = new AtomicDoubleArray(nodeCount);
-    }
-
-    /**
-     * sete traversal direction
-     * OUTGOING for undirected graphs!
-     *
-     * @param direction
-     * @return
-     */
-    public BetweennessCentrality withDirection(Direction direction) {
-        if (direction == Direction.BOTH) {
-            this.direction = Direction.OUTGOING;
-            this.divisor = 2.0;
-        }
-        return this;
+        this.divisor = undirected ? 2.0 : 1.0;
     }
 
     /**

@@ -71,8 +71,7 @@ public class BetweennessCentralityDocTest extends BaseProcTest {
     void shouldStream() {
         String query = " CALL gds.alpha.betweenness.stream({" +
                        "   nodeProjection: 'User'," +
-                       "   relationshipProjection: 'MANAGE'," +
-                       "   direction: 'OUTGOING'" +
+                       "   relationshipProjection: 'MANAGE'" +
                        " })" +
                        " YIELD nodeId, centrality" +
                        " RETURN gds.util.asNode(nodeId).name AS user, centrality" +
@@ -100,7 +99,6 @@ public class BetweennessCentralityDocTest extends BaseProcTest {
         String query = " CALL gds.alpha.betweenness.write({" +
                        "   nodeProjection: 'User'," +
                        "   relationshipProjection: 'MANAGE'," +
-                       "   direction: 'OUTGOING'," +
                        "   writeProperty: 'centrality'" +
                        " })" +
                        " YIELD nodes, minCentrality, maxCentrality, sumCentrality";
@@ -143,8 +141,7 @@ public class BetweennessCentralityDocTest extends BaseProcTest {
                        "   relationshipProjection: 'MANAGE'," +
                        "   strategy: 'random'," +
                        "   probability: 1.0," +
-                       "   maxDepth: 1," +
-                       "   direction: 'OUTGOING'" +
+                       "   maxDepth: 1" +
                        " }) YIELD nodeId, centrality" +
                        " RETURN gds.util.asNode(nodeId).name AS user, centrality" +
                        " ORDER BY centrality DESC";
@@ -174,8 +171,7 @@ public class BetweennessCentralityDocTest extends BaseProcTest {
                        "   strategy: 'random'," +
                        "   probability: 1.0," +
                        "   writeProperty: 'centrality'," +
-                       "   maxDepth: 1," +
-                       "   direction: 'OUTGOING'" +
+                       "   maxDepth: 1" +
                        " })" +
                        " YIELD nodes, minCentrality, maxCentrality, sumCentrality";
 

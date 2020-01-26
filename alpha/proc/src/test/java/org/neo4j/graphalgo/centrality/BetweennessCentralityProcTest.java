@@ -141,7 +141,6 @@ class BetweennessCentralityProcTest extends BaseProcTest {
             .algo("gds.alpha.betweenness")
             .writeMode()
             .addParameter("concurrency", 4)
-            .addParameter("direction", "BOTH")
             .yields("nodes", "minCentrality", "maxCentrality", "sumCentrality", "loadMillis", "computeMillis", "writeMillis");
         runQueryWithRowConsumer(query, row -> {
                 assertEquals(35.0, (double) row.getNumber("sumCentrality"), 0.01);
@@ -185,7 +184,6 @@ class BetweennessCentralityProcTest extends BaseProcTest {
             .withRelationshipType("TYPE", RelationshipProjection.builder().projection(Projection.UNDIRECTED).build())
             .algo("gds.alpha.betweenness")
             .writeMode()
-            .addParameter("direction", "BOTH")
             .addParameter("concurrency", 4)
             .yields("nodes", "minCentrality", "maxCentrality", "sumCentrality", "loadMillis", "computeMillis", "writeMillis");
         runQueryWithRowConsumer(query, row -> {

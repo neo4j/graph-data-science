@@ -53,6 +53,11 @@ import static org.neo4j.procedure.Mode.READ;
  */
 public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityConfig> {
 
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
+
     @Procedure(name = "gds.alpha.betweenness.stream", mode = READ)
     public Stream<BetweennessCentrality.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -148,13 +153,16 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
                 AllocationTracker tracker,
                 Log log
             ) {
-                return new BetweennessCentrality(graph, Pools.DEFAULT, configuration.concurrency())
+                return new BetweennessCentrality(
+                    graph,
+                    Pools.DEFAULT,
+                    configuration.concurrency(),
+                    configuration.undirected()
+                )
                     .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality"))
-                    .withTerminationFlag(TerminationFlag.wrap(transaction))
-                    .withDirection(configuration.direction());
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
             }
         };
-
     }
 
     public static final class BetweennessCentralityProcResult {

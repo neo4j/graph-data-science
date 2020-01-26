@@ -22,15 +22,15 @@ package org.neo4j.graphalgo.impl.betweenness;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -84,9 +84,9 @@ class BetweennessCentralityTest extends AlgoTestBase {
         verify(mock, times(1)).accept(eq("e"), eq(0.0));
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testBC(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testBC() {
+        setup();
         BetweennessCentrality algo = new BetweennessCentrality(graph, Pools.DEFAULT, 1);
         algo.compute();
         algo.resultStream()
@@ -94,9 +94,9 @@ class BetweennessCentralityTest extends AlgoTestBase {
         verifyMock(testConsumer);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testRABrandesForceCompleteSampling(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testRABrandesForceCompleteSampling() {
+        setup();
         RABrandesBetweennessCentrality algo = new RABrandesBetweennessCentrality(
             graph,
             Pools.DEFAULT,
@@ -109,9 +109,9 @@ class BetweennessCentralityTest extends AlgoTestBase {
         verifyMock(testConsumer);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testRABrandesForceEmptySampling(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testRABrandesForceEmptySampling() {
+        setup();
         RABrandesBetweennessCentrality algo = new RABrandesBetweennessCentrality(
             graph,
             Pools.DEFAULT,
@@ -130,8 +130,8 @@ class BetweennessCentralityTest extends AlgoTestBase {
     }
 
     @Disabled
-    void testRABrandes(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    void testRABrandes() {
+        setup();
         RABrandesBetweennessCentrality algo = new RABrandesBetweennessCentrality(
             graph,
             Pools.DEFAULT,
@@ -144,25 +144,23 @@ class BetweennessCentralityTest extends AlgoTestBase {
         verifyMock(testConsumer);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testPBC(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
-        BetweennessCentrality algo = new BetweennessCentrality(
-            graph,
-            Pools.DEFAULT,
-            4
-        );
+    @Test
+    void testPBC() {
+        setup();
+        BetweennessCentrality algo = new BetweennessCentrality(graph, Pools.DEFAULT, 4);
         algo.compute();
         algo.resultStream()
             .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
         verifyMock(testConsumer);
     }
 
-    private void setup(Class<? extends GraphFactory> graphFactory) {
-        graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .load(graphFactory);
+    private void setup() {
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .build()
+            .load(HugeGraphFactory.class);
     }
 
     private String name(long id) {
