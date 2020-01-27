@@ -1,9 +1,9 @@
-[[memory-requirements]]
-= Memory Requirements
+[[memory-estimation]]
+= Memory Estimation
 
 [abstract]
 --
-This section describes memory requirements for the projected graph model used by the Neo4j Graph Algorithms Library.
+This section describes how to estimate memory requirements for the projected graph model used by the Neo4j Graph Algorithms Library.
 --
 
 The graph algorithms library operates completely on the heap, which means we'll need to configure our Neo4j Server with a much larger heap size than we would for transactional workloads.
@@ -13,18 +13,19 @@ image::graph-model-memory.png[width=500]
 
 The model contains three types of data:
 
-* Node ids - up to 2^45^ ("35 trillion") for `graph: "huge"`
-* Relationships - pairs of node ids. Relationships are stored twice if `direction: "BOTH"` config provided.
+* Node ids - up to 2^45^ ("35 trillion")
+* Relationships - pairs of node ids. Relationships are stored twice if `projection: "UNDIRECTED"` is used.
 * Weights - stored as doubles (8 bytes per node) in an array-like data structure next to the relationships
 
 Memory configuration depends on the graph projection that we're using.
 
 This section includes:
 
-* <<estimate-procedure>>
+* <<estimate-procedure-algo>>
+* <<estimate-procedure-graph>>
 
-[[estimate-procedure]]
-== Estimating memory requirements
+[[estimate-procedure-algo]]
+== Estimating memory requirements for algorithms
 
 In many use cases it will be useful to estimate the required memory of a graph and an algorithm before running it in order to make sure that the workload can run on the available hardware.
 To make this process easier every algorithm supports the `.estimate` mode, which returns an estimate of the amount of memory required to run graph algorithms.
@@ -71,3 +72,45 @@ Setting the `nodeCount` and `relationshipCount` parameters allows a memory estim
 | relationshipCount     | int       | The estimated number of relationships in the graph
 |===
 
+[[estimate-procedure-graph]]
+== Estimating memory requirements for graphs
+
+The <<named-graph, `gds.graph.create`>> procedures also support `.estimate` to estimate memory usage for just the graph.
+Those procedures don't accept the graph name as the first argument, as they don't actually load the graph.
+
+.Syntax
+[source, cypher]
+----
+CALL gds.graph.create.estimate(nodeProjection: STRING|LIST|MAP, relationshipProjection: STRING|LIST|MAP, configuration: MAP})
+YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                   | Type                  | Default   | Optional  | Description
+| nodeProjection         | string or list or map | -         | no        | The node projection to estimate for.
+| relationshipProjection | string or list or map | -         | no        | The relationship projection to estimate for.
+| config                 | map                   | {}        | yes       | Additional configuration, such as concurrency.
+|===
+
+The <<cypher-projection, `gds.graph.create.cypher`>> procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
+
+.Syntax
+[source, cypher]
+----
+CALL gds.graph.create.cypher.estimate(nodeQuery: STRING, relationshipQuery: STRING, configuration: MAP})
+YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type   | Default   | Optional  | Description
+| nodeQuery         | string | -         | no        | The node query to estimate for.
+| relationshipQuery | string | -         | no        | The relationship query to estimate for.
+| config            | map    | {}        | yes       | Additional configuration, such as concurrency.
+|===
+
+Both estimate procedures also accept `nodeCount` and `relationshipCount` as configuration keys.
+Setting those parameters allows a memory estimation without having to read from the underlying database.

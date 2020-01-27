@@ -49,7 +49,7 @@ For more information on this algorithm, see:
 [NOTE]
 ====
 Running this algorithm requires sufficient available memory.
-Before running this algorithm, we recommend that you read <<memory-requirements>>.
+Before running this algorithm, we recommend that you read <<memory-estimation>>.
 ====
 
 

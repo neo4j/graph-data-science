@@ -54,7 +54,7 @@ For more information on this algorithm, see:
 [NOTE]
 ====
 Running this algorithm requires sufficient memory availability.
-Before running this algorithm, we recommend that you read <<memory-requirements>>.
+Before running this algorithm, we recommend that you read <<memory-estimation>>.
 ====
 
 [[algorithms-pagerank-syntax]]
