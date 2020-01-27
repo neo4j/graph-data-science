@@ -11,118 +11,20 @@ This section describes the Approximate Nearest Neighbors algorithm in the Neo4j 
 The Approximate Nearest Neighbors algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
-// tag::introduction[]
+
 The Approximate Nearest Neighbors algorithm constructs a k-Nearest Neighbors Graph for a set of objects based on a provided similarity algorithm.
 The similarity of items is computed based on <<labs-algorithms-similarity-jaccard,Jaccard Similarity>>, <<labs-algorithms-similarity-cosine,Cosine Similarity>>, <<labs-algorithms-similarity-euclidean,Euclidean Distance>>, or <<labs-algorithms-similarity-pearson,Pearson Similarity>>.
 
 The implementation in the library is based on Dong, Charikar, and Li's paper http://www.cs.princeton.edu/cass/papers/www11.pdf[Efficient K-Nearest Neighbor Graph Construction for Generic Similarity Measures^].
 
-// end::introduction[]
+
 
 This section includes:
 
+* <<ann-syntax, Syntax>>
 * <<ann-usecase, Use-cases - when to use the Approximate Nearest Neighbors algorithm>>
 * <<ann-procedure-sample, Approximate Nearest Neighbors algorithm sample>>
-* <<ann-syntax, Syntax>>
-
-[[ann-usecase]]
-== Use-cases - when to use the Approximate Nearest Neighbors algorithm
-
-// tag::use-case[]
-We can use the Approximate Nearest Neighbors algorithm to work out the approximate k most similar items to each other.
-The corresponding k-Nearest Neighbors Graph can then be used as part of recommendation queries.
-// end::use-case[]
-
-[[ann-procedure-sample]]
-== Approximate Nearest Neighbors algorithm sample
-
-.The following will create a sample graph:
-[source, cypher]
-----
-include::scripts/similarity-ann.cypher[tag=create-sample-graph-procedure]
-----
-
-.The following will return a stream of nodes, along with up to the 3 most similar nodes to them based on Jaccard Similarity:
-[source, cypher]
-----
-MATCH (p:Person)-[:LIKES]->(cuisine)
-WITH {item:id(p), categories: collect(id(cuisine))} as userData
-WITH collect(userData) as data
-CALL algo.labs.ml.ann.stream("jaccard", data, {similarityCutoff: 0.1})
-YIELD item1, item2, similarity
-return gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
-ORDER BY from
-----
-
-// tag::stream[]
-.Results
-[opts="header",cols="1,1,1"]
-|===
-| From     | To       | Similarity
-|"Arya"    |"Karin"   |0.6666666666666666
-|"Arya"    |"Praveena"|0.25
-|"Arya"    |"Michael" |0.2
-|"Karin"   |"Arya"    |0.6666666666666666
-|"Karin"   |"Michael" |0.25
-|"Michael" |"Karin"   |0.25
-|"Michael" |"Praveena"|0.25
-|"Michael" |"Arya"    |0.2
-|"Praveena"|"Zhen"    |0.3333333333333333
-|"Praveena"|"Arya"    |0.25
-|"Praveena"|"Michael" |0.25
-|"Zhen"    |"Michael" |0.6666666666666666
-|"Zhen"    |"Praveena"|0.3333333333333333
-
-|===
-// end::stream[]
-
-Arya and Karin, and Zhen and Michael have the most similar food preferences, with two overlapping cuisines for a similarity of 0.66.
-We also have 3 pairs of users who are not similar at all.
-We'd probably want to filter those out, which we can do by passing in the `similarityCutoff` parameter.
-
-.The following will find up to 3 similar users for each user, and store a relationship between those users:
-[source, cypher]
-----
-MATCH (p:Person)-[:LIKES]->(cuisine)
-WITH {item:id(p), categories: collect(id(cuisine))} as userData
-WITH collect(userData) as data
-CALL algo.labs.ml.ann("jaccard", data, {similarityCutoff: 0.1, showComputations: true, write: true})
-YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
-RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
-----
-
-// tag::write-back[]
-.Results
-[opts="header"]
-|===
-| `nodes` | `similarityPairs` | `write` | `writeRelationshipType` | `writeProperty` | `min`  | `max`  | `mean` | `p95`
-| 5      |13               |true   |SIMILAR              | score        |0.19999980926513672|0.6666669845581055|0.3512822664701022|0.6666669845581055|29
-|===
-// end::write-back[]
-
-We then could write a query to find out what types of cuisine that other people similar to us might like.
-
-.The following will find the most similar user to Praveena, and return their favorite cuisines that Praveena doesn't (yet!) like:
-[source, cypher]
-----
-MATCH (p:Person {name: "Praveena"})-[:SIMILAR]->(other),
-      (other)-[:LIKES]->(cuisine)
-WHERE not((p)-[:LIKES]->(cuisine))
-RETURN cuisine.name AS cuisine, count(*) AS count
-ORDER BY count DESC
-----
-
-// tag::query[]
-.Results
-[opts="header"]
-|===
-| `cuisine` | count
-| Italian | 2
-| French | 2
-| Lebanese | 1
-|===
-// end::query[]
-
+* <<ann-usage, Usage>>
 
 [[ann-syntax]]
 == Syntax
@@ -130,13 +32,12 @@ ORDER BY count DESC
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.labs.ml.ann(userData:List<Map>, {
-    topK: 1, similarityCutoff: 0.1, write:true, writeProperty: "score"
-})
+CALL gds.alpha.ml.ann.write(configuration: MAP)
 YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
-.Parameters
+
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                    | Type    | Default                | Optional | Description
@@ -145,10 +46,13 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 If algorithm is 'jaccard', a list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}`.
 Otherwise a list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
 | 'top'                   | int     | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
-| 'topK'                  | int     | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| 'topK'                  | int     | 3                      | yes      | The number of similar values to return per node.
+| 'randomSeed'            | int     | 1                      | yes      | The random-seed used for neighbor-sampling.
+| 'sampling'              | boolean | true                   | yes      | Whether the potential neighbors should be sampled.
+| 'p'                     | float   | 0.5                    | yes      | Influences the sample size: `min(1.0, p) * |topK|`.
 | 'similarityCutoff'      | int     | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | 'degreeCutoff'          | int     | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| concurrency             | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| 'concurrency'             | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | 'readConcurrency'       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | 'writeConcurrency'      | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | 'write'                 | boolean | false                  | yes      | Indicates whether results should be stored.
@@ -183,27 +87,29 @@ Otherwise a list of maps of the following structure: `{item: nodeId, weights: [d
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-CALL algo.labs.ml.ann.stream(userData:List<Map>, {
-    degreeCutoff: 10, similarityCutoff: 0.1, concurrency:4
-})
+CALL algo.labs.ml.ann.stream(configuration: MAP)
 YIELD item1, item2, count1, count2, intersection, similarity
 
 ----
 
-.Parameters
+
+.Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name               | Type   | Default                | Optional | Description
-| 'algorithm'        | string | null                   | no       | The similarity algorithm to use. Valid values: jaccard', 'cosine', 'pearson', 'euclidean'
-| 'data'             | list   | null                   | no       |
+| Name               | Type    | Default                | Optional | Description
+| 'algorithm'        | string  | null                   | no       | The similarity algorithm to use. Valid values: jaccard', 'cosine', 'pearson', 'euclidean'
+| 'data'             | list    | null                   | no       |
 If algorithm is 'jaccard', a list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}`.
 Otherwise a list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
-| 'top'              | int    | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
-| 'topK'             | int    | 3                      | yes      | The number of similar values to return per node. If `0`, it  will return as many as it finds.
-| 'similarityCutoff' | int    | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
-| 'degreeCutoff'     | int    | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| concurrency        | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| 'readConcurrency'  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| 'top'              | int     | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| 'topK'             | int     | 3                      | yes      | The number of similar values to return per node.
+| 'randomSeed'       | int     | 1                      | yes      | The random-seed used for neighbor-sampling.
+| 'sampling'         | boolean | true                   | yes      | Whether the potential neighbors should be sampled.
+| 'p'                | float   | 0.5                    | yes      | Influences the sample size: `min(1.0, p) * |topK|`
+| 'similarityCutoff' | int     | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
+| 'degreeCutoff'     | int     | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| 'concurrency'      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| 'readConcurrency'  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 
 .Results
@@ -218,3 +124,141 @@ Otherwise a list of maps of the following structure: `{item: nodeId, weights: [d
 | 'similarity'   | int  | The similarity of the two nodes.
 |===
 
+[[ann-usecase]]
+== Use-cases - when to use the Approximate Nearest Neighbors algorithm
+
+
+We can use the Approximate Nearest Neighbors algorithm to work out the approximate k most similar items to each other.
+The corresponding k-Nearest Neighbors Graph can then be used as part of recommendation queries.
+
+
+[[ann-procedure-sample]]
+== Approximate Nearest Neighbors algorithm sample
+
+.The following will create a sample graph:
+[source, cypher]
+----
+ CREATE 
+  (french:Cuisine {name:'French'}),
+  (italian:Cuisine {name:'Italian'}),
+  (indian:Cuisine {name:'Indian'}),
+  (lebanese:Cuisine {name:'Lebanese'}),
+  (portuguese:Cuisine {name:'Portuguese'}),
+
+  (zhen:Person {name: 'Zhen'}),
+  (praveena:Person {name: 'Praveena'}),
+  (michael:Person {name: 'Michael'}),
+  (arya:Person {name: 'Arya'}),
+  (karin:Person {name: 'Karin'}),
+
+  (praveena)-[:LIKES]->(indian),
+  (praveena)-[:LIKES]->(portuguese),
+
+  (zhen)-[:LIKES]->(french),
+  (zhen)-[:LIKES]->(indian),
+
+  (michael)-[:LIKES]->(french),
+  (michael)-[:LIKES]->(italian),
+  (michael)-[:LIKES]->(indian),
+
+  (arya)-[:LIKES]->(lebanese),
+  (arya)-[:LIKES]->(italian),
+  (arya)-[:LIKES]->(portuguese),
+
+  (karin)-[:LIKES]->(lebanese),
+  (karin)-[:LIKES]->(italian)
+----
+
+.The following will return a stream of nodes, along with up to the 3 most similar nodes to them based on Jaccard Similarity:
+[source, cypher]
+----
+ MATCH (p:Person)-[:LIKES]->(cuisine)
+ WITH {item:id(p), categories: collect(id(cuisine))} as userData
+ WITH collect(userData) as data
+ CALL gds.alpha.ml.ann.stream({
+   data: data,
+   algorithm: 'jaccard',
+   similarityCutoff: 0.1,
+   concurrency: 1
+ })
+ YIELD item1, item2, similarity
+ return gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
+ ORDER BY from
+----
+
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| from | to | similarity
+| Arya     | Karin    | 0.6666666666666666 
+| Arya     | Praveena | 0.25              
+| Arya     | Michael  | 0.2               
+| Karin    | Arya     | 0.6666666666666666 
+| Karin    | Michael  | 0.25               
+| Michael  | Karin    | 0.25               
+| Michael  | Praveena | 0.25               
+| Michael  | Arya     | 0.2                
+| Praveena | Arya     | 0.25               
+| Praveena | Michael  | 0.25               
+| Zhen     | Michael  | 0.6666666666666666 
+|===
+
+
+Arya and Karin, and Zhen and Michael have the most similar food preferences, with two overlapping cuisines for a similarity of 0.66.
+We also have 3 pairs of users who are not similar at all.
+We'd probably want to filter those out, which we can do by passing in the `similarityCutoff` parameter.
+
+.The following will find up to 3 similar users for each user, and store a relationship between those users:
+[source, cypher]
+----
+ MATCH (p:Person)-[:LIKES]->(cuisine)
+ WITH {item:id(p), categories: collect(id(cuisine))} as userData
+ WITH collect(userData) as data
+ CALL gds.alpha.ml.ann.write({
+  algorithm: 'jaccard',
+  data: data,
+  similarityCutoff: 0.1,
+  showComputations: true,
+  concurrency: 1,
+  write: true
+ })
+ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
+ RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
+----
+
+
+.Results
+[opts="header"]
+|===
+| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min               | max              | mean             | p95
+| 5     |13               |true   |SIMILAR                | score         |0.19999980926513672|0.6666669845581055|0.3512822664701022|0.6666669845581055
+|===
+
+
+We then could write a query to find out what types of cuisine that other people similar to us might like.
+
+.The following will find the most similar user to Praveena, and return their favorite cuisines that Praveena doesn't (yet!) like:
+[source, cypher]
+----
+ MATCH (p:Person {name: 'Praveena'})-[:SIMILAR]->(other),
+       (other)-[:LIKES]->(cuisine)
+ WHERE not((p)-[:LIKES]->(cuisine))
+ RETURN cuisine.name AS cuisine, count(*) AS count
+ ORDER BY count DESC
+----
+
+
+.Results
+[opts="header"]
+|===
+| cuisine   | count
+| Italian   | 2
+| French    | 1
+| Lebanese  | 1
+|===
+
+[[ann-usage]]
+=== Usage
+
+When executing ApproximateNearestNeighbors in parallel, it is possible that results are flaky because of the asynchronous execution fashion of the algorithm.
