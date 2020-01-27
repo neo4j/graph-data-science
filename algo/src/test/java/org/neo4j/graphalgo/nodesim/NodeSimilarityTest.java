@@ -619,7 +619,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
                  " CREATE (person)-[:LIKES]->(thing)"
         );
 
-        Graph graph =  new StoreLoaderBuilder()
+        Graph graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
