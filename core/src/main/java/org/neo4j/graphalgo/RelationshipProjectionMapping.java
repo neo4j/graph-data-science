@@ -25,32 +25,19 @@ import org.neo4j.kernel.api.StatementConstants;
 @ValueClass
 public interface RelationshipProjectionMapping {
 
-    RelationshipProjectionMapping ALL = ImmutableRelationshipProjectionMapping.builder()
-        .typeName("")
-        .elementIdentifier("")
-        .projection(Projection.NATURAL)
-        .typeId(StatementConstants.ANY_RELATIONSHIP_TYPE)
-        .exists(true)
-        .build();
+    static RelationshipProjectionMapping all() {
+        return all(Projection.NATURAL);
+    }
 
-//    public static RelationshipProjectionMapping all() {
-//        return all(Projection.NATURAL);
-//    }
-//
-//    public static RelationshipProjectionMapping all(Projection projection) {
-//        return new RelationshipProjectionMapping("", "", projection) {
-//
-//            @Override
-//            public int typeId() {
-//                return StatementConstants.ANY_RELATIONSHIP_TYPE;
-//            }
-//
-//            @Override
-//            public boolean doesExist() {
-//                return true;
-//            }
-//        };
-//    }
+    static RelationshipProjectionMapping all(Projection projection) {
+        return ImmutableRelationshipProjectionMapping.builder()
+            .typeName("")
+            .elementIdentifier("")
+            .projection(projection)
+            .typeId(StatementConstants.ANY_RELATIONSHIP_TYPE)
+            .exists(true)
+            .build();
+    }
 
     String elementIdentifier();
 
