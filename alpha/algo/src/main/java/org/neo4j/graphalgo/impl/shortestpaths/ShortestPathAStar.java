@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -50,7 +49,6 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
     private final long goalNode;
     private final String propertyKeyLat;
     private final String propertyKeyLon;
-    private final Direction direction;
     private IntDoubleMap gCosts;
     private IntDoubleMap fCosts;
     private double totalCost;
@@ -68,8 +66,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
         long startNode,
         long goalNode,
         String propertyKeyLat,
-        String propertyKeyLon,
-        Direction direction
+        String propertyKeyLon
     ) {
         this.graph = graph;
         this.db = db;
@@ -78,7 +75,6 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
         this.goalNode = goalNode;
         this.propertyKeyLat = propertyKeyLat;
         this.propertyKeyLon = propertyKeyLon;
-        this.direction = direction;
         this.gCosts = new IntDoubleScatterMap(nodeCount);
         this.fCosts = new IntDoubleScatterMap(nodeCount);
         this.openNodes = SharedIntPriorityQueue.min(
@@ -104,7 +100,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
         gCosts.put(startNodeInternal, 0.0);
         fCosts.put(startNodeInternal, initialHeuristic);
         openNodes.add(startNodeInternal, 0.0);
-        run(goalNodeInternal, propertyKeyLat, propertyKeyLon, direction);
+        run(goalNodeInternal, propertyKeyLat, propertyKeyLon);
         if (path.containsKey(goalNodeInternal)) {
             totalCost = gCosts.get(goalNodeInternal);
             int node = goalNodeInternal;
@@ -116,11 +112,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
         return this;
     }
 
-    private void run(
-            int goalNodeId,
-            String propertyKeyLat,
-            String propertyKeyLon,
-            Direction direction) {
+    private void run(int goalNodeId, String propertyKeyLat, String propertyKeyLon) {
         double goalLat = getNodeCoordinate(goalNodeId, propertyKeyLat);
         double goalLon = getNodeCoordinate(goalNodeId, propertyKeyLon);
         while (!openNodes.isEmpty() && running()) {
@@ -132,7 +124,6 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
             double currentNodeCost = this.gCosts.getOrDefault(currentNodeId, Double.MAX_VALUE);
             graph.forEachRelationship(
                     currentNodeId,
-                    direction,
                     0.0D,
                     longToIntConsumer((source, target, weight) -> {
                         double neighbourLat = getNodeCoordinate(target, propertyKeyLat);
