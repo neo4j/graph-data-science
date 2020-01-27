@@ -33,6 +33,7 @@ The manual covers the following areas:
 * <<algorithms>> -- A detailed guide to each of the algorithms in their respective categories, including use-cases and examples.
 * <<production-deployment>> -- This chapter explains advanced details with regards to common Neo4j components.
 * <<appendix-a>> -- Reference of all procedures contained in the GDS library.
+* <<migration-guide>> -- A guide for migration from the graph-algorithms API to the graph-data-science API
 
 
 For further reading resources, we recommend studying the free Graph Algorithms book.
@@ -58,6 +59,8 @@ include::algorithms/algorithms-intro.adoc[leveloffset=+1]
 include::production-deployment/production-deployment.adoc[leveloffset=+1]
 
 include::appendix-a.adoc[leveloffset=+1]
+
+include::migration-guide.adoc[leveloffset=+1]
 
 // ifdef::backend-html5[]
 // ++++
