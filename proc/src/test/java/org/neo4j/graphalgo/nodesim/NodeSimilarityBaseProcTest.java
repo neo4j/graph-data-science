@@ -131,37 +131,16 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
 
         TestSupport.allDirectedProjections().forEach(projection -> {
             String name = "myGraph" + projection.name();
-            ModernGraphLoader loader = new StoreLoaderBuilder()
-                .api(db)
-                .graphName(name)
-                .loadAnyLabel()
-                .putRelationshipProjectionsWithIdentifier(
+            String createQuery = GdsCypher.call()
+                .withAnyLabel()
+                .withRelationshipType(
                     "LIKES",
                     RelationshipProjection.builder().type("LIKES").projection(projection).build()
                 )
-                .build();
-            GraphsByRelationshipType graphs = loader.graphs(HugeGraphFactory.class);
-
-            GraphCatalog.set(loader.createConfig(), graphs);
+                .graphCreate(name)
+                .yields();
+            runQuery(createQuery);
         });
-    }
-
-    String createGraphQuery(String graphName, Projection projection) {
-        return GdsCypher.call()
-            .implicitCreation(ImmutableGraphCreateFromStoreConfig
-                .builder()
-                .nodeProjection(NodeProjections.builder().putProjection(NodeProjections.PROJECT_ALL, NodeProjection.empty()).build())
-                .relationshipProjection(RelationshipProjections.builder()
-                    .putProjection(
-                        ElementIdentifier.of("LIKES"),
-                        RelationshipProjection.builder()
-                            .type("LIKES")
-                            .projection(projection)
-                            .build()
-                    ).build()
-                ).build()
-            ).graphCreate(graphName)
-            .yields();
     }
 
     @AfterEach
