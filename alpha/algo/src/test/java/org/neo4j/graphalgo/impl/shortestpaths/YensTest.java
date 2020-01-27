@@ -23,15 +23,17 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.RawValues;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 
 import java.util.List;
@@ -73,26 +75,30 @@ class YensTest extends AlgoTestBase {
                 "CREATE (e:Node {name:'e'})\n" +
                 "CREATE (f:Node {name:'f'})\n" +
                 "CREATE" +
-                " (a)-[:TYPE {cost:1.0}]->(b),\n" +
-                " (b)-[:TYPE {cost:1.0}]->(c),\n" +
-                " (c)-[:TYPE {cost:1.0}]->(d),\n" +
-                " (e)-[:TYPE {cost:1.0}]->(d),\n" +
-                " (a)-[:TYPE {cost:1.0}]->(e),\n" +
+                " (a)-[:REL {cost:1.0}]->(b),\n" +
+                " (b)-[:REL {cost:1.0}]->(c),\n" +
+                " (c)-[:REL {cost:1.0}]->(d),\n" +
+                " (e)-[:REL {cost:1.0}]->(d),\n" +
+                " (a)-[:REL {cost:1.0}]->(e),\n" +
 
-                " (a)-[:TYPE {cost:5.0}]->(f),\n" +
-                " (b)-[:TYPE {cost:4.0}]->(f),\n" +
-                " (c)-[:TYPE {cost:1.0}]->(f),\n" +
-                " (d)-[:TYPE {cost:1.0}]->(f),\n" +
-                " (e)-[:TYPE {cost:4.0}]->(f)";
+                " (a)-[:REL {cost:5.0}]->(f),\n" +
+                " (b)-[:REL {cost:4.0}]->(f),\n" +
+                " (c)-[:REL {cost:1.0}]->(f),\n" +
+                " (d)-[:REL {cost:1.0}]->(f),\n" +
+                " (e)-[:REL {cost:4.0}]->(f)";
 
         runQuery(cypher);
 
-        graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .undirected()
-                .load(HugeGraphFactory.class);
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .putRelationshipProjectionsWithIdentifier(
+                "REL",
+                RelationshipProjection.of("REL", Projection.UNDIRECTED, Aggregation.NONE)
+            )
+            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+            .build()
+            .graph(HugeGraphFactory.class);
     }
 
     @Test
@@ -101,7 +107,6 @@ class YensTest extends AlgoTestBase {
             graph,
             id("a"),
             id("f"),
-            Direction.OUTGOING,
             42,
             10
         )
@@ -128,7 +133,6 @@ class YensTest extends AlgoTestBase {
                 id("d"), id("f"),
                 id("a"), id("b"));
         final Optional<WeightedPath> path = new YensKShortestPathsDijkstra(graph)
-                .withDirection(Direction.OUTGOING)
                 .withFilter(filter04325)
                 .compute(id("a"), id("f"));
         assertTrue(path.isPresent());
@@ -147,7 +151,6 @@ class YensTest extends AlgoTestBase {
                 id("c"), id("f"),
                 id("a"), id("e"));
         final Optional<WeightedPath> path = new YensKShortestPathsDijkstra(graph)
-                .withDirection(Direction.OUTGOING)
                 .withFilter(filter01235)
                 .compute(id("a"), id("f"));
         assertTrue(path.isPresent());

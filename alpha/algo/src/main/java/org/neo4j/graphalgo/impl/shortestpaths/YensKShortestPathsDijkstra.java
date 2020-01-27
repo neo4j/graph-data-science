@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -57,8 +56,6 @@ public class YensKShortestPathsDijkstra {
     private final BitSet visited;
     // visited filter
     private RelationshipConsumer filter = (sourceNodeId, targetNodeId) -> true;
-    // traverse direction
-    private Direction direction = Direction.BOTH;
     // iteration depth
     private int[] depth;
 
@@ -98,17 +95,6 @@ public class YensKShortestPathsDijkstra {
     }
 
     /**
-     * set traverse direction
-     *
-     * @param direction the direction
-     * @return this
-     */
-    public YensKShortestPathsDijkstra withDirection(Direction direction) {
-        this.direction = direction;
-        return this;
-    }
-
-    /**
      * compute shortest path from sourceNode to targetNode
      *
      * @param sourceNode mapped source node id
@@ -130,7 +116,7 @@ public class YensKShortestPathsDijkstra {
     public Optional<WeightedPath> compute(long sourceNodeId, long targetNodeId, int maxDepth) {
         int sourceNode = Math.toIntExact(sourceNodeId);
         int targetNode = Math.toIntExact(targetNodeId);
-        if (!dijkstra(sourceNode, targetNode, direction, maxDepth)) {
+        if (!dijkstra(sourceNode, targetNode, maxDepth)) {
             return Optional.empty();
         }
         int last = targetNode;
@@ -149,7 +135,7 @@ public class YensKShortestPathsDijkstra {
      *
      * @return true if a path has been found, false otherwise
      */
-    private boolean dijkstra(int source, int target, Direction direction, int maxDepth) {
+    private boolean dijkstra(int source, int target, int maxDepth) {
         costs.clear();
         queue.clear();
         path.clear();
@@ -171,7 +157,6 @@ public class YensKShortestPathsDijkstra {
             double costs = this.costs.getOrDefault(node, Double.MAX_VALUE);
             graph.forEachRelationship(
                     node,
-                    direction,
                     0.0D,
                     longToIntConsumer((s, t, w) -> {
                         if (!filter.accept(s, t)) {
