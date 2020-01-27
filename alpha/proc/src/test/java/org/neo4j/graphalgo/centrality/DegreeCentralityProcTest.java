@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;
@@ -36,10 +35,10 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.Projection.NATURAL;
+import static org.neo4j.graphalgo.Projection.REVERSE;
+import static org.neo4j.graphalgo.Projection.UNDIRECTED;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
-import static org.neo4j.graphdb.Direction.BOTH;
-import static org.neo4j.graphdb.Direction.INCOMING;
-import static org.neo4j.graphdb.Direction.OUTGOING;
 
 class DegreeCentralityProcTest extends BaseProcTest {
 
@@ -102,9 +101,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
     @Test
     public void testDegreeIncomingStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        String query = queryBuilder(INCOMING)
+        String query = queryBuilder(REVERSE)
             .streamMode()
-            .addParameter("direction", INCOMING)
             .yields("nodeId", "score");
         runQueryWithRowConsumer(
             query,
@@ -116,10 +114,9 @@ class DegreeCentralityProcTest extends BaseProcTest {
     @Test
     public void testWeightedDegreeIncomingStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        String query = queryBuilder(INCOMING)
+        String query = queryBuilder(REVERSE)
             .streamMode()
             .addParameter("relationshipWeightProperty", "foo")
-            .addParameter("direction", INCOMING)
             .yields("nodeId", "score");
         runQueryWithRowConsumer(
             query,
@@ -130,9 +127,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
 
     @Test
     public void testDegreeIncomingWriteBack() {
-        String query = queryBuilder(INCOMING)
+        String query = queryBuilder(REVERSE)
             .writeMode()
-            .addParameter("direction", INCOMING)
             .yields();
         runQueryWithRowConsumer(query, row -> {
                 assertNotEquals(-1L, row.getNumber("loadMillis").longValue());
@@ -151,9 +147,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
 
     @Test
     public void testWeightedDegreeIncomingWriteBack() {
-        String query = queryBuilder(INCOMING)
+        String query = queryBuilder(REVERSE)
             .writeMode()
-            .addParameter("direction", INCOMING)
             .addParameter("relationshipWeightProperty", "foo")
             .yields("writeMillis", "write", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
@@ -171,9 +166,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
     @Test
     public void testDegreeBothStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        String query = queryBuilder(BOTH)
+        String query = queryBuilder(UNDIRECTED)
             .streamMode()
-            .addParameter("direction", BOTH)
             .yields("nodeId", "score");
         runQueryWithRowConsumer(
             query,
@@ -185,9 +179,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
     @Test
     public void testWeightedDegreeBothStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        String query = queryBuilder(BOTH)
+        String query = queryBuilder(UNDIRECTED)
             .streamMode()
-            .addParameter("direction", BOTH)
             .addParameter("relationshipWeightProperty", "foo")
             .yields("nodeId", "score");
         runQueryWithRowConsumer(
@@ -199,9 +192,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
 
     @Test
     public void testDegreeBothWriteBack() {
-        String query = queryBuilder(BOTH)
+        String query = queryBuilder(UNDIRECTED)
             .writeMode()
-            .addParameter("direction", BOTH)
             .yields("writeMillis", "write", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
                 assertTrue(row.getBoolean("write"));
@@ -214,9 +206,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
 
     @Test
     public void testWeightedDegreeBothWriteBack() {
-        String query = queryBuilder(BOTH)
+        String query = queryBuilder(UNDIRECTED)
             .writeMode()
-            .addParameter("direction", BOTH)
             .addParameter("relationshipWeightProperty", "foo")
             .yields("writeMillis", "write", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
@@ -231,9 +222,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
     @Test
     public void testDegreeOutgoingStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        String query = queryBuilder(OUTGOING)
+        String query = queryBuilder(NATURAL)
             .streamMode()
-            .addParameter("direction", OUTGOING)
             .yields("nodeId", "score");
         runQueryWithRowConsumer(
             query,
@@ -245,9 +235,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
     @Test
     public void testWeightedDegreeOutgoingStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        String query = queryBuilder(OUTGOING)
+        String query = queryBuilder(NATURAL)
             .streamMode()
-            .addParameter("direction", OUTGOING)
             .addParameter("relationshipWeightProperty", "foo")
             .yields("nodeId", "score");
         runQueryWithRowConsumer(query, row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
@@ -257,9 +246,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
 
     @Test
     public void testDegreeOutgoingWriteBack() {
-        String query = queryBuilder(OUTGOING)
+        String query = queryBuilder(NATURAL)
             .writeMode()
-            .addParameter("direction", OUTGOING)
             .yields("writeMillis", "write", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
                 assertTrue(row.getBoolean("write"));
@@ -272,9 +260,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
 
     @Test
     public void testWeightedDegreeOutgoingWriteBack() {
-        String query = queryBuilder(OUTGOING)
+        String query = queryBuilder(NATURAL)
             .writeMode()
-            .addParameter("direction", OUTGOING)
             .addParameter("relationshipWeightProperty", "foo")
             .yields("writeMillis", "write", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
@@ -286,29 +273,16 @@ class DegreeCentralityProcTest extends BaseProcTest {
         assertResult("degree", outgoingWeightedExpected);
     }
 
-    private GdsCypher.ModeBuildStage queryBuilder(Direction direction) {
+    private GdsCypher.ModeBuildStage queryBuilder(Projection projection) {
         return GdsCypher
             .call()
             .withNodeLabel("Label1")
             .withRelationshipType(
                 "TYPE1",
-                RelationshipProjection.builder().type("TYPE1").projection(projection(direction)).build()
+                RelationshipProjection.builder().type("TYPE1").projection(projection).build()
             )
             .withRelationshipProperty("foo")
             .algo("gds.alpha.degree");
-    }
-
-    private Projection projection(Direction direction) {
-        switch (direction) {
-            case OUTGOING:
-                return Projection.NATURAL;
-            case INCOMING:
-                return Projection.REVERSE;
-            case BOTH:
-                return Projection.UNDIRECTED;
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + direction + " (sad java 😞)");
-        }
     }
 
 }

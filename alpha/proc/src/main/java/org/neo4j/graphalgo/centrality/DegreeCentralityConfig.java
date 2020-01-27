@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
-import org.neo4j.graphdb.Direction;
 
 @Configuration("DegreeCentralityConfigImpl")
 @ValueClass
@@ -38,12 +37,6 @@ public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeig
     @Value.Default
     default boolean isWeighted() {
         return StringUtils.isNotEmpty(relationshipWeightProperty());
-    }
-
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return Direction.OUTGOING;
     }
 
     @Value.Default

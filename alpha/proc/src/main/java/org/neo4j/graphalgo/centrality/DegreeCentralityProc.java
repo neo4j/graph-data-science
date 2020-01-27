@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.degree.DegreeCentrality;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -40,11 +39,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphdb.Direction.BOTH;
-import static org.neo4j.graphdb.Direction.OUTGOING;
 import static org.neo4j.procedure.Mode.READ;
 
 public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeCentrality, DegreeCentralityConfig> {
+
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
 
     @Procedure(value = "gds.alpha.degree.write", mode = Mode.WRITE)
     public Stream<CentralityScore.Stats> write(
@@ -130,15 +132,10 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
                 AllocationTracker tracker,
                 Log log
             ) {
-                Direction direction = configuration.direction();
-                if (direction == BOTH) {
-                    direction = OUTGOING;
-                }
                 return new DegreeCentrality(
                     graph,
                     Pools.DEFAULT,
                     configuration.concurrency(),
-                    direction,
                     configuration.isWeighted(),
                     tracker
                 );

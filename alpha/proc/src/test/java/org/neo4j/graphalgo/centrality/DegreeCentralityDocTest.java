@@ -75,7 +75,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("streamUnweightedTuples")
-    void testUnweightedStreaming(String projection, String oldDirection, String expected) {
+    void testUnweightedStreaming(String projection, String expected) {
         String query =
             "CALL gds.alpha.degree.stream({" +
             "   nodeProjection: 'User', " +
@@ -84,8 +84,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "           type: 'FOLLOWS'," +
             "           projection: '" + projection + "'" +
             "       }" +
-            "   }," +
-            "   direction: '" + oldDirection + "' " +
+            "   }" +
             "})" +
             "YIELD nodeId, score " +
             "RETURN gds.util.asNode(nodeId).name AS name, score AS followers " +
@@ -97,7 +96,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("streamWeightedTuples")
-    void testWeightedStreaming(String projection, String oldDirection, String expected) {
+    void testWeightedStreaming(String projection, String expected) {
         String query =
             "CALL gds.alpha.degree.stream({" +
             "   nodeProjection: 'User', " +
@@ -108,8 +107,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "           properties: 'score'" +
             "       }" +
             "   }," +
-            "   relationshipWeightProperty: 'score'," +
-            "   direction: '" + oldDirection + "' " +
+            "   relationshipWeightProperty: 'score'" +
             "})" +
             "YIELD nodeId, score " +
             "RETURN gds.util.asNode(nodeId).name AS name, score AS weightedFollowers " +
@@ -121,7 +119,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("writeTuples")
-    void testUnweightedWriting(String projection, String oldDirection, String expected) {
+    void testUnweightedWriting(String projection, String expected) {
         String query =
             "CALL gds.alpha.degree.write({" +
             "   nodeProjection: 'User', " +
@@ -131,8 +129,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "           projection: '" + projection + "'" +
             "       }" +
             "   }," +
-            "   writeProperty: 'following'," +
-            "   direction: '" + oldDirection + "' " +
+            "   writeProperty: 'following'" +
             "})" +
             "YIELD nodes, writeProperty";
 
@@ -143,7 +140,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("writeTuples")
-    void testWeightedWriting(String projection, String oldDirection, String expected) {
+    void testWeightedWriting(String projection, String expected) {
         String query =
             "CALL gds.alpha.degree.write({" +
             "   nodeProjection: 'User', " +
@@ -155,8 +152,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "       }" +
             "   }," +
             "   relationshipWeightProperty: 'score'," +
-            "   writeProperty: 'following'," +
-            "   direction: '" + oldDirection + "' " +
+            "   writeProperty: 'following'" +
             "})" +
             "YIELD nodes, writeProperty";
         String actual = runQuery(query, Result::resultAsString);
@@ -189,8 +185,8 @@ public class DegreeCentralityDocTest extends BaseProcTest {
                                "+-----------------------+\n" +
                                "6 rows\n";
         return Stream.of(
-            arguments("NATURAL", "OUTGOING", naturalResult),
-            arguments("REVERSE", "INCOMING", reverseResult)
+            arguments("NATURAL", naturalResult),
+            arguments("REVERSE", reverseResult)
         );
     }
 
@@ -218,8 +214,8 @@ public class DegreeCentralityDocTest extends BaseProcTest {
                                "+-------------------------------+\n" +
                                "6 rows\n";
         return Stream.of(
-            arguments("NATURAL", "OUTGOING", naturalResult),
-            arguments("REVERSE", "INCOMING", reverseResult)
+            arguments("NATURAL", naturalResult),
+            arguments("REVERSE", reverseResult)
         );
     }
 
@@ -231,8 +227,8 @@ public class DegreeCentralityDocTest extends BaseProcTest {
                         "+-----------------------+\n" +
                         "1 row\n";
         return Stream.of(
-            arguments("NATURAL", "OUTGOING", naturalResult),
-            arguments("REVERSE", "INCOMING", naturalResult)
+            arguments("NATURAL", naturalResult),
+            arguments("REVERSE", naturalResult)
         );
     }
 

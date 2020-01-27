@@ -57,7 +57,6 @@ YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                          | Type    | Default                | Optional | Description
-| direction                     | string  | INCOMING               | yes      | The relationship direction to load from the graph. If 'BOTH', treats the relationships as undirected.
 | concurrency                   | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
@@ -87,7 +86,6 @@ YIELD node, score
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type   | Default                | Optional | Description
-| direction        | string | INCOMING               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected.
 | concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | weightProperty   | string | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
@@ -137,8 +135,7 @@ CALL gds.alpha.degree.stream({
       type: 'FOLLOWS',
       projection: 'REVERSE'
     }
-  },
-  direction: 'INCOMING'
+  }
 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score AS followers
@@ -156,8 +153,7 @@ CALL gds.alpha.degree.write({
       projection: 'REVERSE'
     }
   },
-  writeProperty: 'followers',
-  direction: 'INCOMING'
+  writeProperty: 'followers'
 })
 ----
 
@@ -251,8 +247,7 @@ CALL gds.alpha.degree.stream({
            properties: 'score'
        }
    },
-   relationshipWeightProperty: 'score',
-  direction: 'INCOMING'
+   relationshipWeightProperty: 'score'
 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score AS weightedFollowers
@@ -272,8 +267,7 @@ CALL gds.alpha.degree.write({
        }
    },
    relationshipWeightProperty: 'score',
-   writeProperty: 'weightedFollowers',
-   direction: 'INCOMING'
+   writeProperty: 'weightedFollowers'
 })
 YIELD nodes, writeProperty
 ----
@@ -308,8 +302,7 @@ CALL gds.alpha.degree.write({
 })
 ----
 
-Note that the `direction` config parameter is ignored when using a Cypher projection for Degree Centrality.
-If we want to find the number of users that a user is following rather than their number of followers, we need to handle that in our Cypher query.
+Note, that if we want to find the number of users that a user is following rather than their number of followers, we need to handle that in our Cypher query.
 
 .The following will run the algorithm and store the results, calculating the number of users that a user follows:
 [source, cypher]

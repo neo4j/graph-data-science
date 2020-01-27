@@ -22,17 +22,19 @@ package org.neo4j.graphalgo.degree;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.CypherLoaderBuilder;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.QueryRunner;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;
@@ -117,7 +119,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void outgoingCentrality(Class<? extends GraphFactory> graphFactory) {
+    void outgoingCentrality(Class<? extends GraphFactory> factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -136,28 +138,28 @@ final class DegreeCentralityTest extends AlgoTestBase {
         );
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
             graph = QueryRunner.runInTransaction(
-                db,
-                () -> new GraphLoader(db)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                    .withRelationshipType(
-                        "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                    .load(graphFactory)
+                db, () -> new CypherLoaderBuilder()
+                    .api(db)
+                    .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
+                    .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target")
+                    .build()
+                    .graph(factoryType)
             );
         } else {
-            graph = new GraphLoader(db)
-                    .withLabel(label)
-                    .withRelationshipType("TYPE1")
-                    .withDirection(Direction.OUTGOING)
-                    .load(graphFactory);
+            graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel(label.name())
+                .addRelationshipType("TYPE1")
+                .build()
+                .graph(factoryType);
         }
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(
                 graph,
                 Pools.DEFAULT,
                 4,
-                Direction.OUTGOING,
                 false,
                 AllocationTracker.EMPTY);
         degreeCentrality.compute();
@@ -174,7 +176,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void incomingCentrality(Class<? extends GraphFactory> graphFactory) {
+    void incomingCentrality(Class<? extends GraphFactory> factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -192,32 +194,29 @@ final class DegreeCentralityTest extends AlgoTestBase {
             }
         );
 
-        final Direction direction;
         final Graph graph;
 
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
             // For Cypher we always treat the graph as outgoing, and let the user
             // handle the direction in the Cypher query
-            direction = Direction.OUTGOING;
             graph = QueryRunner.runInTransaction(
-                db,
-                () -> new GraphLoader(db)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                    .withRelationshipType(
-                        "MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                    .withDirection(direction)
-                    .load(graphFactory)
+                db, () -> new CypherLoaderBuilder().api(db)
+                    .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
+                    .relationshipQuery("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
+                    .build()
+                    .graph(factoryType)
             );
         } else {
-            direction = Direction.INCOMING;
-            graph = new GraphLoader(db)
-                    .withLabel(label)
-                    .withRelationshipType("TYPE1")
-                    .withDirection(direction)
-                    .load(graphFactory);
+            graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel(label.name())
+                .addRelationshipType("TYPE1")
+                .globalProjection(Projection.REVERSE)
+                .build()
+                .graph(HugeGraphFactory.class);
         }
 
-        DegreeCentrality degreeCentrality = new DegreeCentrality(graph, Pools.DEFAULT, 4, direction, false, AllocationTracker.EMPTY);
+        DegreeCentrality degreeCentrality = new DegreeCentrality(graph, Pools.DEFAULT, 4, false, AllocationTracker.EMPTY);
         degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -232,7 +231,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void totalCentrality(Class<? extends GraphFactory> graphFactory) {
+    void totalCentrality(Class<? extends GraphFactory> factoryType) {
         Label label = Label.label("Label1");
         Map<Long, Double> expected = new HashMap<>();
 
@@ -252,29 +251,31 @@ final class DegreeCentralityTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
             graph = QueryRunner.runInTransaction(
                 db,
-                () -> new GraphLoader(db)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                    .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                    .withDefaultAggregation(Aggregation.SINGLE)
-                    .load(graphFactory)
+                () -> new CypherLoaderBuilder()
+                .api(db)
+                .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
+                .relationshipQuery("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
+                .globalAggregation(Aggregation.SINGLE)
+                .build()
+                .graph(factoryType)
             );
         } else {
-            graph = new GraphLoader(db)
-                    .withLabel(label)
-                    .withRelationshipType("TYPE1")
-                    .withDirection(Direction.OUTGOING)
-                    .undirected()
-                    .load(graphFactory);
+            graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel(label.name())
+                .addRelationshipType("TYPE1")
+                .globalProjection(Projection.UNDIRECTED)
+                .build()
+                .graph(factoryType);
         }
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(
                 graph,
                 Pools.DEFAULT,
                 4,
-                Direction.OUTGOING,
                 false,
                 AllocationTracker.EMPTY);
         degreeCentrality.compute();

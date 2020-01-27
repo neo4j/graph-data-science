@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.results.CentralityResult;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
     public static final double DEFAULT_WEIGHT = 0D;
     private final int nodeCount;
     private final boolean weighted;
-    private final Direction direction;
     private Graph graph;
     private final ExecutorService executor;
     private final int concurrency;
@@ -45,13 +43,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
             Graph graph,
             ExecutorService executor,
             int concurrency,
-            Direction direction,
             boolean weighted,
             AllocationTracker tracker) {
         this.graph = graph;
         this.executor = executor;
         this.concurrency = concurrency;
-        this.direction = direction;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.weighted = weighted;
         this.result = HugeDoubleArray.newArray(nodeCount, tracker);
@@ -113,7 +109,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         @Override
         public void run() {
             for (long nodeId = startNodeId; nodeId < endNodeId && running(); nodeId++) {
-                partition[Math.toIntExact(nodeId - startNodeId)] = graph.degree(nodeId, direction);
+                partition[Math.toIntExact(nodeId - startNodeId)] = graph.degree(nodeId);
             }
             result.copyFromArrayIntoSlice(partition, startNodeId, endNodeId);
         }
@@ -134,7 +130,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         public void run() {
             for (long nodeId = startNodeId; nodeId < endNodeId && running(); nodeId++) {
                 int index = Math.toIntExact(nodeId - startNodeId);
-                graph.forEachRelationship(nodeId, direction, DEFAULT_WEIGHT, (sourceNodeId, targetNodeId, weight) -> {
+                graph.forEachRelationship(nodeId, DEFAULT_WEIGHT, (sourceNodeId, targetNodeId, weight) -> {
                     if (weight > 0) {
                         partition[index] += weight;
                     }
