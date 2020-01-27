@@ -22,12 +22,14 @@ package org.neo4j.graphalgo.impl.shortestpaths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 
 import java.util.List;
@@ -60,23 +62,25 @@ public class YensDebugTest extends AlgoTestBase {
                 "CREATE (f:Node {name:'f'})\n" +
                 "CREATE (g:Node {name:'g'})\n" +
                 "CREATE" +
-                " (a)-[:TYPE {cost:2.0}]->(b),\n" +
-                " (a)-[:TYPE {cost:1.0}]->(c),\n" +
-                " (b)-[:TYPE {cost:1.0}]->(d),\n" +
-                " (c)-[:TYPE {cost:2.0}]->(d),\n" +
-                " (d)-[:TYPE {cost:1.0}]->(e),\n" +
-                " (d)-[:TYPE {cost:2.0}]->(f),\n" +
-                " (e)-[:TYPE {cost:2.0}]->(g),\n" +
-                " (f)-[:TYPE {cost:1.0}]->(g)";
+                " (a)-[:REL {cost:2.0}]->(b),\n" +
+                " (a)-[:REL {cost:1.0}]->(c),\n" +
+                " (b)-[:REL {cost:1.0}]->(d),\n" +
+                " (c)-[:REL {cost:2.0}]->(d),\n" +
+                " (d)-[:REL {cost:1.0}]->(e),\n" +
+                " (d)-[:REL {cost:2.0}]->(f),\n" +
+                " (e)-[:REL {cost:2.0}]->(g),\n" +
+                " (f)-[:REL {cost:1.0}]->(g)";
 
         runQuery(cypher);
 
-        graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .withDirection(Direction.BOTH)
-                .load(HugeGraphFactory.class);
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .putRelationshipProjectionsWithIdentifier("REL_OUT", RelationshipProjection.of("REL", Projection.NATURAL, Aggregation.NONE))
+            .putRelationshipProjectionsWithIdentifier("REL_IN", RelationshipProjection.of("REL", Projection.REVERSE, Aggregation.NONE))
+            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+            .build()
+            .graph(HugeGraphFactory.class);
     }
 
     @Test
@@ -85,7 +89,6 @@ public class YensDebugTest extends AlgoTestBase {
             graph,
             getNode("a").getId(),
             getNode("g").getId(),
-            Direction.BOTH,
             5,
             4
         ).compute();

@@ -47,6 +47,11 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPathDijkstra, DijkstraConfig> {
 
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
+
     /**
      * single threaded dijkstra impl.
      * takes a startNode and endNode and tries to find the shortest path

@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -49,7 +48,6 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths, YensKShort
     private YensKShortestPathsDijkstra dijkstra;
     private final long startNode;
     private final long goalNode;
-    private final Direction direction;
     private final int k;
     private final int maxDepth;
     private Graph graph;
@@ -60,7 +58,6 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths, YensKShort
         Graph graph,
         long startNode,
         long goalNode,
-        Direction direction,
         int k,
         int maxDepth
     ) {
@@ -68,7 +65,6 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths, YensKShort
         dijkstra = new YensKShortestPathsDijkstra(graph);
         this.startNode = startNode;
         this.goalNode = goalNode;
-        this.direction = direction;
         this.k = k;
         this.maxDepth = maxDepth;
         shortestPaths = new ArrayList<>();
@@ -92,16 +88,12 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths, YensKShort
      */
     @Override
     public YensKShortestPaths compute() {
-        yens(k,
-                graph.toMappedNodeId(startNode),
-                graph.toMappedNodeId(goalNode),
-                direction,
-                maxDepth);
+        yens(k, graph.toMappedNodeId(startNode), graph.toMappedNodeId(goalNode), maxDepth);
         getProgressLogger().log(String.format("done.. found %d/%d paths", shortestPaths.size(), k));
         return this;
     }
 
-    private void yens(int k, long start, long goal, Direction direction, int maxDepth) {
+    private void yens(int k, long start, long goal, int maxDepth) {
         final ProgressLogger progressLogger = getProgressLogger();
         // blacklist container for dijkstra
         final IntScatterSet nodeBlackList = new IntScatterSet();
@@ -110,7 +102,6 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths, YensKShort
         shortestPaths.clear();
         // equip dijkstra with a node and edge filter and set its traversal direction
         final Optional<WeightedPath> shortestPathOpt = dijkstra.withTerminationFlag(getTerminationFlag())
-                .withDirection(direction)
                 .withFilter(longToIntConsumer((s, t) ->
                         // set custom node filter
                         !nodeBlackList.contains(t) &&

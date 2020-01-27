@@ -23,15 +23,14 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.RawValues;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -57,7 +56,7 @@ class DijkstraTest extends AlgoTestBase {
     private static YensKShortestPathsDijkstra dijkstra;
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
@@ -79,17 +78,18 @@ class DijkstraTest extends AlgoTestBase {
 
         runQuery(cypher);
 
-        graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .undirected()
-                .load(HugeGraphFactory.class);
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(Projection.UNDIRECTED)
+            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+            .build()
+            .graph(HugeGraphFactory.class);
 
         edgeBlackList = new LongArrayList();
 
         dijkstra = new YensKShortestPathsDijkstra(graph)
-                .withDirection(Direction.OUTGOING)
                 .withFilter(longToIntConsumer((s, t) -> !edgeBlackList.contains(RawValues.combineIntInt(s, t))));
     }
 

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -86,11 +87,13 @@ class DijkstraProcTest_152 extends BaseProcTest {
     void testDirect() {
         DoubleConsumer mock = mock(DoubleConsumer.class);
 
-        final Graph graph = new GraphLoader(db, Pools.DEFAULT)
-                .withOptionalLabel("Loc")
-                .withRelationshipType("ROAD")
-                .withRelationshipProperties(PropertyMapping.of("d", 0))
-                .load(HugeGraphFactory.class);
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Loc")
+            .addRelationshipType("ROAD")
+            .addRelationshipProperty(PropertyMapping.of("d", 0))
+            .build()
+            .graph(HugeGraphFactory.class);
 
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, DijkstraConfig.of(startNodeId, endNodeId));
         dijkstra.compute();

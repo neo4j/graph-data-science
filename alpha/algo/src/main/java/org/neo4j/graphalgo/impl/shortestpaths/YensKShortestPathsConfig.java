@@ -25,27 +25,11 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-
-import static org.neo4j.graphdb.Direction.BOTH;
-import static org.neo4j.graphdb.Direction.OUTGOING;
 
 @ValueClass
 @Configuration("YensKShortestPathsConfigImpl")
 public interface YensKShortestPathsConfig extends AlgoBaseConfig, RelationshipWeightConfig {
-
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return BOTH;
-    }
-
-    @Configuration.Ignore
-    @Value.Derived
-    default Direction resolvedDirection() {
-        return direction() == BOTH ? OUTGOING : direction();
-    }
 
     @Value.Default
     default boolean path() {
