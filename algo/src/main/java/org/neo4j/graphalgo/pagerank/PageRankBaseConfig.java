@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.newapi.IterationsConfig;
 import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.SourceNodesConfig;
 import org.neo4j.graphalgo.newapi.ToleranceConfig;
-import org.neo4j.graphdb.Direction;
 
 public interface PageRankBaseConfig extends
     AlgoBaseConfig,
