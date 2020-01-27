@@ -18,7 +18,7 @@ The plugin can be found in the 'Plugins' tab of a database.
 
 image::neo4j-desktop.jpg[width=500]
 
-The installer will download a the GDS library and install it in the 'plugins' directory of the database.
+The installer will download the GDS library and install it in the 'plugins' directory of the database.
 It will also add the following entry to the settings file:
 
 ----
@@ -70,8 +70,8 @@ They can be called directly from Cypher in your Neo4j Browser, from cypher-shell
 
 For most algorithms there are two procedures:
 
-* `algo.<name>` - this procedure writes results back to the graph as node-properties, and reports statistics.
-* `algo.<name>.stream` - this procedure returns a stream of data.
+* `gds.<name>.write` - this procedure writes results back to the graph as node-properties, and reports statistics.
+* `gds.<name>.stream` - this procedure returns a stream of data.
 For example, node-ids and computed values.
 +
 For large graphs, the streaming procedure might return millions, or even billions of results.
