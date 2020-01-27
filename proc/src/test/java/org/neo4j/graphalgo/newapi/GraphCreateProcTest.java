@@ -811,6 +811,34 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
+    @Test
+    void shouldComputeMemoryEstimationForVirtualGraph() throws Exception {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class);
+
+        String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
+        runQueryWithRowConsumer(localDb, query,
+            row -> {
+                assertEquals(303760, row.getNumber("bytesMin").longValue());
+                assertEquals(303760, row.getNumber("bytesMax").longValue());
+            }
+        );
+    }
+
+    @Test
+    void shouldComputeMemoryEstimationForVirtualGraphWithProperties() throws Exception {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class);
+
+        String query = "CALL gds.graph.create.estimate('*', {`*`: {type: '', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
+        runQueryWithRowConsumer(localDb, query,
+            row -> {
+                assertEquals(574192, row.getNumber("bytesMin").longValue());
+                assertEquals(574192, row.getNumber("bytesMax").longValue());
+            }
+        );
+    }
+
     // Arguments for parameterised tests
 
     static Stream<Arguments> multipleNodeProjections() {
