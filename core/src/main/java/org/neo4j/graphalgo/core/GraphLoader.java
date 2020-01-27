@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.LegacyGraphSetup;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -423,7 +422,7 @@ public class GraphLoader implements SharedGraphLoader {
     }
 
     public GraphSetup toSetup() {
-        this.relPropertyMappings.setGlobalDeduplicationStrategy(deduplicationStrategy);
+        this.relPropertyMappings.withGlobalDeduplicationStrategy(deduplicationStrategy);
         return new LegacyGraphSetup(
             username,
             label,
