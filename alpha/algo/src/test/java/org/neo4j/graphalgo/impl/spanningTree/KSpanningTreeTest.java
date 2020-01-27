@@ -21,13 +21,14 @@ package org.neo4j.graphalgo.impl.spanningTree;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
@@ -75,9 +76,9 @@ class KSpanningTreeTest extends AlgoTestBase {
     private Graph graph;
     private int a, b, c, d, x;
 
-    @AllGraphTypesWithoutCypherTest
-    void testMaximumKSpanningTree(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMaximumKSpanningTree() {
+        loadGraph();
         final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MAX_OPERATOR, a, 2)
                 .compute();
 
@@ -88,9 +89,9 @@ class KSpanningTreeTest extends AlgoTestBase {
         assertNotEquals(spanningTree.head(c), spanningTree.head(x));
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMinimumKSpanningTree(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMinimumKSpanningTree() {
+        loadGraph();
         final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, a, 2)
                 .compute();
 
@@ -101,13 +102,15 @@ class KSpanningTreeTest extends AlgoTestBase {
         assertNotEquals(spanningTree.head(b), spanningTree.head(x));
     }
 
-    private void setup(Class<? extends GraphFactory> graphImpl) {
-        graph = new GraphLoader(db)
-                .withRelationshipProperties(PropertyMapping.of("w", 1.0))
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .undirected()
-                .load(graphImpl);
+    private void loadGraph() {
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(Projection.UNDIRECTED)
+            .addRelationshipProperty(PropertyMapping.of("w", 1.0))
+            .build()
+            .graph(HugeGraphFactory.class);
 
         runInTransaction(db, () -> {
             a = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "a").getId()));
