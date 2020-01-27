@@ -21,11 +21,12 @@ package org.neo4j.graphalgo.impl.triangle;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -34,7 +35,6 @@ import org.neo4j.graphalgo.core.utils.paged.PagedAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -78,9 +78,9 @@ class TriangleCountExpTest {
 
     private Graph graph;
 
-    @AllGraphTypesWithoutCypherTest
-    void testQueue(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testQueue() {
+        loadGraph();
         final IntersectingTriangleCount algo = new IntersectingTriangleCount(
                 graph,
                 Pools.DEFAULT,
@@ -95,9 +95,9 @@ class TriangleCountExpTest {
         assertEquals(EXPECTED_COEFFICIENT, algo.getAverageCoefficient(), 0.001);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testQueueParallel(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testQueueParallel() {
+        loadGraph();
         final IntersectingTriangleCount algo = new IntersectingTriangleCount(
                 graph,
                 Pools.DEFAULT,
@@ -182,13 +182,13 @@ class TriangleCountExpTest {
         }
     }
 
-    private void setup(Class<? extends GraphFactory> graphImpl) {
-        graph = new GraphLoader(DB)
-                .withLabel(LABEL)
-                .withRelationshipType(RELATIONSHIP)
-                .withDirection(Direction.BOTH)
-                .sorted()
-                .undirected()
-                .load(graphImpl);
+    private void loadGraph() {
+        graph = new StoreLoaderBuilder()
+            .api(DB)
+            .addNodeLabel(LABEL)
+            .addRelationshipType(RELATIONSHIP)
+            .globalProjection(Projection.UNDIRECTED)
+            .build()
+            .graph(HugeGraphFactory.class);
     }
 }
