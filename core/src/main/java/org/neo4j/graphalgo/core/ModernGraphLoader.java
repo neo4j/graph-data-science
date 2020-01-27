@@ -68,7 +68,7 @@ public interface ModernGraphLoader extends SharedGraphLoader {
 
     @Value.Default
     default boolean legacyMode() {
-        return true;
+        return false;
     }
 
     GraphCreateConfig createConfig();
