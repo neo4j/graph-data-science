@@ -43,11 +43,6 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeCentrality, DegreeCentralityConfig> {
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
-
     @Procedure(value = "gds.alpha.degree.write", mode = Mode.WRITE)
     public Stream<CentralityScore.Stats> write(
         @Name(value = "graphName") Object graphNameOrConfig,

@@ -60,11 +60,6 @@ import static org.neo4j.procedure.Mode.READ;
  */
 public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKShortestPaths, YensKShortestPathsConfig> {
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
-
     @Procedure(name = "gds.alpha.kShortestPaths.stream", mode = READ)
     public Stream<KspStreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

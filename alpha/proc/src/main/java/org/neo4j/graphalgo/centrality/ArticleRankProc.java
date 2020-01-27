@@ -49,11 +49,6 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, ArticleRankConfig> {
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
-
     @Procedure(value = "gds.alpha.articleRank.write", mode = WRITE)
     public Stream<PageRankScore.Stats> write(
         @Name(value = "graphName") Object graphNameOrConfig,

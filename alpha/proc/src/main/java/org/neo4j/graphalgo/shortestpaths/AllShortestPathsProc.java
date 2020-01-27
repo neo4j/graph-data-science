@@ -44,11 +44,6 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream<WeightedAllShortestPaths.Result>, AllShortestPathsConfig> {
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
-
     @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ)
     public Stream<WeightedAllShortestPaths.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

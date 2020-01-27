@@ -56,11 +56,6 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
         return new NodeSimilarityFactory<>();
     }
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
-
     public Stream<WriteResult> write(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, CONFIG> computationResult
     ) {

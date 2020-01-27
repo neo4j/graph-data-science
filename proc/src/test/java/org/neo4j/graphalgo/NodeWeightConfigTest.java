@@ -121,7 +121,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphsByRelationshipType graphs = graphLoader(graphCreateConfig, proc.legacyMode())
+            GraphsByRelationshipType graphs = graphLoader(graphCreateConfig)
                 .build(HugeGraphFactory.class)
                 .build()
                 .graphs();
@@ -150,7 +150,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
     default void testFilteringOnNodePropertiesOnLoadedGraph(String propertyName, double expectedWeight) {
         String graphName = "foo";
         applyOnProcedure((proc) -> {
-            loadExplicitGraphWithNodeWeights(graphName, MULTI_PROPERTY_NODE_PROJECTION, proc.legacyMode());
+            loadExplicitGraphWithNodeWeights(graphName, MULTI_PROPERTY_NODE_PROJECTION);
 
             CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", propertyName));
             CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
@@ -166,7 +166,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
         });
     }
 
-    default void loadExplicitGraphWithNodeWeights(String graphName, NodeProjections nodeProjections, boolean legacyMode) {
+    default void loadExplicitGraphWithNodeWeights(String graphName, NodeProjections nodeProjections) {
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
 
         try {
@@ -191,7 +191,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
             .relationshipProjection(RelationshipProjections.empty())
             .build();
 
-        GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig, legacyMode)
+        GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig)
             .build(HugeGraphFactory.class)
             .build()
             .graphs();
