@@ -197,8 +197,6 @@ final class DegreeCentralityTest extends AlgoTestBase {
         final Graph graph;
 
         if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
-            // For Cypher we always treat the graph as outgoing, and let the user
-            // handle the direction in the Cypher query
             graph = QueryRunner.runInTransaction(
                 db, () -> new CypherLoaderBuilder().api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
