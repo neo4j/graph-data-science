@@ -25,13 +25,9 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 
 import java.util.Optional;
-
-import static org.neo4j.graphdb.Direction.BOTH;
-import static org.neo4j.graphdb.Direction.OUTGOING;
 
 @Configuration("ShortestPathAStarConfigImpl")
 public interface ShortestPathAStarConfig extends
@@ -46,17 +42,6 @@ public interface ShortestPathAStarConfig extends
     @Value.Default
     default String propertyKeyLon() {
         return "longitude";
-    }
-
-    @Value.Default
-    default Direction direction() {
-        return BOTH;
-    }
-
-    @Value.Derived
-    @Configuration.Ignore
-    default Direction resolvedDirection() {
-        return direction() == BOTH ? OUTGOING : direction();
     }
 
     @Configuration.ConvertWith("nodeId")

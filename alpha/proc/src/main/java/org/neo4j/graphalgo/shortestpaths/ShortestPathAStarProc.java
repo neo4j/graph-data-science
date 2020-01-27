@@ -22,13 +22,11 @@ package org.neo4j.graphalgo.shortestpaths;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
-import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.shortestpaths.ShortestPathAStar;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,6 +38,11 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, ShortestPathAStar, ShortestPathAStarConfig> {
+
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
 
     @Procedure(name = "gds.alpha.shortestPath.astar.stream", mode = READ)
     public Stream<ShortestPathAStar.Result> astarStream(
@@ -61,24 +64,6 @@ public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, Short
 
         ShortestPathAStar algo = computationResult.algorithm();
         return algo.resultStream();
-    }
-
-    @Override
-    protected void validateGraphCreateConfig(
-        GraphCreateConfig graphCreateConfig,
-        ShortestPathAStarConfig config
-    ) {
-        if (config.direction() == Direction.BOTH) {
-            graphCreateConfig.relationshipProjection().projections().entrySet().stream()
-                .filter(entry -> entry.getValue().projection() != Projection.UNDIRECTED)
-                .forEach(entry -> {
-                    throw new IllegalArgumentException(String.format(
-                        "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses projection `%s`",
-                        entry.getKey().name,
-                        entry.getValue().projection()
-                    ));
-                });
-        }
     }
 
     @Override
@@ -104,8 +89,7 @@ public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, Short
                     configuration.startNodeId(),
                     configuration.endNodeId(),
                     configuration.propertyKeyLat(),
-                    configuration.propertyKeyLon(),
-                    configuration.resolvedDirection()
+                    configuration.propertyKeyLon()
                 );
             }
         };
