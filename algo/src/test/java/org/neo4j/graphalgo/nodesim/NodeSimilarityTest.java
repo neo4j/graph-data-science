@@ -239,7 +239,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(projection))
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -265,7 +266,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(projection))
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -292,7 +294,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(projection))
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -321,7 +324,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(projection))
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -347,7 +351,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(projection))
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -380,7 +385,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(projection))
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -409,7 +415,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(projection))
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -438,7 +445,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(UNDIRECTED))
+            .loadAnyRelationshipType()
+            .globalProjection(UNDIRECTED)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -459,7 +467,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(projection))
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -518,7 +527,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(localDb)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(projection))
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -571,7 +581,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(projection))
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -611,7 +622,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(projection).withAggregation(Aggregation.NONE))
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .globalAggregation(Aggregation.NONE)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -638,7 +651,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty().withProjection(UNDIRECTED))
+            .loadAnyRelationshipType()
+            .globalProjection(UNDIRECTED)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -662,7 +676,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipProjection(RelationshipProjection.empty())
+            .loadAnyRelationshipType()
             .build()
             .graph(HugeGraphFactory.class);
 

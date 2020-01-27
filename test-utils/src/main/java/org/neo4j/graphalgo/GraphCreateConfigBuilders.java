@@ -88,7 +88,7 @@ final class GraphCreateConfigBuilders {
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
 
         if (tempRP.isEmpty() && anyRelationshipType == AnyRelationshipType.LOAD) {
-            tempRP.put("*", RelationshipProjection.empty().withAggregation(aggregation));
+            tempRP.put("*", RelationshipProjection.empty().withProjection(projection).withAggregation(aggregation));
         }
 
         PropertyMappings relationshipPropertyMappings = PropertyMappings.builder()
