@@ -25,10 +25,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -80,13 +81,14 @@ class BalancedTriadsTest extends AlgoTestBase {
     void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-        graph = new GraphLoader(db, Pools.DEFAULT)
-            .withLabel("Node")
-            .withRelationshipStatement("TYPE")
-            .withRelationshipProperties(PropertyMapping.of("w", 0.0))
-            .sorted()
-            .undirected()
-            .load(HugeGraphFactory.class);
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node")
+            .addRelationshipType("TYPE")
+            .globalProjection(Projection.UNDIRECTED)
+            .addRelationshipProperty(PropertyMapping.of("w", 0.0))
+            .build()
+            .graph(HugeGraphFactory.class);
     }
 
     @BeforeEach
