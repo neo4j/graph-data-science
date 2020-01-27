@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
 import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
-import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
@@ -69,30 +68,6 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
         component = PagedAtomicIntegerArray.newArray(nodeCount, this.tracker);
     }
 
-    public MSClosenessCentrality compute(Direction direction) {
-
-        final ProgressLogger progressLogger = getProgressLogger();
-
-        final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
-            int len = sourceNodeIds.size();
-            farness.add(nodeId, len * depth);
-            while (sourceNodeIds.hasNext()) {
-                component.add(sourceNodeIds.next(), 1);
-            }
-            progressLogger.logProgress((double) nodeId / (nodeCount - 1));
-        };
-
-        new MultiSourceBFS(
-                graph,
-                graph,
-                direction,
-                consumer,
-                tracker)
-                .run(concurrency, executorService);
-
-        return this;
-    }
-
     public HugeDoubleArray getCentrality() {
         final HugeDoubleArray cc = HugeDoubleArray.newArray(nodeCount, tracker);
         for (int i = 0; i < nodeCount; i++) {
@@ -130,7 +105,20 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
 
     @Override
     public MSClosenessCentrality compute() {
-        return compute(Direction.OUTGOING);
+        final ProgressLogger progressLogger = getProgressLogger();
+
+        final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
+            int len = sourceNodeIds.size();
+            farness.add(nodeId, len * depth);
+            while (sourceNodeIds.hasNext()) {
+                component.add(sourceNodeIds.next(), 1);
+            }
+            progressLogger.logProgress((double) nodeId / (nodeCount - 1));
+        };
+
+        new MultiSourceBFS(graph, graph, consumer, tracker).run(concurrency, executorService);
+
+        return this;
     }
 
     public final double[] exportToArray() {

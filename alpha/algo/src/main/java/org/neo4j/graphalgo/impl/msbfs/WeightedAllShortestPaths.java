@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
@@ -69,12 +68,11 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
      */
     private AtomicInteger counter;
     private ExecutorService executorService;
-    private final Direction direction;
     private BlockingQueue<Result> resultQueue;
 
     private volatile boolean outputStreamOpen;
 
-    public WeightedAllShortestPaths(Graph graph, ExecutorService executorService, int concurrency, Direction direction) {
+    public WeightedAllShortestPaths(Graph graph, ExecutorService executorService, int concurrency) {
         if (!graph.hasRelationshipProperty()) {
             throw new UnsupportedOperationException("WeightedAllShortestPaths is not supported on graphs without a weight property");
         }
@@ -82,7 +80,6 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.executorService = executorService;
-        this.direction = direction;
         if (concurrency < 1) {
             throw new IllegalArgumentException("concurrency must be >0");
         }
@@ -180,7 +177,6 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
                 final double sourceDistance = distance[node];
                 threadLocalGraph.forEachRelationship(
                         node,
-                        direction,
                         Double.NaN,
                         longToIntConsumer((source, target, weight) -> {
                             // relax

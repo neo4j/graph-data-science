@@ -20,7 +20,6 @@ package org.neo4j.graphalgo.impl.msbfs;
 
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -74,7 +73,6 @@ public class MSBFSComparisonBenchmark {
         MultiSourceBFS msbfs = new MultiSourceBFS(
                 source.nodes,
                 source.hugeRels,
-                Direction.OUTGOING,
                 hugeConsume(bh),
                 AllocationTracker.EMPTY,
                 source.hugeSources);

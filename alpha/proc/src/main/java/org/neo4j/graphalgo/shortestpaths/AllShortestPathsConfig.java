@@ -19,35 +19,18 @@
  */
 package org.neo4j.graphalgo.shortestpaths;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Optional;
-
-import static org.neo4j.graphdb.Direction.BOTH;
-import static org.neo4j.graphdb.Direction.OUTGOING;
 
 @ValueClass
 @Configuration("AllShortestPathsConfigImpl")
 public interface AllShortestPathsConfig extends AlgoBaseConfig, RelationshipWeightConfig {
-
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return Direction.OUTGOING;
-    }
-
-    @Configuration.Ignore
-    @Value.Derived
-    default Direction resolvedDirection() {
-        return direction() == BOTH ? OUTGOING : direction();
-    }
 
     static AllShortestPathsConfig of(
         String username,

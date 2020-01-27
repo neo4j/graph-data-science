@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -106,7 +105,6 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
             .loadEverything()
             .algo("gds", "alpha", "allShortestPaths")
             .streamMode()
-            .addParameter("direction", Direction.OUTGOING)
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
@@ -133,7 +131,6 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
             .loadEverything(Projection.REVERSE)
             .algo("gds", "alpha", "allShortestPaths")
             .streamMode()
-            .addParameter("direction", Direction.INCOMING)
             .yields();
 
         runQueryWithRowConsumer(query, row -> {

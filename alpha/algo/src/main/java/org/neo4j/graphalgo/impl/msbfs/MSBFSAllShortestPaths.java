@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths.Result;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Iterator;
 import java.util.Spliterators;
@@ -50,21 +49,18 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
     private final AllocationTracker tracker;
     private final int concurrency;
     private final ExecutorService executorService;
-    private final Direction direction;
     private final long nodeCount;
 
     public MSBFSAllShortestPaths(
             Graph graph,
             AllocationTracker tracker,
             int concurrency,
-            ExecutorService executorService,
-            Direction direction) {
+            ExecutorService executorService) {
         this.graph = graph;
         nodeCount = graph.nodeCount();
         this.tracker = tracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.direction = direction;
         this.resultQueue = new LinkedBlockingQueue<>(); // TODO limit size?
     }
 
@@ -134,7 +130,6 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
             new MultiSourceBFS(
                     graph,
                     graph,
-                    direction,
                     (target, distance, sources) -> {
                         while (sources.hasNext()) {
                             long source = sources.next();

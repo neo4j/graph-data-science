@@ -21,17 +21,16 @@ package org.neo4j.graphalgo.impl;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -81,13 +80,15 @@ class MSBFSAllShortestPathsTest {
         if (DB != null) DB.shutdown();
     }
 
-    @TestSupport.AllGraphTypesWithoutCypherTest
-    void testResults(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = new GraphLoader(DB)
-                .withLabel(LABEL)
-                .withRelationshipType(RELATIONSHIP)
-                .load(graphImpl);
-        testASP(new MSBFSAllShortestPaths(graph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, Direction.OUTGOING));
+    @Test
+    void testResults() {
+        Graph graph = new StoreLoaderBuilder()
+            .api(DB)
+            .addNodeLabel(LABEL)
+            .addRelationshipType(RELATIONSHIP)
+            .build()
+            .load(HugeGraphFactory.class);
+        testASP(new MSBFSAllShortestPaths(graph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT));
     }
 
     private void testASP(final MSBFSASPAlgorithm hugeMSBFSAllShortestPaths) {
