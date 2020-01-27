@@ -46,6 +46,11 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
 
     private static boolean isBfs;
 
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
+
     @Procedure(name = "gds.alpha.bfs.stream", mode = READ)
     public Stream<WalkResult> bfs(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -107,8 +112,8 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
                     aggregatorFunction = (s, t, w) -> .0;
                 }
                 return isBfs
-                    ? Traverse.bfs(graph, config.direction(), config.startNode(), exitFunction, aggregatorFunction)
-                    : Traverse.dfs(graph, config.direction(), config.startNode(), exitFunction, aggregatorFunction);
+                    ? Traverse.bfs(graph, config.startNode(), exitFunction, aggregatorFunction)
+                    : Traverse.dfs(graph, config.startNode(), exitFunction, aggregatorFunction);
             }
         };
     }

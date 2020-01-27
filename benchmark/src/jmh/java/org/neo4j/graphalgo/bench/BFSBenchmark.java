@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.traverse.Traverse;
-import org.neo4j.graphdb.Direction;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -88,11 +87,11 @@ public class BFSBenchmark extends BaseBenchmark {
 
     @Benchmark
     public Object bfs() {
-        return Traverse.bfs(g, Direction.OUTGOING, 0L, (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
+        return Traverse.bfs(g, 0L, (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
     }
 
     @Benchmark
     public Object dfs() {
-        return Traverse.dfs(g, Direction.OUTGOING, 0L, (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
+        return Traverse.dfs(g, 0L, (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
     }
 }

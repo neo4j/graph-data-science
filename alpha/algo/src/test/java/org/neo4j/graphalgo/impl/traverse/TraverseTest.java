@@ -23,13 +23,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.traverse.Traverse.ExitPredicate.Result;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 
 import java.util.Arrays;
@@ -50,7 +53,7 @@ import static org.neo4j.graphalgo.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
  */
 class TraverseTest extends AlgoTestBase {
 
-    private static Graph graph;
+    private static GraphsByRelationshipType graphs;
 
     @BeforeEach
     void setupGraph() {
@@ -64,24 +67,26 @@ class TraverseTest extends AlgoTestBase {
                 "CREATE (f:Node {name:'f'})\n" +
                 "CREATE (g:Node {name:'g'})\n" +
                 "CREATE" +
-                " (a)-[:TYPE {cost:2.0}]->(b),\n" +
-                " (a)-[:TYPE {cost:1.0}]->(c),\n" +
-                " (b)-[:TYPE {cost:1.0}]->(d),\n" +
-                " (c)-[:TYPE {cost:2.0}]->(d),\n" +
-                " (d)-[:TYPE {cost:1.0}]->(e),\n" +
-                " (d)-[:TYPE {cost:2.0}]->(f),\n" +
-                " (e)-[:TYPE {cost:2.0}]->(g),\n" +
-                " (f)-[:TYPE {cost:1.0}]->(g)";
+                " (a)-[:REL {cost:2.0}]->(b),\n" +
+                " (a)-[:REL {cost:1.0}]->(c),\n" +
+                " (b)-[:REL {cost:1.0}]->(d),\n" +
+                " (c)-[:REL {cost:2.0}]->(d),\n" +
+                " (d)-[:REL {cost:1.0}]->(e),\n" +
+                " (d)-[:REL {cost:2.0}]->(f),\n" +
+                " (e)-[:REL {cost:2.0}]->(g),\n" +
+                " (f)-[:REL {cost:1.0}]->(g)";
 
         runQuery(cypher);
 
-        graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .withDirection(Direction.BOTH)
-                .load(HugeGraphFactory.class);
-
+        graphs = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node")
+            .putRelationshipProjectionsWithIdentifier("REL_OUT", RelationshipProjection.of("REL", Projection.NATURAL, Aggregation.NONE))
+            .putRelationshipProjectionsWithIdentifier("REL_IN", RelationshipProjection.of("REL", Projection.REVERSE, Aggregation.NONE))
+            .putRelationshipProjectionsWithIdentifier("REL_BOTH", RelationshipProjection.of("REL", Projection.UNDIRECTED, Aggregation.NONE))
+            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+            .build()
+            .graphs(HugeGraphFactory.class);
     }
 
     @AfterEach
@@ -109,11 +114,11 @@ class TraverseTest extends AlgoTestBase {
      */
     @Test
     void testBfsToTargetOut() {
-        final long source = id("a");
-        final long target = id("d");
-        final long[] nodes = Traverse.bfs(
+        long source = id("a");
+        long target = id("d");
+        Graph graph = graphs.getGraphProjection("REL_OUT", "cost");
+        long[] nodes = Traverse.bfs(
             graph,
-            Direction.OUTGOING,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             (s, t, w) -> 1.
@@ -128,11 +133,11 @@ class TraverseTest extends AlgoTestBase {
      */
     @Test
     void testDfsToTargetOut() {
-        final long source = id("a");
-        final long target = id("g");
-        final long[] nodes = Traverse.dfs(
+        long source = id("a");
+        long target = id("g");
+        Graph graph = graphs.getGraphProjection("REL_OUT", "cost");
+        long[] nodes = Traverse.dfs(
             graph,
-            Direction.OUTGOING,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             DEFAULT_AGGREGATOR
@@ -147,10 +152,10 @@ class TraverseTest extends AlgoTestBase {
      */
     @Test
     void testExitConditionNeverTerminates() {
-        final long source = id("a");
-        final long[] nodes = Traverse.dfs(
+        long source = id("a");
+        Graph graph = graphs.getGraphProjection("REL_OUT", "cost");
+        long[] nodes = Traverse.dfs(
             graph,
-            Direction.OUTGOING,
             source,
             (s, t, w) -> Result.FOLLOW,
             DEFAULT_AGGREGATOR
@@ -164,11 +169,11 @@ class TraverseTest extends AlgoTestBase {
      */
     @Test
     void testDfsToTargetIn() {
-        final long source = id("g");
-        final long target = id("a");
-        final long[] nodes = Traverse.dfs(
+        long source = id("g");
+        long target = id("a");
+        Graph graph = graphs.getGraphProjection("REL_IN", "cost");
+        long[] nodes = Traverse.dfs(
             graph,
-            Direction.INCOMING,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             DEFAULT_AGGREGATOR
@@ -183,11 +188,11 @@ class TraverseTest extends AlgoTestBase {
      */
     @Test
     void testBfsToTargetIn() {
-        final long source = id("g");
-        final long target = id("a");
-        final long[] nodes = Traverse.bfs(
+        long source = id("g");
+        long target = id("a");
+        Graph graph = graphs.getGraphProjection("REL_IN", "cost");
+        long[] nodes = Traverse.bfs(
             graph,
-            Direction.INCOMING,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             DEFAULT_AGGREGATOR
@@ -203,27 +208,25 @@ class TraverseTest extends AlgoTestBase {
      */
     @Test
     void testBfsMaxDepthOut() {
-        final long source = id("a");
-        final double maxHops = 3.;
-        final long[] nodes = Traverse.bfs(
+        long source = id("a");
+        double maxHops = 3.;
+        Graph graph = graphs.getGraphProjection("REL_OUT", "cost");
+        long[] nodes = Traverse.bfs(
             graph,
-            Direction.OUTGOING,
             source,
             (s, t, w) -> w >= maxHops ? Result.CONTINUE : Result.FOLLOW,
-            (s, t, w) -> {
-                return w + 1.;
-            }
+            (s, t, w) -> w + 1.
         ).compute().resultNodes();
         assertContains(new String[]{"a", "b", "c", "d"}, nodes);
     }
 
     @Test
     void testBfsMaxCostOut() {
-        final long source = id("a");
-        final double maxCost = 3.;
-        final long[] nodes = Traverse.bfs(
+        long source = id("a");
+        double maxCost = 3.;
+        Graph graph = graphs.getGraphProjection("REL_OUT", "cost");
+        long[] nodes = Traverse.bfs(
             graph,
-            Direction.OUTGOING,
             source,
             (s, t, w) -> w > maxCost ? Result.CONTINUE : Result.FOLLOW,
             (s, t, w) -> {
@@ -236,11 +239,11 @@ class TraverseTest extends AlgoTestBase {
 
     @Test
     void testDfsMaxCostOut() {
-        final long source = id("a");
-        final double maxCost = 3.;
-        final long[] nodes = Traverse.dfs(
+        long source = id("a");
+        double maxCost = 3.;
+        Graph graph = graphs.getGraphProjection("REL_OUT", "cost");
+        long[] nodes = Traverse.dfs(
             graph,
-            Direction.OUTGOING,
             source,
             (s, t, w) -> w > maxCost ? Result.CONTINUE : Result.FOLLOW,
             (s, t, w) -> {

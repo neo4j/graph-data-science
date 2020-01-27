@@ -103,7 +103,6 @@ class TraverseProcTest extends BaseProcTest {
             .withRelationshipType("TYPE")
             .algo("gds.alpha.dfs")
             .streamMode()
-            .addParameter("direction", "OUTGOING")
             .addParameter("startNode", id)
             .addParameter("targetNodes", Arrays.asList(4,5))
             .yields("nodeIds");
@@ -122,7 +121,6 @@ class TraverseProcTest extends BaseProcTest {
             .withRelationshipType("TYPE")
             .algo("gds.alpha.dfs")
             .streamMode()
-            .addParameter("direction", "OUTGOING")
             .addParameter("startNode", id)
             .addParameter("maxDepth", 2)
             .yields("nodeIds");
@@ -140,7 +138,6 @@ class TraverseProcTest extends BaseProcTest {
             .withRelationshipType("TYPE", RelationshipProjection.builder().projection(Projection.REVERSE).build())
             .algo("gds.alpha.dfs")
             .streamMode()
-            .addParameter("direction", "INCOMING")
             .addParameter("startNode", id)
             .addParameter("maxDepth", 2)
             .yields("nodeIds");

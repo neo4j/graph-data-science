@@ -25,7 +25,6 @@ import com.carrotsearch.hppc.LongArrayDeque;
 import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphdb.Direction;
 
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ObjLongConsumer;
@@ -37,7 +36,6 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
     public static final Aggregator DEFAULT_AGGREGATOR = (s, t, w) -> .0;
 
     private final int nodeCount;
-    private final Direction direction;
     private final long startNodeId;
     private final ExitPredicate exitPredicate;
     private final Aggregator aggregatorFunction;
@@ -53,7 +51,6 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
 
     private Traverse(
         Graph graph,
-        Direction direction,
         long startNodeId,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
@@ -62,7 +59,6 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
     ) {
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
-        this.direction = direction;
         this.startNodeId = startNodeId;
         this.exitPredicate = exitPredicate;
         this.aggregatorFunction = aggregatorFunction;
@@ -76,14 +72,12 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
 
     public static Traverse dfs(
         Graph graph,
-        Direction direction,
         long startNodeId,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction
     ) {
         return new Traverse(
             graph,
-            direction,
             startNodeId,
             exitPredicate,
             aggregatorFunction,
@@ -94,14 +88,12 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
 
     public static Traverse bfs(
         Graph graph,
-        Direction direction,
         long startNodeId,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction
     ) {
         return new Traverse(
             graph,
-            direction,
             startNodeId,
             exitPredicate,
             aggregatorFunction,
@@ -140,7 +132,6 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
 
             graph.forEachRelationship(
                 node,
-                direction,
                 longToIntConsumer((s, t) -> {
                     // remove from the visited nodes to allow revisiting in case the node is accessible via more than one path.
                     double aggregatedWeight = aggregatorFunction.apply(s, t, weight);

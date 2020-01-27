@@ -25,12 +25,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.logging.Log;
@@ -83,11 +82,12 @@ class TraverseMaxCostTest extends AlgoTestBase {
 
         runQuery(cypher);
 
-        graph = new GraphLoader(db)
-            .withAnyRelationshipType()
-            .withAnyLabel()
-            .withRelationshipProperties(PropertyMapping.of("distance", Double.MAX_VALUE))
-            .withDirection(Direction.BOTH)
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .addRelationshipProperty(PropertyMapping.of("distance", Double.MAX_VALUE))
+            .build()
             .load(HugeGraphFactory.class);
 
         exitPredicate = (s, t, w) -> {
@@ -109,10 +109,9 @@ class TraverseMaxCostTest extends AlgoTestBase {
 
     @Test
     void testDfsMaxCostOut() {
-        final long source = id("a");
-        final long[] nodes = Traverse.dfs(
+        long source = id("a");
+        long[] nodes = Traverse.dfs(
             graph,
-            Direction.OUTGOING,
             source,
             exitPredicate,
             aggregator
@@ -136,11 +135,10 @@ class TraverseMaxCostTest extends AlgoTestBase {
 
     @Test
     void testBfsMaxCostOut() {
-        final long source = id("a");
+        long source = id("a");
 
-        final long[] nodes = Traverse.bfs(
+        long[] nodes = Traverse.bfs(
             graph,
-            Direction.OUTGOING,
             source,
             exitPredicate,
             aggregator
@@ -164,7 +162,7 @@ class TraverseMaxCostTest extends AlgoTestBase {
 
     private String name(long nodeId) {
         try (Transaction tx = db.beginTx()) {
-            final Node nodeById = db.getNodeById(nodeId);
+            Node nodeById = db.getNodeById(nodeId);
             tx.success();
 
             return nodeById.getProperty("name").toString();
@@ -172,7 +170,7 @@ class TraverseMaxCostTest extends AlgoTestBase {
     }
 
     private long id(String name) {
-        final Node[] node = new Node[1];
+        Node[] node = new Node[1];
         runQuery("MATCH (n:Place) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
         return node[0].getId();
     }
