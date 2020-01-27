@@ -40,6 +40,9 @@ It can be set to any value, except 0.
 The output of the algorithm are new relationships between pairs of the first node set.
 Jaccard similarity scores are expressed via relationship properties.
 
+A related function in the GDS library is INSERT_LINK_HERE[Jaccard Function].
+This function computes the Jaccard similarity between two lists of numbers.
+
 For more information on this algorithm, see:
 
 * https://en.wikipedia.org/wiki/Similarity_(network_science)#Structural_equivalence[Structural equivalence (Wikipedia)]
