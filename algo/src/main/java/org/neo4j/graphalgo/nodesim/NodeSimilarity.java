@@ -137,12 +137,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private void prepare() {
-        // TODO: check if this is relevant when having a UnionGraph(NATURAL, REVERSE)
-//        if (config.direction() == Direction.BOTH) {
-//            throw new IllegalArgumentException(
-//                "Direction BOTH is not supported by the NodeSimilarity algorithm.");
-//        }
-
         progressLogger.log("Start :: NodeSimilarity#prepare");
 
         vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
