@@ -21,16 +21,15 @@ package org.neo4j.graphalgo.impl.scc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.impl.scc.SccAlgorithm;
 import org.neo4j.graphdb.Node;
 
 import java.util.Arrays;
@@ -80,9 +79,9 @@ class SccTest extends AlgoTestBase {
         db.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testDirect(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testDirect() {
+        loadGraph();
         SccAlgorithm scc = new SccAlgorithm(graph, AllocationTracker.EMPTY);
         HugeLongArray components = scc.compute();
 
@@ -92,20 +91,22 @@ class SccTest extends AlgoTestBase {
         assertEquals(3, scc.getSetCount());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testHugeIterativeScc(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testHugeIterativeScc() {
+        loadGraph();
         SccAlgorithm algo = new SccAlgorithm(graph, AllocationTracker.EMPTY);
         HugeLongArray components = algo.compute();
         assertCC(components);
     }
 
-    private void setup(Class<? extends GraphFactory> graphFactory) {
-        graph = new GraphLoader(db)
-                .withLabel("Node")
-                .withRelationshipType("TYPE")
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .load(graphFactory);
+    private void loadGraph() {
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node")
+            .addRelationshipType("TYPE")
+            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+            .build()
+            .graph(HugeGraphFactory.class);
     }
 
     private void assertBelongSameSet(HugeLongArray data, Long... expected) {
