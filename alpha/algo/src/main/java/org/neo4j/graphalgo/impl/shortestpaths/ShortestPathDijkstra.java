@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
-import org.neo4j.graphdb.Direction;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -87,17 +86,17 @@ public class ShortestPathDijkstra extends Algorithm<ShortestPathDijkstra, Shorte
     }
 
     public ShortestPathDijkstra compute() {
-        return compute(config.startNode(), config.endNode(), config.resolvedDirection());
+        return compute(config.startNode(), config.endNode());
     }
 
-    public ShortestPathDijkstra compute(long startNode, long goalNode, Direction direction) {
+    public ShortestPathDijkstra compute(long startNode, long goalNode) {
         reset();
 
         int node = Math.toIntExact(graph.toMappedNodeId(startNode));
         int goal = Math.toIntExact(graph.toMappedNodeId(goalNode));
         costs.put(node, 0.0);
         queue.add(node, 0.0);
-        run(goal, direction);
+        run(goal);
         if (!path.containsKey(goal)) {
             return this;
         }
@@ -152,7 +151,7 @@ public class ShortestPathDijkstra extends Algorithm<ShortestPathDijkstra, Shorte
         return finalPath.size();
     }
 
-    private void run(int goal, Direction direction) {
+    private void run(int goal) {
         while (!queue.isEmpty() && running()) {
             int node = queue.pop();
             if (node == goal) {
@@ -163,7 +162,6 @@ public class ShortestPathDijkstra extends Algorithm<ShortestPathDijkstra, Shorte
             double costs = this.costs.getOrDefault(node, Double.MAX_VALUE);
             graph.forEachRelationship(
                     node,
-                    direction,
                     1.0D,
                     longToIntConsumer((source, target, weight) -> {
                         updateCosts(source, target, weight + costs);

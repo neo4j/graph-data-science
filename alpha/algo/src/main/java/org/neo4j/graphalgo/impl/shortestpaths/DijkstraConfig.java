@@ -27,31 +27,15 @@ import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 
 import java.util.Optional;
-
-import static org.neo4j.graphdb.Direction.BOTH;
-import static org.neo4j.graphdb.Direction.OUTGOING;
 
 @ValueClass
 @Configuration("DijkstraConfigImpl")
 public interface DijkstraConfig extends AlgoBaseConfig, RelationshipWeightConfig, WriteConfig {
 
     String WRITE_PROPERTY_DEFAULT_VALUE = "sssp";
-
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return OUTGOING;
-    }
-
-    @Configuration.Ignore
-    @Value.Derived
-    default Direction resolvedDirection() {
-        return direction() == BOTH ? OUTGOING : direction();
-    }
 
     @Override
     @Value.Default
@@ -67,10 +51,6 @@ public interface DijkstraConfig extends AlgoBaseConfig, RelationshipWeightConfig
 
     static DijkstraConfig of(long startNode, long endNode) {
         return ImmutableDijkstraConfig.builder().startNode(startNode).endNode(endNode).build();
-    }
-
-    static DijkstraConfig of(long startNode, long endNode, Direction direction) {
-        return ImmutableDijkstraConfig.builder().startNode(startNode).endNode(endNode).direction(direction).build();
     }
 
     static DijkstraConfig of(

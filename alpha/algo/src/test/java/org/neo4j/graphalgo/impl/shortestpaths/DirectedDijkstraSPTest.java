@@ -24,12 +24,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,7 +68,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
             "  (e)-[:REL {cost:1}]->(d),\n" +
             "  (d)-[:REL {cost:1}]->(a)\n";
 
-    private Graph graph;
+    private GraphsByRelationshipType graphs;
 
     @BeforeEach
     void setup() {
@@ -73,17 +76,21 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
 
         runQuery(DB_CYPHER);
 
-        graph = new GraphLoader(db)
-                .withLabel("Node")
-                .withRelationshipType("REL")
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .load(HugeGraphFactory.class);
+        graphs = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node")
+            .putRelationshipProjectionsWithIdentifier("REL_OUT", RelationshipProjection.of("REL", Projection.NATURAL, Aggregation.NONE))
+            .putRelationshipProjectionsWithIdentifier("REL_IN", RelationshipProjection.of("REL", Projection.REVERSE, Aggregation.NONE))
+            .putRelationshipProjectionsWithIdentifier("REL_BOTH", RelationshipProjection.of("REL", Projection.UNDIRECTED, Aggregation.NONE))
+            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+            .build()
+            .graphs(HugeGraphFactory.class);
     }
 
     @AfterEach
     void tearDown() {
         db.shutdown();
-        graph = null;
+        graphs = null;
     }
 
     private long id(String name) {
@@ -102,12 +109,12 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     @Test
     void testOutgoing() {
         StringBuilder path = new StringBuilder();
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"), Direction.OUTGOING);
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
+        Graph graph = graphs.getGraphProjection("REL_OUT", "cost");
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
         dijkstra.getFinalPath().forEach((IntProcedure) n -> path.append(name(n)));
-        System.out.println("path(OUTGOING) = " + path);
         assertEquals("abcf", path.toString());
         assertEquals(6.0, dijkstra.getTotalCost(), 0.1);
         assertEquals(4, dijkstra.getPathLength());
@@ -115,13 +122,13 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
 
     @Test
     void testIncoming() {
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"), Direction.INCOMING);
         StringBuilder path = new StringBuilder();
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
+        Graph graph = graphs.getGraphProjection("REL_IN", "cost");
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
         dijkstra.getFinalPath().forEach((IntProcedure) n -> path.append(name(n)));
-        System.out.println("path(INCOMING) = " + path);
         assertEquals("adef", path.toString());
         assertEquals(3.0, dijkstra.getTotalCost(), 0.1);
         assertEquals(4, dijkstra.getPathLength());
@@ -130,9 +137,10 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     @Test
     void testBoth() {
         StringBuilder path = new StringBuilder();
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"), Direction.BOTH);
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
+        Graph graph = graphs.getGraphProjection("REL_BOTH", "cost");
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
-        dijkstra.compute(id("a"), id("f"), Direction.BOTH);
+        dijkstra.compute(id("a"), id("f"));
 
         dijkstra.getFinalPath().forEach((IntProcedure) n -> path.append(name(n)));
         System.out.println("path(BOTH) = " + path);
@@ -144,7 +152,8 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     @Test
     void testUnreachableOutgoing() {
         StringBuilder path = new StringBuilder();
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"), Direction.OUTGOING);
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
+        Graph graph = graphs.getGraphProjection("REL_OUT", "cost");
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -157,7 +166,8 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     @Test
     void testUnreachableIncoming() {
         StringBuilder path = new StringBuilder();
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"), Direction.INCOMING);
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
+        Graph graph = graphs.getGraphProjection("REL_IN", "cost");
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -170,7 +180,8 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     @Test
     void testUnreachableBoth() {
         StringBuilder path = new StringBuilder();
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"), Direction.BOTH);
+        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
+        Graph graph = graphs.getGraphProjection("REL_BOTH", "cost");
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
