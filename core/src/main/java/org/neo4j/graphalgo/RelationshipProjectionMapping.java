@@ -30,7 +30,7 @@ public interface RelationshipProjectionMapping {
         .elementIdentifier("")
         .projection(Projection.NATURAL)
         .typeId(StatementConstants.ANY_RELATIONSHIP_TYPE)
-        .doesExist(true)
+        .exists(true)
         .build();
 
     String elementIdentifier();
@@ -41,7 +41,7 @@ public interface RelationshipProjectionMapping {
 
     int typeId();
 
-    boolean doesExist();
+    boolean exists();
 
     static RelationshipProjectionMapping of(String typeName, int typeId) {
         return of(typeName, typeName, Projection.NATURAL, typeId);
@@ -58,7 +58,7 @@ public interface RelationshipProjectionMapping {
             .typeName(typeName)
             .projection(projection)
             .typeId(typeId)
-            .doesExist(typeId != StatementConstants.NO_SUCH_RELATIONSHIP_TYPE)
+            .exists(typeId != StatementConstants.NO_SUCH_RELATIONSHIP_TYPE)
             .build();
     }
 }

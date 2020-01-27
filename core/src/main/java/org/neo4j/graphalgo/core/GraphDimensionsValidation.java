@@ -54,7 +54,7 @@ public final class GraphDimensionsValidation {
         if (isNotEmpty(setup.relationshipType())) {
             String missingTypes = dimensions.relationshipProjectionMappings()
                 .stream()
-                .filter(m -> !m.doesExist())
+                .filter(m -> !m.exists())
                 .map(RelationshipProjectionMapping::typeName)
                 .collect(joining("', '"));
             if (!missingTypes.isEmpty()) {

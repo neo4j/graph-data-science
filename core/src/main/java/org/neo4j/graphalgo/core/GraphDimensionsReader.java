@@ -115,7 +115,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         // TODO: this will double count relationships between distinct labels
         Map<String, Long> relationshipCounts = relationshipProjectionMappings
             .stream()
-            .filter(RelationshipProjectionMapping::doesExist)
+            .filter(RelationshipProjectionMapping::exists)
             .collect(Collectors.toMap(
                 RelationshipProjectionMapping::elementIdentifier,
                 relationshipProjectionMapping -> nodeLabelIds.stream()
