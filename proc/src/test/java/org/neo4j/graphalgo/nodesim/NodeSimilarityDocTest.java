@@ -72,8 +72,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
     void shouldProduceStreamOutput() {
         String query = "CALL gds.nodeSimilarity.stream({\n" +
                        "  nodeProjection: 'Person | Instrument',\n" +
-                       "  relationshipProjection: 'LIKES',\n" +
-                       "  direction: 'OUTGOING'\n" +
+                       "  relationshipProjection: 'LIKES'\n" +
                        "})\n" +
                        "YIELD node1, node2, similarity\n" +
                        "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
@@ -103,7 +102,6 @@ class NodeSimilarityDocTest extends BaseProcTest {
         String query = "CALL gds.nodeSimilarity.write({\n" +
                        "  nodeProjection: 'Person | Instrument',\n" +
                        "  relationshipProjection: 'LIKES',\n" +
-                       "  direction: 'OUTGOING',\n" +
                        "  writeRelationshipType: 'SIMILAR',\n" +
                        "  writeProperty: 'score'\n" +
                        "})\n" +
@@ -124,7 +122,6 @@ class NodeSimilarityDocTest extends BaseProcTest {
         String query = "CALL gds.nodeSimilarity.stream({\n" +
                        "  nodeProjection: 'Person | Instrument',\n" +
                        "  relationshipProjection: 'LIKES',\n" +
-                       "  direction: 'OUTGOING',\n" +
                        "  topK: 1,\n" +
                        "  topN: 3\n" +
                        "})\n" +
@@ -149,7 +146,6 @@ class NodeSimilarityDocTest extends BaseProcTest {
         String query = "CALL gds.nodeSimilarity.stream({\n" +
                        "  nodeProjection: 'Person | Instrument',\n" +
                        "  relationshipProjection: 'LIKES',\n" +
-                       "  direction: 'OUTGOING',\n" +
                        "  topK: 1\n" +
                        "})\n" +
                        "YIELD node1, node2, similarity\n" +
@@ -174,7 +170,6 @@ class NodeSimilarityDocTest extends BaseProcTest {
         String query = "CALL gds.nodeSimilarity.stream({\n" +
                        "  nodeProjection: 'Person | Instrument',\n" +
                        "  relationshipProjection: 'LIKES',\n" +
-                       "  direction: 'OUTGOING',\n" +
                        "  bottomK: 1\n" +
                        "})\n" +
                        "YIELD node1, node2, similarity\n" +
@@ -200,7 +195,6 @@ class NodeSimilarityDocTest extends BaseProcTest {
         String query = "CALL gds.nodeSimilarity.stream({\n" +
                        "  nodeProjection: 'Person | Instrument',\n" +
                        "  relationshipProjection: 'LIKES',\n" +
-                       "  direction: 'OUTGOING',\n" +
                        "  degreeCutoff: 3\n" +
                        "})\n" +
                        "YIELD node1, node2, similarity\n" +
@@ -223,7 +217,6 @@ class NodeSimilarityDocTest extends BaseProcTest {
         String query = "CALL gds.nodeSimilarity.stream({\n" +
                        "  nodeProjection: 'Person | Instrument',\n" +
                        "  relationshipProjection: 'LIKES',\n" +
-                       "  direction: 'OUTGOING',\n" +
                        "  similarityCutoff: 0.5\n" +
                        "})\n" +
                        "YIELD node1, node2, similarity\n" +

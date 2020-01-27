@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.nodesim;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,13 +30,16 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -43,8 +47,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -60,6 +62,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.Projection.NATURAL;
+import static org.neo4j.graphalgo.Projection.REVERSE;
+import static org.neo4j.graphalgo.Projection.UNDIRECTED;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.TestSupport.assertAlgorithmTermination;
@@ -67,9 +72,6 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
 import static org.neo4j.graphalgo.nodesim.NodeSimilarityBaseConfig.TOP_K_DEFAULT;
-import static org.neo4j.graphdb.Direction.BOTH;
-import static org.neo4j.graphdb.Direction.INCOMING;
-import static org.neo4j.graphdb.Direction.OUTGOING;
 
 final class NodeSimilarityTest extends AlgoTestBase {
 
@@ -206,10 +208,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
     static Stream<Arguments> supportedLoadAndComputeDirections() {
         Stream<Arguments> directions = Stream.of(
-            arguments("OUTGOING", "OUTGOING"),
-            arguments("BOTH", "OUTGOING"),
-            arguments("INCOMING", "INCOMING"),
-            arguments("BOTH", "INCOMING")
+            arguments(NATURAL),
+            arguments(REVERSE)
         );
         return crossArguments(() -> directions, toArguments(NodeSimilarityTest::concurrencies));
     }
@@ -233,18 +233,20 @@ final class NodeSimilarityTest extends AlgoTestBase {
         db.shutdown();
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDirection(loadDirection)
-            .load(HugeGraphFactory.class);
+    void shouldComputeForSupportedDirections(Projection projection, int concurrency) {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).direction(algoDirection).build(),
+            configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -255,21 +257,23 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .collect(Collectors.toSet());
         nodeSimilarity.release();
 
-        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
+        assertEquals(projection == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeTopNForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDirection(loadDirection)
-            .load(HugeGraphFactory.class);
+    void shouldComputeTopNForSupportedDirections(Projection projection, int concurrency) {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).topN(1).direction(algoDirection).build(),
+            configBuilder().concurrency(concurrency).topN(1).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -280,25 +284,24 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .collect(Collectors.toSet());
         nodeSimilarity.release();
 
-        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
+        assertEquals(projection == REVERSE ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeNegativeTopNForSupportedDirections(
-        Direction loadDirection,
-        Direction algoDirection,
-        int concurrency
+    void shouldComputeNegativeTopNForSupportedDirections(Projection projection, int concurrency
     ) {
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDirection(loadDirection)
-            .load(HugeGraphFactory.class);
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).bottomN(1).direction(algoDirection).build(),
+            configBuilder().concurrency(concurrency).bottomN(1).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -306,7 +309,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph similarityGraph = nodeSimilarity.computeToGraph().similarityGraph();
 
         assertGraphEquals(
-            algoDirection == INCOMING
+            projection == REVERSE
                 ? fromGdl(
                 "(i1)-[{w: 0.50000D}]->(i3), (i2), (i4), (a), (b), (c), (d)")
                 : fromGdl(
@@ -315,18 +318,20 @@ final class NodeSimilarityTest extends AlgoTestBase {
         );
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeTopKForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDirection(loadDirection)
-            .load(HugeGraphFactory.class);
+    void shouldComputeTopKForSupportedDirections(Projection projection, int concurrency) {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().topK(1).concurrency(concurrency).direction(algoDirection).build(),
+            configBuilder().topK(1).concurrency(concurrency).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -337,21 +342,19 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .collect(Collectors.toSet());
         nodeSimilarity.release();
 
-        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_K_1 : EXPECTED_OUTGOING_TOP_K_1, result);
+        assertEquals(projection == REVERSE ? EXPECTED_INCOMING_TOP_K_1 : EXPECTED_OUTGOING_TOP_K_1, result);
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeNegativeTopKForSupportedDirections(
-        Direction loadDirection,
-        Direction algoDirection,
-        int concurrency
-    ) {
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDirection(loadDirection)
-            .load(HugeGraphFactory.class);
+    void shouldComputeNegativeTopKForSupportedDirections(Projection projection, int concurrency) {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -359,7 +362,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
                 .concurrency(concurrency)
                 .topK(10)
                 .bottomK(1)
-                .direction(algoDirection)
                 .build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
@@ -368,31 +370,29 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph similarityGraph = nodeSimilarity.computeToGraph().similarityGraph();
 
         assertGraphEquals(
-            algoDirection == INCOMING
+            projection == REVERSE
                 ? fromGdl(
                 "(i1)-[{w: 0.50000D}]->(i3), (i2)-[{w: 0.50000D}]->(i3), (i3)-[{w: 0.500000D}]->(i1), (d), (e), (f), (g), (h)")
                 : fromGdl(
-                "(a)-[{w: 0.333333D}]->(c), (b)-[{w: 0.00000D}]->(c), (c)-[{w: 0.000000D}]->(b), (d)-[{w: 0.333333D}]->(c), (e), (f), (g), (h)")
+                    "(a)-[{w: 0.333333D}]->(c), (b)-[{w: 0.00000D}]->(c), (c)-[{w: 0.000000D}]->(b), (d)-[{w: 0.333333D}]->(c), (e), (f), (g), (h)")
             , similarityGraph
         );
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeWithSimilarityCutoffForSupportedDirections(
-        Direction loadDirection,
-        Direction algoDirection,
-        int concurrency
-    ) {
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDirection(loadDirection)
-            .load(HugeGraphFactory.class);
+    void shouldComputeWithSimilarityCutoffForSupportedDirections(Projection projection, int concurrency) {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).similarityCutoff(0.1).direction(algoDirection).build(),
+            configBuilder().concurrency(concurrency).similarityCutoff(0.1).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -404,27 +404,25 @@ final class NodeSimilarityTest extends AlgoTestBase {
         nodeSimilarity.release();
 
         assertEquals(
-            algoDirection == INCOMING ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF,
+            projection == REVERSE ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF,
             result
         );
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeWithDegreeCutoffForSupportedDirections(
-        Direction loadDirection,
-        Direction algoDirection,
-        int concurrency
-    ) {
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDirection(loadDirection)
-            .load(HugeGraphFactory.class);
+    void shouldComputeWithDegreeCutoffForSupportedDirections(Projection projection, int concurrency) {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().degreeCutoff(2).concurrency(concurrency).direction(algoDirection).build(),
+            configBuilder().degreeCutoff(2).concurrency(concurrency).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -436,7 +434,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
         nodeSimilarity.release();
 
         assertEquals(
-            algoDirection == INCOMING ? EXPECTED_INCOMING_DEGREE_CUTOFF : EXPECTED_OUTGOING_DEGREE_CUTOFF,
+            projection == REVERSE ? EXPECTED_INCOMING_DEGREE_CUTOFF : EXPECTED_OUTGOING_DEGREE_CUTOFF,
             result
         );
     }
@@ -444,11 +442,13 @@ final class NodeSimilarityTest extends AlgoTestBase {
     @ParameterizedTest(name = "concurrency = {0}")
     @MethodSource("concurrencies")
     void shouldComputeForUndirectedGraphs(int concurrency) {
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .undirected()
-            .load(HugeGraphFactory.class);
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(UNDIRECTED)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -461,34 +461,32 @@ final class NodeSimilarityTest extends AlgoTestBase {
         assertNotEquals(Collections.emptySet(), result);
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeSimilarityGraphInAllSupportedDirections(
-        Direction loadDirection,
-        Direction algoDirection,
-        int concurrency
-    ) {
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDirection(loadDirection)
-            .load(HugeGraphFactory.class);
+    void shouldComputeSimilarityGraphInAllSupportedDirections(Projection projection, int concurrency) {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).direction(algoDirection).build(),
+            configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
         SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph();
         assertEquals(
-            algoDirection == INCOMING ? COMPARED_ITEMS : COMPARED_PERSONS,
+            projection == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
             similarityGraphResult.comparedNodes()
         );
         Graph resultGraph = similarityGraphResult.similarityGraph();
         assertGraphEquals(
-            algoDirection == INCOMING
+            projection == REVERSE
                 ? fromGdl(
                 "(a), (b), (c), (d), (e)" +
                 ", (f)-[{property: 1.000000D}]->(g)" +
@@ -519,22 +517,20 @@ final class NodeSimilarityTest extends AlgoTestBase {
         resultGraph.release();
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeToGraphWithUnusedNodesInInputGraph(
-        Direction loadDirection,
-        Direction algoDirection,
-        int concurrency
-    ) {
+    void shouldComputeToGraphWithUnusedNodesInInputGraph(Projection projection, int concurrency) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb, "UNWIND range(0, 1024) AS unused CREATE (:Unused)");
         runQuery(localDb, DB_CYPHER);
 
-        Graph graph = new GraphLoader(localDb)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDirection(loadDirection)
-            .load(HugeGraphFactory.class);
+        Graph graph =  new StoreLoaderBuilder()
+            .api(localDb)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -542,7 +538,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
                 .concurrency(concurrency)
                 .topK(100)
                 .topN(1)
-                .direction(algoDirection)
                 .build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
@@ -550,15 +545,19 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph();
         assertEquals(
-            algoDirection == INCOMING ? COMPARED_ITEMS : COMPARED_PERSONS,
+            projection == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
             similarityGraphResult.comparedNodes()
         );
 
         Graph resultGraph = similarityGraphResult.similarityGraph();
-        String expected = algoDirection == INCOMING ? resultString(1029, 1030, 1.00000)  : resultString(1025, 1028, 1.00000);
+        String expected = projection == REVERSE ? resultString(1029, 1030, 1.00000) : resultString(
+            1025,
+            1028,
+            1.00000
+        );
 
         resultGraph.forEachNode(n -> {
-            resultGraph.forEachRelationship(n, OUTGOING, -1.0, (s, t, w) -> {
+            resultGraph.forEachRelationship(n, -1.0, (s, t, w) -> {
                 assertEquals(expected, resultString(s, t, w));
                 return true;
             });
@@ -569,25 +568,27 @@ final class NodeSimilarityTest extends AlgoTestBase {
         resultGraph.release();
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldIgnoreLoops(Direction loadDirection, Direction algoDirection, int concurrency) {
+    void shouldIgnoreLoops(Projection projection, int concurrency) {
         // Add loops
         runQuery("" +
-                   " MATCH (alice {name: 'Alice'})" +
-                   " MATCH (thing {name: 'p1'})" +
-                   " CREATE (alice)-[:LIKES]->(alice), (thing)-[:LIKES]->(thing)"
+                 " MATCH (alice {name: 'Alice'})" +
+                 " MATCH (thing {name: 'p1'})" +
+                 " CREATE (alice)-[:LIKES]->(alice), (thing)-[:LIKES]->(thing)"
         );
 
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDirection(loadDirection)
-            .load(HugeGraphFactory.class);
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).topN(1).direction(algoDirection).build(),
+            configBuilder().concurrency(concurrency).topN(1).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -598,36 +599,38 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .collect(Collectors.toSet());
         nodeSimilarity.release();
 
-        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
+        assertEquals(projection == REVERSE ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldIgnoreParallelEdges(Direction loadDirection, Direction algoDirection, int concurrency) {
+    void shouldIgnoreParallelEdges(Projection projection, int concurrency) {
         // Add parallel edges
         runQuery("" +
-                   " MATCH (person {name: 'Alice'})" +
-                   " MATCH (thing {name: 'p1'})" +
-                   " CREATE (person)-[:LIKES]->(thing)"
+                 " MATCH (person {name: 'Alice'})" +
+                 " MATCH (thing {name: 'p1'})" +
+                 " CREATE (person)-[:LIKES]->(thing)"
         );
         runQuery("" +
-                   " MATCH (person {name: 'Dave'})" +
-                   " MATCH (thing {name: 'p3'})" +
-                   " CREATE (person)-[:LIKES]->(thing)" +
-                   " CREATE (person)-[:LIKES]->(thing)" +
-                   " CREATE (person)-[:LIKES]->(thing)"
+                 " MATCH (person {name: 'Dave'})" +
+                 " MATCH (thing {name: 'p3'})" +
+                 " CREATE (person)-[:LIKES]->(thing)" +
+                 " CREATE (person)-[:LIKES]->(thing)" +
+                 " CREATE (person)-[:LIKES]->(thing)"
         );
 
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDefaultAggregation(Aggregation.NONE)
-            .withDirection(loadDirection)
-            .load(HugeGraphFactory.class);
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .globalAggregation(Aggregation.NONE)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).direction(algoDirection).build(),
+            configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -638,23 +641,26 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .collect(Collectors.toSet());
         nodeSimilarity.release();
 
-        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
+        assertEquals(projection == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
 
+    @Disabled("Unsure how to proceed with direction BOTH")
     @ParameterizedTest(name = "concurrency = {0}")
     @MethodSource("concurrencies")
     void shouldThrowForDirectionBoth(int concurrency) {
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .undirected()
-            .load(HugeGraphFactory.class);
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(UNDIRECTED)
+            .build()
+            .graph(HugeGraphFactory.class);
 
         IllegalArgumentException ex = Assertions.assertThrows(
             IllegalArgumentException.class,
             () -> new NodeSimilarity(
                 graph,
-                configBuilder().concurrency(concurrency).direction(BOTH).build(),
+                configBuilder().concurrency(concurrency).build(),
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY
             ).computeToStream()
@@ -667,11 +673,12 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldLogProgress(int topK, int concurrency) {
         TestLog log = new TestLog();
 
-        Graph graph = new GraphLoader(db)
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withDirection(OUTGOING)
-            .load(HugeGraphFactory.class);
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,

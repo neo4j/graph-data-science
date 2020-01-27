@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.QueryRunner;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
@@ -120,7 +121,6 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
             .algo("nodeSimilarity")
             .streamMode()
             .addParameter("similarityCutoff", 0.0)
-            .addParameter("direction", OUTGOING.name())
             .yields("node1", "node2", "similarity");
 
         Collection<String> result = new HashSet<>();
@@ -138,11 +138,9 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
     @ParameterizedTest(name = "{2}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
     void shouldStreamResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
-        Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         String query = queryBuilder
             .algo("nodeSimilarity")
             .streamMode()
-            .addParameter("direction", direction.name())
             .addParameter("similarityCutoff", 0.0)
             .yields("node1", "node2", "similarity");
 
@@ -155,7 +153,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
         });
 
         assertEquals(
-            direction == INCOMING
+            projection == REVERSE
                 ? EXPECTED_INCOMING
                 : EXPECTED_OUTGOING,
             result
@@ -165,12 +163,10 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
     @ParameterizedTest(name = "{2}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
     void shouldStreamTopResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
-        Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         int topN = 2;
         String query = queryBuilder
             .algo("nodeSimilarity")
             .streamMode()
-            .addParameter("direction", direction.name())
             .addParameter("topN", topN)
             .yields("node1", "node2", "similarity");
 
@@ -183,7 +179,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
         });
 
         assertEquals(
-            direction == INCOMING
+            projection == REVERSE
                 ? EXPECTED_TOP_INCOMING
                 : EXPECTED_TOP_OUTGOING,
             result
@@ -193,7 +189,6 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
     @ParameterizedTest(name = "{2}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
     void shouldIgnoreParallelEdges(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
-        Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         // Add parallel edges
         runQuery("" +
                  " MATCH (person {name: 'Alice'})" +
@@ -211,7 +206,6 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
         String query = queryBuilder
             .algo("nodeSimilarity")
             .streamMode()
-            .addParameter("direction", direction.name())
             .addParameter("similarityCutoff", 0.0)
             .yields("node1", "node2", "similarity");
 
@@ -224,7 +218,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
         });
 
         assertEquals(
-            direction == INCOMING
+            projection == REVERSE
                 ? EXPECTED_INCOMING
                 : EXPECTED_OUTGOING,
             result

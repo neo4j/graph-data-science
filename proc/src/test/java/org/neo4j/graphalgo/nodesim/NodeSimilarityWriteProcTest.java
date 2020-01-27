@@ -62,11 +62,9 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
     @ParameterizedTest(name = "{2}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
     void shouldWriteResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
-        Direction direction = projection == REVERSE ? INCOMING : OUTGOING;
         String query = queryBuilder
             .algo("nodeSimilarity")
             .writeMode()
-            .addParameter("direction", direction.name())
             .addParameter("similarityCutoff", 0.0)
             .addParameter("writeRelationshipType", "SIMILAR")
             .addParameter("writeProperty", "score")

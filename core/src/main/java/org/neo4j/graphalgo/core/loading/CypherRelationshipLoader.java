@@ -175,7 +175,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         boolean isAnyRelTypeQuery = !allColumns.contains(RelationshipRowVisitor.TYPE_COLUMN);
 
         if (isAnyRelTypeQuery) {
-            loaderContext.getOrCreateImporterBuilder(RelationshipProjectionMapping.ALL);
+            loaderContext.getOrCreateImporterBuilder(RelationshipProjectionMapping.all());
         }
 
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(

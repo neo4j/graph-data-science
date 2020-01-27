@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.nodesim;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphdb.Direction;
 
 public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
 
@@ -115,13 +114,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
     @Value.Derived
     default boolean computeToGraph() {
         return !computeToStream();
-    }
-
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Configuration.ToMapValue("org.neo4j.graphalgo.core.utils.Directions#toString")
-    @Value.Default
-    default Direction direction() {
-        return Direction.OUTGOING;
     }
 
     @Value.Check

@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 public final class RelationshipProjectionMappings implements Iterable<RelationshipProjectionMapping> {
 
-    private static final RelationshipProjectionMappings ALL = new RelationshipProjectionMappings(RelationshipProjectionMapping.ALL);
+    private static final RelationshipProjectionMappings ALL = new RelationshipProjectionMappings(RelationshipProjectionMapping.all());
 
     private final RelationshipProjectionMapping[] mappings;
 

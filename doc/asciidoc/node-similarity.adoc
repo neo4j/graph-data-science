@@ -196,8 +196,7 @@ In the example graph, the Eve node will not be compared to other Person nodes.
 ----
 CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
-  relationshipProjection: 'LIKES',
-  direction: 'OUTGOING'
+  relationshipProjection: 'LIKES'
 })
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
@@ -239,7 +238,6 @@ The similarity score is written as a property on the relationship.
 CALL gds.nodeSimilarity.write({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
-  direction: 'OUTGOING',
   writeRelationshipType: 'SIMILAR',
   writeProperty: 'score'
 })
@@ -295,7 +293,6 @@ If neither is specified, topK is used.
 CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
-  direction: 'OUTGOING',
   topK: 1
 })
 YIELD node1, node2, similarity
@@ -320,7 +317,6 @@ ORDER BY Person1
 CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
-  direction: 'OUTGOING',
   bottomK: 1
 })
 YIELD node1, node2, similarity
@@ -355,7 +351,6 @@ A value of 0 means no global limit is imposed and all results from topK or botto
 CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
-  direction: 'OUTGOING',
   topK: 1,
   topN: 3
 })
@@ -387,7 +382,6 @@ This value can not be lower than 1.
 CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
-  direction: 'OUTGOING',
   degreeCutoff: 3
 })
 YIELD node1, node2, similarity
@@ -418,7 +412,6 @@ Setting similarity cutoff to 0 may yield a very large result set, increased runt
 CALL gds.nodeSimilarity.stream({
   nodeProjection: 'Person | Instrument',
   relationshipProjection: 'LIKES',
-  direction: 'OUTGOING',
   similarityCutoff: 0.5
 })
 YIELD node1, node2, similarity
