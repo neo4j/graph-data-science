@@ -21,13 +21,14 @@ package org.neo4j.graphalgo.impl.spanningTree;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
@@ -82,73 +83,75 @@ class PrimTest extends AlgoTestBase {
         db.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMaximumFromA(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMaximumFromA() {
+        loadGraph();
         assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, a).compute());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMaximumFromB(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMaximumFromB() {
+        loadGraph();
         assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, b).compute());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMaximumFromC(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMaximumFromC() {
+        loadGraph();
         assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, c).compute());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMaximumFromD(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMaximumFromD() {
+        loadGraph();
         assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, d).compute());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMaximumFromE(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMaximumFromE() {
+        loadGraph();
         assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, e).compute());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMinimumFromA(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMinimumFromA() {
+        loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, a).compute());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMinimumFromB(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMinimumFromB() {
+        loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, b).compute());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMinimumFromC(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMinimumFromC() {
+        loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, c).compute());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMinimumFromD(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMinimumFromD() {
+        loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, d).compute());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testMinimumFromE(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testMinimumFromE() {
+        loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, e).compute());
     }
 
-    private void setup(Class<? extends GraphFactory> graphImpl) {
-        graph = new GraphLoader(db)
-                .withLabel(label)
-                .withRelationshipType("TYPE")
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .undirected()
-                .load(graphImpl);
+    private void loadGraph() {
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE")
+            .globalProjection(Projection.UNDIRECTED)
+            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+            .build()
+            .graph(HugeGraphFactory.class);
 
         runInTransaction(db, () -> {
             a = Math.toIntExact(graph.toMappedNodeId(db.findNode(label, "name", "a").getId()));
