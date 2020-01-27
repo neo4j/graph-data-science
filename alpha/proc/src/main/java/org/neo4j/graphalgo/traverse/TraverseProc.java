@@ -46,11 +46,6 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
 
     private static boolean isBfs;
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
-
     @Procedure(name = "gds.alpha.bfs.stream", mode = READ)
     public Stream<WalkResult> bfs(
         @Name(value = "graphName") Object graphNameOrConfig,

@@ -55,10 +55,6 @@ public abstract class BaseProc {
         return transaction.subjectOrAnonymous().username();
     }
 
-    protected boolean legacyMode() {
-        return true;
-    }
-
     protected final ModernGraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
         return ImmutableModernGraphLoader
             .builder()
@@ -68,7 +64,7 @@ public abstract class BaseProc {
             .tracker(tracker)
             .terminationFlag(TerminationFlag.wrap(transaction))
             .createConfig(createConfig)
-            .legacyMode(legacyMode())
+            .legacyMode(false)
             .build();
     }
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -38,11 +37,6 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
             return new PageRankFactory<>();
         }
         return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
-    }
-
-    @Override
-    protected boolean legacyMode() {
-        return false;
     }
 
     protected Stream<WriteResult> write(ComputationResult<PageRank, PageRank, CONFIG> computeResult) {

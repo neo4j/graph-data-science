@@ -39,11 +39,6 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, ShortestPathAStar, ShortestPathAStarConfig> {
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
-
     @Procedure(name = "gds.alpha.shortestPath.astar.stream", mode = READ)
     public Stream<ShortestPathAStar.Result> astarStream(
         @Name(value = "graphName") Object graphNameOrConfig,

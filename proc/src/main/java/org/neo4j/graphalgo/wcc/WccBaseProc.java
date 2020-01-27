@@ -44,11 +44,6 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
         return new WccFactory<>();
     }
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
-
     protected Stream<WriteResult> write(
         ComputationResult<Wcc, DisjointSetStruct, CONFIG> computeResult
     ) {

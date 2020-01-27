@@ -55,11 +55,6 @@ import static org.neo4j.procedure.Mode.WRITE;
  */
 public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetweennessCentrality, RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> {
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
-
     @Procedure(name = "gds.alpha.betweenness.sampled.stream", mode = READ)
     public Stream<BetweennessCentrality.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

@@ -81,7 +81,7 @@ class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
 
         GraphCatalog.set(
             createGraphConfig,
-            graphLoader(createGraphConfig, false).build(HugeGraphFactory.class).build().graphs()
+            graphLoader(createGraphConfig).build(HugeGraphFactory.class).build().graphs()
         );
 
         String query = GdsCypher.call()

@@ -38,11 +38,6 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
         return new LabelPropagationFactory<>(config);
     }
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
-
     protected Stream<WriteResult> write(
         ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult
     ) {

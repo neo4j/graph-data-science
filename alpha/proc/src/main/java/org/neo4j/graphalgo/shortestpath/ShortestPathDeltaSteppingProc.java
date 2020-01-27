@@ -58,11 +58,6 @@ import static org.neo4j.procedure.Mode.READ;
  */
 public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> {
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
-
     @Procedure(name = "gds.alpha.shortestPath.deltaStepping.stream", mode = READ)
     public Stream<ShortestPathDeltaStepping.DeltaSteppingResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

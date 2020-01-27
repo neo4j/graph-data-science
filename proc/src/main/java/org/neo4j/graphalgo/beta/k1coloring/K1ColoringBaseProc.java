@@ -31,8 +31,4 @@ public abstract class K1ColoringBaseProc<T extends K1ColoringConfig> extends Alg
         return new K1ColoringFactory<>();
     }
 
-    @Override
-    protected boolean legacyMode() {
-        return false;
-    }
 }

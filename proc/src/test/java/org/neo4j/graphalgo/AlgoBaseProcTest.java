@@ -194,9 +194,8 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         applyOnProcedure((proc) -> {
             GraphCatalog.set(
                 graphCreateConfig,
-                graphLoader(graphCreateConfig, proc.legacyMode()).build(graphFactory).build().graphs()
+                graphLoader(graphCreateConfig).build(graphFactory).build().graphs()
             );
-
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnLoadedGraph = proc.compute(
                 loadedGraphName,
@@ -250,7 +249,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         applyOnProcedure((proc) -> {
             GraphCatalog.set(
                 graphCreateConfig,
-                graphLoader(graphCreateConfig, proc.legacyMode()).build(graphFactory).build().graphs()
+                graphLoader(graphCreateConfig).build(graphFactory).build().graphs()
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap);
@@ -423,18 +422,18 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     }
 
     @NotNull
-    default ModernGraphLoader graphLoader(GraphCreateConfig graphCreateConfig, boolean legacyMode) {
-        return graphLoader(graphDb(), graphCreateConfig, legacyMode);
+    default ModernGraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
+        return graphLoader(graphDb(), graphCreateConfig);
     }
 
     @NotNull
-    default ModernGraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateConfig graphCreateConfig, boolean legacyMode) {
+    default ModernGraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateConfig graphCreateConfig) {
         return ImmutableModernGraphLoader
             .builder()
             .api(db)
             .username("")
             .log(new TestLog())
-            .legacyMode(legacyMode)
+            .legacyMode(false)
             .createConfig(graphCreateConfig).build();
     }
 
