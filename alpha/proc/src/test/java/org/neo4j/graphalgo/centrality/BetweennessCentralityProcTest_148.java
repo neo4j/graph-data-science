@@ -77,14 +77,13 @@ class BetweennessCentralityProcTest_148 extends BaseProcTest {
     }
 
     @Test
-    void testBCStreamDirectionBoth() {
+    void testBCStreamUndirected() {
         Consumer mock = mock(Consumer.class);
         String query = GdsCypher.call()
             .withNodeLabel("User")
             .withRelationshipType("FRIEND", RelationshipProjection.builder().projection(Projection.UNDIRECTED).build())
             .algo("gds.alpha.betweenness")
             .streamMode()
-            .addParameter("direction", "BOTH")
             .yields("nodeId", "centrality");
         runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();

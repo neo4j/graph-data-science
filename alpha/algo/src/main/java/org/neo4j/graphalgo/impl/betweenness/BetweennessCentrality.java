@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.container.Paths;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,37 +56,19 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
     private final int nodeCount;
     private final ExecutorService executorService;
     private final int concurrency;
-    private Direction direction = Direction.OUTGOING;
-    private double divisor = 1.0;
+    private final double divisor;
 
-    /**
-     * constructs a parallel centrality solver
-     *
-     * @param graph           the graph iface
-     * @param executorService the executor service
-     * @param concurrency     desired number of threads to spawn
-     */
     public BetweennessCentrality(Graph graph, ExecutorService executorService, int concurrency) {
+        this(graph, executorService, concurrency, false);
+    }
+
+    public BetweennessCentrality(Graph graph, ExecutorService executorService, int concurrency, boolean undirected) {
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.centrality = new AtomicDoubleArray(nodeCount);
-    }
-
-    /**
-     * sete traversal direction
-     * OUTGOING for undirected graphs!
-     *
-     * @param direction
-     * @return
-     */
-    public BetweennessCentrality withDirection(Direction direction) {
-        if (direction == Direction.BOTH) {
-            this.direction = Direction.OUTGOING;
-            this.divisor = 2.0;
-        }
-        return this;
+        this.divisor = undirected ? 2.0 : 1.0;
     }
 
     /**
@@ -198,7 +179,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
             while (!queue.isEmpty()) {
                 int node = queue.removeFirst();
                 stack.push(node);
-                localRelationshipIterator.forEachRelationship(node, direction, (source, targetId) -> {
+                localRelationshipIterator.forEachRelationship(node, (source, targetId) -> {
                     // This will break for very large graphs
                     int target = (int) targetId;
 

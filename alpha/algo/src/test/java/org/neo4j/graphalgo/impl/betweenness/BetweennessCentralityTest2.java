@@ -21,15 +21,15 @@ package org.neo4j.graphalgo.impl.betweenness;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 
@@ -93,9 +93,9 @@ class BetweennessCentralityTest2 extends AlgoTestBase {
         db.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testPBC(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testPBC() {
+        setup();
 
         BetweennessCentrality algo = new BetweennessCentrality(
             graph,
@@ -120,9 +120,9 @@ class BetweennessCentralityTest2 extends AlgoTestBase {
     }
 
 
-    @AllGraphTypesWithoutCypherTest
-    void testIterateParallel(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testIterateParallel() {
+        setup();
 
         final AtomicIntegerArray ai = new AtomicIntegerArray(1001);
 
@@ -135,11 +135,13 @@ class BetweennessCentralityTest2 extends AlgoTestBase {
         }
     }
 
-    private void setup(Class<? extends GraphFactory> graphImpl) {
-        graph = new GraphLoader(db)
-            .withAnyRelationshipType()
-            .withAnyLabel()
-            .load(graphImpl);
+    private void setup() {
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .build()
+            .load(HugeGraphFactory.class);
     }
 
     private String name(long id) {

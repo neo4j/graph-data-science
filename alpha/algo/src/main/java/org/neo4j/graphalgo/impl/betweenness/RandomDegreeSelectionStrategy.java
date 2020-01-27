@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
-import org.neo4j.graphdb.Direction;
 
 import java.security.SecureRandom;
 import java.util.concurrent.ExecutorService;
@@ -35,19 +34,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RandomDegreeSelectionStrategy implements RABrandesBetweennessCentrality.SelectionStrategy {
 
     private final Degrees degrees;
-    private final Direction direction;
     private final double maxDegree;
     private final SimpleBitSet bitSet;
     private final int size;
 
-    public RandomDegreeSelectionStrategy(Direction direction, Graph graph, ExecutorService pool, int concurrency) {
+    public RandomDegreeSelectionStrategy(Graph graph, ExecutorService pool, int concurrency) {
         this.degrees = graph;
-        this.direction = direction;
         bitSet = new SimpleBitSet(Math.toIntExact(graph.nodeCount()));
         SecureRandom random = new SecureRandom();
         AtomicInteger mx = new AtomicInteger(0);
         ParallelUtil.iterateParallel(pool, Math.toIntExact(graph.nodeCount()), concurrency, node -> {
-            int degree = degrees.degree(node, direction);
+            int degree = degrees.degree(node);
             int current;
             do {
                 current = mx.get();
@@ -55,7 +52,7 @@ public class RandomDegreeSelectionStrategy implements RABrandesBetweennessCentra
         });
         maxDegree = mx.get();
         ParallelUtil.iterateParallel(pool, Math.toIntExact(graph.nodeCount()), concurrency, node -> {
-            if (random.nextDouble() <= degrees.degree(node, direction) / maxDegree) {
+            if (random.nextDouble() <= degrees.degree(node) / maxDegree) {
                 bitSet.put(node);
             }
         });

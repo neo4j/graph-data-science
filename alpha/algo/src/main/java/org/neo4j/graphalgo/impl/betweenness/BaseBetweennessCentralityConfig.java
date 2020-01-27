@@ -20,23 +20,41 @@
 package org.neo4j.graphalgo.impl.betweenness;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
-import org.neo4j.graphdb.Direction;
-
-import static org.neo4j.graphdb.Direction.OUTGOING;
 
 public interface BaseBetweennessCentralityConfig extends WriteConfig {
-
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return OUTGOING;
-    }
 
     @Value.Default
     default String writeProperty() {
         return "centrality";
+    }
+
+    @Value.Check
+    default void validate() {
+        implicitCreateConfig().ifPresent(this::validate);
+    }
+
+    @Configuration.Ignore
+    default void validate(GraphCreateConfig graphCreateConfig) {
+        if (graphCreateConfig.relationshipProjection().projections().size() > 1) {
+            throw new IllegalArgumentException(
+                "Betweenness Centrality does not support multiple relationship projections.");
+        }
+    }
+
+    @Configuration.Ignore
+    default boolean undirected() {
+        return implicitCreateConfig()
+            .map(config -> config
+                .relationshipProjection()
+                .projections()
+                .values()
+                .stream()
+                .anyMatch(p -> p.projection() == Projection.UNDIRECTED))
+            .orElse(false);
     }
 
 }

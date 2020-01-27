@@ -55,6 +55,11 @@ import static org.neo4j.procedure.Mode.WRITE;
  */
 public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetweennessCentrality, RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> {
 
+    @Override
+    protected boolean legacyMode() {
+        return false;
+    }
+
     @Procedure(name = "gds.alpha.betweenness.sampled.stream", mode = READ)
     public Stream<BetweennessCentrality.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -143,6 +148,14 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
     }
 
     @Override
+    protected void validateGraphCreateConfig(
+        GraphCreateConfig graphCreateConfig,
+        SampledBetweennessCentralityConfig config
+    ) {
+        config.validate(graphCreateConfig);
+    }
+
+    @Override
     protected AlgorithmFactory<RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> algorithmFactory(
         SampledBetweennessCentralityConfig config
     ) {
@@ -158,11 +171,11 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
                     graph,
                     Pools.DEFAULT,
                     configuration.concurrency(),
-                    strategy(configuration, graph)
+                    strategy(configuration, graph),
+                    configuration.undirected()
                 )
                     .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction))
-                    .withDirection(configuration.direction())
                     .withMaxDepth(configuration.maxDepth());
             }
         };
@@ -176,7 +189,6 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
         switch (configuration.strategy()) {
             case "degree":
                 return new RandomDegreeSelectionStrategy(
-                    configuration.direction(),
                     graph,
                     Pools.DEFAULT,
                     configuration.concurrency()

@@ -96,7 +96,6 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMil
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type    | Default                | Optional | Description
-| direction        | string  | OUTGOING               | yes      | The relationship direction to load from the graph. If 'BOTH', treats the relationships as undirected.
 | writeProperty    | string  | 'centrality'           | yes      | The property name written back to.
 | concurrency      | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
@@ -128,7 +127,6 @@ YIELD nodeId, centrality
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name            | Type   | Default                | Optional | Description
-| direction       | string | OUTGOING               | yes      | The relationship direction to load from the graph. If 'BOTH', treats the relationships as undirected.
 | concurrency     | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
@@ -153,7 +151,6 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMil
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type   | Default                | Optional | Description
-| direction        | string | OUTGOING               | yes      | The relationship direction to load from the graph. If 'BOTH', treats the relationships as undirected.
 | writeProperty    | string | 'centrality'           | yes      | The property name written back to.
 | strategy         | string | 'random'               | yes      | The node selection strategy.
 | probability      | float  | log10(N) / e^2         | yes      | The probability a node is selected. Values between 0 and 1. If 1, selects all nodes and works like original Brandes algorithm.
@@ -192,7 +189,6 @@ YIELD nodeId, centrality
 | relationship    | string | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
 | concurrency     | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| direction       | string | outgoing               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected.
 | strategy        | string | 'random'               | yes      | The node selection strategy.
 | probability     | float  | log10(N) / e^2         | yes      | The probability a node is selected. Values between 0 and 1. If 1, selects all nodes and works like original Brandes algorithm.
 | maxDepth        | int    | Integer.MAX            | yes      | The depth of the shortest paths traversal.
@@ -234,8 +230,7 @@ CREATE (alice:User {name: 'Alice'}),
 ----
 CALL gds.alpha.betweenness.stream({
   nodeProjection: 'User',
-  relationshipProjection: 'MANAGE',
-  direction: 'OUTGOING'
+  relationshipProjection: 'MANAGE'
 })
 YIELD nodeId, centrality
 RETURN gds.util.asNode(nodeId).name AS user, centrality
@@ -264,7 +259,6 @@ The others don't have any influence, because all the shortest paths between pair
 CALL gds.alpha.betweenness.write({
   nodeProjection: 'User',
   relationshipProjection: 'MANAGE',
-  direction: 'OUTGOING',
   writeProperty: 'centrality'
 }) YIELD nodes, minCentrality, maxCentrality, sumCentrality
 ----
@@ -311,8 +305,7 @@ CALL gds.alpha.betweenness.sampled.stream({
   relationshipProjection: 'MANAGE',
   strategy: 'random',
   probability: 1.0,
-  maxDepth: 1,
-  direction: 'OUTGOING'
+  maxDepth: 1
 }) YIELD nodeId, centrality
 RETURN gds.util.asNode(nodeId).name AS user, centrality
 ORDER BY centrality DESC
@@ -343,8 +336,7 @@ CALL gds.alpha.betweenness.sampled.write({
   strategy: 'random',
   probability: 1.0,
   writeProperty: 'centrality',
-  maxDepth: 1,
-  direction: 'OUTGOING'
+  maxDepth: 1
 })
 YIELD nodes, minCentrality, maxCentrality, sumCentrality
 ----
