@@ -21,15 +21,15 @@ package org.neo4j.graphalgo.impl.triangle;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -72,9 +72,10 @@ class TriangleStreamTest {
         if (DB != null) DB.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testSequential(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testSequential() {
+        graph = loadGraph();
+
         final TripleConsumer mock = mock(TripleConsumer.class);
 
         new TriangleStream(graph, Pools.DEFAULT, 1)
@@ -84,9 +85,10 @@ class TriangleStreamTest {
         verify(mock, times((int) TRIANGLES)).consume(eq(centerId), anyLong(), anyLong());
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testParallel(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testParallel() {
+        graph = loadGraph();
+
         final TripleConsumer mock = mock(TripleConsumer.class);
 
         new TriangleStream(graph, Pools.DEFAULT, 8)
@@ -97,16 +99,17 @@ class TriangleStreamTest {
     }
 
     interface TripleConsumer {
+
         void consume(long nodeA, long nodeB, long nodeC);
     }
 
-    private void setup(Class<? extends GraphFactory> graphFactory) {
-        graph = new GraphLoader(DB)
-                .withDirection(Direction.BOTH)
-                .withLabel(LABEL)
-                .withRelationshipType(RELATIONSHIP)
-                .undirected()
-                .load(graphFactory);
-
+    private Graph loadGraph() {
+        return new StoreLoaderBuilder()
+            .api(DB)
+            .addNodeLabel(LABEL)
+            .addRelationshipType(RELATIONSHIP)
+            .globalProjection(Projection.UNDIRECTED)
+            .build()
+            .graph(HugeGraphFactory.class);
     }
 }
