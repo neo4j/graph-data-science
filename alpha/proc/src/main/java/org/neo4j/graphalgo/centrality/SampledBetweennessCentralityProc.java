@@ -149,7 +149,8 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
 
     @Override
     protected void validateGraphCreateConfig(
-        GraphCreateConfig graphCreateConfig, SampledBetweennessCentralityConfig config
+        GraphCreateConfig graphCreateConfig,
+        SampledBetweennessCentralityConfig config
     ) {
         config.validate(graphCreateConfig);
     }

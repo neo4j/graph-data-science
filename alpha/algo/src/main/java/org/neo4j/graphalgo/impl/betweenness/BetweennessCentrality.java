@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.container.Paths;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,8 +56,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
     private final int nodeCount;
     private final ExecutorService executorService;
     private final int concurrency;
-    private Direction direction = Direction.OUTGOING;
-    private double divisor = 1.0;
+    private final double divisor;
 
     public BetweennessCentrality(Graph graph, ExecutorService executorService, int concurrency) {
         this(graph, executorService, concurrency, false);
@@ -181,7 +179,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
             while (!queue.isEmpty()) {
                 int node = queue.removeFirst();
                 stack.push(node);
-                localRelationshipIterator.forEachRelationship(node, direction, (source, targetId) -> {
+                localRelationshipIterator.forEachRelationship(node, (source, targetId) -> {
                     // This will break for very large graphs
                     int target = (int) targetId;
 
