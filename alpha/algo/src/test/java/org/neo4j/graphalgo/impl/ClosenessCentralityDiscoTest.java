@@ -23,10 +23,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -75,25 +75,21 @@ class ClosenessCentralityDiscoTest extends AlgoTestBase {
 
     @Test
     void testHuge() {
-        Graph graph = load(HugeGraphFactory.class);
-        test(graph);
-    }
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(Projection.UNDIRECTED)
+            .build()
+            .load(HugeGraphFactory.class);
 
-    private Graph load(Class<? extends GraphFactory> factory) {
-        return new GraphLoader(db, Pools.DEFAULT)
-                .withLabel("Node")
-                .withRelationshipType("TYPE")
-                .undirected()
-                .load(factory);
-    }
-
-    private void test(Graph g) {
         final MSClosenessCentrality algo = new MSClosenessCentrality(
-                g,
-                AllocationTracker.EMPTY,
-                2,
-                Pools.DEFAULT,
-                true);
+            graph,
+            AllocationTracker.EMPTY,
+            2,
+            Pools.DEFAULT,
+            true
+        );
         final DoubleConsumer mock = mock(DoubleConsumer.class);
         algo.compute();
         algo.resultStream()

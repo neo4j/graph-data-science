@@ -22,11 +22,11 @@ package org.neo4j.graphalgo.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
@@ -124,9 +124,11 @@ class ClosenessCentralityTest extends AlgoTestBase {
     }
 
     private void setup(Class<? extends GraphFactory> graphImpl) {
-        graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .load(graphImpl);
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .build()
+            .graph(graphImpl);
     }
 }

@@ -23,9 +23,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -73,11 +74,13 @@ class ClosenessCentralityIntegrationTest_546 extends AlgoTestBase {
 
         runQuery(importQuery);
 
-        final Graph graph = new GraphLoader(db, Pools.DEFAULT)
-                .withLabel("Person")
-                .withRelationshipType("KNOWS")
-                .undirected()
-                .load(HugeGraphFactory.class);
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(Projection.UNDIRECTED)
+            .build()
+            .load(HugeGraphFactory.class);
 
         System.out.println("547:");
         MSClosenessCentrality algo = new MSClosenessCentrality(
@@ -111,11 +114,13 @@ class ClosenessCentralityIntegrationTest_546 extends AlgoTestBase {
 
         runQuery(importQuery);
 
-        final Graph graph = new GraphLoader(db, Pools.DEFAULT)
-                .withLabel("User")
-                .withRelationshipType("FRIEND")
-                .undirected()
-                .load(HugeGraphFactory.class);
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(Projection.UNDIRECTED)
+            .build()
+            .load(HugeGraphFactory.class);
 
         System.out.println("546:");
         MSClosenessCentrality algo = new MSClosenessCentrality(
