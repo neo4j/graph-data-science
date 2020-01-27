@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.container.Buckets;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -74,15 +73,13 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
 
     // multiplier used to scale an double to int
     private double multiplier = 100_000D; // double type is intended
-    private Direction direction;
 
-    public ShortestPathDeltaStepping(Graph graph, long startNode, double delta, Direction direction) {
+    public ShortestPathDeltaStepping(Graph graph, long startNode, double delta) {
         this.graph = graph;
         this.startNode = startNode;
         this.delta = delta;
         this.iDelta = (int) (multiplier * delta);
         nodeCount = Math.toIntExact(graph.nodeCount());
-        this.direction = direction;
         distance = new AtomicIntegerArray(nodeCount);
         buckets = new Buckets(nodeCount);
         heavy = new ArrayDeque<>(1024);
@@ -149,7 +146,7 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
                     return true;
                 });
 
-                graph.forEachRelationship(node, direction, 0.0D, relationshipConsumer);
+                graph.forEachRelationship(node, 0.0D, relationshipConsumer);
                 return true;
             });
             ParallelUtil.run(light, executorService, futures);

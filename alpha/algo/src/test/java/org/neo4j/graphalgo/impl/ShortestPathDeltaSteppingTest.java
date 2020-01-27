@@ -24,11 +24,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 
 import java.util.concurrent.Executors;
@@ -98,11 +97,13 @@ final class ShortestPathDeltaSteppingTest extends AlgoTestBase {
         head = getNode("s").getId();
         tail = getNode("x").getId();
 
-        graph = new GraphLoader(db)
-                .withLabel("Node")
-                .withRelationshipType("TYPE")
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .load(HugeGraphFactory.class);
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node")
+            .addRelationshipType("TYPE")
+            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+            .build()
+            .graph(HugeGraphFactory.class);
     }
 
     @AfterEach
@@ -112,7 +113,7 @@ final class ShortestPathDeltaSteppingTest extends AlgoTestBase {
 
     @Test
     void testSequential() {
-        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, head, 3, Direction.OUTGOING);
+        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, head, 3);
 
         final double[] sp = sssp.compute()
                 .getShortestPaths();
@@ -122,7 +123,7 @@ final class ShortestPathDeltaSteppingTest extends AlgoTestBase {
 
     @Test
     void testParallel() {
-        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, head, 3, Direction.OUTGOING)
+        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, head, 3)
                 .withExecutorService(Executors.newFixedThreadPool(3));
 
         final double[] sp = sssp.compute()
@@ -133,7 +134,7 @@ final class ShortestPathDeltaSteppingTest extends AlgoTestBase {
 
     @Test
     void distanceToNodeInDifferentComponentShouldBeInfinity() {
-        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, head,3, Direction.OUTGOING);
+        final ShortestPathDeltaStepping sssp = new ShortestPathDeltaStepping(graph, head,3);
 
         final double[] sp = sssp.compute().getShortestPaths();
 

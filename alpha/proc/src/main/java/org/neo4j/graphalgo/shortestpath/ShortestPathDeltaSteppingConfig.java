@@ -20,7 +20,6 @@
 
 package org.neo4j.graphalgo.shortestpath;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -28,7 +27,6 @@ import org.neo4j.graphalgo.newapi.BaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 
 import java.util.Optional;
@@ -43,18 +41,6 @@ public interface ShortestPathDeltaSteppingConfig extends BaseConfig, Relationshi
     long startNode();
 
     double delta();
-
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Projection#parseDirection")
-    @Value.Default
-    default Direction direction() {
-        return Direction.OUTGOING;
-    }
-
-    @Configuration.Ignore
-    @Value.Derived
-    default Direction resolvedDirection() {
-        return direction() == Direction.BOTH ? Direction.OUTGOING : direction();
-    }
 
     @Override
     default String writeProperty() {

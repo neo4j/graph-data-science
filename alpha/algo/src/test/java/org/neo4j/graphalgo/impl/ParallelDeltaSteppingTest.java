@@ -23,14 +23,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.graphbuilder.GridBuilder;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.Executors;
@@ -76,11 +75,13 @@ class ParallelDeltaSteppingTest {
         }
 
         try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("load took " + t + "ms"))) {
-            graph = new GraphLoader(db)
-                    .withLabel(LABEL)
-                    .withRelationshipType(RELATIONSHIP)
-                    .withRelationshipProperties(PropertyMapping.of(PROPERTY, 1.0))
-                    .load(HugeGraphFactory.class);
+            graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel(LABEL)
+                .addRelationshipType(RELATIONSHIP)
+                .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
+                .build()
+                .graph(HugeGraphFactory.class);
         }
 
         reference = compute(1);
@@ -106,7 +107,7 @@ class ParallelDeltaSteppingTest {
     }
 
     private double[] compute(int threads) {
-        return new ShortestPathDeltaStepping(graph, rootNodeId, 2.5, Direction.OUTGOING)
+        return new ShortestPathDeltaStepping(graph, rootNodeId, 2.5)
                 .withExecutorService(Executors.newFixedThreadPool(threads))
                 .compute()
                 .getShortestPaths();

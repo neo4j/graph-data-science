@@ -127,8 +127,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
             "   }," +
             "   startNode: n, " +
             "   delta: 3.0," +
-            "   relationshipWeightProperty: 'cost'," +
-            "   direction: 'INCOMING'" +
+            "   relationshipWeightProperty: 'cost'" +
             "}) " +
             "YIELD nodeId, distance RETURN nodeId, distance";
 
@@ -157,8 +156,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
             "   }," +
             "   startNode: n, " +
             "   delta: 3.0," +
-            "   relationshipWeightProperty: 'cost'," +
-            "   direction: 'BOTH'" +
+            "   relationshipWeightProperty: 'cost'" +
             "}) " +
             "YIELD nodeId, distance RETURN nodeId, distance";
 
