@@ -23,16 +23,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 
 import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertLongValues;
@@ -70,11 +71,14 @@ class LabelPropagationPregelTest extends AlgoTestBase {
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(TEST_GRAPH);
-        graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withDirection(Direction.BOTH)
-                .load(HugeGraphFactory.class);
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(Projection.UNDIRECTED)
+            .globalAggregation(Aggregation.NONE)
+            .build()
+            .load(HugeGraphFactory.class);
     }
 
     @AfterEach
@@ -88,7 +92,6 @@ class LabelPropagationPregelTest extends AlgoTestBase {
         int maxIterations = 10;
 
         PregelConfig config = new PregelConfig.Builder()
-            .withMessageDirection(Direction.BOTH)
             .isAsynchronous(false)
             .build();
 

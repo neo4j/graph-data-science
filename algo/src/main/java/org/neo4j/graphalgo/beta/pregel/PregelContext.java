@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.neo4j.graphdb.Direction;
-
 public final class PregelContext {
 
     private final Pregel.ComputeStep computeStep;
@@ -52,19 +50,11 @@ public final class PregelContext {
     }
 
     public void sendMessages(long nodeId, double message) {
-        sendMessages(nodeId, message, config.getMessageDirection());
-    }
-
-    public void sendMessages(long nodeId, double message, Direction direction) {
-        computeStep.sendMessages(nodeId, message, direction);
+        computeStep.sendMessages(nodeId, message);
     }
 
     public int getDegree(long nodeId) {
-        return getDegree(nodeId, config.getMessageDirection());
-    }
-
-    public int getDegree(long nodeId, Direction direction) {
-        return computeStep.getDegree(nodeId, direction);
+        return computeStep.getDegree(nodeId);
     }
 
     public double getInitialNodeValue() {

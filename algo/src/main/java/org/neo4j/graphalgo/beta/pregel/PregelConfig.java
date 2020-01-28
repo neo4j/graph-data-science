@@ -19,25 +19,17 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.neo4j.graphdb.Direction;
-
 public final class PregelConfig {
     private final double initialNodeValue;
-    private final Direction messageDirection;
     private final boolean isAsynchronous;
 
-    private PregelConfig(double initialNodeValue, Direction messageDirection, boolean isAsynchronous) {
+    private PregelConfig(double initialNodeValue, boolean isAsynchronous) {
         this.initialNodeValue = initialNodeValue;
-        this.messageDirection = messageDirection;
         this.isAsynchronous = isAsynchronous;
     }
 
     double getInitialNodeValue() {
         return initialNodeValue;
-    }
-
-    Direction getMessageDirection() {
-        return messageDirection;
     }
 
     boolean isAsynchronous() {
@@ -46,16 +38,10 @@ public final class PregelConfig {
 
     public static class Builder {
         private double initialNodeValue = -1.0;
-        private Direction messageDirection = Direction.OUTGOING;
         private boolean isAsynchronous = false;
 
         public Builder withInitialNodeValue(double initialNodeValue) {
             this.initialNodeValue = initialNodeValue;
-            return this;
-        }
-
-        public Builder withMessageDirection(Direction messageDirection) {
-            this.messageDirection = messageDirection;
             return this;
         }
 
@@ -65,7 +51,7 @@ public final class PregelConfig {
         }
 
         public PregelConfig build() {
-            return new PregelConfig(initialNodeValue, messageDirection, isAsynchronous);
+            return new PregelConfig(initialNodeValue, isAsynchronous);
         }
     }
 }

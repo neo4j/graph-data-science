@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import com.carrotsearch.hppc.BitSet;
-import org.jctools.queues.MpscArrayQueue;
 import org.jctools.queues.MpscLinkedQueue;
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
@@ -35,7 +34,6 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +56,7 @@ public final class Pregel {
 
     private final HugeDoubleArray nodeValues;
 
-    private final HugeObjectArray<? extends Queue<Double>> messageQueues;
+    private final HugeObjectArray<MpscLinkedQueue<Double>> messageQueues;
 
     private final int batchSize;
     private final int concurrency;
@@ -141,14 +139,7 @@ public final class Pregel {
         this.concurrency = concurrency;
         this.executor = executor;
 
-        Direction loadDirection = graph.getLoadDirection();
-
-        // If the graph can compute degrees in both directions,
-        // we can compute the maximum number of received messages
-        // which allows us to use ArrayQueues instead of LinkedQueues.
-        this.messageQueues = (loadDirection == Direction.BOTH)
-                ? initArrayQueues(graph, tracker)
-                : initLinkedQueues(graph, tracker);
+        this.messageQueues = initLinkedQueues(graph, tracker);
     }
 
     public HugeDoubleArray run(final int maxIterations) {
@@ -240,32 +231,6 @@ public final class Pregel {
         return tasks;
     }
 
-    @SuppressWarnings({"unchecked", "InstantiatingObjectToGetClassObject"})
-    private HugeObjectArray<MpscArrayQueue<Double>> initArrayQueues(
-            Graph graph,
-            AllocationTracker tracker) {
-        Direction receiveDirection = config.getMessageDirection().reverse();
-        // In sync mode, we need to reserve space for the termination symbol.
-        int minSize = config.isAsynchronous() ? 0 : 1;
-
-        Class<MpscArrayQueue<Double>> queueClass = (Class<MpscArrayQueue<Double>>) new MpscArrayQueue<>(0).getClass();
-
-        HugeObjectArray<MpscArrayQueue<Double>> messageQueues = HugeObjectArray.newArray(
-                queueClass,
-                graph.nodeCount(),
-                tracker);
-
-        ParallelUtil.parallelStreamConsume(
-                LongStream.range(0, graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId ->
-                        messageQueues.set(
-                                nodeId,
-                                // We init 2 * degree since we store at most messages from two iterations.
-                                new MpscArrayQueue<Double>(minSize + 2 * graph.degree(nodeId, receiveDirection)))));
-
-        return messageQueues;
-    }
-
     @SuppressWarnings({"unchecked"})
     private HugeObjectArray<MpscLinkedQueue<Double>> initLinkedQueues(Graph graph, AllocationTracker tracker) {
         Class<MpscLinkedQueue<Double>> queueClass = (Class<MpscLinkedQueue<Double>>) MpscLinkedQueue
@@ -349,8 +314,8 @@ public final class Pregel {
             return iteration;
         }
 
-        int getDegree(final long nodeId, Direction direction) {
-            return degrees.degree(nodeId, direction);
+        int getDegree(final long nodeId) {
+            return degrees.degree(nodeId);
         }
 
         double getNodeValue(final long nodeId) {
@@ -365,8 +330,8 @@ public final class Pregel {
             voteBits.set(nodeId);
         }
 
-        void sendMessages(final long nodeId, final double message, Direction direction) {
-            relationshipIterator.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
+        void sendMessages(final long nodeId, final double message) {
+            relationshipIterator.forEachRelationship(nodeId, (sourceNodeId, targetNodeId) -> {
                 messageQueues.get(targetNodeId).add(message);
                 senderBits.set(targetNodeId);
                 return true;
