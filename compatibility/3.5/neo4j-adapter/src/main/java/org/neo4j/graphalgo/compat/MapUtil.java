@@ -26,12 +26,37 @@ import java.util.Map;
  * By using this class we reduce the number of references to the Neo4j helper class,
  * which means we break less when the Neo4j helper class moves between Neo4j versions.
  */
-public final class MapUtil extends org.neo4j.helpers.collection.MapUtil {
+public final class MapUtil {
+
+    private MapUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Delegates to {@link org.neo4j.helpers.collection.MapUtil#map(Object...)} and allows static import.
      */
     public static Map<String, Object> map(Object... objects) {
         return org.neo4j.helpers.collection.MapUtil.map(objects);
+    }
+
+    /**
+     * Delegates to {@link org.neo4j.helpers.collection.MapUtil#map(Map, Object...)} and allows static import.
+     */
+    public static Map<String, Object> map(Map<String, Object> targetMap, Object... objects) {
+        return org.neo4j.helpers.collection.MapUtil.map(targetMap, objects);
+    }
+
+    /**
+     * Delegates to {@link org.neo4j.helpers.collection.MapUtil#genericMap(Object...)} and allows static import.
+     */
+    public static <K, V> Map<K, V> genericMap(Object... objects) {
+        return org.neo4j.helpers.collection.MapUtil.genericMap(objects);
+    }
+
+    /**
+     * Delegates to {@link org.neo4j.helpers.collection.MapUtil#genericMap(Map, Object...)} and allows static import.
+     */
+    public static <K, V> Map<K, V> genericMap(Map<K, V> targetMap, Object... objects) {
+        return org.neo4j.helpers.collection.MapUtil.genericMap(targetMap, objects);
     }
 }
