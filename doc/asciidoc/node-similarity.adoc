@@ -24,7 +24,13 @@ This topic includes:
 
 The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to.
 Two nodes are considered similar if they share many of the same neighbors.
-Node Similarity computes pair-wise similarities based on the Jaccard metric, also known as Jaccard similarity.
+Node Similarity computes pair-wise similarities based on the Jaccard metric, also known as the Jaccard Similarity Score.
+
+Jaccard Similarity is computed using the following formula:
+
+image::jaccard.png[role="middle"]
+// This is the raw information for this image:
+// // J(A,B) = ∣A ∩ B∣ / ∣(A ∪ B)∣ // = ∣A ∩ B∣ / ∣A∣ + ∣B∣ - ∣A ∩ B| //
 
 The input of this algorithm is a bipartite, connected graph containing two disjoint node sets.
 Each relationship starts from a node in the first node set and ends at a node in the second node set.
@@ -38,7 +44,7 @@ This is the 'topK' parameter.
 It can be set to any value, except 0.
 
 The output of the algorithm are new relationships between pairs of the first node set.
-Jaccard similarity scores are expressed via relationship properties.
+Similarity scores are expressed via relationship properties.
 
 A related function in the GDS library is INSERT_LINK_HERE[Jaccard Function].
 This function computes the Jaccard similarity between two lists of numbers.
@@ -59,7 +65,7 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 [[algorithms-node-similarity-syntax]]
 == Syntax
 
-.The following procedure call runs the algorithm and writes the computed Jaccard scores back to Neo4j:
+.The following describes the API for running the algorithm and writing the similarity scores back to Neo4j:
 [source, cypher]
 ----
 CALL gds.nodeSimilarity.write(graphName: STRING, {
@@ -87,14 +93,14 @@ YIELD nodesCompared, relationships, writeRelationshipType, writeProperty
 | concurrency            | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency        | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| similarityCutoff       | float   | 1E-42                  | yes      | Lower limit for the Jaccard similarity score to be present in the result.
+| similarityCutoff       | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
 | degreeCutoff           | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| topK                   | int     | 10                     | yes      | Limit on the number of Jaccard scores per node. The K largest results are returned.
+| topK                   | int     | 10                     | yes      | Limit on the number of scores per node. The K largest results are returned.
 | bottomK                | int     | 10                     | yes      | Limit on the number of scores per node. The K smallest results are returned.
-| topN                   | int     | 0                      | yes      | Global limit on the number of Jaccard scores computed. The N largest total results are returned.
-| bottomN                | int     | 0                      | yes      | Global limit on the number of Jaccard scores computed. The N smallest total results are returned.
-| writeRelationshipType  | string  | SIMILAR                | yes      | The relationship type used to represent a Jaccard similarity score.
-| writeProperty          | string  | 'score'                | yes      | The relationship property that stores the Jaccard similarity score.
+| topN                   | int     | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned.
+| bottomN                | int     | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
+| writeRelationshipType  | string  | SIMILAR                | yes      | The relationship type used to represent a similarity score.
+| writeProperty          | string  | 'score'                | yes      | The relationship property that stores the similarity score.
 |===
 
 .Results
@@ -135,12 +141,12 @@ YIELD node1, node2, similarity
 | Name              | Type    | Default                | Optional | Description
 | concurrency       | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| similarityCutoff  | float   | 1E-42                  | yes      | Lower limit for the Jaccard similarity score to be present in the result.
+| similarityCutoff  | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
 | degreeCutoff      | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| topK              | int     | 10                     | yes      | Limit on the number of Jaccard similairty scores per node. The K largest results are returned.
-| bottomK           | int     | 10                     | yes      | Limit on the number of Jaccard similairty scores per node. The K smallest results are returned.
-| topN              | int     | 0                      | yes      | Global limit on the number of Jaccard similairty scores computed. The N largest total results are returned.
-| bottomN           | int     | 0                      | yes      | Global limit on the number of Jaccard similairty scores computed. The N smallest total results are returned.
+| topK              | int     | 10                     | yes      | Limit on the number of scores per node. The K largest results are returned.
+| bottomK           | int     | 10                     | yes      | Limit on the number of scores per node. The K smallest results are returned.
+| topN              | int     | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned.
+| bottomN           | int     | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
 |===
 
 .Results
@@ -149,7 +155,7 @@ YIELD node1, node2, similarity
 | Name          | Type     | Description
 | node1         | int      | The Neo4j ID of the first node.
 | node2         | int      | The Neo4j ID of the second node.
-| similarity    | double   | The Jaccard similarity score for the two nodes.
+| similarity    | double   | The similarity score for the two nodes.
 |===
 
 
@@ -187,7 +193,7 @@ Each relationship starts at a Person node and ends at an Instrument node.
 
 In the example, we want to use the Node Similarity algorithm to compare people based on the instruments they like.
 
-The Node Similarity algorithm will only compute Jaccard similarity for nodes that have a degree of at least 1.
+The Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1.
 In the example graph, the Eve node will not be compared to other Person nodes.
 
 
@@ -225,13 +231,13 @@ ORDER BY similarity DESCENDING, Person1, Person2
 
 We use default values for the procedure configuration parameter.
 TopK is set to 10, topN is set to 0.
-Because of that the result set contains the top 10 Jaccard similarity scores for each node.
+Because of that the result set contains the top 10 similarity scores for each node.
 
 
 [[algorithms-node-similarity-examples-write]]
 === Writing results
 
-To instead write the Jaccard similarity results back to the graph in Neo4j, use the following query.
+To instead write the similarity results back to the graph in Neo4j, use the following query.
 Each result is written as a new relationship between the compared nodes.
 The Jaccard similarity score is written as a property on the relationship.
 
@@ -260,9 +266,9 @@ As we can see from the results, the number of created relationships is equal to 
 [[algorithms-node-similarity-examples-limits]]
 === Limiting results
 
-There are four limits that can be applied to the Jaccard similarity results.
-Top limits the result to the highest Jaccard similarity scores.
-Bottom limits the result to the lowest Jaccard similarity scores.
+There are four limits that can be applied to the similarity results.
+Top limits the result to the highest similarity scores.
+Bottom limits the result to the lowest similarity scores.
 Both top and bottom limits can apply to the result as a whole ("N"), or to the result per node ("K").
 
 [NOTE]
@@ -284,10 +290,10 @@ The default value for topK and bottomK is 10.
 [[algorithms-node-similarity-examples-limits-topk-bottomk]]
 ==== topK and bottomK
 
-TopK and bottomK are limits on the number of Jaccard scores computed per node.
-For topK, the K largest Jaccard scores per node are returned.
-For bottomK, the K smallest Jaccard scores per node are returned.
-TopK and bottomK cannot be 0, used in conjuntion, and the default value is 10.
+TopK and bottomK are limits on the number of scores computed per node.
+For topK, the K largest similarity scores per node are returned.
+For bottomK, the K smallest similarity scores per node are returned.
+TopK and bottomK cannot be 0, used in conjunction, and the default value is 10.
 If neither is specified, topK is used.
 
 .The following will load the graph, run the algorithm, and stream the top 1 result per node:
@@ -342,10 +348,10 @@ ORDER BY Person1
 [[algorithms-node-similarity-examples-limits-topn-bottomn]]
 ==== topN and bottomN
 
-TopN and bottomN limit the number of Jaccard similarity scores across all nodes.
+TopN and bottomN limit the number of similarity scores across all nodes.
 This is a limit on the total result set, in addition to the topK or bottomK limit on the results per node.
-For topN, the N largest Jaccard similarity scores are returned.
-For bottomN, the N smallest Jaccard similarity scores are returned.
+For topN, the N largest similarity scores are returned.
+For bottomN, the N smallest similarity scores are returned.
 A value of 0 means no global limit is imposed and all results from topK or bottomK are returned.
 
 .The following will load the graph, run the algorithm, and stream the 3 highest out of the top 1 results per node:
@@ -401,7 +407,7 @@ ORDER BY Person1
 3+|2 rows
 |===
 
-Similarity cutoff is a lower limit for the Jaccard similarity score to be present in the result.
+Similarity cutoff is a lower limit for the similarity score to be present in the result.
 The default value is very small (`1E-42`) to exclude results with a similarity score of 0.
 
 [NOTE]
@@ -409,7 +415,7 @@ The default value is very small (`1E-42`) to exclude results with a similarity s
 Setting similarity cutoff to 0 may yield a very large result set, increased runtime and memory consumption.
 ====
 
-.The following will ignore node pairs with a Jaccard similarty score less than 0.5:
+.The following will ignore node pairs with a similarity score less than 0.5:
 [source, cypher]
 ----
 CALL gds.nodeSimilarity.stream({
