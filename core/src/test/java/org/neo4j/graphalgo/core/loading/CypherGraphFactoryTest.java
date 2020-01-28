@@ -308,8 +308,8 @@ class CypherGraphFactoryTest {
             .relationshipQuery(relStatement)
             .globalAggregation(aggregation)
             .addRelationshipProperty(PropertyMapping.of("weight", 0D));
-        if (parallel) {
-            builder.executorService(Pools.DEFAULT);
+        if (!parallel) {
+            builder.executorService(Pools.createDefaultSingleThreadPool());
         }
 
         Graph graph = runInTransaction(db, () -> builder.build().load(CypherGraphFactory.class));
