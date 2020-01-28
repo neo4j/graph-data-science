@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.ModernGraphSetup;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -91,7 +90,7 @@ public interface GraphLoader {
 
     @Value.Lazy
     default GraphSetup toSetup() {
-        return new ModernGraphSetup(
+        return new GraphSetup(
             params(),
             executorService(),
             log(),
