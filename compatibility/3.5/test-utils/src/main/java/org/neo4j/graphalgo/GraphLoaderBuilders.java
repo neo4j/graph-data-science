@@ -23,8 +23,8 @@ package org.neo4j.graphalgo;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
-import org.neo4j.graphalgo.core.ModernGraphLoader;
+import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -45,12 +45,12 @@ final class GraphLoaderBuilders {
     private GraphLoaderBuilders() { }
 
     /**
-     * Factory method that defines the generation of a {@link ModernGraphLoader}
+     * Factory method that defines the generation of a {@link GraphLoader}
      * using a {@link GraphCreateFromStoreConfig}. Use {@link StoreLoaderBuilder}
      * to create the input for that method in a convenient way.
      */
     @Builder.Factory
-    static ModernGraphLoader storeLoader(
+    static GraphLoader storeLoader(
         // GraphLoader parameters
         GraphDatabaseAPI api,
         Optional<ExecutorService> executorService,
@@ -94,7 +94,7 @@ final class GraphLoaderBuilders {
             globalAggregation
         );
 
-        return ImmutableModernGraphLoader.of(
+        return ImmutableGraphLoader.of(
             api,
             executorService.orElse(Pools.DEFAULT),
             tracker.orElse(AllocationTracker.EMPTY),
@@ -108,12 +108,12 @@ final class GraphLoaderBuilders {
     }
 
     /**
-     * Factory method that defines the generation of a {@link ModernGraphLoader}
+     * Factory method that defines the generation of a {@link GraphLoader}
      * using a {@link GraphCreateFromCypherConfig}. Use {@link CypherLoaderBuilder}
      * to create the input for that method in a convenient way.
      */
     @Builder.Factory
-    static ModernGraphLoader cypherLoader(
+    static GraphLoader cypherLoader(
         // GraphLoader parameters
         GraphDatabaseAPI api,
         Optional<ExecutorService> executorService,
@@ -147,7 +147,7 @@ final class GraphLoaderBuilders {
             globalAggregation
         );
 
-        return ImmutableModernGraphLoader.of(
+        return ImmutableGraphLoader.of(
             api,
             executorService.orElse(Pools.DEFAULT),
             tracker.orElse(AllocationTracker.EMPTY),

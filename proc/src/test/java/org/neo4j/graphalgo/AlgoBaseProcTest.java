@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
-import org.neo4j.graphalgo.core.ModernGraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphLoader;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TransactionWrapper;
@@ -422,13 +422,13 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     }
 
     @NotNull
-    default ModernGraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
+    default GraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
         return graphLoader(graphDb(), graphCreateConfig);
     }
 
     @NotNull
-    default ModernGraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateConfig graphCreateConfig) {
-        return ImmutableModernGraphLoader
+    default GraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateConfig graphCreateConfig) {
+        return ImmutableGraphLoader
             .builder()
             .api(db)
             .username("")

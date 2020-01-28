@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -116,7 +116,7 @@ class GraphCatalogTest {
                     .build()
             ).build();
 
-        GraphsByRelationshipType importedGraphs = ImmutableModernGraphLoader
+        GraphsByRelationshipType importedGraphs = ImmutableGraphLoader
             .builder()
             .api(db)
             .username("")

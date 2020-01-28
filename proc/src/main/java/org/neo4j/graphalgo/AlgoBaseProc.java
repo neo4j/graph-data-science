@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphWithConfig;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
@@ -109,7 +109,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
         if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-            ModernGraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
+            GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
             GraphFactory graphFactory = loader.build(config.getGraphImpl());
             estimateDimensions = graphFactory.dimensions();
 
@@ -135,7 +135,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 .findFirst()
                 .get();
 
-            ModernGraphLoader loader = newLoader(graphCreateConfig, AllocationTracker.EMPTY);
+            GraphLoader loader = newLoader(graphCreateConfig, AllocationTracker.EMPTY);
             GraphFactory graphFactory = loader.build(config.getGraphImpl());
             estimateDimensions = graphFactory.dimensions();
         }
@@ -193,7 +193,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             relationshipTypes = config.relationshipTypes();
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-            ModernGraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
+            GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
             GraphsByRelationshipType loadedGraph = loader.build(createConfig.getGraphImpl()).build().graphs();
 
             graphCandidate = ImmutableGraphWithConfig.of(loadedGraph, createConfig);

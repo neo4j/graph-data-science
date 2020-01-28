@@ -30,27 +30,16 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MemoryEstimateTest;
-import org.neo4j.graphalgo.NodeProjection;
-import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.ModernGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -67,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.Projection.NATURAL;
-import static org.neo4j.graphalgo.Projection.REVERSE;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements

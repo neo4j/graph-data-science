@@ -252,7 +252,7 @@ class GraphLoaderDirectionalityTest {
     ) {
         runQuery(db, dbQuery);
 
-        ModernGraphLoader graphLoader;
+        GraphLoader graphLoader;
 
         if (graphImpl == CypherGraphFactory.class) {
             graphLoader = new CypherLoaderBuilder()

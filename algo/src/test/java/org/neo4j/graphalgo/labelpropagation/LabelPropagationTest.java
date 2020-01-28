@@ -37,7 +37,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.ModernGraphLoader;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
@@ -86,7 +86,7 @@ final class LabelPropagationTest extends AlgoTestBase {
     }
 
     Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
-        ModernGraphLoader graphLoader;
+        GraphLoader graphLoader;
         if (graphImpl == CypherGraphFactory.class) {
             graphLoader = new CypherLoaderBuilder()
                 .api(db)

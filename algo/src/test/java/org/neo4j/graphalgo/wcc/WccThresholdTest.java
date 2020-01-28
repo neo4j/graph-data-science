@@ -36,8 +36,8 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ImmutableModernGraphLoader;
-import org.neo4j.graphalgo.core.ModernGraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphLoader;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -113,7 +113,7 @@ public class WccThresholdTest extends AlgoTestBase {
             .implicitCreateConfig(createConfig)
             .build();
 
-        ModernGraphLoader loader = ImmutableModernGraphLoader
+        GraphLoader loader = ImmutableGraphLoader
             .builder()
             .api(db)
             .username("")

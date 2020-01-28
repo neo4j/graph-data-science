@@ -43,7 +43,7 @@ import java.util.concurrent.ExecutorService;
 import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
 
 @ValueClass
-public interface ModernGraphLoader {
+public interface GraphLoader {
 
     GraphDatabaseAPI api();
 

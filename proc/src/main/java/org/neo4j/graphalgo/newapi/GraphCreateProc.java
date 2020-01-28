@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.ModernGraphLoader;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
@@ -105,7 +105,7 @@ public class GraphCreateProc extends CatalogProc {
     private GraphCreateResult createGraph(GraphCreateConfig config, Class<? extends GraphFactory> factoryClazz) {
         GraphCreateResult.Builder builder = new GraphCreateResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
-            ModernGraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+            GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
             GraphFactory graphFactory = loader.build(factoryClazz);
             GraphFactory.ImportResult importResult = graphFactory.build();
 

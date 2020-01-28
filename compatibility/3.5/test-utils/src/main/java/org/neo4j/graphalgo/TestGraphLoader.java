@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.ModernGraphLoader;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
@@ -120,11 +120,11 @@ public final class TestGraphLoader {
         }
     }
 
-    private <T extends GraphFactory> ModernGraphLoader loader(Class<T> graphFactory) {
+    private <T extends GraphFactory> GraphLoader loader(Class<T> graphFactory) {
         return graphFactory.isAssignableFrom(CypherGraphFactory.class) ? cypherLoader() : storeLoader();
     }
 
-    private ModernGraphLoader cypherLoader() {
+    private GraphLoader cypherLoader() {
         CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder().api(db);
 
         String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s";
@@ -161,7 +161,7 @@ public final class TestGraphLoader {
         return cypherLoaderBuilder.build();
     }
 
-    private ModernGraphLoader storeLoader() {
+    private GraphLoader storeLoader() {
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().api(db);
         if (maybeLabel.isPresent()) {
             storeLoaderBuilder.addNodeLabel(maybeLabel.get());
