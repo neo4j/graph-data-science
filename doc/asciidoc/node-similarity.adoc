@@ -73,7 +73,7 @@ CALL gds.nodeSimilarity.write(graphName: STRING, {
   writeProperty: STRING
   // additional configuration
 })
-YIELD nodesCompared, relationships, writeRelationshipType, writeProperty
+YIELD nodesCompared, relationshipsWritten, writeRelationshipType, writeProperty
 ----
 
 .Parameters
@@ -164,7 +164,7 @@ YIELD node1, node2, similarity
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
 CREATE (alice:Person {name: 'Alice'})
 CREATE (bob:Person {name: 'Bob'})
@@ -200,6 +200,8 @@ In the example graph, the Eve node will not be compared to other Person nodes.
 [[algorithms-node-similarity-examples-stream]]
 === Streaming results
 
+[role=query-example]
+--
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
@@ -228,6 +230,7 @@ ORDER BY similarity DESCENDING, Person1, Person2
 | "Dave"  | "Carol" | 0.3333333333333333
 3+|10 rows
 |===
+--
 
 We use default values for the procedure configuration parameter.
 TopK is set to 10, topN is set to 0.
@@ -241,6 +244,8 @@ To instead write the similarity results back to the graph in Neo4j, use the foll
 Each result is written as a new relationship between the compared nodes.
 The Jaccard similarity score is written as a property on the relationship.
 
+[role=query-example]
+--
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
@@ -250,15 +255,16 @@ CALL gds.nodeSimilarity.write({
   writeRelationshipType: 'SIMILAR',
   writeProperty: 'score'
 })
-YIELD nodesCompared, relationships;
+YIELD nodesCompared, relationshipsWritten
 ----
 
 .Results
 [opts="header"]
 |===
-| nodesCompared | relationships
+| nodesCompared | relationshipsWritten
 | 4             | 10
 |===
+--
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
 
@@ -296,6 +302,8 @@ For bottomK, the K smallest similarity scores per node are returned.
 TopK and bottomK cannot be 0, used in conjunction, and the default value is 10.
 If neither is specified, topK is used.
 
+[role=query-example]
+--
 .The following will load the graph, run the algorithm, and stream the top 1 result per node:
 [source, cypher]
 ----
@@ -319,7 +327,11 @@ ORDER BY Person1
 | "Dave"  | "Alice" | 1.0
 3+|4 rows
 |===
+--
 
+
+[role=query-example]
+--
 .The following will load the graph, run the algorithm, and stream the bottom 1 result per node:
 [source, cypher]
 ----
@@ -337,12 +349,13 @@ ORDER BY Person1
 [opts="header"]
 |===
 | Person1 | Person2 | similarity
-| Alice   | Carol   | 0.3333333333333333
-| Bob     | Alice   | 0.6666666666666666
-| Carol   | Alice   | 0.3333333333333333
-| Dave    | Carol   | 0.3333333333333333
+| "Alice" | "Carol" | 0.3333333333333333
+| "Bob"   | "Alice" | 0.6666666666666666
+| "Carol" | "Alice" | 0.3333333333333333
+| "Dave"  | "Carol" | 0.3333333333333333
 3+|4 rows
 |===
+--
 
 
 [[algorithms-node-similarity-examples-limits-topn-bottomn]]
@@ -354,6 +367,8 @@ For topN, the N largest similarity scores are returned.
 For bottomN, the N smallest similarity scores are returned.
 A value of 0 means no global limit is imposed and all results from topK or bottomK are returned.
 
+[role=query-example]
+--
 .The following will load the graph, run the algorithm, and stream the 3 highest out of the top 1 results per node:
 [source, cypher]
 ----
@@ -377,6 +392,7 @@ ORDER BY similarity DESC, Person1, Person2
 | "Bob"   | "Alice" | 0.6666666666666666
 3+|3 rows
 |===
+--
 
 
 [[algorithms-node-similarity-examples-degree-similarity-cutoff]]
@@ -385,6 +401,8 @@ ORDER BY similarity DESC, Person1, Person2
 Degree cutoff is a lower limit on the node degree for a node to be considered in the comparisons.
 This value can not be lower than 1.
 
+[role=query-example]
+--
 .The following will ignore nodes with less than 3 LIKES relationships:
 [source, cypher]
 ----
@@ -406,6 +424,7 @@ ORDER BY Person1
 | "Dave"  | "Alice" | 1.0
 3+|2 rows
 |===
+--
 
 Similarity cutoff is a lower limit for the similarity score to be present in the result.
 The default value is very small (`1E-42`) to exclude results with a similarity score of 0.
@@ -415,6 +434,8 @@ The default value is very small (`1E-42`) to exclude results with a similarity s
 Setting similarity cutoff to 0 may yield a very large result set, increased runtime and memory consumption.
 ====
 
+[role=query-example]
+--
 .The following will ignore node pairs with a similarity score less than 0.5:
 [source, cypher]
 ----
@@ -440,4 +461,5 @@ ORDER BY Person1
 | "Dave"  | "Bob"   | 0.6666666666666666
 3+|6 rows
 |===
+--
 
