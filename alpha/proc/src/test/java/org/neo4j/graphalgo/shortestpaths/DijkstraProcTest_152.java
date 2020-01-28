@@ -28,9 +28,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.shortestpaths.DijkstraConfig;
 import org.neo4j.graphalgo.impl.shortestpaths.ShortestPathDijkstra;
 import org.neo4j.graphdb.Label;
@@ -110,12 +108,14 @@ class DijkstraProcTest_152 extends BaseProcTest {
     void testDirectRoadOrRail() {
         DoubleConsumer mock = mock(DoubleConsumer.class);
 
-        final Graph graph = new GraphLoader(db, Pools.DEFAULT)
-                .withOptionalLabel("Loc")
-                .withAnyRelationshipType()
-                .withDefaultAggregation(Aggregation.NONE)
-                .withRelationshipProperties(PropertyMapping.of("d", 0))
-                .load(HugeGraphFactory.class);
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Loc")
+            .loadAnyRelationshipType()
+            .globalAggregation(Aggregation.NONE)
+            .addRelationshipProperty(PropertyMapping.of("d", 0))
+            .build()
+            .load(HugeGraphFactory.class);
 
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, DijkstraConfig.of(startNodeId, endNodeId));
         dijkstra.compute();
