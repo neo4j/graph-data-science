@@ -29,8 +29,6 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -89,11 +87,13 @@ final class HugeGraphLoadingTest {
             }
         });
 
-        Graph graph = new GraphLoader(db)
-                .withDirection(Direction.OUTGOING)
-                .withLabel(label)
-                .withOptionalNodeProperties(PropertyMapping.of("bar", "bar", -1.0))
-                .load(HugeGraphFactory.class);
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addNodeProperty(PropertyMapping.of("bar", -1.0))
+            .loadAnyRelationshipType()
+            .build()
+            .graph(HugeGraphFactory.class);
 
         NodeProperties nodeProperties = graph.nodeProperties("bar");
         long propertyCountDiff = nodeCount - nodeProperties.size();
@@ -126,7 +126,12 @@ final class HugeGraphLoadingTest {
             }
         });
 
-        final Graph graph = new GraphLoader(db).load(HugeGraphFactory.class);
+        final Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .build()
+            .graph(HugeGraphFactory.class);
 
         assertEquals(nodeCount, graph.nodeCount());
     }
@@ -152,10 +157,13 @@ final class HugeGraphLoadingTest {
             }
         });
 
-        final Graph graph = new GraphLoader(db)
-                .withDirection(Direction.OUTGOING)
-                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .load(HugeGraphFactory.class);
+        final Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+            .build()
+            .graph(HugeGraphFactory.class);
 
         assertEquals(2, graph.relationshipCount());
     }
