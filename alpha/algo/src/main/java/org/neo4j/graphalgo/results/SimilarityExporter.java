@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.core.utils.ExceptionUtil;
+import org.neo4j.graphalgo.compat.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.StatementApi;
