@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -80,7 +79,10 @@ class RelationshipPredicateTest {
     @Test
     void testOutgoing() {
 
-        final Graph graph = loader()
+        final Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
                 .build()
                 .graph(HugeGraphFactory.class);
 
@@ -133,44 +135,38 @@ class RelationshipPredicateTest {
         // B <- A
         assertTrue(graph.exists(
                 graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeA),
-                Direction.INCOMING
+                graph.toMappedNodeId(nodeA)
         ));
 
         // A <- B
         assertFalse(graph.exists(
                 graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeB),
-                Direction.INCOMING
+                graph.toMappedNodeId(nodeB)
         ));
 
         // C <- B
         assertTrue(graph.exists(
                 graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeB),
-                Direction.INCOMING
+                graph.toMappedNodeId(nodeB)
         ));
 
         // B <- C
         assertFalse(graph.exists(
                 graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeC),
-                Direction.INCOMING
+                graph.toMappedNodeId(nodeC)
         ));
 
 
         // A <- C
         assertTrue(graph.exists(
                 graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeC),
-                Direction.INCOMING
+                graph.toMappedNodeId(nodeC)
         ));
 
         // C <- A
         assertFalse(graph.exists(
                 graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeA),
-                Direction.INCOMING
+                graph.toMappedNodeId(nodeA)
         ));
     }
 
@@ -218,91 +214,6 @@ class RelationshipPredicateTest {
         assertTrue(graph.exists(
                 graph.toMappedNodeId(nodeA),
                 graph.toMappedNodeId(nodeC)
-        ));
-
-
-        // B <- A
-        assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeA),
-                Direction.INCOMING
-        ));
-
-        // A <- B
-        assertFalse(graph.exists(
-                graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeB),
-                Direction.INCOMING
-        ));
-
-        // C <- B
-        assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeB),
-                Direction.INCOMING
-        ));
-
-        // B <- C
-        assertFalse(graph.exists(
-                graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeC),
-                Direction.INCOMING
-        ));
-
-        // A <- C
-        assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeC),
-                Direction.INCOMING
-        ));
-
-        // C <- A
-        assertFalse(graph.exists(
-                graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeA),
-                Direction.INCOMING
-        ));
-
-        // A <-> B
-        assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeB),
-                Direction.BOTH
-        ));
-
-        // B <-> A
-        assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeA),
-                Direction.BOTH
-        ));
-
-        // B <-> C
-        assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeC),
-                Direction.BOTH
-        ));
-
-        // C <-> B
-        assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeB),
-                Direction.BOTH
-        ));
-
-        // C <-> A
-        assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeA),
-                Direction.BOTH
-        ));
-
-        // A <-> C
-        assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeC),
-                Direction.BOTH
         ));
     }
 
