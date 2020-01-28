@@ -40,7 +40,6 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransaction.Revertable;
-import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -49,6 +48,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class CypherGraphFactory extends GraphFactory {
@@ -215,7 +215,7 @@ public class CypherGraphFactory extends GraphFactory {
         AdjacencyList propertyList = null;
         AdjacencyOffsets propertyOffsets = null;
         if (relationshipsBuilder != null) {
-            if (propertyMapping.propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            if (propertyMapping.propertyKeyId() != NO_SUCH_PROPERTY_KEY) {
                 propertyOffsets = relationshipsBuilder.globalWeightOffsets[propertyKeyId];
                 if (propertyOffsets != null) {
                     propertyList = relationshipsBuilder.weights[propertyKeyId].build();

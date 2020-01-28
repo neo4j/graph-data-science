@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
 import static org.neo4j.graphalgo.core.Aggregation.NONE;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 
 @Value.Enclosing
 class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoader.LoadResult> {

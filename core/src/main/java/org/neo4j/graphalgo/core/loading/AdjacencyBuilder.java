@@ -22,13 +22,13 @@ package org.neo4j.graphalgo.core.loading;
 import org.apache.lucene.util.LongsRef;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.LongAdder;
 
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
@@ -64,7 +64,7 @@ public abstract class AdjacencyBuilder {
         long[][][] globalWeightOffsets = new long[propertyKeyIds.length][][];
         Arrays.setAll(globalWeightOffsets, i -> {
             int weightProperty = propertyKeyIds[i];
-            return weightProperty != StatementConstants.NO_SUCH_PROPERTY_KEY ? new long[numPages][] : null;
+            return weightProperty != NO_SUCH_PROPERTY_KEY ? new long[numPages][] : null;
         });
 
         CompressingPagedAdjacency compressingPagedAdjacency = new CompressingPagedAdjacency(
@@ -144,7 +144,7 @@ public abstract class AdjacencyBuilder {
             long[][] localWeightOffsets = new long[propertyKeyIds.length][];
             for (int i = 0; i < propertyKeyIds.length; i++) {
                 int weightProperty = propertyKeyIds[i];
-                if (weightProperty != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+                if (weightProperty != NO_SUCH_PROPERTY_KEY) {
                     localWeightOffsets[i] = globalWeightOffsets[i][pageIndex] = new long[pageSize];
                 }
             }

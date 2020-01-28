@@ -22,7 +22,8 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
-import org.neo4j.kernel.api.StatementConstants;
+
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 
 public final class NodePropertiesBuilder {
 
@@ -37,7 +38,7 @@ public final class NodePropertiesBuilder {
             double defaultValue,
             int propertyId,
             String propertyKey) {
-        assert propertyId != StatementConstants.NO_SUCH_PROPERTY_KEY;
+        assert propertyId != NO_SUCH_PROPERTY_KEY;
         PagedLongDoubleMap properties = PagedLongDoubleMap.of(numberOfNodes, tracker);
         return new NodePropertiesBuilder(defaultValue, propertyId, properties, propertyKey);
     }

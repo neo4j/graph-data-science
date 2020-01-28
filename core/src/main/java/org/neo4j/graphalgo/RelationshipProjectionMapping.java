@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.kernel.api.StatementConstants;
+
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.ANY_RELATIONSHIP_TYPE;
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_RELATIONSHIP_TYPE;
 
 @ValueClass
 public interface RelationshipProjectionMapping {
@@ -34,7 +36,7 @@ public interface RelationshipProjectionMapping {
             .typeName("")
             .elementIdentifier("")
             .projection(projection)
-            .typeId(StatementConstants.ANY_RELATIONSHIP_TYPE)
+            .typeId(ANY_RELATIONSHIP_TYPE)
             .exists(true)
             .build();
     }
@@ -64,7 +66,7 @@ public interface RelationshipProjectionMapping {
             .typeName(typeName)
             .projection(projection)
             .typeId(typeId)
-            .exists(typeId != StatementConstants.NO_SUCH_RELATIONSHIP_TYPE)
+            .exists(typeId != NO_SUCH_RELATIONSHIP_TYPE)
             .build();
     }
 }

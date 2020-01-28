@@ -20,8 +20,9 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
+
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.ANY_RELATIONSHIP_TYPE;
 
 
 public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRecord> {
@@ -51,7 +52,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
 
     @Override
     public void offer(final RelationshipRecord record) {
-        if (type == StatementConstants.ANY_RELATIONSHIP_TYPE || type == record.getType()) {
+        if ((type == ANY_RELATIONSHIP_TYPE) || (type == record.getType())) {
             long source = idMap.toMappedNodeId(record.getFirstNode());
             if (source != -1L) {
                 long target = idMap.toMappedNodeId(record.getSecondNode());

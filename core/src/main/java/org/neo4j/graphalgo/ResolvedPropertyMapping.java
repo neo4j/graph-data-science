@@ -21,7 +21,8 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.kernel.api.StatementConstants;
+
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 
 @ValueClass
 public abstract class ResolvedPropertyMapping {
@@ -46,6 +47,6 @@ public abstract class ResolvedPropertyMapping {
     public abstract int propertyKeyId();
 
     public boolean exists() {
-        return propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY;
+        return propertyKeyId() != NO_SUCH_PROPERTY_KEY;
     }
 }

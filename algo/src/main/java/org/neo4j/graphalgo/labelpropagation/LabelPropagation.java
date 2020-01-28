@@ -29,8 +29,6 @@ import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,6 +36,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_LABEL;
 
 public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagation> {
 
@@ -81,7 +80,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
             nodeWeightProperty = new NullPropertyMap(1.0);
         }
         this.nodeWeights = nodeWeightProperty;
-        maxLabelId = nodeProperties.getMaxPropertyValue().orElse(StatementConstants.NO_SUCH_LABEL);
+        maxLabelId = nodeProperties.getMaxPropertyValue().orElse(NO_SUCH_LABEL);
     }
 
     @Override

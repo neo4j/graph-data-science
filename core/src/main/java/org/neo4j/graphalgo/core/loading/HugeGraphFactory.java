@@ -38,7 +38,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
@@ -47,6 +46,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 
 public final class HugeGraphFactory extends GraphFactory {
@@ -330,7 +330,7 @@ public final class HugeGraphFactory extends GraphFactory {
         AdjacencyList outWeightList = null;
         AdjacencyOffsets outWeightOffsets = null;
         if (outRelationshipsBuilder != null) {
-            if (weightProperty.propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            if (weightProperty.propertyKeyId() != NO_SUCH_PROPERTY_KEY) {
                 outWeightOffsets = outRelationshipsBuilder.globalWeightOffsets[weightIndex];
                 if (outWeightOffsets != null) {
                     outWeightList = outRelationshipsBuilder.weights[weightIndex].build();
