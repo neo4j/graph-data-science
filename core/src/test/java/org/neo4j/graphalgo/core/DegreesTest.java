@@ -21,16 +21,22 @@ package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Label;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
-import static org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 
 /**
  * A->B; A->C; B->C;
@@ -76,76 +82,90 @@ class DegreesTest extends AlgoTestBase {
 
     private Graph graph;
 
-    @AllGraphTypesWithoutCypherTest
-    void testUnidirectionalOutgoing(Class<? extends GraphFactory> graphFactory) {
-        setup(UNI_DIRECTIONAL, Direction.OUTGOING, graphFactory);
-        assertEquals(2, graph.degree(nodeId("a"), Direction.OUTGOING));
-        assertEquals(1, graph.degree(nodeId("b"), Direction.OUTGOING));
-        assertEquals(0, graph.degree(nodeId("c"), Direction.OUTGOING));
+    @Test
+    void testUnidirectionalNatural() {
+        setup(UNI_DIRECTIONAL, Projection.NATURAL);
+        assertEquals(2, graph.degree(nodeId("a")));
+        assertEquals(1, graph.degree(nodeId("b")));
+        assertEquals(0, graph.degree(nodeId("c")));
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testUnidirectionalIncoming(Class<? extends GraphFactory> graphFactory) {
-        setup(UNI_DIRECTIONAL, Direction.INCOMING, graphFactory);
-        assertEquals(0, graph.degree(nodeId("a"), Direction.INCOMING));
-        assertEquals(1, graph.degree(nodeId("b"), Direction.INCOMING));
-        assertEquals(2, graph.degree(nodeId("c"), Direction.INCOMING));
+    @Test
+    void testUnidirectionalReverse() {
+        setup(UNI_DIRECTIONAL, Projection.REVERSE);
+        assertEquals(0, graph.degree(nodeId("a")));
+        assertEquals(1, graph.degree(nodeId("b")));
+        assertEquals(2, graph.degree(nodeId("c")));
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testUnidirectionalUndirected(Class<? extends GraphFactory> graphFactory) {
-
-        setup(UNI_DIRECTIONAL, Direction.BOTH, graphFactory);
-        assertEquals(2, graph.degree(nodeId("a"), Direction.BOTH));
-        assertEquals(2, graph.degree(nodeId("b"), Direction.BOTH));
-        assertEquals(2, graph.degree(nodeId("c"), Direction.BOTH));
+    @Test
+    void testUnidirectionalBoth() {
+        setup(UNI_DIRECTIONAL, null);
+        assertEquals(2, graph.degree(nodeId("a")));
+        assertEquals(2, graph.degree(nodeId("b")));
+        assertEquals(2, graph.degree(nodeId("c")));
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testBidirectionalOutgoing(Class<? extends GraphFactory> graphFactory) {
-        setup(BI_DIRECTIONAL, Direction.OUTGOING, graphFactory);
-        assertEquals(2, graph.degree(nodeId("a"), Direction.OUTGOING));
-        assertEquals(2, graph.degree(nodeId("b"), Direction.OUTGOING));
-        assertEquals(2, graph.degree(nodeId("c"), Direction.OUTGOING));
+    @Test
+    void testBidirectionalNatural() {
+        setup(BI_DIRECTIONAL, Projection.NATURAL);
+        assertEquals(2, graph.degree(nodeId("a")));
+        assertEquals(2, graph.degree(nodeId("b")));
+        assertEquals(2, graph.degree(nodeId("c")));
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testBidirectionalIncoming(Class<? extends GraphFactory> graphFactory) {
-        setup(BI_DIRECTIONAL, Direction.INCOMING, graphFactory);
-        assertEquals(2, graph.degree(nodeId("a"), Direction.INCOMING));
-        assertEquals(2, graph.degree(nodeId("b"), Direction.INCOMING));
-        assertEquals(2, graph.degree(nodeId("c"), Direction.INCOMING));
+    @Test
+    void testBidirectionalReverse() {
+        setup(BI_DIRECTIONAL, Projection.REVERSE);
+        assertEquals(2, graph.degree(nodeId("a")));
+        assertEquals(2, graph.degree(nodeId("b")));
+        assertEquals(2, graph.degree(nodeId("c")));
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testBidirectionalBoth(Class<? extends GraphFactory> graphFactory) {
-        setup(BI_DIRECTIONAL, Direction.BOTH, graphFactory);
-        assertEquals(4, graph.degree(nodeId("a"), Direction.BOTH));
-        assertEquals(4, graph.degree(nodeId("b"), Direction.BOTH));
-        assertEquals(4, graph.degree(nodeId("c"), Direction.BOTH));
+    @Test
+    void testBidirectionalBoth() {
+        setup(BI_DIRECTIONAL, null);
+        assertEquals(4, graph.degree(nodeId("a")));
+        assertEquals(4, graph.degree(nodeId("b")));
+        assertEquals(4, graph.degree(nodeId("c")));
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testBidirectionalUndirected(Class<? extends GraphFactory> graphFactory) {
-        setup(BI_DIRECTIONAL, null, graphFactory);
-        assertEquals(2, graph.degree(nodeId("a"), Direction.OUTGOING));
-        assertEquals(2, graph.degree(nodeId("b"), Direction.OUTGOING));
-        assertEquals(2, graph.degree(nodeId("c"), Direction.OUTGOING));
+    @Test
+    void testBidirectionalUndirected() {
+        setup(BI_DIRECTIONAL, Projection.UNDIRECTED);
+        assertEquals(2, graph.degree(nodeId("a")));
+        assertEquals(2, graph.degree(nodeId("b")));
+        assertEquals(2, graph.degree(nodeId("c")));
     }
 
-    private void setup(
-            String cypher,
-            Direction direction,
-            Class<? extends GraphFactory> graphFactory) {
+    private void setup(String cypher, Projection projection) {
         runQuery(cypher);
-        GraphLoader graphLoader = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withDirection(direction == null ? Direction.BOTH : direction);
-        if (direction == null) {
-            graphLoader.undirected();
+        GraphsByRelationshipType graphs = new StoreLoaderBuilder()
+            .api(db)
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_OUT",
+                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL)
+            )
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_IN",
+                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE)
+            )
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_UNDIRECTED",
+                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.UNDIRECTED)
+            )
+            .build()
+            .graphs(HugeGraphFactory.class);
+
+        if (projection == Projection.NATURAL) {
+            graph = graphs.getGraphProjection("TYPE_OUT");
+        } else if (projection == Projection.REVERSE) {
+            graph = graphs.getGraphProjection("TYPE_IN");
+        } else if (projection == Projection.UNDIRECTED) {
+            graph = graphs.getGraphProjection("TYPE_UNDIRECTED");
+        } else if (projection == null) { // BOTH case
+            graph = graphs.getGraphProjection(Arrays.asList("TYPE_OUT", "TYPE_IN"), Optional.empty());
         }
-        graph = graphLoader.load(graphFactory);
     }
 
     private long nodeId(String name) {
