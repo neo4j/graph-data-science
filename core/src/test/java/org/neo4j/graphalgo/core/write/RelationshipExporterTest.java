@@ -25,9 +25,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -112,13 +112,18 @@ class RelationshipExporterTest {
         // create graph to export
         GraphDatabaseAPI fromDb = TestDatabaseCreator.createTestDatabase();
         runQuery(fromDb, NODE_QUERY_PART + RELS_QUERY_PART);
-        GraphLoader loader = new GraphLoader(fromDb)
-            .withAnyLabel()
-            .withRelationshipType("BARFOO");
-        if (includeProperties) {
-            loader.withRelationshipProperties(PropertyMapping.of("weight", PROPERTY_VALUE_IF_MISSING));
+
+        Graph fromGraph = new StoreLoaderBuilder()
+            .api(fromDb)
+            .loadAnyLabel()
+            .addRelationshipType("BARFOO")
+            .addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_MISSING))
+            .build()
+            .graph(HugeGraphFactory.class);
+
+        if (!includeProperties) {
+            fromGraph = fromGraph.withoutRelationshipProperties();
         }
-        Graph fromGraph = loader.load(HugeGraphFactory.class);
 
         // export into new database
         return RelationshipExporter
@@ -153,10 +158,12 @@ class RelationshipExporterTest {
     }
 
     private Graph loadWrittenGraph() {
-        return new GraphLoader(db)
-            .withAnyLabel()
-            .withRelationshipType("FOOBAR")
-            .withRelationshipProperties(PropertyMapping.of("weight", PROPERTY_VALUE_IF_NOT_WRITTEN))
-            .load(HugeGraphFactory.class);
+        return new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .addRelationshipType("FOOBAR")
+            .addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_NOT_WRITTEN))
+            .build()
+            .graph(HugeGraphFactory.class);
     }
 }
