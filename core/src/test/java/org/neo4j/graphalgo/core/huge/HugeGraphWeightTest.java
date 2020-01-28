@@ -24,14 +24,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -118,12 +116,13 @@ final class HugeGraphWeightTest {
     }
 
     private Graph loadGraph(final GraphDatabaseAPI db) {
-        return new GraphLoader(db)
-                .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                .withDirection(Direction.OUTGOING)
-                .withExecutorService(Pools.DEFAULT)
-                .withBatchSize(BATCH_SIZE)
-                .load(HugeGraphFactory.class);
+        return new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .addRelationshipProperty(PropertyMapping.of("weight", 0))
+            .build()
+            .load(HugeGraphFactory.class);
     }
 
 }

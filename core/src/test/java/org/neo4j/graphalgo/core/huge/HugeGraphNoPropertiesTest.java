@@ -23,12 +23,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,13 +67,13 @@ final class HugeGraphNoPropertiesTest {
     }
 
     @ParameterizedTest
-    @EnumSource(Direction.class)
-    void relationshipIteratorShouldReturnFallbackWeight(Direction direction) {
-        Graph graph = loadGraph(db, direction);
+    @EnumSource(Projection.class)
+    void relationshipIteratorShouldReturnFallbackWeight(Projection projection) {
+        Graph graph = loadGraph(db, projection);
 
         double fallbackWeight = 42D;
         graph.forEachNode((nodeId) -> {
-            graph.forEachRelationship(nodeId, direction, fallbackWeight, (s, t, w) -> {
+            graph.forEachRelationship(nodeId, fallbackWeight, (s, t, w) -> {
                 assertEquals(fallbackWeight, w);
                 return true;
             });
@@ -83,13 +82,13 @@ final class HugeGraphNoPropertiesTest {
     }
 
     @ParameterizedTest
-    @EnumSource(Direction.class)
-    void weightOfShouldReturnFallbackWeight(Direction direction) {
-        Graph graph = loadGraph(db, direction);
+    @EnumSource(Projection.class)
+    void weightOfShouldReturnFallbackWeight(Projection projection) {
+        Graph graph = loadGraph(db, projection);
 
         double fallbackWeight = 42D;
         graph.forEachNode((nodeId) -> {
-            graph.forEachRelationship(nodeId, direction, (s, t) -> {
+            graph.forEachRelationship(nodeId, (s, t) -> {
                 assertEquals(fallbackWeight, graph.relationshipProperty(s, t, fallbackWeight));
                 return true;
             });
@@ -97,12 +96,14 @@ final class HugeGraphNoPropertiesTest {
         });
     }
 
-    private Graph loadGraph(final GraphDatabaseAPI db, Direction direction) {
-        return new GraphLoader(db)
-                .withDirection(direction)
-                .withExecutorService(Pools.DEFAULT)
-                .withBatchSize(BATCH_SIZE)
-                .load(HugeGraphFactory.class);
+    private Graph loadGraph(final GraphDatabaseAPI db, Projection projection) {
+        return new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .build()
+            .load(HugeGraphFactory.class);
     }
 
 }
