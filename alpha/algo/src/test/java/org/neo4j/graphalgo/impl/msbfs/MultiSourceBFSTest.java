@@ -25,15 +25,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
@@ -90,8 +89,8 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         db.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testPaperExample(Class<? extends GraphFactory> graphFactory) {
+    @Test
+    void testPaperExample() {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFS msbfs = new MultiSourceBFS(
@@ -111,11 +110,11 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             verify(mock).accept(1, 2, toList(2));
             verify(mock).accept(2, 2, toList(1));
             verifyNoMoreInteractions(mock);
-        }, graphFactory);
+        });
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testPaperExampleWithAllSources(Class<? extends GraphFactory> graphFactory) {
+    @Test
+    void testPaperExampleWithAllSources() {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFS msbfs = new MultiSourceBFS(
@@ -150,11 +149,11 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             verify(mock).accept(6, 4, toList(5));
 
             verifyNoMoreInteractions(mock);
-        }, graphFactory);
+        });
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testSequentialInvariant(Class<? extends GraphFactory> graphFactory) {
+    @Test
+    void testSequentialInvariant() {
         // for a single run with < ω nodes, the same node may only be traversed once at a given depth
         withGrid(
                 gb -> gb.newGridBuilder().createGrid(8, 4),
@@ -174,11 +173,11 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                             AllocationTracker.EMPTY
                     );
                     msbfs.run(1, null);
-                }, graphFactory);
+                });
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testParallel(Class<? extends GraphFactory> graphFactory) {
+    @Test
+    void testParallel() {
         // each node should only be traversed once for every source node
         int maxNodes = 256;
         int[][] seen = new int[maxNodes][maxNodes];
@@ -198,7 +197,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                             },
                             AllocationTracker.EMPTY);
                     msbfs.run(Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT);
-                }, graphFactory);
+                });
 
         for (int i = 0; i < maxNodes; i++) {
             final int[] ints = seen[i];
@@ -209,8 +208,8 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         }
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testSize(Class<? extends GraphFactory> graphFactory) {
+    @Test
+    void testSize() {
         int maxNodes = 100;
         // [ last i, expected source from, expected source to ]
         int[] state = {-1, 0, MultiSourceBFS.OMEGA};
@@ -245,7 +244,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                             AllocationTracker.EMPTY);
                     // run sequentially to guarantee order
                     msbfs.run(1, null);
-                }, graphFactory);
+                });
     }
 
     @Test
@@ -306,23 +305,27 @@ final class MultiSourceBFSTest extends AlgoTestBase {
 
     private void withGraph(
             String cypher,
-            Consumer<? super Graph> block,
-            Class<? extends GraphFactory> graphImpl) {
+            Consumer<? super Graph> block) {
         runQuery(cypher);
-        block.accept(new GraphLoader(db).load(graphImpl));
+        block.accept(new StoreLoaderBuilder()
+            .api(db)
+            .build()
+            .graph(HugeGraphFactory.class));
     }
 
     private void withGrid(
             Consumer<? super GraphBuilder<?>> build,
-            Consumer<? super Graph> block,
-            Class<? extends GraphFactory> graphImpl) {
+            Consumer<? super Graph> block) {
         runInTransaction(db, () -> {
             DefaultBuilder graphBuilder = GraphBuilder.create(db)
                     .setLabel("Foo")
                     .setRelationship("BAR");
             build.accept(graphBuilder);
         });
-        Graph graph = new GraphLoader(db).load(graphImpl);
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .build()
+            .graph(HugeGraphFactory.class);
         block.accept(graph);
     }
 
