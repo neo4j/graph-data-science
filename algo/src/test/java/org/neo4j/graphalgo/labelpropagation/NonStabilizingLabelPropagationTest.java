@@ -22,13 +22,15 @@ package org.neo4j.graphalgo.labelpropagation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.QueryRunner;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
@@ -67,23 +69,21 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
 
 
     Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
-        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT)
-                .undirected()
-                .withDefaultConcurrency();
-
         if (graphImpl == CypherGraphFactory.class) {
-            graphLoader
-                    .withLabel("MATCH (u) RETURN id(u) as id")
-                    .withRelationshipType("MATCH (u1)-[rel]-(u2) \n" +
-                                          "RETURN id(u1) AS source, id(u2) AS target")
-                    .withName("cypher");
+            return QueryRunner.runInTransaction(db, () -> new CypherLoaderBuilder()
+                .api(db)
+                .nodeQuery("MATCH (u) RETURN id(u) as id")
+                .relationshipQuery("MATCH (u1)-[rel]-(u2) RETURN id(u1) AS source, id(u2) AS target")
+                .build()
+                .graph(CypherGraphFactory.class));
         } else {
-            graphLoader
-                    .withAnyLabel()
-                    .withRelationshipType("R")
-                    .withName(graphImpl.getSimpleName());
+            return new StoreLoaderBuilder()
+                .api(db)
+                .loadAnyLabel()
+                .loadAnyRelationshipType()
+                .build()
+                .graph(HugeGraphFactory.class);
         }
-        return QueryRunner.runInTransaction(db, () -> graphLoader.load(graphImpl));
     }
 
     // According to "Near linear time algorithm to detect community structures in large-scale networks"[1], for a graph of this shape
