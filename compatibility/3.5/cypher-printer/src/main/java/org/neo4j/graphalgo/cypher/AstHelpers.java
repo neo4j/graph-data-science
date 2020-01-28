@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.cypher.v3_5;
+package org.neo4j.graphalgo.cypher;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +40,7 @@ import scala.collection.Seq;
 
 import java.util.Map;
 
-import static org.neo4j.graphalgo.cypher.v3_5.ScalaHelpers.pair;
+import static org.neo4j.graphalgo.cypher.ScalaHelpers.pair;
 
 final class AstHelpers {
 

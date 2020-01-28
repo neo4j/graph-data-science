@@ -25,7 +25,7 @@ import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.cypher.v3_5.CypherPrinter;
+import org.neo4j.graphalgo.cypher.CypherPrinter;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 
