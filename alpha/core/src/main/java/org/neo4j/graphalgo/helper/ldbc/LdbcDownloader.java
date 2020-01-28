@@ -48,8 +48,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-import static org.neo4j.kernel.configuration.Settings.BOOLEAN;
-import static org.neo4j.kernel.configuration.Settings.setting;
+import static org.neo4j.graphalgo.compat.SettingsProxy.BOOLEAN;
+import static org.neo4j.graphalgo.compat.SettingsProxy.setting;
 
 public final class LdbcDownloader {
 
