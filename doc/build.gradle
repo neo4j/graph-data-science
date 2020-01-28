@@ -32,6 +32,12 @@ plugins {
 
 description = 'Neo4j Graph Data Science :: Docs'
 
+dependencies {
+    compile group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.asciidoctorj
+    compile project(':test-utils')
+    testCompile project(':proc')
+}
+
 apply plugin: 'ch.kk7.spawn'
 
 ext {
@@ -337,6 +343,18 @@ task pdf {
 task packagePdf(type: Copy) {
     from tasks.pdf
     into "$distributionDir/documentation/pdf"
+}
+
+task copyAsciidoc(type: Copy) {
+    from 'asciidoc'
+    into "$buildDir/asciidoc"
+}
+
+task asciidocJar(type: Jar) {
+    baseName 'user-guide'
+    classifier 'asciidoc'
+    destinationDir file("$buildDir/distributions")
+    from copyAsciidoc
 }
 
 tasks.assemble.dependsOn packageHtml, packagePdf

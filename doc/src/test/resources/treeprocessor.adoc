@@ -1,0 +1,61 @@
+= Treeprocessor test
+
+.Setup query
+[source, cypher, role=setup-query]
+----
+CREATE (alice:Person {name: 'Alice'})
+CREATE (bob:Person {name: 'Bob'})
+CREATE (carol:Person {name: 'Carol'})
+CREATE (dave:Person {name: 'Dave'})
+CREATE (eve:Person {name: 'Eve'})
+CREATE (guitar:Instrument {name: 'Guitar'})
+CREATE (synth:Instrument {name: 'Synthesizer'})
+CREATE (bongos:Instrument {name: 'Bongos'})
+CREATE (trumpet:Instrument {name: 'Trumpet'})
+
+CREATE (alice)-[:LIKES]->(guitar)
+CREATE (alice)-[:LIKES]->(synth)
+CREATE (alice)-[:LIKES]->(bongos)
+CREATE (bob)-[:LIKES]->(guitar)
+CREATE (bob)-[:LIKES]->(synth)
+CREATE (carol)-[:LIKES]->(bongos)
+CREATE (dave)-[:LIKES]->(guitar)
+CREATE (dave)-[:LIKES]->(synth)
+CREATE (dave)-[:LIKES]->(bongos);
+----
+
+[role=query-example]
+--
+
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stream({
+  nodeProjection: 'Person | Instrument',
+  relationshipProjection: 'LIKES',
+  direction: 'OUTGOING'
+})
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY similarity DESCENDING, Person1, Person2
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Dave"  | "Alice" | 1.0
+| "Alice" | "Bob"   | 0.6666666666666666
+| "Bob"   | "Alice" | 0.6666666666666666
+| "Bob"   | "Dave"  | 0.6666666666666666
+| "Dave"  | "Bob"   | 0.6666666666666666
+| "Alice" | "Carol" | 0.3333333333333333
+| "Carol" | "Alice" | 0.3333333333333333
+| "Carol" | "Dave"  | 0.3333333333333333
+| "Dave"  | "Carol" | 0.3333333333333333
+3+|10 rows
+|===
+
+--
+
+
