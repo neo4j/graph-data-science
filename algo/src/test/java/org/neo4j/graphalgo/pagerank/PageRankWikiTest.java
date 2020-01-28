@@ -21,14 +21,13 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.results.CentralityResult;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;
@@ -97,8 +96,8 @@ final class PageRankWikiTest extends AlgoTestBase {
         if (db != null) db.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void test(Class<? extends GraphFactory> graphFactory) {
+    @Test
+    void test() {
         final Label label = Label.label("Node");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -116,11 +115,12 @@ final class PageRankWikiTest extends AlgoTestBase {
             expected.put(db.findNode(label, "name", "k").getId(), 0.15);
         });
 
-        final Graph graph = new GraphLoader(db)
-                .withLabel("Node")
-                .withRelationshipType("TYPE")
-                .withDirection(Direction.OUTGOING)
-                .load(graphFactory);
+        final Graph graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel("Node")
+                .addRelationshipType("TYPE")
+                .build()
+                .graph(HugeGraphFactory.class);
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
                 .create(graph, DEFAULT_CONFIG, LongStream.empty())
