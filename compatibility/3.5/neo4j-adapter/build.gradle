@@ -5,7 +5,7 @@ dependencies {
     compile group: 'org.neo4j',                             name: 'neo4j',                    version: ver.'neo4j'
     compile group: 'org.neo4j',                             name: 'neo4j-common',             version: ver.'neo4j'
     compile group: 'org.neo4j',                             name: 'neo4j-io',                 version: ver.'neo4j'
-    compile group: 'org.neo4j',                             name: 'neo4j-kernel-api',         version: ver.'neo4j', classifier: 'tests'
+    compile group: 'org.neo4j',                             name: 'neo4j-kernel-api',         version: ver.'neo4j'
     compile group: 'org.neo4j',                             name: 'neo4j-kernel',             version: ver.'neo4j'
     compile group: 'org.neo4j',                             name: 'procedure-compiler',       version: ver.'neo4j'
     compile group: 'org.neo4j.community',                   name: 'it-test-support',          version: ver.'neo4j'

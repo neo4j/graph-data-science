@@ -6,7 +6,7 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
     compile project(':algo')
-    compile project(':neo4j-compat')
+    compile project(':neo4j-adapter')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'

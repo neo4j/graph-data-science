@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 "Neo4j,"
+ * Copyright (c) 2017-2020 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -27,6 +27,8 @@ public final class ExceptionUtil {
     /**
      * Returns the root cause of an exception.
      *
+     * Copied from {@link org.neo4j.helpers.Exceptions#rootCause(Throwable)} due to deprecation.
+     *
      * @param caughtException exception to find the root cause of.
      * @return the root cause.
      * @throws IllegalArgumentException if the provided exception is null.
@@ -44,6 +46,8 @@ public final class ExceptionUtil {
 
     /**
      * Adds the current exception to the initial exception as suppressed.
+     *
+     * Copied from {@link org.neo4j.helpers.Exceptions#chain(Throwable, Throwable)} due to deprecation.
      */
     public static <T extends Throwable> T chain(T initial, T current) {
         if (initial == null) {
