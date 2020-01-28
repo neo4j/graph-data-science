@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.neo4j.graphalgo.compat.StatementApi;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.Callable;
