@@ -21,15 +21,13 @@ package org.neo4j.graphalgo.impl.shortestpaths;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.impl.shortestpaths.DijkstraConfig;
-import org.neo4j.graphalgo.impl.shortestpaths.ShortestPathDijkstra;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -122,8 +120,8 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
         db.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void test1(Class<? extends GraphFactory> graphImpl) {
+    @Test
+    void test1() {
         Label label = Label.label("Label1");
         RelationshipType type = RelationshipType.withName("TYPE1");
 
@@ -135,12 +133,13 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 "name", "f");
         long[] nodeIds = expected.nodeIds;
 
-        Graph graph = new GraphLoader(db)
-                .withLabel(label)
-                .withRelationshipType(type)
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .withDirection(Direction.OUTGOING)
-                .load(graphImpl);
+        Graph graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel(label.name())
+                .addRelationshipType(type.name())
+                .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+                .build()
+                .graph(HugeGraphFactory.class);
 
         DijkstraConfig config = DijkstraConfig.of(nodeIds[0], nodeIds[nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
@@ -154,8 +153,8 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
         assertArrayEquals(nodeIds, path);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void test2(Class<? extends GraphFactory> graphImpl) {
+    @Test
+    void test2() {
         Label label = Label.label("Label2");
         RelationshipType type = RelationshipType.withName("TYPE2");
         ShortestPath expected = expected(label, type,
@@ -165,12 +164,13 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 "name", "7");
         long[] nodeIds = expected.nodeIds;
 
-        Graph graph = new GraphLoader(db)
-                .withLabel(label)
-                .withRelationshipType(type)
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .withDirection(Direction.OUTGOING)
-                .load(graphImpl);
+        Graph graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel(label.name())
+                .addRelationshipType(type.name())
+                .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+                .build()
+                .graph(HugeGraphFactory.class);
 
         DijkstraConfig config = DijkstraConfig.of(nodeIds[0], nodeIds[nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
@@ -187,8 +187,8 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
     /**
      * @see <a href="https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/599">Issue #599</a>
      */
-    @AllGraphTypesWithoutCypherTest
-    void test599(Class<? extends GraphFactory> graphImpl) {
+    @Test
+    void test599() {
         Label label = Label.label("Label599");
         RelationshipType type = RelationshipType.withName("TYPE599");
         ShortestPath expected = expected(
@@ -196,12 +196,13 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 "id", "1", "id", "2", "id", "5",
                 "id", "6", "id", "3", "id", "4");
 
-        Graph graph = new GraphLoader(db)
-                .withLabel(label)
-                .withRelationshipType(type)
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .withDirection(Direction.OUTGOING)
-                .load(graphImpl);
+        Graph graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel(label.name())
+                .addRelationshipType(type.name())
+                .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+                .build()
+                .graph(HugeGraphFactory.class);
 
         DijkstraConfig config = DijkstraConfig.of(expected.nodeIds[0], expected.nodeIds[expected.nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
@@ -215,8 +216,8 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
         assertEquals(expected.weight, shortestPathDijkstra.getTotalCost(), 0.1);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testResultStream(Class<? extends GraphFactory> graphImpl) {
+    @Test
+    void testResultStream() {
         Label label = Label.label("Label1");
         RelationshipType type = RelationshipType.withName("TYPE1");
         ShortestPath expected = expected(label, type,
@@ -227,12 +228,13 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 "name", "f");
         long head = expected.nodeIds[0], tail = expected.nodeIds[expected.nodeIds.length - 1];
 
-        Graph graph = new GraphLoader(db)
-                .withLabel(label)
-                .withRelationshipType("TYPE1")
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .withDirection(Direction.OUTGOING)
-                .load(graphImpl);
+        Graph graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel(label.name())
+                .addRelationshipType("TYPE1")
+                .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+                .build()
+                .graph(HugeGraphFactory.class);
 
         DijkstraConfig config = DijkstraConfig.of(head, tail);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
