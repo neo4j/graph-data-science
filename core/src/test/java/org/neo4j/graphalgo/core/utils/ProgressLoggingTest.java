@@ -21,12 +21,13 @@ package org.neo4j.graphalgo.core.utils;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.write.ExporterBuilder;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
@@ -71,27 +72,34 @@ class ProgressLoggingTest {
         if (DB != null) DB.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testLoad(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testLoad() {
         final StringWriter buffer = new StringWriter();
 
-        graph = new GraphLoader(DB)
-                .withLog(testLogger(buffer))
-                .withExecutorService(Pools.DEFAULT)
-                .withLabel(LABEL)
-                .withRelationshipType(RELATIONSHIP)
-                .withRelationshipProperties(PropertyMapping.of(PROPERTY, 1.0))
-                .load(graphFactory);
+        graph = new StoreLoaderBuilder()
+            .api(DB)
+            .log(testLogger(buffer))
+            .addNodeLabel(LABEL)
+            .addRelationshipType(RELATIONSHIP)
+            .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
+            .build()
+            .load(HugeGraphFactory.class);
 
         final String output = buffer.toString();
         assertTrue(output.length() > 0);
         assertTrue(output.contains(GraphFactory.TASK_LOADING));
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testWrite(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testWrite() {
+        graph = new StoreLoaderBuilder()
+            .api(DB)
+            .addNodeLabel(LABEL)
+            .addRelationshipType(RELATIONSHIP)
+            .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
+            .build()
+            .load(HugeGraphFactory.class);
+
         final StringWriter buffer = new StringWriter();
 
         final int[] ints = new int[(int) graph.nodeCount()];
@@ -112,15 +120,6 @@ class ProgressLoggingTest {
 
         assertTrue(output.length() > 0);
         assertTrue(output.contains(ExporterBuilder.TASK_EXPORT));
-    }
-
-    private void setup(Class<? extends GraphFactory> graphImpl) {
-        graph = new GraphLoader(DB)
-                .withExecutorService(Pools.DEFAULT)
-                .withLabel(LABEL)
-                .withRelationshipType(RELATIONSHIP)
-                .withRelationshipProperties(PropertyMapping.of(PROPERTY, 1.0))
-                .load(graphImpl);
     }
 
     private static Log testLogger(StringWriter writer) {
