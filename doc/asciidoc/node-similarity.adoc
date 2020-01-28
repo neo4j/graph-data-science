@@ -46,8 +46,7 @@ It can be set to any value, except 0.
 The output of the algorithm are new relationships between pairs of the first node set.
 Similarity scores are expressed via relationship properties.
 
-A related function in the GDS library is INSERT_LINK_HERE[Jaccard Function].
-This function computes the Jaccard similarity between two lists of numbers.
+A related function for computing Jaccard similarity is described in <<labs-algorithms-similarity-jaccard>>.
 
 For more information on this algorithm, see:
 
