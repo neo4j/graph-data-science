@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.neo4j.graphalgo.compat.Editions;
+
 final class ConcurrencyConfig {
 
     private static final String PROCESSORS_OVERRIDE_PROPERTY = "neo4j.graphalgo.processors";
@@ -35,8 +37,7 @@ final class ConcurrencyConfig {
         if (definedProcessors == null) {
             definedProcessors = Runtime.getRuntime().availableProcessors();
         }
-        boolean isOnEnterprise = Package.getPackage("org.neo4j.kernel.impl.enterprise") != null;
-        return new ConcurrencyConfig(definedProcessors, isOnEnterprise);
+        return new ConcurrencyConfig(definedProcessors, Editions.isEnterprise());
     }
 
     /* test-private */ ConcurrencyConfig(int availableProcessors, boolean isOnEnterprise) {
