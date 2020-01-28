@@ -12,7 +12,7 @@ dependencies {
 
     compile project(':neo4j-adapter')
     compile project(':annotations')
-    compile project(':cypher-printer-3.5')
+    compile project(':cypher-printer')
     compile group: 'com.carrotsearch',           name: 'hppc',               version: ver.'hppc'
     compile group: 'com.github.petitparser',     name: 'petitparser-core',   version: ver.'petitparser'
 
