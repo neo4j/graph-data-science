@@ -20,15 +20,33 @@
 package org.neo4j.graphalgo.compat;
 
 import org.neo4j.graphdb.config.Setting;
+import org.neo4j.kernel.configuration.BoltConnector;
+import org.neo4j.kernel.configuration.HttpConnector;
 import org.neo4j.kernel.configuration.Settings;
 
 import java.util.function.Function;
 
-public class SettingsProxy {
+public final class SettingsProxy {
+
+    private SettingsProxy() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final Function<String, Boolean> BOOLEAN = Settings.BOOLEAN;
 
-    public static <T> Setting<T> setting(String name, Function<String,T> parser, String defaultValue ) {
+    public static <T> Setting<T> setting(String name, Function<String, T> parser, String defaultValue) {
         return Settings.setting(name, parser, defaultValue);
+    }
+
+    public static Setting<Boolean> boltEnabled() {
+        return new BoltConnector("bolt").enabled;
+    }
+
+    public static Setting<Boolean> httpEnabled() {
+        return new HttpConnector("http").enabled;
+    }
+
+    public static Setting<Boolean> httpsEnabled() {
+        return new HttpConnector("https").enabled;
     }
 }
