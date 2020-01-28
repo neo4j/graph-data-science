@@ -104,7 +104,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     @MethodSource("parameters")
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
     void shouldLoadNodesInOrder(int batchSize) {
-        Graph graph = load( batchSize);
+        Graph graph = load(batchSize);
         if (batchSize < NODE_COUNT) {
             graph.forEachNode(nodeId -> {
                 assertEquals(

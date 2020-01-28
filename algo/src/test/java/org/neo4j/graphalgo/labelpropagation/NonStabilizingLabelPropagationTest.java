@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 
 class NonStabilizingLabelPropagationTest extends AlgoTestBase {
 
@@ -67,12 +68,11 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
         db.shutdown();
     }
 
-
     Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
         if (graphImpl == CypherGraphFactory.class) {
             return QueryRunner.runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
-                .nodeQuery("MATCH (u) RETURN id(u) as id")
+                .nodeQuery(ALL_NODES_QUERY)
                 .relationshipQuery("MATCH (u1)-[rel]-(u2) RETURN id(u1) AS source, id(u2) AS target")
                 .build()
                 .graph(CypherGraphFactory.class));
