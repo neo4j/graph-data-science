@@ -30,14 +30,22 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
+
 @ValueClass
-public interface ModernGraphLoader extends SharedGraphLoader {
+public interface ModernGraphLoader {
+
+    GraphDatabaseAPI api();
 
     @Value.Default
     default ExecutorService executorService() {
@@ -81,7 +89,6 @@ public interface ModernGraphLoader extends SharedGraphLoader {
         return build(factoryType).build().graphs();
     }
 
-    @Override
     @Value.Lazy
     default GraphSetup toSetup() {
         return new ModernGraphSetup(
@@ -93,5 +100,41 @@ public interface ModernGraphLoader extends SharedGraphLoader {
             createConfig(),
             legacyMode()
         );
+    }
+
+    MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
+
+    MethodType CTOR_METHOD = MethodType.methodType(
+        void.class,
+        GraphDatabaseAPI.class,
+        GraphSetup.class
+    );
+
+    /**
+     * Returns an instance of the factory that can be used to load the graph.
+     */
+    default <T extends GraphFactory> T build(final Class<T> factoryType) {
+        try {
+            MethodHandle constructor = LOOKUP.findConstructor(factoryType, CTOR_METHOD);
+            GraphSetup setup = toSetup();
+            GraphFactory factory = (GraphFactory) constructor.invoke(api(), setup);
+            return factoryType.cast(factory);
+        } catch (Throwable throwable) {
+            throwIfUnchecked(throwable);
+            throw new RuntimeException(throwable.getMessage(), throwable);
+        }
+    }
+
+    /**
+     * Loads the graph using the provided GraphFactory, passing the built
+     * configuration as parameters.
+     * <p>
+     * The chosen implementation determines the performance characteristics
+     * during load and usage of the Graph.
+     *
+     * @return the freshly loaded graph
+     */
+    default Graph load(Class<? extends GraphFactory> factoryType) {
+        return build(factoryType).build().graphs().getUnion();
     }
 }
