@@ -84,7 +84,7 @@ class GraphLoaderDirectionalityTest {
     }
 
     @AllGraphTypesTest
-    void loadOutgoing(Class<? extends GraphFactory> graphImpl) {
+    void loadNatural(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_OUTGOING, Projection.NATURAL);
 
         assertEquals(4L, graph.nodeCount());
@@ -95,25 +95,18 @@ class GraphLoaderDirectionalityTest {
     }
 
     @AllGraphTypesTest
-    void loadIncoming(Class<? extends GraphFactory> graphImpl) {
+    void loadReverse(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_INCOMING, Projection.REVERSE);
 
         assertEquals(4L, graph.nodeCount());
-        if (graphImpl == CypherGraphFactory.class) {
-            assertRelationships(graph, 0, 0);
-            assertRelationships(graph, 1, 0, 1);
-            assertRelationships(graph, 2, 1);
-            assertRelationships(graph, 3, 1);
-        } else {
-            assertRelationships(graph, 0, 0);
-            assertRelationships(graph, 1, 0, 1);
-            assertRelationships(graph, 2, 1);
-            assertRelationships(graph, 3, 1);
-        }
+        assertRelationships(graph, 0, 0);
+        assertRelationships(graph, 1, 0, 1);
+        assertRelationships(graph, 2, 1);
+        assertRelationships(graph, 3, 1);
     }
 
     @AllGraphTypesTest
-    void loadOutgoingWithoutAggregation(Class<? extends GraphFactory> graphImpl) {
+    void loadNaturalWithoutAggregation(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_OUTGOING, Projection.NATURAL);
 
         assertEquals(4L, graph.nodeCount());
