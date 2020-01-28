@@ -25,9 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -74,10 +74,12 @@ class ParallelTraverseTest {
         }
 
         try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("load took " + t + "ms"))) {
-            graph = new GraphLoader(DB)
-                    .withLabel(LABEL)
-                    .withRelationshipType(RELATIONSHIP)
-                    .load(HugeGraphFactory.class);
+            graph = new StoreLoaderBuilder()
+                    .api(DB)
+                    .addNodeLabel(LABEL)
+                    .addRelationshipType(RELATIONSHIP)
+                    .build()
+                    .graph(HugeGraphFactory.class);
 
             nodeCount = (int) graph.nodeCount();
 
