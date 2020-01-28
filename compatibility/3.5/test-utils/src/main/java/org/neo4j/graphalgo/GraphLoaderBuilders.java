@@ -58,7 +58,6 @@ final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        @Builder.Switch(defaultName = "MODERN") Mode mode,
         Map<String, Object> params,
         // CreateConfig parameters
         Optional<String> graphName,
@@ -102,7 +101,6 @@ final class GraphLoaderBuilders {
             params,
             userName.orElse(""),
             log.orElse(NullLog.getInstance()),
-            mode == Mode.LEGACY,
             createConfig
         );
     }
@@ -121,7 +119,6 @@ final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        @Builder.Switch(defaultName = "MODERN") Mode mode,
         Map<String, Object> params,
         // CreateConfig parameters
         Optional<String> graphName,
@@ -155,12 +152,7 @@ final class GraphLoaderBuilders {
             params,
             userName.orElse(""),
             log.orElse(NullLog.getInstance()),
-            mode == Mode.LEGACY,
             createConfig
         );
-    }
-
-    enum Mode {
-        MODERN, LEGACY
     }
 }

@@ -64,7 +64,6 @@ public abstract class BaseProc {
             .tracker(tracker)
             .terminationFlag(TerminationFlag.wrap(transaction))
             .createConfig(createConfig)
-            .legacyMode(false)
             .build();
     }
 

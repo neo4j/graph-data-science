@@ -118,7 +118,6 @@ public class WccThresholdTest extends AlgoTestBase {
             .api(db)
             .username("")
             .log(new TestLog())
-            .legacyMode(false)
             .createConfig(createConfig).build();
 
         Graph graph = loader.load(HugeGraphFactory.class);

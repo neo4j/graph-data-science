@@ -73,11 +73,6 @@ public interface GraphLoader {
 
     Log log();
 
-    @Value.Default
-    default boolean legacyMode() {
-        return false;
-    }
-
     GraphCreateConfig createConfig();
 
     default Graph graph(Class<? extends GraphFactory> factoryType) {
@@ -96,8 +91,7 @@ public interface GraphLoader {
             log(),
             tracker(),
             terminationFlag(),
-            createConfig(),
-            legacyMode()
+            createConfig()
         );
     }
 

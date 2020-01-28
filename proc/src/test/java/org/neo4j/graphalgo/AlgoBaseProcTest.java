@@ -433,7 +433,6 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             .api(db)
             .username("")
             .log(new TestLog())
-            .legacyMode(false)
             .createConfig(graphCreateConfig).build();
     }
 
