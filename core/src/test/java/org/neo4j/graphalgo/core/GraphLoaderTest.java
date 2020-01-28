@@ -33,14 +33,12 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.TransactionTerminatedException;
-import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 
 class GraphLoaderTest {
 
@@ -160,8 +158,7 @@ class GraphLoaderTest {
     @Test
     void stopsImportingWhenTransactionHasBeenTerminated() {
         TerminationFlag terminationFlag = () -> false;
-        TransactionTerminatedException exception = assertThrows(
-            TransactionTerminatedException.class,
+        assertTransactionTermination(
             () -> new StoreLoaderBuilder()
                 .api(db)
                 .loadAnyLabel()
@@ -170,6 +167,5 @@ class GraphLoaderTest {
                 .build()
                 .load(HugeGraphFactory.class)
         );
-        assertEquals(Status.Transaction.Terminated, exception.status());
     }
 }

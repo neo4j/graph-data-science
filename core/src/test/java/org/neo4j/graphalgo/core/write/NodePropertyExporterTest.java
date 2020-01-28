@@ -25,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphdb.TransactionTerminatedException;
-import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
@@ -36,9 +34,9 @@ import java.util.concurrent.ExecutorService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
+import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 
 class NodePropertyExporterTest {
 
@@ -81,10 +79,8 @@ class NodePropertyExporterTest {
         NodePropertyExporter exporter = NodePropertyExporter.of(DB, new DirectIdMapping(3), terminationFlag)
                 .parallel(executorService, 4)
                 .build();
-        TransactionTerminatedException exception = assertThrows(
-                TransactionTerminatedException.class,
-                () -> exporter.write("foo", 42.0, new DoublePropertyTranslator()));
-        assertEquals(Status.Transaction.Terminated, exception.status());
+
+        assertTransactionTermination(() -> exporter.write("foo", 42.0, new DoublePropertyTranslator()));
 
         runQueryWithRowConsumer(DB, "MATCH (n) WHERE n.foo IS NOT NULL RETURN COUNT(*) AS count", row -> {
             Number count = row.getNumber("count");

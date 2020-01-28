@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -50,6 +51,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.Projection.NATURAL;
@@ -220,5 +222,14 @@ public final class TestSupport {
                 }
             }
         );
+    }
+
+    public static void assertTransactionTermination(Executable executable) {
+        TransactionTerminatedException exception = assertThrows(
+            TransactionTerminatedException.class,
+            executable
+        );
+
+        assertEquals(Status.Transaction.Terminated, exception.status());
     }
 }

@@ -22,10 +22,9 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.Transactions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphdb.TransactionFailureException;
-import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.api.KernelTransactions;
 
@@ -35,6 +34,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.compat.Transactions.transactionFailureException;
 
 /**        _______
  *        /       \
@@ -69,7 +69,7 @@ class TerminationTest extends BaseProcTest {
                 .filter(thx -> thx.lastTransactionIdWhenStarted() == txId)
                 .forEach(thx -> {
                     System.out.println("terminating transaction " + txId);
-                    thx.markForTermination(Status.Transaction.TransactionMarkedAsFailed);
+                    thx.markForTermination(Transactions.markedAsFailed());
                 });
     }
 
@@ -122,7 +122,7 @@ class TerminationTest extends BaseProcTest {
     @Test
     void test() {
         assertThrows(
-                TransactionFailureException.class,
+            transactionFailureException(),
                 () -> {
                     try {
                         executeAndKill();

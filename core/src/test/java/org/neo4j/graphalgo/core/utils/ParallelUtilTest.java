@@ -25,8 +25,6 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
-import org.neo4j.graphdb.TransactionTerminatedException;
-import org.neo4j.kernel.api.exceptions.Status;
 
 import java.util.AbstractCollection;
 import java.util.Arrays;
@@ -67,6 +65,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
@@ -333,31 +332,29 @@ final class ParallelUtilTest {
 
     @Test
     void shouldBailOnTermination() {
-        TransactionTerminatedException exception = assertThrows(
-                TransactionTerminatedException.class,
-                () -> withPool(4, pool -> {
-                    Tasks tasks = new Tasks(6, 100);
-                    AtomicReference<Throwable> thrownException = new AtomicReference<>();
-                    AtomicBoolean running = new AtomicBoolean(true);
-                    TerminationFlag isRunning = running::get;
-                    final Thread thread = new Thread(() -> tasks.run(t ->
-                            ParallelUtil.runWithConcurrency(2, t, isRunning, pool)));
+        assertTransactionTermination(
+            () -> withPool(4, pool -> {
+                Tasks tasks = new Tasks(6, 100);
+                AtomicReference<Throwable> thrownException = new AtomicReference<>();
+                AtomicBoolean running = new AtomicBoolean(true);
+                TerminationFlag isRunning = running::get;
+                final Thread thread = new Thread(() -> tasks.run(t ->
+                    ParallelUtil.runWithConcurrency(2, t, isRunning, pool)));
 
-                    thread.setUncaughtExceptionHandler((t, e) -> thrownException.set(e));
-                    thread.start();
-                    running.set(false);
-                    thread.join();
+                thread.setUncaughtExceptionHandler((t, e) -> thrownException.set(e));
+                thread.start();
+                running.set(false);
+                thread.join();
 
-                    if (thrownException.get() != null) {
-                        throw thrownException.get();
-                    }
+                assertTrue(tasks.started() <= 2);
+                assertTrue(tasks.maxRunning() <= 2);
+                assertTrue(tasks.requested() <= 2);
 
-                    assertTrue(tasks.started() <= 2);
-                    assertTrue(tasks.maxRunning() <= 2);
-                    assertTrue(tasks.requested() <= 2);
-                })
+                if (thrownException.get() != null) {
+                    throw thrownException.get();
+                }
+            })
         );
-        assertEquals(Status.Transaction.Terminated, exception.status());
     }
 
     @Test
