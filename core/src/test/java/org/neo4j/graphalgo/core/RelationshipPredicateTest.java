@@ -21,10 +21,12 @@ package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -75,13 +77,12 @@ class RelationshipPredicateTest {
         db.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testOutgoing(Class<? extends GraphFactory> graphFactory) {
+    @Test
+    void testOutgoing() {
 
         final Graph graph = loader()
-                .withDirection(Direction.OUTGOING)
-                .sorted()
-                .load(graphFactory);
+                .build()
+                .graph(HugeGraphFactory.class);
 
         // A -> B
         assertTrue(graph.exists(
@@ -121,13 +122,13 @@ class RelationshipPredicateTest {
     }
 
 
-    @AllGraphTypesWithoutCypherTest
-    void testIncoming(Class<? extends GraphFactory> graphFactory) {
+    @Test
+    void testIncoming() {
 
         final Graph graph = loader()
-                .withDirection(Direction.INCOMING)
-                .sorted()
-                .load(graphFactory);
+                .globalProjection(Projection.REVERSE)
+                .build()
+                .load(HugeGraphFactory.class);
 
         // B <- A
         assertTrue(graph.exists(
@@ -174,13 +175,13 @@ class RelationshipPredicateTest {
     }
 
 
-    @AllGraphTypesWithoutCypherTest
-    void testBoth(Class<? extends GraphFactory> graphFactory) {
+    @Test
+    void testBoth() {
 
         final Graph graph = loader()
-                .withDirection(Direction.BOTH)
-                .sorted()
-                .load(graphFactory);
+                .globalProjection(Projection.UNDIRECTED)
+                .build()
+                .graph(HugeGraphFactory.class);
 
         // A -> B
         assertTrue(graph.exists(
@@ -189,7 +190,7 @@ class RelationshipPredicateTest {
         ));
 
         // B -> A
-        assertFalse(graph.exists(
+        assertTrue(graph.exists(
                 graph.toMappedNodeId(nodeB),
                 graph.toMappedNodeId(nodeA)
         ));
@@ -202,7 +203,7 @@ class RelationshipPredicateTest {
         ));
 
         // C -> B
-        assertFalse(graph.exists(
+        assertTrue(graph.exists(
                 graph.toMappedNodeId(nodeC),
                 graph.toMappedNodeId(nodeB)
         ));
@@ -214,7 +215,7 @@ class RelationshipPredicateTest {
         ));
 
         // A -> C
-        assertFalse(graph.exists(
+        assertTrue(graph.exists(
                 graph.toMappedNodeId(nodeA),
                 graph.toMappedNodeId(nodeC)
         ));
@@ -305,9 +306,10 @@ class RelationshipPredicateTest {
         ));
     }
 
-    private GraphLoader loader() {
-        return new GraphLoader(db)
-                .withAnyLabel()
-                .withAnyRelationshipType();
+    private StoreLoaderBuilder loader() {
+        return new StoreLoaderBuilder()
+                .api(db)
+                .loadAnyLabel()
+                .loadAnyRelationshipType();
     }
 }
