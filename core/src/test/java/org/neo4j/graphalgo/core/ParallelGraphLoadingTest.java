@@ -24,8 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.PrivateLookup;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Direction;
@@ -65,26 +65,26 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
 
     private static Stream<Arguments> parameters() {
         return Stream.of(
-                arguments(HugeGraphFactory.class, 30),
-                arguments(HugeGraphFactory.class, 100000)
+                arguments(30),
+                arguments(100000)
         );
     }
 
     @ParameterizedTest
     @MethodSource("parameters")
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
-    void shouldLoadAllNodes(Class<? extends GraphFactory> graphImpl, int batchSize) {
-        Graph graph = load(graphImpl, batchSize);
+    void shouldLoadAllNodes(int batchSize) {
+        Graph graph = load(batchSize);
         assertEquals(NODE_COUNT, graph.nodeCount());
     }
 
     @ParameterizedTest
     @MethodSource("parameters")
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
-    void shouldLoadSparseNodes(Class<? extends GraphFactory> graphImpl, int batchSize) {
+    void shouldLoadSparseNodes(int batchSize) {
         GraphDatabaseAPI largerGraph = buildGraph(PageUtil.pageSizeFor(Long.BYTES) << 1);
         try {
-            Graph sparseGraph = load(largerGraph, l -> l.withLabel("Label2"), graphImpl, batchSize);
+            Graph sparseGraph = load(largerGraph, l -> l.addNodeLabel("Label2"), batchSize);
             runInTransaction(largerGraph, () -> {
                 largerGraph
                     .findNodes(Label.label("Label2"))
@@ -103,8 +103,8 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     @ParameterizedTest
     @MethodSource("parameters")
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
-    void shouldLoadNodesInOrder(Class<? extends GraphFactory> graphImpl, int batchSize) {
-        Graph graph = load(graphImpl, batchSize);
+    void shouldLoadNodesInOrder(int batchSize) {
+        Graph graph = load( batchSize);
         if (batchSize < NODE_COUNT) {
             graph.forEachNode(nodeId -> {
                 assertEquals(
@@ -134,22 +134,26 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     @ParameterizedTest
     @MethodSource("parameters")
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
-    void shouldLoadAllRelationships(Class<? extends GraphFactory> graphImpl, int batchSize) {
-        Graph graph = load(graphImpl, batchSize);
+    void shouldLoadAllRelationships(int batchSize) {
+        Graph graph = load(batchSize);
         runInTransaction(db, () -> graph.forEachNode(id -> testRelationships(graph, id)));
     }
 
     @ParameterizedTest
     @MethodSource("parameters")
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
-    void shouldCollectErrors(Class<? extends GraphFactory> graphImpl, int batchSize) {
+    void shouldCollectErrors(int batchSize) {
         if (batchSize < NODE_COUNT) {
             String message = "oh noes";
             ThrowingThreadPool pool = new ThrowingThreadPool(3, message);
             try {
-                new GraphLoader(db, pool)
-                        .withBatchSize(batchSize)
-                        .load(graphImpl);
+                new StoreLoaderBuilder()
+                    .api(db)
+                    .executorService(pool)
+                    .loadAnyLabel()
+                    .loadAnyRelationshipType()
+                    .build()
+                    .graph(HugeGraphFactory.class);
                 fail("Should have thrown an Exception.");
             } catch (Exception e) {
                 assertEquals(message, e.getMessage());
@@ -164,32 +168,17 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     }
 
     private boolean testRelationships(Graph graph, long nodeId) {
-        testRelationships(graph, nodeId, Direction.OUTGOING);
-        testRelationships(graph, nodeId, Direction.INCOMING);
-        return true;
-    }
-
-    private void testRelationships(Graph graph, long nodeId, final Direction direction) {
         final Node node = db.getNodeById(graph.toOriginalNodeId(nodeId));
         final Map<Long, Relationship> relationships = Iterables
-                .stream(node.getRelationships(direction))
+                .stream(node.getRelationships(Direction.OUTGOING))
                 .collect(Collectors.toMap(
                         rel -> combineIntInt((int) rel.getStartNode().getId(), (int) rel.getEndNode().getId()),
                         Function.identity()));
         graph.forEachRelationship(
                 nodeId,
-                direction,
                 (sourceId, targetId) -> {
                     assertEquals(nodeId, sourceId);
-                    long relId = 0;
-                    switch (direction) {
-                        case OUTGOING:
-                            relId = combineIntInt((int) sourceId, (int) targetId);
-                            break;
-                        case INCOMING:
-                            relId = combineIntInt((int) targetId, (int) sourceId);
-                            break;
-                    }
+                    long relId = combineIntInt((int) sourceId, (int) targetId);
                     final Relationship relationship = relationships.remove(relId);
                     assertNotNull(
                             relationship,
@@ -199,39 +188,35 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
                                     relId,
                                     targetId));
 
-                    if (direction == Direction.OUTGOING) {
-                        assertEquals(
-                                relationship.getStartNode().getId(),
-                                graph.toOriginalNodeId(sourceId));
-                        assertEquals(
-                                relationship.getEndNode().getId(),
-                                graph.toOriginalNodeId(targetId));
-                    } else {
-                        assertEquals(
-                                relationship.getEndNode().getId(),
-                                graph.toOriginalNodeId(sourceId));
-                        assertEquals(
-                                relationship.getStartNode().getId(),
-                                graph.toOriginalNodeId(targetId));
-                    }
+                    assertEquals(
+                        relationship.getStartNode().getId(),
+                        graph.toOriginalNodeId(sourceId)
+                    );
+                    assertEquals(
+                        relationship.getEndNode().getId(),
+                        graph.toOriginalNodeId(targetId));
                     return true;
                 });
 
         assertTrue(
                 relationships.isEmpty(),
                 "Relationships that were not traversed " + relationships);
+
+        return true;
     }
 
-    private Graph load(Class<? extends GraphFactory> graphImpl, int batchSize) {
-        return load(db, l -> {}, graphImpl, batchSize);
+    private Graph load(int batchSize) {
+        return load(db, l -> l.loadAnyLabel().loadAnyRelationshipType(), batchSize);
     }
 
-    private Graph load(GraphDatabaseAPI db, Consumer<GraphLoader> block, Class<? extends GraphFactory> graphImpl, int batchSize) {
+    private Graph load(GraphDatabaseAPI db, Consumer<StoreLoaderBuilder> block, int batchSize) {
         final ExecutorService pool = Executors.newFixedThreadPool(3);
-        GraphLoader loader = new GraphLoader(db, pool).withBatchSize(batchSize);
+        StoreLoaderBuilder loader = new StoreLoaderBuilder()
+            .api(db)
+            .executorService(pool);
         block.accept(loader);
         try {
-            return loader.load(graphImpl);
+            return loader.build().load(HugeGraphFactory.class);
         } catch (Exception e) {
             markFailure();
             throw e;
