@@ -83,27 +83,6 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
         this.computeCommunityCount = computeCommunityCount;
     }
 
-    public GraphLoader configureLoader(GraphLoader loader) {
-        if (hasWeightProperty()) {
-            loader.withRelationshipProperties(PropertyMapping.of(
-                getWeightProperty(),
-                getWeightPropertyDefaultValue(getAlgoSpecificDefaultWeightValue())
-            ));
-        }
-
-        String label = getNodeLabelOrQuery();
-        String relationship = getRelationshipOrQuery();
-        return loader.withUsername(getUsername())
-            .withName(getGraphName(null))
-            .withOptionalLabel(label)
-            .withOptionalRelationshipType(relationship)
-            .withConcurrency(getReadConcurrency())
-            .withBatchSize(getBatchSize())
-            .withDefaultAggregation(getAggregation())
-            .withParams(getParams())
-            .withLoadedGraph(false);
-    }
-
     private double getAlgoSpecificDefaultWeightValue() {
         return configurationMap.getDouble(ALGO_SPECIFIC_DEFAULT_WEIGHT, DEFAULT_VALUE_DEFAULT);
     }
