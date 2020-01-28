@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import org.neo4j.helpers.NamedThreadFactory;
+import org.neo4j.graphalgo.compat.NamedThreadFactoryProxy;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -59,17 +59,18 @@ public final class Pools {
 
     public static ExecutorService createDefaultPool() {
         return new ThreadPoolExecutor(
-                DEFAULT_CONCURRENCY,
-                DEFAULT_CONCURRENCY * 2,
-                30L,
-                TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(DEFAULT_QUEUE_SIZE),
-                NamedThreadFactory.daemon("algo"),
-                new CallerBlocksPolicy());
+            DEFAULT_CONCURRENCY,
+            DEFAULT_CONCURRENCY * 2,
+            30L,
+            TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(DEFAULT_QUEUE_SIZE),
+            NamedThreadFactoryProxy.daemon(),
+            new CallerBlocksPolicy()
+        );
     }
 
     public static ExecutorService createDefaultSingleThreadPool() {
-        return Executors.newSingleThreadExecutor(NamedThreadFactory.daemon("algo"));
+        return Executors.newSingleThreadExecutor(NamedThreadFactoryProxy.daemon());
     }
 
     public static ForkJoinPool createFJPool() {
