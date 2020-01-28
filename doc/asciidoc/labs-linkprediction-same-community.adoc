@@ -17,14 +17,12 @@ The Same Community algorithm was developed by the Neo4j Labs team and is not off
 This section includes:
 
 * <<algorithms-linkprediction-same-community-context, History and explanation>>
-* <<algorithms-linkprediction-same-community-sample, Same Community algorithm sample>>
 * <<algorithms-linkprediction-same-community-syntax, Syntax>>
+* <<algorithms-linkprediction-same-community-sample, Same Community algorithm sample>>
 
 
 [[algorithms-linkprediction-same-community-context]]
 == History and explanation
-
-// tag::explanation[]
 
 If two nodes belong to the same community, there is a greater likelihood that there will be a relationship between them in future, if there isn't already.
 
@@ -32,75 +30,6 @@ A value of 0 indicates that two nodes are not in the same community.
 A value of 1 indicates that two nodes are in the same community.
 
 The library contains a function to calculate closeness between two nodes.
-
-// end::explanation[]
-
-
-[[algorithms-linkprediction-same-community-sample]]
-== Same Community algorithm sample
-
-.The following will create a sample graph:
-[source, cypher]
-----
-include::scripts/linkprediction-same-community.cypher[tag=create-sample-graph]
-----
-
-.The following will indicate that Michael and Zhen belong to the same community:
-[source, cypher]
-----
-include::scripts/linkprediction-same-community.cypher[tag=same-community]
-----
-
-.Results
-[opts="header",cols="1"]
-|===
-| `score`
-| 1.0
-|===
-
-.The following will indicate that Michael and Praveena do not belong to the same community:
-[source, cypher]
-----
-include::scripts/linkprediction-same-community.cypher[tag=different-community]
-----
-
-.Results
-[opts="header",cols="1"]
-|===
-| `score`
-| 0.0
-|===
-
-If one of the nodes doesn't have a community, this means it doesn't belong to the same community as any other node.
-
-.The following will indicate that Michael and Jennifer do not belong to the same community:
-[source, cypher]
-----
-include::scripts/linkprediction-same-community.cypher[tag=missing-community]
-----
-
-.Results
-[opts="header",cols="1"]
-|===
-| `score`
-| 0.0
-|===
-
-By default, the community is read from the `community` property, but it is possible to explicitly state which property to read from.
-
-
-.The following will indicate that Arya and Karin belong to the same community, based on the `partition` property:
-[source, cypher]
-----
-include::scripts/linkprediction-same-community.cypher[tag=same-community-specific]
-----
-
-.Results
-[opts="header",cols="1"]
-|===
-| `score`
-| 1.0
-|===
 
 
 [[algorithms-linkprediction-same-community-syntax]]
@@ -116,8 +45,89 @@ RETURN gds.alpha.linkprediction.sameCommunity(node1:Node, node2:Node, communityP
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                   | Type    | Default        | Optional | Description
-| `node1`                   | Node    | null           | no       | A node
-| `node2`                   | Node    | null           | no       | Another node
-| `communityProperty`                   | String    | 'community'           | yes       | The property that contains the community to which nodes belong
+| Name                | Type   | Default     | Optional | Description
+| `node1`             | Node   | null        | no       | A node
+| `node2`             | Node   | null        | no       | Another node
+| `communityProperty` | String | 'community' | yes      | The property that contains the community to which nodes belong
 |===
+
+
+[[algorithms-linkprediction-same-community-sample]]
+== Same Community algorithm sample
+
+.The following will create a sample graph:
+[source, cypher]
+----
+CREATE (zhen:Person {name: 'Zhen', community: 1}),
+       (praveena:Person {name: 'Praveena', community: 2}),
+       (michael:Person {name: 'Michael', community: 1}),
+       (arya:Person {name: 'Arya', partition: 5}),
+       (karin:Person {name: 'Karin', partition: 5}),
+       (jennifer:Person {name: 'Jennifer'})
+----
+
+.The following will indicate that Michael and Zhen belong to the same community:
+[source, cypher]
+----
+MATCH (p1:Person {name: 'Michael'})
+MATCH (p2:Person {name: 'Zhen'})
+RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 1.0
+|===
+
+.The following will indicate that Michael and Praveena do not belong to the same community:
+[source, cypher]
+----
+MATCH (p1:Person {name: 'Michael'})
+MATCH (p2:Person {name: 'Praveena'})
+RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 0.0
+|===
+
+If one of the nodes doesn't have a community, this means it doesn't belong to the same community as any other node.
+
+.The following will indicate that Michael and Jennifer do not belong to the same community:
+[source, cypher]
+----
+MATCH (p1:Person {name: 'Michael'})
+MATCH (p2:Person {name: 'Jennifer'})
+RETURN gds.alpha.linkprediction.sameCommunity(p1, p2) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 0.0
+|===
+
+By default, the community is read from the `community` property, but it is possible to explicitly state which property to read from.
+
+
+.The following will indicate that Arya and Karin belong to the same community, based on the `partition` property:
+[source, cypher]
+----
+MATCH (p1:Person {name: 'Arya'})
+MATCH (p2:Person {name: 'Karin'})
+RETURN gds.alpha.linkprediction.sameCommunity(p1, p2, 'partition') AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 1.0
+|===
+

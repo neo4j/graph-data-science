@@ -16,14 +16,12 @@ The Preferential Attachment algorithm was developed by the Neo4j Labs team and i
 This section includes:
 
 * <<algorithms-linkprediction-preferential-attachment-context, History and explanation>>
-* <<algorithms-linkprediction-preferential-attachment-sample, Preferential Attachment algorithm sample>>
 * <<algorithms-linkprediction-preferential-attachment-syntax, Syntax>>
+* <<algorithms-linkprediction-preferential-attachment-sample, Preferential Attachment algorithm sample>>
 
 
 [[algorithms-linkprediction-preferential-attachment-context]]
 == History and explanation
-
-// tag::explanation[]
 
 Preferential attachment means that the more connected a node is, the more likely it is to receive new links.
 This algorithm was popularised by https://en.wikipedia.org/wiki/Barab%C3%A1si%E2%80%93Albert_model[Albert-László Barabási and Réka Albert^] through their work on scale-free networks.
@@ -37,51 +35,6 @@ A value of 0 indicates that two nodes are not close, while higher values indicat
 
 The library contains a function to calculate closeness between two nodes.
 
-// end::explanation[]
-
-
-[[algorithms-linkprediction-preferential-attachment-sample]]
-== Preferential Attachment algorithm sample
-
-.The following will create a sample graph:
-[source, cypher]
-----
-include::scripts/linkprediction-preferential-attachment.cypher[tag=create-sample-graph]
-----
-
-.The following will return the Preferential Attachment score for Michael and Karin:
-[source, cypher]
-----
-include::scripts/linkprediction-preferential-attachment.cypher[tag=all-rels]
-----
-
-// tag::function[]
-.Results
-[opts="header",cols="1"]
-|===
-| `score`
-| 6.0
-|===
-// end::function[]
-
-
-We can also compute the score of a pair of nodes based on a specific relationship type.
-
-.The following will return the Preferential Attachment score for Michael and Karin based only on the `FRIENDS` relationship:
-[source, cypher]
-----
-include::scripts/linkprediction-preferential-attachment.cypher[tag=only-friends]
-----
-
-// tag::function[]
-.Results
-[opts="header",cols="1"]
-|===
-| `score`
-| 1.0
-|===
-// end::function[]
-
 
 [[algorithms-linkprediction-preferential-attachment-syntax]]
 == Syntax
@@ -90,8 +43,8 @@ include::scripts/linkprediction-preferential-attachment.cypher[tag=only-friends]
 [source, cypher]
 ----
 RETURN gds.alpha.linkprediction.preferentialAttachment(node1:Node, node2:Node, {
-    relationshipQuery: null,
-    direction: "BOTH"
+    relationshipQuery:STRING,
+    direction:STRING
 })
 ----
 
@@ -100,8 +53,63 @@ RETURN gds.alpha.linkprediction.preferentialAttachment(node1:Node, node2:Node, {
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                   | Type    | Default        | Optional | Description
-| `node1`                   | Node    | null           | no       | A node
-| `node2`                   | Node    | null           | no       | Another node
-| `relationshipQuery`                   | String    | null           | yes       | The relationship type used to compute similarity between `node1` and `node2`
-| `direction`                   | String    | BOTH           | yes       | The direction of relationship type used to compute similarity between `node1` and `node2`
+| `node1`                | Node    | null           | no       | A node
+| `node2`                | Node    | null           | no       | Another node
+| `relationshipQuery`    | String  | null           | yes      | The relationship type used to compute similarity between `node1` and `node2`
+| `direction`            | String  | BOTH           | yes      | The direction of relationship type used to compute similarity between `node1` and `node2`
+|===
+
+
+[[algorithms-linkprediction-preferential-attachment-sample]]
+== Preferential Attachment algorithm sample
+
+.The following will create a sample graph:
+[source, cypher]
+----
+CREATE
+ (zhen:Person {name: 'Zhen'}),
+ (praveena:Person {name: 'Praveena'}),
+ (michael:Person {name: 'Michael'}),
+ (arya:Person {name: 'Arya'}),
+ (karin:Person {name: 'Karin'}),
+
+ (zhen)-[:FRIENDS]->(arya),
+ (zhen)-[:FRIENDS]->(praveena),
+ (praveena)-[:WORKS_WITH]->(karin),
+ (praveena)-[:FRIENDS]->(michael),
+ (michael)-[:WORKS_WITH]->(karin),
+ (arya)-[:FRIENDS]->(karin)
+----
+
+.The following will return the Preferential Attachment score for Michael and Karin:
+[source, cypher]
+----
+ MATCH (p1:Person {name: 'Michael'})
+ MATCH (p2:Person {name: 'Karin'})
+ RETURN gds.alpha.linkprediction.preferentialAttachment(p1, p2) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 6.0
+|===
+
+
+We can also compute the score of a pair of nodes based on a specific relationship type.
+
+.The following will return the Preferential Attachment score for Michael and Karin based only on the `FRIENDS` relationship:
+[source, cypher]
+----
+ MATCH (p1:Person {name: 'Michael'})
+ MATCH (p2:Person {name: 'Karin'})
+ RETURN gds.alpha.linkprediction.preferentialAttachment(p1, p2, {relationshipQuery: "FRIENDS"}) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 1.0
 |===

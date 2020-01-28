@@ -17,14 +17,12 @@ The Total Neighbors algorithm was developed by the Neo4j Labs team and is not of
 This section includes:
 
 * <<algorithms-linkprediction-total-neighbors-context, History and explanation>>
-* <<algorithms-linkprediction-total-neighbors-sample, Total Neighbors algorithm sample>>
 * <<algorithms-linkprediction-total-neighbors-syntax, Syntax>>
+* <<algorithms-linkprediction-total-neighbors-sample, Total Neighbors algorithm sample>>
 
 
 [[algorithms-linkprediction-total-neighbors-context]]
 == History and explanation
-
-// tag::explanation[]
 
 Total Neighbors is computed using the following formula:
 
@@ -35,51 +33,6 @@ where `N(x)` is the set of nodes adjacent to `x`, and `N(y)` is the set of nodes
 A value of 0 indicates that two nodes are not close, while higher values indicate nodes are closer.
 
 The library contains a function to calculate the closeness between two nodes.
-
-// end::explanation[]
-
-
-[[algorithms-linkprediction-total-neighbors-sample]]
-== Total Neighbors algorithm sample
-
-.The following will create a sample graph:
-[source, cypher]
-----
-include::scripts/linkprediction-total-neighbors.cypher[tag=create-sample-graph]
-----
-
-.The following will return the Total Neighbors score for Michael and Karin:
-[source, cypher]
-----
-include::scripts/linkprediction-total-neighbors.cypher[tag=all-rels]
-----
-
-// tag::function[]
-.Results
-[opts="header",cols="1"]
-|===
-| `score`
-| 4.0
-|===
-// end::function[]
-
-
-We can also compute the score of a pair of nodes, based on a specific relationship type.
-
-.The following will return the Total Neighbors score for Michael and Karin based only on the `FRIENDS` relationship:
-[source, cypher]
-----
-include::scripts/linkprediction-total-neighbors.cypher[tag=only-friends]
-----
-
-// tag::function[]
-.Results
-[opts="header",cols="1"]
-|===
-| `score`
-| 2.0
-|===
-// end::function[]
 
 
 [[algorithms-linkprediction-total-neighbors-syntax]]
@@ -98,9 +51,62 @@ RETURN gds.alpha.linkprediction.totalNeighbors(node1:Node, node2:Node, {
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                   | Type    | Default        | Optional | Description
-| `node1`                   | Node    | null           | no       | A node
-| `node2`                   | Node    | null           | no       | Another node
-| `relationshipQuery`                   | String    | null           | yes       | The relationship type used to compute similarity between `node1` and `node2`
-| `direction`                   | String    | BOTH           | yes       | The direction of relationship type used to compute similarity between `node1` and `node2`
+| Name                | Type   | Default | Optional | Description
+| `node1`             | Node   | null    | no       | A node
+| `node2`             | Node   | null    | no       | Another node
+| `relationshipQuery` | String | null    | yes      | The relationship type used to compute similarity between `node1` and `node2`
+| `direction`         | String | BOTH    | yes      | The direction of relationship type used to compute similarity between `node1` and `node2`
+|===
+
+
+[[algorithms-linkprediction-total-neighbors-sample]]
+== Total Neighbors algorithm sample
+
+.The following will create a sample graph:
+[source, cypher]
+----
+CREATE (zhen:Person {name: 'Zhen'}),
+       (praveena:Person {name: 'Praveena'}),
+       (michael:Person {name: 'Michael'}),
+       (arya:Person {name: 'Arya'}),
+       (karin:Person {name: 'Karin'}),
+
+       (zhen)-[:FRIENDS]->(arya),
+       (zhen)-[:FRIENDS]->(praveena),
+       (praveena)-[:WORKS_WITH]->(karin),
+       (praveena)-[:FRIENDS]->(michael),
+       (michael)-[:WORKS_WITH]->(karin),
+       (arya)-[:FRIENDS]->(karin)
+----
+
+.The following will return the Total Neighbors score for Michael and Karin:
+[source, cypher]
+----
+MATCH (p1:Person {name: 'Michael'})
+MATCH (p2:Person {name: 'Karin'})
+RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 4.0
+|===
+
+We can also compute the score of a pair of nodes, based on a specific relationship type.
+
+.The following will return the Total Neighbors score for Michael and Karin based only on the `FRIENDS` relationship:
+[source, cypher]
+----
+MATCH (p1:Person {name: 'Michael'})
+MATCH (p2:Person {name: 'Karin'})
+RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2, {relationshipQuery: "FRIENDS"}) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 2.0
 |===

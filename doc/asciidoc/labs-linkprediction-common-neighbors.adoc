@@ -16,14 +16,13 @@ The Common Neighbors algorithm was developed by the Neo4j Labs team and is not o
 This section includes:
 
 * <<algorithms-linkprediction-common-neighbors-context, History and explanation>>
-* <<algorithms-linkprediction-common-neighbors-sample, Common Neighbors algorithm sample>>
 * <<algorithms-linkprediction-common-neighbors-syntax, Syntax>>
+* <<algorithms-linkprediction-common-neighbors-sample, Common Neighbors algorithm sample>>
 
 
 [[algorithms-linkprediction-common-neighbors-context]]
 == History and explanation
 
-// tag::explanation[]
 
 It is computed using the following formula:
 
@@ -35,52 +34,6 @@ A value of 0 indicates that two nodes are not close, while higher values indicat
 
 The library contains a function to calculate closeness between two nodes.
 
-// end::explanation[]
-
-
-[[algorithms-linkprediction-common-neighbors-sample]]
-== Common Neighbors algorithm sample
-
-.The following will create a sample graph:
-[source, cypher]
-----
-include::scripts/linkprediction-common-neighbors.cypher[tag=create-sample-graph]
-----
-
-.The following will return the number of common neighbors for Michael and Karin:
-[source, cypher]
-----
-include::scripts/linkprediction-common-neighbors.cypher[tag=all-rels]
-----
-
-// tag::function[]
-.Results
-[opts="header",cols="1"]
-|===
-| `score`
-| 1.0
-|===
-// end::function[]
-
-
-We can also compute the score of a pair of nodes based on a specific relationship type.
-
-.The following will return the number of common neighbors for Michael and Karin based only on the `FRIENDS` relationships:
-[source, cypher]
-----
-include::scripts/linkprediction-common-neighbors.cypher[tag=only-friends]
-----
-
-// tag::function[]
-.Results
-[opts="header",cols="1"]
-|===
-| `score`
-| 0.0
-|===
-// end::function[]
-
-
 [[algorithms-linkprediction-common-neighbors-syntax]]
 == Syntax
 
@@ -88,8 +41,8 @@ include::scripts/linkprediction-common-neighbors.cypher[tag=only-friends]
 [source, cypher]
 ----
 RETURN gds.alpha.linkprediction.commonNeighbors(node1:Node, node2:Node, {
-    relationshipQuery: null,
-    direction: "BOTH"
+    relationshipQuery:STRING,
+    direction:STRING
 })
 ----
 
@@ -98,8 +51,63 @@ RETURN gds.alpha.linkprediction.commonNeighbors(node1:Node, node2:Node, {
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                   | Type    | Default        | Optional | Description
-| `node1`                   | Node    | null           | no       | A node
-| `node2`                   | Node    | null           | no       | Another node
-| `relationshipQuery`                   | String    | null           | yes       | The relationship type used to compute similarity between `node1` and `node2`
-| `direction`                   | String    | BOTH           | yes       | The direction of relationship type used to compute similarity between `node1` and `node2`
+| `node1`                | Node    | null           | no       | A node
+| `node2`                | Node    | null           | no       | Another node
+| `relationshipQuery`    | String  | null           | yes      | The relationship type used to compute similarity between `node1` and `node2`
+| `direction`            | String  | BOTH           | yes      | The direction of relationship type used to compute similarity between `node1` and `node2`
+|===
+
+
+[[algorithms-linkprediction-common-neighbors-sample]]
+== Common Neighbors algorithm sample
+
+.The following will create a sample graph:
+[source, cypher]
+----
+CREATE
+ (zhen:Person {name: 'Zhen'}),
+ (praveena:Person {name: 'Praveena'}),
+ (michael:Person {name: 'Michael'}),
+ (arya:Person {name: 'Arya'}),
+ (karin:Person {name: 'Karin'}),
+
+ (zhen)-[:FRIENDS]->(arya),
+ (zhen)-[:FRIENDS]->(praveena),
+ (praveena)-[:WORKS_WITH]->(karin),
+ (praveena)-[:FRIENDS]->(michael),
+ (michael)-[:WORKS_WITH]->(karin),
+ (arya)-[:FRIENDS]->(karin)
+----
+
+.The following will return the number of common neighbors for Michael and Karin:
+[source, cypher]
+----
+ MATCH (p1:Person {name: 'Michael'})
+ MATCH (p2:Person {name: 'Karin'})
+ RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 1.0
+|===
+
+
+We can also compute the score of a pair of nodes based on a specific relationship type.
+
+.The following will return the number of common neighbors for Michael and Karin based only on the `FRIENDS` relationships:
+[source, cypher]
+----
+ MATCH (p1:Person {name: 'Michael'})
+ MATCH (p2:Person {name: 'Karin'})
+ RETURN gds.alpha.linkprediction.commonNeighbors(p1, p2, {relationshipQuery: "FRIENDS"}) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 0.0
 |===
