@@ -24,11 +24,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -102,22 +101,20 @@ final class CypherExporterTest {
                 "  (n1)-[ {weight:42.0}]->(n2),\n" +
                 "  (n2)-[ {weight:42.0}]->(n3);";
 
-        String output = dumpGraph(HugeGraphFactory.class);
+        String output = dumpGraph();
         assertEquals(expected, output);
     }
 
-    private String dumpGraph(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = new GraphLoader(db)
-                .withExecutorService(Pools.DEFAULT)
-                .withAnyLabel()
-                .withAnyRelationshipType()
-                .withOptionalNodeProperties(
-                        PropertyMapping.of(
-                                "property", "property", 42
-                        )
-                )
-                .withRelationshipProperties(PropertyMapping.of("property", 42))
-                .load(graphImpl);
+    private String dumpGraph() {
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .addNodeProperty(PropertyMapping.of("property", 42))
+            .addRelationshipProperty(PropertyMapping.of("property", 42))
+            .build()
+            .load(HugeGraphFactory.class);
+
 
         StringWriter output = new StringWriter();
         CypherExporter.export(new PrintWriter(output), graph);
