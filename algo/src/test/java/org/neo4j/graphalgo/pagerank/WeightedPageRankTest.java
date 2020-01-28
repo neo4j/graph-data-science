@@ -22,15 +22,15 @@ package org.neo4j.graphalgo.pagerank;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.results.CentralityResult;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;
@@ -143,20 +143,23 @@ final class WeightedPageRankTest extends AlgoTestBase {
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(
                 db,
-                () -> new GraphLoader(db)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType(
+                () -> new CypherLoaderBuilder()
+                    .api(db)
+                    .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
+                    .relationshipQuery(
                         "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                    .load(graphFactory)
+                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                    .build()
+                    .graph(graphFactory)
             );
         } else {
-            graph = new GraphLoader(db)
-                    .withLabel(label)
-                    .withRelationshipType("TYPE1")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                    .withDirection(Direction.OUTGOING)
-                    .load(graphFactory);
+            graph = new StoreLoaderBuilder()
+                .api(db)
+                .addNodeLabel(label.name())
+                .addRelationshipType("TYPE1")
+                .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                .build()
+                .graph(graphFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -197,20 +200,23 @@ final class WeightedPageRankTest extends AlgoTestBase {
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(
                 db,
-                () -> new GraphLoader(db)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType(
+                () -> new CypherLoaderBuilder()
+                    .api(db)
+                    .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
+                    .relationshipQuery(
                         "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 1))
-                    .load(graphFactory)
+                    .addRelationshipProperty(PropertyMapping.of("weight", 1))
+                    .build()
+                    .graph(graphFactory)
             );
         } else {
-            graph = new GraphLoader(db)
-                    .withLabel(label)
-                    .withRelationshipType("TYPE1")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 1))
-                    .withDirection(Direction.OUTGOING)
-                    .load(graphFactory);
+            graph = new StoreLoaderBuilder()
+                    .api(db)
+                    .addNodeLabel(label.name())
+                    .addRelationshipType("TYPE1")
+                    .addRelationshipProperty(PropertyMapping.of("weight", 1))
+                    .build()
+                    .graph(graphFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -251,20 +257,23 @@ final class WeightedPageRankTest extends AlgoTestBase {
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(
                 db,
-                () -> new GraphLoader(db)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType(
+                () -> new CypherLoaderBuilder()
+                    .api(db)
+                    .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
+                    .relationshipQuery(
                         "MATCH (n:Label1)-[r:TYPE2]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                    .load(graphFactory)
+                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                    .build()
+                    .graph(graphFactory)
             );
         } else {
-            graph = new GraphLoader(db)
-                    .withLabel(label)
-                    .withRelationshipType("TYPE2")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                    .withDirection(Direction.OUTGOING)
-                    .load(graphFactory);
+            graph = new StoreLoaderBuilder()
+                    .api(db)
+                    .addNodeLabel(label.name())
+                    .addRelationshipType("TYPE2")
+                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                    .build()
+                    .graph(graphFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -305,20 +314,23 @@ final class WeightedPageRankTest extends AlgoTestBase {
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(
                 db,
-                () -> new GraphLoader(db)
-                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                        .withRelationshipType(
+                () -> new CypherLoaderBuilder()
+                        .api(db)
+                        .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
+                        .relationshipQuery(
                             "MATCH (n:Label1)-[r:TYPE3]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
-                        .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                        .load(graphFactory)
+                        .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                        .build()
+                        .graph(graphFactory)
             );
         } else {
-            graph = new GraphLoader(db)
-                    .withLabel(label)
-                    .withRelationshipType("TYPE3")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                    .withDirection(Direction.OUTGOING)
-                    .load(graphFactory);
+            graph = new StoreLoaderBuilder()
+                    .api(db)
+                    .addNodeLabel(label.name())
+                    .addRelationshipType("TYPE3")
+                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                    .build()
+                    .graph(graphFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -359,20 +371,23 @@ final class WeightedPageRankTest extends AlgoTestBase {
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
             graph = runInTransaction(
                 db,
-                () -> new GraphLoader(db)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType(
+                () -> new CypherLoaderBuilder()
+                    .api(db)
+                    .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
+                    .relationshipQuery(
                         "MATCH (n:Label1)-[r:TYPE4]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                    .load(graphFactory)
+                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                    .build()
+                    .graph(graphFactory)
             );
         } else {
-            graph = new GraphLoader(db)
-                    .withLabel(label)
-                    .withRelationshipType("TYPE4")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                    .withDirection(Direction.OUTGOING)
-                    .load(graphFactory);
+            graph = new StoreLoaderBuilder()
+                    .api(db)
+                    .addNodeLabel(label.name())
+                    .addRelationshipType("TYPE4")
+                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                    .build()
+                    .graph(graphFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED

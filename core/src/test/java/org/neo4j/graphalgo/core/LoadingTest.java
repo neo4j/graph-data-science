@@ -22,10 +22,11 @@ package org.neo4j.graphalgo.core;
 import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -67,15 +68,16 @@ final class LoadingTest {
         db.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testBasicLoading(Class<? extends GraphFactory> graphFactory) {
+    @Test
+    void testBasicLoading() {
 
-        Graph graph = new GraphLoader(db)
-                .withDirection(Direction.OUTGOING)
-                .withExecutorService(Pools.DEFAULT)
-                .withLabel("Node")
-                .withRelationshipType("TYPE")
-                .load(graphFactory);
+        Graph graph = new StoreLoaderBuilder()
+                .api(db)
+                .executorService(Pools.DEFAULT)
+                .addNodeLabel("Node")
+                .addRelationshipType("TYPE")
+                .build()
+                .load(HugeGraphFactory.class);
 
         assertEquals(3, graph.nodeCount());
 
