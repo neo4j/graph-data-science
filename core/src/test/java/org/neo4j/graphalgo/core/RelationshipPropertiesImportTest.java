@@ -21,14 +21,15 @@ package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
@@ -56,97 +57,78 @@ class RelationshipPropertiesImportTest {
         db.shutdown();
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testPropertiesOfInterconnectedNodesWithOutgoing(Class<? extends GraphFactory> graphFactory) {
-        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Direction.OUTGOING, graphFactory);
+    @Test
+    void testPropertiesOfInterconnectedNodesWithOutgoing() {
+        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Projection.NATURAL);
 
-        checkProperties(0, Direction.OUTGOING, 1.0);
-        checkProperties(1, Direction.OUTGOING, 2.0);
+        checkProperties(0, Projection.NATURAL, 1.0);
+        checkProperties(1, Projection.NATURAL, 2.0);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testPropertiesOfTriangledNodesWithOutgoing(Class<? extends GraphFactory> graphFactory) {
-        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Direction.OUTGOING, graphFactory);
+    @Test
+    void testPropertiesOfTriangledNodesWithOutgoing() {
+        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Projection.NATURAL);
 
-        checkProperties(0, Direction.OUTGOING, 1.0);
-        checkProperties(1, Direction.OUTGOING, 2.0);
-        checkProperties(2, Direction.OUTGOING, 3.0);
+        checkProperties(0, Projection.NATURAL, 1.0);
+        checkProperties(1, Projection.NATURAL, 2.0);
+        checkProperties(2, Projection.NATURAL, 3.0);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testPropertiesOfInterconnectedNodesWithIncoming(Class<? extends GraphFactory> graphFactory) {
-        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Direction.INCOMING, graphFactory);
+    @Test
+    void testPropertiesOfInterconnectedNodesWithIncoming() {
+        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Projection.REVERSE);
 
-        checkProperties(0, Direction.INCOMING, 2.0);
-        checkProperties(1, Direction.INCOMING, 1.0);
+        checkProperties(0, Projection.REVERSE, 2.0);
+        checkProperties(1, Projection.REVERSE, 1.0);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testPropertiesOfTriangledNodesWithIncoming(Class<? extends GraphFactory> graphFactory) {
-        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Direction.INCOMING, graphFactory);
+    @Test
+    void testPropertiesOfTriangledNodesWithIncoming() {
+        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Projection.REVERSE);
 
-        checkProperties(0, Direction.INCOMING, 3.0);
-        checkProperties(1, Direction.INCOMING, 1.0);
-        checkProperties(2, Direction.INCOMING, 2.0);
+        checkProperties(0, Projection.REVERSE, 3.0);
+        checkProperties(1, Projection.REVERSE, 1.0);
+        checkProperties(2, Projection.REVERSE, 2.0);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testPropertiesOfInterconnectedNodesWithBoth(Class<? extends GraphFactory> graphFactory) {
-        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Direction.BOTH, graphFactory);
+    @Test
+    void testPropertiesOfInterconnectedNodesWithUndirected() {
+        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Projection.UNDIRECTED);
 
-        // loading both overwrites the weights in the following order,
-        // which expects the GraphFactory to load OUTGOINGs before INCOMINGs
-        //   (a)-[{w:1}]->(b)  |  (a)<-[{w:2}]-(b)  |  (b)-[{w:2}]->(a)  |  (b)<-[{w:1}]-(a)
-        // therefore the final property value for in/outs of either a/b is 1,
-        // the property value of 2 is discarded.
-        checkProperties(0, Direction.OUTGOING, 1.0);
-        checkProperties(1, Direction.OUTGOING, 2.0);
-
-        checkProperties(0, Direction.INCOMING, 2.0);
-        checkProperties(1, Direction.INCOMING, 1.0);
-
-        checkProperties(0, Direction.BOTH, 1.0, 2.0);
-        checkProperties(1, Direction.BOTH, 2.0, 1.0);
+        checkProperties(0, Projection.UNDIRECTED, 1.0, 2.0);
+        checkProperties(1, Projection.UNDIRECTED, 2.0, 1.0);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testPropertiesOfTriangledNodesWithBoth(Class<? extends GraphFactory> graphFactory) {
-        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Direction.BOTH, graphFactory);
+    @Test
+    void testPropertiesOfTriangledNodesWithUndirected() {
+        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Projection.UNDIRECTED);
 
-        checkProperties(0, Direction.OUTGOING, 1.0);
-        checkProperties(1, Direction.OUTGOING, 2.0);
-        checkProperties(2, Direction.OUTGOING, 3.0);
-
-        checkProperties(0, Direction.INCOMING, 3.0);
-        checkProperties(1, Direction.INCOMING, 1.0);
-        checkProperties(2, Direction.INCOMING, 2.0);
-
-        checkProperties(0, Direction.BOTH, 1.0, 3.0);
-        checkProperties(1, Direction.BOTH, 2.0, 1.0);
-        checkProperties(2, Direction.BOTH, 3.0, 2.0);
+        checkProperties(0, Projection.UNDIRECTED, 1.0, 3.0);
+        checkProperties(1, Projection.UNDIRECTED, 1.0, 2.0);
+        checkProperties(2, Projection.UNDIRECTED, 3.0, 2.0);
     }
 
-    private void setup(
-            String cypher,
-            Direction direction,
-            Class<? extends GraphFactory> graphFactory) {
+    private void setup(String cypher, Projection projection) {
         runQuery(db, cypher);
-        graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withDirection(direction)
-                .withRelationshipProperties(PropertyMapping.of("w", 0.0))
-                .sorted()
-                .load(graphFactory);
+
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(projection)
+            .addRelationshipProperty(PropertyMapping.of("w", 0.0))
+            .build()
+            .load(HugeGraphFactory.class);
+
     }
 
-    private void checkProperties(int nodeId, Direction direction, double... expecteds) {
+    private void checkProperties(int nodeId, Projection projection, double... expecteds) {
         AtomicInteger i = new AtomicInteger();
         int limit = expecteds.length;
         List<Executable> assertions = new ArrayList<>();
 
         RelationshipWithPropertyConsumer consumer = (s, t, w) -> {
-            String rel = String.format("(%d %s %d)", s, arrow(direction), t);
+            String rel = String.format("(%d %s %d)", s, arrow(projection), t);
             if (i.get() >= limit) {
                 assertions.add(() -> assertFalse(
                     i.get() >= limit,
@@ -165,20 +147,20 @@ class RelationshipPropertiesImportTest {
             return true;
         };
 
-        graph.forEachRelationship(nodeId, direction, Double.NaN, consumer);
+        graph.forEachRelationship(nodeId, Double.NaN, consumer);
         assertAll(assertions);
     }
 
-    private static String arrow(Direction direction) {
-        switch (direction) {
-            case OUTGOING:
+    private static String arrow(Projection projection) {
+        switch (projection) {
+            case NATURAL:
                 return "->";
-            case INCOMING:
+            case REVERSE:
                 return "<-";
-            case BOTH:
+            case UNDIRECTED:
                 return "<->";
             default:
-                return "???";
+                throw new IllegalArgumentException("Unknown projection: " + projection);
         }
     }
 }
