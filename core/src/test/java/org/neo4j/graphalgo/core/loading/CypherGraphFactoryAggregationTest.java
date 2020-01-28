@@ -24,11 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -72,11 +72,11 @@ class CypherGraphFactoryAggregationTest {
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 
         Graph graph = runInTransaction(
-            db,
-            () -> new GraphLoader(db)
-                .withLabel(nodes)
-                .withRelationshipType(rels)
-                .withDefaultAggregation(Aggregation.SINGLE)
+            db, () -> new CypherLoaderBuilder().api(db)
+                .nodeQuery(nodes)
+                .relationshipQuery(rels)
+                .globalAggregation(Aggregation.SINGLE)
+                .build()
                 .load(CypherGraphFactory.class)
         );
 
@@ -91,12 +91,12 @@ class CypherGraphFactoryAggregationTest {
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 
         Graph graph = runInTransaction(
-            db,
-            () -> new GraphLoader(db)
-                .withLabel(nodes)
-                .withRelationshipType(rels)
-                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .withDefaultAggregation(Aggregation.SINGLE)
+            db, () -> new CypherLoaderBuilder().api(db)
+                .nodeQuery(nodes)
+                .relationshipQuery(rels)
+                .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+                .globalAggregation(Aggregation.SINGLE)
+                .build()
                 .load(CypherGraphFactory.class)
         );
 
@@ -115,12 +115,12 @@ class CypherGraphFactoryAggregationTest {
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 
         Graph graph = runInTransaction(
-            db,
-            () -> new GraphLoader(db)
-                .withLabel(nodes)
-                .withRelationshipType(rels)
-                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .withDefaultAggregation(aggregation)
+            db, () -> new CypherLoaderBuilder().api(db)
+                .nodeQuery(nodes)
+                .relationshipQuery(rels)
+                .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+                .globalAggregation(aggregation)
+                .build()
                 .load(CypherGraphFactory.class)
         );
 

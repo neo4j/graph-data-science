@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -31,7 +32,6 @@ import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -86,20 +86,17 @@ class CypherGraphFactoryTest {
         });
 
         String nodes = "MATCH (n) RETURN id(n) AS id, n.partition AS partition, n.foo AS foo";
-        String rels = "MATCH (n)-[r]->(m) WHERE type(r) = $rel RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
+        String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
 
         Graph graph = runInTransaction(
-            db,
-            () -> new GraphLoader(db)
-                .withParams(MapUtil.map("rel", "REL"))
-                .withRelationshipProperties(PropertyMapping.of("weight", 0))
-                .withLabel(nodes)
-                .withRelationshipType(rels)
-                .withOptionalNodeProperties(
-                    PropertyMapping.of("partition", "partition", 0.0),
-                    PropertyMapping.of("foo", "foo", 5.0)
-                )
-                .sorted()
+            db, () -> new CypherLoaderBuilder().api(db)
+                .nodeQuery(nodes)
+                .relationshipQuery(rels)
+                .addNodeProperty(PropertyMapping.of("partition", 0.0))
+                .addNodeProperty(PropertyMapping.of("foo", 5.0))
+                .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                .globalAggregation(Aggregation.SINGLE)
+                .build()
                 .load(CypherGraphFactory.class)
         );
 
@@ -302,19 +299,20 @@ class CypherGraphFactoryTest {
     private void loadAndTestGraph(
         String nodeStatement,
         String relStatement,
-        Aggregation strategy,
+        Aggregation aggregation,
         boolean parallel
     ) {
-        GraphLoader loader = new GraphLoader(db)
-            .withBatchSize(1000)
-            .withDefaultAggregation(strategy)
-            .withRelationshipProperties(PropertyMapping.of("weight", 0D))
-            .withLabel(nodeStatement)
-            .withRelationshipType(relStatement);
+        CypherLoaderBuilder builder = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery(nodeStatement)
+            .relationshipQuery(relStatement)
+            .globalAggregation(aggregation)
+            .addRelationshipProperty(PropertyMapping.of("weight", 0D));
         if (parallel) {
-            loader.withExecutorService(Pools.DEFAULT);
+            builder.executorService(Pools.DEFAULT);
         }
-        Graph graph = runInTransaction(db, () -> loader.load(CypherGraphFactory.class));
+
+        Graph graph = runInTransaction(db, () -> builder.build().load(CypherGraphFactory.class));
 
         assertEquals(COUNT, graph.nodeCount());
         AtomicInteger relCount = new AtomicInteger();
