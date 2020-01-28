@@ -69,9 +69,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.GraphHelper.assertOutProperties;
-import static org.neo4j.graphalgo.GraphHelper.assertOutPropertiesWithDelta;
-import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
+import static org.neo4j.graphalgo.GraphHelper.assertProperties;
+import static org.neo4j.graphalgo.GraphHelper.assertPropertiesWithDelta;
+import static org.neo4j.graphalgo.GraphHelper.assertRelationships;
 import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
@@ -178,8 +178,8 @@ class GraphLoadProcTest extends BaseProcTest {
         assertEquals(12, fooGraph.nodeCount());
         assertEquals(10, fooGraph.relationshipCount());
 
-        assertOutProperties(fooGraph, 0, 1.0, 1.0, 1.0, 1.0, 1.0);
-        assertOutProperties(fooGraph, 1, 42.0, 42.0, 42.0, 42.0, 42.0);
+        assertProperties(fooGraph, 0, 1.0, 1.0, 1.0, 1.0, 1.0);
+        assertProperties(fooGraph, 1, 42.0, 42.0, 42.0, 42.0, 42.0);
     }
 
     @Disabled
@@ -379,8 +379,8 @@ class GraphLoadProcTest extends BaseProcTest {
         assertEquals(2, g.nodeCount());
         assertEquals(3, g.relationshipCount());
 
-        assertOutRelationships(g, 0, 1, 1, 1);
-        assertOutPropertiesWithDelta(g, 1E-3, 0, 85.3, 42.1, 2.0);
+        assertRelationships(g, 0, 1, 1, 1);
+        assertPropertiesWithDelta(g, 1E-3, 0, 85.3, 42.1, 2.0);
 
         GraphCatalog.remove(getUsername(), "aggGraph");
         testLocalDb.shutdown();

@@ -29,21 +29,10 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
-import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public final class GraphHelper {
-
-    public static long[] collectTargetIds(final Graph graph, long sourceId) {
-        LongStream.Builder outIds = LongStream.builder();
-        graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING,
-                (sourceNodeId, targetNodeId) -> {
-                    outIds.add(targetNodeId);
-                    return true;
-                });
-        return outIds.build().sorted().toArray();
-    }
 
     public static double[] collectTargetProperties(final Graph graph, long sourceId) {
         DoubleStream.Builder outWeights = DoubleStream.builder();
@@ -55,26 +44,18 @@ public final class GraphHelper {
         return outWeights.build().toArray();
     }
 
-    public static void assertOutProperties(Graph graph, long node, double... expected) {
-        assertOutPropertiesWithDelta(graph, 0, node, expected);
+    public static void assertProperties(Graph graph, long node, double... expected) {
+        assertPropertiesWithDelta(graph, 0, node, expected);
     }
 
-    public static void assertInProperties(Graph graph, long node, double... expected) {
-        assertInPropertiesWithDelta(graph, 0, node, expected);
+    public static void assertPropertiesWithDelta(Graph graph, double delta, long node, double... expected) {
+        assertProperties(graph, delta, node, expected);
     }
 
-    public static void assertOutPropertiesWithDelta(Graph graph, double delta, long node, double... expected) {
-        assertProperties(graph, Direction.OUTGOING, delta, node, expected);
-    }
-
-    public static void assertInPropertiesWithDelta(Graph graph, double delta, long node, double... expected) {
-        assertProperties(graph, Direction.INCOMING, delta, node, expected);
-    }
-
-    private static void assertProperties(Graph graph, Direction direction, double delta, long node, double... expected) {
+    private static void assertProperties(Graph graph, double delta, long node, double... expected) {
         LongArrayList idList = new LongArrayList(expected.length);
         DoubleArrayList properties = new DoubleArrayList(expected.length);
-        graph.forEachRelationship(node, direction, 0D, (s, t, w) -> {
+        graph.forEachRelationship(node, 0D, (s, t, w) -> {
             idList.add(t);
             properties.add(w);
             return true;
@@ -88,17 +69,10 @@ public final class GraphHelper {
         assertArrayEquals(expected, sortedProperties.toArray(), delta);
     }
 
-    public static void assertOutRelationships(Graph graph, long node, long... expected) {
-        assertRelationships(graph, Direction.OUTGOING, node, expected);
-    }
 
-    public static void assertInRelationships(Graph graph, long node, long... expected) {
-        assertRelationships(graph, Direction.INCOMING, node, expected);
-    }
-
-    private static void assertRelationships(Graph graph, Direction direction, long node, long... expected) {
+    public static void assertRelationships(Graph graph, long node, long... expected) {
         LongArrayList idList = new LongArrayList();
-        graph.forEachRelationship(node, direction, (s, t) -> {
+        graph.forEachRelationship(node, (s, t) -> {
             idList.add(t);
             return true;
         });
