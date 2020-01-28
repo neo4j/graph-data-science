@@ -37,7 +37,7 @@ class ProcedureConfigurationTest {
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         String value = procedureConfiguration.get("partitionProperty", "defaultValue");
         assertEquals("defaultValue", value);
-        assertEquals(testUsername, procedureConfiguration.getUsername());
+        assertEquals(testUsername, procedureConfiguration.username());
     }
 
     @Test
@@ -91,35 +91,6 @@ class ProcedureConfigurationTest {
         Map<String, Object> map = MapUtil.map("writeProperty", "scc");
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         assertEquals("scc", procedureConfiguration.getString("writeProperty", "defaultValue"));
-    }
-
-    @Test
-    void convertNonDoubleDefaultValues() {
-        Map<String, Object> map = MapUtil.map("defaultValue", 1L);
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
-        assertEquals(1.0, procedureConfiguration.getWeightPropertyDefaultValue(0.0), 0.001);
-    }
-
-    @Test
-    void returnDefaultConcurrencyIfNoReadOrWriteConcurrencyIsGiven() {
-        Map<String, Object> map = MapUtil.map("concurrency", 2L);
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
-        assertEquals(2L, procedureConfiguration.getReadConcurrency(1));
-        assertEquals(2L, procedureConfiguration.getWriteConcurrency(1));
-    }
-
-    @Test
-    void skipValueDefault() {
-        Map<String, Object> map = Collections.emptyMap();
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
-        assertEquals(Double.NaN, procedureConfiguration.getSkipValue(Double.NaN), 0.01);
-    }
-
-    @Test
-    void skipValueAllowIntegers() {
-        Map<String, Object> map = MapUtil.map("skipValue", 0);
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
-        assertEquals(0.0, procedureConfiguration.getSkipValue(Double.NaN), 0.0);
     }
 
 }

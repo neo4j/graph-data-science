@@ -19,14 +19,8 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -41,57 +35,35 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.Arrays.asList;
-import static org.neo4j.graphalgo.core.ProcedureConstants.DEFAULT_VALUE_DEFAULT;
 import static org.neo4j.graphalgo.core.ProcedureConstants.NODECOUNT_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.NODE_PROPERTIES_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELCOUNT_KEY;
 
-/**
- * Wrapper around configuration options map
- */
 public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
-
-    public static final String HEAVY_GRAPH_TYPE = "heavy";
-    public static final String LIGHT_GRAPH_TYPE = "light";
-    public static final String ALGO_SPECIFIC_DEFAULT_WEIGHT = "algoSpecificDefaultWeight";
 
     private final CypherMapWrapper configurationMap;
 
     private final String username;
-    private final boolean computeHistogram;
-    private final boolean computeCommunityCount;
 
-    protected ProcedureConfiguration(
-        CypherMapWrapper configurationMap,
-        String username,
-        boolean computeHistogram,
-        boolean computeCommunityCount
-    ) {
+    public static ProcedureConfiguration empty() {
+        return create(CypherMapWrapper.empty(), AuthSubject.ANONYMOUS.username());
+    }
+
+    public static ProcedureConfiguration create(Map<String, Object> config, String username) {
+        return create(CypherMapWrapper.create(config), username);
+    }
+
+    public static ProcedureConfiguration create(CypherMapWrapper map, String username) {
+        return new ProcedureConfiguration(map, username);
+    }
+
+    protected ProcedureConfiguration(CypherMapWrapper configurationMap, String username) {
         this.configurationMap = configurationMap;
         this.username = username;
-        this.computeHistogram = computeHistogram;
-        this.computeCommunityCount = computeCommunityCount;
-    }
-
-    private double getAlgoSpecificDefaultWeightValue() {
-        return configurationMap.getDouble(ALGO_SPECIFIC_DEFAULT_WEIGHT, DEFAULT_VALUE_DEFAULT);
-    }
-
-    public ProcedureConfiguration setAlgoSpecificDefaultWeight(double defaultWeightProperty) {
-        return new ProcedureConfiguration(configurationMap.withDouble(
-            ALGO_SPECIFIC_DEFAULT_WEIGHT,
-            defaultWeightProperty
-        ), username, computeHistogram, computeCommunityCount);
     }
 
     public MemoryEstimation estimate(GraphSetup setup, GraphFactory factory) {
@@ -121,10 +93,6 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
 
     public boolean containsKey(String key) {
         return configurationMap.containsKey(key);
-    }
-
-    public Optional<String> getStringWithFallback(String key, String oldKey) {
-        return configurationMap.getStringWithFallback(key, oldKey);
     }
 
     public <V> V get(String key, V defaultValue) {
@@ -169,224 +137,20 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
 
     // END DELEGATION
 
-    public String getUsername() {
-        return username();
-    }
-
     @Override
     public String username() {
         return username;
     }
 
-    /**
-     * Sets the nodeOrLabelQuery parameter.
-     *
-     * If the parameters is already set, it's overriden.
-     *
-     * @param nodeLabelOrQuery the query or identifier
-     * @return an updated configuration
-     */
-    public ProcedureConfiguration setNodeLabelOrQuery(String nodeLabelOrQuery) {
-        return new ProcedureConfiguration(
-            configurationMap.withString(ProcedureConstants.NODE_LABEL_QUERY_KEY, nodeLabelOrQuery),
-            username,
-            computeHistogram,
-            computeCommunityCount
-        );
-    }
-
-    /**
-     * Sets the relationshipOrQuery parameter.
-     *
-     * If the parameters is already set, it's overriden.
-     *
-     * @param relationshipTypeOrQuery the relationshipQuery or Identifier
-     * @return an updated configuration
-     */
-    public ProcedureConfiguration setRelationshipTypeOrQuery(String relationshipTypeOrQuery) {
-        return new ProcedureConfiguration(
-            configurationMap.withString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, relationshipTypeOrQuery),
-            username,
-            computeHistogram,
-            computeCommunityCount
-        );
-    }
-
-    /**
-     * Sets the direction parameter.
-     *
-     * If the parameters is already set, it's overriden.
-     *
-     * @return this configuration
-     */
-    public ProcedureConfiguration setDirection(String direction) {
-        return new ProcedureConfiguration(
-            configurationMap.withString(ProcedureConstants.DIRECTION_KEY, direction),
-            username,
-            computeHistogram,
-            computeCommunityCount
-        );
-    }
-
-    public ProcedureConfiguration setComputeHistogram(boolean computeHistogram) {
-        return new ProcedureConfiguration(configurationMap, username, computeHistogram, computeCommunityCount);
-    }
-
-    public ProcedureConfiguration setComputeCommunityCount(boolean computeCommunityCount) {
-        return new ProcedureConfiguration(configurationMap, username, computeHistogram, computeCommunityCount);
-    }
-
-    /**
-     * True iff the procedure caller yields histogram fields (p01, p25, etc.).
-     */
-    public boolean computeHistogram() {
-        return computeHistogram;
-    }
-
-    /**
-     * True iff the procedure caller yields community counts (communityCount, setCount).
-     */
-    public boolean computeCommunityCount() {
-        return computeCommunityCount;
-    }
-
-    /**
-     * return either the Label or the cypher query for node request
-     *
-     * @return the label or query
-     */
-    public String getNodeLabelOrQuery() {
-        return configurationMap.getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, null);
-    }
-
-    /**
-     * return either the Label or the cypher query for node request
-     *
-     * @param defaultValue default value if {@link ProcedureConstants#NODE_LABEL_QUERY_KEY}
-     *                     is not set
-     * @return the label or query
-     */
-    public String getNodeLabelOrQuery(String defaultValue) {
-        return configurationMap.getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, defaultValue);
-    }
-
-    public String getRelationshipOrQuery() {
-        return configurationMap.getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, null);
-    }
-
-    /**
-     * return the name of the property to write to
-     *
-     * @return property name
-     */
-    public String getWriteProperty() {
-        return getWriteProperty(ProcedureConstants.WRITE_PROPERTY_DEFAULT);
-    }
-
-    /**
-     * return either the name of the property to write to if given or defaultValue
-     *
-     * @param defaultValue a default value
-     * @return the property name
-     */
-    public String getWriteProperty(String defaultValue) {
-        return configurationMap.getString(ProcedureConstants.WRITE_PROPERTY_KEY, defaultValue);
-    }
-
-    /**
-     * return either the relationship name or a cypher query for requesting the relationships
-     * TODO: @mh pls. validate
-     *
-     * @param defaultValue a default value
-     * @return the relationship name or query
-     */
-    public String getRelationshipOrQuery(String defaultValue) {
-        return configurationMap.getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, defaultValue);
-    }
-
-    /**
-     * return whether the write-back option has been set
-     *
-     * @return true if write is activated, false otherwise
-     */
-    public boolean isWriteFlag() {
-        return isWriteFlag(true);
-    }
-
-    /**
-     * flag for requesting additional result stats
-     *
-     * @return true if stat flag is activated, false otherwise
-     */
-    public boolean isStatsFlag() {
-        return configurationMap.get(ProcedureConstants.STATS_FLAG_KEY, false);
-    }
-
-    /**
-     * return whether the write-back option has been set
-     *
-     * @param defaultValue a default value
-     * @return true if write is activated, false otherwise
-     */
-    public boolean isWriteFlag(boolean defaultValue) {
-        return configurationMap.get(ProcedureConstants.WRITE_FLAG_KEY, defaultValue);
-    }
-
-    public boolean hasWeightProperty() {
-        return containsKey(ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY);
-    }
-
-    public String getWeightProperty() {
-        return configurationMap.getString(ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY, null);
-    }
-
-    public PropertyMappings getNodeProperties() {
-        return getPropertyMappings(NODE_PROPERTIES_KEY);
-    }
-
-    public PropertyMappings getRelationshipProperties() {
-        return getPropertyMappings(RELATIONSHIP_PROPERTIES_KEY);
-    }
-
-    private PropertyMappings getPropertyMappings(String paramKey) {
-        Object propertyMappings = configurationMap.get(paramKey, null);
-        if (propertyMappings != null) {
-            return PropertyMappings.fromObject(propertyMappings);
-        }
-        return PropertyMappings.of();
-    }
-
-    public double getWeightPropertyDefaultValue(double defaultValue) {
-        return configurationMap.getNumber(ProcedureConstants.DEFAULT_VALUE_KEY, defaultValue).doubleValue();
-    }
-
-    /**
-     * return the number of iterations a algorithm has to compute
-     *
-     * @param defaultValue a default value
-     * @return
-     */
-    public int getIterations(int defaultValue) {
-        return configurationMap.getNumber(ProcedureConstants.ITERATIONS_KEY, defaultValue).intValue();
-    }
-
-    /**
-     * get the batchSize for parallel evaluation
-     *
-     * @return batch size
-     */
-    public int getBatchSize() {
-        return configurationMap.getNumber(ProcedureConstants.BATCH_SIZE_KEY, ParallelUtil.DEFAULT_BATCH_SIZE).intValue();
-    }
-
-    @Override
-    public int concurrency() {
-        return concurrency(Pools.DEFAULT_CONCURRENCY);
-    }
-
     @Override
     public Optional<String> graphName() {
-        return Optional.ofNullable(getGraphName(null));
+        String graphName = configurationMap.getString(ProcedureConstants.GRAPH_IMPL_KEY, null);
+        return Optional.ofNullable(graphName);
+    }
+
+    @Override
+    public Optional<GraphCreateConfig> implicitCreateConfig() {
+        return Optional.empty();
     }
 
     @Override
@@ -397,113 +161,33 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
     }
 
     @Override
-    public Optional<GraphCreateConfig> implicitCreateConfig() {
-        return Optional.empty();
+    public String writeProperty() {
+        return configurationMap.getString(ProcedureConstants.WRITE_PROPERTY_KEY,
+            ProcedureConstants.WRITE_PROPERTY_DEFAULT
+        );
     }
 
-    public int concurrency(int defaultValue) {
-        int requestedConcurrency = configurationMap.getNumber(ProcedureConstants.CONCURRENCY_KEY, defaultValue).intValue();
+    @Override
+    public int concurrency() {
+        int requestedConcurrency = configurationMap
+            .getNumber(ProcedureConstants.CONCURRENCY_KEY, Pools.DEFAULT_CONCURRENCY)
+            .intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
-    public int getReadConcurrency() {
-        return getReadConcurrency(Pools.DEFAULT_CONCURRENCY);
-    }
-
-    public int getReadConcurrency(int defaultValue) {
-        Number readConcurrency = configurationMap.getNumber(
-                ProcedureConstants.READ_CONCURRENCY_KEY,
-                ProcedureConstants.CONCURRENCY_KEY,
-                defaultValue);
-        int requestedConcurrency = readConcurrency.intValue();
-        return Pools.allowedConcurrency(requestedConcurrency);
-    }
-
-    public int getWriteConcurrency() {
-        return getWriteConcurrency(Pools.DEFAULT_CONCURRENCY);
-    }
-
-    public int getWriteConcurrency(int defaultValue) {
+    @Override
+    public int writeConcurrency() {
         Number writeConcurrency = configurationMap.getNumber(
-                ProcedureConstants.WRITE_CONCURRENCY_KEY,
-                ProcedureConstants.CONCURRENCY_KEY,
-                defaultValue);
+            ProcedureConstants.WRITE_CONCURRENCY_KEY,
+            ProcedureConstants.CONCURRENCY_KEY,
+            Pools.DEFAULT_CONCURRENCY
+        );
         int requestedConcurrency = writeConcurrency.intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
-    private String getDirectionName(String defaultDirection) {
-        return configurationMap.get(ProcedureConstants.DIRECTION_KEY, defaultDirection);
-    }
-
-    public Direction getDirection(Direction defaultDirection) {
-        return Directions.fromString(getDirectionName(defaultDirection.name()));
-    }
-
-    public RelationshipType getRelationship() {
-        return getRelationshipOrQuery() == null ? null : RelationshipType.withName(getRelationshipOrQuery());
-    }
-
-    public String getGraphName(String defaultValue) {
-        return configurationMap.getString(ProcedureConstants.GRAPH_IMPL_KEY, defaultValue);
-    }
-
-    public Class<? extends GraphFactory> getGraphImpl() {
-        return getGraphImpl(ProcedureConstants.GRAPH_IMPL_DEFAULT);
-    }
-
-    /**
-     * @return the Graph-Implementation Factory class
-     */
-    public Class<? extends GraphFactory> getGraphImpl(String defaultGraphImpl) {
-        final String graphImpl = getGraphName(defaultGraphImpl);
-        switch (graphImpl.toLowerCase(Locale.ROOT)) {
-            case CypherGraphFactory.TYPE:
-                return CypherGraphFactory.class;
-            case LIGHT_GRAPH_TYPE:
-            case HEAVY_GRAPH_TYPE:
-            case HugeGraph.TYPE:
-                return HugeGraphFactory.class;
-            default:
-                throw new IllegalArgumentException("Unknown impl: " + graphImpl
-                                                   + " or usage of graph catalogue which is not supported by Labs.");
-        }
-    }
-
-    private static final Set<String> RESERVED = new HashSet<>(asList(
-        CypherGraphFactory.TYPE,
-        HugeGraph.TYPE,
-        LIGHT_GRAPH_TYPE,
-        HEAVY_GRAPH_TYPE
-    ));
-
-    private static boolean validCustomName(String name) {
-        return name != null && !name.trim().isEmpty() && !RESERVED.contains(name.trim().toLowerCase());
-    }
-
-    public final Class<? extends GraphFactory> getGraphImpl(
-            String defaultImpl,
-            String... alloweds) {
-        String graphName = getGraphName(defaultImpl);
-        List<String> allowedNames = asList(alloweds);
-        if (allowedNames.contains(graphName) || allowedNames.contains(GraphCatalog.getType(getUsername(), graphName))) {
-            return getGraphImpl(defaultImpl);
-        }
-        throw new IllegalArgumentException("The graph algorithm only supports these graph types; " + allowedNames);
-    }
-
-    public Double getSkipValue(Double defaultValue) {
-        String key = ProcedureConstants.SKIP_VALUE_KEY;
-        if (!configurationMap.containsKey(key)) {
-            return defaultValue;
-        }
-        Object value = configurationMap.get(key, null);
-
-        if (value == null) {
-            return null;
-        }
-
-        return CypherMapWrapper.typedValue(key, Number.class, value).doubleValue();
+    public int getBatchSize() {
+        return configurationMap.getNumber(ProcedureConstants.BATCH_SIZE_KEY, ParallelUtil.DEFAULT_BATCH_SIZE).intValue();
     }
 
     @Override
@@ -512,38 +196,16 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
         return configurationMap.toMap().keySet();
     }
 
-    public static ProcedureConfiguration create(Map<String, Object> config, String username) {
-        return create(CypherMapWrapper.create(config), username);
+    // TODO: get rid of usage in LinkPrediction
+    public Direction getDirection(Direction defaultDirection) {
+        String direction = configurationMap.get(ProcedureConstants.DIRECTION_KEY, defaultDirection.name());
+        return Directions.fromString(direction);
     }
 
-    public static ProcedureConfiguration create(CypherMapWrapper map, String username) {
-        return new ProcedureConfiguration(map, username, false, false);
-    }
-
-    public static ProcedureConfiguration create(String username) {
-        return create(CypherMapWrapper.empty(), username);
-    }
-
-    public static ProcedureConfiguration empty() {
-        return create(CypherMapWrapper.empty(), AuthSubject.ANONYMOUS.username());
-    }
-
-    public Map<String, Object> getParams() {
-        return configurationMap.getChecked("params", Collections.emptyMap(), Map.class);
-    }
-
-    public Aggregation getAggregation() {
-        String strategy = configurationMap.get("duplicateRelationships", null);
-        return strategy != null ? Aggregation.lookup(strategy.toUpperCase()) : Aggregation.DEFAULT;
-    }
-
-    @Override
-    public String writeProperty() {
-        return getWriteProperty();
-    }
-
-    @Override
-    public int writeConcurrency() {
-        return getWriteConcurrency(Pools.DEFAULT_CONCURRENCY);
+    // TODO: get rid of usage in LinkPrediction
+    public RelationshipType getRelationship() {
+        return configurationMap.getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, null) == null
+            ? null
+            : RelationshipType.withName(configurationMap.getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, null));
     }
 }
