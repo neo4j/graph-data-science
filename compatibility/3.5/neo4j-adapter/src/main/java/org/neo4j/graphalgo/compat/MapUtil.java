@@ -26,7 +26,7 @@ import java.util.Map;
  * By using this class we reduce the number of references to the Neo4j helper class,
  * which means we break less when the Neo4j helper class moves between Neo4j versions.
  */
-public final class MapUtil extends org.neo4j.helpers.collection.MapUtil{
+public final class MapUtil extends org.neo4j.helpers.collection.MapUtil {
 
     /**
      * Delegates to {@link org.neo4j.helpers.collection.MapUtil#map(Object...)} and allows static import.
