@@ -21,14 +21,16 @@ package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.TransactionTerminatedException;
@@ -158,14 +160,20 @@ class GraphLoaderTest {
         assertGraphEquals(graph, fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 1337.42D}]->(c), (b)-[{w: 1337.42D}]->(c)"));
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void stopsImportingWhenTransactionHasBeenTerminated(Class<? extends GraphFactory> graphFactory) {
+    @Test
+    void stopsImportingWhenTransactionHasBeenTerminated() {
         TerminationFlag terminationFlag = () -> false;
         TransactionTerminatedException exception = assertThrows(
-                TransactionTerminatedException.class,
-                () -> new GraphLoader(db)
-                        .withTerminationFlag(terminationFlag)
-                        .load(graphFactory)
+            TransactionTerminatedException.class,
+            () -> {
+                new StoreLoaderBuilder()
+                    .api(db)
+                    .loadAnyLabel()
+                    .loadAnyRelationshipType()
+                    .terminationFlag(terminationFlag)
+                    .build()
+                    .load(HugeGraphFactory.class);
+            }
         );
         assertEquals(Status.Transaction.Terminated, exception.status());
     }
