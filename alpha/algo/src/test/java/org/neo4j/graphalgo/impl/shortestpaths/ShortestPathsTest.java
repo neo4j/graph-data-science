@@ -25,9 +25,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Node;
 
@@ -97,11 +97,13 @@ public final class ShortestPathsTest extends AlgoTestBase {
         tail = getNode("x").getId();
         outstanding = getNode("q").getId();
 
-        graph = new GraphLoader(db)
-                .withLabel("Node")
-                .withRelationshipType("TYPE")
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .load(HugeGraphFactory.class);
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+            .build()
+            .graph(HugeGraphFactory.class);
     }
 
     @AfterEach

@@ -21,10 +21,11 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -74,7 +75,14 @@ final class HugeIntersectionTest {
             return Arrays.copyOf(targets, some);
         });
 
-        final Graph graph = new GraphLoader(db).undirected().load(HugeGraphFactory.class);
+        final Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalProjection(Projection.UNDIRECTED)
+            .build()
+            .graph(HugeGraphFactory.class);
+
         INTERSECT = graph.intersection();
         START1 = graph.toMappedNodeId(neoStarts[0]);
         START2 = graph.toMappedNodeId(neoStarts[1]);
