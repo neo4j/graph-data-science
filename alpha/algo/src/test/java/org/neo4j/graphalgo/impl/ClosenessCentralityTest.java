@@ -21,12 +21,14 @@ package org.neo4j.graphalgo.impl;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
@@ -88,9 +90,9 @@ class ClosenessCentralityTest extends AlgoTestBase {
 
     private Graph graph;
 
-    @AllGraphTypesWithoutCypherTest
-    void testGetCentrality(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testGetCentrality() {
+        loadGraph();
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
             AllocationTracker.EMPTY,
@@ -104,9 +106,9 @@ class ClosenessCentralityTest extends AlgoTestBase {
         assertArrayEquals(EXPECTED, centrality, 0.1);
     }
 
-    @AllGraphTypesWithoutCypherTest
-    void testStream(Class<? extends GraphFactory> graphFactory) {
-        setup(graphFactory);
+    @Test
+    void testStream() {
+        loadGraph();
         final double[] centrality = new double[(int) graph.nodeCount()];
 
         MSClosenessCentrality algo = new MSClosenessCentrality(
@@ -123,12 +125,12 @@ class ClosenessCentralityTest extends AlgoTestBase {
         assertArrayEquals(EXPECTED, centrality, 0.1);
     }
 
-    private void setup(Class<? extends GraphFactory> graphImpl) {
+    private void loadGraph() {
         graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .build()
-            .graph(graphImpl);
+            .graph(HugeGraphFactory.class);
     }
 }
