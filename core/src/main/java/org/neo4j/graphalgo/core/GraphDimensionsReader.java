@@ -36,7 +36,7 @@ import org.neo4j.graphalgo.core.utils.StatementFunction;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.newapi.InternalReadOps;
+import org.neo4j.graphalgo.compat.InternalReadOps;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
