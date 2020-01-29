@@ -294,6 +294,10 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         return neighbors;
     }
 
+    public int iterations() {
+        return actualIterations.get();
+    }
+
     private class InitTask implements Runnable {
 
         private final INPUT[] inputs;

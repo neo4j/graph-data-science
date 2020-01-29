@@ -19,10 +19,13 @@
  */
 package org.neo4j.graphalgo.similarity;
 
+import org.HdrHistogram.DoubleHistogram;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.ApproximateNearestNeighborsConfig;
 import org.neo4j.graphalgo.impl.similarity.ApproximateNearestNeighborsConfigImpl;
+import org.neo4j.graphalgo.impl.similarity.Computations;
 import org.neo4j.graphalgo.impl.similarity.CosineAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.CosineConfig;
 import org.neo4j.graphalgo.impl.similarity.EuclideanAlgorithm;
@@ -36,15 +39,19 @@ import org.neo4j.graphalgo.impl.similarity.JaccardConfig;
 import org.neo4j.graphalgo.impl.similarity.PearsonAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.PearsonConfig;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.results.ApproxSimilaritySummaryResult;
+import org.neo4j.graphalgo.results.SimilarityExporter;
 import org.neo4j.graphalgo.results.SimilarityResult;
-import org.neo4j.graphalgo.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -61,11 +68,11 @@ public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeig
     }
 
     @Procedure(name = "gds.alpha.ml.ann.write", mode = WRITE)
-    public Stream<SimilaritySummaryResult> annWrite(
+    public Stream<ApproxSimilaritySummaryResult> annWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(graphNameOrConfig, configuration);
+        return writeResult(graphNameOrConfig, configuration);
     }
 
     @Override
@@ -109,5 +116,82 @@ public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeig
             default:
                 throw new IllegalArgumentException("Unexpected value: " + config.algorithm() + " (sad java 😞)");
         }
+    }
+
+    Stream<ApproxSimilaritySummaryResult> writeResult(
+        Object graphNameOrConfig,
+        Map<String, Object> configuration
+    ) {
+        ComputationResult<ApproxNearestNeighborsAlgorithm<SimilarityInput>, SimilarityAlgorithmResult, ApproximateNearestNeighborsConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
+
+        ApproximateNearestNeighborsConfig config = computationResult.config();
+        SimilarityAlgorithmResult result = computationResult.result();
+        assert result != null;
+
+        if (result.isEmpty()) {
+            return emptyStreamResult(result, config, computationResult.algorithm());
+        }
+
+        return writeAndAggregateANNResults(result, config, computationResult.algorithm());
+    }
+
+    private Stream<ApproxSimilaritySummaryResult> emptyStreamResult(
+        SimilarityAlgorithmResult result,
+        ApproximateNearestNeighborsConfig config,
+        @Nullable ApproxNearestNeighborsAlgorithm<SimilarityInput> algorithm
+    ) {
+        return Stream.of(
+            ApproxSimilaritySummaryResult.from(
+                result.nodes(),
+                0,
+                result.computations().map(Computations::count).orElse(-1L),
+                config.writeRelationshipType(),
+                config.writeProperty(),
+                config.write(),
+                algorithm.iterations(),
+                new DoubleHistogram(5)
+            )
+        );
+    }
+
+    private Stream<ApproxSimilaritySummaryResult> writeAndAggregateANNResults(
+        SimilarityAlgorithmResult algoResult,
+        ApproximateNearestNeighborsConfig config,
+        @Nullable ApproxNearestNeighborsAlgorithm<SimilarityInput> algorithm
+    ) {
+        AtomicLong similarityPairs = new AtomicLong();
+        DoubleHistogram histogram = new DoubleHistogram(5);
+        Consumer<SimilarityResult> recorder = result -> {
+            result.record(histogram);
+            similarityPairs.getAndIncrement();
+        };
+
+        if (config.write()) {
+            SimilarityExporter similarityExporter = new SimilarityExporter(
+                api,
+                config.writeRelationshipType(),
+                config.writeProperty(),
+                algorithm.getTerminationFlag()
+            );
+            similarityExporter.export(algoResult.stream().peek(recorder), config.writeBatchSize());
+        } else {
+            algoResult.stream().forEach(recorder);
+        }
+
+        return Stream.of(
+            ApproxSimilaritySummaryResult.from(
+                algoResult.nodes(),
+                similarityPairs.get(),
+                algoResult.computations().map(Computations::count).orElse(-1L),
+                config.writeRelationshipType(),
+                config.writeProperty(),
+                config.write(),
+                algorithm.iterations(),
+                histogram
+            )
+        );
     }
 }

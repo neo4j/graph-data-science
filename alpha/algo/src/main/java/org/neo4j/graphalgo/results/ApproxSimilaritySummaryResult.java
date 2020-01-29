@@ -94,8 +94,8 @@ public class ApproxSimilaritySummaryResult {
     }
 
     public static ApproxSimilaritySummaryResult from(
-            long length,
-            AtomicLong similarityPairs,
+            long nodes,
+            long similarityPairs,
             long computations,
             String writeRelationshipType,
             String writeProperty,
@@ -103,8 +103,8 @@ public class ApproxSimilaritySummaryResult {
             long iterations,
             DoubleHistogram histogram) {
         return new ApproxSimilaritySummaryResult(
-                length,
-                similarityPairs.get(),
+                nodes,
+                similarityPairs,
                 computations,
                 write,
                 writeRelationshipType,
