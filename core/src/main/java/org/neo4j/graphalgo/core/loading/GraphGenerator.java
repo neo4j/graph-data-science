@@ -325,15 +325,15 @@ public final class GraphGenerator {
             return new Relationships(
                 -1,
                 importedRelationships,
-                loadIncoming ? inRelationshipsBuilder.adjacency() : null,
-                loadOutgoing ? outRelationshipsBuilder.adjacency() : null,
+                loadIncoming ? inRelationshipsBuilder.adjacencyList() : null,
+                loadOutgoing ? outRelationshipsBuilder.adjacencyList() : null,
                 loadIncoming ? inRelationshipsBuilder.globalAdjacencyOffsets() : null,
                 loadOutgoing ? outRelationshipsBuilder.globalAdjacencyOffsets() : null,
                 Optional.empty(),
-                loadRelationshipProperty && loadIncoming ? inRelationshipsBuilder.weights() : null,
-                loadRelationshipProperty && loadOutgoing ? outRelationshipsBuilder.weights() : null,
-                loadRelationshipProperty && loadIncoming ? inRelationshipsBuilder.globalWeightOffsets() : null,
-                loadRelationshipProperty && loadOutgoing ? outRelationshipsBuilder.globalWeightOffsets() : null
+                loadRelationshipProperty && loadIncoming ? inRelationshipsBuilder.properties() : null,
+                loadRelationshipProperty && loadOutgoing ? outRelationshipsBuilder.properties() : null,
+                loadRelationshipProperty && loadIncoming ? inRelationshipsBuilder.globalPropertyOffsets() : null,
+                loadRelationshipProperty && loadOutgoing ? outRelationshipsBuilder.globalPropertyOffsets() : null
             );
         }
     }

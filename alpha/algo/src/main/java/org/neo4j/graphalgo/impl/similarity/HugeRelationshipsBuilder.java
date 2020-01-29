@@ -134,15 +134,15 @@ public class HugeRelationshipsBuilder {
             return new Relationships(
                     -1,
                     -1,
-                    inRelationshipsBuilder.adjacency(),
-                    outRelationshipsBuilder.adjacency(),
+                    inRelationshipsBuilder.adjacencyList(),
+                    outRelationshipsBuilder.adjacencyList(),
                     inRelationshipsBuilder.globalAdjacencyOffsets(),
                     outRelationshipsBuilder.globalAdjacencyOffsets(),
                     Optional.empty(),
-                    inRelationshipsBuilder.weights(),
-                    outRelationshipsBuilder.weights(),
-                    inRelationshipsBuilder.globalWeightOffsets(),
-                    outRelationshipsBuilder.globalWeightOffsets()
+                    inRelationshipsBuilder.properties(),
+                    outRelationshipsBuilder.properties(),
+                    inRelationshipsBuilder.globalPropertyOffsets(),
+                    outRelationshipsBuilder.globalPropertyOffsets()
             );
         }
         static AdjacencyBuilder createAdjacencyBuilder(

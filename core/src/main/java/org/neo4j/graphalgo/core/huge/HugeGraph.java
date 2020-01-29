@@ -22,15 +22,18 @@ package org.neo4j.graphalgo.core.huge;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
+import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.Collection;
 import java.util.Map;
@@ -116,6 +119,42 @@ public class HugeGraph implements Graph {
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
+            loadAsUndirected);
+    }
+
+    public static HugeGraph create(
+        AllocationTracker tracker,
+        IdMap idMapping,
+        Map<String, NodeProperties> nodeProperties,
+        RelationshipsBuilder relationshipsBuilder,
+        AdjacencyList adjacencyList,
+        AdjacencyOffsets adjacencyOffsets,
+        int propertyIndex,
+        ResolvedPropertyMapping propertyMapping,
+        long relationshipCount,
+        boolean loadAsUndirected) {
+
+        AdjacencyList properties = null;
+        AdjacencyOffsets propertyOffsets = null;
+        if (relationshipsBuilder != null) {
+            if (propertyMapping.propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+                propertyOffsets = relationshipsBuilder.globalPropertyOffsets(propertyIndex);
+                if (propertyOffsets != null) {
+                    properties = relationshipsBuilder.properties(propertyIndex);
+                }
+            }
+        }
+
+        return create(
+            tracker,
+            idMapping,
+            nodeProperties,
+            relationshipCount,
+            adjacencyList,
+            adjacencyOffsets,
+            propertyMapping.exists() ? Optional.empty() : Optional.of(propertyMapping.defaultValue()),
+            Optional.ofNullable(properties),
+            Optional.ofNullable(propertyOffsets),
             loadAsUndirected);
     }
 

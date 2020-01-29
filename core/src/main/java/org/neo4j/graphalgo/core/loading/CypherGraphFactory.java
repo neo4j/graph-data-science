@@ -27,14 +27,12 @@ import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
@@ -45,7 +43,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
@@ -156,7 +153,7 @@ public class CypherGraphFactory extends GraphFactory {
                         );
                     }
 
-                    AdjacencyList adjacencyList = relationshipsBuilder.adjacency.build();
+                    AdjacencyList adjacencyList = relationshipsBuilder.adjacencyListBuilder.build();
                     AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets;
 
                     long relationshipCount = relationshipCounts.getOrDefault(relationshipProjectionMapping, 0L);
@@ -176,7 +173,7 @@ public class CypherGraphFactory extends GraphFactory {
                         return resultDimensions.relationshipProperties().enumerate().map(propertyEntry -> {
                             int propertyKeyId = propertyEntry.getOne();
                             ResolvedPropertyMapping propertyMapping = propertyEntry.getTwo();
-                            HugeGraph graph = create(
+                            HugeGraph graph = HugeGraph.create(
                                 setup.tracker(),
                                 idsAndProperties.hugeIdMap,
                                 idsAndProperties.properties,
@@ -195,48 +192,6 @@ public class CypherGraphFactory extends GraphFactory {
             ));
 
         return ImportResult.of(resultDimensions, GraphsByRelationshipType.of(graphs));
-    }
-
-    private HugeGraph create(
-        AllocationTracker tracker,
-        IdMap idMapping,
-        Map<String, NodeProperties> nodeProperties,
-        RelationshipsBuilder relationshipsBuilder,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets,
-        int propertyKeyId,
-        ResolvedPropertyMapping propertyMapping,
-        long relationshipCount,
-        boolean loadAsUndirected
-    ) {
-
-        AdjacencyList propertyList = null;
-        AdjacencyOffsets propertyOffsets = null;
-        if (relationshipsBuilder != null) {
-            if (propertyMapping.propertyKeyId() != NO_SUCH_PROPERTY_KEY) {
-                propertyOffsets = relationshipsBuilder.globalWeightOffsets[propertyKeyId];
-                if (propertyOffsets != null) {
-                    propertyList = relationshipsBuilder.weights[propertyKeyId].build();
-                }
-            }
-        }
-
-        Optional<Double> maybeDefaultValue = propertyMapping.exists()
-            ? Optional.empty()
-            : Optional.of(propertyMapping.defaultValue());
-
-        return HugeGraph.create(
-            tracker,
-            idMapping,
-            nodeProperties,
-            relationshipCount,
-            adjacencyList,
-            adjacencyOffsets,
-            maybeDefaultValue,
-            Optional.ofNullable(propertyList),
-            Optional.ofNullable(propertyOffsets),
-            loadAsUndirected
-        );
     }
 
     private Revertable setReadOnlySecurityContext() {

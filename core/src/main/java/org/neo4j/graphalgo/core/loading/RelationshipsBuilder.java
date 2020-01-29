@@ -32,11 +32,11 @@ public class RelationshipsBuilder {
     private static final AdjacencyListBuilder[] EMPTY_WEIGHTS = new AdjacencyListBuilder[0];
 
     private final Aggregation[] aggregations;
-    final AdjacencyListBuilder adjacency;
-    final AdjacencyListBuilder[] weights;
+    final AdjacencyListBuilder adjacencyListBuilder;
+    final AdjacencyListBuilder[] propertyBuilders;
 
     AdjacencyOffsets globalAdjacencyOffsets;
-    AdjacencyOffsets[] globalWeightOffsets;
+    AdjacencyOffsets[] globalPropertyOffsets;
 
     public RelationshipsBuilder(
         Aggregation[] aggregations,
@@ -50,14 +50,14 @@ public class RelationshipsBuilder {
             ));
         }
         this.aggregations = aggregations;
-        adjacency = AdjacencyListBuilder.newBuilder(tracker);
+        adjacencyListBuilder = AdjacencyListBuilder.newBuilder(tracker);
         if (numberOfRelationshipProperties > 0) {
-            weights = new AdjacencyListBuilder[numberOfRelationshipProperties];
+            propertyBuilders = new AdjacencyListBuilder[numberOfRelationshipProperties];
             // TODO: can we avoid to create an allocator/complete adjacency list
             //  if we know that the property does not exist?
-            Arrays.setAll(weights, i -> AdjacencyListBuilder.newBuilder(tracker));
+            Arrays.setAll(propertyBuilders, i -> AdjacencyListBuilder.newBuilder(tracker));
         } else {
-            weights = EMPTY_WEIGHTS;
+            propertyBuilders = EMPTY_WEIGHTS;
         }
     }
 
@@ -66,8 +66,8 @@ public class RelationshipsBuilder {
             long[][] weightOffsets) {
         return new ThreadLocalRelationshipsBuilder(
             aggregations,
-                adjacency.newAllocator(),
-                Arrays.stream(weights)
+                adjacencyListBuilder.newAllocator(),
+                Arrays.stream(propertyBuilders)
                         .map(AdjacencyListBuilder::newAllocator)
                         .toArray(AdjacencyListBuilder.Allocator[]::new),
                 adjacencyOffsets,
@@ -78,17 +78,12 @@ public class RelationshipsBuilder {
         this.globalAdjacencyOffsets = globalAdjacencyOffsets;
     }
 
-    final void setGlobalWeightOffsets(AdjacencyOffsets[] globalWeightOffsets) {
-        this.globalWeightOffsets = globalWeightOffsets;
+    final void setGlobalPropertyOffsets(AdjacencyOffsets[] globalPropertyOffsets) {
+        this.globalPropertyOffsets = globalPropertyOffsets;
     }
 
-    public AdjacencyList adjacency() {
-        return adjacency.build();
-    }
-
-    // TODO: This returns only the first of possibly multiple properties
-    public AdjacencyList weights() {
-        return weights.length > 0 ? weights[0].build() : null;
+    public AdjacencyList adjacencyList() {
+        return adjacencyListBuilder.build();
     }
 
     public AdjacencyOffsets globalAdjacencyOffsets() {
@@ -96,7 +91,20 @@ public class RelationshipsBuilder {
     }
 
     // TODO: This returns only the first of possibly multiple properties
-    public AdjacencyOffsets globalWeightOffsets() {
-        return globalWeightOffsets[0];
+    public AdjacencyList properties() {
+        return propertyBuilders.length > 0 ? propertyBuilders[0].build() : null;
+    }
+
+    public AdjacencyList properties(int propertyIndex) {
+        return propertyBuilders.length > 0 ? propertyBuilders[propertyIndex].build() : null;
+    }
+
+    // TODO: This returns only the first of possibly multiple properties
+    public AdjacencyOffsets globalPropertyOffsets() {
+        return globalPropertyOffsets[0];
+    }
+
+    public AdjacencyOffsets globalPropertyOffsets(int propertyIndex) {
+        return globalPropertyOffsets[propertyIndex];
     }
 }

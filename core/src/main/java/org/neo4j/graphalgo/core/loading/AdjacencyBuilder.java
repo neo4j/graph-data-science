@@ -165,7 +165,7 @@ public abstract class AdjacencyBuilder {
                 }
                 return null;
             });
-            globalBuilder.setGlobalWeightOffsets(globalWeights);
+            globalBuilder.setGlobalPropertyOffsets(globalWeights);
         }
 
         @Override

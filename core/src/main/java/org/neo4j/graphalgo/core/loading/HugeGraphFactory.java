@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -42,7 +41,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -208,12 +206,12 @@ public final class HugeGraphFactory extends GraphFactory {
                     RelationshipsBuilder incomingRelationshipsBuilder = builders.getTwo();
 
                     AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder != null
-                            ? outgoingRelationshipsBuilder.adjacency.build() : null;
+                            ? outgoingRelationshipsBuilder.adjacencyListBuilder.build() : null;
                     AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder != null
                             ? outgoingRelationshipsBuilder.globalAdjacencyOffsets : null;
 
                     AdjacencyList inAdjacencyList = incomingRelationshipsBuilder != null
-                            ? incomingRelationshipsBuilder.adjacency.build() : null;
+                            ? incomingRelationshipsBuilder.adjacencyListBuilder.build() : null;
                     AdjacencyOffsets inAdjacencyOffsets = incomingRelationshipsBuilder != null
                             ? incomingRelationshipsBuilder.globalAdjacencyOffsets : null;
 
@@ -247,16 +245,16 @@ public final class HugeGraphFactory extends GraphFactory {
                         return dimensions.relationshipProperties().enumerate().map(propertyEntry -> {
                             int weightIndex = propertyEntry.getOne();
                             ResolvedPropertyMapping property = propertyEntry.getTwo();
-                            HugeGraph graph = create(
-                                    tracker,
-                                    idsAndProperties.hugeIdMap,
-                                    idsAndProperties.properties,
-                                    relationshipsBuilder,
-                                    adjacencyList,
-                                    adjacencyOffsets,
-                                    weightIndex,
-                                    property,
-                                    relationshipCount,
+                            HugeGraph graph = HugeGraph.create(
+                                tracker,
+                                idsAndProperties.hugeIdMap,
+                                idsAndProperties.properties,
+                                relationshipsBuilder,
+                                adjacencyList,
+                                adjacencyOffsets,
+                                weightIndex,
+                                property,
+                                relationshipCount,
                                 setup.loadAsUndirected()
                             );
                             return Tuples.pair(property.propertyKey(), graph);
@@ -305,46 +303,6 @@ public final class HugeGraphFactory extends GraphFactory {
         }
 
         return Tuples.pair(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
-    }
-
-    private HugeGraph create(
-        AllocationTracker tracker,
-        IdMap idMapping,
-        Map<String, NodeProperties> nodeProperties,
-        RelationshipsBuilder relationshipsBuilder,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets,
-        int weightIndex,
-        ResolvedPropertyMapping weightProperty,
-        long relationshipCount,
-        boolean loadAsUndirected) {
-
-        AdjacencyList properties = null;
-        AdjacencyOffsets propertyOffsets = null;
-        if (relationshipsBuilder != null) {
-            if (weightProperty.propertyKeyId() != NO_SUCH_PROPERTY_KEY) {
-                propertyOffsets = relationshipsBuilder.globalWeightOffsets[weightIndex];
-                if (propertyOffsets != null) {
-                    properties = relationshipsBuilder.weights[weightIndex].build();
-                }
-            }
-        }
-
-        Optional<Double> maybeDefaultWeight = weightProperty.exists()
-                ? Optional.empty()
-                : Optional.of(weightProperty.defaultValue());
-
-        return HugeGraph.create(
-            tracker,
-            idMapping,
-            nodeProperties,
-            relationshipCount,
-            adjacencyList,
-            adjacencyOffsets,
-            maybeDefaultWeight,
-            Optional.ofNullable(properties),
-            Optional.ofNullable(propertyOffsets),
-            loadAsUndirected);
     }
 
 }
