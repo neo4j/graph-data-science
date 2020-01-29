@@ -31,7 +31,6 @@ class ApproxSimilaritySummaryResultTest {
                 100,
                 0,
                 495,
-                false,
                 "",
                 "",
                 -1,
