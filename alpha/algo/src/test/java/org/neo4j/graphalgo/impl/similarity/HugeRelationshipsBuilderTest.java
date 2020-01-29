@@ -55,10 +55,10 @@ class HugeRelationshipsBuilderTest {
         builder.addRelationship(0, 4);
         builder.addRelationship(0, 5);
 
-        Graph graph = ANNUtils.createGraph(nodes, builder.build());
+        Graph graph = ANNUtils.createGraphsByRelationshipType(nodes, builder.build()).getUnion();
 
         final LongArrayList rels = new LongArrayList();
-        graph.forEachOutgoing(0L, (sourceNodeId, targetNodeId) -> {
+        graph.forEachRelationship(0L, (sourceNodeId, targetNodeId) -> {
             rels.add(targetNodeId);
             return true;
         });
@@ -81,10 +81,10 @@ class HugeRelationshipsBuilderTest {
         builder.addRelationship(0, 4);
         builder.addRelationship(0, 5);
 
-        Graph graph = ANNUtils.createGraph(nodes, builder.build());
+        Graph graph = ANNUtils.createGraphsByRelationshipType(nodes, builder.build()).getUnion();
 
         final LongArrayList rels = new LongArrayList();
-        graph.forEachIncoming(1L, (sourceNodeId, targetNodeId) -> {
+        graph.forEachRelationship(1L, (sourceNodeId, targetNodeId) -> {
             rels.add(targetNodeId);
             return true;
         });
@@ -111,10 +111,10 @@ class HugeRelationshipsBuilderTest {
 
         builder.addRelationshipsFrom(new AnnTopKConsumer[] {annTopKConsumer});
 
-        Graph graph = ANNUtils.createGraph(nodes, builder.build());
+        Graph graph = ANNUtils.createGraphsByRelationshipType(nodes, builder.build()).getUnion();
 
         final LongArrayList rels = new LongArrayList();
-        graph.forEachOutgoing(0L, (sourceNodeId, targetNodeId) -> {
+        graph.forEachRelationship(0L, (sourceNodeId, targetNodeId) -> {
             rels.add(targetNodeId);
             return true;
         });

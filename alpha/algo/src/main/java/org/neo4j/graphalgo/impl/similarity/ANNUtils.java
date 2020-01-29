@@ -21,15 +21,22 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.roaringbitmap.RoaringBitmap;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+
+import static org.neo4j.graphalgo.impl.similarity.ApproxNearestNeighborsAlgorithm.ANN_IN_GRAPH;
+import static org.neo4j.graphalgo.impl.similarity.ApproxNearestNeighborsAlgorithm.ANN_OUT_GRAPH;
 
 public class ANNUtils {
     public static long[] sampleNeighbors(long[] potentialNeighbors, double initialSampleSize, Random random) {
@@ -55,20 +62,62 @@ public class ANNUtils {
 
     public static Graph createGraph(IdsAndProperties nodes, Relationships hugeRels) {
         return HugeGraph.create(
-                AllocationTracker.EMPTY,
-                nodes.idMap(),
-                nodes.properties(),
-                hugeRels.relationshipCount(),
-                hugeRels.inAdjacency(),
-                hugeRels.outAdjacency(),
-                hugeRels.inOffsets(),
-                hugeRels.outOffsets(),
-                hugeRels.maybeDefaultRelProperty(),
-                Optional.ofNullable(hugeRels.inRelProperties()),
-                Optional.ofNullable(hugeRels.outRelProperties()),
-                Optional.ofNullable(hugeRels.inRelPropertyOffsets()),
-                Optional.ofNullable(hugeRels.outRelPropertyOffsets()),
-                false);
+            AllocationTracker.EMPTY,
+            nodes.idMap(),
+            nodes.properties(),
+            hugeRels.relationshipCount(),
+            hugeRels.inAdjacency(),
+            hugeRels.outAdjacency(),
+            hugeRels.inOffsets(),
+            hugeRels.outOffsets(),
+            hugeRels.maybeDefaultRelProperty(),
+            Optional.ofNullable(hugeRels.inRelProperties()),
+            Optional.ofNullable(hugeRels.outRelProperties()),
+            Optional.ofNullable(hugeRels.inRelPropertyOffsets()),
+            Optional.ofNullable(hugeRels.outRelPropertyOffsets()),
+            false
+        );
+    }
+
+    public static GraphsByRelationshipType createGraphsByRelationshipType(IdsAndProperties nodes, Relationships hugeRels) {
+        Graph outGraph = HugeGraph.create(
+            AllocationTracker.EMPTY,
+            nodes.idMap(),
+            nodes.properties(),
+            hugeRels.relationshipCount(),
+            null,
+            hugeRels.outAdjacency(),
+            null,
+            hugeRels.outOffsets(),
+            hugeRels.maybeDefaultRelProperty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            false
+        );
+        Graph inGraph = HugeGraph.create(
+            AllocationTracker.EMPTY,
+            nodes.idMap(),
+            nodes.properties(),
+            hugeRels.relationshipCount(),
+            null,
+            hugeRels.inAdjacency(),
+            null,
+            hugeRels.inOffsets(),
+            hugeRels.maybeDefaultRelProperty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            false
+        );
+
+        Map<String, Map<String, Graph>> annGraphs = new HashMap<>();
+        annGraphs.put(ANN_OUT_GRAPH, Collections.singletonMap("", outGraph));
+        annGraphs.put(ANN_IN_GRAPH, Collections.singletonMap("", inGraph));
+
+        return GraphsByRelationshipType.of(annGraphs);
     }
 
     static RoaringBitmap[] initializeRoaringBitmaps(int length) {

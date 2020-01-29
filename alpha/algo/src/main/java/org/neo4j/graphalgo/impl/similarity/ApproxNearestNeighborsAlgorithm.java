@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
@@ -34,7 +35,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphalgo.results.SimilarityResult;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.roaringbitmap.RoaringBitmap;
@@ -53,6 +53,9 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput> extends SimilarityAlgorithm<ApproxNearestNeighborsAlgorithm<INPUT>, INPUT> {
+
+    static final String ANN_OUT_GRAPH = "ANN_OUT";
+    static final String ANN_IN_GRAPH = "ANN_IN";
 
     private final ApproximateNearestNeighborsConfig config;
     private final SimilarityAlgorithm<?, INPUT> algorithm;
@@ -136,7 +139,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             relationshipBuilder.addRelationshipsFrom(topKConsumers);
             Relationships hugeRels = relationshipBuilder.build();
 
-            Graph graph = ANNUtils.createGraph(nodes, hugeRels);
+            Graph graph = ANNUtils.createGraphsByRelationshipType(nodes, hugeRels).getUnion();
             HugeRelationshipsBuilder oldRelationshipsBuilder = new HugeRelationshipsBuilder(nodes);
             HugeRelationshipsBuilder newRelationshipBuilder = new HugeRelationshipsBuilder(nodes);
 
@@ -151,8 +154,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             );
             ParallelUtil.runWithConcurrency(1, setupTasks, executor);
 
-            Graph oldGraph = ANNUtils.createGraph(nodes, oldRelationshipsBuilder.build());
-            Graph newGraph = ANNUtils.createGraph(nodes, newRelationshipBuilder.build());
+            GraphsByRelationshipType oldGraph = ANNUtils.createGraphsByRelationshipType(nodes, oldRelationshipsBuilder.build());
+            GraphsByRelationshipType newGraph = ANNUtils.createGraphsByRelationshipType(nodes, newRelationshipBuilder.build());
 
             Collection<NeighborhoodTask> computeTasks = computeTasks(
                 sampleSize,
@@ -227,9 +230,9 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         double sampleSize,
         INPUT[] inputs,
         SimilarityComputer<INPUT> similarityComputer,
-        Graph oldGraph,
+        GraphsByRelationshipType oldGraph,
         Supplier<RleDecoder> rleDecoderFactory,
-        Graph newGraph
+        GraphsByRelationshipType newGraph
     ) {
         nodeQueue.set(0);
         Collection<NeighborhoodTask> computeTasks = new ArrayList<>();
@@ -284,9 +287,9 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         return changes == 0 || changes < inputSize * Math.abs(topK) * config.precision();
     }
 
-    private LongHashSet findNeighbors(long nodeId, RelationshipIterator graph, Direction direction) {
+    private LongHashSet findNeighbors(long nodeId, RelationshipIterator graph) {
         LongHashSet neighbors = new LongHashSet();
-        graph.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
+        graph.forEachRelationship(nodeId, (sourceNodeId, targetNodeId) -> {
             neighbors.add(targetNodeId);
             return true;
         });
@@ -420,8 +423,10 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         private final SimilarityComputer<INPUT> similarityComputer;
         private final RleDecoder rleDecoder;
         private final AnnTopKConsumer[] localTopKConsumers;
-        private final RelationshipIterator oldGraph;
-        private final RelationshipIterator newGraph;
+        private final RelationshipIterator oldOutRelationships;
+        private final RelationshipIterator oldInRelationships;
+        private final RelationshipIterator newOutRelationships;
+        private final RelationshipIterator newInRelationships;
         private final double sampleRate;
 
         ComputeTask(
@@ -429,16 +434,18 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             SimilarityComputer<INPUT> similarityComputer,
             Supplier<RleDecoder> rleDecoderFactory,
             int length,
-            RelationshipIterator oldGraph,
-            RelationshipIterator newGraph,
+            GraphsByRelationshipType oldGraph,
+            GraphsByRelationshipType newGraph,
             double sampleRate
         ) {
             this.inputs = inputs;
             this.similarityComputer = similarityComputer;
             this.rleDecoder = rleDecoderFactory.get();
             this.localTopKConsumers = AnnTopKConsumer.initializeTopKConsumers(length, config.topK());
-            this.oldGraph = oldGraph.concurrentCopy();
-            this.newGraph = newGraph.concurrentCopy();
+            this.oldOutRelationships = oldGraph.getGraphProjection(ANN_OUT_GRAPH).concurrentCopy();
+            this.oldInRelationships = oldGraph.getGraphProjection(ANN_IN_GRAPH).concurrentCopy();
+            this.newOutRelationships = newGraph.getGraphProjection(ANN_OUT_GRAPH).concurrentCopy();
+            this.newInRelationships = newGraph.getGraphProjection(ANN_IN_GRAPH).concurrentCopy();
             this.sampleRate = sampleRate;
         }
 
@@ -450,8 +457,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                     return;
                 }
 
-                LongHashSet oldNeighbors = getNeighbors(nodeId, oldGraph);
-                long[] newNeighbors = getNeighbors(nodeId, newGraph).toArray();
+                LongHashSet oldNeighbors = getNeighbors(nodeId, oldOutRelationships, oldInRelationships);
+                long[] newNeighbors = getNeighbors(nodeId, newOutRelationships, newInRelationships).toArray();
 
                 for (int sourceIndex = 0; sourceIndex < newNeighbors.length; sourceIndex++) {
                     int sourceNodeId = Math.toIntExact(newNeighbors[sourceIndex]);
@@ -491,13 +498,13 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             }
         }
 
-        private LongHashSet getNeighbors(long nodeId, RelationshipIterator graph) {
-            long[] potentialIncomingNeighbors = findNeighbors(nodeId, graph, Direction.INCOMING).toArray();
+        private LongHashSet getNeighbors(long nodeId, RelationshipIterator outRelationships, RelationshipIterator inRelationships) {
+            long[] potentialIncomingNeighbors = findNeighbors(nodeId, inRelationships).toArray();
             long[] incomingNeighbors = config.sampling()
                 ? ANNUtils.sampleNeighbors(potentialIncomingNeighbors, sampleRate, random)
                 : potentialIncomingNeighbors;
 
-            LongHashSet outgoingNeighbors = findNeighbors(nodeId, graph, Direction.OUTGOING);
+            LongHashSet outgoingNeighbors = findNeighbors(nodeId, outRelationships);
 
             LongHashSet newNeighbors = new LongHashSet();
             newNeighbors.addAll(incomingNeighbors);
