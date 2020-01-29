@@ -22,7 +22,6 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 
@@ -76,7 +75,7 @@ public enum MSBFSSource {
         }
 
         @Override
-        public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
+        public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
             for (int i = 0; i < nodeCount; i++) {
                 if (i != nodeId) {
                     consumer.accept(nodeId, i);
@@ -85,7 +84,7 @@ public enum MSBFSSource {
         }
 
         @Override
-        public void forEachRelationship(long nodeId, Direction direction, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
+        public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
             throw new UnsupportedOperationException("relationship iteration with properties is not supported.");
         }
 
@@ -104,10 +103,7 @@ public enum MSBFSSource {
         }
 
         @Override
-        public void forEachRelationship(
-                long nodeId,
-                Direction direction,
-                RelationshipConsumer consumer) {
+        public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
             for (long i = 0; i < nodeCount; i++) {
                 if (i != nodeId) {
                     consumer.accept(nodeId, i);
@@ -116,12 +112,8 @@ public enum MSBFSSource {
         }
 
         @Override
-        public void forEachRelationship(
-                long nodeId,
-                Direction direction,
-                double fallbackValue,
-                RelationshipWithPropertyConsumer consumer) {
-            forEachRelationship(nodeId, direction, (s, t) -> consumer.accept(s, t, Double.NaN));
+        public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
+            forEachRelationship(nodeId, (s, t) -> consumer.accept(s, t, Double.NaN));
         }
 
         @Override

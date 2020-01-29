@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Element;
@@ -158,7 +157,7 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
+    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         Adjacency adjacency = adjacencyList.get(nodeId);
         forEach(adjacency.edges, consumer);
     }
@@ -168,11 +167,7 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(
-            long nodeId,
-            Direction direction,
-            double fallbackValue,
-            RelationshipWithPropertyConsumer consumer) {
+    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         Adjacency adjacency = adjacencyList.get(nodeId);
         forEachWithProperty(adjacency.edges, fallbackValue, consumer);
     }

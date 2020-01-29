@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 
@@ -46,22 +45,16 @@ public class SpanningGraph extends FilterGraph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
+    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         forEachRelationship(
             nodeId,
-            direction,
             0.0,
             (sourceNodeId, targetNodeId, property) -> consumer.accept(sourceNodeId, targetNodeId)
         );
     }
 
     @Override
-    public void forEachRelationship(
-        long nodeId,
-        Direction direction,
-        double fallbackValue,
-        RelationshipWithPropertyConsumer consumer
-    ) {
+    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         int parent = spanningTree.parent[Math.toIntExact(nodeId)];
         if (parent != -1) {
             consumer.accept(parent, nodeId, fallbackValue);

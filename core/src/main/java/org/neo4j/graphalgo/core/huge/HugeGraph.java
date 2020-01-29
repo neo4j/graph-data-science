@@ -336,43 +336,17 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
-        switch (direction) {
-            case INCOMING:
-                runForEach(nodeId, Direction.INCOMING, consumer);
-                return;
-
-            case OUTGOING:
-                runForEach(nodeId, Direction.OUTGOING, consumer);
-                return;
-
-            default:
-                runForEach(nodeId, Direction.OUTGOING, consumer);
-                runForEach(nodeId, Direction.INCOMING, consumer);
-        }
+    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
+        runForEach(nodeId, Direction.OUTGOING, consumer);
     }
 
     @Override
     public void forEachRelationship(
         long nodeId,
-        Direction direction,
         double fallbackValue,
         RelationshipWithPropertyConsumer consumer
     ) {
-
-        switch (direction) {
-            case INCOMING:
-                runForEachWithProperty(nodeId, Direction.INCOMING, fallbackValue, consumer);
-                return;
-
-            case OUTGOING:
-                runForEachWithProperty(nodeId, Direction.OUTGOING, fallbackValue, consumer);
-                return;
-
-            default:
-                runForEachWithProperty(nodeId, Direction.OUTGOING, fallbackValue, consumer);
-                runForEachWithProperty(nodeId, Direction.INCOMING, fallbackValue, consumer);
-        }
+        runForEachWithProperty(nodeId, Direction.OUTGOING, fallbackValue, consumer);
     }
 
     @Override
@@ -397,16 +371,6 @@ public class HugeGraph implements Graph {
     @Override
     public boolean contains(final long nodeId) {
         return idMapping.contains(nodeId);
-    }
-
-    @Override
-    public void forEachIncoming(long node, final RelationshipConsumer consumer) {
-        runForEach(node, Direction.INCOMING, consumer);
-    }
-
-    @Override
-    public void forEachOutgoing(long node, final RelationshipConsumer consumer) {
-        runForEach(node, Direction.OUTGOING, consumer);
     }
 
     @Override

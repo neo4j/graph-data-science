@@ -52,7 +52,7 @@ class RandomGraphGeneratorTest {
         graph.forEachNode((nodeId) -> {
             long[] degree = {0L};
 
-            graph.forEachOutgoing(nodeId, (a, b) -> {
+            graph.forEachRelationship(nodeId, (a, b) -> {
                 degree[0] = degree[0] + 1;
                 return true;
             });
@@ -100,7 +100,7 @@ class RandomGraphGeneratorTest {
         graph.forEachNode((nodeId) -> {
             long[] degree = {0L};
 
-            graph.forEachOutgoing(nodeId, (a, b) -> {
+            graph.forEachRelationship(nodeId, (a, b) -> {
                 degree[0] = degree[0] + 1;
                 return true;
             });

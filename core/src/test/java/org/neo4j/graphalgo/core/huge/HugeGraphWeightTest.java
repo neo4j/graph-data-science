@@ -65,7 +65,7 @@ final class HugeGraphWeightTest {
         Graph graph = loadGraph(db);
 
         graph.forEachNode((long node) -> {
-            graph.forEachOutgoing(node, (src, tgt) -> {
+            graph.forEachRelationship(node, (src, tgt) -> {
                 long propertyValue = (long) graph.relationshipProperty(src, tgt, Double.NaN);
                 int fakeId = ((int) src << 16) | (int) tgt & 0xFFFF;
                 assertEquals(

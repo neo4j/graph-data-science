@@ -96,7 +96,7 @@ final class LoadingTest {
 
     private long[] mkRels(Graph graph, int node) {
         final LongArrayList rels = new LongArrayList();
-        graph.forEachOutgoing(node, (s, t) -> {
+        graph.forEachRelationship(node, (s, t) -> {
             rels.add(t);
             return true;
         });

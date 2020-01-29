@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Iterables;
 
 import java.util.Collection;
@@ -115,40 +114,22 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
+    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         for (Graph graph : graphs) {
-            graph.forEachRelationship(nodeId, direction, consumer);
+            graph.forEachRelationship(nodeId, consumer);
         }
     }
 
     @Override
-    public void forEachRelationship(
-            long nodeId,
-            Direction direction,
-            double fallbackValue,
-            RelationshipWithPropertyConsumer consumer) {
+    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         for (Graph graph : graphs) {
-            graph.forEachRelationship(nodeId, direction, fallbackValue, consumer);
+            graph.forEachRelationship(nodeId, fallbackValue, consumer);
         }
     }
 
     @Override
     public int degree(long nodeId) {
         return Math.toIntExact(graphs.stream().mapToLong(g -> g.degree(nodeId)).sum());
-    }
-
-    @Override
-    public void forEachIncoming(long node, final RelationshipConsumer consumer) {
-        for (Graph graph : graphs) {
-            graph.forEachIncoming(node, consumer);
-        }
-    }
-
-    @Override
-    public void forEachOutgoing(long node, final RelationshipConsumer consumer) {
-        for (Graph graph : graphs) {
-            graph.forEachOutgoing(node, consumer);
-        }
     }
 
     @Override

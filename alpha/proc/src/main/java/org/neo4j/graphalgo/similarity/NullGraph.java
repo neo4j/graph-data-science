@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Collection;
 import java.util.Set;
@@ -138,15 +137,13 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
+    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         throw new UnsupportedOperationException(
             "org.neo4j.graphalgo.similarity.NullGraph.forEachRelationship is not implemented.");
     }
 
     @Override
-    public void forEachRelationship(
-        long nodeId, Direction direction, double fallbackValue, RelationshipWithPropertyConsumer consumer
-    ) {
+    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         throw new UnsupportedOperationException(
             "org.neo4j.graphalgo.similarity.NullGraph.forEachRelationship is not implemented.");
     }

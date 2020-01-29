@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -254,7 +253,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
 
         RelationshipIterator iter = new RelationshipIterator() {
             @Override
-            public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
+            public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
                 for (long i = 0; i < nodeCount; i++) {
                     if (i != nodeId) {
                         consumer.accept(nodeId, i);
@@ -263,7 +262,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             }
 
             @Override
-            public void forEachRelationship(long nodeId, Direction direction, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
+            public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
 
             }
 
@@ -303,9 +302,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         }
     }
 
-    private void withGraph(
-            String cypher,
-            Consumer<? super Graph> block) {
+    private void withGraph(String cypher, Consumer<? super Graph> block) {
         runQuery(cypher);
         block.accept(new StoreLoaderBuilder()
             .api(db)

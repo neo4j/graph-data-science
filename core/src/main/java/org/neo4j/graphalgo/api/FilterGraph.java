@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Collection;
 import java.util.Set;
@@ -116,14 +115,14 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
-        graph.forEachRelationship(nodeId, direction, consumer);
+    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
+        graph.forEachRelationship(nodeId, consumer);
 
     }
 
     @Override
-    public void forEachRelationship(long nodeId, Direction direction, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
-        graph.forEachRelationship(nodeId, direction, fallbackValue, consumer);
+    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
+        graph.forEachRelationship(nodeId, fallbackValue, consumer);
     }
 
     @Override

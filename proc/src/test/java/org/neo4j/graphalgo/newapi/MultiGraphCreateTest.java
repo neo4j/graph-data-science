@@ -75,12 +75,12 @@ class MultiGraphCreateTest {
     private void assertGraph(Graph graph1) {
         assertEquals(2, graph1.nodeCount());
         AtomicInteger rels = new AtomicInteger();
-        graph1.forEachOutgoing(0, (s, t) -> {
+        graph1.forEachRelationship(0, (s, t) -> {
             assertEquals(1, t);
             rels.incrementAndGet();
             return true;
         });
-        graph1.forEachOutgoing(1, (s, t) -> {
+        graph1.forEachRelationship(1, (s, t) -> {
             assertEquals(0, t);
             rels.incrementAndGet();
             return true;

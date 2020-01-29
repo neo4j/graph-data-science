@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphdb.Direction;
 
 public class TopKGraph extends FilterGraph {
 
@@ -46,7 +45,7 @@ public class TopKGraph extends FilterGraph {
     }
 
     @Override
-    public void forEachRelationship(long node1, Direction direction, RelationshipConsumer consumer) {
+    public void forEachRelationship(long node1, RelationshipConsumer consumer) {
         TopKMap.TopKList topKList = topKMap.get(node1);
         if (topKList != null) {
             topKList.forEach((node2, similarity) -> consumer.accept(node1, node2));
@@ -54,7 +53,7 @@ public class TopKGraph extends FilterGraph {
     }
 
     @Override
-    public void forEachRelationship(long node1, Direction direction, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
+    public void forEachRelationship(long node1, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         TopKMap.TopKList topKList = topKMap.get(node1);
         if (topKList != null) {
             topKList.forEach((node2, similarity) -> consumer.accept(node1, node2, similarity));

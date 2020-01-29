@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
@@ -94,7 +93,7 @@ public final class PR2 extends BaseMain {
                     int degree = hugeGraph.degree((int) node);
                     long[] calcDegree = new long[1];
                     try {
-                        hugeGraph.forEachOutgoing(node, (src, tgt) -> {
+                        hugeGraph.forEachRelationship(node, (src, tgt) -> {
                             ++calcDegree[0];
                             return true;
                         });
