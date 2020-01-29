@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.GraphGenerator;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Optional;
 import java.util.Random;
@@ -105,11 +104,9 @@ public final class RandomGraphGenerator {
 
         GraphGenerator.RelImporter relationshipsImporter = GraphGenerator.createRelImporter(
             nodeImporter,
-            projection == Projection.NATURAL || projection == Projection.UNDIRECTED ? Direction.OUTGOING : Direction.INCOMING,
-            projection == Projection.UNDIRECTED,
+            projection,
             maybePropertyProducer.isPresent(),
-            Aggregation.NONE,
-            false
+            Aggregation.NONE
         );
 
         generateRelationships(relationshipsImporter);

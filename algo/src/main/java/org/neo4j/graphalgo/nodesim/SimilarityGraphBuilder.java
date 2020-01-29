@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -29,7 +30,6 @@ import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
@@ -95,13 +95,11 @@ class SimilarityGraphBuilder {
 
         GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
             idMap,
-            Direction.OUTGOING,
-            baseGraph.isUndirected(),
+            baseGraph.isUndirected() ? Projection.UNDIRECTED : Projection.NATURAL,
             true,
             Aggregation.NONE,
             executorService,
-            tracker,
-            false
+            tracker
         );
 
         relImporter.addFromInternal(stream);

@@ -27,13 +27,10 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
@@ -67,17 +64,13 @@ class GraphGeneratorTest {
         return fromGdl(EXPECTED_UNWEIGHTED_GRAPH, projection);
     }
 
-    static Stream<Direction> validDirections() {
-        return Stream.of(Direction.OUTGOING, Direction.INCOMING);
-    }
-
-    static Projection toProjection(Direction direction) {
-        return direction == Direction.OUTGOING ? Projection.NATURAL : Projection.REVERSE;
+    static Stream<Projection> validProjections() {
+        return Stream.of(Projection.NATURAL, Projection.REVERSE);
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("validDirections")
-    void unweighted(Direction direction) {
+    @MethodSource("validProjections")
+    void unweighted(Projection projection) {
         int nodeCount = 4;
         GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
             nodeCount,
@@ -91,57 +84,46 @@ class GraphGeneratorTest {
 
         GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
             nodeImporter,
-            direction,
+            projection,
             false,
-            false,
-            Aggregation.SUM,
-            false
+            Aggregation.SUM
         );
 
         for (int i = 0; i < nodeCount; i++) {
             relImporter.add(i, (i + 1) % nodeCount);
         }
         Graph graph = relImporter.buildGraph();
-        assertGraphEquals(expectedUnweighted(toProjection(direction)), graph);
+        assertGraphEquals(expectedUnweighted(projection), graph);
         assertEquals(nodeCount, graph.relationshipCount());
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("validDirections")
-    void weightedWithAggregation(Direction direction) {
-        Graph graph = generateGraph(direction, false, Aggregation.SUM);
-        assertGraphEquals(expectedWithAggregation(toProjection(direction)), graph);
+    @MethodSource("validProjections")
+    void weightedWithAggregation(Projection projection) {
+        Graph graph = generateGraph(projection, Aggregation.SUM);
+        assertGraphEquals(expectedWithAggregation(projection), graph);
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("validDirections")
-    void weightedWithoutAggregation(Direction direction) {
-        Graph graph = generateGraph(direction, false, Aggregation.NONE);
-        assertGraphEquals(expectedWithoutAggregation(toProjection(direction)), graph);
+    @MethodSource("validProjections")
+    void weightedWithoutAggregation(Projection projection) {
+        Graph graph = generateGraph(projection, Aggregation.NONE);
+        assertGraphEquals(expectedWithoutAggregation(projection), graph);
     }
 
     @Test
     void undirectedWithAggregation() {
-        Graph graph = generateGraph(Direction.OUTGOING, true, Aggregation.SUM);
+        Graph graph = generateGraph(Projection.UNDIRECTED, Aggregation.SUM);
         assertGraphEquals(expectedWithAggregation(Projection.UNDIRECTED), graph);
     }
 
     @Test
     void undirectedWithoutAggregation() {
-        Graph graph = generateGraph(Direction.OUTGOING, true, Aggregation.NONE);
+        Graph graph = generateGraph(Projection.UNDIRECTED, Aggregation.NONE);
         assertGraphEquals(expectedWithoutAggregation(Projection.UNDIRECTED), graph);
     }
 
-    @Test
-    void shouldFailOnIncomingWithUndirected() {
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> generateGraph(Direction.INCOMING, true, Aggregation.SUM)
-        );
-        assertTrue(exception.getMessage().contains("Direction must be OUTGOING if graph is undirected"));
-    }
-
-    private Graph generateGraph(Direction outgoing, boolean undirected, Aggregation aggregation) {
+    private Graph generateGraph(Projection projection, Aggregation aggregation) {
         int nodeCount = 4;
 
         GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
@@ -156,11 +138,9 @@ class GraphGeneratorTest {
 
         GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
             nodeImporter,
-            outgoing,
-            undirected,
+            projection,
             true,
-            aggregation,
-            false
+            aggregation
         );
 
         for (int i = 0; i < nodeCount; i++) {

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
@@ -29,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -55,43 +55,35 @@ public final class GraphGenerator {
 
     public static RelImporter createRelImporter(
         NodeImporter nodeImporter,
-        Direction direction,
-        boolean undirected,
+        Projection projection,
         boolean loadRelationshipProperty,
-        Aggregation aggregation,
-        boolean legacyMode
+        Aggregation aggregation
     ) {
         return createRelImporter(
             nodeImporter.idMap(),
-            direction,
-            undirected,
+            projection,
             loadRelationshipProperty,
             aggregation,
             nodeImporter.executorService,
-            nodeImporter.tracker,
-            legacyMode
+            nodeImporter.tracker
         );
     }
 
     public static RelImporter createRelImporter(
         IdMap idMap,
-        Direction direction,
-        boolean undirected,
+        Projection projection,
         boolean loadRelationshipProperty,
         Aggregation aggregation,
         ExecutorService executorService,
-        AllocationTracker tracker,
-        boolean legacyMode
+        AllocationTracker tracker
     ) {
         return new RelImporter(
             idMap,
-            direction,
-            undirected,
+            projection,
             loadRelationshipProperty,
             aggregation,
             executorService,
-            tracker,
-            legacyMode
+            tracker
         );
     }
 
@@ -155,12 +147,10 @@ public final class GraphGenerator {
         private final RelationshipImporter.Imports imports;
         private final RelationshipsBatchBuffer relationshipBuffer;
         private final IdMap idMap;
-        private final Direction direction;
-        private final boolean undirected;
+        private final boolean loadUndirected;
         private final boolean loadRelationshipProperty;
         private final ExecutorService executorService;
         private final AllocationTracker tracker;
-        private final boolean legacyMode;
 
         private long importedRelationships = 0;
 
@@ -170,33 +160,16 @@ public final class GraphGenerator {
 
         public RelImporter(
             IdMap idMap,
-            Direction direction,
-            boolean undirected,
+            Projection projection,
             boolean loadRelationshipProperty,
             Aggregation aggregation,
             ExecutorService executorService,
-            AllocationTracker tracker,
-            boolean legacyMode
+            AllocationTracker tracker
         ) {
-            this.direction = direction;
-            this.undirected = undirected;
             this.loadRelationshipProperty = loadRelationshipProperty;
             this.executorService = executorService;
             this.tracker = tracker;
             this.idMap = idMap;
-            this.legacyMode = legacyMode;
-
-            if (undirected && direction != Direction.OUTGOING) {
-                throw new IllegalArgumentException(String.format(
-                    "Direction must be %s if graph is undirected, but got %s",
-                    Direction.OUTGOING,
-                    direction
-                ));
-            }
-
-            if (!legacyMode && direction == Direction.BOTH) {
-                throw new IllegalArgumentException("Direction.BOTH is invalid in non-legacy mode.");
-            }
 
             ImportSizing importSizing = ImportSizing.of(1, idMap.nodeCount());
             int pageSize = importSizing.pageSize();
@@ -206,8 +179,9 @@ public final class GraphGenerator {
             AdjacencyBuilder inAdjacencyBuilder = null;
             int[] propertyKeyIds = loadRelationshipProperty ? new int[]{DUMMY_PROPERTY_ID} : new int[0];
 
-            this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
-            this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
+            this.loadOutgoing = projection == Projection.NATURAL || projection == Projection.UNDIRECTED;
+            this.loadIncoming = projection == Projection.REVERSE;
+            this.loadUndirected = projection == Projection.UNDIRECTED;
 
             if (loadOutgoing) {
                 this.outRelationshipsBuilder = new RelationshipsBuilder(
@@ -227,7 +201,7 @@ public final class GraphGenerator {
                 );
             }
 
-            if (loadIncoming || undirected) {
+            if (loadIncoming || loadUndirected) {
                 this.inRelationshipsBuilder = new RelationshipsBuilder(
                     new Aggregation[]{aggregation},
                     tracker,
@@ -251,7 +225,7 @@ public final class GraphGenerator {
                 inAdjacencyBuilder
             );
             this.imports = relationshipImporter.imports(
-                undirected,
+                loadUndirected,
                 loadOutgoing,
                 loadIncoming,
                 loadRelationshipProperty
@@ -304,42 +278,24 @@ public final class GraphGenerator {
             flushBuffer();
             Relationships relationships = buildRelationships();
 
-            AdjacencyList inAdjacencyList = null;
             AdjacencyList outAdjacencyList = null;
-            AdjacencyOffsets inAdjacencyOffsets = null;
             AdjacencyOffsets outAdjacencyOffsets = null;
-            Optional<AdjacencyList> inProperties = Optional.empty();
             Optional<AdjacencyList> outProperties = Optional.empty();
-            Optional<AdjacencyOffsets> inPropertyOffsets = Optional.empty();
             Optional<AdjacencyOffsets> outPropertyOffsets = Optional.empty();
 
-            if (legacyMode) {
-                inAdjacencyList = relationships.inAdjacency();
-                outAdjacencyList = relationships.outAdjacency();
-                inAdjacencyOffsets = relationships.inOffsets();
-                outAdjacencyOffsets = relationships.outOffsets();
+            // We either load outgoing or incoming or undirected.
+            // The corresponding adjacency list is always stored in
+            // the outgoing adjacency list of the resulting graph.
+            outAdjacencyList = loadOutgoing ? relationships.outAdjacency() : relationships.inAdjacency();
+            outAdjacencyOffsets = loadOutgoing ? relationships.outOffsets() : relationships.inOffsets();
 
-                if (loadRelationshipProperty) {
-                    inProperties = loadIncoming ? Optional.of(relationships.inRelProperties()) : Optional.empty();
-                    outProperties = loadOutgoing ? Optional.of(relationships.outRelProperties()) : Optional.empty();
-                    inPropertyOffsets = loadIncoming ? Optional.of(relationships.inRelPropertyOffsets()) : Optional.empty();
-                    outPropertyOffsets = loadOutgoing ? Optional.of(relationships.outRelPropertyOffsets()) : Optional.empty();
-                }
-            } else {
-                // In non-legacy mode we load either outgoing or incoming or undirected.
-                // The corresponding adjacency list is always stored in the outgoing
-                // adjacency list of the resulting graph.
-                outAdjacencyList = loadOutgoing ? relationships.outAdjacency() : relationships.inAdjacency();
-                outAdjacencyOffsets = loadOutgoing ? relationships.outOffsets() : relationships.inOffsets();
-
-                if (loadRelationshipProperty) {
-                    outProperties = loadOutgoing
-                        ? Optional.of(relationships.outRelProperties())
-                        : Optional.of(relationships.inRelProperties());
-                    outPropertyOffsets = loadOutgoing
-                        ? Optional.of(relationships.outRelPropertyOffsets())
-                        : Optional.of(relationships.inRelPropertyOffsets());
-                }
+            if (loadRelationshipProperty) {
+                outProperties = loadOutgoing
+                    ? Optional.of(relationships.outRelProperties())
+                    : Optional.of(relationships.inRelProperties());
+                outPropertyOffsets = loadOutgoing
+                    ? Optional.of(relationships.outRelPropertyOffsets())
+                    : Optional.of(relationships.inRelPropertyOffsets());
             }
 
             return HugeGraph.create(
@@ -347,16 +303,16 @@ public final class GraphGenerator {
                 idMap,
                 Collections.emptyMap(),
                 relationships.relationshipCount(),
-                inAdjacencyList,
+                null,
                 outAdjacencyList,
-                inAdjacencyOffsets,
+                null,
                 outAdjacencyOffsets,
                 Optional.empty(),
-                inProperties,
+                Optional.empty(),
                 outProperties,
-                inPropertyOffsets,
+                Optional.empty(),
                 outPropertyOffsets,
-                undirected
+                loadUndirected
             );
         }
 
@@ -364,7 +320,7 @@ public final class GraphGenerator {
             RelationshipImporter.PropertyReader propertyReader = loadRelationshipProperty ? RelationshipImporter.preLoadedPropertyReader() : null;
 
             long newImportedInOut = imports.importRels(relationshipBuffer, propertyReader);
-            importedRelationships += direction == Direction.BOTH ? RawValues.getHead(newImportedInOut) / 2 : RawValues.getHead(newImportedInOut);
+            importedRelationships += RawValues.getHead(newImportedInOut);
             relationshipBuffer.reset();
         }
 

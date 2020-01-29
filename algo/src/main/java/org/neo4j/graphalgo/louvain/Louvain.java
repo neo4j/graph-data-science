@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimization;
@@ -29,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -178,11 +178,9 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
             nodeImporter,
-            Direction.OUTGOING,
-            rootGraph.isUndirected(),
+            rootGraph.isUndirected() ? Projection.UNDIRECTED : Projection.NATURAL,
             true,
-            Aggregation.SUM,
-            false
+            Aggregation.SUM
         );
 
         workingGraph.forEachNode((nodeId) -> {
