@@ -449,9 +449,9 @@ public class HugeGraph implements Graph {
      * O(n) !
      */
     @Override
-    public long getTarget(long sourceNodeId, long index, Direction direction) {
+    public long getTarget(long sourceNodeId, long index) {
         GetTargetConsumer consumer = new GetTargetConsumer(index);
-        runForEach(sourceNodeId, direction, consumer);
+        runForEach(sourceNodeId, Direction.OUTGOING, consumer);
         return consumer.target;
     }
 

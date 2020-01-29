@@ -116,8 +116,8 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public long getTarget(long nodeId, long index, Direction direction) {
-        return graph.getTarget(nodeId, index, direction);
+    public long getTarget(long nodeId, long index) {
+        return graph.getTarget(nodeId, index);
     }
 
     @Override

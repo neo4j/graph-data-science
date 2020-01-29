@@ -139,7 +139,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public long getTarget(long nodeId, long index, Direction direction) {
+    public long getTarget(long nodeId, long index) {
         throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.getTarget is not implemented.");
     }
 

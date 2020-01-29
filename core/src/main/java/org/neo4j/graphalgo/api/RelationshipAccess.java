@@ -19,14 +19,8 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphdb.Direction;
-
 public interface RelationshipAccess {
 
-    long getTarget(long nodeId, long index, Direction direction);
-
-    default long getTarget(long nodeId, long index) {
-        return getTarget(nodeId, index, Direction.OUTGOING);
-    }
+    long getTarget(long nodeId, long index);
 
 }

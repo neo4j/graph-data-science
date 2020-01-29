@@ -217,7 +217,7 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public long getTarget(long nodeId, long index, Direction direction) {
+    public long getTarget(long nodeId, long index) {
         throw new UnsupportedOperationException();
     }
 

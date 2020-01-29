@@ -203,7 +203,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             double[] distribution = buildProbabilityDistribution(currentNodeId, previousNodeId, returnParam, inOutParam, degree);
             int neighbourIndex = pickIndexFromDistribution(distribution, ThreadLocalRandom.current().nextDouble());
 
-            return graph.getTarget(currentNodeId, neighbourIndex, Direction.OUTGOING);
+            return graph.getTarget(currentNodeId, neighbourIndex);
         }
 
         private double[] buildProbabilityDistribution(int currentNodeId, int previousNodeId,

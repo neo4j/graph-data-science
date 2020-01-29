@@ -173,9 +173,9 @@ public final class UnionGraph implements Graph {
      * O(n) !
      */
     @Override
-    public long getTarget(long sourceNodeId, long index, Direction direction) {
+    public long getTarget(long sourceNodeId, long index) {
         return graphs.stream()
-                .mapToLong(g -> g.getTarget(sourceNodeId, index, direction))
+                .mapToLong(g -> g.getTarget(sourceNodeId, index))
                 .filter(t -> t != HugeGraph.GetTargetConsumer.TARGET_NOT_FOUND)
                 .findFirst()
                 .orElse(HugeGraph.GetTargetConsumer.TARGET_NOT_FOUND);
