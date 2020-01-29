@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongHashSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
@@ -55,7 +55,7 @@ class HugeRelationshipsBuilderTest {
         builder.addRelationship(0, 4);
         builder.addRelationship(0, 5);
 
-        HugeGraph graph = ANNUtils.hugeGraph(nodes, builder.build());
+        Graph graph = ANNUtils.createGraph(nodes, builder.build());
 
         final LongArrayList rels = new LongArrayList();
         graph.forEachOutgoing(0L, (sourceNodeId, targetNodeId) -> {
@@ -81,7 +81,7 @@ class HugeRelationshipsBuilderTest {
         builder.addRelationship(0, 4);
         builder.addRelationship(0, 5);
 
-        HugeGraph graph = ANNUtils.hugeGraph(nodes, builder.build());
+        Graph graph = ANNUtils.createGraph(nodes, builder.build());
 
         final LongArrayList rels = new LongArrayList();
         graph.forEachIncoming(1L, (sourceNodeId, targetNodeId) -> {
@@ -111,7 +111,7 @@ class HugeRelationshipsBuilderTest {
 
         builder.addRelationshipsFrom(new AnnTopKConsumer[] {annTopKConsumer});
 
-        HugeGraph graph = ANNUtils.hugeGraph(nodes, builder.build());
+        Graph graph = ANNUtils.createGraph(nodes, builder.build());
 
         final LongArrayList rels = new LongArrayList();
         graph.forEachOutgoing(0L, (sourceNodeId, targetNodeId) -> {

@@ -20,14 +20,14 @@
 package org.neo4j.graphalgo.impl.similarity;
 
 import com.carrotsearch.hppc.LongHashSet;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.roaringbitmap.RoaringBitmap;
 
 public class NewOldGraph {
-    private final HugeGraph graph;
+    private final Graph graph;
     private final RoaringBitmap[] visitedRelationships;
 
-    NewOldGraph(HugeGraph graph, RoaringBitmap[] visitedRelationships) {
+    NewOldGraph(Graph graph, RoaringBitmap[] visitedRelationships) {
         this.graph = graph;
         this.visitedRelationships = visitedRelationships;
     }

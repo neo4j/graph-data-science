@@ -58,10 +58,7 @@ public class HugeRelationshipsBuilder {
         private final RelationshipsBatchBuffer buffer;
         private final IdMap idMap;
 
-        HugeRelationshipsBuilderWithBuffer(
-                IdMap idMap,
-                RelationshipBuilder builder,
-                RelationshipsBatchBuffer buffer) {
+        HugeRelationshipsBuilderWithBuffer(IdMap idMap, RelationshipBuilder builder, RelationshipsBatchBuffer buffer) {
             this.idMap = idMap;
             this.builder = builder;
             this.buffer = buffer;

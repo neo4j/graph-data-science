@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.triangle;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
@@ -55,7 +55,7 @@ class IntersectingTriangleCountTest {
         relationshipBuilder.addRelationship(idMap.toMappedNodeId(2), idMap.toMappedNodeId(1));
         Relationships relationships = relationshipBuilder.build();
 
-        HugeGraph graph = ANNUtils.hugeGraph(nodes, relationships);
+        Graph graph = ANNUtils.createGraph(nodes, relationships);
         IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         triangleCount.compute();
 
@@ -76,7 +76,7 @@ class IntersectingTriangleCountTest {
         HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipBuilder = new HugeRelationshipsBuilder(nodes).withBuffer();
         Relationships relationships = relationshipBuilder.build();
 
-        HugeGraph graph = ANNUtils.hugeGraph(nodes, relationships);
+        Graph graph = ANNUtils.createGraph(nodes, relationships);
         IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         triangleCount.compute();
 
@@ -105,7 +105,7 @@ class IntersectingTriangleCountTest {
         relationshipBuilder.addRelationship(idMap.toMappedNodeId(1), idMap.toMappedNodeId(3));
         Relationships relationships = relationshipBuilder.build();
 
-        HugeGraph graph = ANNUtils.hugeGraph(nodes, relationships);
+        Graph graph = ANNUtils.createGraph(nodes, relationships);
         IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         triangleCount.compute();
 

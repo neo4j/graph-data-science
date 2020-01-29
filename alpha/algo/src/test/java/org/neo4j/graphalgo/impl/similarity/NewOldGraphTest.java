@@ -36,7 +36,7 @@ import java.util.Collections;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.ArrayMatching.arrayContainingInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.impl.similarity.ANNUtils.hugeGraph;
+import static org.neo4j.graphalgo.impl.similarity.ANNUtils.createGraph;
 import static org.neo4j.graphalgo.impl.similarity.ANNUtils.initializeRoaringBitmaps;
 
 class NewOldGraphTest {
@@ -65,7 +65,7 @@ class NewOldGraphTest {
         relationshipsBuilder.addRelationship(0, 3);
 
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
-        NewOldGraph graph = new NewOldGraph(hugeGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(createGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
 
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(3, newNeighbors.length);
@@ -98,7 +98,7 @@ class NewOldGraphTest {
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(hugeGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(createGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
 
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(2, newNeighbors.length);
@@ -131,7 +131,7 @@ class NewOldGraphTest {
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(hugeGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(createGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
 
         long[] oldNeighbors = graph.findOldNeighbors(0).toArray();
         assertEquals(1, oldNeighbors.length);

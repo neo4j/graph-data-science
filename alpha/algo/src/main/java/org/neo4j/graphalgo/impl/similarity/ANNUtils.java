@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.Relationships;
@@ -52,7 +53,7 @@ public class ANNUtils {
         }
     }
 
-    public static HugeGraph hugeGraph(IdsAndProperties nodes, Relationships hugeRels) {
+    public static Graph createGraph(IdsAndProperties nodes, Relationships hugeRels) {
         return HugeGraph.create(
                 AllocationTracker.EMPTY,
                 nodes.idMap(),
