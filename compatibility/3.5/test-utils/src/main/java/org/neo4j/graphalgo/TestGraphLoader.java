@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -37,7 +36,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.Projection.NATURAL;
-import static org.neo4j.graphalgo.Projection.REVERSE;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
 import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
 
@@ -53,7 +51,6 @@ public final class TestGraphLoader {
     private PropertyMappings relProperties = PropertyMappings.of();
     private boolean addRelationshipPropertiesToLoader;
 
-    private Direction direction = Direction.OUTGOING;
     private Optional<Aggregation> maybeAggregation = Optional.empty();
 
     public static TestGraphLoader from(@NotNull GraphDatabaseAPI db) {
@@ -95,11 +92,6 @@ public final class TestGraphLoader {
     public TestGraphLoader withRelationshipProperties(PropertyMappings relProperties, boolean addToLoader) {
         this.relProperties = relProperties;
         this.addRelationshipPropertiesToLoader = addToLoader;
-        return this;
-    }
-
-    public TestGraphLoader withDirection(Direction direction) {
-        this.direction = direction;
         return this;
     }
 
@@ -174,14 +166,7 @@ public final class TestGraphLoader {
                     RelationshipProjection template = RelationshipProjection.empty()
                         .withType(relType)
                         .withAggregation(maybeAggregation.orElse(SINGLE));
-                    if (direction == Direction.OUTGOING) {
-                        storeLoaderBuilder.addRelationshipProjection(template.withProjection(NATURAL));
-                    } else if (direction == Direction.INCOMING) {
-                        storeLoaderBuilder.addRelationshipProjection(template.withProjection(REVERSE));
-                    } else {
-                        storeLoaderBuilder.addRelationshipProjection(template.withProjection(NATURAL));
-                        storeLoaderBuilder.addRelationshipProjection(template.withProjection(REVERSE));
-                    }
+                    storeLoaderBuilder.addRelationshipProjection(template.withProjection(NATURAL));
                 });
         } else {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(

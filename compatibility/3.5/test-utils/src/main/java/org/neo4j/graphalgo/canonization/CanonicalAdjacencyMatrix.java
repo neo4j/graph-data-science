@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.canonization;
 
 import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphdb.Direction;
 
 import java.util.HashMap;
 import java.util.List;
