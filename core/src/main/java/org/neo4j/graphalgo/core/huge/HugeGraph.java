@@ -439,9 +439,9 @@ public class HugeGraph implements Graph {
      * O(n) !
      */
     @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
+    public boolean exists(long sourceNodeId, long targetNodeId) {
         ExistsConsumer consumer = new ExistsConsumer(targetNodeId);
-        runForEach(sourceNodeId, direction, consumer);
+        runForEach(sourceNodeId, Direction.OUTGOING, consumer);
         return consumer.found;
     }
 

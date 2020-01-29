@@ -305,7 +305,7 @@ public final class CypherExporter {
 
         @Override
         public void forEachOutgoing(Graph graph, Long node, Consumer<Pair<Long, Long>> action) {
-            graph.forEachRelationship(node, Direction.OUTGOING, (s, t) -> {
+            graph.forEachRelationship(node, (s, t) -> {
                 action.accept(Tuples.pair(s, t));
                 return true;
             });

@@ -25,7 +25,6 @@ import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
@@ -36,7 +35,7 @@ public final class GraphHelper {
 
     public static double[] collectTargetProperties(final Graph graph, long sourceId) {
         DoubleStream.Builder outWeights = DoubleStream.builder();
-        graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING, 0D,
+        graph.forEachRelationship(graph.toMappedNodeId(sourceId), 0D,
                 (sourceNodeId, targetNodeId, weight) -> {
                     outWeights.add(weight);
                     return true;

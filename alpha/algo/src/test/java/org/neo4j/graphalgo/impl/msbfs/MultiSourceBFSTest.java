@@ -268,7 +268,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             }
 
             @Override
-            public boolean exists(final long sourceNodeId, final long targetNodeId, final Direction direction) {
+            public boolean exists(final long sourceNodeId, final long targetNodeId) {
                 return false;
             }
         };

@@ -194,9 +194,9 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
+    public boolean exists(long sourceNodeId, long targetNodeId) {
         ExistsConsumer consumer = new ExistsConsumer(targetNodeId);
-        forEachRelationship(sourceNodeId, direction, consumer);
+        forEachRelationship(sourceNodeId, consumer);
         return consumer.found;
 
     }

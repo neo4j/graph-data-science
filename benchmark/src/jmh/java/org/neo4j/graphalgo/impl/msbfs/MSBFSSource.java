@@ -90,7 +90,7 @@ public enum MSBFSSource {
         }
 
         @Override
-        public boolean exists(final long sourceNodeId, final long targetNodeId, final Direction direction) {
+        public boolean exists(long sourceNodeId, long targetNodeId) {
             return false;
         }
     }
@@ -125,7 +125,7 @@ public enum MSBFSSource {
         }
 
         @Override
-        public boolean exists(final long sourceNodeId, final long targetNodeId, final Direction direction) {
+        public boolean exists(long sourceNodeId, long targetNodeId) {
             return false;
         }
     }

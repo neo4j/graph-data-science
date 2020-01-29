@@ -168,7 +168,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
             MutableLong targetNodeId = new MutableLong(-1L);
             MutableInt counter = new MutableInt(0);
-            graph.concurrentCopy().forEachRelationship(currentNodeId, Direction.OUTGOING, (s, t) -> {
+            graph.concurrentCopy().forEachRelationship(currentNodeId, (s, t) -> {
                 if (counter.getAndIncrement() == randomEdgeIndex) {
                     targetNodeId.setValue(t);
                     return false;
@@ -209,7 +209,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         private double[] buildProbabilityDistribution(int currentNodeId, int previousNodeId,
                                                       double returnParam, double inOutParam, int degree) {
             ProbabilityDistributionComputer consumer = new ProbabilityDistributionComputer(degree, currentNodeId, previousNodeId, returnParam, inOutParam);
-            graph.concurrentCopy().forEachRelationship(currentNodeId, Direction.OUTGOING, longToIntConsumer(consumer));
+            graph.concurrentCopy().forEachRelationship(currentNodeId, longToIntConsumer(consumer));
             return consumer.probabilities();
         }
 
@@ -259,7 +259,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                 if (neighbourId == previousNodeId) {
                     // node is previous node
                     probability = 1D / returnParam;
-                } else if (graph.exists(previousNodeId, neighbourId, Direction.OUTGOING)) {
+                } else if (graph.exists(previousNodeId, neighbourId)) {
                     // node is also adjacent to previous node --> distance to previous node is 1
                     probability = 1D;
                 } else {

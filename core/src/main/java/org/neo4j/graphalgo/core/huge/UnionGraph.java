@@ -165,8 +165,8 @@ public final class UnionGraph implements Graph {
      * O(n) !
      */
     @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
-        return graphs.stream().anyMatch(g -> g.exists(sourceNodeId, targetNodeId, direction));
+    public boolean exists(long sourceNodeId, long targetNodeId) {
+        return graphs.stream().anyMatch(g -> g.exists(sourceNodeId, targetNodeId));
     }
 
     /*

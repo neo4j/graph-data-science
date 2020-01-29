@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongStack;
 import org.neo4j.graphalgo.core.utils.paged.PagedSimpleBitSet;
-import org.neo4j.graphdb.Direction;
 
 /**
  * huge iterative (non recursive) sequential strongly connected components algorithm.
@@ -189,7 +188,7 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
         stack.push(nodeId);
         boundaries.push(stackSize);
         push(Action.POSTVISIT, nodeId);
-        graph.forEachRelationship(nodeId, Direction.OUTGOING, (s, t) -> {
+        graph.forEachRelationship(nodeId, (s, t) -> {
             push(Action.VISITEDGE, t);
             return true;
         });

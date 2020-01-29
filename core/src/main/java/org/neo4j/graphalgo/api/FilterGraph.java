@@ -132,8 +132,8 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
-        return graph.exists(sourceNodeId, targetNodeId, direction);
+    public boolean exists(long sourceNodeId, long targetNodeId) {
+        return graph.exists(sourceNodeId, targetNodeId);
     }
 
     @Override

@@ -158,7 +158,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
+    public boolean exists(long sourceNodeId, long targetNodeId) {
         throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.exists is not implemented.");
     }
 

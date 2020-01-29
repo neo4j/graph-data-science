@@ -586,14 +586,14 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         rel1Graph.release();
 
         assertThrows(NullPointerException.class, () -> rel1Graph.forEachNode(n -> {
-            rel1Graph.forEachRelationship(n, OUTGOING, (s, t) -> true);
+            rel1Graph.forEachRelationship(n, (s, t) -> true);
             return true;
         }), "Graph should release");
 
         unionGraph.release();
 
         assertThrows(NullPointerException.class, () -> unionGraph.forEachNode(n -> {
-            unionGraph.forEachRelationship(n, OUTGOING, (s, t) -> true);
+            unionGraph.forEachRelationship(n, (s, t) -> true);
             return true;
         }), "UnionGraph should release");
     }

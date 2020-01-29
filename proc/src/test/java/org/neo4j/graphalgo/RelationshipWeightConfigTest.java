@@ -36,7 +36,6 @@ import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
 import org.neo4j.graphdb.DependencyResolver;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -188,7 +187,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
             Graph graph = proc.createGraph(configAndName);
             graph.forEachNode(nodeId -> {
-                graph.forEachRelationship(nodeId, Direction.OUTGOING, Double.NaN, (s, t, w) -> {
+                graph.forEachRelationship(nodeId, Double.NaN, (s, t, w) -> {
                     assertEquals(expectedWeight, w);
                     return true;
                 });
