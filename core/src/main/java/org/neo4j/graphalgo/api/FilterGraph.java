@@ -71,8 +71,8 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public int degree(long nodeId, Direction direction) {
-        return graph.degree(nodeId, direction);
+    public int degree(long nodeId) {
+        return graph.degree(nodeId);
     }
 
     @Override

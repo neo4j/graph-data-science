@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,7 +109,6 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         @Override
         public void run() {
             final RelationshipIterator threadLocalGraph = graph.concurrentCopy();
-            Direction loadDirection = graph.getLoadDirection();
             while (true) {
                 final int nodeId = nodeQueue.getAndIncrement();
                 if (nodeId >= nodeCount || !running()) {
@@ -118,7 +116,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
                 }
 
                 double[] weightedDegree = new double[1];
-                threadLocalGraph.forEachRelationship(nodeId, loadDirection, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
+                threadLocalGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
                     if(weight > 0) {
                         weightedDegree[0] += weight;
                     }
@@ -136,7 +134,6 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         @Override
         public void run() {
             final RelationshipIterator threadLocalGraph = graph.concurrentCopy();
-            Direction loadDirection = graph.getLoadDirection();
             double[] weightedDegree = new double[1];
             for (; ; ) {
                 final int nodeId = nodeQueue.getAndIncrement();
@@ -144,12 +141,12 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
                     return;
                 }
 
-                final HugeDoubleArray nodeWeights = HugeDoubleArray.newArray(graph.degree(nodeId, loadDirection), tracker);
+                final HugeDoubleArray nodeWeights = HugeDoubleArray.newArray(graph.degree(nodeId), tracker);
                 weights.set(nodeId, nodeWeights);
 
                 int[] index = {0};
                 weightedDegree[0] = 0D;
-                threadLocalGraph.forEachRelationship(nodeId, loadDirection, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
+                threadLocalGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
                     if(weight > 0) {
                         weightedDegree[0] += weight;
                     }

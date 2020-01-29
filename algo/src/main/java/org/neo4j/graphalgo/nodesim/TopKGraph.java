@@ -40,7 +40,7 @@ public class TopKGraph extends FilterGraph {
     }
 
     @Override
-    public int degree(long nodeId, Direction direction) {
+    public int degree(long nodeId) {
         TopKMap.TopKList topKList = topKMap.get(nodeId);
         return topKList != null ? topKList.size() : 0;
     }

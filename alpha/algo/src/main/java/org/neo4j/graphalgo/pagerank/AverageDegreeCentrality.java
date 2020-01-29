@@ -87,7 +87,7 @@ public class AverageDegreeCentrality extends Algorithm<AverageDegreeCentrality, 
                     return;
                 }
 
-                int degree = graph.degree(nodeId, graph.getLoadDirection());
+                int degree = graph.degree(nodeId);
                 histogram.recordValue(degree);
             }
         }

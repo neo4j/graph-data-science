@@ -133,8 +133,8 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public int degree(final long node, final Direction direction) {
-        return Math.toIntExact(graphs.stream().mapToLong(g -> g.degree(node, direction)).sum());
+    public int degree(long nodeId) {
+        return Math.toIntExact(graphs.stream().mapToLong(g -> g.degree(nodeId)).sum());
     }
 
     @Override

@@ -105,9 +105,9 @@ class CypherGraphFactoryTest {
         long node3 = graph.toMappedNodeId(id3);
 
         assertEquals(3, graph.nodeCount());
-        assertEquals(2, graph.degree(node1, Direction.OUTGOING));
-        assertEquals(1, graph.degree(node2, Direction.OUTGOING));
-        assertEquals(0, graph.degree(node3, Direction.OUTGOING));
+        assertEquals(2, graph.degree(node1));
+        assertEquals(1, graph.degree(node2));
+        assertEquals(0, graph.degree(node3));
         AtomicInteger total = new AtomicInteger();
         graph.forEachNode(n -> {
             graph.forEachRelationship(n, Direction.OUTGOING, Double.NaN, (s, t, w) -> {
@@ -317,7 +317,7 @@ class CypherGraphFactoryTest {
         assertEquals(COUNT, graph.nodeCount());
         AtomicInteger relCount = new AtomicInteger();
         graph.forEachNode(node -> {
-            relCount.addAndGet(graph.degree(node, Direction.OUTGOING));
+            relCount.addAndGet(graph.degree(node));
             return true;
         });
         assertEquals(COUNT, relCount.get());

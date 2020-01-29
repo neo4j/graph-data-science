@@ -30,14 +30,12 @@ import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningGraph;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
@@ -94,7 +92,6 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
             RelationshipExporter.of(
                 api,
                 new SpanningGraph(graph, spanningTree),
-                Direction.OUTGOING,
                 prim.getTerminationFlag()
             )
                 .withLog(log)

@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -81,9 +80,9 @@ final class LoadingTest {
 
         assertEquals(3, graph.nodeCount());
 
-        assertEquals(2, graph.degree(0, Direction.OUTGOING));
-        assertEquals(0, graph.degree(1, Direction.OUTGOING));
-        assertEquals(0, graph.degree(2, Direction.OUTGOING));
+        assertEquals(2, graph.degree(0));
+        assertEquals(0, graph.degree(1));
+        assertEquals(0, graph.degree(2));
 
         checkRels(graph, 0, 1, 2);
         checkRels(graph, 1);

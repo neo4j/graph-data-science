@@ -160,7 +160,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
         @Override
         public long getNextNode(long currentNodeId, long previousNodeId) {
-            int degree = degrees.degree(currentNodeId, Direction.OUTGOING);
+            int degree = degrees.degree(currentNodeId);
             if (degree == 0) {
                 return -1;
             }
@@ -195,7 +195,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             int currentNodeId = Math.toIntExact(currentNode);
             int previousNodeId = Math.toIntExact(previousNode);
 
-            int degree = degrees.degree(currentNodeId, Direction.OUTGOING);
+            int degree = degrees.degree(currentNodeId);
             if (degree == 0) {
                 return -1;
             }

@@ -37,7 +37,7 @@ public class SpanningGraph extends FilterGraph {
     }
 
     @Override
-    public int degree(long nodeId, Direction direction) {
+    public int degree(long nodeId) {
         if (spanningTree.parent[Math.toIntExact(nodeId)] == -1) {
             return Math.toIntExact(Arrays.stream(spanningTree.parent).filter(i -> i == -1).count());
         } else {

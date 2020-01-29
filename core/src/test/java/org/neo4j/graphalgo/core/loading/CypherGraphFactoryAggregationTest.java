@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -81,8 +80,8 @@ class CypherGraphFactoryAggregationTest {
         );
 
         assertEquals(2, graph.nodeCount());
-        assertEquals(1, graph.degree(graph.toMappedNodeId(id1), Direction.OUTGOING));
-        assertEquals(1, graph.degree(graph.toMappedNodeId(id2), Direction.OUTGOING));
+        assertEquals(1, graph.degree(graph.toMappedNodeId(id1)));
+        assertEquals(1, graph.degree(graph.toMappedNodeId(id2)));
     }
 
     @Test

@@ -69,7 +69,7 @@ class TestGraphTest {
         assertTrue(graph.hasRelationshipProperty());
         assertFalse(graph.isUndirected());
         assertFalse(graph.isEmpty());
-        assertEquals(Direction.BOTH, graph.getLoadDirection());
+        assertEquals(Direction.OUTGOING, graph.getLoadDirection());
         assertEquals(TestGraph.TYPE, graph.getType());
     }
 

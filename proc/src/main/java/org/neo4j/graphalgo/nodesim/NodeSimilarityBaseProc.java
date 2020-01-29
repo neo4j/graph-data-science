@@ -104,12 +104,7 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
                 () -> {
                     try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
                         RelationshipExporter exporter = RelationshipExporter
-                            .of(
-                                api,
-                                similarityGraph,
-                                similarityGraph.getLoadDirection(),
-                                algorithm.getTerminationFlag()
-                            )
+                            .of(api, similarityGraph, algorithm.getTerminationFlag())
                             .withLog(log)
                             .build();
                         if (shouldComputeHistogram) {

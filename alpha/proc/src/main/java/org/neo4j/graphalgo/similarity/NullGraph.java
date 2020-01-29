@@ -88,7 +88,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public int degree(long nodeId, Direction direction) {
+    public int degree(long nodeId) {
         throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.degree is not implemented.");
     }
 

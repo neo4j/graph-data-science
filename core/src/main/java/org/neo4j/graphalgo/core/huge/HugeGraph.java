@@ -376,24 +376,8 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public int degree(
-        final long node,
-        final Direction direction
-    ) {
-        switch (direction) {
-            case INCOMING:
-                return degree(node, inOffsets, inAdjacency);
-
-            case OUTGOING:
-                return degree(node, outOffsets, outAdjacency);
-
-            case BOTH:
-                return degree(node, inOffsets, inAdjacency) +
-                       degree(node, outOffsets, outAdjacency);
-
-            default:
-                throw new IllegalArgumentException(direction + "");
-        }
+    public int degree(final long node) {
+        return degree(node, outOffsets, outAdjacency);
     }
 
     @Override

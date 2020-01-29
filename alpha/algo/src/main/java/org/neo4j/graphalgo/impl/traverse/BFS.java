@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo.impl.traverse;
 
-import org.neo4j.graphdb.Direction;
-
 import java.util.function.LongConsumer;
 import java.util.function.LongPredicate;
 
 public interface BFS {
 
-    BFS bfs(long startNodeId, Direction direction, LongPredicate predicate, LongConsumer visitor);
+    BFS bfs(long startNodeId, LongPredicate predicate, LongConsumer visitor);
 
 }

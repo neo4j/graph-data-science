@@ -103,7 +103,7 @@ public final class TestGraph implements Graph {
 
     @Override
     public Direction getLoadDirection() {
-        return Direction.BOTH;
+        return Direction.OUTGOING;
     }
 
     @Override
@@ -118,8 +118,8 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public int degree(long nodeId, Direction direction) {
-        return adjacencyList.get(nodeId).degree(direction);
+    public int degree(long nodeId) {
+        return adjacencyList.get(nodeId).degree(getLoadDirection());
     }
 
     @Override
