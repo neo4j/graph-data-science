@@ -415,7 +415,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header",cols="1,1,1,1,1"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 8         | 14                | 304064   | 304064   | "297 KiB"
+| 8         | 14                | 304048   | 304048   | "297 KiB"
 |===
 
 [[algorithms-pagerank-examples-stats]]

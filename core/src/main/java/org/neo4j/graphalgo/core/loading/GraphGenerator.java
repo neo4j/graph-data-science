@@ -278,22 +278,22 @@ public final class GraphGenerator {
             flushBuffer();
             Relationships relationships = buildRelationships();
 
-            AdjacencyList outAdjacencyList = null;
-            AdjacencyOffsets outAdjacencyOffsets = null;
-            Optional<AdjacencyList> outProperties = Optional.empty();
-            Optional<AdjacencyOffsets> outPropertyOffsets = Optional.empty();
+            AdjacencyList adjacencyList;
+            AdjacencyOffsets adjacencyOffsets;
+            Optional<AdjacencyList> properties = Optional.empty();
+            Optional<AdjacencyOffsets> propertyOffsets = Optional.empty();
 
             // We either load outgoing or incoming or undirected.
             // The corresponding adjacency list is always stored in
             // the outgoing adjacency list of the resulting graph.
-            outAdjacencyList = loadOutgoing ? relationships.outAdjacency() : relationships.inAdjacency();
-            outAdjacencyOffsets = loadOutgoing ? relationships.outOffsets() : relationships.inOffsets();
+            adjacencyList = loadOutgoing ? relationships.outAdjacency() : relationships.inAdjacency();
+            adjacencyOffsets = loadOutgoing ? relationships.outOffsets() : relationships.inOffsets();
 
             if (loadRelationshipProperty) {
-                outProperties = loadOutgoing
+                properties = loadOutgoing
                     ? Optional.of(relationships.outRelProperties())
                     : Optional.of(relationships.inRelProperties());
-                outPropertyOffsets = loadOutgoing
+                propertyOffsets = loadOutgoing
                     ? Optional.of(relationships.outRelPropertyOffsets())
                     : Optional.of(relationships.inRelPropertyOffsets());
             }
@@ -303,15 +303,11 @@ public final class GraphGenerator {
                 idMap,
                 Collections.emptyMap(),
                 relationships.relationshipCount(),
-                null,
-                outAdjacencyList,
-                null,
-                outAdjacencyOffsets,
+                adjacencyList,
+                adjacencyOffsets,
                 Optional.empty(),
-                Optional.empty(),
-                outProperties,
-                Optional.empty(),
-                outPropertyOffsets,
+                properties,
+                propertyOffsets,
                 loadUndirected
             );
         }

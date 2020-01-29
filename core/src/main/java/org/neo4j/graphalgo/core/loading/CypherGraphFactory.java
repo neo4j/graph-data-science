@@ -168,8 +168,6 @@ public class CypherGraphFactory extends GraphFactory {
                             idsAndProperties.properties,
                             adjacencyList,
                             adjacencyOffsets,
-                            null,
-                            null,
                             relationshipCount,
                             setup.loadAsUndirected()
                         );
@@ -232,14 +230,10 @@ public class CypherGraphFactory extends GraphFactory {
             idMapping,
             nodeProperties,
             relationshipCount,
-            null,
             adjacencyList,
-            null,
             adjacencyOffsets,
             maybeDefaultValue,
-            Optional.empty(),
             Optional.ofNullable(propertyList),
-            Optional.empty(),
             Optional.ofNullable(propertyOffsets),
             loadAsUndirected
         );

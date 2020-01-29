@@ -28,9 +28,7 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
 
@@ -84,20 +82,15 @@ public class HugeGraph implements Graph {
 
     private final Map<String, NodeProperties> nodeProperties;
     private final long relationshipCount;
-    private AdjacencyList inAdjacency;
-    private AdjacencyList outAdjacency;
-    private AdjacencyOffsets inOffsets;
-    private AdjacencyOffsets outOffsets;
+    private AdjacencyList adjacencyList;
+    private AdjacencyOffsets adjacencyOffsets;
 
     private final double defaultPropertyValue;
-    private AdjacencyList inProperties;
-    private AdjacencyList outProperties;
-    private AdjacencyOffsets inPropertyOffsets;
-    private AdjacencyOffsets outPropertyOffsets;
+    private @Nullable AdjacencyList properties;
+    private @Nullable AdjacencyOffsets propertyOffsets;
 
-    private AdjacencyList.DecompressingCursor emptyAdjacencyCursor;
-    private AdjacencyList.DecompressingCursor inCache;
-    private AdjacencyList.DecompressingCursor outCache;
+    private AdjacencyList.DecompressingCursor emptyCursor;
+    private AdjacencyList.DecompressingCursor cursorCache;
 
     private boolean canRelease = true;
 
@@ -108,10 +101,8 @@ public class HugeGraph implements Graph {
         AllocationTracker tracker,
         IdMap idMapping,
         Map<String, NodeProperties> nodeProperties,
-        @Nullable AdjacencyList outAdjacencyList,
-        @Nullable AdjacencyOffsets outAdjacencyOffsets,
-        @Nullable AdjacencyList inAdjacencyList,
-        @Nullable AdjacencyOffsets inAdjacencyOffsets,
+        AdjacencyList adjacencyList,
+        AdjacencyOffsets adjacencyOffsets,
         long relationshipCount,
         boolean loadAsUndirected) {
 
@@ -120,12 +111,8 @@ public class HugeGraph implements Graph {
             idMapping,
             nodeProperties,
             relationshipCount,
-            inAdjacencyList,
-            outAdjacencyList,
-            inAdjacencyOffsets,
-            outAdjacencyOffsets,
-            Optional.empty(),
-            Optional.empty(),
+            adjacencyList,
+            adjacencyOffsets,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -137,15 +124,11 @@ public class HugeGraph implements Graph {
         IdMap idMapping,
         Map<String, NodeProperties> nodeProperties,
         long relationshipCount,
-        @Nullable AdjacencyList inAdjacency,
-        @Nullable AdjacencyList outAdjacency,
-        @Nullable AdjacencyOffsets inOffsets,
-        @Nullable AdjacencyOffsets outOffsets,
+        AdjacencyList adjacencyList,
+        AdjacencyOffsets adjacencyOffsets,
         Optional<Double> defaultPropertyValue,
-        Optional<AdjacencyList> inProperties,
-        Optional<AdjacencyList> outProperties,
-        Optional<AdjacencyOffsets> inPropertyOffsets,
-        Optional<AdjacencyOffsets> outPropertyOffsets,
+        Optional<AdjacencyList> properties,
+        Optional<AdjacencyOffsets> propertyOffsets,
         boolean isUndirected
     ) {
         return new HugeGraph(
@@ -153,43 +136,12 @@ public class HugeGraph implements Graph {
             idMapping,
             nodeProperties,
             relationshipCount,
-            inAdjacency,
-            outAdjacency,
-            inOffsets,
-            outOffsets,
-            inProperties.isPresent() || outProperties.isPresent(),
+            adjacencyList,
+            adjacencyOffsets,
+            properties.isPresent(),
             defaultPropertyValue.orElse(Double.NaN),
-            inProperties.orElse(null),
-            outProperties.orElse(null),
-            inPropertyOffsets.orElse(null),
-            outPropertyOffsets.orElse(null),
-            isUndirected
-        );
-    }
-
-    /**
-     * Create a HugeGraph based on an existing graph but with different topology.
-     * The new relationships must guarantee to connect nodes within the node space
-     * of the base graph.
-     */
-    public static HugeGraph create(HugeGraph baseGraph, Relationships relationships, boolean isUndirected) {
-        boolean hasRelationshipProperty = relationships.inRelProperties() != null || relationships.outRelProperties() != null;
-        double defaultPropertyValue = relationships.maybeDefaultRelProperty().orElse(baseGraph.defaultPropertyValue);
-        return new HugeGraph(
-            baseGraph.tracker,
-            baseGraph.idMapping,
-            baseGraph.nodeProperties,
-            relationships.relationshipCount(),
-            relationships.inAdjacency(),
-            relationships.outAdjacency(),
-            relationships.inOffsets(),
-            relationships.outOffsets(),
-            hasRelationshipProperty,
-            defaultPropertyValue,
-            relationships.inRelProperties(),
-            relationships.outRelProperties(),
-            relationships.inRelPropertyOffsets(),
-            relationships.outRelPropertyOffsets(),
+            properties.orElse(null),
+            propertyOffsets.orElse(null),
             isUndirected
         );
     }
@@ -199,36 +151,27 @@ public class HugeGraph implements Graph {
         IdMap idMapping,
         Map<String, NodeProperties> nodeProperties,
         long relationshipCount,
-        @Nullable AdjacencyList inAdjacency,
-        @Nullable AdjacencyList outAdjacency,
-        @Nullable AdjacencyOffsets inOffsets,
-        @Nullable AdjacencyOffsets outOffsets,
+        AdjacencyList adjacencyList,
+        AdjacencyOffsets adjacencyOffsets,
         boolean hasRelationshipProperty,
         double defaultPropertyValue,
-        @Nullable AdjacencyList inProperties,
-        @Nullable AdjacencyList outProperties,
-        @Nullable AdjacencyOffsets inPropertyOffsets,
-        @Nullable AdjacencyOffsets outPropertyOffsets,
+        @Nullable AdjacencyList properties,
+        @Nullable AdjacencyOffsets propertyOffsets,
         boolean isUndirected
     ) {
         this.idMapping = idMapping;
         this.tracker = tracker;
         this.nodeProperties = nodeProperties;
         this.relationshipCount = relationshipCount;
-        this.inAdjacency = inAdjacency;
-        this.outAdjacency = outAdjacency;
-        this.inOffsets = inOffsets;
-        this.outOffsets = outOffsets;
+        this.adjacencyList = adjacencyList;
+        this.adjacencyOffsets = adjacencyOffsets;
         this.defaultPropertyValue = defaultPropertyValue;
-        this.inProperties = inProperties;
-        this.outProperties = outProperties;
-        this.inPropertyOffsets = inPropertyOffsets;
-        this.outPropertyOffsets = outPropertyOffsets;
+        this.properties = properties;
+        this.propertyOffsets = propertyOffsets;
         this.isUndirected = isUndirected;
         this.hasRelationshipProperty = hasRelationshipProperty;
-        inCache = newAdjacencyCursor(this.inAdjacency);
-        outCache = newAdjacencyCursor(this.outAdjacency);
-        emptyAdjacencyCursor = inCache == null ? newAdjacencyCursor(this.outAdjacency) : newAdjacencyCursor(this.inAdjacency);
+        this.cursorCache = newAdjacencyCursor(this.adjacencyList);
+        this.emptyCursor = newAdjacencyCursor(this.adjacencyList);
     }
 
     @Override
@@ -242,7 +185,7 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public Collection<PrimitiveLongIterable> batchIterables(final int batchSize) {
+    public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
         return idMapping.batchIterables(batchSize);
     }
 
@@ -262,32 +205,15 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public double relationshipProperty(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
+    public double relationshipProperty(long sourceId, long targetId, double fallbackValue) {
         if (!hasRelationshipProperty) {
             return fallbackValue;
         }
 
         double maybeValue;
 
-        if (outProperties != null) {
-            maybeValue = findPropertyValue(
-                sourceNodeId,
-                targetNodeId,
-                outProperties,
-                outPropertyOffsets,
-                outAdjacency,
-                outOffsets
-            );
-            if (!Double.isNaN(maybeValue)) {
-                return maybeValue;
-            }
-        }
-
-        if (inProperties != null) {
-            maybeValue = findPropertyValue(targetNodeId, sourceNodeId, inProperties,
-                inPropertyOffsets, inAdjacency, inOffsets
-            );
-
+        if (properties != null) {
+            maybeValue = findPropertyValue(sourceId, targetId);
             if (!Double.isNaN(maybeValue)) {
                 return maybeValue;
             }
@@ -296,21 +222,14 @@ public class HugeGraph implements Graph {
         return defaultPropertyValue;
     }
 
-    private double findPropertyValue(
-        final long fromId,
-        final long toId,
-        final AdjacencyList properties,
-        final AdjacencyOffsets propertyOffsets,
-        final AdjacencyList adjacencies,
-        final AdjacencyOffsets adjacencyOffsets
-    ) {
+    private double findPropertyValue(long fromId, long toId) {
         long relOffset = adjacencyOffsets.get(fromId);
         if (relOffset == NO_SUCH_NODE) {
             return NO_PROPERTY_VALUE;
         }
         long propertyOffset = propertyOffsets.get(fromId);
 
-        AdjacencyList.DecompressingCursor relDecompressingCursor = adjacencies.decompressingCursor(relOffset);
+        AdjacencyList.DecompressingCursor relDecompressingCursor = adjacencyList.decompressingCursor(relOffset);
         AdjacencyList.Cursor propertyCursor = properties.cursor(propertyOffset);
 
         while (relDecompressingCursor.hasNextVLong() && propertyCursor.hasNextLong() && relDecompressingCursor.nextVLong() != toId) {
@@ -326,7 +245,7 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public NodeProperties nodeProperties(final String type) {
+    public NodeProperties nodeProperties(String type) {
         return nodeProperties.get(type);
     }
 
@@ -337,21 +256,24 @@ public class HugeGraph implements Graph {
 
     @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
-        runForEach(nodeId, Direction.OUTGOING, consumer);
+        runForEach(nodeId, consumer);
     }
 
     @Override
-    public void forEachRelationship(
-        long nodeId,
-        double fallbackValue,
-        RelationshipWithPropertyConsumer consumer
-    ) {
-        runForEachWithProperty(nodeId, Direction.OUTGOING, fallbackValue, consumer);
+    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
+        runForEach(nodeId, fallbackValue, consumer);
     }
 
     @Override
-    public int degree(final long node) {
-        return degree(node, outOffsets, outAdjacency);
+    public int degree(long node) {
+        if (adjacencyOffsets == null) {
+            return 0;
+        }
+        long offset = adjacencyOffsets.get(node);
+        if (offset == 0L) {
+            return 0;
+        }
+        return adjacencyList.getDegree(offset);
     }
 
     @Override
@@ -369,7 +291,7 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public boolean contains(final long nodeId) {
+    public boolean contains(long nodeId) {
         return idMapping.contains(nodeId);
     }
 
@@ -380,23 +302,19 @@ public class HugeGraph implements Graph {
             idMapping,
             nodeProperties,
             relationshipCount,
-            inAdjacency,
-            outAdjacency,
-            inOffsets,
-            outOffsets,
+            adjacencyList,
+            adjacencyOffsets,
             hasRelationshipProperty,
             defaultPropertyValue,
-            inProperties,
-            outProperties,
-            inPropertyOffsets,
-            outPropertyOffsets,
+            properties,
+            propertyOffsets,
             isUndirected
         );
     }
 
     @Override
     public RelationshipIntersect intersection() {
-        return new HugeGraphIntersectImpl(outAdjacency, outOffsets);
+        return new HugeGraphIntersectImpl(adjacencyList, adjacencyOffsets);
     }
 
     /**
@@ -405,7 +323,7 @@ public class HugeGraph implements Graph {
     @Override
     public boolean exists(long sourceNodeId, long targetNodeId) {
         ExistsConsumer consumer = new ExistsConsumer(targetNodeId);
-        runForEach(sourceNodeId, Direction.OUTGOING, consumer);
+        runForEach(sourceNodeId, consumer);
         return consumer.found;
     }
 
@@ -415,90 +333,48 @@ public class HugeGraph implements Graph {
     @Override
     public long getTarget(long sourceNodeId, long index) {
         GetTargetConsumer consumer = new GetTargetConsumer(index);
-        runForEach(sourceNodeId, Direction.OUTGOING, consumer);
+        runForEach(sourceNodeId, consumer);
         return consumer.target;
     }
 
-    private void runForEach(
-        long sourceNodeId,
-        Direction direction,
-        RelationshipConsumer consumer
-    ) {
-
-        if (direction == Direction.BOTH) {
-            runForEach(sourceNodeId, Direction.OUTGOING, consumer);
-            runForEach(sourceNodeId, Direction.INCOMING, consumer);
-            return;
-        }
-
-        AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(
-            sourceNodeId,
-            direction
-        );
-        consumeAdjacentNodes(sourceNodeId, adjacencyCursor, consumer);
+    private void runForEach(long sourceId, RelationshipConsumer consumer) {
+        AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(sourceId);
+        consumeAdjacentNodes(sourceId, adjacencyCursor, consumer);
     }
 
-    private void runForEachWithProperty(
-        long sourceNodeId,
-        Direction direction,
-        double fallbackValue,
-        RelationshipWithPropertyConsumer consumer
-    ) {
-
-        if (direction == Direction.BOTH) {
-            runForEachWithProperty(sourceNodeId, Direction.OUTGOING, fallbackValue, consumer);
-            runForEachWithProperty(sourceNodeId, Direction.INCOMING, fallbackValue, consumer);
-            return;
-        }
-
+    private void runForEach(long sourceId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         if (!hasRelationshipProperty()) {
-            runForEach(sourceNodeId, direction, (s, t) -> consumer.accept(s, t, fallbackValue));
+            runForEach(sourceId, (s, t) -> consumer.accept(s, t, fallbackValue));
         } else {
-            AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(
-                sourceNodeId,
-                direction
-            );
-
-            AdjacencyList.Cursor propertyCursor = propertyCursorForIteration(sourceNodeId, direction);
-            consumeAdjacentNodesWithProperty(sourceNodeId, adjacencyCursor, propertyCursor, consumer);
+            AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(sourceId);
+            AdjacencyList.Cursor propertyCursor = propertyCursorForIteration(sourceId);
+            consumeAdjacentNodesWithProperty(sourceId, adjacencyCursor, propertyCursor, consumer);
         }
     }
 
-    private AdjacencyList.DecompressingCursor adjacencyCursorForIteration(
-        long sourceNodeId,
-        Direction direction
-    ) {
-        if (direction == Direction.OUTGOING) {
-            return adjacencyCursor(
-                sourceNodeId,
-                outCache,
-                outOffsets,
-                outAdjacency
-            );
-        } else {
-            return adjacencyCursor(
-                sourceNodeId,
-                inCache,
-                inOffsets,
-                inAdjacency
-            );
+    private AdjacencyList.DecompressingCursor adjacencyCursorForIteration(long sourceNodeId) {
+        if (adjacencyOffsets == null) {
+            throw new NullPointerException();
         }
+        long offset = adjacencyOffsets.get(sourceNodeId);
+        if (offset == 0L) {
+            return emptyCursor;
+        }
+        return adjacencyList.decompressingCursor(cursorCache, offset);
+
     }
 
-    private AdjacencyList.Cursor propertyCursorForIteration(long sourceNodeId, Direction direction) {
-        if (direction == Direction.OUTGOING) {
-            return propertyCursor(
-                sourceNodeId,
-                outPropertyOffsets,
-                outProperties
-            );
-        } else {
-            return propertyCursor(
-                sourceNodeId,
-                inPropertyOffsets,
-                inProperties
-            );
+    private AdjacencyList.Cursor propertyCursorForIteration(long sourceNodeId) {
+        if (!hasRelationshipProperty()) {
+            throw new UnsupportedOperationException(
+                "Can not create property cursor on a graph without relationship property");
         }
+
+        long offset = propertyOffsets.get(sourceNodeId);
+        if (offset == 0L) {
+            return AdjacencyList.Cursor.EMPTY;
+        }
+        return properties.cursor(offset);
     }
 
     @Override
@@ -509,31 +385,23 @@ public class HugeGraph implements Graph {
     @Override
     public void releaseTopology() {
         if (!canRelease) return;
-        if (inAdjacency != null) {
-            tracker.remove(inAdjacency.release());
-            tracker.remove(inOffsets.release());
-            inAdjacency = null;
-            inProperties = null;
-            inOffsets = null;
-            inPropertyOffsets = null;
+
+        if (adjacencyList != null) {
+            tracker.remove(adjacencyList.release());
+            tracker.remove(adjacencyOffsets.release());
+            adjacencyList = null;
+            properties = null;
+            adjacencyOffsets = null;
+            propertyOffsets = null;
         }
-        if (outAdjacency != null) {
-            tracker.remove(outAdjacency.release());
-            tracker.remove(outOffsets.release());
-            outAdjacency = null;
-            outProperties = null;
-            outOffsets = null;
-            outPropertyOffsets = null;
-        }
-        emptyAdjacencyCursor = null;
-        inCache = null;
-        outCache = null;
+        emptyCursor = null;
+        cursorCache = null;
     }
 
     @Override
     public void releaseProperties() {
         if (canRelease) {
-            for (final NodeProperties nodeMapping : nodeProperties.values()) {
+            for (NodeProperties nodeMapping : nodeProperties.values()) {
                 tracker.remove(nodeMapping.release());
             }
         }
@@ -550,23 +418,19 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public HugeGraph withoutRelationshipProperties() {
+    public Graph withoutRelationshipProperties() {
         if (!hasRelationshipProperty()) {
             return this;
         } else {
-            HugeGraph graphWithoutProperties = new HugeGraph(
+            Graph graphWithoutProperties = new HugeGraph(
                 tracker,
                 idMapping,
                 nodeProperties,
                 relationshipCount,
-                inAdjacency,
-                outAdjacency,
-                inOffsets,
-                outOffsets,
+                adjacencyList,
+                adjacencyOffsets,
                 false,
                 Double.NaN,
-                null,
-                null,
                 null,
                 null,
                 isUndirected
@@ -576,80 +440,36 @@ public class HugeGraph implements Graph {
         }
     }
 
-    private AdjacencyList.DecompressingCursor newAdjacencyCursor(final AdjacencyList adjacency) {
+    private AdjacencyList.DecompressingCursor newAdjacencyCursor(AdjacencyList adjacency) {
         return adjacency != null ? adjacency.rawDecompressingCursor() : null;
     }
 
-    private int degree(long node, AdjacencyOffsets offsets, AdjacencyList array) {
-        if (offsets == null) {
-            return 0;
-        }
-        long offset = offsets.get(node);
-        if (offset == 0L) {
-            return 0;
-        }
-        return array.getDegree(offset);
-    }
-
-    private AdjacencyList.DecompressingCursor adjacencyCursor(
-        long node,
-        AdjacencyList.DecompressingCursor adjacencyCursor,
-        AdjacencyOffsets offsets,
-        AdjacencyList adjacencyList
-    ) {
-        if (offsets == null) {
-            throw new NullPointerException();
-        }
-        final long offset = offsets.get(node);
-        if (offset == 0L) {
-            return emptyAdjacencyCursor;
-        }
-        return adjacencyList.decompressingCursor(adjacencyCursor, offset);
-    }
-
-    private AdjacencyList.Cursor propertyCursor(
-        long node,
-        AdjacencyOffsets offsets,
-        AdjacencyList properties
-    ) {
-        if (!hasRelationshipProperty()) {
-            throw new UnsupportedOperationException(
-                "Can not create property cursor on a graph without relationship property");
-        }
-
-        final long offset = offsets.get(node);
-        if (offset == 0L) {
-            return AdjacencyList.Cursor.EMPTY;
-        }
-        return properties.cursor(offset);
-    }
-
     private void consumeAdjacentNodes(
-        long startNode,
+        long sourceId,
         AdjacencyList.DecompressingCursor adjacencyCursor,
         RelationshipConsumer consumer
     ) {
         while (adjacencyCursor.hasNextVLong()) {
-            if (!consumer.accept(startNode, adjacencyCursor.nextVLong())) {
+            if (!consumer.accept(sourceId, adjacencyCursor.nextVLong())) {
                 break;
             }
         }
     }
 
     private void consumeAdjacentNodesWithProperty(
-        long startNode,
+        long sourceId,
         AdjacencyList.DecompressingCursor adjacencyCursor,
         AdjacencyList.Cursor propertyCursor,
         RelationshipWithPropertyConsumer consumer
     ) {
 
         while (adjacencyCursor.hasNextVLong()) {
-            long targetNodeId = adjacencyCursor.nextVLong();
+            long targetId = adjacencyCursor.nextVLong();
 
             long propertyBits = propertyCursor.nextLong();
             double property = Double.longBitsToDouble(propertyBits);
 
-            if (!consumer.accept(startNode, targetNodeId, property)) {
+            if (!consumer.accept(sourceId, targetId, property)) {
                 break;
             }
         }

@@ -356,12 +356,12 @@ class LouvainTest extends AlgoTestBase {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1, 6414185, 16338896),
-            arguments(1, 10, 6414185, 23539256),
-            arguments(4, 1, 6417473, 22143272),
-            arguments(4, 10, 6417473, 29343632),
-            arguments(42, 1, 6459121, 98116760),
-            arguments(42, 10, 6459121, 105317120)
+            arguments(1, 1, 6414185, 16338880),
+            arguments(1, 10, 6414185, 23539240),
+            arguments(4, 1, 6417473, 22143256),
+            arguments(4, 10, 6417473, 29343616),
+            arguments(42, 1, 6459121, 98116744),
+            arguments(42, 10, 6459121, 105317104)
         );
     }
 

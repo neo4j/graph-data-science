@@ -66,14 +66,10 @@ public class ANNUtils {
             nodes.idMap(),
             nodes.properties(),
             hugeRels.relationshipCount(),
-            hugeRels.inAdjacency(),
             hugeRels.outAdjacency(),
-            hugeRels.inOffsets(),
             hugeRels.outOffsets(),
             hugeRels.maybeDefaultRelProperty(),
-            Optional.ofNullable(hugeRels.inRelProperties()),
             Optional.ofNullable(hugeRels.outRelProperties()),
-            Optional.ofNullable(hugeRels.inRelPropertyOffsets()),
             Optional.ofNullable(hugeRels.outRelPropertyOffsets()),
             false
         );
@@ -85,15 +81,11 @@ public class ANNUtils {
             nodes.idMap(),
             nodes.properties(),
             hugeRels.relationshipCount(),
-            null,
             hugeRels.outAdjacency(),
-            null,
             hugeRels.outOffsets(),
             hugeRels.maybeDefaultRelProperty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
+            Optional.ofNullable(hugeRels.outRelProperties()),
+            Optional.ofNullable(hugeRels.outRelPropertyOffsets()),
             false
         );
         Graph inGraph = HugeGraph.create(
@@ -101,15 +93,11 @@ public class ANNUtils {
             nodes.idMap(),
             nodes.properties(),
             hugeRels.relationshipCount(),
-            null,
             hugeRels.inAdjacency(),
-            null,
             hugeRels.inOffsets(),
             hugeRels.maybeDefaultRelProperty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
+            Optional.ofNullable(hugeRels.inRelProperties()),
+            Optional.ofNullable(hugeRels.inRelPropertyOffsets()),
             false
         );
 
