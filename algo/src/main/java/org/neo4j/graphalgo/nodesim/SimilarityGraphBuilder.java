@@ -100,7 +100,8 @@ class SimilarityGraphBuilder {
             true,
             Aggregation.NONE,
             executorService,
-            tracker
+            tracker,
+            false
         );
 
         relImporter.addFromInternal(stream);

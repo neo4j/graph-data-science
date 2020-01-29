@@ -58,23 +58,6 @@ public final class GraphGenerator {
         Direction direction,
         boolean undirected,
         boolean loadRelationshipProperty,
-        Aggregation aggregation
-    ) {
-        return createRelImporter(
-            nodeImporter,
-            direction,
-            undirected,
-            loadRelationshipProperty,
-            aggregation,
-            true
-        );
-    }
-
-    public static RelImporter createRelImporter(
-        NodeImporter nodeImporter,
-        Direction direction,
-        boolean undirected,
-        boolean loadRelationshipProperty,
         Aggregation aggregation,
         boolean legacyMode
     ) {
@@ -87,27 +70,6 @@ public final class GraphGenerator {
             nodeImporter.executorService,
             nodeImporter.tracker,
             legacyMode
-        );
-    }
-
-    public static RelImporter createRelImporter(
-        IdMap idMap,
-        Direction direction,
-        boolean undirected,
-        boolean loadRelationshipProperty,
-        Aggregation aggregation,
-        ExecutorService executorService,
-        AllocationTracker tracker
-    ) {
-        return createRelImporter(
-            idMap,
-            direction,
-            undirected,
-            loadRelationshipProperty,
-            aggregation,
-            executorService,
-            tracker,
-            true
         );
     }
 

@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.bench;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Direction;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -69,9 +69,9 @@ public class K1ColoringBenchmark {
     public void setup() {
         graph = UnionGraph.of(Arrays.asList(
             new RandomGraphGenerator(1_000_000, 50, RelationshipDistribution.POWER_LAW, 42L, Optional.empty(), AllocationTracker.EMPTY)
-                .generate(Direction.OUTGOING, false),
+                .generate(),
             new RandomGraphGenerator(1_000_000, 50, RelationshipDistribution.POWER_LAW, 42L, Optional.empty(), AllocationTracker.EMPTY)
-                .generate(Direction.INCOMING, false)
+                .generate()
         ));
     }
 
