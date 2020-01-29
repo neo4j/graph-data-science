@@ -28,7 +28,6 @@ public class ApproxSimilaritySummaryResult {
     public final long nodes;
     public final long similarityPairs;
     public final long computations;
-    public final boolean write;
     public final String writeRelationshipType;
     public final String writeProperty;
     public final double min;
@@ -50,7 +49,6 @@ public class ApproxSimilaritySummaryResult {
             long nodes,
             long similarityPairs,
             long computations,
-            boolean write,
             String writeRelationshipType,
             String writeProperty,
             double min,
@@ -69,7 +67,6 @@ public class ApproxSimilaritySummaryResult {
         this.nodes = nodes;
         this.similarityPairs = similarityPairs;
         this.computations = computations;
-        this.write = write;
         this.writeRelationshipType = writeRelationshipType;
         this.writeProperty = writeProperty;
         this.min = min;
@@ -106,7 +103,6 @@ public class ApproxSimilaritySummaryResult {
                 nodes,
                 similarityPairs,
                 computations,
-                write,
                 writeRelationshipType,
                 writeProperty,
                 histogram.getMinValue(),

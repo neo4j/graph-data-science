@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.neo4j.graphalgo.similarity;
 
 import org.intellij.lang.annotations.Language;
@@ -29,7 +28,6 @@ import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -70,7 +68,7 @@ public class ApproxNearestNeighborsDocTest extends BaseProcTest {
     String NL = System.lineSeparator();
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
@@ -135,14 +133,14 @@ public class ApproxNearestNeighborsDocTest extends BaseProcTest {
             "  concurrency: 1, " +
             "  write: true " +
             " }) " +
-            " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95 " +
-            " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95 ";
+            " YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95 " +
+            " RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95 ";
 
-        String expectedResult = "+---------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
-                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min                 | max                | mean                | p95                |" + NL +
-                                "+---------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
-                                "| 5     | 13              | true  | \"SIMILAR\"             | \"score\"       | 0.19999980926513672 | 0.6666669845581055 | 0.35277803738911945 | 0.6666669845581055 |" + NL +
-                                "+---------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
+        String expectedResult = "+-------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
+                                "| nodes | similarityPairs | writeRelationshipType | writeProperty | min                 | max                | mean                | p95                |" + NL +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
+                                "| 5     | 13              | \"SIMILAR\"             | \"score\"       | 0.19999980926513672 | 0.6666669845581055 | 0.35277803738911945 | 0.6666669845581055 |" + NL +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
                                 "1 row" + NL ;
 
         runQueryWithResultConsumer(query, result -> assertNotEquals(expectedResult, result.resultAsString()));

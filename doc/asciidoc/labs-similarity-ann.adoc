@@ -33,7 +33,7 @@ This section includes:
 [source, cypher]
 ----
 CALL gds.alpha.ml.ann.write(configuration: MAP)
-YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
 
@@ -55,7 +55,6 @@ Otherwise a list of maps of the following structure: `{item: nodeId, weights: [d
 | 'concurrency'             | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | 'readConcurrency'       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | 'writeConcurrency'      | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| 'write'                 | boolean | false                  | yes      | Indicates whether results should be stored.
 | 'writeBatchSize'        | int     | 10000                  | yes      | The batch size to use when storing results.
 | 'writeRelationshipType' | string  | SIMILAR                | yes      | The relationship type to use when storing results.
 | 'writeProperty'         | string  | score                  | yes      | The property to use when storing results.
@@ -67,7 +66,6 @@ Otherwise a list of maps of the following structure: `{item: nodeId, weights: [d
 | Name                    | Type    | Description
 | 'nodes'                 | int     | The number of nodes passed in.
 | 'similarityPairs'       | int     | The number of pairs of similar nodes computed.
-| 'write'                 | boolean | Indicates whether results were stored.
 | 'writeRelationshipType' | string  | The relationship type used when storing results.
 | 'writeProperty'         | string  | The property used when storing results.
 | 'min'                   | double  | The minimum similarity score computed.
@@ -223,16 +221,16 @@ We'd probably want to filter those out, which we can do by passing in the `simil
   concurrency: 1,
   write: true
  })
- YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
- RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
+ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+ RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
 ----
 
 
 .Results
 [opts="header"]
 |===
-| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min               | max              | mean             | p95
-| 5     |13               |true   |SIMILAR                | score         |0.19999980926513672|0.6666669845581055|0.3512822664701022|0.6666669845581055
+| nodes | similarityPairs | writeRelationshipType | writeProperty | min                 | max                | mean               | p95
+| 5     | 13              | "SIMILAR"             | "score"       | 0.19999980926513672 | 0.6666669845581055 | 0.3512822664701022 | 0.6666669845581055
 |===
 
 
@@ -252,10 +250,10 @@ We then could write a query to find out what types of cuisine that other people 
 .Results
 [opts="header"]
 |===
-| cuisine   | count
-| Italian   | 2
-| French    | 1
-| Lebanese  | 1
+| cuisine    | count
+| "Italian"  | 2
+| "French"   | 1
+| "Lebanese" | 1
 |===
 
 [[ann-usage]]
