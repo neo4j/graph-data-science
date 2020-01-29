@@ -49,17 +49,10 @@ public final class CanonicalAdjacencyMatrix {
             return true;
         });
 
-        // canonical relationships
-        Direction direction = (g.getLoadDirection() == Direction.BOTH || g.getLoadDirection() == Direction.OUTGOING)
-                ? Direction.OUTGOING
-                : Direction.INCOMING;
-
         Map<Long, List<String>> outAdjacencies = new HashMap<>();
         Map<Long, List<String>> inAdjacencies = new HashMap<>();
         g.forEachNode(nodeId -> {
-            g.forEachRelationship(nodeId, direction, 1.0, (source, target, propertyValue) -> {
-                long sourceId = (direction == Direction.OUTGOING) ? source : target;
-                long targetId = (direction == Direction.OUTGOING) ? target : source;
+            g.forEachRelationship(nodeId, 1.0, (sourceId, targetId, propertyValue) -> {
                 outAdjacencies.compute(
                         sourceId,
                         canonicalRelationship(canonicalNodeLabels.get(targetId), propertyValue, "()-[w: %f]->%s"));

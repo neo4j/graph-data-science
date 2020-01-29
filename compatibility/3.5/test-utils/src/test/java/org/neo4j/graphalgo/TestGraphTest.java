@@ -23,8 +23,6 @@ package org.neo4j.graphalgo;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphdb.Direction;
 import org.s1ck.gdl.GDLHandler;
@@ -82,13 +80,12 @@ class TestGraphTest {
         assertEquals(Arrays.asList(1d, 2d, 3d), nodeProps);
     }
 
-    @ParameterizedTest
-    @EnumSource(Direction.class)
-    void testForAllRelationships(Direction direction) {
+    @Test
+    void testForAllRelationships() {
         Graph graph = TestGraph.Builder.fromGdl("(a),(b),(c),(a)-[{w:1}]->(b),(a)-[{w:2}]->(c),(b)-[{w:3}]->(c)");
         Set<Double> relProps = Sets.newHashSet();
         graph.forEachNode(nodeId -> {
-            graph.forEachRelationship(nodeId, direction, 1.0, (s, t, w) -> {
+            graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                 relProps.add(w);
                 return true;
             });

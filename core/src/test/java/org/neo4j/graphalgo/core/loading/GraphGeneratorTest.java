@@ -21,12 +21,15 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,8 +39,10 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class GraphGeneratorTest {
 
-    public static final Graph EXPECTED_WITH_AGGREGATION = fromGdl("(a)-[{w: 0.0}]->(b)-[{w: 2.0}]->(c)-[{w: 4.0}]->(d)-[{w: 6.0}]->(a)");
-    public static final Graph EXPECTED_WITHOUT_AGGREGATION = fromGdl(
+    private static final String EXPECTED_WITH_AGGREGATION =
+        "(a)-[{w: 0.0}]->(b)-[{w: 2.0}]->(c)-[{w: 4.0}]->(d)-[{w: 6.0}]->(a)";
+
+    private static final String EXPECTED_WITHOUT_AGGREGATION_GRAPH =
         "(a)-[{w: 0.0}]->(b)" +
         "(a)-[{w: 0.0}]->(b)" +
         "(b)-[{w: 1.0}]->(c)" +
@@ -45,12 +50,33 @@ class GraphGeneratorTest {
         "(c)-[{w: 2.0}]->(d)" +
         "(c)-[{w: 2.0}]->(d)" +
         "(d)-[{w: 3.0}]->(a)" +
-        "(d)-[{w: 3.0}]->(a)"
-    );
-    public static final Graph EXPECTED_UNWEIGHTED = fromGdl("(a)-->(b)-->(c)-->(d)-->(a)");
+        "(d)-[{w: 3.0}]->(a)";
+
+    private static final String EXPECTED_UNWEIGHTED_GRAPH =
+        "(a)-->(b)-->(c)-->(d)-->(a)";
+
+    private static Graph expectedWithAggregation(Projection projection) {
+        return fromGdl(EXPECTED_WITH_AGGREGATION, projection);
+    }
+
+    private static Graph expectedWithoutAggregation(Projection projection) {
+        return fromGdl(EXPECTED_WITHOUT_AGGREGATION_GRAPH, projection);
+    }
+
+    private static Graph expectedUnweighted(Projection projection) {
+        return fromGdl(EXPECTED_UNWEIGHTED_GRAPH, projection);
+    }
+
+    static Stream<Direction> validDirections() {
+        return Stream.of(Direction.OUTGOING, Direction.INCOMING);
+    }
+
+    static Projection toProjection(Direction direction) {
+        return direction == Direction.OUTGOING ? Projection.NATURAL : Projection.REVERSE;
+    }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(value = Direction.class)
+    @MethodSource("validDirections")
     void unweighted(Direction direction) {
         int nodeCount = 4;
         GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
@@ -68,45 +94,42 @@ class GraphGeneratorTest {
             direction,
             false,
             false,
-            Aggregation.SUM
+            Aggregation.SUM,
+            false
         );
 
         for (int i = 0; i < nodeCount; i++) {
             relImporter.add(i, (i + 1) % nodeCount);
         }
         Graph graph = relImporter.buildGraph();
-        assertGraphEquals(EXPECTED_UNWEIGHTED, graph);
+        assertGraphEquals(expectedUnweighted(toProjection(direction)), graph);
         assertEquals(nodeCount, graph.relationshipCount());
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(value = Direction.class)
+    @MethodSource("validDirections")
     void weightedWithAggregation(Direction direction) {
         Graph graph = generateGraph(direction, false, Aggregation.SUM);
-        assertGraphEquals(EXPECTED_WITH_AGGREGATION, graph);
-        assertEquals(direction, graph.getLoadDirection());
+        assertGraphEquals(expectedWithAggregation(toProjection(direction)), graph);
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(value = Direction.class)
+    @MethodSource("validDirections")
     void weightedWithoutAggregation(Direction direction) {
         Graph graph = generateGraph(direction, false, Aggregation.NONE);
-        assertGraphEquals(EXPECTED_WITHOUT_AGGREGATION, graph);
-        assertEquals(direction, graph.getLoadDirection());
+        assertGraphEquals(expectedWithoutAggregation(toProjection(direction)), graph);
     }
 
     @Test
     void undirectedWithAggregation() {
         Graph graph = generateGraph(Direction.OUTGOING, true, Aggregation.SUM);
-        assertGraphEquals(EXPECTED_WITH_AGGREGATION, graph);
-        assertEquals(Direction.OUTGOING, graph.getLoadDirection());
+        assertGraphEquals(expectedWithAggregation(Projection.UNDIRECTED), graph);
     }
 
     @Test
     void undirectedWithoutAggregation() {
         Graph graph = generateGraph(Direction.OUTGOING, true, Aggregation.NONE);
-        assertGraphEquals(EXPECTED_WITHOUT_AGGREGATION, graph);
-        assertEquals(Direction.OUTGOING, graph.getLoadDirection());
+        assertGraphEquals(expectedWithoutAggregation(Projection.UNDIRECTED), graph);
     }
 
     @Test
@@ -136,7 +159,8 @@ class GraphGeneratorTest {
             outgoing,
             undirected,
             true,
-            aggregation
+            aggregation,
+            false
         );
 
         for (int i = 0; i < nodeCount; i++) {
