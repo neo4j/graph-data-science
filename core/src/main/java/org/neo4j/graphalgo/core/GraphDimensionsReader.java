@@ -73,38 +73,28 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         RelationshipProjectionMappings.Builder mappingsBuilder = new RelationshipProjectionMappings.Builder();
         if (readTokens) {
-            if (setup.legacyMode()) {
-                if (!loadAnyRelationshipType()) {
-                    Set<String> types = ProjectionParser.parse(setup.relationshipType());
-                    for (String typeName : types) {
-                        int typeId = tokenRead.relationshipType(typeName);
-                        RelationshipProjectionMapping typeMapping = RelationshipProjectionMapping.of(typeName, typeId);
-                        mappingsBuilder.addMapping(typeMapping);
-                    }
-                }
-            } else {
-                for (Map.Entry<ElementIdentifier, RelationshipProjection> entry : setup.relationshipProjections().projections().entrySet()) {
-                    RelationshipProjection relationshipProjection = entry.getValue();
+            for (Map.Entry<ElementIdentifier, RelationshipProjection> entry : setup.relationshipProjections().projections().entrySet()) {
+                RelationshipProjection relationshipProjection = entry.getValue();
 
-                    if (!relationshipProjection.type().isPresent()) {
-                        mappingsBuilder.addMapping(RelationshipProjectionMapping.all(relationshipProjection.projection()));
-                    } else {
-                        String elementIdentifier = entry.getKey().name;
-                        String typeName = relationshipProjection.type().get();
-                        Projection projection = relationshipProjection.projection();
-                        int typeId = tokenRead.relationshipType(typeName);
+                if (!relationshipProjection.type().isPresent()) {
+                    mappingsBuilder.addMapping(RelationshipProjectionMapping.all(relationshipProjection.projection()));
+                } else {
+                    String elementIdentifier = entry.getKey().name;
+                    String typeName = relationshipProjection.type().get();
+                    Projection projection = relationshipProjection.projection();
+                    int typeId = tokenRead.relationshipType(typeName);
 
-                        RelationshipProjectionMapping typeMapping = RelationshipProjectionMapping.of(
-                            elementIdentifier,
-                            typeName,
-                            projection,
-                            typeId
-                        );
-                        mappingsBuilder.addMapping(typeMapping);
-                    }
+                    RelationshipProjectionMapping typeMapping = RelationshipProjectionMapping.of(
+                        elementIdentifier,
+                        typeName,
+                        projection,
+                        typeId
+                    );
+                    mappingsBuilder.addMapping(typeMapping);
                 }
             }
         }
+
         RelationshipProjectionMappings relationshipProjectionMappings = mappingsBuilder.build();
 
         ResolvedPropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings());

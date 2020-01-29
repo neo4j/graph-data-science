@@ -50,22 +50,13 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         List<SingleTypeRelationshipImporter.Builder.WithImporter> builders = importerBuilders
                 .stream()
                 .map(relImporter -> {
-                    if (setup.legacyMode()) {
-                        return relImporter.loadImporter(
-                            setup.loadAsUndirected(),
-                            setup.loadOutgoing(),
-                            setup.loadIncoming(),
-                            loadWeights
-                        );
-                    } else {
-                        RelationshipProjectionMapping relationshipProjectionMapping = relImporter.mapping();
-                        return relImporter.loadImporter(
-                            relationshipProjectionMapping.projection() == Projection.UNDIRECTED,
-                            relationshipProjectionMapping.projection() == Projection.NATURAL,
-                            relationshipProjectionMapping.projection() == Projection.REVERSE,
-                            loadWeights
-                        );
-                    }
+                    RelationshipProjectionMapping relationshipProjectionMapping = relImporter.mapping();
+                    return relImporter.loadImporter(
+                        relationshipProjectionMapping.projection() == Projection.UNDIRECTED,
+                        relationshipProjectionMapping.projection() == Projection.NATURAL,
+                        relationshipProjectionMapping.projection() == Projection.REVERSE,
+                        loadWeights
+                    );
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
