@@ -24,7 +24,6 @@ import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphdb.Direction;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
 
@@ -67,7 +66,6 @@ class TestGraphTest {
         assertTrue(graph.hasRelationshipProperty());
         assertFalse(graph.isUndirected());
         assertFalse(graph.isEmpty());
-        assertEquals(Direction.OUTGOING, graph.getLoadDirection());
         assertEquals(TestGraph.TYPE, graph.getType());
     }
 

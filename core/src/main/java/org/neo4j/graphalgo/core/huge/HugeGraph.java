@@ -586,18 +586,6 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public Direction getLoadDirection() {
-        if (inOffsets != null && outOffsets != null) {
-            return Direction.BOTH;
-        } else if (inOffsets != null) {
-            return Direction.INCOMING;
-        } else {
-            assert (outOffsets != null);
-            return Direction.OUTGOING;
-        }
-    }
-
-    @Override
     public HugeGraph withoutRelationshipProperties() {
         if (!hasRelationshipProperty()) {
             return this;

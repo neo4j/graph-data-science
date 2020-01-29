@@ -203,11 +203,6 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public Direction getLoadDirection() {
-        return first.getLoadDirection();
-    }
-
-    @Override
     public boolean hasRelationshipProperty() {
         return first.hasRelationshipProperty();
     }

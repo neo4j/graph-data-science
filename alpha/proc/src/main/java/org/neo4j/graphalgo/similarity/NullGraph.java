@@ -64,12 +64,6 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public Direction getLoadDirection() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.getLoadDirection is not implemented.");
-    }
-
-    @Override
     public void canRelease(boolean canRelease) {
         throw new UnsupportedOperationException(
             "org.neo4j.graphalgo.similarity.NullGraph.canRelease is not implemented.");

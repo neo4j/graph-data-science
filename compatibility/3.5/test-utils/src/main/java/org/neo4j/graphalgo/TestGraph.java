@@ -102,11 +102,6 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public Direction getLoadDirection() {
-        return Direction.OUTGOING;
-    }
-
-    @Override
     public void canRelease(boolean canRelease) { }
 
     @Override

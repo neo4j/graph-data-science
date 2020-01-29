@@ -51,11 +51,6 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public Direction getLoadDirection() {
-        return graph.getLoadDirection();
-    }
-
-    @Override
     public void canRelease(boolean canRelease) {
         graph.canRelease(canRelease);
     }
