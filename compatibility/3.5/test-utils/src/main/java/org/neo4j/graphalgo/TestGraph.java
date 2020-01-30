@@ -226,6 +226,10 @@ public final class TestGraph implements Graph {
             this.sourceId = sourceId;
             this.targetId = targetId;
         }
+
+        Relationship flip() {
+            return new Relationship(id, targetId, sourceId);
+        }
     }
 
     private static class Adjacency {
@@ -322,18 +326,11 @@ public final class TestGraph implements Graph {
             Map<Long, Adjacency> adjacencyList = new HashMap<>();
 
             for (Vertex vertex : vertices) {
-                List<Relationship> rels;
-                if (projection == Projection.NATURAL || projection == Projection.UNDIRECTED) {
-                    rels = edges.stream()
-                        .filter(e -> e.getSourceVertexId() == vertex.getId())
-                        .map(e -> new Relationship(e.getId(), e.getSourceVertexId(), e.getTargetVertexId()))
-                        .collect(toList());
-                } else {
-                    rels = edges.stream()
-                        .filter(e -> e.getTargetVertexId() == vertex.getId())
-                        .map(e -> new Relationship(e.getId(), e.getTargetVertexId(), e.getSourceVertexId()))
-                        .collect(toList());
-                }
+                List<Relationship> rels = edges.stream()
+                    .filter(e -> e.getSourceVertexId() == vertex.getId())
+                    .map(e -> new Relationship(e.getId(), e.getSourceVertexId(), e.getTargetVertexId()))
+                    .map(e -> projection == Projection.REVERSE ? e.flip() : e)
+                    .collect(toList());
 
                 adjacencyList.put(vertex.getId(), new Adjacency(rels));
             }

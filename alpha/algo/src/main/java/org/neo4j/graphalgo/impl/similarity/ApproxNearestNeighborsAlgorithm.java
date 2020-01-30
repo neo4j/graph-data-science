@@ -134,12 +134,12 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             }
             tempVisitedRelationships = ANNUtils.initializeRoaringBitmaps(inputSize);
 
-            HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipBuilder = new HugeRelationshipsBuilder(
-                nodes).withBuffer();
+            HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipBuilder =
+                new HugeRelationshipsBuilder(nodes).withBuffer();
             relationshipBuilder.addRelationshipsFrom(topKConsumers);
-            Relationships hugeRels = relationshipBuilder.build();
+            Relationships relationships = relationshipBuilder.build();
 
-            Graph graph = ANNUtils.createGraphsByRelationshipType(nodes, hugeRels).getUnion();
+            Graph graph = ANNUtils.createGraphsByRelationshipType(nodes, relationships).getUnion();
             HugeRelationshipsBuilder oldRelationshipsBuilder = new HugeRelationshipsBuilder(nodes);
             HugeRelationshipsBuilder newRelationshipBuilder = new HugeRelationshipsBuilder(nodes);
 
