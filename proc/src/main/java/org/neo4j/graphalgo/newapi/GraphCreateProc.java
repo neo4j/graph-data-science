@@ -174,7 +174,7 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     private Stream<MemoryEstimateResult> estimateGraph(GraphCreateConfig config, Class<? extends GraphFactory> factoryClazz) {
-        ModernGraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+        GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(factoryClazz);
         GraphDimensions dimensions = graphFactory.dimensions();
         MemoryTree memoryTree = estimate(loader.toSetup(), graphFactory, config);
