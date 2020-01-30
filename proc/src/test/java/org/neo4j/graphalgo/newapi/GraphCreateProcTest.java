@@ -747,8 +747,8 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = "CALL gds.graph.create.estimate('*', $relProjection)";
         runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
             row -> {
-                assertEquals(303520, row.getNumber("bytesMin").longValue());
-                assertEquals(303520, row.getNumber("bytesMax").longValue());
+                assertEquals(303504, row.getNumber("bytesMin").longValue());
+                assertEquals(303504, row.getNumber("bytesMax").longValue());
             }
         );
     }
@@ -767,8 +767,8 @@ class GraphCreateProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
             row -> {
-                assertEquals(573952, row.getNumber("bytesMin").longValue());
-                assertEquals(573952, row.getNumber("bytesMax").longValue());
+                assertEquals(573936, row.getNumber("bytesMin").longValue());
+                assertEquals(573936, row.getNumber("bytesMax").longValue());
             }
         );
     }
@@ -786,8 +786,8 @@ class GraphCreateProcTest extends BaseProcTest {
             query,
             map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
             row -> {
-                assertEquals(303520, row.getNumber("bytesMin").longValue());
-                assertEquals(303520, row.getNumber("bytesMax").longValue());
+                assertEquals(303504, row.getNumber("bytesMin").longValue());
+                assertEquals(303504, row.getNumber("bytesMax").longValue());
             }
         );
     }
@@ -805,8 +805,8 @@ class GraphCreateProcTest extends BaseProcTest {
             query,
             map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
             row -> {
-                assertEquals(573952, row.getNumber("bytesMin").longValue());
-                assertEquals(573952, row.getNumber("bytesMax").longValue());
+                assertEquals(573936, row.getNumber("bytesMin").longValue());
+                assertEquals(573936, row.getNumber("bytesMax").longValue());
             }
         );
     }
@@ -819,8 +819,8 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
         runQueryWithRowConsumer(localDb, query,
             row -> {
-                assertEquals(303760, row.getNumber("bytesMin").longValue());
-                assertEquals(303760, row.getNumber("bytesMax").longValue());
+                assertEquals(303744, row.getNumber("bytesMin").longValue());
+                assertEquals(303744, row.getNumber("bytesMax").longValue());
             }
         );
     }
@@ -833,8 +833,8 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = "CALL gds.graph.create.estimate('*', {`*`: {type: '', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
         runQueryWithRowConsumer(localDb, query,
             row -> {
-                assertEquals(574192, row.getNumber("bytesMin").longValue());
-                assertEquals(574192, row.getNumber("bytesMax").longValue());
+                assertEquals(574176, row.getNumber("bytesMin").longValue());
+                assertEquals(574176, row.getNumber("bytesMax").longValue());
             }
         );
     }
