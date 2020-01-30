@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.beta.generator;
 
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.HugeGraph;

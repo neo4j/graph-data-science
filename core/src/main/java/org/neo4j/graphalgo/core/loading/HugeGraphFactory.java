@@ -125,11 +125,8 @@ public final class HugeGraphFactory extends GraphFactory {
         GraphDimensions dimensions,
         GraphSetup setup
     ) {
-        // ops for scanning degrees
-        long relOperations = LOAD_DEGREES ? dimensions.maxRelCount() : 0L;
-
         // batching for undirected double the amount of rels imported
-        relOperations = setup.relationshipProjections().projections().entrySet().stream().map(entry -> {
+        long relOperations = setup.relationshipProjections().projections().entrySet().stream().map(entry -> {
             Long relCount = dimensions.relationshipCounts().getOrDefault(entry.getKey().name, 0L);
             return entry.getValue().projection() == Projection.UNDIRECTED
                 ? relCount * 2

@@ -31,8 +31,7 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
     }
 
     /**
-     * @return if supported, returns the total number of relationships in the graph.
-     * @throws UnsupportedOperationException
+     * @return returns the total number of relationships in the graph.
      */
     long relationshipCount();
 
