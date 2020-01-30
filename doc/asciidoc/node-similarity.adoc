@@ -4,6 +4,7 @@
 [abstract]
 --
 This section describes the Node Similarity algorithm in the Neo4j Graph Algorithms library.
+The algorithm is based on the Jaccard Similarity score.
 --
 
 This topic includes:
@@ -24,7 +25,13 @@ This topic includes:
 
 The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to.
 Two nodes are considered similar if they share many of the same neighbors.
-Node Similarity computes pair-wise similarities based on the Jaccard metric.
+Node Similarity computes pair-wise similarities based on the Jaccard metric, also known as the Jaccard Similarity Score.
+
+Jaccard Similarity is computed using the following formula:
+
+image::jaccard.png[role="middle"]
+// This is the raw information for this image:
+// // J(A,B) = ∣A ∩ B∣ / ∣(A ∪ B)∣ // = ∣A ∩ B∣ / ∣A∣ + ∣B∣ - ∣A ∩ B| //
 
 The input of this algorithm is a bipartite, connected graph containing two disjoint node sets.
 Each relationship starts from a node in the first node set and ends at a node in the second node set.
@@ -39,6 +46,8 @@ It can be set to any value, except 0.
 
 The output of the algorithm are new relationships between pairs of the first node set.
 Similarity scores are expressed via relationship properties.
+
+A related function for computing Jaccard similarity is described in <<labs-algorithms-similarity-jaccard>>.
 
 For more information on this algorithm, see:
 
@@ -56,7 +65,7 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 [[algorithms-node-similarity-syntax]]
 == Syntax
 
-.The following describes the API for running the algorithm and writing results back to Neo4j:
+.The following describes the API for running the algorithm and writing the similarity scores back to Neo4j:
 [source, cypher]
 ----
 CALL gds.nodeSimilarity.write(graphName: STRING, {
@@ -109,7 +118,7 @@ YIELD nodesCompared, relationships, writeRelationshipType, writeProperty
 |===
 
 [[algorithms-node-similarity-syntax-stream]]
-.The following describes the API for running the algorithm and streaming results:
+.The following describes the API for running the algorithm and streaming node pairs and their Jaccard similarity:
 [source, cypher]
 ----
 CALL gds.nodeSimilarity.stream(graphName: STRING, {
@@ -182,7 +191,7 @@ This bipartite graph has two node sets, Person nodes and Instrument nodes.
 The two node sets are connected via LIKES relationships.
 Each relationship starts at a Person node and ends at an Instrument node.
 
-In the example, we want to use the Node Similarity algorithm to compare persons based on the instruments they like.
+In the example, we want to use the Node Similarity algorithm to compare people based on the instruments they like.
 
 The Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1.
 In the example graph, the Eve node will not be compared to other Person nodes.
@@ -230,7 +239,7 @@ Because of that the result set contains the top 10 similarity scores for each no
 
 To instead write the similarity results back to the graph in Neo4j, use the following query.
 Each result is written as a new relationship between the compared nodes.
-The similarity score is written as a property on the relationship.
+The Jaccard similarity score is written as a property on the relationship.
 
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
@@ -284,7 +293,7 @@ The default value for topK and bottomK is 10.
 TopK and bottomK are limits on the number of scores computed per node.
 For topK, the K largest similarity scores per node are returned.
 For bottomK, the K smallest similarity scores per node are returned.
-TopK and bottomK cannot be 0, used in conjuntion, and the default value is 10.
+TopK and bottomK cannot be 0, used in conjunction, and the default value is 10.
 If neither is specified, topK is used.
 
 .The following will load the graph, run the algorithm, and stream the top 1 result per node:
@@ -406,7 +415,7 @@ The default value is very small (`1E-42`) to exclude results with a similarity s
 Setting similarity cutoff to 0 may yield a very large result set, increased runtime and memory consumption.
 ====
 
-.The following will ignore node pairs with a similarty score less than 0.5:
+.The following will ignore node pairs with a similarity score less than 0.5:
 [source, cypher]
 ----
 CALL gds.nodeSimilarity.stream({
