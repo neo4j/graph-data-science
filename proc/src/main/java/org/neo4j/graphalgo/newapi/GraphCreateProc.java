@@ -21,19 +21,20 @@ package org.neo4j.graphalgo.newapi;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.GraphDimensionsValidation;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -189,9 +190,13 @@ public class GraphCreateProc extends CatalogProc {
             .from(factory.dimensions())
             .nodeCount(config.nodeCount())
             .highestNeoId(config.nodeCount())
+            .relationshipProjectionMappings(RelationshipProjectionMappings.all())
             .maxRelCount(Math.max(config.relationshipCount(), 0))
             .build();
-        return factory.memoryEstimation(setup, dimensions).estimate(dimensions, config.concurrency());
+
+        GraphDimensionsValidation.validate(dimensions, setup);
+
+        return factory.memoryEstimation(dimensions).estimate(dimensions, config.concurrency());
     }
 
     public static class GraphCreateResult {

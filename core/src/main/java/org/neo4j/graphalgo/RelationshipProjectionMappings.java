@@ -32,6 +32,10 @@ public final class RelationshipProjectionMappings implements Iterable<Relationsh
 
     private final RelationshipProjectionMapping[] mappings;
 
+    public static RelationshipProjectionMappings all() {
+        return ALL;
+    }
+
     public static RelationshipProjectionMappings of(RelationshipProjectionMapping... mappings) {
         if (mappings == null || mappings.length == 0) {
             return ALL;

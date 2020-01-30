@@ -74,12 +74,12 @@ public class CypherGraphFactory extends GraphFactory {
             .maxRelCount(relCount.rows())
             .build();
 
-        return HugeGraphFactory.getMemoryEstimation(setup, estimateDimensions);
+        return HugeGraphFactory.getMemoryEstimation(estimateDimensions);
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(GraphSetup setup, GraphDimensions dimensions) {
-        return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
+    public MemoryEstimation memoryEstimation(GraphDimensions dimensions) {
+        return HugeGraphFactory.getMemoryEstimation(dimensions);
     }
 
     @Override

@@ -121,7 +121,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                     .build();
             }
 
-            estimationBuilder.add("graph", graphFactory.memoryEstimation(graphFactory.setup(), estimateDimensions));
+            estimationBuilder.add("graph", graphFactory.memoryEstimation(estimateDimensions));
         } else {
             String graphName = config.graphName().get();
 

@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
+import java.util.Optional;
+
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
@@ -70,29 +72,43 @@ public final class AdjacencyList {
     }
 
     public static MemoryEstimation compressedMemoryEstimation(boolean undirected) {
+        return compressedMemoryEstimation(Optional.empty(), undirected);
+    }
+
+    public static MemoryEstimation compressedMemoryEstimation(Optional<String> relationshipType, boolean undirected) {
         return MemoryEstimations.setup("", dim -> {
             long nodeCount = dim.nodeCount();
-            long relCount = undirected ? dim.maxRelCount() * 2 : dim.maxRelCount();
+            long relCountForType = relationshipType.isPresent()
+                ? dim.relationshipCounts().getOrDefault(relationshipType.get(), 0L)
+                : dim.maxRelCount();
+            long relCount = undirected ? relCountForType * 2 : relCountForType;
             long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
             return AdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
         });
     }
 
     public static MemoryEstimation uncompressedMemoryEstimation(boolean undirected) {
+        return uncompressedMemoryEstimation(Optional.empty(), undirected);
+    }
+
+    public static MemoryEstimation uncompressedMemoryEstimation(Optional<String> relationshipType, boolean undirected) {
 
         return MemoryEstimations
-                .builder(AdjacencyList.class)
-                .perGraphDimension("pages", (dim, concurrency) -> {
-                    long nodeCount = dim.nodeCount();
-                    long relCount = undirected ? dim.maxRelCount() * 2 : dim.maxRelCount();
+            .builder(AdjacencyList.class)
+            .perGraphDimension("pages", (dim, concurrency) -> {
+                long nodeCount = dim.nodeCount();
+                long relCountForType = relationshipType.isPresent()
+                    ? dim.relationshipCounts().getOrDefault(relationshipType.get(), 0L)
+                    : dim.maxRelCount();
+                long relCount = undirected ? relCountForType * 2 : relCountForType;
 
-                    long uncompressedAdjacencySize = relCount * Long.BYTES + nodeCount * Integer.BYTES;
-                    int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-                    long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
+                long uncompressedAdjacencySize = relCount * Long.BYTES + nodeCount * Integer.BYTES;
+                int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
+                long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
 
-                    return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
-                })
-                .build();
+                return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
+            })
+            .build();
     }
 
     /* test private */

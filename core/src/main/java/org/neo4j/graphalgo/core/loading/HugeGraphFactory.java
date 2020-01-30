@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.Projection;
@@ -41,6 +42,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -54,22 +56,15 @@ public final class HugeGraphFactory extends GraphFactory {
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        return memoryEstimation(setup, dimensions);
+        return memoryEstimation(dimensions);
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(GraphSetup setup, GraphDimensions dimensions) {
-        return getMemoryEstimation(setup, dimensions);
-    }
-
-    public static MemoryEstimation getMemoryEstimation(GraphSetup setup, GraphDimensions dimensions) {
-        return getMemoryEstimation(setup.loadOutgoing(), setup.loadIncoming(), setup.loadAsUndirected(), dimensions);
+    public MemoryEstimation memoryEstimation(GraphDimensions dimensions) {
+        return getMemoryEstimation(dimensions);
     }
 
     public static MemoryEstimation getMemoryEstimation(
-        boolean loadOutgoing,
-        boolean loadIncoming,
-        boolean loadAsUndirected,
         GraphDimensions dimensions
     ) {
         MemoryEstimations.Builder builder = MemoryEstimations
@@ -81,34 +76,33 @@ public final class HugeGraphFactory extends GraphFactory {
             builder.add(resolvedPropertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
         }
 
-        // Relationship properties
-        for (ResolvedPropertyMapping mapping : dimensions.relationshipProperties()) {
-            // Adjacency lists and Adjacency offsets
-            MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(loadAsUndirected);
-            MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
-            if (loadOutgoing || loadAsUndirected) {
-                builder.add("outgoing properties for " + mapping.neoPropertyKey(), adjacencyListSize);
-                builder.add("outgoing property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
+        // Relationships
+        dimensions.relationshipProjectionMappings().stream().forEach(relationshipProjectionMapping -> {
+            Optional<String> neoType = StringUtils.isBlank(relationshipProjectionMapping.typeName())
+                ? Optional.empty()
+                : Optional.of(relationshipProjectionMapping.typeName());
+            String elementIdentifier = relationshipProjectionMapping.elementIdentifier();
 
-            }
-            if (loadIncoming && !loadAsUndirected) {
-                builder.add("incoming properties for " + mapping.neoPropertyKey(), adjacencyListSize);
-                builder.add("incoming property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
-            }
-        }
+            boolean undirected = relationshipProjectionMapping.projection() == Projection.UNDIRECTED;
 
-        // Adjacency lists and Adjacency offsets
-        MemoryEstimation adjacencyListSize = AdjacencyList.compressedMemoryEstimation(loadAsUndirected);
-        MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
-        if (loadOutgoing || loadAsUndirected) {
-            builder.add("outgoing", adjacencyListSize);
-            builder.add("outgoing offsets", adjacencyOffsetsSetup);
+            builder.add(
+                "relationship with type " + elementIdentifier,
+                AdjacencyList.compressedMemoryEstimation(neoType, undirected)
+            );
 
-        }
-        if (loadIncoming && !loadAsUndirected) {
-            builder.add("incoming", adjacencyListSize);
-            builder.add("incoming offsets", adjacencyOffsetsSetup);
-        }
+            dimensions.relationshipProperties().mappings().forEach(resolvedPropertyMapping -> {
+                builder.add(
+                    "property " + resolvedPropertyMapping.propertyKey() + " for type " + neoType.orElse("<empty>"),
+                    AdjacencyList.uncompressedMemoryEstimation(neoType, undirected)
+                );
+            });
+
+            builder.add(
+                "property offsets for type " + neoType.orElse("<empty>"),
+                AdjacencyOffsets.memoryEstimation()
+            );
+        });
+
 
         return builder.build();
     }

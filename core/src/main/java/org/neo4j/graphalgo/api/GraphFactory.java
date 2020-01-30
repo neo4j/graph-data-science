@@ -66,7 +66,7 @@ public abstract class GraphFactory implements Assessable {
 
     public abstract ImportResult build();
 
-    public abstract MemoryEstimation memoryEstimation(GraphSetup setup, GraphDimensions dimensions);
+    public abstract MemoryEstimation memoryEstimation(GraphDimensions dimensions);
 
     public GraphDimensions dimensions() {
         return this.dimensions;
@@ -81,13 +81,9 @@ public abstract class GraphFactory implements Assessable {
         GraphDimensions dimensions,
         GraphSetup setup
     ) {
-        long relOperations = 0L;
-        if (setup.loadIncoming() || setup.loadAsUndirected()) {
-            relOperations += dimensions.maxRelCount();
-        }
-        if (setup.loadOutgoing() || setup.loadAsUndirected()) {
-            relOperations += dimensions.maxRelCount();
-        }
+        long relOperations = setup.loadAsUndirected()
+            ? dimensions.maxRelCount() * 2
+            : dimensions.maxRelCount();
         return new ApproximatedImportProgress(
             progressLogger,
             setup.tracker(),

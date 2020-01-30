@@ -54,8 +54,9 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmF
         return MemoryEstimations.builder(Louvain.class)
             .add("modularityOptimization()", ModularityOptimizationFactory.MEMORY_ESTIMATION)
             .rangePerGraphDimension("subGraph", (graphDimensions, concurrency) -> {
+                // TODO: copy graphDimensions but keep only one node and rel property
                 long maxGraphSize = HugeGraphFactory
-                    .getMemoryEstimation(true, true, false, graphDimensions)
+                    .getMemoryEstimation(graphDimensions)
                     .estimate(graphDimensions, concurrency)
                     .memoryUsage()
                     .max;
