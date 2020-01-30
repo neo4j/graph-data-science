@@ -33,13 +33,14 @@ import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
-import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongPredicate;
+
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 
 /**
  * Huge Graph contains two array like data structures.
@@ -137,7 +138,7 @@ public class HugeGraph implements Graph {
         AdjacencyList properties = null;
         AdjacencyOffsets propertyOffsets = null;
         if (relationshipsBuilder != null) {
-            if (propertyMapping.propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            if (propertyMapping.propertyKeyId() != NO_SUCH_PROPERTY_KEY) {
                 propertyOffsets = relationshipsBuilder.globalPropertyOffsets(propertyIndex);
                 if (propertyOffsets != null) {
                     properties = relationshipsBuilder.properties(propertyIndex);
