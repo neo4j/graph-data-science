@@ -118,58 +118,6 @@ public class GraphSetup {
      * @deprecated There is no global direction anymore
      */
     @Deprecated
-    public Direction direction() {
-        Direction direction = createConfig
-            .relationshipProjection()
-            .allFilters()
-            .stream()
-            .map(RelationshipProjection::projection)
-            .reduce(null, this::accumulateDirections, (d1, d2) -> d1);
-        return direction == null ? Direction.OUTGOING : direction;
-    }
-
-    private Direction accumulateDirections(@Nullable Direction current, Projection projection) {
-        switch (projection) {
-            case NATURAL:
-                if (current == null) {
-                    return Direction.OUTGOING;
-                }
-                return current == Direction.INCOMING ? Direction.BOTH : current;
-            case UNDIRECTED:
-                if (current == null || current == Direction.OUTGOING) {
-                    return Direction.OUTGOING;
-                }
-                throw new IllegalArgumentException("Cannot mix undirection with " + projection);
-            case REVERSE:
-                if (current == null) {
-                    return Direction.INCOMING;
-                }
-                return current == Direction.OUTGOING ? Direction.BOTH : current;
-            default:
-                throw new IllegalArgumentException("Unknown projection " + projection);
-        }
-    }
-
-    /**
-     * @deprecated There is no global direction anymore
-     */
-    @Deprecated
-    public boolean loadIncoming() {
-        return direction() == Direction.INCOMING || direction() == Direction.BOTH;
-    }
-
-    /**
-     * @deprecated There is no global direction anymore
-     */
-    @Deprecated
-    public boolean loadOutgoing() {
-        return direction() == Direction.OUTGOING || direction() == Direction.BOTH;
-    }
-
-    /**
-     * @deprecated There is no global direction anymore
-     */
-    @Deprecated
     public boolean loadAsUndirected() {
         return createConfig
             .relationshipProjection()
