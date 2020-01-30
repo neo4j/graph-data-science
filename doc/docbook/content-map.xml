@@ -12,6 +12,10 @@
             <?dbhtml filename="installation/index.html"?>
         </d:tocentry>
 
+        <d:tocentry linkend="common-usage">
+            <?dbhtml filename="common-usage/index.html"?>
+        </d:tocentry>
+
         <d:tocentry linkend="projected-graph-model">
             <?dbhtml filename="projected-graph-model/index.html"?>
             <d:tocentry linkend="label-relationship-type-projection">

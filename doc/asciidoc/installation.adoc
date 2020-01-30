@@ -63,22 +63,5 @@ CALL gds.list()
 ----
 
 
-== Usage
-
-These algorithms are exposed as Neo4j procedures.
-They can be called directly from Cypher in your Neo4j Browser, from cypher-shell, or from your client code.
-
-For most algorithms there are two procedures:
-
-* `gds.<name>.write` - this procedure writes results back to the graph as node-properties, and reports statistics.
-* `gds.<name>.stream` - this procedure returns a stream of data.
-For example, node-ids and computed values.
-+
-For large graphs, the streaming procedure might return millions, or even billions of results.
-In this case it may be more convenient to store the results of the algorithm, and then use them with later queries.
-
-The execution of any algorithm can be canceled by terminating the cypher transaction that is executing the procedure call.
-For more on how transactions are used, see <<transaction-handling, Transaction Handling>>.
-
 include::system-requirements.adoc[leveloffset=2]
 
