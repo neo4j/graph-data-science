@@ -134,9 +134,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 weightProperties,
                 defaultWeights);
 
-        AdjacencyBuilder otherBuilder = setup.legacyMode()
-            ? setup.loadAsUndirected() ? outBuilder : inBuilder
-            : mapping.projection() == Projection.UNDIRECTED ? outBuilder : inBuilder;
+        AdjacencyBuilder otherBuilder = mapping.projection() == Projection.UNDIRECTED ? outBuilder : inBuilder;
 
         RelationshipImporter importer = new RelationshipImporter(
             setup.tracker(),

@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphdb.Direction;
 import org.roaringbitmap.RoaringBitmap;
 
 public class NewOldGraph {
@@ -37,7 +36,7 @@ public class NewOldGraph {
         LongHashSet neighbors = new LongHashSet();
         RoaringBitmap visited = visitedRelationships[(int) nodeId];
 
-        graph.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
+        graph.forEachRelationship(nodeId, (sourceNodeId, targetNodeId) -> {
             if (visited.contains((int) targetNodeId)) {
                 neighbors.add(targetNodeId);
             }
@@ -53,7 +52,7 @@ public class NewOldGraph {
 
         RoaringBitmap visited = visitedRelationships[(int) nodeId];
 
-        graph.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
+        graph.forEachRelationship(nodeId, (sourceNodeId, targetNodeId) -> {
             if (!visited.contains((int) targetNodeId)) {
                 neighbors.add(targetNodeId);
             }

@@ -37,7 +37,7 @@ public class SpanningGraph extends FilterGraph {
     }
 
     @Override
-    public int degree(long nodeId, Direction direction) {
+    public int degree(long nodeId) {
         if (spanningTree.parent[Math.toIntExact(nodeId)] == -1) {
             return Math.toIntExact(Arrays.stream(spanningTree.parent).filter(i -> i == -1).count());
         } else {
@@ -69,7 +69,7 @@ public class SpanningGraph extends FilterGraph {
     }
 
     @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
+    public boolean exists(long sourceNodeId, long targetNodeId) {
         int source = Math.toIntExact(sourceNodeId);
         int target = Math.toIntExact(targetNodeId);
         return spanningTree.parent[source] != -1 || spanningTree.parent[target] != -1;

@@ -75,11 +75,6 @@ public class GraphSetup {
         this.createConfig = createConfig;
     }
 
-    @Deprecated
-    public boolean legacyMode() {
-        return false;
-    }
-
     public String username() {
         return createConfig.username();
     }

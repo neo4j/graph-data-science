@@ -51,11 +51,6 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public Direction getLoadDirection() {
-        return graph.getLoadDirection();
-    }
-
-    @Override
     public void canRelease(boolean canRelease) {
         graph.canRelease(canRelease);
     }
@@ -71,8 +66,8 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public int degree(long nodeId, Direction direction) {
-        return graph.degree(nodeId, direction);
+    public int degree(long nodeId) {
+        return graph.degree(nodeId);
     }
 
     @Override
@@ -116,8 +111,8 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public long getTarget(long nodeId, long index, Direction direction) {
-        return graph.getTarget(nodeId, index, direction);
+    public long getTarget(long nodeId, long index) {
+        return graph.getTarget(nodeId, index);
     }
 
     @Override
@@ -132,8 +127,8 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
-        return graph.exists(sourceNodeId, targetNodeId, direction);
+    public boolean exists(long sourceNodeId, long targetNodeId) {
+        return graph.exists(sourceNodeId, targetNodeId);
     }
 
     @Override

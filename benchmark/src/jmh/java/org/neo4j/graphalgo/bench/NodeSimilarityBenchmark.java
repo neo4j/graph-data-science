@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.nodesim.ImmutableNodeSimilarityStreamConfig;
 import org.neo4j.graphalgo.nodesim.NodeSimilarity;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityBaseConfig;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -134,7 +133,7 @@ public class NodeSimilarityBenchmark {
         List<Map<String, Object>> jaccardInput = new ArrayList<>();
         graph.forEachNode(nodeId -> {
             List<Number> targetIds = new ArrayList<>();
-            graph.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
+            graph.forEachRelationship(nodeId, (sourceNodeId, targetNodeId) -> {
                 targetIds.add(targetNodeId);
                 return true;
             });

@@ -376,24 +376,8 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public int degree(
-        final long node,
-        final Direction direction
-    ) {
-        switch (direction) {
-            case INCOMING:
-                return degree(node, inOffsets, inAdjacency);
-
-            case OUTGOING:
-                return degree(node, outOffsets, outAdjacency);
-
-            case BOTH:
-                return degree(node, inOffsets, inAdjacency) +
-                       degree(node, outOffsets, outAdjacency);
-
-            default:
-                throw new IllegalArgumentException(direction + "");
-        }
+    public int degree(final long node) {
+        return degree(node, outOffsets, outAdjacency);
     }
 
     @Override
@@ -455,9 +439,9 @@ public class HugeGraph implements Graph {
      * O(n) !
      */
     @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
+    public boolean exists(long sourceNodeId, long targetNodeId) {
         ExistsConsumer consumer = new ExistsConsumer(targetNodeId);
-        runForEach(sourceNodeId, direction, consumer);
+        runForEach(sourceNodeId, Direction.OUTGOING, consumer);
         return consumer.found;
     }
 
@@ -465,9 +449,9 @@ public class HugeGraph implements Graph {
      * O(n) !
      */
     @Override
-    public long getTarget(long sourceNodeId, long index, Direction direction) {
+    public long getTarget(long sourceNodeId, long index) {
         GetTargetConsumer consumer = new GetTargetConsumer(index);
-        runForEach(sourceNodeId, direction, consumer);
+        runForEach(sourceNodeId, Direction.OUTGOING, consumer);
         return consumer.target;
     }
 
@@ -599,18 +583,6 @@ public class HugeGraph implements Graph {
     @Override
     public boolean hasRelationshipProperty() {
         return hasRelationshipProperty;
-    }
-
-    @Override
-    public Direction getLoadDirection() {
-        if (inOffsets != null && outOffsets != null) {
-            return Direction.BOTH;
-        } else if (inOffsets != null) {
-            return Direction.INCOMING;
-        } else {
-            assert (outOffsets != null);
-            return Direction.OUTGOING;
-        }
     }
 
     @Override

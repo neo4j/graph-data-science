@@ -64,12 +64,6 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public Direction getLoadDirection() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.getLoadDirection is not implemented.");
-    }
-
-    @Override
     public void canRelease(boolean canRelease) {
         throw new UnsupportedOperationException(
             "org.neo4j.graphalgo.similarity.NullGraph.canRelease is not implemented.");
@@ -88,7 +82,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public int degree(long nodeId, Direction direction) {
+    public int degree(long nodeId) {
         throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.degree is not implemented.");
     }
 
@@ -139,7 +133,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public long getTarget(long nodeId, long index, Direction direction) {
+    public long getTarget(long nodeId, long index) {
         throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.getTarget is not implemented.");
     }
 
@@ -158,7 +152,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
+    public boolean exists(long sourceNodeId, long targetNodeId) {
         throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.exists is not implemented.");
     }
 

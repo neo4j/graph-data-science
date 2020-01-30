@@ -87,7 +87,7 @@ public final class TestGraph implements Graph {
     public long relationshipCount() {
         return adjacencyList.values()
                 .parallelStream()
-                .mapToLong(adjacency -> adjacency.outEdges.size())
+                .mapToLong(adjacency -> adjacency.edges.size())
                 .sum();
     }
 
@@ -102,11 +102,6 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public Direction getLoadDirection() {
-        return Direction.BOTH;
-    }
-
-    @Override
     public void canRelease(boolean canRelease) { }
 
     @Override
@@ -118,8 +113,8 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public int degree(long nodeId, Direction direction) {
-        return adjacencyList.get(nodeId).degree(direction);
+    public int degree(long nodeId) {
+        return adjacencyList.get(nodeId).degree();
     }
 
     @Override
@@ -165,14 +160,7 @@ public final class TestGraph implements Graph {
     @Override
     public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
         Adjacency adjacency = adjacencyList.get(nodeId);
-        if (direction == Direction.BOTH) {
-            forEach(adjacency.outEdges, consumer);
-            forEach(adjacency.inEdges, consumer);
-        } else if (direction == Direction.OUTGOING) {
-            forEach(adjacency.outEdges, consumer);
-        } else {
-            forEach(adjacency.inEdges, consumer);
-        }
+        forEach(adjacency.edges, consumer);
     }
 
     private void forEach(List<Relationship> rels, RelationshipConsumer consumer) {
@@ -186,14 +174,7 @@ public final class TestGraph implements Graph {
             double fallbackValue,
             RelationshipWithPropertyConsumer consumer) {
         Adjacency adjacency = adjacencyList.get(nodeId);
-        if (direction == Direction.BOTH) {
-            forEachWithProperty(adjacency.outEdges, fallbackValue, consumer);
-            forEachWithProperty(adjacency.inEdges, fallbackValue, consumer);
-        } else if (direction == Direction.OUTGOING) {
-            forEachWithProperty(adjacency.outEdges, fallbackValue, consumer);
-        } else {
-            forEachWithProperty(adjacency.inEdges, fallbackValue, consumer);
-        }
+        forEachWithProperty(adjacency.edges, fallbackValue, consumer);
     }
 
     private void forEachWithProperty(List<Relationship> rels, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
@@ -208,9 +189,9 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
+    public boolean exists(long sourceNodeId, long targetNodeId) {
         ExistsConsumer consumer = new ExistsConsumer(targetNodeId);
-        forEachRelationship(sourceNodeId, direction, consumer);
+        forEachRelationship(sourceNodeId, consumer);
         return consumer.found;
 
     }
@@ -231,7 +212,7 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public long getTarget(long nodeId, long index, Direction direction) {
+    public long getTarget(long nodeId, long index) {
         throw new UnsupportedOperationException();
     }
 
@@ -253,22 +234,14 @@ public final class TestGraph implements Graph {
     }
 
     private static class Adjacency {
-        private final List<Relationship> outEdges;
-        private final List<Relationship> inEdges;
+        private final List<Relationship> edges;
 
-        Adjacency(List<Relationship> outEdges, List<Relationship> inEdges) {
-            this.outEdges = outEdges;
-            this.inEdges = inEdges;
+        Adjacency(List<Relationship> edges) {
+            this.edges = edges;
         }
 
-        int degree(Direction direction) {
-            if (direction == Direction.BOTH) {
-                return outEdges.size() + inEdges.size();
-            } else if (direction == Direction.OUTGOING) {
-                return outEdges.size();
-            } else {
-                return inEdges.size();
-            }
+        int degree() {
+            return edges.size();
         }
     }
 
@@ -295,6 +268,10 @@ public final class TestGraph implements Graph {
         private Builder() {}
 
         public static Graph fromGdl(String gdl) {
+            return fromGdl(gdl, Projection.NATURAL);
+        }
+
+        public static Graph fromGdl(String gdl, Projection projection) {
             Objects.requireNonNull(gdl);
 
             GDLHandler gdlHandler = new GDLHandler.Builder().buildFromString(gdl);
@@ -303,7 +280,7 @@ public final class TestGraph implements Graph {
 
             validateInput(vertices, edges);
 
-            Map<Long, Adjacency> adjacencyList = buildAdjacencyList(vertices, edges);
+            Map<Long, Adjacency> adjacencyList = buildAdjacencyList(vertices, edges, projection);
             Map<String, NodeProperties> nodeProperties = buildWeightMappings(vertices);
             Map<String, NodeProperties> relationshipProperties = buildWeightMappings(edges);
 
@@ -342,21 +319,28 @@ public final class TestGraph implements Graph {
                     .allMatch(keys -> keys.equals(head));
         }
 
-        private static Map<Long, Adjacency> buildAdjacencyList(Collection<Vertex> vertices, Collection<Edge> edges) {
+        private static Map<Long, Adjacency> buildAdjacencyList(
+            Collection<Vertex> vertices,
+            Collection<Edge> edges,
+            Projection projection
+        ) {
             Map<Long, Adjacency> adjacencyList = new HashMap<>();
 
             for (Vertex vertex : vertices) {
-                List<Relationship> outRels = edges.stream()
+                List<Relationship> rels;
+                if (projection == Projection.NATURAL || projection == Projection.UNDIRECTED) {
+                    rels = edges.stream()
                         .filter(e -> e.getSourceVertexId() == vertex.getId())
                         .map(e -> new Relationship(e.getId(), e.getSourceVertexId(), e.getTargetVertexId()))
                         .collect(toList());
-
-                List<Relationship> inRels = edges.stream()
+                } else {
+                    rels = edges.stream()
                         .filter(e -> e.getTargetVertexId() == vertex.getId())
                         .map(e -> new Relationship(e.getId(), e.getTargetVertexId(), e.getSourceVertexId()))
                         .collect(toList());
+                }
 
-                adjacencyList.put(vertex.getId(), new Adjacency(outRels, inRels));
+                adjacencyList.put(vertex.getId(), new Adjacency(rels));
             }
 
             return adjacencyList;

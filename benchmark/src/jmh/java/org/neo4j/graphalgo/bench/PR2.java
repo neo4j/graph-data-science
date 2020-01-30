@@ -91,7 +91,7 @@ public final class PR2 extends BaseMain {
                 LongArrayList mismatches = new LongArrayList();
                 long[] matches = new long[1];
                 hugeGraph.forEachNode((long node) -> {
-                    int degree = hugeGraph.degree((int) node, Direction.OUTGOING);
+                    int degree = hugeGraph.degree((int) node);
                     long[] calcDegree = new long[1];
                     try {
                         hugeGraph.forEachOutgoing(node, (src, tgt) -> {

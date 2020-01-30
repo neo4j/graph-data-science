@@ -90,7 +90,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         final HugeDoubleArray array = HugeDoubleArray.newArray(nodeCount, tracker);
         final double[] adder = new double[]{0.0};
         for (int i = 0; i < nodeCount; i++) {
-            final double c = calculateCoefficient(triangles.get(i), graph.degree(i, Direction.OUTGOING));
+            final double c = calculateCoefficient(triangles.get(i), graph.degree(i));
             array.set(i, c);
             adder[0] += (c);
         }
@@ -128,7 +128,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
             .mapToObj(i -> new IntersectingTriangleCount.Result(
                 graph.toOriginalNodeId(i),
                 triangles.get(i),
-                calculateCoefficient(triangles.get(i), graph.degree(i, Direction.OUTGOING))));
+                calculateCoefficient(triangles.get(i), graph.degree(i))));
     }
 
     private class IntersectTask implements Runnable, IntersectionConsumer {

@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.StatementApi;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -45,22 +44,15 @@ import static org.neo4j.graphalgo.core.write.NodePropertyExporter.MIN_BATCH_SIZE
 public final class RelationshipExporter extends StatementApi {
 
     private final Graph graph;
-    private final Direction readDirection;
     private final long nodeCount;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
     private final ExecutorService executorService;
 
-    public static RelationshipExporter.Builder of(
-        GraphDatabaseAPI db,
-        Graph graph,
-        Direction readDirection,
-        TerminationFlag terminationFlag
-    ) {
+    public static RelationshipExporter.Builder of(GraphDatabaseAPI db, Graph graph, TerminationFlag terminationFlag) {
         return new RelationshipExporter.Builder(
             db,
             graph,
-            readDirection,
             terminationFlag
         );
     }
@@ -68,17 +60,10 @@ public final class RelationshipExporter extends StatementApi {
     public static final class Builder extends ExporterBuilder<RelationshipExporter> {
 
         private final Graph graph;
-        private final Direction readDirection;
 
-        Builder(
-            GraphDatabaseAPI db,
-            Graph graph,
-            Direction readDirection,
-            TerminationFlag terminationFlag
-        ) {
+        Builder(GraphDatabaseAPI db, Graph graph, TerminationFlag terminationFlag) {
             super(db, graph, terminationFlag);
             this.graph = graph;
-            this.readDirection = readDirection;
         }
 
         @Override
@@ -90,7 +75,6 @@ public final class RelationshipExporter extends StatementApi {
             return new RelationshipExporter(
                 db,
                 graph,
-                readDirection,
                 terminationFlag,
                 progressLogger
             );
@@ -100,14 +84,12 @@ public final class RelationshipExporter extends StatementApi {
     private RelationshipExporter(
         GraphDatabaseAPI db,
         Graph graph,
-        Direction readDirection,
         TerminationFlag terminationFlag,
         ProgressLogger progressLogger
     ) {
         super(db);
         this.nodeCount = graph.nodeCount();
         this.graph = graph;
-        this.readDirection = readDirection;
         this.terminationFlag = terminationFlag;
         this.progressLogger = progressLogger;
         this.executorService = DEFAULT_SINGLE_THREAD_POOL;
@@ -130,10 +112,9 @@ public final class RelationshipExporter extends StatementApi {
 
         // We use MIN_BATCH_SIZE since writing relationships
         // is performed batch-wise, but single-threaded.
-        PartitionUtils.degreePartition(graph, readDirection, MIN_BATCH_SIZE)
+        PartitionUtils.degreePartition(graph, MIN_BATCH_SIZE)
             .stream()
             .map(partition -> createBatchRunnable(
-                readDirection,
                 progress,
                 relationshipToken,
                 propertyToken,
@@ -145,7 +126,6 @@ public final class RelationshipExporter extends StatementApi {
     }
 
     private Runnable createBatchRunnable(
-        Direction direction,
         AtomicLong progress,
         int relationshipToken,
         int propertyToken,
@@ -163,7 +143,7 @@ public final class RelationshipExporter extends StatementApi {
             }
             RelationshipIterator relationshipIterator = graph.concurrentCopy();
             for (long currentNode = start; currentNode < end; currentNode++) {
-                relationshipIterator.forEachRelationship(currentNode, direction, Double.NaN, writeConsumer);
+                relationshipIterator.forEachRelationship(currentNode, Double.NaN, writeConsumer);
 
                 // Only log after writing relationships for 10_000 nodes
                 if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {

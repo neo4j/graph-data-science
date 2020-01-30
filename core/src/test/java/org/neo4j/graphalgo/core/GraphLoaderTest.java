@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -118,7 +117,6 @@ class GraphLoaderTest {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipType("REL3")
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-            .withDirection(Direction.OUTGOING)
             .buildGraph(graphFactory);
 
         assertGraphEquals(graph, fromGdl("(), ()-[{w:1337}]->()"));
@@ -128,7 +126,6 @@ class GraphLoaderTest {
     void testWithOutgoingRelationship(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipType("REL3")
-            .withDirection(Direction.OUTGOING)
             .buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(), ()-->()"));
     }
@@ -165,15 +162,13 @@ class GraphLoaderTest {
         TerminationFlag terminationFlag = () -> false;
         TransactionTerminatedException exception = assertThrows(
             TransactionTerminatedException.class,
-            () -> {
-                new StoreLoaderBuilder()
-                    .api(db)
-                    .loadAnyLabel()
-                    .loadAnyRelationshipType()
-                    .terminationFlag(terminationFlag)
-                    .build()
-                    .load(HugeGraphFactory.class);
-            }
+            () -> new StoreLoaderBuilder()
+                .api(db)
+                .loadAnyLabel()
+                .loadAnyRelationshipType()
+                .terminationFlag(terminationFlag)
+                .build()
+                .load(HugeGraphFactory.class)
         );
         assertEquals(Status.Transaction.Terminated, exception.status());
     }

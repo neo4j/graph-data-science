@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.TestGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
-import org.neo4j.graphdb.Direction;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -93,7 +92,7 @@ class PartitionUtilsTest {
             "(b)-->(c)"
         );
 
-        List<Partition> partitions = PartitionUtils.degreePartition(graph, Direction.OUTGOING, 2);
+        List<Partition> partitions = PartitionUtils.degreePartition(graph, 2);
         assertEquals(2, partitions.size());
         assertEquals(0, partitions.get(0).startNode);
         assertEquals(2, partitions.get(0).nodeCount);
@@ -114,10 +113,7 @@ class PartitionUtilsTest {
         nodeFilter.set(2);
 
         List<Partition> partitions = PartitionUtils.degreePartition(
-            new SetBitsIterable(nodeFilter).primitiveLongIterator(),
-            graph,
-            Direction.OUTGOING,
-            2
+            new SetBitsIterable(nodeFilter).primitiveLongIterator(), graph, 2
         );
         assertEquals(1, partitions.size());
         assertEquals(0, partitions.get(0).startNode);

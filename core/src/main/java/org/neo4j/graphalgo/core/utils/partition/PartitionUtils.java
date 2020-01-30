@@ -23,7 +23,6 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,21 +51,12 @@ public final class PartitionUtils {
     }
 
     public static List<Partition> degreePartition(Graph graph, long batchSize) {
-        return degreePartition(graph.nodeIterator(), graph, Direction.OUTGOING, batchSize);
-    }
-
-    public static List<Partition> degreePartition(Graph graph, Direction direction, long batchSize) {
-        return degreePartition(graph.nodeIterator(), graph, direction, batchSize);
-    }
-
-    public static List<Partition> degreePartition(PrimitiveLongIterator nodes, Degrees degrees, long batchSize) {
-        return degreePartition(nodes, degrees, Direction.OUTGOING, batchSize);
+        return degreePartition(graph.nodeIterator(), graph, batchSize);
     }
 
     public static List<Partition> degreePartition(
         PrimitiveLongIterator nodes,
         Degrees degrees,
-        Direction direction,
         long batchSize
     ) {
         List<Partition> partitions = new ArrayList<>();
@@ -77,7 +67,7 @@ public final class PartitionUtils {
             long nodeId = 0L;
             while (nodes.hasNext() && partitionSize <= batchSize && nodeId - start < MAX_NODE_COUNT) {
                 nodeId = nodes.next();
-                partitionSize += degrees.degree(nodeId, direction);
+                partitionSize += degrees.degree(nodeId);
             }
 
             long end = nodeId + 1;

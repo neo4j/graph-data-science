@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.graphbuilder.GridBuilder;
 import org.neo4j.graphalgo.impl.traverse.ParallelLocalQueueBFS;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -101,7 +100,7 @@ class ParallelTraverseTest {
 
         traverse
                 .reset()
-                .bfs(rootNodeId, Direction.OUTGOING, n -> true, mock)
+                .bfs(rootNodeId, n -> true, mock)
                 .awaitTermination();
 
         System.out.println("traverse.getThreadsCreated() = " + traverse.getThreadsCreated());
@@ -122,7 +121,7 @@ class ParallelTraverseTest {
             traverse
                     .reset()
                     .withConcurrencyFactor(1)
-                    .bfs(rootNodeId, Direction.OUTGOING, n -> true, node -> ai.incrementAndGet())
+                    .bfs(rootNodeId, n -> true, node -> ai.incrementAndGet())
                     .awaitTermination();
 
             assertEquals(nodeCount, ai.get(), "Iteration " + i + " results in error");

@@ -133,8 +133,8 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public int degree(final long node, final Direction direction) {
-        return Math.toIntExact(graphs.stream().mapToLong(g -> g.degree(node, direction)).sum());
+    public int degree(long nodeId) {
+        return Math.toIntExact(graphs.stream().mapToLong(g -> g.degree(nodeId)).sum());
     }
 
     @Override
@@ -165,17 +165,17 @@ public final class UnionGraph implements Graph {
      * O(n) !
      */
     @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
-        return graphs.stream().anyMatch(g -> g.exists(sourceNodeId, targetNodeId, direction));
+    public boolean exists(long sourceNodeId, long targetNodeId) {
+        return graphs.stream().anyMatch(g -> g.exists(sourceNodeId, targetNodeId));
     }
 
     /*
      * O(n) !
      */
     @Override
-    public long getTarget(long sourceNodeId, long index, Direction direction) {
+    public long getTarget(long sourceNodeId, long index) {
         return graphs.stream()
-                .mapToLong(g -> g.getTarget(sourceNodeId, index, direction))
+                .mapToLong(g -> g.getTarget(sourceNodeId, index))
                 .filter(t -> t != HugeGraph.GetTargetConsumer.TARGET_NOT_FOUND)
                 .findFirst()
                 .orElse(HugeGraph.GetTargetConsumer.TARGET_NOT_FOUND);
@@ -200,11 +200,6 @@ public final class UnionGraph implements Graph {
         for (Graph graph : graphs) {
             graph.releaseProperties();
         }
-    }
-
-    @Override
-    public Direction getLoadDirection() {
-        return first.getLoadDirection();
     }
 
     @Override

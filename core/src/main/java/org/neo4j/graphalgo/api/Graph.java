@@ -19,10 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphdb.Direction;
-
-import java.util.Optional;
-
 /**
  * Composition of often used source interfaces
  */
@@ -30,14 +26,13 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
 
     String TYPE = "huge";
 
-    long RELATIONSHIP_COUNT_NOT_SUPPORTED = -1L;
-
     default boolean isEmpty() {
         return nodeCount() == 0;
     }
 
     /**
-     * @return if supported, returns the total number of relationships in the graph, otherwise {@link Graph#RELATIONSHIP_COUNT_NOT_SUPPORTED}.
+     * @return if supported, returns the total number of relationships in the graph.
+     * @throws UnsupportedOperationException
      */
     long relationshipCount();
 
@@ -66,36 +61,6 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
     boolean isUndirected();
 
     boolean hasRelationshipProperty();
-
-    Direction getLoadDirection();
-
-    default Optional<Direction> compatibleDirection(Direction procedureDirection) {
-        boolean isUndirected = this.isUndirected();
-        Direction loadDirection = this.getLoadDirection();
-
-        switch (procedureDirection) {
-            case OUTGOING:
-                if (!isUndirected && (loadDirection == Direction.BOTH || loadDirection == Direction.OUTGOING)) {
-                    return Optional.of(Direction.OUTGOING);
-                }
-                break;
-            case INCOMING:
-                if (!isUndirected && (loadDirection == Direction.BOTH || loadDirection == Direction.INCOMING)) {
-                    return Optional.of(Direction.INCOMING);
-                }
-                break;
-            case BOTH:
-                if (isUndirected && loadDirection == Direction.OUTGOING) {
-                    return Optional.of(Direction.OUTGOING);
-                }
-                if (!isUndirected && loadDirection == Direction.BOTH) {
-                    return Optional.of(Direction.BOTH);
-                }
-                break;
-        }
-
-        return Optional.empty();
-    }
 
     void canRelease(boolean canRelease);
 

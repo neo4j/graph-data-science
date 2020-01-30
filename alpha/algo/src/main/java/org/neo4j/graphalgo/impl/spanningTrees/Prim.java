@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
 import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
@@ -86,7 +85,7 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
             }
             effectiveNodeCount++;
             visited.put(node);
-            relationshipIterator.forEachRelationship(node, Direction.OUTGOING, 0.0D, longToIntConsumer((s, t, w) -> {
+            relationshipIterator.forEachRelationship(node, 0.0D, longToIntConsumer((s, t, w) -> {
                 if (visited.contains(t)) {
                     return true;
                 }

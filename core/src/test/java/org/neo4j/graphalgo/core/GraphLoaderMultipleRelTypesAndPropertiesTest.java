@@ -56,7 +56,6 @@ import static org.neo4j.graphalgo.core.Aggregation.MIN;
 import static org.neo4j.graphalgo.core.Aggregation.NONE;
 import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
 import static org.neo4j.graphalgo.core.Aggregation.SUM;
-import static org.neo4j.graphdb.Direction.OUTGOING;
 import static org.neo4j.helpers.collection.Iterables.asSet;
 
 class GraphLoaderMultipleRelTypesAndPropertiesTest {
@@ -234,7 +233,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("agg2", "p2", 2.0, Aggregation.NONE),
                 PropertyMapping.of("agg3", "p3", 2.0, Aggregation.NONE)
             )
-            .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
         Graph p1Graph = graphs.getGraph("", Optional.of("agg1"));
@@ -287,7 +285,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("agg2", "p1", 50.0, MAX),
                 PropertyMapping.of("agg3", "p1", 3.0, SUM)
             )
-            .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
         Graph p1Graph = graphs.getGraph("", Optional.of("agg1"));
@@ -334,7 +331,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                     PropertyMapping.of("p1", "p1", 1.0, Aggregation.NONE),
                     PropertyMapping.of("p2", "p2", 2.0, SUM)
                 )
-                .withDirection(OUTGOING)
                 .buildGraphs(graphFactory)
         );
 
@@ -364,7 +360,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("agg1", "p1", 1.0, MAX),
                 PropertyMapping.of("agg2", "p1", 2.0, MIN)
             )
-            .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
         Graph p1Graph = graphs.getGraph("", Optional.of("agg1"));
@@ -433,7 +428,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("p1", "p1", 1.0, localAggregation1),
                 PropertyMapping.of("p2", "p2", 2.0, localAggregation2)
             )
-            .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
         Graph p1Graph = graphs.getGraph("", Optional.of("p1"));
@@ -474,7 +468,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withRelationshipProperties(
                 PropertyMapping.of("agg", "p1", 1.0, MAX)
             )
-            .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
         Graph graph = graphs.getGraph("", Optional.of("agg"));
@@ -519,7 +512,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("p1", "p1", 1.0, aggregation),
                 PropertyMapping.of("p2", "p2", 2.0, aggregation)
             )
-            .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
         Graph p1Graph = graphs.getGraph("", Optional.of("p1"));
@@ -556,7 +548,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("p1", "p1", 1.0, SINGLE),
                 PropertyMapping.of("p2", "p2", 2.0, SINGLE)
             )
-            .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
         String expectedGraphTemplate =
@@ -586,14 +577,14 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         rel1Graph.release();
 
         assertThrows(NullPointerException.class, () -> rel1Graph.forEachNode(n -> {
-            rel1Graph.forEachRelationship(n, OUTGOING, (s, t) -> true);
+            rel1Graph.forEachRelationship(n, (s, t) -> true);
             return true;
         }), "Graph should release");
 
         unionGraph.release();
 
         assertThrows(NullPointerException.class, () -> unionGraph.forEachNode(n -> {
-            unionGraph.forEachRelationship(n, OUTGOING, (s, t) -> true);
+            unionGraph.forEachRelationship(n, (s, t) -> true);
             return true;
         }), "UnionGraph should release");
     }
@@ -602,7 +593,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     void graphsByRelationshipTypeGiveCorrectElementCounts(Class<? extends GraphFactory> graphFactory) {
         GraphsByRelationshipType graphs = TestGraphLoader.from(db)
             .withRelationshipType("REL1 | REL2 | REL3")
-            .withDirection(OUTGOING)
             .buildGraphs(graphFactory);
 
         Graph rel1Graph = graphs.getGraph("REL1");

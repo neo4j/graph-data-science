@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -129,7 +128,7 @@ class RandomGraphGeneratorTest {
         HugeGraph graph = randomGraphGenerator.generate();
 
         graph.forEachNode((nodeId) -> {
-            graph.forEachRelationship(nodeId, Direction.BOTH, Double.NaN, (s, t, p) -> {
+            graph.forEachRelationship(nodeId, Double.NaN, (s, t, p) -> {
                 Assertions.assertEquals(42D, p);
                 return true;
             });
@@ -152,7 +151,7 @@ class RandomGraphGeneratorTest {
         HugeGraph graph = randomGraphGenerator.generate();
 
         graph.forEachNode((nodeId) -> {
-            graph.forEachRelationship(nodeId, Direction.BOTH, Double.NaN, (s, t, p) -> {
+            graph.forEachRelationship(nodeId, Double.NaN, (s, t, p) -> {
                 Assertions.assertTrue(p >= -10);
                 Assertions.assertTrue(p <= 10);
                 return true;

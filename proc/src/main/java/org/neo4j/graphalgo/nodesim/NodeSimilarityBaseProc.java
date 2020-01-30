@@ -35,8 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphdb.Direction.OUTGOING;
-
 public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseConfig> extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, CONFIG> {
 
     static final String NODE_SIMILARITY_DESCRIPTION =
@@ -104,12 +102,7 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
                 () -> {
                     try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
                         RelationshipExporter exporter = RelationshipExporter
-                            .of(
-                                api,
-                                similarityGraph,
-                                similarityGraph.getLoadDirection(),
-                                algorithm.getTerminationFlag()
-                            )
+                            .of(api, similarityGraph, algorithm.getTerminationFlag())
                             .withLog(log)
                             .build();
                         if (shouldComputeHistogram) {
@@ -140,7 +133,7 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
     private DoubleHistogram computeHistogram(Graph similarityGraph) {
         DoubleHistogram histogram = new DoubleHistogram(5);
         similarityGraph.forEachNode(nodeId -> {
-            similarityGraph.forEachRelationship(nodeId, OUTGOING, Double.NaN, (node1, node2, property) -> {
+            similarityGraph.forEachRelationship(nodeId, Double.NaN, (node1, node2, property) -> {
                 histogram.recordValue(property);
                 return true;
             });

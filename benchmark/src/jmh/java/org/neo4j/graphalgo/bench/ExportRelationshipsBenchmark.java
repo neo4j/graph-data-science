@@ -45,7 +45,6 @@ import org.openjdk.jmh.annotations.Warmup;
 import java.util.concurrent.TimeUnit;
 
 import static org.neo4j.graphalgo.bench.NodeSimilarityBenchmark.createGraph;
-import static org.neo4j.graphdb.Direction.OUTGOING;
 
 @Threads(1)
 @Fork(value = 1, jvmArgs = {"-Xms4g", "-Xmx4g"})
@@ -80,7 +79,7 @@ public class ExportRelationshipsBenchmark extends BaseBenchmark {
             .build()
             .graph(HugeGraphFactory.class);
 
-        this.exporter = RelationshipExporter.of(db, graph, OUTGOING, TerminationFlag.RUNNING_TRUE).build();
+        this.exporter = RelationshipExporter.of(db, graph, TerminationFlag.RUNNING_TRUE).build();
     }
 
     @TearDown

@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
-import org.neo4j.graphdb.Direction;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -94,7 +93,6 @@ public class ShortestPaths extends Algorithm<ShortestPaths, ShortestPaths> {
             // scan ALL relationships
             graph.forEachRelationship(
                     node,
-                    Direction.OUTGOING,
                     0.0D,
                     longToIntConsumer((source, target, weight) -> {
                         // relax

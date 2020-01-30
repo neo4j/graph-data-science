@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.container.AtomicBitSet;
 import org.neo4j.graphalgo.core.utils.queue.LongPriorityQueue;
-import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -97,7 +96,6 @@ public class ParallelLocalQueueBFS implements BFS {
      */
     public ParallelLocalQueueBFS bfs(
             long startNodeId,
-            Direction direction,
             LongPredicate predicate,
             LongConsumer visitor) {
         if (!predicate.test(startNodeId)) {
@@ -114,7 +112,7 @@ public class ParallelLocalQueueBFS implements BFS {
             }
             visitor.accept(node);
 
-            localRelationshipIterator.forEachRelationship(node, direction, (sourceNodeId, targetNodeId) -> {
+            localRelationshipIterator.forEachRelationship(node, (sourceNodeId, targetNodeId) -> {
                 // should we visit this node?
                 if (!predicate.test(targetNodeId)) {
                     return true;
@@ -123,8 +121,8 @@ public class ParallelLocalQueueBFS implements BFS {
                 if (visited.get(targetNodeId)) {
                     return true;
                 }
-                if (!addThread(() -> bfs(targetNodeId, direction, predicate, visitor))) {
-                    queue.add(targetNodeId, graph.degree(targetNodeId, direction));
+                if (!addThread(() -> bfs(targetNodeId, predicate, visitor))) {
+                    queue.add(targetNodeId, graph.degree(targetNodeId));
                 }
                 return true;
             });
