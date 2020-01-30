@@ -66,6 +66,8 @@ class ListProcTest extends BaseProcTest {
 
         "gds.graph.create",
         "gds.graph.create.cypher",
+        "gds.graph.create.cypher.estimate",
+        "gds.graph.create.estimate",
         "gds.graph.drop",
         "gds.graph.exists",
         "gds.graph.list",

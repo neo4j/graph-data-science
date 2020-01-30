@@ -38,7 +38,7 @@ For more information, see:
 * <<label-relationship-type-projection>>
 * <<named-graph>>
 * <<cypher-projection>>
-* <<memory-requirements>>
+* <<memory-estimation>>
 * <<transaction-handling>>
 
 include::projected-graph-model/label-relationship-type-projection.adoc[leveloffset=+1]
@@ -47,6 +47,6 @@ include::projected-graph-model/cypher-projection.adoc[tag=overview,leveloffset=+
 
 include::projected-graph-model/named-graph.adoc[leveloffset=+1]
 
-include::memory-requirements.adoc[leveloffset=+1]
+include::memory-estimation.adoc[leveloffset=+1]
 
 include::transaction-handling.adoc[leveloffset=+1]

@@ -18,7 +18,7 @@ There are three supported execution modes:
 * `stats`
 ** Returns a single record of summary statistics, but does not write to the Neo4j database.
 
-Finally, an execution mode may be <<memory-requirements, estimated>> by appending the command with `estimate`.
+Finally, an execution mode may be <<memory-estimation, estimated>> by appending the command with `estimate`.
 
 [NOTE]
 Only the production-quality tier guarantees availability of all execution modes.

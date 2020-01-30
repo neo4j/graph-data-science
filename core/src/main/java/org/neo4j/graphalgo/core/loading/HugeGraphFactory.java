@@ -84,28 +84,22 @@ public final class HugeGraphFactory extends GraphFactory {
 
         // Node properties
         for (ResolvedPropertyMapping resolvedPropertyMapping : dimensions.nodeProperties()) {
-            if (resolvedPropertyMapping.exists()) {
-                builder.add(resolvedPropertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
-            } else {
-                builder.add(resolvedPropertyMapping.propertyKey(), NullPropertyMap.MEMORY_USAGE);
-            }
+            builder.add(resolvedPropertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
         }
 
         // Relationship properties
         for (ResolvedPropertyMapping mapping : dimensions.relationshipProperties()) {
-            if (mapping.exists()) {
-                // Adjacency lists and Adjacency offsets
-                MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(loadAsUndirected);
-                MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
-                if (loadOutgoing || loadAsUndirected) {
-                    builder.add("outgoing properties for " + mapping.neoPropertyKey(), adjacencyListSize);
-                    builder.add("outgoing property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
+            // Adjacency lists and Adjacency offsets
+            MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(loadAsUndirected);
+            MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
+            if (loadOutgoing || loadAsUndirected) {
+                builder.add("outgoing properties for " + mapping.neoPropertyKey(), adjacencyListSize);
+                builder.add("outgoing property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
 
-                }
-                if (loadIncoming && !loadAsUndirected) {
-                    builder.add("incoming properties for " + mapping.neoPropertyKey(), adjacencyListSize);
-                    builder.add("incoming property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
-                }
+            }
+            if (loadIncoming && !loadAsUndirected) {
+                builder.add("incoming properties for " + mapping.neoPropertyKey(), adjacencyListSize);
+                builder.add("incoming property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
             }
         }
 

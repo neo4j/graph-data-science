@@ -19,13 +19,10 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.WriteConfig;
@@ -39,9 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import static org.neo4j.graphalgo.core.ProcedureConstants.NODECOUNT_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELCOUNT_KEY;
 
 public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
 
@@ -64,28 +58,6 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
     protected ProcedureConfiguration(CypherMapWrapper configurationMap, String username) {
         this.configurationMap = configurationMap;
         this.username = username;
-    }
-
-    public MemoryEstimation estimate(GraphSetup setup, GraphFactory factory) {
-        MemoryEstimation estimation;
-
-        if (containsKey(NODECOUNT_KEY)) {
-            GraphDimensions dimensions = factory.dimensions();
-            long nodeCount = get(NODECOUNT_KEY, 0L);
-            long relCount = get(RELCOUNT_KEY, 0L);
-
-            GraphDimensions estimateDimensions = ImmutableGraphDimensions.builder()
-                .from(dimensions)
-                .nodeCount(nodeCount)
-                .highestNeoId(nodeCount)
-                .maxRelCount(relCount)
-                .build();
-
-            estimation = factory.memoryEstimation(setup, estimateDimensions);
-        } else {
-            estimation = factory.memoryEstimation();
-        }
-        return estimation;
     }
 
     // Below methods are delegators that will be removed

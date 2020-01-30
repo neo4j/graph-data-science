@@ -429,38 +429,6 @@ class GraphLoadProcTest extends BaseProcTest {
     }
 
     @Disabled
-    @Test
-    void shouldComputeMemoryEstimationForHuge() {
-        String query = "CALL algo.graph.load.memrec(" +
-                       "    null, null, {" +
-                       "        graph: $graph" +
-                       "    }" +
-                       ") YIELD bytesMin, bytesMax";
-        runQueryWithRowConsumer(query, singletonMap("graph", "huge"),
-                row -> {
-                    assertEquals(303520, row.getNumber("bytesMin").longValue());
-                    assertEquals(303520, row.getNumber("bytesMax").longValue());
-                }
-        );
-    }
-
-    @Disabled
-    @Test
-    void shouldComputeMemoryEstimationForHugeWithProperties() {
-        String query = "CALL algo.graph.load.memrec(" +
-                       "    null, null, {" +
-                       "        graph: $graph, weightProperty: 'weight'" +
-                       "    }" +
-                       ") YIELD bytesMin, bytesMax";
-
-        runQueryWithRowConsumer(query, singletonMap("graph", "huge"),
-                row -> {
-                    assertEquals(573952, row.getNumber("bytesMin").longValue());
-                    assertEquals(573952, row.getNumber("bytesMax").longValue());
-                });
-    }
-
-    @Disabled
     @ParameterizedTest
     @ValueSource(strings = {"huge", "cypher"})
     void shouldUseLoadedGraph(String graph) {
