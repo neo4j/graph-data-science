@@ -80,7 +80,8 @@ abstract class CypherRecordLoader<R> {
         String elementType
     ) {
         List<String> invalidNodeProperties = resolvedPropertyMappings
-            .mappings().stream()
+            .mappings()
+            .stream()
             .map(ResolvedPropertyMapping::neoPropertyKey)
             .filter(k -> !propertyColumns.contains(k))
             .collect(Collectors.toList());

@@ -63,7 +63,7 @@ class PropertyMappingTest {
         ));
         assertEquals(propertyMapping.propertyKey(), "transaction_count");
         assertEquals(propertyMapping.neoPropertyKey(), "transaction_count");
-        assertEquals(propertyMapping.deduplicationStrategy(), DeduplicationStrategy.MIN);
+        assertEquals(propertyMapping.aggregation(), Aggregation.MIN);
         assertEquals(propertyMapping.defaultValue(), 42.0);
     }
 

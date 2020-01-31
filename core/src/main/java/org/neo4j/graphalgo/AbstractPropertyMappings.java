@@ -51,10 +51,10 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
     }
 
     public static PropertyMappings fromObject(Object relPropertyMapping) {
-        return fromObject(relPropertyMapping, DeduplicationStrategy.DEFAULT);
+        return fromObject(relPropertyMapping, Aggregation.DEFAULT);
     }
 
-    public static PropertyMappings fromObject(Object relPropertyMapping, DeduplicationStrategy defaultAggregation) {
+    public static PropertyMappings fromObject(Object relPropertyMapping, Aggregation defaultAggregation) {
         if (relPropertyMapping instanceof PropertyMappings) {
             PropertyMappings properties = (PropertyMappings) relPropertyMapping;
             return properties.withDefaultAggregation(defaultAggregation);
@@ -83,9 +83,9 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         }
     }
 
-    PropertyMappings withDefaultAggregation(DeduplicationStrategy defaultAggregation) {
+    PropertyMappings withDefaultAggregation(Aggregation defaultAggregation) {
         List<PropertyMapping> mappingsWithNewDefault = mappings().stream().map(propertyMapping -> {
-            if (propertyMapping.deduplicationStrategy() == DeduplicationStrategy.DEFAULT) {
+            if (propertyMapping.aggregation() == Aggregation.DEFAULT) {
                 return PropertyMapping.of(
                     propertyMapping.propertyKey(),
                     propertyMapping.neoPropertyKey(),

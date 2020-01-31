@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -37,8 +38,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
@@ -366,5 +369,37 @@ public class BaseProcTest {
 
     private Map<String, Object> extractUserInput(Result.ResultRow row) {
         return ((Map<String, Object>) row.get("configuration"));
+    }
+
+    protected void assertGraphExists(String graphName) {
+        final Set<Graph> graphs = getLoadedGraphs(graphName);
+
+        assertEquals(1, graphs.size());
+    }
+
+    protected void assertGraphDoesNotExist(String graphName) {
+        final Set<Graph> graphs = getLoadedGraphs(graphName);
+        assertTrue(graphs.isEmpty());
+    }
+
+    protected Graph findLoadedGraph(String graphName) {
+        return GraphCatalog
+            .getLoadedGraphs("")
+            .entrySet()
+            .stream()
+            .filter(e -> e.getKey().graphName().equals(graphName))
+            .map(Map.Entry::getValue)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException(String.format("Graph %s not found.", graphName)));
+    }
+
+    private Set<Graph> getLoadedGraphs(String graphName) {
+        return GraphCatalog
+                .getLoadedGraphs("")
+                .entrySet()
+                .stream()
+                .filter(e -> e.getKey().graphName().equals(graphName))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toSet());
     }
 }
