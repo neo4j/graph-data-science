@@ -165,7 +165,7 @@ final class HugeGraphLoadingTest {
             .build()
             .graph(HugeGraphFactory.class);
 
-        assertEquals(2, graph.relationshipCount());
+        assertEquals(11, graph.relationshipCount());
     }
 
     @Test

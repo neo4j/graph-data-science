@@ -133,9 +133,9 @@ class DegreesTest extends AlgoTestBase {
     @Test
     void testBidirectionalUndirected() {
         setup(BI_DIRECTIONAL, Projection.UNDIRECTED);
-        assertEquals(2, graph.degree(nodeId("a")));
-        assertEquals(2, graph.degree(nodeId("b")));
-        assertEquals(2, graph.degree(nodeId("c")));
+        assertEquals(4, graph.degree(nodeId("a")));
+        assertEquals(4, graph.degree(nodeId("b")));
+        assertEquals(4, graph.degree(nodeId("c")));
     }
 
     private void setup(String cypher, Projection projection) {

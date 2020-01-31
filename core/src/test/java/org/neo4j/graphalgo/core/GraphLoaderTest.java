@@ -66,7 +66,7 @@ class GraphLoaderTest {
 
     @AllGraphTypesTest
     void testAnyLabel(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = TestGraphLoader.from(db).buildGraph(graphFactory);
+        Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
     }
 
@@ -105,7 +105,7 @@ class GraphLoaderTest {
 
     @AllGraphTypesTest
     void testAnyRelation(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = TestGraphLoader.from(db).buildGraph(graphFactory);
+        Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
     }
 
@@ -138,6 +138,7 @@ class GraphLoaderTest {
         Graph graph = TestGraphLoader
             .from(db)
             .withNodeProperties(nodePropertyMappings)
+            .withDefaultAggregation(Aggregation.SINGLE)
             .buildGraph(graphFactory);
 
         assertGraphEquals(graph, fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
@@ -150,6 +151,7 @@ class GraphLoaderTest {
     void testWithRelationshipProperty(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipProperties(PropertyMapping.of("weight","prop1", 1337.42))
+            .withDefaultAggregation(Aggregation.SINGLE)
             .buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 1337.42D}]->(c), (b)-[{w: 1337.42D}]->(c)"));
     }

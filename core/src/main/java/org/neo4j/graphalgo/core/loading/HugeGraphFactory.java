@@ -44,13 +44,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 
 public final class HugeGraphFactory extends GraphFactory {
-
-    // TODO: make this configurable from somewhere
-    private static final boolean LOAD_DEGREES = false;
 
     public HugeGraphFactory(GraphDatabaseAPI api, GraphSetup setup) {
         super(api, setup);
@@ -274,7 +270,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 .relationshipProperties()
                 .stream()
                 .map(property -> property.aggregation() == Aggregation.DEFAULT
-                        ? Aggregation.SINGLE
+                        ? Aggregation.NONE
                         : property.aggregation()
                 )
                 .toArray(Aggregation[]::new);
@@ -282,7 +278,7 @@ public final class HugeGraphFactory extends GraphFactory {
         if (aggregations.length == 0) {
             Aggregation aggregation =
                 setup.aggregation() == Aggregation.DEFAULT
-                            ? Aggregation.SINGLE
+                            ? Aggregation.NONE
                             : setup.aggregation();
             aggregations = new Aggregation[]{aggregation};
         }

@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.Projection.NATURAL;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
-import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
 
 public final class TestGraphLoader {
 
@@ -145,7 +144,7 @@ public final class TestGraphLoader {
             relPropertiesString
         ));
 
-        cypherLoaderBuilder.globalAggregation(maybeAggregation.orElse(SINGLE));
+        cypherLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));
         if (addNodePropertiesToLoader) cypherLoaderBuilder.nodeProperties(nodeProperties);
         if (addRelationshipPropertiesToLoader) cypherLoaderBuilder.relationshipProperties(relProperties);
 
@@ -164,7 +163,7 @@ public final class TestGraphLoader {
                 .forEach(relType -> {
                     RelationshipProjection template = RelationshipProjection.empty()
                         .withType(relType)
-                        .withAggregation(maybeAggregation.orElse(SINGLE));
+                        .withAggregation(maybeAggregation.orElse(DEFAULT));
                     storeLoaderBuilder.addRelationshipProjection(template.withProjection(NATURAL));
                 });
         } else {
@@ -173,7 +172,7 @@ public final class TestGraphLoader {
                 RelationshipProjection.empty().withAggregation(maybeAggregation.orElse(DEFAULT))
             );
         }
-        storeLoaderBuilder.globalAggregation(maybeAggregation.orElse(SINGLE));
+        storeLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));
         if (addNodePropertiesToLoader) storeLoaderBuilder.nodeProperties(nodeProperties);
         if (addRelationshipPropertiesToLoader) storeLoaderBuilder.relationshipProperties(relProperties);
         return storeLoaderBuilder.build();

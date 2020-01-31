@@ -188,6 +188,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .addNodeLabel(label.name())
                 .addRelationshipType("TYPE1")
                 .globalProjection(Projection.UNDIRECTED)
+                .globalAggregation(Aggregation.SINGLE)
                 .build()
                 .graph(factoryType);
         }
