@@ -58,8 +58,8 @@ import java.util.stream.Stream;
 
 public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput> extends SimilarityAlgorithm<ApproxNearestNeighborsAlgorithm<INPUT>, INPUT> {
 
-    static final String ANN_OUT_GRAPH = "ANN_OUT";
-    static final String ANN_IN_GRAPH = "ANN_IN";
+    private static final String ANN_OUT_GRAPH = "ANN_OUT";
+    private static final String ANN_IN_GRAPH = "ANN_IN";
 
     private final ApproximateNearestNeighborsConfig config;
     private final SimilarityAlgorithm<?, INPUT> algorithm;
