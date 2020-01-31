@@ -42,6 +42,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -64,9 +65,7 @@ public final class HugeGraphFactory extends GraphFactory {
         return getMemoryEstimation(dimensions);
     }
 
-    public static MemoryEstimation getMemoryEstimation(
-        GraphDimensions dimensions
-    ) {
+    public static MemoryEstimation getMemoryEstimation(GraphDimensions dimensions) {
         MemoryEstimations.Builder builder = MemoryEstimations
             .builder(HugeGraph.class)
             .add("nodeIdMap", IdMap.memoryEstimation());
@@ -74,6 +73,10 @@ public final class HugeGraphFactory extends GraphFactory {
         // Node properties
         for (ResolvedPropertyMapping resolvedPropertyMapping : dimensions.nodeProperties()) {
             builder.add(resolvedPropertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
+        }
+
+        if (Objects.isNull(dimensions.relationshipProjectionMappings())) {
+            throw new IllegalArgumentException("No relationship projection was specified.");
         }
 
         // Relationships
