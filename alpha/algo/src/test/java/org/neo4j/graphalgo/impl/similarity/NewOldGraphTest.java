@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.roaringbitmap.RoaringBitmap;
@@ -36,16 +37,16 @@ import java.util.Collections;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.ArrayMatching.arrayContainingInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.impl.similarity.ANNUtils.createGraphsByRelationshipType;
 import static org.neo4j.graphalgo.impl.similarity.ANNUtils.initializeRoaringBitmaps;
 
 class NewOldGraphTest {
 
     @Test
     void allRelationshipsNewByDefault() {
-
         int numberOfNodes = 5;
-        HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, AllocationTracker.EMPTY);
+        AllocationTracker tracker = AllocationTracker.EMPTY;
+
+        HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, tracker);
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null);
 
         NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), numberOfNodes, false);
@@ -55,17 +56,18 @@ class NewOldGraphTest {
         }
         nodeImporter.importNodes(buffer, null);
 
-        IdMap idMap = IdMapBuilder.build(idMapBuilder, numberOfNodes-1, 1, AllocationTracker.EMPTY);
+        IdMap idMap = IdMapBuilder.build(idMapBuilder, numberOfNodes-1, 1, tracker);
         IdsAndProperties nodes = new IdsAndProperties(idMap, Collections.emptyMap());
 
-        HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipsBuilder = new HugeRelationshipsBuilder(nodes).withBuffer();
+        ApproxNearestNeighborsAlgorithm.RelationshipImporter importer = ApproxNearestNeighborsAlgorithm.RelationshipImporter
+            .of(nodes.idMap(), Pools.DEFAULT, tracker);
 
-        relationshipsBuilder.addRelationship(0, 1);
-        relationshipsBuilder.addRelationship(0, 2);
-        relationshipsBuilder.addRelationship(0, 3);
+        importer.addRelationship(0, 1);
+        importer.addRelationship(0, 2);
+        importer.addRelationship(0, 3);
 
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
-        NewOldGraph graph = new NewOldGraph(createGraphsByRelationshipType(nodes, relationshipsBuilder.build()).getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(importer.buildGraphs().getUnion(), visitedRelationships);
 
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(3, newNeighbors.length);
@@ -74,9 +76,10 @@ class NewOldGraphTest {
 
     @Test
     void newShouldFilterVisitedRelationships() {
-
         int numberOfNodes = 5;
-        HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, AllocationTracker.EMPTY);
+        AllocationTracker tracker = AllocationTracker.EMPTY;
+
+        HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, tracker);
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null);
 
         NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), numberOfNodes, false);
@@ -86,19 +89,20 @@ class NewOldGraphTest {
         }
         nodeImporter.importNodes(buffer, null);
 
-        IdMap idMap = IdMapBuilder.build(idMapBuilder, numberOfNodes-1, 1, AllocationTracker.EMPTY);
+        IdMap idMap = IdMapBuilder.build(idMapBuilder, numberOfNodes-1, 1, tracker);
         IdsAndProperties nodes = new IdsAndProperties(idMap, Collections.emptyMap());
 
-        HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipsBuilder = new HugeRelationshipsBuilder(nodes).withBuffer();
+        ApproxNearestNeighborsAlgorithm.RelationshipImporter importer = ApproxNearestNeighborsAlgorithm.RelationshipImporter
+            .of(nodes.idMap(), Pools.DEFAULT, tracker);
 
-        relationshipsBuilder.addRelationship(0, 1);
-        relationshipsBuilder.addRelationship(0, 2);
-        relationshipsBuilder.addRelationship(0, 3);
+        importer.addRelationship(0, 1);
+        importer.addRelationship(0, 2);
+        importer.addRelationship(0, 3);
 
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(createGraphsByRelationshipType(nodes, relationshipsBuilder.build()).getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(importer.buildGraphs().getUnion(), visitedRelationships);
 
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(2, newNeighbors.length);
@@ -107,9 +111,9 @@ class NewOldGraphTest {
 
     @Test
     void oldShouldReturnVisitedRelationships() {
-
         int numberOfNodes = 5;
-        HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, AllocationTracker.EMPTY);
+        AllocationTracker tracker = AllocationTracker.EMPTY;
+        HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, tracker);
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null);
 
         NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), numberOfNodes, false);
@@ -119,19 +123,20 @@ class NewOldGraphTest {
         }
         nodeImporter.importNodes(buffer, null);
 
-        IdMap idMap = IdMapBuilder.build(idMapBuilder, numberOfNodes-1, 1, AllocationTracker.EMPTY);
+        IdMap idMap = IdMapBuilder.build(idMapBuilder, numberOfNodes-1, 1, tracker);
         IdsAndProperties nodes = new IdsAndProperties(idMap, Collections.emptyMap());
 
-        HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipsBuilder = new HugeRelationshipsBuilder(nodes).withBuffer();
+        ApproxNearestNeighborsAlgorithm.RelationshipImporter importer = ApproxNearestNeighborsAlgorithm.RelationshipImporter
+            .of(nodes.idMap(), Pools.DEFAULT, tracker);
 
-        relationshipsBuilder.addRelationship(0, 1);
-        relationshipsBuilder.addRelationship(0, 2);
-        relationshipsBuilder.addRelationship(0, 3);
+        importer.addRelationship(0, 1);
+        importer.addRelationship(0, 2);
+        importer.addRelationship(0, 3);
 
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(createGraphsByRelationshipType(nodes, relationshipsBuilder.build()).getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(importer.buildGraphs().getUnion(), visitedRelationships);
 
         long[] oldNeighbors = graph.findOldNeighbors(0).toArray();
         assertEquals(1, oldNeighbors.length);

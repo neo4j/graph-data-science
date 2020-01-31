@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.GraphGenerator;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.IdMap;
@@ -143,12 +142,12 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             }
             tempVisitedRelationships = ANNUtils.initializeRoaringBitmaps(inputSize);
 
-            RelationshipImporterWrapper importer = RelationshipImporterWrapper.of(nodes.idMap(), executor, tracker);
+            RelationshipImporter importer = RelationshipImporter.of(nodes.idMap(), executor, tracker);
             importer.consume(topKConsumers);
             Graph graph = importer.buildGraphs().getUnion();
 
-            RelationshipImporterWrapper oldImporter = RelationshipImporterWrapper.of(nodes.idMap(), executor, tracker);
-            RelationshipImporterWrapper newImporter = RelationshipImporterWrapper.of(nodes.idMap(), executor, tracker);
+            RelationshipImporter oldImporter = RelationshipImporter.of(nodes.idMap(), executor, tracker);
+            RelationshipImporter newImporter = RelationshipImporter.of(nodes.idMap(), executor, tracker);
 
             Collection<Runnable> setupTasks = setupTasks(
                 sampleSize,
@@ -193,8 +192,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         RoaringBitmap[] visitedRelationships,
         RoaringBitmap[] tempVisitedRelationships,
         Graph graph,
-        RelationshipImporterWrapper oldImporter,
-        RelationshipImporterWrapper newImporter
+        RelationshipImporter oldImporter,
+        RelationshipImporter newImporter
     ) {
         int batchSize = ParallelUtil.adjustedBatchSize(inputSize, config.concurrency(), 100);
         int numberOfBatches = (inputSize / batchSize) + 1;
@@ -363,8 +362,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
     private class SetupTask implements Runnable {
         private final NewOldGraph graph;
-        private final RelationshipImporterWrapper oldImporter;
-        private final RelationshipImporterWrapper newImporter;
+        private final RelationshipImporter oldImporter;
+        private final RelationshipImporter newImporter;
         private final double sampleSize;
         private final RoaringBitmap[] visitedRelationships;
         private final long startNodeId;
@@ -373,8 +372,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         SetupTask(
             NewOldGraph graph,
             RoaringBitmap[] visitedRelationships,
-            RelationshipImporterWrapper oldImporter,
-            RelationshipImporterWrapper newImporter,
+            RelationshipImporter oldImporter,
+            RelationshipImporter newImporter,
             double sampleSize,
             long startNodeId,
             long nodeCount
@@ -527,7 +526,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
     }
 
     @ValueClass
-    interface RelationshipImporterWrapper {
+    public interface RelationshipImporter {
         GraphGenerator.RelImporter outImporter();
         GraphGenerator.RelImporter inImporter();
 
@@ -559,7 +558,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             return GraphsByRelationshipType.of(annGraphs);
         }
 
-        static RelationshipImporterWrapper of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {
+        static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {
             GraphGenerator.RelImporter outImporter = new GraphGenerator.RelImporter(
                 idMap,
                 Projection.NATURAL,
@@ -578,7 +577,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 tracker
             );
 
-            return ImmutableRelationshipImporterWrapper.of(outImporter, inImporter);
+            return ImmutableRelationshipImporter.of(outImporter, inImporter);
         }
     }
 
