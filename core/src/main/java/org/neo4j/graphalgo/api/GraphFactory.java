@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.loading.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
@@ -50,6 +51,8 @@ public abstract class GraphFactory implements Assessable {
     protected final Log log;
     protected final ProgressLogger progressLogger;
 
+    protected KernelTransaction kernelTransaction;
+
     public GraphFactory(GraphDatabaseAPI api, GraphSetup setup) {
         this(api, setup, true);
     }
@@ -70,6 +73,11 @@ public abstract class GraphFactory implements Assessable {
 
     public GraphDimensions dimensions() {
         return this.dimensions;
+    }
+
+    public GraphFactory withKernelTransaction(KernelTransaction kernelTransaction) {
+        this.kernelTransaction = kernelTransaction;
+        return this;
     }
 
     protected ImportProgress importProgress(

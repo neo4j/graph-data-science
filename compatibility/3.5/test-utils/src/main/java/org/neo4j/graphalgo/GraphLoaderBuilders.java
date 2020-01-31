@@ -30,6 +30,9 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -73,7 +76,8 @@ final class GraphLoaderBuilders {
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Projection> globalProjection,
-        Optional<Aggregation> globalAggregation) {
+        Optional<Aggregation> globalAggregation
+        ) {
 
         GraphCreateFromStoreConfig createConfig = GraphCreateConfigBuilders.storeConfig(
             userName,
@@ -93,16 +97,24 @@ final class GraphLoaderBuilders {
             globalAggregation
         );
 
-        return ImmutableGraphLoader.of(
-            api,
-            executorService.orElse(Pools.DEFAULT),
-            tracker.orElse(AllocationTracker.EMPTY),
-            terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
-            params,
-            userName.orElse(""),
-            log.orElse(NullLog.getInstance()),
-            createConfig
-        );
+        try(Transaction tx = api.beginTx()) {
+            KernelTransaction kernelTransaction = api
+                .getDependencyResolver()
+                .resolveDependency(ThreadToStatementContextBridge.class)
+                .getKernelTransactionBoundToThisThread(true);
+            tx.success();
+            return ImmutableGraphLoader.of(
+                api,
+                executorService.orElse(Pools.DEFAULT),
+                tracker.orElse(AllocationTracker.EMPTY),
+                terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
+                params,
+                userName.orElse(""),
+                log.orElse(NullLog.getInstance()),
+                createConfig,
+                kernelTransaction
+            );
+        }
     }
 
     /**
@@ -143,16 +155,23 @@ final class GraphLoaderBuilders {
             concurrency,
             globalAggregation
         );
-
-        return ImmutableGraphLoader.of(
-            api,
-            executorService.orElse(Pools.DEFAULT),
-            tracker.orElse(AllocationTracker.EMPTY),
-            terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
-            params,
-            userName.orElse(""),
-            log.orElse(NullLog.getInstance()),
-            createConfig
-        );
+        try(Transaction tx = api.beginTx()) {
+            KernelTransaction kernelTransaction = api
+                .getDependencyResolver()
+                .resolveDependency(ThreadToStatementContextBridge.class)
+                .getKernelTransactionBoundToThisThread(true);
+            tx.success();
+            return ImmutableGraphLoader.of(
+                api,
+                executorService.orElse(Pools.DEFAULT),
+                tracker.orElse(AllocationTracker.EMPTY),
+                terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
+                params,
+                userName.orElse(""),
+                log.orElse(NullLog.getInstance()),
+                createConfig,
+                kernelTransaction
+            );
+        }
     }
 }

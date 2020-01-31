@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -66,6 +66,7 @@ public abstract class BaseProc {
             .tracker(tracker)
             .terminationFlag(TerminationFlag.wrap(transaction))
             .createConfig(createConfig)
+            .kernelTransaction(transaction)
             .build();
     }
 

@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -116,14 +117,27 @@ class GraphCatalogTest {
                     .build()
             ).build();
 
-        GraphsByRelationshipType importedGraphs = ImmutableGraphLoader
-            .builder()
-            .api(db)
-            .username("")
-            .log(new TestLog())
-            .createConfig(graphCreateConfig)
-            .build()
-            .graphs(HugeGraphFactory.class);
+        GraphsByRelationshipType importedGraphs =
+            QueryRunner.runWithKernelTransaction(db, kernelTransaction -> ImmutableGraphLoader
+                .builder()
+                .api(db)
+                .kernelTransaction(kernelTransaction)
+                .username("")
+                .log(new TestLog())
+                .createConfig(graphCreateConfig)
+                .build()
+                .graphs(HugeGraphFactory.class));
+
+
+//        GraphsByRelationshipType importedGraphs = ImmutableGraphLoader
+//            .builder()
+//            .api(db)
+//            .kernelTransaction(null)
+//            .username("")
+//            .log(new TestLog())
+//            .createConfig(graphCreateConfig)
+//            .build()
+//            .graphs(HugeGraphFactory.class);
 
         GraphCatalog.set(graphCreateConfig, importedGraphs);
 

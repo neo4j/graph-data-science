@@ -26,6 +26,7 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.AuthenticationResult;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -112,6 +113,18 @@ public final class QueryRunner {
     public static <T> T runInTransaction(GraphDatabaseService db, Supplier<T> supplier) {
         try (Transaction tx = db.beginTx()) {
             T t = supplier.get();
+            tx.success();
+            return t;
+        }
+    }
+
+    public static <R> R runWithKernelTransaction(GraphDatabaseAPI db, Function<KernelTransaction, R> function) {
+        try (Transaction tx = db.beginTx()) {
+            KernelTransaction kernelTransaction = db
+                .getDependencyResolver()
+                .resolveDependency(ThreadToStatementContextBridge.class)
+                .getKernelTransactionBoundToThisThread(true);
+            R t = function.apply(kernelTransaction);
             tx.success();
             return t;
         }

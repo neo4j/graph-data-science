@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
@@ -75,6 +76,8 @@ public interface GraphLoader {
 
     GraphCreateConfig createConfig();
 
+    KernelTransaction kernelTransaction();
+
     default Graph graph(Class<? extends GraphFactory> factoryType) {
         return load(factoryType);
     }
@@ -110,7 +113,8 @@ public interface GraphLoader {
         try {
             MethodHandle constructor = LOOKUP.findConstructor(factoryType, CTOR_METHOD);
             GraphSetup setup = toSetup();
-            GraphFactory factory = (GraphFactory) constructor.invoke(api(), setup);
+            GraphFactory factory = ((GraphFactory) constructor.invoke(api(), setup))
+                .withKernelTransaction(kernelTransaction());
             return factoryType.cast(factory);
         } catch (Throwable throwable) {
             throwIfUnchecked(throwable);

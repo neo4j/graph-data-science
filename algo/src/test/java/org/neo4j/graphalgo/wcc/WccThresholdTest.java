@@ -31,13 +31,13 @@ import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -113,14 +113,16 @@ public class WccThresholdTest extends AlgoTestBase {
             .implicitCreateConfig(createConfig)
             .build();
 
-        GraphLoader loader = ImmutableGraphLoader
-            .builder()
-            .api(db)
-            .username("")
-            .log(new TestLog())
-            .createConfig(createConfig).build();
-
-        Graph graph = loader.load(HugeGraphFactory.class);
+        Graph graph =
+            QueryRunner.runWithKernelTransaction(db, kernelTransaction -> ImmutableGraphLoader
+                .builder()
+                .api(db)
+                .kernelTransaction(kernelTransaction)
+                .username("")
+                .log(new TestLog())
+                .createConfig(createConfig)
+                .build()
+                .load(HugeGraphFactory.class));
 
         DisjointSetStruct dss = new Wcc(
             graph,

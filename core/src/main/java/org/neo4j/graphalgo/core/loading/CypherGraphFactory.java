@@ -37,15 +37,12 @@ import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.KernelTransaction.Revertable;
-import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class CypherGraphFactory extends GraphFactory {
@@ -84,8 +81,8 @@ public class CypherGraphFactory extends GraphFactory {
 
     @Override
     public ImportResult build() {
-        // Temporarily override the security context to enforce read-only access during load
-        try (Revertable ignored = setReadOnlySecurityContext()) {
+//         Temporarily override the security context to enforce read-only access during load
+        try (KernelTransaction.Revertable ignored = setReadOnlySecurityContext()) {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), api, setup).load();
 
             CypherNodeLoader.LoadResult loadResult = new CypherNodeLoader(
@@ -194,12 +191,8 @@ public class CypherGraphFactory extends GraphFactory {
         return ImportResult.of(resultDimensions, GraphsByRelationshipType.of(graphs));
     }
 
-    private Revertable setReadOnlySecurityContext() {
+    private KernelTransaction.Revertable setReadOnlySecurityContext() {
         try {
-            KernelTransaction kernelTransaction = api
-                .getDependencyResolver()
-                .resolveDependency(ThreadToStatementContextBridge.class)
-                .getKernelTransactionBoundToThisThread(true);
             AuthSubject subject = kernelTransaction.securityContext().subject();
             SecurityContext securityContext = new SecurityContext(subject, READ);
             return kernelTransaction.overrideWith(securityContext);
