@@ -171,12 +171,12 @@ public final class HugeGraphFactory extends GraphFactory {
             AllocationTracker tracker,
             IdsAndProperties idsAndProperties,
             int concurrency) {
-        Map<RelationshipProjectionMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders = dimensions
+        Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders = dimensions
                 .relationshipProjectionMappings()
                 .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        mapping -> createBuildersForRelationshipType(mapping, tracker)
+                        mapping -> createRelationshipsBuilder(tracker)
                 ));
 
         ScanningRelationshipsImporter scanningImporter = new ScanningRelationshipsImporter(
@@ -196,48 +196,24 @@ public final class HugeGraphFactory extends GraphFactory {
                 entry -> entry.getKey().elementIdentifier(),
                 entry -> {
                     RelationshipProjectionMapping relProjectionMapping = entry.getKey();
+                    RelationshipsBuilder relationshipsBuilder = entry.getValue();
 
-                    Pair<RelationshipsBuilder, RelationshipsBuilder> builders = entry.getValue();
-                    RelationshipsBuilder outgoingRelationshipsBuilder = builders.getOne();
-                    RelationshipsBuilder incomingRelationshipsBuilder = builders.getTwo();
-
-                    AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder != null
-                            ? outgoingRelationshipsBuilder.adjacencyListBuilder.build() : null;
-                    AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder != null
-                            ? outgoingRelationshipsBuilder.globalAdjacencyOffsets : null;
-
-                    AdjacencyList inAdjacencyList = incomingRelationshipsBuilder != null
-                            ? incomingRelationshipsBuilder.adjacencyListBuilder.build() : null;
-                    AdjacencyOffsets inAdjacencyOffsets = incomingRelationshipsBuilder != null
-                            ? incomingRelationshipsBuilder.globalAdjacencyOffsets : null;
-
+                    AdjacencyList adjacencyList = relationshipsBuilder.adjacencyListBuilder.build();
+                    AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets;
                     long relationshipCount = relationshipCounts.getOrDefault(relProjectionMapping, 0L);
-
-                    // The factory loads at most one adjacency list for a single projection.
-                    // We store that adjacency list always in the outgoing adjacency list.
-
-                    if (relProjectionMapping.projection() == Projection.REVERSE) {
-                        outAdjacencyList = inAdjacencyList;
-                        outAdjacencyOffsets = inAdjacencyOffsets;
-                        outgoingRelationshipsBuilder = incomingRelationshipsBuilder;
-                    }
 
                     if (!dimensions.relationshipProperties().hasMappings()) {
                         HugeGraph graph = HugeGraph.create(
                                 tracker,
                                 idsAndProperties.hugeIdMap,
                                 idsAndProperties.properties,
-                                outAdjacencyList,
-                                outAdjacencyOffsets,
+                                adjacencyList,
+                                adjacencyOffsets,
                                 relationshipCount,
                             setup.loadAsUndirected()
                         );
                         return Collections.singletonMap(ANY_REL_TYPE, graph);
                     } else {
-                        AdjacencyList adjacencyList = outAdjacencyList;
-                        AdjacencyOffsets adjacencyOffsets = outAdjacencyOffsets;
-                        RelationshipsBuilder relationshipsBuilder = outgoingRelationshipsBuilder;
-
                         return dimensions.relationshipProperties().enumerate().map(propertyEntry -> {
                             int weightIndex = propertyEntry.getOne();
                             ResolvedPropertyMapping property = propertyEntry.getTwo();
@@ -259,13 +235,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 }));
     }
 
-    private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuildersForRelationshipType(
-        RelationshipProjectionMapping relationshipProjectionMapping,
-        AllocationTracker tracker
-    ) {
-        RelationshipsBuilder outgoingRelationshipsBuilder = null;
-        RelationshipsBuilder incomingRelationshipsBuilder = null;
-
+    private RelationshipsBuilder createRelationshipsBuilder(AllocationTracker tracker) {
         Aggregation[] aggregations = dimensions
                 .relationshipProperties()
                 .stream()
@@ -283,22 +253,11 @@ public final class HugeGraphFactory extends GraphFactory {
             aggregations = new Aggregation[]{aggregation};
         }
 
-        if (relationshipProjectionMapping.projection() == Projection.NATURAL || relationshipProjectionMapping.projection() == Projection.UNDIRECTED) {
-            outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                aggregations,
-                tracker,
-                setup.relationshipPropertyMappings().numberOfMappings()
-            );
-        }
-        if (relationshipProjectionMapping.projection() == Projection.REVERSE) {
-            incomingRelationshipsBuilder = new RelationshipsBuilder(
-                aggregations,
-                tracker,
-                setup.relationshipPropertyMappings().numberOfMappings()
-            );
-        }
-
-        return Tuples.pair(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
+        return new RelationshipsBuilder(
+            aggregations,
+            tracker,
+            setup.relationshipPropertyMappings().numberOfMappings()
+        );
     }
 
 }

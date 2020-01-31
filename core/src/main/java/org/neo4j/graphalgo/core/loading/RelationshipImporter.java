@@ -19,16 +19,13 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.BATCH_ENTRY_SIZE;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.PROPERTIES_REFERENCE_OFFSET;
@@ -37,16 +34,13 @@ import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.RELATION
 public class RelationshipImporter {
 
     private final AllocationTracker tracker;
-    private final AdjacencyBuilder outAdjacency;
-    private final AdjacencyBuilder inAdjacency;
+    private final AdjacencyBuilder adjacencyBuilder;
 
     public RelationshipImporter(
         AllocationTracker tracker,
-        @Nullable AdjacencyBuilder outAdjacency,
-        @Nullable AdjacencyBuilder inAdjacency) {
+        AdjacencyBuilder adjacencyBuilder) {
         this.tracker = tracker;
-        this.outAdjacency = outAdjacency;
-        this.inAdjacency = inAdjacency;
+        this.adjacencyBuilder = adjacencyBuilder;
     }
 
     public interface Imports {
@@ -85,9 +79,9 @@ public class RelationshipImporter {
 
     private long importBothOrUndirected(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortBySource();
-        int importedOut = importRelationships(buffer, batch, null, outAdjacency, tracker);
+        int importedOut = importRelationships(buffer, batch, null, adjacencyBuilder, tracker);
         batch = buffer.sortByTarget();
-        int importedIn = importRelationships(buffer, batch, null, inAdjacency, tracker);
+        int importedIn = importRelationships(buffer, batch, null, adjacencyBuilder, tracker);
         return RawValues.combineIntInt(importedOut + importedIn, 0);
     }
 
@@ -97,23 +91,23 @@ public class RelationshipImporter {
         long[][] outProperties = reader.readProperty(
                 batch,
                 batchLength,
-                outAdjacency.getPropertyKeyIds(),
-                outAdjacency.getDefaultValues());
-        int importedOut = importRelationships(buffer, batch, outProperties, outAdjacency, tracker);
+                adjacencyBuilder.getPropertyKeyIds(),
+                adjacencyBuilder.getDefaultValues());
+        int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder, tracker);
         batch = buffer.sortByTarget();
 
         long[][] inProperties = reader.readProperty(
                 batch,
                 batchLength,
-                inAdjacency.getPropertyKeyIds(),
-                inAdjacency.getDefaultValues());
-        int importedIn = importRelationships(buffer, batch, inProperties, inAdjacency, tracker);
+                adjacencyBuilder.getPropertyKeyIds(),
+                adjacencyBuilder.getDefaultValues());
+        int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder, tracker);
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
 
     private long importOutgoing(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortBySource();
-        return RawValues.combineIntInt(importRelationships(buffer, batch, null, outAdjacency, tracker), 0);
+        return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuilder, tracker), 0);
     }
 
     private long importOutgoingWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
@@ -122,15 +116,15 @@ public class RelationshipImporter {
         long[][] outProperties = propertyReader.readProperty(
                 batch,
                 batchLength,
-                outAdjacency.getPropertyKeyIds(),
-                outAdjacency.getDefaultValues());
-        int importedOut = importRelationships(buffer, batch, outProperties, outAdjacency, tracker);
+                adjacencyBuilder.getPropertyKeyIds(),
+                adjacencyBuilder.getDefaultValues());
+        int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder, tracker);
         return RawValues.combineIntInt(importedOut, importedOut);
     }
 
     private long importIncoming(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortByTarget();
-        return RawValues.combineIntInt(importRelationships(buffer, batch, null, inAdjacency, tracker), 0);
+        return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuilder, tracker), 0);
     }
 
     private long importIncomingWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
@@ -139,9 +133,9 @@ public class RelationshipImporter {
         long[][] inProperties = propertyReader.readProperty(
                 batch,
                 batchLength,
-                inAdjacency.getPropertyKeyIds(),
-                inAdjacency.getDefaultValues());
-        int importedIn = importRelationships(buffer, batch, inProperties, inAdjacency, tracker);
+                adjacencyBuilder.getPropertyKeyIds(),
+                adjacencyBuilder.getDefaultValues());
+        int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder, tracker);
         return RawValues.combineIntInt(importedIn, importedIn);
     }
 
@@ -159,19 +153,8 @@ public class RelationshipImporter {
         long[][] readProperty(long[] batch, int batchLength, int[] propertyKeyIds, double[] defaultValues);
     }
 
-    public Collection<Runnable> flushTasks() {
-        if (outAdjacency != null) {
-            if (inAdjacency == null || inAdjacency == outAdjacency) {
-                return outAdjacency.flushTasks();
-            }
-            Collection<Runnable> tasks = new ArrayList<>(outAdjacency.flushTasks());
-            tasks.addAll(inAdjacency.flushTasks());
-            return tasks;
-        }
-        if (inAdjacency != null) {
-            return inAdjacency.flushTasks();
-        }
-        return Collections.emptyList();
+    Collection<Runnable> flushTasks() {
+        return adjacencyBuilder.flushTasks();
     }
 
     PropertyReader storeBackedPropertiesReader(CursorFactory cursors, Read read) {

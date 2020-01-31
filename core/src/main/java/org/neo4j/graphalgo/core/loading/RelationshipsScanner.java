@@ -45,7 +45,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             ImportProgress progress,
             IdMapping idMap,
             AbstractStorePageCacheScanner<RelationshipRecord> scanner,
-            boolean loadWeights,
+            boolean loadProperties,
             Collection<SingleTypeRelationshipImporter.Builder> importerBuilders) {
         List<SingleTypeRelationshipImporter.Builder.WithImporter> builders = importerBuilders
                 .stream()
@@ -55,7 +55,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                         relationshipProjectionMapping.projection() == Projection.UNDIRECTED,
                         relationshipProjectionMapping.projection() == Projection.NATURAL,
                         relationshipProjectionMapping.projection() == Projection.REVERSE,
-                        loadWeights
+                        loadProperties
                     );
                 })
                 .filter(Objects::nonNull)

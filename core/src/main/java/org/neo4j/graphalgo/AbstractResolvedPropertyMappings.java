@@ -69,7 +69,7 @@ public abstract class AbstractResolvedPropertyMappings implements Iterable<Resol
             .toArray();
     }
 
-    public double[] allDefaultWeights() {
+    public double[] allDefaultValues() {
         return stream()
             .mapToDouble(ResolvedPropertyMapping::defaultValue)
             .toArray();

@@ -141,8 +141,7 @@ public final class GraphGenerator {
     public static class RelImporter {
 
         static final int DUMMY_PROPERTY_ID = -2;
-        private RelationshipsBuilder outRelationshipsBuilder;
-        private RelationshipsBuilder inRelationshipsBuilder;
+        private final RelationshipsBuilder relationshipsBuilder;
         private final RelationshipImporter relationshipImporter;
         private final RelationshipImporter.Imports imports;
         private final RelationshipsBatchBuffer relationshipBuffer;
@@ -153,10 +152,6 @@ public final class GraphGenerator {
         private final AllocationTracker tracker;
 
         private long importedRelationships = 0;
-
-
-        boolean loadOutgoing;
-        boolean loadIncoming;
 
         public RelImporter(
             IdMap idMap,
@@ -170,68 +165,38 @@ public final class GraphGenerator {
             this.executorService = executorService;
             this.tracker = tracker;
             this.idMap = idMap;
+            this.loadUndirected = projection == Projection.UNDIRECTED;
 
             ImportSizing importSizing = ImportSizing.of(1, idMap.nodeCount());
             int pageSize = importSizing.pageSize();
             int numberOfPages = importSizing.numberOfPages();
 
-            AdjacencyBuilder outAdjacencyBuilder = null;
-            AdjacencyBuilder inAdjacencyBuilder = null;
             int[] propertyKeyIds = loadRelationshipProperty ? new int[]{DUMMY_PROPERTY_ID} : new int[0];
 
-            this.loadOutgoing = projection == Projection.NATURAL || projection == Projection.UNDIRECTED;
-            this.loadIncoming = projection == Projection.REVERSE;
-            this.loadUndirected = projection == Projection.UNDIRECTED;
-
-            if (loadOutgoing) {
-                this.outRelationshipsBuilder = new RelationshipsBuilder(
-                    new Aggregation[]{aggregation},
-                    tracker,
-                    loadRelationshipProperty ? 1 : 0
-                );
-
-                outAdjacencyBuilder = AdjacencyBuilder.compressing(
-                    outRelationshipsBuilder,
-                    numberOfPages,
-                    pageSize,
-                    tracker,
-                    new LongAdder(),
-                    propertyKeyIds,
-                    new double[]{}
-                );
-            }
-
-            if (loadIncoming || loadUndirected) {
-                this.inRelationshipsBuilder = new RelationshipsBuilder(
-                    new Aggregation[]{aggregation},
-                    tracker,
-                    loadRelationshipProperty ? 1 : 0
-                );
-
-                inAdjacencyBuilder = AdjacencyBuilder.compressing(
-                    inRelationshipsBuilder,
-                    numberOfPages,
-                    pageSize,
-                    tracker,
-                    new LongAdder(),
-                    propertyKeyIds,
-                    new double[]{}
-                );
-            }
-
-            this.relationshipImporter = new RelationshipImporter(
+            this.relationshipsBuilder = new RelationshipsBuilder(
+                new Aggregation[]{aggregation},
                 tracker,
-                outAdjacencyBuilder,
-                inAdjacencyBuilder
+                loadRelationshipProperty ? 1 : 0
             );
+
+            AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
+                relationshipsBuilder,
+                numberOfPages,
+                pageSize,
+                tracker,
+                new LongAdder(),
+                propertyKeyIds,
+                new double[]{}
+            );
+
+            this.relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);
             this.imports = relationshipImporter.imports(
                 loadUndirected,
-                loadOutgoing,
-                loadIncoming,
+                projection == Projection.NATURAL,
+                projection == Projection.REVERSE,
                 loadRelationshipProperty
             );
-
-            relationshipBuffer = new RelationshipsBatchBuffer(idMap, -1, ParallelUtil.DEFAULT_BATCH_SIZE);
+            this.relationshipBuffer = new RelationshipsBatchBuffer(idMap, -1, ParallelUtil.DEFAULT_BATCH_SIZE);
         }
 
         public void add(long source, long target) {
@@ -276,24 +241,16 @@ public final class GraphGenerator {
 
         public HugeGraph buildGraph() {
             flushBuffer();
+
             Relationships relationships = buildRelationships();
-
-            AdjacencyList adjacencyList;
-            AdjacencyOffsets adjacencyOffsets;
-            Optional<AdjacencyList> properties = Optional.empty();
-            Optional<AdjacencyOffsets> propertyOffsets = Optional.empty();
-
-            adjacencyList = loadOutgoing ? relationships.outAdjacency() : relationships.inAdjacency();
-            adjacencyOffsets = loadOutgoing ? relationships.outOffsets() : relationships.inOffsets();
-
-            if (loadRelationshipProperty) {
-                properties = loadOutgoing
-                    ? Optional.of(relationships.outRelProperties())
-                    : Optional.of(relationships.inRelProperties());
-                propertyOffsets = loadOutgoing
-                    ? Optional.of(relationships.outRelPropertyOffsets())
-                    : Optional.of(relationships.inRelPropertyOffsets());
-            }
+            AdjacencyList adjacencyList = relationships.adjacencyList();
+            AdjacencyOffsets adjacencyOffsets = relationships.adjacencyOffsets();
+            Optional<AdjacencyList> properties = loadRelationshipProperty
+                ? Optional.of(relationships.properties())
+                : Optional.empty();
+            Optional<AdjacencyOffsets> propertyOffsets = loadRelationshipProperty
+                ? Optional.of(relationships.propertyOffsets())
+                : Optional.empty();
 
             return HugeGraph.create(
                 tracker,
@@ -322,15 +279,10 @@ public final class GraphGenerator {
             return new Relationships(
                 -1,
                 importedRelationships,
-                loadIncoming ? inRelationshipsBuilder.adjacencyList() : null,
-                loadOutgoing ? outRelationshipsBuilder.adjacencyList() : null,
-                loadIncoming ? inRelationshipsBuilder.globalAdjacencyOffsets() : null,
-                loadOutgoing ? outRelationshipsBuilder.globalAdjacencyOffsets() : null,
-                Optional.empty(),
-                loadRelationshipProperty && loadIncoming ? inRelationshipsBuilder.properties() : null,
-                loadRelationshipProperty && loadOutgoing ? outRelationshipsBuilder.properties() : null,
-                loadRelationshipProperty && loadIncoming ? inRelationshipsBuilder.globalPropertyOffsets() : null,
-                loadRelationshipProperty && loadOutgoing ? outRelationshipsBuilder.globalPropertyOffsets() : null
+                relationshipsBuilder.adjacencyList(),
+                relationshipsBuilder.globalAdjacencyOffsets(),
+                loadRelationshipProperty ? relationshipsBuilder.properties() : null,
+                loadRelationshipProperty ? relationshipsBuilder.globalPropertyOffsets() : null
             );
         }
     }

@@ -49,8 +49,8 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
-import static org.neo4j.graphalgo.core.Aggregation.NONE;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.Aggregation.NONE;
 
 @Value.Enclosing
 class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoader.LoadResult> {
@@ -132,7 +132,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
         importWeights = newDimensions.relationshipProperties().atLeastOneExists();
         propertyKeyIds = newDimensions.relationshipProperties().allPropertyKeyIds();
-        propertyDefaultValues = newDimensions.relationshipProperties().allDefaultWeights();
+        propertyDefaultValues = newDimensions.relationshipProperties().allDefaultValues();
         aggregations = getAggregations(newDimensions);
 
         return newDimensions;
@@ -312,12 +312,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 propertyDefaultValues
             );
 
-            RelationshipImporter relationshipImporter = new RelationshipImporter(
-                setup.tracker(),
-                adjacencyBuilder,
-                null
-            );
-
+            RelationshipImporter relationshipImporter = new RelationshipImporter(setup.tracker(), adjacencyBuilder);
             return new SingleTypeRelationshipImporter.Builder(mapping, relationshipImporter, relationshipCounter);
         }
     }

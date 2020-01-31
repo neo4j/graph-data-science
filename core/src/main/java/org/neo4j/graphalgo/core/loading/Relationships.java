@@ -27,39 +27,25 @@ import java.util.Optional;
 public class Relationships {
     private final long rows;
     private final long relationshipCount;
-    private final AdjacencyList inAdjacency;
-    private final AdjacencyList outAdjacency;
-    private final AdjacencyOffsets inOffsets;
-    private final AdjacencyOffsets outOffsets;
-    private final Optional<Double> maybeDefaultRelProperty;
-    private final AdjacencyList inRelProperties;
-    private final AdjacencyList outRelProperties;
-    private final AdjacencyOffsets inRelPropertyOffsets;
-    private final AdjacencyOffsets outRelPropertyOffsets;
+    private final AdjacencyList adjacencyList;
+    private final AdjacencyOffsets adjacencyOffsets;
+    private final AdjacencyList properties;
+    private final AdjacencyOffsets propertyOffsets;
 
     public Relationships(
-            long rows,
-            long relationshipCount,
-            AdjacencyList inAdjacency,
-            AdjacencyList outAdjacency,
-            AdjacencyOffsets inOffsets,
-            AdjacencyOffsets outOffsets,
-            Optional<Double> maybeDefaultRelProperty,
-            AdjacencyList inRelProperties,
-            AdjacencyList outRelProperties,
-            AdjacencyOffsets inRelPropertyOffsets,
-            AdjacencyOffsets outRelPropertyOffsets) {
+        long rows,
+        long relationshipCount,
+        AdjacencyList adjacencyList,
+        AdjacencyOffsets adjacencyOffsets,
+        AdjacencyList properties,
+        AdjacencyOffsets propertyOffsets
+    ) {
         this.rows = rows;
         this.relationshipCount = relationshipCount;
-        this.inAdjacency = inAdjacency;
-        this.outAdjacency = outAdjacency;
-        this.inOffsets = inOffsets;
-        this.outOffsets = outOffsets;
-        this.maybeDefaultRelProperty = maybeDefaultRelProperty;
-        this.inRelProperties = inRelProperties;
-        this.outRelProperties = outRelProperties;
-        this.inRelPropertyOffsets = inRelPropertyOffsets;
-        this.outRelPropertyOffsets = outRelPropertyOffsets;
+        this.adjacencyList = adjacencyList;
+        this.adjacencyOffsets = adjacencyOffsets;
+        this.properties = properties;
+        this.propertyOffsets = propertyOffsets;
     }
 
     public long rows() {
@@ -68,21 +54,11 @@ public class Relationships {
 
     public long relationshipCount() { return relationshipCount; }
 
-    public AdjacencyList inAdjacency() { return inAdjacency; }
+    public AdjacencyList adjacencyList() { return adjacencyList; }
 
-    public AdjacencyList outAdjacency() { return outAdjacency; }
+    public AdjacencyOffsets adjacencyOffsets() { return adjacencyOffsets; }
 
-    public AdjacencyOffsets inOffsets() { return inOffsets; }
+    public AdjacencyList properties() { return properties; }
 
-    public AdjacencyOffsets outOffsets() { return outOffsets; }
-
-    public Optional<Double> maybeDefaultRelProperty() { return maybeDefaultRelProperty; }
-
-    public AdjacencyList inRelProperties() { return inRelProperties; }
-
-    public AdjacencyList outRelProperties() { return outRelProperties; }
-
-    public AdjacencyOffsets inRelPropertyOffsets() { return inRelPropertyOffsets; }
-
-    public AdjacencyOffsets outRelPropertyOffsets() { return outRelPropertyOffsets; }
+    public AdjacencyOffsets propertyOffsets() { return propertyOffsets; }
 }

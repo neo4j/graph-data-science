@@ -325,16 +325,21 @@ public final class TestGraph implements Graph {
             Map<Long, Adjacency> adjacencyList = new HashMap<>();
 
             for (Vertex vertex : vertices) {
-                List<Relationship> relationships = edges.stream()
-                    .filter(e -> projection == Projection.REVERSE
-                        ? e.getTargetVertexId() == vertex.getId()
-                        : e.getSourceVertexId() == vertex.getId()
-                    )
+                List<Relationship> outgoing = edges.stream()
+                    .filter(e -> e.getSourceVertexId() == vertex.getId())
                     .map(e -> new Relationship(e.getId(), e.getSourceVertexId(), e.getTargetVertexId()))
-                    .map(e -> projection == Projection.REVERSE ? e.flip() : e)
                     .collect(toList());
 
-                adjacencyList.put(vertex.getId(), new Adjacency(relationships));
+                List<Relationship> incoming = edges.stream()
+                    .filter(e -> e.getTargetVertexId() == vertex.getId())
+                    .map(e -> new Relationship(e.getId(), e.getTargetVertexId(), e.getSourceVertexId()))
+                    .collect(toList());
+
+                if (projection == Projection.UNDIRECTED) {
+                    outgoing.addAll(incoming);
+                }
+
+                adjacencyList.put(vertex.getId(), new Adjacency(projection == Projection.REVERSE ? incoming : outgoing));
             }
 
             return adjacencyList;
