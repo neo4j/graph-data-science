@@ -57,46 +57,30 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
     public static PropertyMappings fromObject(Object relPropertyMapping, Aggregation defaultAggregation) {
         if (relPropertyMapping instanceof PropertyMappings) {
             PropertyMappings properties = (PropertyMappings) relPropertyMapping;
-            return properties.withDefaultAggregation(defaultAggregation);
+            return PropertyMappings.builder().from(properties).withDefaultAggregation(defaultAggregation).build();
         }
         if (relPropertyMapping instanceof String) {
             String propertyMapping = (String) relPropertyMapping;
             return fromObject(singletonMap(propertyMapping, propertyMapping), defaultAggregation);
         } else if (relPropertyMapping instanceof List) {
-            PropertyMappings.Builder builder = PropertyMappings.builder();
+            PropertyMappings.Builder builder = PropertyMappings.builder().withDefaultAggregation(defaultAggregation);
             for (Object mapping : (List<?>) relPropertyMapping) {
                 builder.addAllMappings(fromObject(mapping, defaultAggregation).mappings());
             }
             return builder.build();
         } else if (relPropertyMapping instanceof Map) {
-            PropertyMappings.Builder builder = PropertyMappings.builder();
+            PropertyMappings.Builder builder = PropertyMappings.builder().withDefaultAggregation(defaultAggregation);
             ((Map<String, Object>) relPropertyMapping).forEach((key, spec) -> {
                 PropertyMapping propertyMapping = PropertyMapping.fromObject(key, spec);
                 builder.addMapping(propertyMapping);
             });
-            return builder.build().withDefaultAggregation(defaultAggregation);
+            return builder.build();
         } else {
             throw new IllegalArgumentException(String.format(
                 "Expected String or Map for property mappings. Got %s.",
                 relPropertyMapping.getClass().getSimpleName()
             ));
         }
-    }
-
-    PropertyMappings withDefaultAggregation(Aggregation defaultAggregation) {
-        List<PropertyMapping> mappingsWithNewDefault = mappings().stream().map(propertyMapping -> {
-            if (propertyMapping.aggregation() == Aggregation.DEFAULT) {
-                return PropertyMapping.of(
-                    propertyMapping.propertyKey(),
-                    propertyMapping.neoPropertyKey(),
-                    propertyMapping.defaultValue(),
-                    defaultAggregation
-                );
-            }
-            return propertyMapping;
-        }).collect(Collectors.toList());
-
-        return PropertyMappings.of(mappingsWithNewDefault);
     }
 
     public static PropertyMappings of(ResolvedPropertyMappings resolvedPropertyMappings) {

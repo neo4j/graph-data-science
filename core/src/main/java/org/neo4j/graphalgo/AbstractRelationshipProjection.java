@@ -24,11 +24,9 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.Aggregation;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 
@@ -129,26 +127,17 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     @Override
     public RelationshipProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
-        PropertyMappings newMappings = properties().mergeWith(mappings.withDefaultAggregation(aggregation()));
-        if (newMappings.equals(properties())) {
-            return RelationshipProjection.copyOf(this);
-        }
+        PropertyMappings withSameAggregation = PropertyMappings
+            .builder()
+            .from(mappings)
+            .withDefaultAggregation(aggregation())
+            .build();
 
-        List<PropertyMapping> updatedPropertyMappings = newMappings.mappings().stream().map(propertyMapping -> {
-            if (propertyMapping.aggregation() == Aggregation.DEFAULT) {
-                return PropertyMapping.of(
-                    propertyMapping.propertyKey(),
-                    propertyMapping.neoPropertyKey(),
-                    propertyMapping.defaultValue(),
-                    aggregation()
-                );
-            }
-            return propertyMapping;
+        PropertyMappings newMappings = properties().mergeWith(withSameAggregation);
 
-        }).collect(Collectors.toList());
-
-        newMappings = PropertyMappings.of(updatedPropertyMappings);
-        return RelationshipProjection.copyOf(this).withProperties(newMappings);
+        return newMappings.equals(properties())
+            ? RelationshipProjection.copyOf(this)
+            : RelationshipProjection.copyOf(this).withProperties(newMappings);
     }
 
     public static RelationshipProjection empty() {
