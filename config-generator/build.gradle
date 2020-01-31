@@ -1,4 +1,6 @@
-description = 'Neo4j Graph Data Science :: Procedures Processor'
+apply plugin: 'java'
+
+description = 'Neo4j Graph Data Science :: Config Generator'
 
 import org.gradle.internal.jvm.Jvm
 

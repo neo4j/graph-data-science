@@ -1,3 +1,5 @@
+apply plugin: 'java'
+
 description = 'Neo4j Graph Data Science :: Benchmark'
 
 apply plugin: 'com.github.johnrengelman.shadow'
