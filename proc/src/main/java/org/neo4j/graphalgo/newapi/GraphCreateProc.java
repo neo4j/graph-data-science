@@ -194,8 +194,6 @@ public class GraphCreateProc extends CatalogProc {
             .maxRelCount(Math.max(config.relationshipCount(), 0))
             .build();
 
-        GraphDimensionsValidation.validate(dimensions, setup);
-
         return factory.memoryEstimation(dimensions).estimate(dimensions, config.concurrency());
     }
 
