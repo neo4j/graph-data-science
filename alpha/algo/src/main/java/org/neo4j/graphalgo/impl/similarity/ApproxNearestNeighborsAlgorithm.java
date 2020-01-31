@@ -21,17 +21,20 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.cursors.LongCursor;
+import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.loading.GraphGenerator;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
-import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphalgo.results.SimilarityResult;
@@ -43,7 +46,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -60,23 +65,27 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
     private final ApproximateNearestNeighborsConfig config;
     private final SimilarityAlgorithm<?, INPUT> algorithm;
     private final Log log;
-    private final ExecutorService executor;
     private final AtomicLong nodeQueue;
     private final AtomicInteger actualIterations;
     private final Random random;
+    private final ExecutorService executor;
+    private final AllocationTracker tracker;
 
     public ApproxNearestNeighborsAlgorithm(
         ApproximateNearestNeighborsConfig config,
         SimilarityAlgorithm<?, INPUT> algorithm,
         GraphDatabaseAPI api,
-        Log log
+        Log log,
+        ExecutorService executor,
+        AllocationTracker tracker
     ) {
         super(config, api);
         this.config = config;
         this.algorithm = algorithm;
         this.log = log;
+        this.executor = executor;
+        this.tracker = tracker;
 
-        this.executor = Pools.DEFAULT;
         this.nodeQueue = new AtomicLong();
         this.actualIterations = new AtomicInteger();
         this.random = new Random(config.randomSeed());
@@ -134,14 +143,12 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             }
             tempVisitedRelationships = ANNUtils.initializeRoaringBitmaps(inputSize);
 
-            HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipBuilder =
-                new HugeRelationshipsBuilder(nodes).withBuffer();
-            relationshipBuilder.addRelationshipsFrom(topKConsumers);
-            Relationships relationships = relationshipBuilder.build();
+            RelationshipImporterWrapper importer = RelationshipImporterWrapper.of(nodes.idMap(), executor, tracker);
+            importer.consume(topKConsumers);
+            Graph graph = importer.buildGraphs().getUnion();
 
-            Graph graph = ANNUtils.createGraphsByRelationshipType(nodes, relationships).getUnion();
-            HugeRelationshipsBuilder oldRelationshipsBuilder = new HugeRelationshipsBuilder(nodes);
-            HugeRelationshipsBuilder newRelationshipBuilder = new HugeRelationshipsBuilder(nodes);
+            RelationshipImporterWrapper oldImporter = RelationshipImporterWrapper.of(nodes.idMap(), executor, tracker);
+            RelationshipImporterWrapper newImporter = RelationshipImporterWrapper.of(nodes.idMap(), executor, tracker);
 
             Collection<Runnable> setupTasks = setupTasks(
                 sampleSize,
@@ -149,21 +156,21 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 visitedRelationships,
                 tempVisitedRelationships,
                 graph,
-                oldRelationshipsBuilder,
-                newRelationshipBuilder
+                oldImporter,
+                newImporter
             );
             ParallelUtil.runWithConcurrency(1, setupTasks, executor);
 
-            GraphsByRelationshipType oldGraph = ANNUtils.createGraphsByRelationshipType(nodes, oldRelationshipsBuilder.build());
-            GraphsByRelationshipType newGraph = ANNUtils.createGraphsByRelationshipType(nodes, newRelationshipBuilder.build());
+            GraphsByRelationshipType oldGraphs = oldImporter.buildGraphs();
+            GraphsByRelationshipType newGraphs = newImporter.buildGraphs();
 
             Collection<NeighborhoodTask> computeTasks = computeTasks(
                 sampleSize,
                 inputs,
                 computer,
-                newGraph,
+                newGraphs,
                 decoderFactory,
-                oldGraph
+                oldGraphs
             );
             ParallelUtil.runWithConcurrency(config.concurrency(), computeTasks, executor);
 
@@ -186,8 +193,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         RoaringBitmap[] visitedRelationships,
         RoaringBitmap[] tempVisitedRelationships,
         Graph graph,
-        HugeRelationshipsBuilder oldRelationshipsBuilder,
-        HugeRelationshipsBuilder newRelationshipBuilder
+        RelationshipImporterWrapper oldImporter,
+        RelationshipImporterWrapper newImporter
     ) {
         int batchSize = ParallelUtil.adjustedBatchSize(inputSize, config.concurrency(), 100);
         int numberOfBatches = (inputSize / batchSize) + 1;
@@ -200,8 +207,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 new SetupTask(
                     new NewOldGraph(graph, visitedRelationships),
                     tempVisitedRelationships,
-                    oldRelationshipsBuilder,
-                    newRelationshipBuilder,
+                    oldImporter,
+                    newImporter,
                     sampleSize,
                     startNodeId,
                     nodeCount
@@ -356,8 +363,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
     private class SetupTask implements Runnable {
         private final NewOldGraph graph;
-        private final HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer oldRelationshipBuilder;
-        private final HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer newRelationshipBuilder;
+        private final RelationshipImporterWrapper oldImporter;
+        private final RelationshipImporterWrapper newImporter;
         private final double sampleSize;
         private final RoaringBitmap[] visitedRelationships;
         private final long startNodeId;
@@ -366,16 +373,16 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         SetupTask(
             NewOldGraph graph,
             RoaringBitmap[] visitedRelationships,
-            HugeRelationshipsBuilder oldRelationshipBuilder,
-            HugeRelationshipsBuilder newRelationshipBuilder,
+            RelationshipImporterWrapper oldImporter,
+            RelationshipImporterWrapper newImporter,
             double sampleSize,
             long startNodeId,
             long nodeCount
         ) {
             this.graph = graph;
             this.visitedRelationships = visitedRelationships;
-            this.oldRelationshipBuilder = oldRelationshipBuilder.withBuffer();
-            this.newRelationshipBuilder = newRelationshipBuilder.withBuffer();
+            this.oldImporter = oldImporter;
+            this.newImporter = newImporter;
             this.sampleSize = sampleSize;
             this.startNodeId = startNodeId;
             this.nodeCount = nodeCount;
@@ -391,7 +398,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 int nodeId = Math.toIntExact(longNodeId);
 
                 for (LongCursor neighbor : graph.findOldNeighbors(longNodeId)) {
-                    oldRelationshipBuilder.addRelationship(longNodeId, neighbor.value);
+                    oldImporter.addRelationship(longNodeId, neighbor.value);
                 }
 
                 long[] potentialNewNeighbors = graph.findNewNeighbors(longNodeId).toArray();
@@ -401,7 +408,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                     random
                 ) : potentialNewNeighbors;
                 for (long neighbor : newOutgoingNeighbors) {
-                    newRelationshipBuilder.addRelationship(longNodeId, neighbor);
+                    newImporter.addRelationship(longNodeId, neighbor);
                 }
 
                 for (Long neighbor : newOutgoingNeighbors) {
@@ -409,8 +416,6 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                     visitedRelationships[nodeId].add(neighborNodeId);
                 }
             }
-            oldRelationshipBuilder.flushAll();
-            newRelationshipBuilder.flushAll();
         }
     }
 
@@ -518,6 +523,62 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 changes += target[i].apply(this.localTopKConsumers[i]);
             }
             return changes;
+        }
+    }
+
+    @ValueClass
+    interface RelationshipImporterWrapper {
+        GraphGenerator.RelImporter outImporter();
+        GraphGenerator.RelImporter inImporter();
+
+        default void consume(AnnTopKConsumer[] topKConsumers) {
+            for (AnnTopKConsumer consumer : topKConsumers) {
+                consumer.stream().forEach(result -> {
+                    long source = result.item1;
+                    long target = result.item2;
+                    if(source != -1 && target != -1 && source != target) {
+                        addRelationship(source, target);
+                    }
+                });
+            }
+        }
+
+        default void addRelationship(long source, long target) {
+            outImporter().addFromInternal(source, target);
+            inImporter().addFromInternal(target, source);
+        }
+
+        default GraphsByRelationshipType buildGraphs() {
+            Graph outGraph = outImporter().buildGraph();
+            Graph inGraph = inImporter().buildGraph();
+
+            Map<String, Map<String, Graph>> annGraphs = new HashMap<>();
+            annGraphs.put(ANN_OUT_GRAPH, Collections.singletonMap("", outGraph));
+            annGraphs.put(ANN_IN_GRAPH, Collections.singletonMap("", inGraph));
+
+            return GraphsByRelationshipType.of(annGraphs);
+        }
+
+        static RelationshipImporterWrapper of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {
+            GraphGenerator.RelImporter outImporter = new GraphGenerator.RelImporter(
+                idMap,
+                Projection.NATURAL,
+                false,
+                Aggregation.NONE,
+                executorService,
+                tracker
+            );
+
+            GraphGenerator.RelImporter inImporter = new GraphGenerator.RelImporter(
+                idMap,
+                Projection.REVERSE,
+                false,
+                Aggregation.NONE,
+                executorService,
+                tracker
+            );
+
+            return ImmutableRelationshipImporterWrapper.of(outImporter, inImporter);
         }
     }
 
