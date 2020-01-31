@@ -283,9 +283,6 @@ public final class GraphGenerator {
             Optional<AdjacencyList> properties = Optional.empty();
             Optional<AdjacencyOffsets> propertyOffsets = Optional.empty();
 
-            // We either load outgoing or incoming or undirected.
-            // The corresponding adjacency list is always stored in
-            // the outgoing adjacency list of the resulting graph.
             adjacencyList = loadOutgoing ? relationships.outAdjacency() : relationships.inAdjacency();
             adjacencyOffsets = loadOutgoing ? relationships.outOffsets() : relationships.inOffsets();
 

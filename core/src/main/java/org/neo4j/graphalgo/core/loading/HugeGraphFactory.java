@@ -124,7 +124,7 @@ public final class HugeGraphFactory extends GraphFactory {
         GraphSetup setup
     ) {
         // batching for undirected double the amount of rels imported
-        long relOperations = setup.relationshipProjections().projections().entrySet().stream().map(entry -> {
+        long relationshipCount = setup.relationshipProjections().projections().entrySet().stream().map(entry -> {
             Long relCount = dimensions.relationshipCounts().getOrDefault(entry.getKey().name, 0L);
             return entry.getValue().projection() == Projection.UNDIRECTED
                 ? relCount * 2
@@ -135,7 +135,7 @@ public final class HugeGraphFactory extends GraphFactory {
             progressLogger,
             setup.tracker(),
             dimensions.nodeCount(),
-            relOperations
+            relationshipCount
         );
     }
 
