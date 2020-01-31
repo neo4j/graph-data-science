@@ -31,6 +31,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.ArrayMatching.arrayContainingInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.impl.similarity.ANNUtils.initializeRoaringBitmaps;
+import static org.neo4j.graphalgo.impl.similarity.ApproxNearestNeighborsAlgorithm.*;
 
 class NewOldGraphTest {
 
@@ -38,9 +39,7 @@ class NewOldGraphTest {
     void allRelationshipsNewByDefault() {
         int numberOfNodes = 5;
 
-        ApproxNearestNeighborsAlgorithm.RelationshipImporter importer = ApproxNearestNeighborsAlgorithm.RelationshipImporter
-            .of(idMap(numberOfNodes), Pools.DEFAULT, AllocationTracker.EMPTY);
-
+        RelationshipImporter importer = RelationshipImporter.of(idMap(numberOfNodes), Pools.DEFAULT, AllocationTracker.EMPTY);
         importer.addRelationship(0, 1);
         importer.addRelationship(0, 2);
         importer.addRelationship(0, 3);
@@ -57,9 +56,7 @@ class NewOldGraphTest {
     void newShouldFilterVisitedRelationships() {
         int numberOfNodes = 5;
 
-        ApproxNearestNeighborsAlgorithm.RelationshipImporter importer = ApproxNearestNeighborsAlgorithm.RelationshipImporter
-            .of(idMap(numberOfNodes), Pools.DEFAULT, AllocationTracker.EMPTY);
-
+        RelationshipImporter importer = RelationshipImporter.of(idMap(numberOfNodes), Pools.DEFAULT, AllocationTracker.EMPTY);
         importer.addRelationship(0, 1);
         importer.addRelationship(0, 2);
         importer.addRelationship(0, 3);
@@ -68,19 +65,16 @@ class NewOldGraphTest {
         visitedRelationships[0].add(1);
 
         NewOldGraph graph = new NewOldGraph(importer.buildGraphs().getUnion(), visitedRelationships);
-
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(2, newNeighbors.length);
-        assertThat(ArrayUtils.toObject(newNeighbors), arrayContainingInAnyOrder( 2L, 3L));
+        assertThat(ArrayUtils.toObject(newNeighbors), arrayContainingInAnyOrder(2L, 3L));
     }
 
     @Test
     void oldShouldReturnVisitedRelationships() {
         int numberOfNodes = 5;
 
-        ApproxNearestNeighborsAlgorithm.RelationshipImporter importer = ApproxNearestNeighborsAlgorithm.RelationshipImporter
-            .of(idMap(numberOfNodes), Pools.DEFAULT, AllocationTracker.EMPTY);
-
+        RelationshipImporter importer = RelationshipImporter.of(idMap(numberOfNodes), Pools.DEFAULT, AllocationTracker.EMPTY);
         importer.addRelationship(0, 1);
         importer.addRelationship(0, 2);
         importer.addRelationship(0, 3);
@@ -89,10 +83,9 @@ class NewOldGraphTest {
         visitedRelationships[0].add(1);
 
         NewOldGraph graph = new NewOldGraph(importer.buildGraphs().getUnion(), visitedRelationships);
-
         long[] oldNeighbors = graph.findOldNeighbors(0).toArray();
         assertEquals(1, oldNeighbors.length);
-        assertThat(ArrayUtils.toObject(oldNeighbors), arrayContainingInAnyOrder( 1L));
+        assertThat(ArrayUtils.toObject(oldNeighbors), arrayContainingInAnyOrder(1L));
     }
 
     private static IdMap idMap(int numberOfNodes) {

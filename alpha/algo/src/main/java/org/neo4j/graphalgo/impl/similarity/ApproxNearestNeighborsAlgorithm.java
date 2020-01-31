@@ -581,4 +581,43 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
     }
 
+    static class NewOldGraph {
+        private final Graph graph;
+        private final RoaringBitmap[] visitedRelationships;
+
+        NewOldGraph(Graph graph, RoaringBitmap[] visitedRelationships) {
+            this.graph = graph;
+            this.visitedRelationships = visitedRelationships;
+        }
+
+        LongHashSet findOldNeighbors(final long nodeId) {
+            LongHashSet neighbors = new LongHashSet();
+            RoaringBitmap visited = visitedRelationships[(int) nodeId];
+
+            graph.forEachRelationship(nodeId, (sourceNodeId, targetNodeId) -> {
+                if (visited.contains((int) targetNodeId)) {
+                    neighbors.add(targetNodeId);
+                }
+
+                return true;
+            });
+            return neighbors;
+        }
+
+        LongHashSet findNewNeighbors(final long nodeId) {
+            LongHashSet neighbors = new LongHashSet();
+
+            RoaringBitmap visited = visitedRelationships[(int) nodeId];
+
+            graph.forEachRelationship(nodeId, (sourceNodeId, targetNodeId) -> {
+                if (!visited.contains((int) targetNodeId)) {
+                    neighbors.add(targetNodeId);
+                }
+
+                return true;
+            });
+            return neighbors;
+        }
+    }
+
 }
