@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
@@ -295,6 +296,7 @@ class LouvainTest extends AlgoTestBase {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000L)
             .maxRelCount(500_000L)
+            .relationshipProjectionMappings(RelationshipProjectionMappings.all())
             .build();
 
         LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
@@ -356,12 +358,12 @@ class LouvainTest extends AlgoTestBase {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1, 6414185, 16338880),
-            arguments(1, 10, 6414185, 23539240),
-            arguments(4, 1, 6417473, 22143256),
-            arguments(4, 10, 6417473, 29343616),
-            arguments(42, 1, 6459121, 98116744),
-            arguments(42, 10, 6459121, 105317104)
+            arguments(1, 1, 6414185, 13585992),
+            arguments(1, 10, 6414185, 20786352),
+            arguments(4, 1, 6417473, 19488312),
+            arguments(4, 10, 6417473, 26688672),
+            arguments(42, 1, 6459121, 95476728),
+            arguments(42, 10, 6459121, 102677088)
         );
     }
 
