@@ -21,20 +21,18 @@ package org.neo4j.graphalgo.impl.triangle;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.loading.GraphGenerator;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdMapBuilder;
-import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
-import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.graphalgo.impl.similarity.ANNUtils;
-import org.neo4j.graphalgo.impl.similarity.HugeRelationshipsBuilder;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,14 +46,20 @@ class IntersectingTriangleCountTest {
     void noTriangles() {
         long[] inputs = new long[]{1, 2};
         IdMap idMap = createIdMap(inputs);
-        IdsAndProperties nodes = new IdsAndProperties(idMap, Collections.emptyMap());
 
-        HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipBuilder = new HugeRelationshipsBuilder(nodes).withBuffer();
-        relationshipBuilder.addRelationship(idMap.toMappedNodeId(1), idMap.toMappedNodeId(2));
-        relationshipBuilder.addRelationship(idMap.toMappedNodeId(2), idMap.toMappedNodeId(1));
-        Relationships relationships = relationshipBuilder.build();
+        GraphGenerator.RelImporter importer = new GraphGenerator.RelImporter(
+            idMap,
+            Projection.NATURAL,
+            false,
+            Aggregation.NONE,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
 
-        Graph graph = ANNUtils.createGraph(nodes, relationships);
+        importer.add(1, 2);
+        importer.add(2, 1);
+
+        Graph graph = importer.buildGraph();
         IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         triangleCount.compute();
 
@@ -71,12 +75,17 @@ class IntersectingTriangleCountTest {
     void noRelationships() {
         long[] inputs = new long[]{1, 2};
         IdMap idMap = createIdMap(inputs);
-        IdsAndProperties nodes = new IdsAndProperties(idMap, Collections.emptyMap());
 
-        HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipBuilder = new HugeRelationshipsBuilder(nodes).withBuffer();
-        Relationships relationships = relationshipBuilder.build();
+        GraphGenerator.RelImporter importer = new GraphGenerator.RelImporter(
+            idMap,
+            Projection.NATURAL,
+            false,
+            Aggregation.NONE,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+        Graph graph = importer.buildGraph();
 
-        Graph graph = ANNUtils.createGraph(nodes, relationships);
         IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         triangleCount.compute();
 
@@ -92,20 +101,24 @@ class IntersectingTriangleCountTest {
     void oneTriangle() {
         long[] inputs = new long[]{1, 2, 3};
         IdMap idMap = createIdMap(inputs);
-        IdsAndProperties nodes = new IdsAndProperties(idMap, Collections.emptyMap());
 
-        HugeRelationshipsBuilder.HugeRelationshipsBuilderWithBuffer relationshipBuilder = new HugeRelationshipsBuilder(nodes).withBuffer();
-        relationshipBuilder.addRelationship(idMap.toMappedNodeId(1), idMap.toMappedNodeId(2));
-        relationshipBuilder.addRelationship(idMap.toMappedNodeId(2), idMap.toMappedNodeId(1));
+        GraphGenerator.RelImporter importer = new GraphGenerator.RelImporter(
+            idMap,
+            Projection.NATURAL,
+            false,
+            Aggregation.NONE,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
 
-        relationshipBuilder.addRelationship(idMap.toMappedNodeId(2), idMap.toMappedNodeId(3));
-        relationshipBuilder.addRelationship(idMap.toMappedNodeId(3), idMap.toMappedNodeId(2));
+        importer.add(1, 2);
+        importer.add(2, 1);
+        importer.add(2, 3);
+        importer.add(3, 2);
+        importer.add(3, 1);
+        importer.add(1, 3);
 
-        relationshipBuilder.addRelationship(idMap.toMappedNodeId(3), idMap.toMappedNodeId(1));
-        relationshipBuilder.addRelationship(idMap.toMappedNodeId(1), idMap.toMappedNodeId(3));
-        Relationships relationships = relationshipBuilder.build();
-
-        Graph graph = ANNUtils.createGraph(nodes, relationships);
+        Graph graph = importer.buildGraph();
         IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         triangleCount.compute();
 
