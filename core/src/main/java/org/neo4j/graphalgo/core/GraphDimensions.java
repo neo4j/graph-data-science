@@ -64,4 +64,21 @@ public interface GraphDimensions {
 
     @Nullable
     RelationshipProjectionMappings relationshipProjectionMappings();
+
+    default Aggregation[] aggregations(Aggregation defaultAggregation) {
+        Aggregation[] aggregations = relationshipProperties().stream()
+            .map(property -> property.aggregation() == Aggregation.DEFAULT
+                ? Aggregation.NONE
+                : property.aggregation()
+            )
+            .toArray(Aggregation[]::new);
+        // TODO: backwards compat code
+        if (aggregations.length == 0) {
+            Aggregation aggregation = defaultAggregation == Aggregation.DEFAULT
+                ? Aggregation.NONE
+                : defaultAggregation;
+            aggregations = new Aggregation[]{aggregation};
+        }
+        return aggregations;
+    }
 }

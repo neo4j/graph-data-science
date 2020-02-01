@@ -139,15 +139,10 @@ public final class HugeGraphFactory extends GraphFactory {
     public ImportResult build() {
         validate(dimensions, setup);
 
-        GraphDimensions dimensions = this.dimensions;
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker();
         IdsAndProperties mappingAndProperties = loadIdMap(tracker, concurrency);
-        Map<String, Map<String, Graph>> graphs = loadRelationships(
-                dimensions,
-                tracker,
-                mappingAndProperties,
-                concurrency);
+        Map<String, Map<String, Graph>> graphs = loadRelationships(tracker, mappingAndProperties, concurrency);
         progressLogger.logDone(tracker);
 
         return ImportResult.of(dimensions, GraphsByRelationshipType.of(graphs));
@@ -167,17 +162,18 @@ public final class HugeGraphFactory extends GraphFactory {
     }
 
     private Map<String, Map<String, Graph>> loadRelationships(
-            GraphDimensions dimensions,
             AllocationTracker tracker,
             IdsAndProperties idsAndProperties,
             int concurrency) {
+        Aggregation[] aggregations = dimensions.aggregations(setup.aggregation());
+        int propertyCount = setup.relationshipPropertyMappings().numberOfMappings();
         Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders = dimensions
-                .relationshipProjectionMappings()
-                .stream()
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        mapping -> createRelationshipsBuilder(tracker)
-                ));
+            .relationshipProjectionMappings()
+            .stream()
+            .collect(Collectors.toMap(
+                Function.identity(),
+                mapping -> new RelationshipsBuilder(aggregations, tracker, propertyCount)
+            ));
 
         ScanningRelationshipsImporter scanningImporter = new ScanningRelationshipsImporter(
                 setup,
@@ -234,30 +230,4 @@ public final class HugeGraphFactory extends GraphFactory {
                     }
                 }));
     }
-
-    private RelationshipsBuilder createRelationshipsBuilder(AllocationTracker tracker) {
-        Aggregation[] aggregations = dimensions
-                .relationshipProperties()
-                .stream()
-                .map(property -> property.aggregation() == Aggregation.DEFAULT
-                        ? Aggregation.NONE
-                        : property.aggregation()
-                )
-                .toArray(Aggregation[]::new);
-        // TODO: backwards compat code
-        if (aggregations.length == 0) {
-            Aggregation aggregation =
-                setup.aggregation() == Aggregation.DEFAULT
-                            ? Aggregation.NONE
-                            : setup.aggregation();
-            aggregations = new Aggregation[]{aggregation};
-        }
-
-        return new RelationshipsBuilder(
-            aggregations,
-            tracker,
-            setup.relationshipPropertyMappings().numberOfMappings()
-        );
-    }
-
 }

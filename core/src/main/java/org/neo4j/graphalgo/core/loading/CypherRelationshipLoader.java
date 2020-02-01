@@ -95,7 +95,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             ? NONE
             : setup.aggregation();
         this.globalDefaultPropertyValue = setup.relationshipDefaultPropertyValue().orElse(DEFAULT_FALLBACK_VALUE);
-
         this.resultDimensions = initFromDimension(dimensions);
     }
 
@@ -133,7 +132,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         importWeights = newDimensions.relationshipProperties().atLeastOneExists();
         propertyKeyIds = newDimensions.relationshipProperties().allPropertyKeyIds();
         propertyDefaultValues = newDimensions.relationshipProperties().allDefaultValues();
-        aggregations = getAggregations(newDimensions);
+        aggregations = dimensions.aggregations(globalAggregation);
 
         return newDimensions;
     }
@@ -226,22 +225,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders() {
         return loaderContext.allBuilders;
-    }
-
-    private Aggregation[] getAggregations(GraphDimensions dimensions) {
-        Aggregation[] aggregations = dimensions
-            .relationshipProperties()
-            .stream()
-            .map(property -> property.aggregation() == Aggregation.DEFAULT
-                ? NONE
-                : property.aggregation()
-            )
-            .toArray(Aggregation[]::new);
-        // TODO: backwards compat code
-        if (aggregations.length == 0) {
-            aggregations = new Aggregation[]{globalAggregation};
-        }
-        return aggregations;
     }
 
     class Context {
