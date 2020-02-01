@@ -269,12 +269,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             relationshipCounters.put(typeMapping, importerBuilder.relationshipCounter());
 
-            return importerBuilder.loadImporter(
-                false,
-                true,
-                false,
-                importWeights
-            );
+            return importerBuilder.loadImporter(importWeights);
         }
 
         private SingleTypeRelationshipImporter.Builder createImporterBuilder(

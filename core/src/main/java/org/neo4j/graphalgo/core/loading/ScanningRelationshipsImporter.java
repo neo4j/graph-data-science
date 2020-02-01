@@ -109,8 +109,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             RelationshipProjectionMapping mapping,
             RelationshipsBuilder relationshipsBuilder
     ) {
-        int[] weightProperties = dimensions.relationshipProperties().allPropertyKeyIds();
-        double[] defaultWeights = dimensions.relationshipProperties().allDefaultValues();
+        int[] propertyKeyIds = dimensions.relationshipProperties().allPropertyKeyIds();
+        double[] defaultValues = dimensions.relationshipProperties().allDefaultValues();
 
         LongAdder relationshipCounter = new LongAdder();
         AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
@@ -119,8 +119,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 pageSize,
                 tracker,
                 relationshipCounter,
-                weightProperties,
-                defaultWeights
+                propertyKeyIds,
+                defaultValues
         );
 
         RelationshipImporter importer = new RelationshipImporter(setup.tracker(), adjacencyBuilder);

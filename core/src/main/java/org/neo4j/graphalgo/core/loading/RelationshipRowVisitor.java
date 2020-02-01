@@ -209,7 +209,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     }
 
     private void flush(SingleTypeRelationshipImporter importer) {
-        long imported = importer.importRels();
+        long imported = importer.importRelationships();
         relationshipCount += RawValues.getHead(imported);
     }
 
@@ -220,7 +220,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     void flushAll() {
         relationshipCount += localImporters.values().stream()
-            .mapToLong(SingleTypeRelationshipImporter::importRels)
+            .mapToLong(SingleTypeRelationshipImporter::importRelationships)
             .mapToInt(RawValues::getHead)
             .sum();
     }

@@ -46,8 +46,8 @@ final class SingleTypeRelationshipImporter {
         return buffer;
     }
 
-    long importRels() {
-        return imports.importRels(buffer, propertyReader);
+    long importRelationships() {
+        return imports.importRelationships(buffer, propertyReader);
     }
 
     static class Builder {
@@ -56,10 +56,7 @@ final class SingleTypeRelationshipImporter {
         private final RelationshipImporter importer;
         private final LongAdder relationshipCounter;
 
-        Builder(
-                RelationshipProjectionMapping mapping,
-                RelationshipImporter importer,
-                LongAdder relationshipCounter) {
+        Builder(RelationshipProjectionMapping mapping, RelationshipImporter importer, LongAdder relationshipCounter) {
             this.mapping = mapping;
             this.importer = importer;
             this.relationshipCounter = relationshipCounter;
@@ -73,19 +70,8 @@ final class SingleTypeRelationshipImporter {
             return relationshipCounter;
         }
 
-        WithImporter loadImporter(
-                boolean loadAsUndirected,
-                boolean loadOutgoing,
-                boolean loadIncoming,
-                boolean loadWeights) {
-            RelationshipImporter.Imports imports = importer.imports(
-                    loadAsUndirected,
-                    loadOutgoing,
-                    loadIncoming,
-                    loadWeights);
-            if (imports == null) {
-                return null;
-            }
+        WithImporter loadImporter(boolean loadProperties) {
+            RelationshipImporter.Imports imports = importer.imports(mapping.projection(), loadProperties);
             return new WithImporter(imports);
         }
 

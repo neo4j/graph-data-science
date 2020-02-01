@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -31,53 +32,39 @@ import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.BATCH_EN
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.PROPERTIES_REFERENCE_OFFSET;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.RELATIONSHIP_REFERENCE_OFFSET;
 
-public class RelationshipImporter {
+class RelationshipImporter {
 
     private final AllocationTracker tracker;
     private final AdjacencyBuilder adjacencyBuilder;
 
-    public RelationshipImporter(
-        AllocationTracker tracker,
-        AdjacencyBuilder adjacencyBuilder) {
+    RelationshipImporter(AllocationTracker tracker, AdjacencyBuilder adjacencyBuilder) {
         this.tracker = tracker;
         this.adjacencyBuilder = adjacencyBuilder;
     }
 
     public interface Imports {
-        long importRels(
-                RelationshipsBatchBuffer batches,
-                PropertyReader propertyReader);
+        long importRelationships(RelationshipsBatchBuffer batches, PropertyReader propertyReader);
     }
 
-    public Imports imports(
-            boolean loadAsUndirected,
-            boolean loadOutgoing,
-            boolean loadIncoming,
-            boolean loadProperties) {
-        if (loadAsUndirected) {
+    Imports imports(Projection projection, boolean loadProperties) {
+        if (projection == Projection.UNDIRECTED) {
             return loadProperties
-                    ? this::importBothOrUndirectedWithProperties
-                    : this::importBothOrUndirected;
-        }
-        if (loadOutgoing) {
-            if (loadIncoming) {
-                return loadProperties
-                        ? this::importBothOrUndirectedWithProperties
-                        : this::importBothOrUndirected;
-            }
+                ? this::importUndirectedWithProperties
+                : this::importUndirected;
+        } else if (projection == Projection.NATURAL) {
             return loadProperties
-                    ? this::importOutgoingWithProperties
-                    : this::importOutgoing;
-        }
-        if (loadIncoming) {
+                ? this::importNaturalWithProperties
+                : this::importNatural;
+        } else if (projection == Projection.REVERSE) {
             return loadProperties
-                    ? this::importIncomingWithProperties
-                    : this::importIncoming;
+                ? this::importReverseWithProperties
+                : this::importReverse;
+        } else {
+            throw new IllegalArgumentException(String.format("Unexpected projection: %s", projection));
         }
-        return null;
     }
 
-    private long importBothOrUndirected(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
+    private long importUndirected(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortBySource();
         int importedOut = importRelationships(buffer, batch, null, adjacencyBuilder, tracker);
         batch = buffer.sortByTarget();
@@ -85,7 +72,7 @@ public class RelationshipImporter {
         return RawValues.combineIntInt(importedOut + importedIn, 0);
     }
 
-    private long importBothOrUndirectedWithProperties(RelationshipsBatchBuffer buffer, PropertyReader reader) {
+    private long importUndirectedWithProperties(RelationshipsBatchBuffer buffer, PropertyReader reader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortBySource();
         long[][] outProperties = reader.readProperty(
@@ -105,12 +92,12 @@ public class RelationshipImporter {
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
 
-    private long importOutgoing(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
+    private long importNatural(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortBySource();
         return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuilder, tracker), 0);
     }
 
-    private long importOutgoingWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
+    private long importNaturalWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortBySource();
         long[][] outProperties = propertyReader.readProperty(
@@ -122,12 +109,12 @@ public class RelationshipImporter {
         return RawValues.combineIntInt(importedOut, importedOut);
     }
 
-    private long importIncoming(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
+    private long importReverse(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortByTarget();
         return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuilder, tracker), 0);
     }
 
-    private long importIncomingWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
+    private long importReverseWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortByTarget();
         long[][] inProperties = propertyReader.readProperty(

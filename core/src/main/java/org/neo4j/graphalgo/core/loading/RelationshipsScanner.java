@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.Projection;
-import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.RawValues;
@@ -49,15 +47,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             Collection<SingleTypeRelationshipImporter.Builder> importerBuilders) {
         List<SingleTypeRelationshipImporter.Builder.WithImporter> builders = importerBuilders
                 .stream()
-                .map(relImporter -> {
-                    RelationshipProjectionMapping relationshipProjectionMapping = relImporter.mapping();
-                    return relImporter.loadImporter(
-                        relationshipProjectionMapping.projection() == Projection.UNDIRECTED,
-                        relationshipProjectionMapping.projection() == Projection.NATURAL,
-                        relationshipProjectionMapping.projection() == Projection.REVERSE,
-                        loadProperties
-                    );
-                })
+                .map(relImporter -> relImporter.loadImporter(loadProperties))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         if (builders.isEmpty()) {
@@ -173,7 +163,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                 terminationFlag.assertRunning();
                 long imported = 0L;
                 for (SingleTypeRelationshipImporter importer : importers) {
-                    imported += importer.importRels();
+                    imported += importer.importRelationships();
                 }
                 int importedRels = RawValues.getHead(imported);
                 int importedWeights = RawValues.getTail(imported);

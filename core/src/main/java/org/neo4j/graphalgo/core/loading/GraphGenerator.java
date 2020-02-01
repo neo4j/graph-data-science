@@ -190,12 +190,7 @@ public final class GraphGenerator {
             );
 
             this.relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);
-            this.imports = relationshipImporter.imports(
-                loadUndirected,
-                projection == Projection.NATURAL,
-                projection == Projection.REVERSE,
-                loadRelationshipProperty
-            );
+            this.imports = relationshipImporter.imports(projection, loadRelationshipProperty);
             this.relationshipBuffer = new RelationshipsBatchBuffer(idMap, -1, ParallelUtil.DEFAULT_BATCH_SIZE);
         }
 
@@ -269,7 +264,7 @@ public final class GraphGenerator {
         private void flushBuffer() {
             RelationshipImporter.PropertyReader propertyReader = loadRelationshipProperty ? RelationshipImporter.preLoadedPropertyReader() : null;
 
-            long newImportedInOut = imports.importRels(relationshipBuffer, propertyReader);
+            long newImportedInOut = imports.importRelationships(relationshipBuffer, propertyReader);
             importedRelationships += RawValues.getHead(newImportedInOut);
             relationshipBuffer.reset();
         }
