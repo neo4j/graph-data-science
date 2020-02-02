@@ -56,10 +56,6 @@ public final class RelationshipProjectionMappings implements Iterable<Relationsh
         return stream().iterator();
     }
 
-    public boolean isMultipleTypes() {
-        return mappings.length > 1;
-    }
-
     public static final class Builder {
         private final List<RelationshipProjectionMapping> mappings;
 

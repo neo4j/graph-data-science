@@ -24,10 +24,8 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.GraphDimensionsValidation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
@@ -178,11 +176,11 @@ public class GraphCreateProc extends CatalogProc {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(factoryClazz);
         GraphDimensions dimensions = graphFactory.dimensions();
-        MemoryTree memoryTree = estimate(loader.toSetup(), graphFactory, config);
+        MemoryTree memoryTree = estimate(graphFactory, config);
         return Stream.of(new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
     }
 
-    public MemoryTree estimate(GraphSetup setup, GraphFactory factory, GraphCreateConfig config) {
+    public MemoryTree estimate(GraphFactory factory, GraphCreateConfig config) {
         if (config.nodeCount() <= -1) {
             return factory.memoryEstimation().estimate(factory.dimensions(), config.concurrency());
         }

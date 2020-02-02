@@ -60,8 +60,8 @@ public abstract class GraphFactory implements Assessable {
         this.setup = setup;
         this.log = setup.log();
         this.progressLogger = progressLogger(log, setup.logMillis());
-        dimensions = new GraphDimensionsReader(api, setup, readTokens).call();
-        progress = importProgress(progressLogger, dimensions, setup);
+        this.dimensions = new GraphDimensionsReader(api, setup, readTokens).call();
+        this.progress = importProgress(progressLogger, dimensions, setup);
     }
 
     public abstract ImportResult build();
@@ -72,23 +72,19 @@ public abstract class GraphFactory implements Assessable {
         return this.dimensions;
     }
 
-    public GraphSetup setup() {
-        return this.setup;
-    }
-
     protected ImportProgress importProgress(
         ProgressLogger progressLogger,
         GraphDimensions dimensions,
         GraphSetup setup
     ) {
-        long relOperations = setup.loadAsUndirected()
+        long relationshipCount = setup.loadAsUndirected()
             ? dimensions.maxRelCount() * 2
             : dimensions.maxRelCount();
         return new ApproximatedImportProgress(
             progressLogger,
             setup.tracker(),
             dimensions.nodeCount(),
-            relOperations
+            relationshipCount
         );
     }
 

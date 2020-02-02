@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
-import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -31,12 +30,12 @@ import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.compat.InternalReadOps;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.graphalgo.compat.InternalReadOps;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
@@ -59,7 +58,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     }
 
     @Override
-    public GraphDimensions apply(final KernelTransaction transaction) throws RuntimeException {
+    public GraphDimensions apply(KernelTransaction transaction) throws RuntimeException {
         TokenRead tokenRead = transaction.tokenRead();
         Read dataRead = transaction.dataRead();
 
@@ -127,10 +126,6 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .relationshipProjectionMappings(relationshipProjectionMappings)
                 .relationshipProperties(relProperties)
                 .build();
-    }
-
-    private boolean loadAnyRelationshipType() {
-        return StringUtils.isEmpty(setup.relationshipType());
     }
 
     private ResolvedPropertyMappings loadPropertyMapping(TokenRead tokenRead, PropertyMappings propertyMappings) {

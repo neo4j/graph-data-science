@@ -76,11 +76,11 @@ public final class AdjacencyList {
     }
 
     public static MemoryEstimation compressedMemoryEstimation(Optional<String> relationshipType, boolean undirected) {
-        return MemoryEstimations.setup("", dim -> {
-            long nodeCount = dim.nodeCount();
+        return MemoryEstimations.setup("", dimensions -> {
+            long nodeCount = dimensions.nodeCount();
             long relCountForType = relationshipType.isPresent()
-                ? dim.relationshipCounts().getOrDefault(relationshipType.get(), 0L)
-                : dim.maxRelCount();
+                ? dimensions.relationshipCounts().getOrDefault(relationshipType.get(), 0L)
+                : dimensions.maxRelCount();
             long relCount = undirected ? relCountForType * 2 : relCountForType;
             long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
             return AdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
@@ -95,11 +95,11 @@ public final class AdjacencyList {
 
         return MemoryEstimations
             .builder(AdjacencyList.class)
-            .perGraphDimension("pages", (dim, concurrency) -> {
-                long nodeCount = dim.nodeCount();
+            .perGraphDimension("pages", (dimensions, concurrency) -> {
+                long nodeCount = dimensions.nodeCount();
                 long relCountForType = relationshipType.isPresent()
-                    ? dim.relationshipCounts().getOrDefault(relationshipType.get(), 0L)
-                    : dim.maxRelCount();
+                    ? dimensions.relationshipCounts().getOrDefault(relationshipType.get(), 0L)
+                    : dimensions.maxRelCount();
                 long relCount = undirected ? relCountForType * 2 : relCountForType;
 
                 long uncompressedAdjacencySize = relCount * Long.BYTES + nodeCount * Integer.BYTES;
