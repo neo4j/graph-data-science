@@ -70,7 +70,7 @@ class GraphCreateProcTest extends BaseProcTest {
     private static final String DB_CYPHER = "CREATE (:A {age: 2})-[:REL {weight: 55}]->(:A)";
     private static final long nodeCount = 2L;
     private static final long relCount = 1L;
-    public static final String DB_CYPHER_ESTIMATE =
+    private static final String DB_CYPHER_ESTIMATE =
         "CREATE" +
         "  (a:A {id: 0, partition: 42})" +
         ", (b:B {id: 1, partition: 42})" +
@@ -767,8 +767,8 @@ class GraphCreateProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
             row -> {
-                assertEquals(565712, row.getNumber("bytesMin").longValue());
-                assertEquals(565712, row.getNumber("bytesMax").longValue());
+                assertEquals(573936, row.getNumber("bytesMin").longValue());
+                assertEquals(573936, row.getNumber("bytesMax").longValue());
             }
         );
     }
@@ -805,8 +805,8 @@ class GraphCreateProcTest extends BaseProcTest {
             query,
             map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
             row -> {
-                assertEquals(565712, row.getNumber("bytesMin").longValue());
-                assertEquals(565712, row.getNumber("bytesMax").longValue());
+                assertEquals(573936, row.getNumber("bytesMin").longValue());
+                assertEquals(573936, row.getNumber("bytesMax").longValue());
             }
         );
     }
@@ -833,8 +833,8 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = "CALL gds.graph.create.estimate('*', {`*`: {type: '', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
         runQueryWithRowConsumer(localDb, query,
             row -> {
-                assertEquals(565952, row.getNumber("bytesMin").longValue());
-                assertEquals(565952, row.getNumber("bytesMax").longValue());
+                assertEquals(574176, row.getNumber("bytesMin").longValue());
+                assertEquals(574176, row.getNumber("bytesMax").longValue());
             }
         );
     }

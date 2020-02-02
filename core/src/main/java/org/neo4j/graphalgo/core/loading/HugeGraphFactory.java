@@ -70,16 +70,16 @@ public final class HugeGraphFactory extends GraphFactory {
             .builder(HugeGraph.class)
             .add("nodeIdMap", IdMap.memoryEstimation());
 
-        // Node properties
-        for (ResolvedPropertyMapping resolvedPropertyMapping : dimensions.nodeProperties()) {
-            builder.add(resolvedPropertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
-        }
-
         if (Objects.isNull(dimensions.relationshipProjectionMappings())) {
             throw new IllegalArgumentException("No relationship projection was specified.");
         }
 
-        // Relationships
+        // node properties
+        for (ResolvedPropertyMapping resolvedPropertyMapping : dimensions.nodeProperties()) {
+            builder.add(resolvedPropertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
+        }
+
+        // relationships
         dimensions.relationshipProjectionMappings().stream().forEach(relationshipProjectionMapping -> {
             Optional<String> neoType = StringUtils.isBlank(relationshipProjectionMapping.typeName())
                 ? Optional.empty()
@@ -88,24 +88,27 @@ public final class HugeGraphFactory extends GraphFactory {
 
             boolean undirected = relationshipProjectionMapping.projection() == Projection.UNDIRECTED;
 
+            // adjacency list
             builder.add(
-                "relationship with type " + elementIdentifier,
+                String.format("adjacency list for '%s'", elementIdentifier),
                 AdjacencyList.compressedMemoryEstimation(neoType, undirected)
             );
-
-            dimensions.relationshipProperties().mappings().forEach(resolvedPropertyMapping -> {
-                builder.add(
-                    "property " + resolvedPropertyMapping.propertyKey() + " for type " + neoType.orElse("<empty>"),
-                    AdjacencyList.uncompressedMemoryEstimation(neoType, undirected)
-                );
-            });
-
             builder.add(
-                "property offsets for type " + neoType.orElse("<empty>"),
+                String.format("adjacency offsets for '%s'", elementIdentifier),
                 AdjacencyOffsets.memoryEstimation()
             );
+            // all properties per projection
+            dimensions.relationshipProperties().mappings().forEach(resolvedPropertyMapping -> {
+                builder.add(
+                    String.format("property '%s.%s", elementIdentifier, resolvedPropertyMapping.propertyKey()),
+                    AdjacencyList.uncompressedMemoryEstimation(neoType, undirected)
+                );
+                builder.add(
+                    String.format("property offset '%s.%s", elementIdentifier, resolvedPropertyMapping.propertyKey()),
+                    AdjacencyOffsets.memoryEstimation()
+                );
+            });
         });
-
 
         return builder.build();
     }
