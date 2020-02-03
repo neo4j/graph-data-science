@@ -14,8 +14,6 @@ This topic includes:
 ** <<algorithms-wcc-examples-unweighted, Unweighted>>
 ** <<algorithms-wcc-examples-weighted, Weighted>>
 ** <<algorithms-wcc-examples-seeding, Seeded components>>
-** <<algorithms-wcc-examples-projection, Named graphs and Cypher projections>>
-//* <<algorithms-wcc-usage-details, Usage Details>>
 
 
 [[algorithms-wcc-intro]]
@@ -179,17 +177,27 @@ This graph has two connected components, each with three nodes.
 The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
 In the following examples we will demonstrate using the Weakly Connected Components algorithm on this graph.
 
+We can load this graph into the in-memory catalog.
+
+[source, cypher]
+----
+CALL gds.graph.create(
+    'myGraph',
+    'User',
+    'LINK',
+    {
+        relationshipProperties: ['weight']
+    }
+)
+----
 
 [[algorithms-wcc-examples-unweighted]]
 === Unweighted
 
-.The following will load the graph, run the algorithm, and stream results:
+.The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.wcc.stream({
-  nodeProjection: 'User',
-  relationshipProjection: 'LINK'
-})
+CALL gds.wcc.stream('myGraph')
 YIELD nodeId, componentId
 RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
 ----
@@ -208,14 +216,10 @@ RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, n
 
 To instead write the component ID to a node property in the Neo4j graph, use this query:
 
-.The following will load the graph with weights, run the algorithm, and write back results:
+.The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.wcc.write({
-  nodeProjection: 'User',
-  relationshipProjection: 'LINK',
-  writeProperty: "componentId"
-})
+CALL gds.wcc.write('myGraph', { writeProperty: 'componentId' })
 YIELD nodePropertiesWritten, componentCount;
 ----
 
@@ -240,16 +244,10 @@ We do this by specifying the threshold value with the `threshold` configuration 
 If a relationship does not have a weight property, a default weight is used.
 The default is zero, and can be configured to another value using the `defaultValue` configuration parameter.
 
-.The following will load the graph with weights, run the algorithm, and stream results:
+.The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.wcc.stream({
-  nodeProjection: 'User',
-  relationshipProjection: 'LINK',
-  relationshipProperties: 'weight',
-  relationshipWeightProperty: "weight",
-  threshold: 1.0
-})
+CALL gds.wcc.stream('myGraph', { relationshipWeightProperty: 'weight', threshold: 1.0 })
 YIELD nodeId, componentId
 RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
 ----
@@ -267,15 +265,13 @@ RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, n
 |===
 
 
-.The following will load the graph with weights, run the algorithm, and write back results:
+.The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.wcc.write({
-  nodeProjection: 'User',
-  relationshipProjection: 'LINK',
-  writeProperty: "componentId",
-  relationshipWeightProperty: "weight",
-  threshold: 1.0
+CALL gds.wcc.write('myGraph', {
+    writeProperty: 'componentId',
+    relationshipWeightProperty: 'weight',
+    threshold: 1.0
 })
 YIELD nodePropertiesWritten, componentCount;
 ----
@@ -314,15 +310,13 @@ It is then recommended to run WCC without seeds.
 To show this in practice, we will run the algorithm, then add another node to our graph, then run the algorithm again with the `seedProperty` configuration parameter.
 We will use the weighted variant of WCC.
 
-.The following will load the graph, run the algorithm, and write back results:
+.The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.wcc.write({
-  nodeProjection: 'User',
-  relationshipProjection: 'LINK',
-  writeProperty: "componentId",
-  relationshipWeightProperty: "weight",
-  threshold: 1.0
+CALL gds.wcc.write('myGraph', {
+    writeProperty: 'componentId',
+    relationshipWeightProperty: 'weight',
+    threshold: 1.0
 })
 YIELD nodePropertiesWritten, componentCount;
 ----
@@ -347,17 +341,30 @@ CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})
 |No data returned.
 |===
 
-.The following will load the graph, run the algorithm, and stream results:
+Note, that we can not use our already loaded graph as the component id is not yet loaded into memory.
+We will therefore create a second in-memory graph that contains the previously computed component id.
+
+.The following will create a new in-memory graph containing the previously computed component id:
 [source, cypher]
 ----
-CALL gds.wcc.stream({
-  nodeProjection: 'User',
-  nodeProperties: 'componentId',
-  relationshipProjection: 'LINK',
-  relationshipProperties: 'weight',
-  seedProperty: "componentId",
-  relationshipWeightProperty: "weight",
-  threshold: 1.0
+CALL gds.graph.create(
+    'myGraph-seeded',
+    'User',
+    'LINK',
+    {
+        nodeProperties: 'componentId',
+        relationshipProperties: 'weight'
+    }
+)
+----
+
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+CALL gds.wcc.stream('myGraph-seeded', {
+    seedProperty: 'componentId',
+    relationshipWeightProperty: 'weight',
+    threshold: 1.0
 })
 YIELD nodeId, componentId
 RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
@@ -376,16 +383,14 @@ RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, n
 | "Michael" | 3
 |===
 
-.The following will load the graph, run the algorithm, and write back results:
+.The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.wcc.write({
-  nodeProjection: 'User',
-  relationshipProjection: 'LINK',
-  seedProperty: "componentId",
-  writeProperty: "componentId",
-  relationshipWeightProperty: "weight",
-  threshold: 1.0
+CALL gds.wcc.write('myGraph-seeded', {
+    seedProperty: 'componentId',
+    writeProperty: 'componentId',
+    relationshipWeightProperty: 'weight',
+    threshold: 1.0
 })
 YIELD nodePropertiesWritten, componentCount;
 ----
@@ -402,63 +407,3 @@ YIELD nodePropertiesWritten, componentCount;
 If the `seedProperty` configuration parameter has the same value as `writeProperty`, the algorithm only writes properties for nodes where the component ID has changed.
 If they differ, the algorithm writes properties for all nodes.
 ====
-
-
-[[algorithms-wcc-examples-projection]]
-=== Named graphs and Cypher projections
-
-In the examples above, we have relied on the _implicit_ loading of graphs for the algorithm computation.
-However, like other algorithms WCC also accepts _named graphs_ and _Cypher projections_ as inputs.
-See <<graph-catalog-ops>> for more details.
-
-.Using a named graph:
-[source, cypher]
-----
-CALL gds.graph.create('myGraph', ['User'], ['LINK']) YIELD graphName;
-
-CALL gds.wcc.stream('myGraph')
-YIELD nodeId, componentId
-RETURN gds.util.asNode(nodeId).name AS name, componentId
-ORDER BY componentId, Name;
-----
-
-.Results
-[opts="header",cols="1m,1m"]
-|===
-| name      | componentId
-| "Alice"   | 0
-| "Bridget" | 0
-| "Charles" | 0
-| "Doug"    | 3
-| "Mark"    | 3
-| "Michael" | 3
-|===
-
-As we can see, the results are identical to the results in the <<algorithms-wcc-examples-unweighted>> example.
-
-.Using a Cypher projection:
-[source, cypher]
-----
-CALL gds.wcc.stream({
-    nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
-    relationshipQuery: 'MATCH (u1:User)-[:LINK]->(u2:User) RETURN id(u1) AS source, id(u2) AS target'
-})
-YIELD nodeId, componentId
-RETURN gds.util.asNode(nodeId).name AS name, componentId
-ORDER BY componentId, name
-----
-
-.Results
-[opts="header",cols="1m,1m"]
-|===
-| Name      | ComponentId
-| "Alice"   | 0
-| "Bridget" | 0
-| "Charles" | 0
-| "Doug"    | 3
-| "Mark"    | 3
-| "Michael" | 3
-|===
-
-Again, results are identical, as the Cypher projection we use mimics the behaviour of the default loading configuration.
-Of course, the Cypher projection feature enables more advanced control over which exact parts of the graph to compute over; please see <<cypher-projection>> for more details.
