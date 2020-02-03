@@ -180,14 +180,6 @@
                 <d:tocentry linkend="labs-algorithms-one-hot-encoding">
                     <?dbhtml filename="labs-algorithms/one-hot-encoding/index.html"?>
                 </d:tocentry>
-            </d:tocentry>
-
-            <d:tocentry linkend="labs-algorithms">
-                <?dbhtml filename="labs-algorithms/index.html"?>
-                <d:tocentry linkend="labs-procedures">
-                    <?dbhtml filename="labs-procedures/index.html"?>
-                </d:tocentry>
-
                 <d:tocentry linkend="labs-graph-generation">
                     <?dbhtml filename="labs-algorithms/graph-generation/index.html"?>
                 </d:tocentry>
@@ -199,6 +191,10 @@
             <d:tocentry linkend="transaction-handling">
                 <?dbhtml filename="production-deployment/transaction-handling/index.html"?>
             </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="appendix-a">
+            <?dbhtml filename="appendix-a/index.html"?>
         </d:tocentry>
 
     </d:tocentry>

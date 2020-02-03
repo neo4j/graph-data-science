@@ -26,7 +26,6 @@ This chapter is divided into the following sections:
 * <<algorithms-path-finding>>
 * <<algorithms-linkprediction>>
 * <<algorithms-auxiliary>>
-* <<labs-algorithms>>
 
 include::algorithms-syntax.adoc[leveloffset=+1]
 
@@ -41,5 +40,3 @@ include::algorithms-path-finding.adoc[leveloffset=+1]
 include::algorithms-link-prediction.adoc[leveloffset=+1]
 
 include::algorithms-auxiliary.adoc[leveloffset=+1]
-
-include::alpha/alpha-algorithms.adoc[leveloffset=+1]

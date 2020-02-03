@@ -31,17 +31,12 @@ The manual covers the following areas:
 * <<common-usage>> -- General usage patterns and recommendations for getting the most out of the Neo4j Graph Data Science library.
 * <<management-ops>> -- A detailed guide to the graph catalog and utility procedures included in the GDS library.
 * <<yelp-example>> -- An illustration of how to use graph algorithms on a social network of friends.
-* <<procedures>> -- A list of Neo4j Graph Data Science library procedures.
 * <<algorithms-centrality>> -- A detailed guide to each of the centrality algorithms, including use-cases and examples.
 * <<algorithms-community>> -- A detailed guide to each of the community detection algorithms, including use-cases and examples.
 * <<algorithms-similarity>> -- A detailed guide to each of the similarity detection algorithms, including use-cases and examples.
 * <<algorithms-auxiliary>> -- A detailed guide to each of the auxiliary procedures, including use-cases and examples.
+* <<appendix-a>> -- Reference of all procedures contained in the GDS library.
 
-
-In addition to the above algorithms, there are a large number of algorithm implementations developed as part of Neo4j Labs.
-These include algorithms in various categories, including categories in which there are officially supported algorithms.
-The Neo4j Labs algorithms are documented in <<labs-algorithms>>.
-Please note that Neo4j Labs algorithms are not supported for production purposes.
 
 ====
 image::download_book.png[Graph Algorithms,200]
@@ -61,11 +56,11 @@ include::management-ops/management-ops.adoc[leveloffset=+1]
 
 include::yelp-example.adoc[leveloffset=+1]
 
-include::procedures.adoc[leveloffset=+1]
-
 include::algorithms/algorithms-intro.adoc[leveloffset=+1]
 
 include::production-deployment/production-deployment.adoc[leveloffset=+1]
+
+include::appendix-a.adoc[leveloffset=+1]
 
 // ifdef::backend-html5[]
 // ++++
