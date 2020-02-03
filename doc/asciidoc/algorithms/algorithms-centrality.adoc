@@ -9,7 +9,7 @@ This chapter provides explanations and examples for each of the centrality algor
 Centrality algorithms are used to determine the importance of distinct nodes in a network.
 The Neo4j GDS library includes the following centrality algorithms, grouped by quality tier:
 
-* Production-quality:
+* Production-quality
 ** <<algorithms-pagerank, PageRank>>
 * Alpha
 ** <<algorithms-articlerank, ArticleRank>>
