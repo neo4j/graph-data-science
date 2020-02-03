@@ -58,11 +58,7 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
         ComputationResult<NodeSimilarity, NodeSimilarityResult, CONFIG> computationResult
     ) {
         CONFIG config = computationResult.config();
-        boolean write = config instanceof NodeSimilarityWriteConfig;
-        NodeSimilarityWriteConfig writeConfig = ImmutableNodeSimilarityWriteConfig.builder()
-            .writeProperty("stats does not support a write property")
-            .from(config)
-            .build();
+
         if (computationResult.isGraphEmpty()) {
             return Stream.of(
                 new WriteResult(
@@ -78,8 +74,8 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
             );
         }
 
-        String writeRelationshipType = writeConfig.writeRelationshipType();
-        String writeProperty = writeConfig.writeProperty();
+        boolean write = config instanceof NodeSimilarityWriteConfig;
+
         NodeSimilarityResult result = computationResult.result();
         NodeSimilarity algorithm = computationResult.algorithm();
         SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
@@ -97,6 +93,13 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
             .outputFields()
             .anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
         if (write && similarityGraph.relationshipCount() > 0) {
+            NodeSimilarityWriteConfig writeConfig = ImmutableNodeSimilarityWriteConfig.builder()
+                .from(config)
+                .build();
+
+            String writeRelationshipType = writeConfig.writeRelationshipType();
+            String writeProperty = writeConfig.writeProperty();
+
             runWithExceptionLogging(
                 "NodeSimilarity write-back failed",
                 () -> {

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -32,36 +32,26 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class NodeSimilarityStreamProc extends NodeSimilarityBaseProc<NodeSimilarityStreamConfig> {
+import static org.neo4j.procedure.Mode.READ;
 
-    @Procedure(value = "gds.nodeSimilarity.stream", mode = Mode.READ)
-    @Description(NODE_SIMILARITY_DESCRIPTION)
-    public Stream<SimilarityResult> stream(
+public class NodeSimilarityStatsProc extends NodeSimilarityBaseProc<NodeSimilarityStatsConfig> {
+
+    @Procedure(name = "gds.nodeSimilarity.stats", mode = Mode.WRITE)
+    @Description(STATS_DESCRIPTION)
+    public Stream<NodeSimilarityBaseProc.WriteResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig> result = compute(
+        AlgoBaseProc.ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> result = compute(
             graphNameOrConfig,
             configuration
         );
-        Graph graph = result.graph();
-
-        if (result.isGraphEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-
-        return result.result().maybeStreamResult().get()
-            .map(similarityResult -> {
-                similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
-                similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
-                return similarityResult;
-            });
+        return write(result);
     }
 
-    @Procedure(value = "gds.nodeSimilarity.stream.estimate", mode = Mode.READ)
+    @Procedure(value = "gds.nodeSimilarity.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimate(
+    public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -69,12 +59,12 @@ public class NodeSimilarityStreamProc extends NodeSimilarityBaseProc<NodeSimilar
     }
 
     @Override
-    protected NodeSimilarityStreamConfig newConfig(
+    protected NodeSimilarityStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return NodeSimilarityStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return NodeSimilarityStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 }

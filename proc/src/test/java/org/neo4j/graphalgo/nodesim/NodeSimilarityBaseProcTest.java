@@ -114,7 +114,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(NodeSimilarityWriteProc.class, NodeSimilarityStreamProc.class, GraphCreateProc.class);
+        registerProcedures(NodeSimilarityWriteProc.class, NodeSimilarityStreamProc.class, NodeSimilarityStatsProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
 
         TestSupport.allDirectedProjections().forEach(projection -> {
