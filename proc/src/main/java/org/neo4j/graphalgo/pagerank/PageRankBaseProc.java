@@ -110,6 +110,39 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
         }
     }
 
+    public static final class StatsResult {
+
+        public long createMillis;
+        public long computeMillis;
+        public long ranIterations;
+        public boolean didConverge;
+        public Map<String, Object> configuration;
+
+        StatsResult(
+            long createMillis,
+            long computeMillis,
+            long ranIterations,
+            boolean didConverge,
+            Map<String, Object> configuration
+        ) {
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.ranIterations = ranIterations;
+            this.didConverge = didConverge;
+            this.configuration = configuration;
+        }
+
+        public static StatsResult from(WriteResult writeResult) {
+            return new StatsResult(
+                writeResult.createMillis,
+                writeResult.computeMillis,
+                writeResult.ranIterations,
+                writeResult.didConverge,
+                writeResult.configuration
+            );
+        }
+    }
+
     static class WriteResultBuilder extends AbstractResultBuilder<WriteResult> {
 
         private long ranIterations;

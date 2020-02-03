@@ -31,6 +31,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -175,5 +178,26 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
                 assertFalse(row.getBoolean("didConverge"));
             }
         );
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    void statsShouldNotHaveWriteProperties(ModeBuildStage queryBuilder, String testCaseName) {
+        String query = queryBuilder
+            .statsMode()
+            .yields();
+
+        runQueryWithResultConsumer(query, result -> {
+            assertThat(result.columns(), not(hasItems(
+                "writeMillis",
+                "nodePropertiesWritten",
+                "relationshipPropertiesWritten"
+            )));
+
+            if(result.hasNext()) {
+                Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
+                assertFalse(config.containsKey("writeProperty"));
+            }
+        });
     }
 }
