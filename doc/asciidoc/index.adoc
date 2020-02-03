@@ -31,12 +31,11 @@ The manual covers the following areas:
 * <<common-usage>> -- General usage patterns and recommendations for getting the most out of the Neo4j Graph Data Science library.
 * <<management-ops>> -- A detailed guide to the graph catalog and utility procedures included in the GDS library.
 * <<yelp-example>> -- An illustration of how to use graph algorithms on a social network of friends.
-* <<algorithms-centrality>> -- A detailed guide to each of the centrality algorithms, including use-cases and examples.
-* <<algorithms-community>> -- A detailed guide to each of the community detection algorithms, including use-cases and examples.
-* <<algorithms-similarity>> -- A detailed guide to each of the similarity detection algorithms, including use-cases and examples.
-* <<algorithms-auxiliary>> -- A detailed guide to each of the auxiliary procedures, including use-cases and examples.
+* <<algorithms>> -- A detailed guide to each of the algorithms in their respective categories, including use-cases and examples.
 * <<appendix-a>> -- Reference of all procedures contained in the GDS library.
 
+
+For further reading resources, we recommend studying the free Graph Algorithms book.
 
 ====
 image::download_book.png[Graph Algorithms,200]
