@@ -20,8 +20,6 @@ This section includes:
 ** <<algorithms-label-propagation-examples-unweighted, Unweighted>>
 ** <<algorithms-label-propagation-examples-weighted, Weighted>>
 ** <<algorithms-label-propagation-examples-seeded, Seeded>>
-** <<algorithms-label-propagation-examples-projection, Named graphs and Cypher projections>>
-* <<algorithms-label-propagation-usage, Usage>>
 
 [[algorithms-label-propagation-intro]]
 == Introduction
@@ -258,16 +256,28 @@ The `seed_label` property represents a value in the graph used to seed the node 
 For example, this can be a result from a previous run of the Label Propagation algorithm.
 In addition, each relationship has a weight property.
 
+We can load this graph into the in-memory catalog.
+
+[source, cypher]
+----
+CALL gds.graph.create(
+    'myGraph',
+    'User',
+    'FOLLOW',
+    {
+        nodeProperties: ['seed_label'],
+        relationshipProperties: ['weight']
+    }
+)
+----
+
 [[algorithms-label-propagation-examples-unweighted]]
 === Unweighted
 
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.labelPropagation.stream({
-  nodeProjection: 'User',
-  relationshipProjection: 'FOLLOW'
-})
+CALL gds.labelPropagation.stream('myGraph'e)
 YIELD nodeId, communityId AS Community
 RETURN gds.util.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
@@ -289,11 +299,7 @@ ORDER BY Community, Name
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.labelPropagation.write({
-  nodeProjection: 'User',
-  relationshipProjection: 'FOLLOW',
-  writeProperty: 'community'
-})
+CALL gds.labelPropagation.write('myGraph', { writeProperty: 'community' })
 YIELD ranIterations, communityCount
 ----
 
@@ -313,17 +319,14 @@ Only Charles doesn't strongly fit into either side, but ends up with Doug and Ma
 [[algorithms-label-propagation-examples-weighted]]
 === Weighted
 
-The Label-Propagation algorithm can also run on weighted graphs,
-taking the given relationship or node weights into concern when forming the communities.
+The Label-Propagation algorithm can also take node and relationship weights into account.
+In the example we load the graph with an extra relationship property `weight`.
+In order to tell the algorithm to consider this property as a relationship weight, we have to set the `relationshipWeightProperty` configuration parameter to `weight`.
 
 .The following will run the algorithm on a graph with weighted relationships and stream results:
 [source, cypher]
 ----
-CALL gds.labelPropagation.stream({
-  nodeProjection: 'User',
-  relationshipProjection: 'FOLLOW',
-  relationshipWeightProperty: 'weight'
-})
+CALL gds.labelPropagation.stream('myGraph', { relationshipWeightProperty: 'weight' })
 YIELD nodeId, communityId AS Community
 RETURN gds.util.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
@@ -347,10 +350,7 @@ Using the weighted relationships, `Alice` and `Charles` are now in the same comm
 .The following will load the graph, run the algorithm on a weighted graph and write back results:
 [source, cypher]
 ----
-CALL gds.labelPropagation.write({
-  nodeProjection: 'User',
-  relationshipProjection: 'FOLLOW',
-  relationshipProperties: 'weight',
+CALL gds.labelPropagation.write('myGraph', {
   writeProperty: 'community',
   relationshipWeightProperty: 'weight'
 })
@@ -373,23 +373,16 @@ As we can see, the weighted example takes 4 iterations to converge, instead of 3
 At the beginning of the algorithm, every node is initialized with a unique label and the labels propagate through the network.
 
 It is possible to define preliminary labels of nodes using the `seedProperty` parameter.
-We need to store a preliminary set of labels that we would like to run the Label Propagation algorithm with as node properties.
-That property needs to be a number.
-In our example graph we saved them as the property `seed_label`.
+An initial set of labels can be provided by setting the `seedProperty` configuration parameter to a node property present in the loaded graph.
 
-The algorithm first checks if there is a seed label assigned to the node, and loads it if there is one.
-If there isn't one, it assigns a new unique label to the node.
+The algorithm first checks if there is a seed label assigned to the node
+If no seed label is present, a new unique label is assigned to the node.
 Using this preliminary set of labels, it then sequentially updates each node's label to a new one, which is the most frequent label among its neighbors at every iteration of label propagation.
 
 .The following will run the algorithm with pre-defined labels:
 [source, cypher]
 ----
-CALL gds.labelPropagation.stream({
-  nodeProjection: 'User',
-  relationshipProjection: 'FOLLOW',
-  nodeProperties: 'seed_label',
-  seedProperty: 'seed_label'
-})
+CALL gds.labelPropagation.stream('myGraph', { seedProperty: 'seed_label' })
 YIELD nodeId, communityId AS Community
 RETURN gds.util.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
@@ -412,13 +405,10 @@ As we can see, the communities are based on the `seed_label` property, concretel
 .The following will load the graph, run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.labelPropagation.write({
-  nodeProjection: 'User',
-  relationshipProjection: 'FOLLOW',
-  nodeProperties: 'seed_label',
+CALL gds.labelPropagation.write('myGraph', {
   writeProperty: 'community',
   seedProperty: 'seed_label'
-  })
+})
 YIELD ranIterations, communityCount
 ----
 
@@ -429,69 +419,3 @@ YIELD ranIterations, communityCount
 | 3             | 2
 |===
 
-
-[[algorithms-label-propagation-examples-projection]]
-=== Cypher projection
-
-In the examples above, we have relied on the _implicit_ loading of graphs for the algorithm computation.
-However, like other algorithms WCC also accepts _named graphs_ and _Cypher projections_ as inputs.
-See <<graph-catalog-ops>> for more details.
-
-.Using a named graph:
-[source,cypher]
-----
-CALL gds.graph.create('myGraph', ['User'], ['FOLLOW']);
-
-CALL gds.labelPropagation.stream('myGraph', {})
-YIELD nodeId, communityId AS Community
-RETURN gds.util.asNode(nodeId).name AS Name, Community
-ORDER BY Community, Name
-----
-
-.Results
-[opts="header",cols="1,1"]
-|===
-| Name    | Community
-| "Alice   | 1
-| "Bridget" | 1
-| "Michael" | 1
-| "Charles" | 4
-| "Doug"    | 4
-| "Mark"    | 4
-|===
-
-As we can see, the results are identical to the results in the <<algorithms-label-propagation-examples-unweighted>> example.
-
-.Set `graph:'cypher'` in the config:
-[source, cypher]
-----
-CALL gds.labelPropagation.stream({
-  nodeQuery: 'MATCH (p:User) RETURN id(p) AS id',
-  relationshipQuery: 'MATCH (p1:User)-[f:FOLLOW]->(p2:User)
-    RETURN id(p1) AS source, id(p2) AS target'
-})
-YIELD nodeId, communityId AS Community
-RETURN gds.util.asNode(nodeId).name AS Name, Community
-ORDER BY Community, Name
-----
-
-.Results
-[opts="header",cols="1,1"]
-|===
-| Name    | Community
-| "Alice"   | 1
-| "Bridget" | 1
-| "Michael" | 1
-| "Charles" | 4
-| "Doug"    | 4
-| "Mark"    | 4
-|===
-
-Again, results are identical, as the Cypher projection we use mimics the behaviour of the default loading configuration.
-Of course, the Cypher projection feature enables more advanced control over which exact parts of the graph to compute over; please see <<cypher-projection>> for more details.
-
-[[algorithms-label-propagation-usage]]
-=== Usage
-
-When executing LabelPropagation in parallel with direction 'BOTH', it is possible that results are flaky because of the asynchronous execution fashion of the algorithm.
-This might also happen in an direction 'OUTGOING' graph, if two nodes have relationships that point to each other.

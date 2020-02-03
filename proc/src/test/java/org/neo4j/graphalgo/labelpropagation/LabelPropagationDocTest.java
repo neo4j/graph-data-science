@@ -40,6 +40,9 @@ class LabelPropagationDocTest extends BaseProcTest {
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
+        registerProcedures(LabelPropagationWriteProc.class, LabelPropagationStreamProc.class, GraphCreateProc.class);
+        registerFunctions(GetNodeFunc.class);
+
         String createGraph =
             "CREATE (alice:User {name: 'Alice', seed_label: 52})" +
             "CREATE (bridget:User {name: 'Bridget', seed_label: 21})" +
@@ -59,9 +62,18 @@ class LabelPropagationDocTest extends BaseProcTest {
             "CREATE (michael)-[:FOLLOW {weight: 1}]->(bridget)" +
             "CREATE (charles)-[:FOLLOW {weight: 1}]->(doug)";
 
+        String loadGraph = "CALL gds.graph.create(" +
+                           "    'myGraph'," +
+                           "    'User'," +
+                           "    'FOLLOW'," +
+                           "    {" +
+                           "        nodeProperties: ['seed_label']," +
+                           "        relationshipProperties: ['weight']" +
+                           "    }" +
+                           ")";
+
         runQuery(createGraph);
-        registerProcedures(LabelPropagationWriteProc.class, LabelPropagationStreamProc.class, GraphCreateProc.class);
-        registerFunctions(GetNodeFunc.class);
+        runQuery(loadGraph);
     }
 
     @AfterEach
@@ -72,10 +84,7 @@ class LabelPropagationDocTest extends BaseProcTest {
 
     @Test
     void unweighted() {
-        String q1 = "CALL gds.labelPropagation.stream({" +
-                    "   nodeProjection: 'User'," +
-                    "   relationshipProjection: 'FOLLOW'" +
-                    "})" +
+        String q1 = "CALL gds.labelPropagation.stream('myGraph')" +
                     "YIELD nodeId, communityId AS Community " +
                     "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
                     "ORDER BY Community, Name";
@@ -101,11 +110,7 @@ class LabelPropagationDocTest extends BaseProcTest {
                          "+--------------------------------+\n" +
                          "1 row\n";
 
-        String q2 = "CALL gds.labelPropagation.write({" +
-                    "   nodeProjection: 'User'," +
-                    "   relationshipProjection: 'FOLLOW'," +
-                    "   writeProperty: 'community'" +
-                    "})" +
+        String q2 = "CALL gds.labelPropagation.write('myGraph', { writeProperty: 'community' })" +
                     "YIELD ranIterations, communityCount";
 
         assertEquals(expectedString, runQuery(q2, Result::resultAsString));
@@ -113,12 +118,7 @@ class LabelPropagationDocTest extends BaseProcTest {
 
     @Test
     void weighted() {
-        String q1 = "CALL gds.labelPropagation.stream({" +
-                    "   nodeProjection: 'User'," +
-                    "   relationshipProjection: 'FOLLOW'," +
-                    "   relationshipProperties: 'weight'," +
-                    "   relationshipWeightProperty: 'weight'" +
-                    "})" +
+        String q1 = "CALL gds.labelPropagation.stream('myGraph', { relationshipWeightProperty: 'weight' })" +
                     "YIELD nodeId, communityId AS Community " +
                     "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
                     "ORDER BY Community, Name";
@@ -137,12 +137,9 @@ class LabelPropagationDocTest extends BaseProcTest {
 
         assertEquals(expectedString, runQuery(q1, Result::resultAsString));
 
-        String q2 = "CALL gds.labelPropagation.write({" +
-                    "   nodeProjection: 'User'," +
-                    "   relationshipProjection: 'FOLLOW'," +
-                    "   relationshipProperties: 'weight'," +
-                    "   writeProperty: 'community'," +
-                    "   relationshipWeightProperty: 'weight'" +
+        String q2 = "CALL gds.labelPropagation.write('myGraph', {" +
+                    "  writeProperty: 'community'," +
+                    "  relationshipWeightProperty: 'weight'" +
                     "})" +
                     "YIELD ranIterations, communityCount";
 
@@ -158,12 +155,7 @@ class LabelPropagationDocTest extends BaseProcTest {
 
     @Test
     void seeded(){
-        String q1 = "CALL gds.labelPropagation.stream({" +
-                    "   nodeProjection: 'User'," +
-                    "   relationshipProjection: 'FOLLOW'," +
-                    "   nodeProperties: 'seed_label'," +
-                    "   seedProperty: 'seed_label'" +
-                    "})" +
+        String q1 = "CALL gds.labelPropagation.stream('myGraph', { seedProperty: 'seed_label' })" +
                     "YIELD nodeId, communityId AS Community " +
                     "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
                     "ORDER BY Community, Name";
@@ -182,13 +174,10 @@ class LabelPropagationDocTest extends BaseProcTest {
 
         assertEquals(expectedString, runQuery(q1, Result::resultAsString));
 
-        String q2 = "CALL gds.labelPropagation.write({" +
-                    "   nodeProjection: 'User'," +
-                    "   relationshipProjection: 'FOLLOW'," +
-                    "   nodeProperties: 'seed_label'," +
-                    "   writeProperty: 'community'," +
-                    "   seedProperty: 'seed_label'" +
-                    " })" +
+        String q2 = "CALL gds.labelPropagation.write('myGraph', {" +
+                    "  writeProperty: 'community'," +
+                    "  seedProperty: 'seed_label'" +
+                    "})" +
                     "YIELD ranIterations, communityCount";
 
         expectedString = "+--------------------------------+\n" +
@@ -197,44 +186,6 @@ class LabelPropagationDocTest extends BaseProcTest {
                          "| 3             | 2              |\n" +
                          "+--------------------------------+\n" +
                          "1 row\n";
-
-        assertEquals(expectedString, runQuery(q2, Result::resultAsString));
-    }
-
-    // Queries from the named graph and Cypher projection example in label-propagation.adoc
-    // used to test that the results are correct in the docs
-    @Test
-    void namedGraphAndCypherProjection() {
-        String loadGraph = "CALL  gds.graph.create('myGraph', 'User', 'FOLLOW')";
-        runQuery(loadGraph);
-
-        String q1 = "CALL gds.labelPropagation.stream('myGraph', {})" +
-                    "YIELD nodeId, communityId AS Community " +
-                    "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
-                    "ORDER BY Community, Name";
-
-        String expectedString = "+-----------------------+\n" +
-                                "| Name      | Community |\n" +
-                                "+-----------------------+\n" +
-                                "| \"Alice\"   | 1         |\n" +
-                                "| \"Bridget\" | 1         |\n" +
-                                "| \"Michael\" | 1         |\n" +
-                                "| \"Charles\" | 4         |\n" +
-                                "| \"Doug\"    | 4         |\n" +
-                                "| \"Mark\"    | 4         |\n" +
-                                "+-----------------------+\n" +
-                                "6 rows\n";
-
-        assertEquals(expectedString, runQuery(q1, Result::resultAsString));
-
-        String q2 = "CALL gds.labelPropagation.stream({" +
-                    "  nodeQuery: 'MATCH (p:User) RETURN id(p) AS id'," +
-                    "  relationshipQuery: 'MATCH (p1:User)-[f:FOLLOW]->(p2:User)" +
-                    "   RETURN id(p1) AS source, id(p2) AS target'" +
-                    "})" +
-                    "YIELD nodeId, communityId AS Community " +
-                    "RETURN gds.util.asNode(nodeId).name AS Name, Community " +
-                    "ORDER BY Community, Name";
 
         assertEquals(expectedString, runQuery(q2, Result::resultAsString));
     }
