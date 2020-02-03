@@ -86,11 +86,7 @@ class GraphCatalogTest {
 
         Graph filteredGraph = GraphCatalog.get("", "myGraph").graph().getGraphProjection(relTypes, relProperty);
 
-        assertGraphEquals(
-            fromGdl(
-                expectedGraph),
-            filteredGraph
-        );
+        assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
     }
 
     @NotNull

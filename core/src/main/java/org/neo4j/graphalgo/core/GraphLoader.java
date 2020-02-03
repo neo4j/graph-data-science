@@ -135,24 +135,4 @@ public interface GraphLoader {
         return build(factoryType).build().graphs().getUnion();
     }
 
-    static GraphLoader create(
-        GraphDatabaseAPI api,
-        Log log,
-        String username,
-        AllocationTracker allocationTracker,
-        TerminationFlag terminationFlag,
-        GraphCreateConfig graphCreateConfig,
-        KernelTransaction kernelTransaction
-    ) {
-        return ImmutableGraphLoader
-            .builder()
-            .api(api)
-            .log(log)
-            .username(username)
-            .tracker(allocationTracker)
-            .terminationFlag(terminationFlag)
-            .createConfig(graphCreateConfig)
-            .kernelTransaction(kernelTransaction)
-            .build();
-    }
 }

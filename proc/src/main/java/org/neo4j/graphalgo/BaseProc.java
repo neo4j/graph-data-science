@@ -21,6 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -57,15 +58,16 @@ public abstract class BaseProc {
     }
 
     protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
-        return GraphLoader.create(
-            api,
-            log,
-            getUsername(),
-            tracker,
-            TerminationFlag.wrap(transaction),
-            createConfig,
-            transaction
-        );
+        return ImmutableGraphLoader
+            .builder()
+            .api(api)
+            .log(log)
+            .username(getUsername())
+            .tracker(tracker)
+            .terminationFlag(TerminationFlag.wrap(transaction))
+            .createConfig(createConfig)
+            .kernelTransaction(transaction)
+            .build();
     }
 
     protected void runWithExceptionLogging(String message, Runnable runnable) {
