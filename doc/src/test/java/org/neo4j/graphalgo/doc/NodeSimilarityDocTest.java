@@ -55,7 +55,7 @@ public class NodeSimilarityDocTest extends DocTestBase {
         asciidoctor
             .javaExtensionRegistry()
             .treeprocessor(new QueryConsumingTreeProcessor(defaultSetupQueryConsumer(), defaultQueryExampleConsumer()));
-        File file = ASCIIDOC_PATH.resolve("node-similarity.adoc").toFile();
+        File file = ASCIIDOC_PATH.resolve("algorithms/node-similarity.adoc").toFile();
         assertTrue(file.exists() && file.canRead());
         asciidoctor.loadFile(file, Collections.emptyMap());
     }
