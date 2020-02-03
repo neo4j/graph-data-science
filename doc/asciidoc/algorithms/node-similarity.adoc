@@ -196,19 +196,22 @@ In the example, we want to use the Node Similarity algorithm to compare people b
 The Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1.
 In the example graph, the Eve node will not be compared to other Person nodes.
 
+With the following statement we load the graph into the in-memory graph catalog.
+
+[source, cypher]
+----
+CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES')
+----
 
 [[algorithms-node-similarity-examples-stream]]
 === Streaming results
 
 [role=query-example]
 --
-.The following will load the graph, run the algorithm, and stream results:
+.The following will run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.stream({
-  nodeProjection: 'Person | Instrument',
-  relationshipProjection: 'LIKES'
-})
+CALL gds.nodeSimilarity.stream('myGraph')
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
 ORDER BY similarity DESCENDING, Person1, Person2
@@ -246,14 +249,12 @@ The Jaccard similarity score is written as a property on the relationship.
 
 [role=query-example]
 --
-.The following will load the graph, run the algorithm, and write back results:
+.The following will run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.write({
-  nodeProjection: 'Person | Instrument',
-  relationshipProjection: 'LIKES',
-  writeRelationshipType: 'SIMILAR',
-  writeProperty: 'score'
+CALL gds.nodeSimilarity.write('myGraph', {
+    writeRelationshipType: 'SIMILAR',
+    writeProperty: 'score'
 })
 YIELD nodesCompared, relationshipsWritten
 ----
@@ -304,14 +305,10 @@ If neither is specified, topK is used.
 
 [role=query-example]
 --
-.The following will load the graph, run the algorithm, and stream the top 1 result per node:
+.The following will run the algorithm, and stream the top 1 result per node:
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.stream({
-  nodeProjection: 'Person | Instrument',
-  relationshipProjection: 'LIKES',
-  topK: 1
-})
+`CALL gds.nodeSimilarity.stream('myGraph', { topK: 1 })`
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
 ORDER BY Person1
@@ -332,14 +329,10 @@ ORDER BY Person1
 
 [role=query-example]
 --
-.The following will load the graph, run the algorithm, and stream the bottom 1 result per node:
+.The following will run the algorithm, and stream the bottom 1 result per node:
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.stream({
-  nodeProjection: 'Person | Instrument',
-  relationshipProjection: 'LIKES',
-  bottomK: 1
-})
+CALL gds.nodeSimilarity.stream('myGraph', { bottomK: 1 })
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
 ORDER BY Person1
@@ -369,12 +362,10 @@ A value of 0 means no global limit is imposed and all results from topK or botto
 
 [role=query-example]
 --
-.The following will load the graph, run the algorithm, and stream the 3 highest out of the top 1 results per node:
+.The following will run the algorithm, and stream the 3 highest out of the top 1 results per node:
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.stream({
-  nodeProjection: 'Person | Instrument',
-  relationshipProjection: 'LIKES',
+CALL gds.nodeSimilarity.stream('myGraph', {
   topK: 1,
   topN: 3
 })
@@ -406,11 +397,7 @@ This value can not be lower than 1.
 .The following will ignore nodes with less than 3 LIKES relationships:
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.stream({
-  nodeProjection: 'Person | Instrument',
-  relationshipProjection: 'LIKES',
-  degreeCutoff: 3
-})
+CALL gds.nodeSimilarity.stream('myGraph', { degreeCutoff: 3 })
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
 ORDER BY Person1
@@ -439,11 +426,7 @@ Setting similarity cutoff to 0 may yield a very large result set, increased runt
 .The following will ignore node pairs with a similarity score less than 0.5:
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.stream({
-  nodeProjection: 'Person | Instrument',
-  relationshipProjection: 'LIKES',
-  similarityCutoff: 0.5
-})
+CALL gds.nodeSimilarity.stream('myGraph', { similarityCutoff: 0.5 })
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
 ORDER BY Person1

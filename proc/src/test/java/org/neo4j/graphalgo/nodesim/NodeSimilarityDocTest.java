@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
@@ -32,35 +33,39 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NodeSimilarityDocTest extends BaseProcTest {
 
-    private static final String DB_CYPHER =
-        "CREATE (alice:Person {name: 'Alice'})" +
-        "CREATE (bob:Person {name: 'Bob'})" +
-        "CREATE (carol:Person {name: 'Carol'})" +
-        "CREATE (dave:Person {name: 'Dave'})" +
-        "CREATE (eve:Person {name: 'Eve'})" +
-        "CREATE (guitar:Instrument {name: 'Guitar'})" +
-        "CREATE (synth:Instrument {name: 'Synthesizer'})" +
-        "CREATE (bongos:Instrument {name: 'Bongos'})" +
-        "CREATE (trumpet:Instrument {name: 'Trumpet'})" +
-
-        "CREATE (alice)-[:LIKES]->(guitar)" +
-        "CREATE (alice)-[:LIKES]->(synth)" +
-        "CREATE (alice)-[:LIKES]->(bongos)" +
-        "CREATE (bob)-[:LIKES]->(guitar)" +
-        "CREATE (bob)-[:LIKES]->(synth)" +
-        "CREATE (carol)-[:LIKES]->(bongos)" +
-        "CREATE (dave)-[:LIKES]->(guitar)" +
-        "CREATE (dave)-[:LIKES]->(synth)" +
-        "CREATE (dave)-[:LIKES]->(bongos);";
-
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
-        runQuery(DB_CYPHER);
-        registerProcedures(NodeSimilarityStreamProc.class, NodeSimilarityWriteProc.class);
+        registerProcedures(NodeSimilarityStreamProc.class, NodeSimilarityWriteProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
+
+        String createCypher =
+            "CREATE (alice:Person {name: 'Alice'})" +
+            "CREATE (bob:Person {name: 'Bob'})" +
+            "CREATE (carol:Person {name: 'Carol'})" +
+            "CREATE (dave:Person {name: 'Dave'})" +
+            "CREATE (eve:Person {name: 'Eve'})" +
+            "CREATE (guitar:Instrument {name: 'Guitar'})" +
+            "CREATE (synth:Instrument {name: 'Synthesizer'})" +
+            "CREATE (bongos:Instrument {name: 'Bongos'})" +
+            "CREATE (trumpet:Instrument {name: 'Trumpet'})" +
+
+            "CREATE (alice)-[:LIKES]->(guitar)" +
+            "CREATE (alice)-[:LIKES]->(synth)" +
+            "CREATE (alice)-[:LIKES]->(bongos)" +
+            "CREATE (bob)-[:LIKES]->(guitar)" +
+            "CREATE (bob)-[:LIKES]->(synth)" +
+            "CREATE (carol)-[:LIKES]->(bongos)" +
+            "CREATE (dave)-[:LIKES]->(guitar)" +
+            "CREATE (dave)-[:LIKES]->(synth)" +
+            "CREATE (dave)-[:LIKES]->(bongos);";
+
+        String loadCypher = "CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES')";
+
+        runQuery(createCypher);
+        runQuery(loadCypher);
     }
 
     @AfterEach
@@ -70,10 +75,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
 
     @Test
     void shouldProduceStreamOutput() {
-        String query = "CALL gds.nodeSimilarity.stream({\n" +
-                       "  nodeProjection: 'Person | Instrument',\n" +
-                       "  relationshipProjection: 'LIKES'\n" +
-                       "})\n" +
+        String query = "CALL gds.nodeSimilarity.stream('myGraph')\n" +
                        "YIELD node1, node2, similarity\n" +
                        "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
                        "ORDER BY similarity DESCENDING, Person1, Person2\n";
@@ -99,13 +101,11 @@ class NodeSimilarityDocTest extends BaseProcTest {
 
     @Test
     void shouldProduceWriteOutput() {
-        String query = "CALL gds.nodeSimilarity.write({\n" +
-                       "  nodeProjection: 'Person | Instrument',\n" +
-                       "  relationshipProjection: 'LIKES',\n" +
-                       "  writeRelationshipType: 'SIMILAR',\n" +
-                       "  writeProperty: 'score'\n" +
+        String query = "CALL gds.nodeSimilarity.write('myGraph', {\n" +
+                       "    writeRelationshipType: 'SIMILAR',\n" +
+                       "    writeProperty: 'score'\n" +
                        "})\n" +
-                       "YIELD nodesCompared, relationshipsWritten;\n";
+                       "YIELD nodesCompared, relationshipsWritten;";
 
         String expectedString = "+--------------------------------------+\n" +
                                 "| nodesCompared | relationshipsWritten |\n" +
@@ -119,9 +119,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
 
     @Test
     void shouldProduceTopStreamOutput() {
-        String query = "CALL gds.nodeSimilarity.stream({\n" +
-                       "  nodeProjection: 'Person | Instrument',\n" +
-                       "  relationshipProjection: 'LIKES',\n" +
+        String query = "CALL gds.nodeSimilarity.stream('myGraph', {\n" +
                        "  topK: 1,\n" +
                        "  topN: 3\n" +
                        "})\n" +
@@ -143,11 +141,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
 
     @Test
     void shouldProduceTopKStreamOutput() {
-        String query = "CALL gds.nodeSimilarity.stream({\n" +
-                       "  nodeProjection: 'Person | Instrument',\n" +
-                       "  relationshipProjection: 'LIKES',\n" +
-                       "  topK: 1\n" +
-                       "})\n" +
+        String query = "CALL gds.nodeSimilarity.stream('myGraph', { topK: 1 })\n" +
                        "YIELD node1, node2, similarity\n" +
                        "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
                        "ORDER BY Person1\n";
@@ -167,11 +161,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
 
     @Test
     void shouldProduceBottomKStreamOutput() {
-        String query = "CALL gds.nodeSimilarity.stream({\n" +
-                       "  nodeProjection: 'Person | Instrument',\n" +
-                       "  relationshipProjection: 'LIKES',\n" +
-                       "  bottomK: 1\n" +
-                       "})\n" +
+        String query = "CALL gds.nodeSimilarity.stream('myGraph', { bottomK: 1 })\n" +
                        "YIELD node1, node2, similarity\n" +
                        "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
                        "ORDER BY Person1\n";
@@ -192,11 +182,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
 
     @Test
     void shouldProduceDegreeCutoffStreamOutput() {
-        String query = "CALL gds.nodeSimilarity.stream({\n" +
-                       "  nodeProjection: 'Person | Instrument',\n" +
-                       "  relationshipProjection: 'LIKES',\n" +
-                       "  degreeCutoff: 3\n" +
-                       "})\n" +
+        String query = "CALL gds.nodeSimilarity.stream('myGraph', { degreeCutoff: 3 })\n" +
                        "YIELD node1, node2, similarity\n" +
                        "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
                        "ORDER BY Person1\n";
@@ -214,11 +200,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
 
     @Test
     void shouldProduceSimilarityCutoffStreamOutput() {
-        String query = "CALL gds.nodeSimilarity.stream({\n" +
-                       "  nodeProjection: 'Person | Instrument',\n" +
-                       "  relationshipProjection: 'LIKES',\n" +
-                       "  similarityCutoff: 0.5\n" +
-                       "})\n" +
+        String query = "CALL gds.nodeSimilarity.stream('myGraph', { similarityCutoff: 0.5 })\n" +
                        "YIELD node1, node2, similarity\n" +
                        "RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity\n" +
                        "ORDER BY Person1\n";
