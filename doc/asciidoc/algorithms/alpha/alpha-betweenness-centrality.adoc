@@ -12,10 +12,7 @@ It is often used to find nodes that serve as a bridge from one part of a graph t
 
 // TODO: If we want to call out the paper: http://www.algo.uni-konstanz.de/publications/b-fabc-01.pdf
 
-[WARNING]
---
-The Betweenness Centrality algorithm was developed by the Neo4j Labs team and is not officially supported.
---
+include::alpha-note.adoc[tag=alpha-note]
 
 In the following example, Alice is the main connection in the graph:
 

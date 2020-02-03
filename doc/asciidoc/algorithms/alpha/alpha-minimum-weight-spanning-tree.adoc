@@ -10,10 +10,7 @@ The Minimum Weight Spanning Tree (MST) starts from a given node, and finds all i
 Prim's algorithm is one of the simplest and best-known minimum spanning tree algorithms.
 The K-Means variant of this algorithm can be used to detect clusters in the graph.
 
-[WARNING]
---
-The Minimum Weight Spanning Tree algorithm was developed by the Neo4j Labs team and is not officially supported.
---
+include::alpha-note.adoc[tag=alpha-note]
 
 This section includes:
 

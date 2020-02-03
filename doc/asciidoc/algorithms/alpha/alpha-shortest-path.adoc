@@ -10,10 +10,7 @@ The Shortest Path algorithm calculates the shortest (weighted) path between a pa
 In this category, Dijkstra's algorithm is the most well known.
 It is a real time graph algorithm, and can be used as part of the normal user flow in a web or mobile application.
 
-[WARNING]
---
-The Shortest Path algorithm was developed by the Neo4j Labs team and is not officially supported.
---
+include::alpha-note.adoc[tag=alpha-note]
 
 This section includes:
 

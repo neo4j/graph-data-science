@@ -9,10 +9,7 @@ This section describes the Same Community algorithm in the Neo4j Graph Data Scie
 Same Community is a way of determining whether two nodes belong to the same community.
 These communities could be computed by using one of the <<algorithms-community>>.
 
-[WARNING]
---
-The Same Community algorithm was developed by the Neo4j Labs team and is not officially supported.
---
+include::alpha-note.adoc[tag=alpha-note]
 
 This section includes:
 
