@@ -161,8 +161,27 @@ CREATE (nMichael)-[:LINK {weight: 1}]->(nMark);
 This graph has two clusters of _Users_, that are closely connected.
 Between those clusters there is one single edge.
 The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
-In the following examples we will demonstrate using the Louvain algorithm on this graph.
+We can now load the graph into the in-memory graph catalog.
+We load the `LINK` relationships with projection mode set to `UNDIRECTEd` as this works best with the Louvain algorithm.
+This graph will be used to demonstrate the usage of the Louvain algorithm.
 
+
+[source, cypher]
+----
+CALL gds.graph.create(
+    'myGraph',
+    'User',
+    {
+        LINK: {
+            projection: 'UNDIRECTED'
+        }
+    },
+    {
+        nodeProperties: 'seed',
+        relationshipProperties: 'weight'
+    }
+)
+----
 
 [[algorithms-louvain-examples-stream]]
 === Streaming results
@@ -170,15 +189,8 @@ In the following examples we will demonstrate using the Louvain algorithm on thi
 .The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.louvain.stream({
-    nodeProjection: 'User',
-    relationshipProjection: {
-        LINK: {
-            type: 'LINK',
-            projection: 'undirected'
-        }
-    }
-}) YIELD nodeId, communityId, communityIds
+CALL gds.louvain.stream('myGraph')
+YIELD nodeId, communityId, communityIds
 RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds
 ORDER BY name ASC
 ----
@@ -207,20 +219,11 @@ Because we did not set the value of `includeIntermediateCommunities` to `true`, 
 To instead write the community results back to the graph in Neo4j, use the following query.
 For each node a property is written that holds the assigned community.
 
-.The following will load the graph, run the algorithm, and write back results:
+.The following run the algorithm, and write back results:
 [source, cypher]
 ----
-CALL gds.louvain.write({
-    nodeProjection: 'User',
-    relationshipProjection: {
-        LINK: {
-            type: 'LINK',
-            projection: 'undirected',
-            aggregation: 'NONE'
-        }
-    },
-    writeProperty: 'community'
-}) YIELD communityCount, modularity, modularities
+CALL gds.louvain.write('myGraph', { writeProperty: 'community' })
+YIELD communityCount, modularity, modularities
 ----
 
 .Results
@@ -240,21 +243,11 @@ The result contains meta information, like the number of identified communities 
 
 The Louvain algorithm can also run on weighted graphs, taking the given relationship weights into concern when calculating the modularity.
 
-.The following will load the graph, run the algorithm on a weighted graph and stream results:
+.The following will run the algorithm on a weighted graph and stream results:
 [source, cypher]
 ----
-CALL gds.louvain.stream({
-    nodeProjection: 'User',
-    relationshipProjection: {
-        LINK: {
-            type: 'LINK',
-            projection: 'UNDIRECTED',
-            aggregation: 'NONE',
-            properties: ['weight']
-        }
-    },
-    relationshipWeightProperty: 'weight'
-}) YIELD nodeId, communityId, communityIds
+CALL gds.louvain.stream('myGraph', { relationshipWeightProperty: 'weight' })
+YIELD nodeId, communityId, communityIds
 RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds
 ORDER BY name ASC
 ----
@@ -282,25 +275,11 @@ The Louvain algorithm can be run incrementally, by providing a seed property.
 With the seed property an initial community mapping can be supplied for a subset of the loaded nodes.
 The algorithm will try to keep the seeded community IDs.
 
-.The following will load the seeded graph, run the algorithm and stream results:
+.The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.louvain.stream({
-    nodeProjection: {
-        User: {
-            labels: 'User',
-            properties: ['seed']
-        }
-    },
-    relationshipProjection: {
-        LINK: {
-            type: 'LINK',
-            projection: 'UNDIRECTED',
-            aggregation: 'NONE'
-        }
-    },
-    seedProperty: 'seed'
-}) YIELD nodeId, communityId, communityIds
+CALL gds.louvain.stream('myGraph', { seedProperty: 'seed' })
+YIELD nodeId, communityId, communityIds
 RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds
 ORDER BY name ASC
 ----

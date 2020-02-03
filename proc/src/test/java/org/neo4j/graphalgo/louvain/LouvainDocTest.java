@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -40,7 +41,7 @@ class LouvainDocTest extends BaseProcTest {
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
-        final String cypher =
+        final String createCypher =
             "CREATE" +
             "  (nAlice:User {name: 'Alice', seed: 42})" +
             ", (nBridget:User {name: 'Bridget', seed: 42}) " +
@@ -56,9 +57,24 @@ class LouvainDocTest extends BaseProcTest {
             ", (nMark)-[:LINK {weight: 1}]->(nMichael)" +
             ", (nMichael)-[:LINK {weight: 1}]->(nMark)";
 
-        registerProcedures(LouvainWriteProc.class, LouvainStreamProc.class);
+        String loadCypher = "CALL gds.graph.create(" +
+                            "    'myGraph'," +
+                            "    'User'," +
+                            "    {" +
+                            "        LINK: {" +
+                            "            projection: 'UNDIRECTED'" +
+                            "        }" +
+                            "    }," +
+                            "    {" +
+                            "        nodeProperties: 'seed'," +
+                            "        relationshipProperties: 'weight'" +
+                            "    }" +
+                            ")";
+
+        registerProcedures(LouvainWriteProc.class, LouvainStreamProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
-        runQuery(cypher);
+        runQuery(createCypher);
+        runQuery(loadCypher);
     }
 
     @AfterEach
@@ -70,17 +86,9 @@ class LouvainDocTest extends BaseProcTest {
     @Test
     void streamUnweighted() {
         String query =
-            "CALL gds.louvain.stream({" +
-                "nodeProjection: ['User']," +
-                "relationshipProjection: {" +
-                "    LINK: {" +
-                "       type: 'LINK'," +
-                "       projection: 'undirected'," +
-                "       aggregation: 'NONE'" +
-                "    }" +
-                "}" +
-            "}) YIELD nodeId, communityId, communityIds " +
-            "RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds";
+            " CALL gds.louvain.stream('myGraph')" +
+            " YIELD nodeId, communityId, communityIds" +
+            " RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds";
 
         String expected =
             "+----------------------------------------+\n" +
@@ -103,17 +111,8 @@ class LouvainDocTest extends BaseProcTest {
     @Test
     void writeUnweighted() {
         String query =
-            "CALL gds.louvain.write({" +
-            "   nodeProjection: ['User']," +
-            "   relationshipProjection: {" +
-            "       LINK: {" +
-            "          type: 'LINK'," +
-            "          projection: 'UNDIRECTED'," +
-            "          aggregation: 'NONE'" +
-            "       }" +
-            "   }," +
-            "   writeProperty: 'community'" +
-            "}) YIELD communityCount, modularity, modularities";
+            "CALL gds.louvain.write('myGraph', { writeProperty: 'community' })" +
+            "YIELD communityCount, modularity, modularities";
 
         String expected =
             "+------------------------------------------------------------+\n" +
@@ -131,18 +130,8 @@ class LouvainDocTest extends BaseProcTest {
     @Test
     void streamWeighted() {
         String query =
-            "CALL gds.louvain.stream({" +
-            "   nodeProjection: ['User']," +
-            "   relationshipProjection: {" +
-            "       LINK: {" +
-            "          type: 'LINK'," +
-            "          projection: 'UNDIRECTED'," +
-            "          aggregation: 'NONE'," +
-            "          properties: ['weight']" +
-            "       }" +
-            "   }," +
-            "   relationshipWeightProperty: 'weight'" +
-            "}) YIELD nodeId, communityId, communityIds " +
+            "CALL gds.louvain.stream('myGraph', { relationshipWeightProperty: 'weight' })" +
+            "YIELD nodeId, communityId, communityIds " +
             "RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds " +
             "ORDER BY name ASC";
 
@@ -167,22 +156,8 @@ class LouvainDocTest extends BaseProcTest {
     @Test
     void streamSeeded() {
         String query =
-            "CALL gds.louvain.stream({" +
-            "   nodeProjection: {" +
-            "       User: {" +
-            "           labels: 'User'," +
-            "           properties: ['seed']" +
-            "       }" +
-            "   }," +
-            "   relationshipProjection: {" +
-            "       LINK: {" +
-            "          type: 'LINK'," +
-            "          projection: 'UNDIRECTED'," +
-            "          aggregation: 'NONE'" +
-            "       }" +
-            "   }," +
-            "   seedProperty: 'seed'" +
-            "}) YIELD nodeId, communityId, communityIds " +
+            "CALL gds.louvain.stream('myGraph', { seedProperty: 'seed' })" +
+            "YIELD nodeId, communityId, communityIds " +
             "RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds " +
             "ORDER BY name ASC";
 

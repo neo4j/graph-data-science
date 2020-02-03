@@ -277,7 +277,7 @@ CALL gds.graph.create(
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.labelPropagation.stream('myGraph'e)
+CALL gds.labelPropagation.stream('myGraph')
 YIELD nodeId, communityId AS Community
 RETURN gds.util.asNode(nodeId).name AS Name, Community
 ORDER BY Community, Name
