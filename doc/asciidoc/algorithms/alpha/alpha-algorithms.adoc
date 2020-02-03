@@ -17,15 +17,12 @@ The Neo4j Labs algorithms were developed by the Neo4j labs team and are not offi
 The documentation for the Neo4j Labs algorithms is divided into the following sections:
 
 * <<labs-procedures>>
-* <<labs-algorithms-linkprediction>>
 * <<labs-algorithms-preprocessing>>
 * <<labs-graph-generation>>
 
 //TODO: this doesn't belong here. Move to appendix
 include::../../alpha-procedures.adoc[leveloffset=+1]
 
-
-include::alpha-algorithms-link-prediction.adoc[leveloffset=+1]
 
 include::alpha-algorithms-preprocessing.adoc[leveloffset=+1]
 

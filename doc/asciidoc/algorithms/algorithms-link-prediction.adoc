@@ -1,0 +1,32 @@
+[[algorithms-linkprediction]]
+= Link Prediction algorithms
+
+[abstract]
+--
+This chapter provides explanations and examples for each of the link prediction algorithms in the Neo4j Graph Data Science library.
+--
+
+Link prediction algorithms help determine the closeness of a pair of nodes.
+The computed scores can then be used to predict new edges between them.
+The Neo4j GDS library includes the following link prediction algorithms, grouped by quality tier:
+
+* Alpha
+** <<labs-algorithms-linkprediction-adamic-adar, Adamic Adar>>
+** <<labs-algorithms-linkprediction-common-neighbors, Common Neighbors>>
+** <<labs-algorithms-linkprediction-preferential-attachment, Preferential Attachment>>
+** <<labs-algorithms-linkprediction-resource-allocation, Resource Allocation>>
+** <<labs-algorithms-linkprediction-same-community, Same Community>>
+** <<labs-algorithms-linkprediction-total-neighbors, Total Neighbors>>
+
+
+include::alpha/alpha-linkprediction-adamic-adar.adoc[leveloffset=+1]
+
+include::alpha/alpha-linkprediction-common-neighbors.adoc[leveloffset=+1]
+
+include::alpha/alpha-linkprediction-preferential-attachment.adoc[leveloffset=+1]
+
+include::alpha/alpha-linkprediction-resource-allocation.adoc[leveloffset=+1]
+
+include::alpha/alpha-linkprediction-same-community.adoc[leveloffset=+1]
+
+include::alpha/alpha-linkprediction-total-neighbors.adoc[leveloffset=+1]
