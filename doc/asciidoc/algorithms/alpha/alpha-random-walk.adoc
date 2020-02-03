@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Random Walk algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Random Walk algorithm in the Neo4j Graph Data Science library.
 --
 
 Random Walk is an algorithm that provides random paths in a graph.

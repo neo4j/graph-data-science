@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the ArticleRank algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the ArticleRank algorithm in the Neo4j Graph Data Science library.
 --
 
 ArticleRank is a variant of the <<algorithms-pagerank, PageRank algorithm>>, which measures the *transitive* influence or connectivity of nodes.

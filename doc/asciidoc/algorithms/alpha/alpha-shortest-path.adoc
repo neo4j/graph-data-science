@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Shortest Path algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Shortest Path algorithm in the Neo4j Graph Data Science library.
 --
 
 The Shortest Path algorithm calculates the shortest (weighted) path between a pair of nodes.

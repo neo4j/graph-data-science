@@ -67,7 +67,7 @@ We want to execute the page rank algorithm over a projected graph of users that 
 This is the first example where we can express the projected graph in terms of node labels and relationship types.
 Instead we will write Cypher statements to project the required graph.
 
-See the Usage section of The Neo4j Graph Algorithms Library chapter for a refresher on the different usage options.
+See the Usage section of The Neo4j Graph Data Science library chapter for a refresher on the different usage options.
 
 The following query will execute the page rank algorithm:
 // end::influential-hotel-reviewers-intro[]

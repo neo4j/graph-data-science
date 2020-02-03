@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Label Propagation algorithm in the Neo4j Graph Algorithms library.
+This section describes the Label Propagation algorithm in the Neo4j Graph Data Science library.
 --
 
 The Label Propagation algorithm (LPA) is a fast algorithm for finding communities in a graph.

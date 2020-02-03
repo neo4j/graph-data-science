@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Strongly Connected Components algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Strongly Connected Components algorithm in the Neo4j Graph Data Science library.
 --
 
 The Strongly Connected Components (SCC) algorithm finds maximal sets of connected nodes in a directed graph.

@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Betweenness Centrality algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Betweenness Centrality algorithm in the Neo4j Graph Data Science library.
 --
 
 Betweenness centrality is a way of detecting the amount of influence a node has over the flow of information in a graph.

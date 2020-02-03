@@ -5,7 +5,7 @@
 ifdef::env-docs[]
 [abstract]
 --
-This chapter explains Cypher projection in the Neo4j Graph Algorithms library.
+This chapter explains Cypher projection in the Neo4j Graph Data Science library.
 --
 endif::env-docs[]
 

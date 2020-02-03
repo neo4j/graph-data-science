@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the All Pairs Shortest Path algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the All Pairs Shortest Path algorithm in the Neo4j Graph Data Science library.
 --
 
 The All Pairs Shortest Path (APSP) calculates the shortest (weighted) path between all pairs of nodes.

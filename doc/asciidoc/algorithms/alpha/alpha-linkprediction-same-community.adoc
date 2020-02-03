@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Same Community algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Same Community algorithm in the Neo4j Graph Data Science library.
 --
 
 Same Community is a way of determining whether two nodes belong to the same community.

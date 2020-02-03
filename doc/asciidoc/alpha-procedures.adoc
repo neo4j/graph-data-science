@@ -3,10 +3,10 @@
 
 [abstract]
 --
-This chapter contains a reference of procedures for using the algorithms in the Neo4j Labs Graph Algorithms library.
+This chapter contains a reference of procedures for using the algorithms in the Neo4j Graph Data Science library.
 --
 
-The following is a procedure reference for calling the algorithms in the Neo4j Labs Graph Algorithms library.
+The following is a procedure reference for calling the algorithms in the Neo4j Graph Data Science library.
 
 [[table-labs]]
 [opts=header,cols="1m,5m"]

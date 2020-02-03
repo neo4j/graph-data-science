@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Jaccard Similarity algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Jaccard Similarity algorithm in the Neo4j Graph Data Science library.
 --
 
 Jaccard Similarity (coefficient), a term coined by https://en.wikipedia.org/wiki/Paul_Jaccard[Paul Jaccard^], measures similarities between sets.

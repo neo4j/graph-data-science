@@ -4,7 +4,7 @@
 
 [abstract]
 --
-This section describes the Cosine Similarity algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Cosine Similarity algorithm in the Neo4j Graph Data Science library.
 --
 
 link:http://en.wikipedia.org/wiki/Cosine_similarity[Cosine similarity] is the cosine of the angle between two _n_-dimensional vectors in an _n_-dimensional space.

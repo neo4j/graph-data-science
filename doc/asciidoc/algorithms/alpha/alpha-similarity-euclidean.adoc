@@ -5,7 +5,7 @@
 
 [abstract]
 --
-This section describes the Euclidean Distance algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Euclidean Distance algorithm in the Neo4j Graph Data Science library.
 --
 
 Euclidean distance measures the straight line distance between two points in n-dimensional space.

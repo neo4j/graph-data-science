@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Overlap Similarity algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Overlap Similarity algorithm in the Neo4j Graph Data Science library.
 --
 
 link:https://en.wikipedia.org/wiki/Overlap_coefficient[Overlap similarity] measures overlap between two sets.

@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes how to estimate memory requirements for the projected graph model used by the Neo4j Graph Algorithms Library.
+This section describes how to estimate memory requirements for the projected graph model used by the Neo4j Graph Data Science library.
 --
 
 The graph algorithms library operates completely on the heap, which means we'll need to configure our Neo4j Server with a much larger heap size than we would for transactional workloads.

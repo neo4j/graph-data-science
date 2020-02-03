@@ -6,7 +6,7 @@
 ifdef::env-docs[]
 [abstract]
 --
-This chapter explains node-label and relationship-type projection in the Neo4j Graph Algorithms library.
+This chapter explains node-label and relationship-type projection in the Neo4j Graph Data Science library.
 --
 endif::env-docs[]
 

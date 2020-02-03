@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Balanced Triads algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Balanced Triads algorithm in the Neo4j Graph Data Science library.
 --
 
 Balanced Triads algorithm is used to evaluate structural balance of the graph.

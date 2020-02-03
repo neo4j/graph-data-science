@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Total Neighbors algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Total Neighbors algorithm in the Neo4j Graph Data Science library.
 --
 
 Total Neighbors computes the closeness of nodes, based on the number of unique neighbors that they have.

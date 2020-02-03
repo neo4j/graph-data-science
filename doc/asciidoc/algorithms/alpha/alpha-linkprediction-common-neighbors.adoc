@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Common Neighbors algorithm in the Neo4j Labs Graph Algorithms library.
+This section describes the Common Neighbors algorithm in the Neo4j Graph Data Science library.
 --
 
 Common neighbors captures the idea that two strangers who have a friend in common are more likely to be introduced than those who don't have any friends in common.

@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Node Similarity algorithm in the Neo4j Graph Algorithms library.
+This section describes the Node Similarity algorithm in the Neo4j Graph Data Science library.
 The algorithm is based on the Jaccard Similarity score.
 --
 

@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the graph generation algorithms in the Neo4j Graph Algorithms library.
+This section describes the graph generation algorithms in the Neo4j Graph Data Science library.
 --
 
 In certain use cases it is useful to generate random graphs, for example, for testing or benchmarking purposes.
