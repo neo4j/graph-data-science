@@ -14,6 +14,9 @@
 
         <d:tocentry linkend="common-usage">
             <?dbhtml filename="common-usage/index.html"?>
+            <d:tocentry linkend="memory-estimation">
+                <?dbhtml filename="common-usage/memory-estimation/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="projected-graph-model">
@@ -26,9 +29,6 @@
             </d:tocentry>
             <d:tocentry linkend="named-graph">
                 <?dbhtml filename="projected-graph-model/named-graph/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="memory-requirements">
-                <?dbhtml filename="projected-graph-model/memory-requirements/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="transaction-handling">
                 <?dbhtml filename="projected-graph-model/transaction-handling/index.html"?>

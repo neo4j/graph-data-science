@@ -1,8 +1,32 @@
 [[common-usage]]
 = Common usage
 
-== Memory estimation
+[abstract]
+--
+This chapter explains the common usage patterns and operations that constitute the core of the Neo4j Graph Data Science library.
+--
 
+The GDS library usage pattern is typically split in two phases: development and production.
+In the development phase, it is typical to make use of the memory estimation features of the library.
+This enables you to successfully configure your system to handle the amount of data to be processed.
+There are two kinds of resources to keep in mind: the in-memory graph and the algorithm data structures.
+
+In the production phase, the system would be configured appropriately to successfully run the desired algorithms.
+The sequence of operations would normally be to create a graph, run one or more algorithms on it, and consume results.
+
+In this chapter, we will go through these aspects and guide you towards the most useful operations.
+
+This chapter is divided into the following sections:
+
+* <<memory-estimation>>
+* <<creating-graphs>>
+* <<running-algos>>
+
+
+include::memory-estimation.adoc[leveloffset=+1]
+
+
+[[creating-graphs]]
 == Creating graphs
 
 == Running algorithms
