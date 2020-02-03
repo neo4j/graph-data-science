@@ -213,7 +213,7 @@ RETURN nodeCount,totalCost
 [[algorithms-shortest-path-cp]]
 === Cypher projection
 
-include::projected-graph-model/cypher-projection.adoc[tag=explanation]
+include::management-ops/cypher-projection.adoc[tag=explanation]
 
 .Set `graph:'cypher'` in the config:
 

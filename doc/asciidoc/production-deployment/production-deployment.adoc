@@ -1,0 +1,14 @@
+[[production-deployment]]
+= Production deployment
+
+[abstract]
+--
+This chapter explains advanced details with regards to common Neo4j components.
+--
+
+This chapter is divided into the following sections:
+
+* <<transaction-handling>>
+
+
+include::transaction-handling.adoc[leveloffset=+1]

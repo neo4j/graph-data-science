@@ -14,6 +14,18 @@ There are two kinds of resources to keep in mind: the in-memory graph and the al
 In the production phase, the system would be configured appropriately to successfully run the desired algorithms.
 The sequence of operations would normally be to create a graph, run one or more algorithms on it, and consume results.
 
+The below image illustrates an overview of standard operation of the GDS library:
+
+image::projected-graph-model.png[width="850px"]
+
+The more detail on each individual operation, see the corresponding section:
+
+1. <<graph-catalog-ops>>
+2. <<creating-graphs>>
+3. <<running-algos>>
+4. <<running-algos-write>>
+
+
 In this chapter, we will go through these aspects and guide you towards the most useful operations.
 
 This chapter is divided into the following sections:

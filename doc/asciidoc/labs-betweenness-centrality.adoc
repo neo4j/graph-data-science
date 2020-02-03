@@ -352,7 +352,7 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality
 [[algorithms-betweenness-centrality-cp]]
 == Cypher projection
 
-include::projected-graph-model/cypher-projection.adoc[tag=explanation]
+include::management-ops/cypher-projection.adoc[tag=explanation]
 
 [source, cypher]
 ----

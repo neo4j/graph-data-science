@@ -464,7 +464,7 @@ For cases where no values should be skipped, skipping can be disabled by setting
 [[algorithms-similarity-euclidean-cypher-projection]]
 == Cypher projection
 
-include::projected-graph-model/cypher-projection.adoc[tag=similarity-explanation]
+include::management-ops/cypher-projection.adoc[tag=similarity-explanation]
 
 .Set `graph:'cypher'` in the config:
 

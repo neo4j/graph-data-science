@@ -152,7 +152,7 @@ In the following examples we will demonstrate using the K-1 Coloring algorithm o
 
 In the examples below, we will rely on the _implicit_ loading of graphs for the algorithm computation.
 However, like other algorithms K-1 Coloring also accepts _named graphs_ and _Cypher projections_ as inputs.
-See <<projected-graph-model, Projected Graph Model>> for more details.
+See <<graph-catalog-ops>> for more details.
 
 .Using a named graph:
 [source, cypher]

@@ -446,7 +446,7 @@ YIELD ranIterations
 
 In the examples above, we have relied on the _implicit_ creation of graphs for the algorithm computation.
 However, like other algorithms PageRank also accepts _named graphs_ and _Cypher projections_ as inputs.
-See <<projected-graph-model, Projected Graph Model>> for more details.
+See <<graph-catalog-ops>> for more details.
 
 .Using a named graph:
 [source, cypher]

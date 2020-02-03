@@ -112,7 +112,7 @@ include::scripts/articlerank.cypher[tag=huge-projection]
 [[algorithms-articlerank-cp]]
 == Cypher projection
 
-include::projected-graph-model/cypher-projection.adoc[tag=explanation]
+include::management-ops/cypher-projection.adoc[tag=explanation]
 
 .Set `graph:'cypher'` in the config:
 

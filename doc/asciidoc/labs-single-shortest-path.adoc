@@ -198,7 +198,7 @@ RETURN nodeCount, loadDuration, evalDuration, writeDuration
 [[algorithms-single-source-shortest-path-cp]]
 ==== Cypher projection
 
-include::projected-graph-model/cypher-projection.adoc[tag=explanation]
+include::management-ops/cypher-projection.adoc[tag=explanation]
 
 .Set `graph:'cypher'` in the config:
 

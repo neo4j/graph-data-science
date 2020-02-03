@@ -11,6 +11,7 @@ The execution of any algorithm can be canceled by terminating the Cypher transac
 For more on how transactions are used, see <<transaction-handling, Transaction Handling>>.
 
 
+[[running-algos-write]]
 == Write
 
 The `write` mode will write the results of the algorithm computation back to the graph.
@@ -24,6 +25,7 @@ The `write` mode can be very useful for use cases where the algorithm results wo
 In order for the results from a `write` mode computation to be used in another algorithm, a new graph must be created from the Neo4j database with the updated graph.
 
 
+[[running-algos-stream]]
 == Stream
 
 The `stream` mode will return the results of the algorithm computation as Cypher result rows.

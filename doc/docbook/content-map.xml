@@ -27,21 +27,14 @@
 
         <d:tocentry linkend="management-ops">
             <?dbhtml filename="management-ops/index.html"?>
-        </d:tocentry>
-
-        <d:tocentry linkend="projected-graph-model">
-            <?dbhtml filename="projected-graph-model/index.html"?>
             <d:tocentry linkend="label-relationship-type-projection">
-                <?dbhtml filename="projected-graph-model/label-relationship-type-projection/index.html"?>
+                <?dbhtml filename="management-ops/label-relationship-type-projection/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="cypher-projection">
-                <?dbhtml filename="projected-graph-model/cypher-projection/index.html"?>
+                <?dbhtml filename="management-ops/cypher-projection/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="named-graph">
-                <?dbhtml filename="projected-graph-model/named-graph/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="transaction-handling">
-                <?dbhtml filename="projected-graph-model/transaction-handling/index.html"?>
+                <?dbhtml filename="management-ops/named-graph/index.html"?>
             </d:tocentry>
         </d:tocentry>
 
@@ -205,5 +198,13 @@
                 </d:tocentry>
             </d:tocentry>
         </d:tocentry>
+
+        <d:tocentry linkend="production-deployment">
+            <?dbhtml filename="production-deployment/index.html"?>
+            <d:tocentry linkend="transaction-handling">
+                <?dbhtml filename="production-deployment/transaction-handling/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
     </d:tocentry>
 </d:toc><!-- vim: set ts=2 sw=2: -->

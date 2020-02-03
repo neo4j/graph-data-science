@@ -210,7 +210,7 @@ CALL gds.alpha.closeness.write({
 [[algorithms-closeness-centrality-cp]]
 == Cypher projection
 
-include::projected-graph-model/cypher-projection.adoc[tag=explanation]
+include::management-ops/cypher-projection.adoc[tag=explanation]
 
 [source, cypher]
 ----

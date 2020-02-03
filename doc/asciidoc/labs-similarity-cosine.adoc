@@ -579,7 +579,7 @@ CREATE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31
 [[algorithms-similarity-cosine-cypher-projection]]
 == Cypher projection
 
-include::projected-graph-model/cypher-projection.adoc[tag=similarity-explanation]
+include::management-ops/cypher-projection.adoc[tag=similarity-explanation]
 
 .Set `graph:'cypher'` in the config:
 

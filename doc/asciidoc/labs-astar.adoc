@@ -137,7 +137,7 @@ RETURN gds.util.asNode(nodeId).name AS station, cost
 [[algorithms-a_star-cp]]
 == Cypher projection
 
-include::projected-graph-model/cypher-projection.adoc[tag=explanation]
+include::management-ops/cypher-projection.adoc[tag=explanation]
 
 [source, cypher]
 ----
