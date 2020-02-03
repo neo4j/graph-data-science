@@ -78,7 +78,7 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
 
     @Procedure(value = "gds.louvain.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<WriteResult> stats(
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -86,7 +86,8 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
             graphNameOrConfig,
             configuration
         );
-        return write(computationResult);
+        return write(computationResult)
+            .map(StatsResult::from);
     }
 
     @Procedure(value = "gds.louvain.stats.estimate", mode = READ)

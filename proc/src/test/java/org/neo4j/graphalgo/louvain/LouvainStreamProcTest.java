@@ -29,9 +29,14 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
@@ -88,6 +93,28 @@ class LouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
         );
         assertEquals(false, louvainConfig.includeIntermediateCommunities());
         assertEquals(10, louvainConfig.maxLevels());
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
+    void statsShouldNotHaveWriteProperties(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
+        String query = queryBuilder
+            .algo("louvain")
+            .statsMode()
+            .yields();
+
+        runQueryWithResultConsumer(query, result -> {
+            assertThat(result.columns(), not(hasItems(
+                "writeMillis",
+                "nodePropertiesWritten",
+                "relationshipPropertiesWritten"
+            )));
+
+            if(result.hasNext()) {
+                Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
+                assertFalse(config.containsKey("writeProperty"));
+            }
+        });
     }
 
     @Override

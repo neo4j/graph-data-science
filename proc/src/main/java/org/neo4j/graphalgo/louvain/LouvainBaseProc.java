@@ -133,6 +133,56 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
         }
     }
 
+    public static final class StatsResult {
+
+        public long createMillis;
+        public long computeMillis;
+        public long postProcessingMillis;
+        public long ranLevels;
+        public long communityCount;
+        public double modularity;
+        public List<Double> modularities;
+        public Map<String, Object> communityDistribution;
+        public Map<String, Object> configuration;
+
+        StatsResult(
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long ranLevels,
+            long communityCount,
+            double modularity,
+            List<Double> modularities,
+            Map<String, Object> communityDistribution,
+            Map<String, Object> configuration
+
+        ) {
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.postProcessingMillis = postProcessingMillis;
+            this.ranLevels = ranLevels;
+            this.communityCount = communityCount;
+            this.modularity = modularity;
+            this.modularities = modularities;
+            this.communityDistribution = communityDistribution;
+            this.configuration = configuration;
+        }
+
+        static StatsResult from(WriteResult writeResult) {
+            return new StatsResult(
+            writeResult.createMillis,
+            writeResult.computeMillis,
+            writeResult.postProcessingMillis,
+            writeResult.ranLevels,
+            writeResult.communityCount,
+            writeResult.modularity,
+            writeResult.modularities,
+            writeResult.communityDistribution,
+            writeResult.configuration
+            );
+        }
+    }
+
     static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
 
         private long levels = -1;
