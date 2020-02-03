@@ -21,14 +21,10 @@ package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
-import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;
@@ -103,287 +99,280 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
         });
     }
 
-    // TODO: Enable tests and complete the prepared GdsCypher query builds once support for Cypher loading is there
-    @Disabled
+    @Test
     void testDegreeIncomingStream() {
-        final Map<Long, Double> actual = new HashMap<>();
-//        String query = queryBuilder(INCOMING)
-//            .streamMode()
-//            .addParameter("direction", INCOMING)
-//            .yields("nodeId", "score");
+        Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.alpha.degree.stream({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    direction: 'INCOMING'," +
-                       "    duplicateRelationships: 'skip'" +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'single'" +
+                       "        }" +
+                       "    }" +
                        "}) YIELD nodeId, score";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
-                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(incomingExpected, actual);
     }
 
-    @Disabled
+    @Test
     void testWeightedDegreeIncomingStream() {
-        final Map<Long, Double> actual = new HashMap<>();
-//        String query = queryBuilder(INCOMING)
-//            .streamMode()
-//            .addParameter("direction", INCOMING)
-//            .addParameter("weightProperty", "foo")
-//            .yields("nodeId", "score");
+        Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.alpha.degree.stream({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    direction: 'INCOMING'," +
-                       "    weightProperty: 'foo'," +
-                       "    duplicateRelationships: 'sum'" +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'sum'" +
+                       "        }" +
+                       "    }," +
+                       "    relationshipWeightProperty: 'foo'" +
                        "}) YIELD nodeId, score";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
-                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(incomingWeightedExpected, actual);
     }
 
-    @Disabled
+    @Test
     void testDegreeIncomingWriteBack() {
-//        String query = queryBuilder(INCOMING)
-//            .writeMode()
-//            .addParameter("direction", INCOMING)
-//            .yields("writeMillis", "write", "writeProperty");
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    direction: 'INCOMING'," +
-                       "    duplicateRelationships: 'skip'" +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'single'" +
+                       "        }" +
+                       "    }" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
-                row -> {
-                    assertTrue(row.getBoolean("write"));
-                    assertEquals("degree", row.getString("writeProperty"));
-                    assertTrue(
-                            row.getNumber("writeMillis").intValue() >= 0,
-                            "write time not set");
-                });
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+            row -> {
+                assertTrue(row.getBoolean("write"));
+                assertEquals("degree", row.getString("writeProperty"));
+                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+            }
+        );
         assertResult("degree", incomingExpected);
     }
 
-    @Disabled
+    @Test
     void testWeightedDegreeIncomingWriteBack() {
-//        String query = queryBuilder(INCOMING)
-//            .writeMode()
-//            .addParameter("direction", INCOMING)
-//            .addParameter("weightProperty", "foo")
-//            .yields("writeMillis", "write", "writeProperty");
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    direction: 'INCOMING'," +
-                       "    weightProperty: 'foo'," +
-                       "    duplicateRelationships: 'sum'" +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'sum'" +
+                       "        }" +
+                       "    }," +
+                       "    relationshipWeightProperty: 'foo'" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
-                row -> {
-                    assertTrue(row.getBoolean("write"));
-                    assertEquals("degree", row.getString("writeProperty"));
-                    assertTrue(
-                            row.getNumber("writeMillis").intValue() >= 0,
-                            "write time not set");
-                });
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+            row -> {
+                assertTrue(row.getBoolean("write"));
+                assertEquals("degree", row.getString("writeProperty"));
+                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+            }
+        );
         assertResult("degree", incomingWeightedExpected);
     }
 
-    @Disabled
+    @Test
     void testDegreeBothStream() {
-        final Map<Long, Double> actual = new HashMap<>();
-//        String query = queryBuilder(BOTH)
-//            .streamMode()
-//            .addParameter("direction", BOTH)
-//            .yields("nodeId", "score");
+        Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.alpha.degree.stream({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    direction: 'BOTH'," +
-                       "    duplicateRelationships: 'skip'" +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'single'" +
+                       "        }" +
+                       "    }" +
                        "}) YIELD nodeId, score";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
-                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(bothExpected, actual);
     }
 
-    @Disabled
+    @Test
     void testWeightedDegreeBothStream() {
-        final Map<Long, Double> actual = new HashMap<>();
-//        String query = queryBuilder(BOTH)
-//            .streamMode()
-//            .addParameter("direction", BOTH)
-//            .addParameter("weightProperty", "foo")
-//            .yields("nodeId", "score");
+        Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.alpha.degree.stream({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    direction: 'BOTH'," +
-                       "    weightProperty: 'foo'," +
-                       "    duplicateRelationships: 'sum'" +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'sum'" +
+                       "        }" +
+                       "    }," +
+                       "    relationshipWeightProperty: 'foo'" +
                        "}) YIELD nodeId, score";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
-                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(bothWeightedExpected, actual);
     }
 
-    @Disabled
+    @Test
     void testDegreeBothWriteBack() {
-//        String query = queryBuilder(BOTH)
-//            .writeMode()
-//            .addParameter("direction", BOTH)
-//            .yields("writeMillis", "write", "writeProperty");
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    direction: 'BOTH'," +
-                       "    duplicateRelationships: 'skip'" +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'single'" +
+                       "        }" +
+                       "    }" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
-                row -> {
-                    assertTrue(row.getBoolean("write"));
-                    assertEquals("degree", row.getString("writeProperty"));
-                    assertTrue(
-                            row.getNumber("writeMillis").intValue() >= 0,
-                            "write time not set");
-                });
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+            row -> {
+                assertTrue(row.getBoolean("write"));
+                assertEquals("degree", row.getString("writeProperty"));
+                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+            }
+        );
         assertResult("degree", bothExpected);
     }
 
-    @Disabled
+    @Test
     void testWeightedDegreeBothWriteBack() {
-//        String query = queryBuilder(BOTH)
-//            .writeMode()
-//            .addParameter("direction", BOTH)
-//            .addParameter("weightProperty", "foo")
-//            .yields("writeMillis", "write", "writeProperty");
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    direction: 'BOTH'," +
-                       "    weightProperty: 'foo'," +
-                       "    duplicateRelationships: 'sum'" +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'sum'" +
+                       "        }" +
+                       "    }," +
+                       "    relationshipWeightProperty: 'foo'" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
-                row -> {
-                    assertTrue(row.getBoolean("write"));
-                    assertEquals("degree", row.getString("writeProperty"));
-                    assertTrue(
-                            row.getNumber("writeMillis").intValue() >= 0,
-                            "write time not set");
-                });
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+            row -> {
+                assertTrue(row.getBoolean("write"));
+                assertEquals("degree", row.getString("writeProperty"));
+                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+            }
+        );
         assertResult("degree", bothWeightedExpected);
     }
 
-    @Disabled
+    @Test
     void testDegreeOutgoingStream() {
-        final Map<Long, Double> actual = new HashMap<>();
-//        String query = queryBuilder(OUTGOING)
-//            .writeMode()
-//            .addParameter("direction", OUTGOING)
-//            .yields("nodeId", "score");
+        Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.alpha.degree.stream({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    direction: 'OUTGOING'," +
-                       "    duplicateRelationships: 'skip'" +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'single'" +
+                       "        }" +
+                       "    }" +
                        "}) YIELD nodeId, score";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
-                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(outgoingExpected, actual);
     }
 
-    @Disabled
+    @Test
     void testWeightedDegreeOutgoingStream() {
-//        String query = queryBuilder(OUTGOING)
-//            .writeMode()
-//            .addParameter("direction", OUTGOING)
-//            .addParameter("weightProperty", "foo)
-//            .yields("nodeId", "score");
-        final Map<Long, Double> actual = new HashMap<>();
-        String query= "CALL gds.alpha.degree.stream({" +
-                      "    nodeQuery: $nodeQuery," +
-                      "    relationshipQuery: $relQuery," +
-                      "    direction: 'OUTGOING'," +
-                      "    weightProperty: 'foo'," +
-                      "    duplicateRelationships: 'sum'" +
-                      "}) YIELD nodeId, score";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
-                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
+        Map<Long, Double> actual = new HashMap<>();
+        String query = "CALL gds.alpha.degree.stream({" +
+                       "    nodeQuery: $nodeQuery," +
+                       "    relationshipQuery: $relQuery," +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'sum'" +
+                       "        }" +
+                       "    }," +
+                       "    relationshipWeightProperty: 'foo'" +
+                       "}) YIELD nodeId, score";
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(outgoingWeightedExpected, actual);
     }
 
-    @Disabled
+    @Test
     void testDegreeOutgoingWriteBack() {
-//        String query = queryBuilder(OUTGOING)
-//            .writeMode()
-//            .addParameter("direction", OUTGOING)
-//            .yields("writeMillis", "write", "writeProperty");
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    direction: 'OUTGOING'," +
-                       "    duplicateRelationships: 'skip'" +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'single'" +
+                       "        }" +
+                       "    }" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
-                row -> {
-                    assertTrue(row.getBoolean("write"));
-                    assertEquals("degree", row.getString("writeProperty"));
-                    assertTrue(
-                            row.getNumber("writeMillis").intValue() >= 0,
-                            "write time not set");
-                });
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+            row -> {
+                assertTrue(row.getBoolean("write"));
+                assertEquals("degree", row.getString("writeProperty"));
+                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+            }
+        );
         assertResult("degree", outgoingExpected);
     }
 
-    @Disabled
+    @Test
     void testWeightedDegreeOutgoingWriteBack() {
-//        String query = queryBuilder(OUTGOING)
-//            .writeMode()
-//            .addParameter("direction", OUTGOING)
-//            .addParameter("weightProperty", "foo")
-//            .yields("writeMillis", "write", "writeProperty");
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    direction: 'OUTGOING'," +
-                       "    weightProperty: 'foo'," +
-                       "    duplicateRelationships: 'sum'" +
+                       "    relationshipProperties: {" +
+                       "        foo: {" +
+                       "            property: 'foo'," +
+                       "            aggregation: 'sum'" +
+                       "        }" +
+                       "    }," +
+                       "    relationshipWeightProperty: 'foo'" +
                        "}) YIELD writeMillis, write, writeProperty";
-        runQueryWithRowConsumer(query, MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
-                row -> {
-                    assertTrue(row.getBoolean("write"));
-                    assertEquals("degree", row.getString("writeProperty"));
-                    assertTrue(
-                            row.getNumber("writeMillis").intValue() >= 0,
-                            "write time not set");
-                });
+        runQueryWithRowConsumer(
+            query,
+            MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+            row -> {
+                assertTrue(row.getBoolean("write"));
+                assertEquals("degree", row.getString("writeProperty"));
+                assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+            }
+        );
         assertResult("degree", outgoingWeightedExpected);
     }
 
-    private GdsCypher.ModeBuildStage queryBuilder(Direction direction) {
-        return GdsCypher
-            .call()
-            .withNodeLabel("Label1")
-            .withRelationshipType(
-                "TYPE1",
-                RelationshipProjection.builder().type("TYPE1").projection(projection(direction)).build()
-            )
-            .withRelationshipProperty("foo")
-            .algo("gds.alpha.degree");
-    }
-
-    private Projection projection(Direction direction) {
-        switch (direction) {
-            case OUTGOING:
-                return Projection.NATURAL;
-            case INCOMING:
-                return Projection.REVERSE;
-            case BOTH:
-                return Projection.UNDIRECTED;
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + direction + " (sad java 😞)");
-        }
-    }
 }
