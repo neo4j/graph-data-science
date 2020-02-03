@@ -66,23 +66,25 @@ public class AllShortestPathsDocTest extends BaseProcTest {
 
     @Test
     void shouldStream() {
-        String query = "CALL gds.alpha.allShortestPaths.stream({" +
-                       "  nodeProjection: 'Loc'," +
-                       "  relationshipProjection: {" +
-                       "    ROAD: {" +
-                       "      type: 'ROAD'," +
-                       "      properties: 'cost'," +
-                       "      defaultValue: 1.0" +
-                       "    }" +
-                       "  }," +
-                       "  relationshipWeightProperty: 'cost'" +
-                       "})" +
+        String query = " CALL gds.alpha.allShortestPaths.stream({" +
+                       "   nodeProjection: 'Loc'," +
+                       "   relationshipProjection: {" +
+                       "     ROAD: {" +
+                       "       type: 'ROAD'," +
+                       "       properties: 'cost'," +
+                       "       defaultValue: 1.0" +
+                       "     }" +
+                       "   }," +
+                       "   relationshipWeightProperty: 'cost'" +
+                       " })" +
                        " YIELD sourceNodeId, targetNodeId, distance" +
                        " WITH sourceNodeId, targetNodeId, distance" +
                        " WHERE gds.util.isFinite(distance) = true" +
+
                        " MATCH (source:Loc) WHERE id(source) = sourceNodeId" +
                        " MATCH (target:Loc) WHERE id(target) = targetNodeId" +
                        " WITH source, target, distance WHERE source <> target" +
+
                        " RETURN source.name AS source, target.name AS target, distance" +
                        " ORDER BY distance DESC, source ASC, target ASC" +
                        " LIMIT 10";
@@ -109,19 +111,21 @@ public class AllShortestPathsDocTest extends BaseProcTest {
 
     @Test
     void shouldStreamWithCypherProjection() {
-        String query = "CALL gds.alpha.allShortestPaths.stream({" +
-                       "  nodeQuery:'MATCH (n:Loc) RETURN id(n) as id'," +
-                       "  relationshipQuery:'MATCH (n:Loc)-[r]-(p:Loc) RETURN id(n) as source, id(p) as target, r.cost as cost'," +
-                       "  relationshipWeightProperty: 'cost'" +
-                       "})" +
+        String query = " CALL gds.alpha.allShortestPaths.stream({" +
+                       "   nodeQuery: 'MATCH (n:Loc) RETURN id(n) AS id'," +
+                       "   relationshipQuery: 'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost'," +
+                       "   relationshipWeightProperty: 'cost'" +
+                       " })" +
                        " YIELD sourceNodeId, targetNodeId, distance" +
                        " WITH sourceNodeId, targetNodeId, distance" +
                        " WHERE gds.util.isFinite(distance) = true" +
+
                        " MATCH (source:Loc) WHERE id(source) = sourceNodeId" +
                        " MATCH (target:Loc) WHERE id(target) = targetNodeId" +
                        " WITH source, target, distance WHERE source <> target" +
+
                        " RETURN source.name AS source, target.name AS target, distance" +
-                       " ORDER BY distance DESC, source ASC, target ASC" +
+                       " ORDER BY distance DESC, source" +
                        " LIMIT 10";
 
         String actual = runQuery(query, Result::resultAsString);
