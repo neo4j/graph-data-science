@@ -27,30 +27,26 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CommunityHelper;
-import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ImmutableGraphLoader;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
-public class WccThresholdTest extends AlgoTestBase {
+class WccThresholdTest extends AlgoTestBase {
 
     @BeforeEach
     void setup() {
@@ -88,41 +84,28 @@ public class WccThresholdTest extends AlgoTestBase {
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.wcc.WccThresholdTest#thresholdParams")
     void testThreshold(double threshold, long[][] expectedComponents) {
-        GraphCreateConfig createConfig = ImmutableGraphCreateFromStoreConfig.builder()
+
+        GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(db)
             .graphName("myGraph")
-            .nodeProjection(NodeProjections.empty())
-            .relationshipProjection(
-                RelationshipProjections.builder()
-                    .putProjection(
-                        ElementIdentifier.of("TYPE"),
-                        RelationshipProjection.builder()
-                            .type("TYPE")
-                            .properties(
-                                PropertyMappings.of(
-                                    PropertyMapping.of("cost", 10.0)
-                                )
-                            ).build()
+            .nodeProjections(emptyList())
+            .relationshipProjections(singletonList(RelationshipProjection.builder()
+                .type("TYPE")
+                .properties(
+                    PropertyMappings.of(
+                        PropertyMapping.of("cost", 10.0)
                     )
-                    .build())
+                ).build()))
             .build();
+
+        Graph graph = graphLoader.graph(HugeGraphFactory.class);
 
         WccStreamConfig wccConfig = ImmutableWccStreamConfig
             .builder()
             .threshold(threshold)
             .relationshipWeightProperty("cost")
-            .implicitCreateConfig(createConfig)
+            .implicitCreateConfig(graphLoader.createConfig())
             .build();
-
-        Graph graph =
-            QueryRunner.runWithKernelTransaction(db, kernelTransaction -> ImmutableGraphLoader
-                .builder()
-                .api(db)
-                .kernelTransaction(kernelTransaction)
-                .username("")
-                .log(new TestLog())
-                .createConfig(createConfig)
-                .build()
-                .load(HugeGraphFactory.class));
 
         DisjointSetStruct dss = new Wcc(
             graph,

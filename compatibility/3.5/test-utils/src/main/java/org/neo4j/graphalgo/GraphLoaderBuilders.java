@@ -22,12 +22,14 @@ package org.neo4j.graphalgo;
 
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Transaction;
@@ -79,7 +81,7 @@ final class GraphLoaderBuilders {
         Optional<Aggregation> globalAggregation
         ) {
 
-        GraphCreateFromStoreConfig createConfig = GraphCreateConfigBuilders.storeConfig(
+        GraphCreateFromStoreConfig graphCreateConfig = GraphCreateConfigBuilders.storeConfig(
             userName,
             graphName,
             nodeLabels,
@@ -97,24 +99,8 @@ final class GraphLoaderBuilders {
             globalAggregation
         );
 
-        try(Transaction tx = api.beginTx()) {
-            KernelTransaction kernelTransaction = api
-                .getDependencyResolver()
-                .resolveDependency(ThreadToStatementContextBridge.class)
-                .getKernelTransactionBoundToThisThread(true);
-            tx.success();
-            return ImmutableGraphLoader.of(
-                api,
-                executorService.orElse(Pools.DEFAULT),
-                tracker.orElse(AllocationTracker.EMPTY),
-                terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
-                params,
-                userName.orElse(""),
-                log.orElse(NullLog.getInstance()),
-                createConfig,
-                kernelTransaction
-            );
-        }
+        return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, params, graphCreateConfig);
+
     }
 
     /**
@@ -143,7 +129,7 @@ final class GraphLoaderBuilders {
         Optional<Integer> concurrency,
         Optional<Aggregation> globalAggregation
     ) {
-        GraphCreateFromCypherConfig createConfig = GraphCreateConfigBuilders.cypherConfig(
+        GraphCreateFromCypherConfig graphCreateConfig = GraphCreateConfigBuilders.cypherConfig(
             userName,
             graphName,
             nodeQuery,
@@ -155,6 +141,21 @@ final class GraphLoaderBuilders {
             concurrency,
             globalAggregation
         );
+
+        return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, params, graphCreateConfig);
+    }
+
+    @NotNull
+    private static GraphLoader createGraphLoader(
+        GraphDatabaseAPI api,
+        Optional<ExecutorService> executorService,
+        Optional<AllocationTracker> tracker,
+        Optional<TerminationFlag> terminationFlag,
+        Optional<Log> log,
+        Optional<String> userName,
+        Map<String, Object> params,
+        GraphCreateConfig graphCreateConfig
+    ) {
         try(Transaction tx = api.beginTx()) {
             KernelTransaction kernelTransaction = api
                 .getDependencyResolver()
@@ -169,7 +170,7 @@ final class GraphLoaderBuilders {
                 params,
                 userName.orElse(""),
                 log.orElse(NullLog.getInstance()),
-                createConfig,
+                graphCreateConfig,
                 kernelTransaction
             );
         }

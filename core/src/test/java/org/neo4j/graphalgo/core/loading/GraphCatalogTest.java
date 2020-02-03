@@ -19,33 +19,30 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.ImmutableGraphLoader;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -65,7 +62,7 @@ class GraphCatalogTest {
     }
 
     @AfterEach
-    void teardown() {
+    void tearDown() {
         db.shutdown();
         GraphCatalog.removeAllLoadedGraphs();
     }
@@ -73,6 +70,31 @@ class GraphCatalogTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("validFilterParameters")
     void testFilteringGraphs(String desc, List<String> relTypes, Optional<String> relProperty, String expectedGraph) {
+
+        final GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(db)
+            .graphName("myGraph")
+            .nodeProjections(emptyList())
+            .relationshipProjections(relationshipProjections())
+            .build();
+
+        GraphsByRelationshipType importedGraphs = graphLoader.graphs(HugeGraphFactory.class);
+
+        final GraphCreateConfig graphCreateConfig = graphLoader.createConfig();
+
+        GraphCatalog.set(graphCreateConfig, importedGraphs);
+
+        Graph filteredGraph = GraphCatalog.get("", "myGraph").graph().getGraphProjection(relTypes, relProperty);
+
+        assertGraphEquals(
+            fromGdl(
+                expectedGraph),
+            filteredGraph
+        );
+    }
+
+    @NotNull
+    private List<RelationshipProjection> relationshipProjections() {
         RelationshipProjection t1Mapping = RelationshipProjection.builder()
             .type("T1")
             .projection(Projection.NATURAL)
@@ -104,57 +126,14 @@ class GraphCatalogTest {
                     .build()
             ).build();
 
-
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
-            .username("")
-            .graphName("myGraph")
-            .nodeProjection(NodeProjections.empty())
-            .relationshipProjection(
-                RelationshipProjections.builder()
-                    .putProjection(ElementIdentifier.of("T1"), t1Mapping)
-                    .putProjection(ElementIdentifier.of("T2"), t2Mapping)
-                    .putProjection(ElementIdentifier.of("T3"), t3Mapping)
-                    .build()
-            ).build();
-
-        GraphsByRelationshipType importedGraphs =
-            QueryRunner.runWithKernelTransaction(db, kernelTransaction -> ImmutableGraphLoader
-                .builder()
-                .api(db)
-                .kernelTransaction(kernelTransaction)
-                .username("")
-                .log(new TestLog())
-                .createConfig(graphCreateConfig)
-                .build()
-                .graphs(HugeGraphFactory.class));
-
-
-//        GraphsByRelationshipType importedGraphs = ImmutableGraphLoader
-//            .builder()
-//            .api(db)
-//            .kernelTransaction(null)
-//            .username("")
-//            .log(new TestLog())
-//            .createConfig(graphCreateConfig)
-//            .build()
-//            .graphs(HugeGraphFactory.class);
-
-        GraphCatalog.set(graphCreateConfig, importedGraphs);
-
-        Graph filteredGraph = GraphCatalog.get("", "myGraph").graph().getGraphProjection(relTypes, relProperty);
-
-        assertGraphEquals(
-            fromGdl(
-                expectedGraph),
-            filteredGraph
-        );
+        return Arrays.asList(t1Mapping, t2Mapping, t3Mapping);
     }
 
     static Stream<Arguments> validFilterParameters() {
         return Stream.of(
             Arguments.of(
                 "filterByRelationshipType",
-                Collections.singletonList("T1"),
+                singletonList("T1"),
                 Optional.empty(),
                 "(a), (b), (a)-[T1]->(b)"
             ),
@@ -166,7 +145,7 @@ class GraphCatalogTest {
             ),
             Arguments.of(
                 "filterByAnyRelationshipType",
-                Collections.singletonList("*"),
+                singletonList("*"),
                 Optional.empty(),
                 "(a), (b), (a)-[T1]->(b), (a)-[T2]->(b), (a)-[T3]->(b)"
             ),
@@ -178,7 +157,7 @@ class GraphCatalogTest {
             ),
             Arguments.of(
                 "filterByRelationshipTypeAndProperty",
-                Collections.singletonList("T1"),
+                singletonList("T1"),
                 Optional.of("property1"),
                 "(a), (b), (a)-[T1 {property1: 42}]->(b)"
             ),
@@ -190,7 +169,7 @@ class GraphCatalogTest {
              */
             Arguments.of(
                 "includeRelatiionshipTypesThatDoNotHaveTheProperty",
-                Collections.singletonList("*"),
+                singletonList("*"),
                 Optional.of("property1"),
                 "(a), (b), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b), (a)-[T3 {property1: 42.0}]->(b)"
             )
