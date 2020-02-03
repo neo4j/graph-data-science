@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -342,5 +344,20 @@ class GraphListProcTest extends BaseProcTest {
         runQueryWithRowConsumer("CALL gds.graph.list()", row -> {
             assertEquals(2, row.getNumber("nodeCount").intValue());
         });
+    }
+
+    @Disabled
+    @Test
+    void shouldListAllAvailableGraphsForUser() {
+        String loadQuery = "CALL gds.graph.create(" +
+                           "    $name, '', '')";
+
+        runQuery("alice", loadQuery, MapUtil.map("name", "aliceGraph"));
+        runQuery("bob", loadQuery, MapUtil.map("name", "bobGraph"));
+
+        String listQuery = "CALL gds.graph.list() YIELD graphName as name";
+
+        runQueryWithRowConsumer("alice", listQuery, resultRow -> Assertions.assertEquals("aliceGraph", resultRow.getString("name")));
+        runQueryWithRowConsumer("bob", listQuery, resultRow -> Assertions.assertEquals("bobGraph", resultRow.getString("name")));
     }
 }
