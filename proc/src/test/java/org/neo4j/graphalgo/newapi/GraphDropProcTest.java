@@ -91,7 +91,7 @@ class GraphDropProcTest extends BaseProcTest {
                     "relationshipQuery", null,
                     "nodeCount", 2L,
                     "relationshipCount", 1L,
-                    "histogram", map(
+                    "degreeDistribution", map(
                         "min", 0L,
                         "mean", 0.5D,
                         "max", 1L,
@@ -117,7 +117,7 @@ class GraphDropProcTest extends BaseProcTest {
 
 
     @Test
-    void dropWithHistogramComputationOptOut() {
+    void dropWithdegreeDistributionComputationOptOut() {
         runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
 
         assertCypherResult(

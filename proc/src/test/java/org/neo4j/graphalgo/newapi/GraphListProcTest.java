@@ -93,7 +93,7 @@ class GraphListProcTest extends BaseProcTest {
                 "relationshipQuery", null,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
-                "histogram", map(
+                "degreeDistribution", map(
                     "min", 0L,
                     "mean", 0.5D,
                     "max", 1L,
@@ -136,7 +136,7 @@ class GraphListProcTest extends BaseProcTest {
                 "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
-                "histogram", map(
+                "degreeDistribution", map(
                     "min", 0L,
                     "mean", 0.5D,
                     "max", 1L,
@@ -152,7 +152,7 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @Test
-    void histogramComputationIsOptOut() {
+    void degreeDistributionComputationIsOptOut() {
         String name = "name";
         runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
 
@@ -179,13 +179,13 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @Test
-    void calculateHistogramForUndirectedNodesWhenAskedTo() {
+    void calculatedegreeDistributionForUndirectedNodesWhenAskedTo() {
         String name = "name";
         runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
 
-        assertCypherResult("CALL gds.graph.list() YIELD histogram", singletonList(
+        assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
             map(
-                "histogram", map(
+                "degreeDistribution", map(
                     "min", 0L,
                     "mean", 0.5D,
                     "max", 1L,
@@ -202,13 +202,13 @@ class GraphListProcTest extends BaseProcTest {
 
     @Disabled("Disabled until we support REL> syntax for type filter")
     @Test
-    void calculateHistogramForOutgoingRelationshipsWhenAskedTo() {
+    void calculatedegreeDistributionForOutgoingRelationshipsWhenAskedTo() {
         String name = "name";
         runQuery("CALL gds.graph.create($name, 'A', 'REL>')", map("name", name));
 
-        assertCypherResult("CALL gds.graph.list() YIELD histogram", singletonList(
+        assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
             map(
-                "histogram", map(
+                "degreeDistribution", map(
                     "min", 1,
                     "mean", 1,
                     "max", 1,
@@ -225,13 +225,13 @@ class GraphListProcTest extends BaseProcTest {
 
     @Disabled("Disabled until we support REL> syntax for type filter")
     @Test
-    void calculateHistogramForIncomingRelationshipsWhenAskedTo() {
+    void calculatedegreeDistributionForIncomingRelationshipsWhenAskedTo() {
         String name = "name";
         runQuery("CALL gds.graph.create($name, 'A', '<REL')", map("name", name));
 
-        assertCypherResult("CALL gds.graph.list() YIELD histogram", singletonList(
+        assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
             map(
-                "histogram", map(
+                "degreeDistribution", map(
                     "min", 1,
                     "mean", 1,
                     "max", 1,

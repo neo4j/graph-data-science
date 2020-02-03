@@ -24,7 +24,6 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.Map;
@@ -41,7 +40,7 @@ public class GraphInfo {
     public final String relationshipQuery;
     public final long nodeCount;
     public final long relationshipCount;
-    public final Map<String, Object> histogram;
+    public final Map<String, Object> degreeDistribution;
 
     GraphInfo(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
         this.graphName = config.graphName();
@@ -55,7 +54,7 @@ public class GraphInfo {
             : null;
         this.nodeCount = graph.nodeCount();
         this.relationshipCount = graph.relationshipCount();
-        this.histogram = computeHistogram ? computeHistogram(graph) : emptyMap();
+        this.degreeDistribution = computeHistogram ? computeHistogram(graph) : emptyMap();
     }
 
     private Map<String, Object> computeHistogram(Graph graph) {
