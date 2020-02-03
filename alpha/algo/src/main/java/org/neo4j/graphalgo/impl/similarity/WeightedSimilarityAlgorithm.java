@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityAlgorithm<ME>> extends SimilarityAlgorithm<ME, WeightedInput> {
@@ -61,15 +62,19 @@ public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityA
         Map<Long, LongDoubleMap> map = new HashMap<>();
         LongSet ids = new LongHashSet();
         result.accept(resultRow -> {
-            long item = resultRow.getNumber("item").longValue();
-            long id = resultRow.getNumber("category").longValue();
-            ids.add(id);
-            double weight = resultRow.getNumber("weight").doubleValue();
-            map.compute(item, (key, agg) -> {
-                if (agg == null) agg = new LongDoubleHashMap();
-                agg.put(id, weight);
-                return agg;
-            });
+            try {
+                long item = resultRow.getNumber("item").longValue();
+                long id = resultRow.getNumber("category").longValue();
+                double weight = resultRow.getNumber("weight").doubleValue();
+                ids.add(id);
+                map.compute(item, (key, agg) -> {
+                    if (agg == null) agg = new LongDoubleHashMap();
+                    agg.put(id, weight);
+                    return agg;
+                });
+            } catch (NoSuchElementException nse) {
+                throw new IllegalArgumentException(String.format("Query %s does not return expected columns 'item', 'category' and 'weight'", query));
+            }
             return true;
         });
 

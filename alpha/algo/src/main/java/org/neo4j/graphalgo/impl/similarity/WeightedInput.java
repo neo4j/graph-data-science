@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.core.utils.Intersections;
 import org.neo4j.graphalgo.results.SimilarityResult;
 
 import java.util.Arrays;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 
@@ -76,6 +77,9 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         boolean skipNan = skipAnything && Double.isNaN(skipValue);
 
         for (Map<String, Object> row : data) {
+            if (!row.containsKey("weights") || !row.containsKey("item")) {
+                throw new IllegalArgumentException("Input data requires 'item' and 'weights' for every row");
+            }
             List<Number> weightList = SimilarityInput.extractValues(row.get("weights"));
 
             long weightsSize = skipAnything ? skipSize(skipValue, skipNan, weightList) : weightList.size();
