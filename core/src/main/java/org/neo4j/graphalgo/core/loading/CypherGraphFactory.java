@@ -54,11 +54,13 @@ public class CypherGraphFactory extends GraphFactory {
 
     private final GraphDatabaseAPI api;
     private final GraphSetup setup;
+    private final KernelTransaction kernelTransaction;
 
-    public CypherGraphFactory(GraphDatabaseAPI api, GraphSetup setup) {
+    public CypherGraphFactory(GraphDatabaseAPI api, GraphSetup setup, KernelTransaction kernelTransaction) {
         super(api, setup, false);
         this.api = api;
         this.setup = setup;
+        this.kernelTransaction = kernelTransaction;
     }
 
     public final MemoryEstimation memoryEstimation() {

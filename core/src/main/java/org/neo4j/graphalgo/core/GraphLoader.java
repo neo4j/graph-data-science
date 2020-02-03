@@ -24,7 +24,9 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -33,9 +35,6 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -98,23 +97,20 @@ public interface GraphLoader {
         );
     }
 
-    MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
-
-    MethodType CTOR_METHOD = MethodType.methodType(
-        void.class,
-        GraphDatabaseAPI.class,
-        GraphSetup.class
-    );
-
     /**
      * Returns an instance of the factory that can be used to load the graph.
      */
     default <T extends GraphFactory> T build(final Class<T> factoryType) {
         try {
-            MethodHandle constructor = LOOKUP.findConstructor(factoryType, CTOR_METHOD);
             GraphSetup setup = toSetup();
-            GraphFactory factory = ((GraphFactory) constructor.invoke(api(), setup))
-                .withKernelTransaction(kernelTransaction());
+            GraphFactory factory;
+
+            if (CypherGraphFactory.class.isAssignableFrom(factoryType)) {
+                factory = new CypherGraphFactory(api(), setup, kernelTransaction());
+            } else {
+                factory = new HugeGraphFactory(api(), setup);
+            }
+
             return factoryType.cast(factory);
         } catch (Throwable throwable) {
             throwIfUnchecked(throwable);
