@@ -55,7 +55,7 @@ include::introduction.adoc[leveloffset=+1]
 
 include::installation.adoc[leveloffset=+1]
 
-include::common-usage.adoc[leveloffset=+1]
+include::common-usage/common-usage.adoc[leveloffset=+1]
 
 include::management-ops/management-ops.adoc[leveloffset=+1]
 

@@ -35,8 +35,8 @@ This chapter is divided into the following sections:
 * <<running-algos>>
 
 
-include::common-usage-memory-estimation.adoc[leveloffset=+1]
+include::memory-estimation.adoc[leveloffset=+1]
 
-include::common-usage-creating-graphs.adoc[leveloffset=+1]
+include::creating-graphs.adoc[leveloffset=+1]
 
-include::common-usage-running-algorihms.adoc[leveloffset=+1]
+include::running-algorihms.adoc[leveloffset=+1]
