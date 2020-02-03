@@ -630,7 +630,6 @@ class GraphCreateProcTest extends BaseProcTest {
     void relationshipQueryAndProperties(Object relationshipProperties, Map<String, Object> expectedProperties) {
         String name = "g";
 
-        // TODO: check property values on graph
         String nodeQuery = "RETURN 0 AS id";
         String relationshipQuery = "RETURN 0 AS source, 0 AS target, 3 AS weight";
         assertCypherResult(
@@ -655,7 +654,8 @@ class GraphCreateProcTest extends BaseProcTest {
             ))
         );
 
-        assertGraphExists(name);
+        Graph graph = GraphCatalog.get("", name).getGraph();
+        assertGraphEquals(TestGraph.Builder.fromGdl("(a)-[{w: 3}]->(a)"), graph);
     }
 
     @Test
