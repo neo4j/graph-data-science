@@ -17,20 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.wcc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.CommunityHelper;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.wcc.WccStreamConfig;
-import org.neo4j.graphalgo.wcc.WccStreamProc;
 
+import java.util.Map;
 import java.util.Optional;
+
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
 
@@ -99,4 +108,29 @@ class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
 
         CommunityHelper.assertCommunities(communities, EXPECTED_COMMUNITIES);
     }
+
+
+    @Test
+    void statsShouldNotHaveWriteProperties() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("wcc")
+            .statsMode()
+            .yields();
+
+        runQueryWithResultConsumer(query, result -> {
+            assertThat(result.columns(), not(hasItems(
+                "writeMillis",
+                "nodePropertiesWritten",
+                "relationshipPropertiesWritten"
+            )));
+
+            if(result.hasNext()) {
+                Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
+                assertFalse(config.containsKey("writeProperty"));
+            }
+        });
+    }
+
 }

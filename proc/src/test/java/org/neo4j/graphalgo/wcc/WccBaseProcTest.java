@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.wcc;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
@@ -25,14 +25,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.AlgoBaseProcTest;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.MemoryEstimateTest;
+import org.neo4j.graphalgo.RelationshipWeightConfigTest;
+import org.neo4j.graphalgo.SeedConfigTest;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
-import org.neo4j.graphalgo.wcc.WccBaseConfig;
-import org.neo4j.graphalgo.wcc.WccStreamProc;
-import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 

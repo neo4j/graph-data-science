@@ -155,6 +155,44 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
         }
     }
 
+    public static final class StatsResult {
+
+        public final long createMillis;
+        public final long computeMillis;
+        public final long postProcessingMillis;
+        public final long componentCount;
+        public final Map<String, Object> componentDistribution;
+        public final Map<String, Object> configuration;
+
+        StatsResult(
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long componentCount,
+            Map<String, Object> componentDistribution,
+            Map<String, Object> configuration
+        ) {
+
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.postProcessingMillis = postProcessingMillis;
+            this.componentCount = componentCount;
+            this.componentDistribution = componentDistribution;
+            this.configuration = configuration;
+        }
+
+        public static StatsResult from(WriteResult writeResult) {
+            return new StatsResult(
+                writeResult.createMillis,
+                writeResult.computeMillis,
+                writeResult.postProcessingMillis,
+                writeResult.componentCount,
+                writeResult.componentDistribution,
+                writeResult.configuration
+            );
+        }
+    }
+
     static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
 
         WriteResultBuilder(
