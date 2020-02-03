@@ -49,6 +49,10 @@ abstract class CypherRecordLoader<R> {
         String capitalize() {
             return name().substring(0, 1) + name().substring(1).toLowerCase();
         }
+
+        String toLowerCase() {
+            return name().toLowerCase();
+        }
     }
 
     static final long NO_COUNT = -1L;
@@ -172,7 +176,7 @@ abstract class CypherRecordLoader<R> {
         if (!missingColumns.isEmpty()) {
             throw new IllegalArgumentException(String.format(
                 "Invalid %s query, required column(s) not found: '%s'",
-                queryType().toString().toLowerCase(),
+                queryType().toLowerCase(),
                 String.join("', '", missingColumns)
             ));
         }
@@ -194,7 +198,7 @@ abstract class CypherRecordLoader<R> {
                 "%s properties not found: '%s'. Available properties from the %s query are: '%s'",
                 queryType().capitalize(),
                 String.join("', '", invalidNodeProperties),
-                queryType().name().toLowerCase(),
+                queryType().toLowerCase(),
                 String.join("', '", propertyColumns)
             ));
         }
