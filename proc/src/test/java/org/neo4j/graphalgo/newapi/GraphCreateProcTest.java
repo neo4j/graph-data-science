@@ -51,12 +51,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Stream;
@@ -908,7 +906,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 RelationshipProjection.builder()
                     .type("KNOWS")
                     .projection(Projection.NATURAL)
-                    .addProperty("weight", "weight", Double.NaN, Aggregation.valueOf(aggregation))
+                    .addProperty("weight", "weight", Double.NaN, Aggregation.lookup(aggregation))
                     .build()
             )
             .graphCreate(standard)

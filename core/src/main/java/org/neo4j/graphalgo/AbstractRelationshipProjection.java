@@ -65,8 +65,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
             builder.projection(Projection.of(nonEmptyString(map, PROJECTION_KEY)));
         }
         if (map.containsKey(AGGREGATION_KEY)) {
-            builder.aggregation(Aggregation.valueOf(nonEmptyString(map, AGGREGATION_KEY)));
-            Aggregation aggregation = Aggregation.valueOf(nonEmptyString(map, AGGREGATION_KEY));
+            Aggregation aggregation = Aggregation.lookup(nonEmptyString(map, AGGREGATION_KEY));
             builder.aggregation(aggregation);
             return create(map, aggregation, properties -> builder.properties(properties).build());
         }
