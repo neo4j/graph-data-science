@@ -27,14 +27,17 @@
 
         <d:tocentry linkend="management-ops">
             <?dbhtml filename="management-ops/index.html"?>
-            <d:tocentry linkend="label-relationship-type-projection">
-                <?dbhtml filename="management-ops/label-relationship-type-projection/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="cypher-projection">
-                <?dbhtml filename="management-ops/cypher-projection/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="named-graph">
-                <?dbhtml filename="management-ops/named-graph/index.html"?>
+            <d:tocentry linkend="graph-catalog-ops">
+                <?dbhtml filename="management-ops/graph-catalog/index.html"?>
+                <d:tocentry linkend="label-relationship-type-projection">
+                    <?dbhtml filename="management-ops/label-relationship-type-projection/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="cypher-projection">
+                    <?dbhtml filename="management-ops/cypher-projection/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="named-graph">
+                    <?dbhtml filename="management-ops/named-graph/index.html"?>
+                </d:tocentry>
             </d:tocentry>
         </d:tocentry>
 

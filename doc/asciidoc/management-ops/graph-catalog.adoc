@@ -1,0 +1,23 @@
+[[graph-catalog-ops]]
+= Graph Catalog
+
+Graph algorithms run on an in-memory projected graph model.
+The projected graph model is separate from Neo4j's stored graph model, to enable fast caching for the topology of the graph, containing only relevant nodes, relationships and weights.
+The standard approach to create a graph is detailed in <<label-relationship-type-projection, Label and relationship-type projection>>.
+It is also possible to use Cypher queries to project a more customised view of your graph.
+The Cypher projection (see <<cypher-projection, Cypher projection>>) is more flexible but does not provide the same level of performance during graph creation.
+
+As it can take some time to create large graphs into the algorithm data structures, you can store a graph in the graph catalog.
+Graphs from the graph catalog can then later be referenced by name when running algorithms.
+Named graphs can be created using either of the projected graph models.
+After usage, named graphs can be removed from memory to free resources used.
+
+* <<label-relationship-type-projection>>
+* <<named-graph>>
+* <<cypher-projection>>
+
+include::label-relationship-type-projection.adoc[leveloffset=+1]
+
+include::cypher-projection.adoc[tag=overview,leveloffset=+1]
+
+include::named-graph.adoc[leveloffset=+1]
