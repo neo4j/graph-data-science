@@ -47,6 +47,8 @@ public final class K1ColoringDocTest extends BaseProcTest {
         ", (alice)-[:LINK]->(doug)" +
         ", (bridget)-[:LINK]->(charles)";
 
+    public static final String GRAPH_CREATE_CYPHER = "CALL gds.graph.create('myGraph', 'User', 'LINK')";
+
     @BeforeEach
     void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
@@ -58,6 +60,7 @@ public final class K1ColoringDocTest extends BaseProcTest {
         registerFunctions(GetNodeFunc.class);
 
         runQuery(DB_CYPHER);
+        runQuery(GRAPH_CREATE_CYPHER);
     }
 
     @AfterEach
@@ -68,12 +71,10 @@ public final class K1ColoringDocTest extends BaseProcTest {
 
     @Test
     void shouldStream() {
-        String createQuery = "CALL gds.graph.create('myGraph', 'User', 'LINK')";
         String query = "CALL gds.beta.k1coloring.stream('myGraph')" +
                        " YIELD nodeId, color" +
                        " RETURN gds.util.asNode(nodeId).name AS name, color ORDER BY name";
 
-        runQuery(createQuery);
         String actual = runQuery(query, Result::resultAsString);
         String expected =
             "+-------------------+" + NL +
@@ -91,81 +92,18 @@ public final class K1ColoringDocTest extends BaseProcTest {
 
     @Test
     void shouldWrite() {
-        String createQuery = "CALL gds.graph.create('myGraph', 'User', 'LINK')";
-        String query = "CALL gds.beta.k1coloring.write('myGraph', {writeProperty: 'color'})" +
-                       " YIELD nodes" +
-                       " RETURN nodes";
-        String verifyQuery = "MATCH (n:User) RETURN n.name AS name, n.color AS color ORDER BY name";
+        String query = " CALL gds.beta.k1coloring.write('myGraph', {writeProperty: 'color'})" +
+                       " YIELD nodes, colorCount, ranIterations, didConverge";
 
-        runQuery(createQuery);
-        String actual = runQuery(query, Result::resultAsString);
-        String expected =
-            "+-------+" + NL +
-            "| nodes |" + NL +
-            "+-------+" + NL +
-            "| 4     |" + NL +
-            "+-------+" + NL +
-            "1 row" + NL;
-
-        assertEquals(expected, actual);
-
-        String verify = runQuery(verifyQuery, Result::resultAsString);
-        String expectedVerify =
-            "+-------------------+" + NL +
-            "| name      | color |" + NL +
-            "+-------------------+" + NL +
-            "| \"Alice\"   | 2     |" + NL +
-            "| \"Bridget\" | 1     |" + NL +
-            "| \"Charles\" | 0     |" + NL +
-            "| \"Doug\"    | 0     |" + NL +
-            "+-------------------+" + NL +
-            "4 rows" + NL;
-
-        assertEquals(expectedVerify, verify);
-    }
-
-    @Test
-    void shouldStreamCypher() {
-        String query = "CALL gds.beta.k1coloring.stream({" +
-                       "  nodeQuery: 'MATCH (n:User) RETURN id(n) AS id'," +
-                       "  relationshipQuery: 'MATCH (s:User)-[:LINK]->(t:User) RETURN id(s) AS source, id(t) AS target'" +
-                       "})" +
-                       " YIELD nodeId, color" +
-                       " RETURN gds.util.asNode(nodeId).name AS name, color ORDER BY name";
-
-        String actual = runQuery(query, Result::resultAsString);
-        String expected =
-            "+-------------------+" + NL +
-            "| name      | color |" + NL +
-            "+-------------------+" + NL +
-            "| \"Alice\"   | 2     |" + NL +
-            "| \"Bridget\" | 1     |" + NL +
-            "| \"Charles\" | 0     |" + NL +
-            "| \"Doug\"    | 0     |" + NL +
-            "+-------------------+" + NL +
-            "4 rows" + NL;
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void shouldWriteCypher() {
-        String query = "CALL gds.beta.k1coloring.write({" +
-                       "  nodeQuery: 'MATCH (n:User) RETURN id(n) AS id'," +
-                       "  relationshipQuery: 'MATCH (s:User)-[:LINK]->(t:User) RETURN id(s) AS source, id(t) AS target'," +
-                       "  writeProperty: 'color'" +
-                       "})" +
-                       " YIELD nodes" +
-                       " RETURN nodes";
         String verifyQuery = "MATCH (n:User) RETURN n.name AS name, n.color AS color ORDER BY name";
 
         String actual = runQuery(query, Result::resultAsString);
         String expected =
-            "+-------+" + NL +
-            "| nodes |" + NL +
-            "+-------+" + NL +
-            "| 4     |" + NL +
-            "+-------+" + NL +
+            "+--------------------------------------------------+" + NL +
+            "| nodes | colorCount | ranIterations | didConverge |" + NL +
+            "+--------------------------------------------------+" + NL +
+            "| 4     | 3          | 3             | true        |" + NL +
+            "+--------------------------------------------------+" + NL +
             "1 row" + NL;
 
         assertEquals(expected, actual);

@@ -143,22 +143,19 @@ CREATE (alice:User {name: 'Alice'}),
        (bridget)-[:LINK]->(charles)
 ----
 
-This graph has a super node with name "Alice" that connects to all other nodes.
-It should therefore not be possible for any other node to be assigned to the color as the Alice node.
-In the following examples we will demonstrate using the K-1 Coloring algorithm on this graph.
-
-[[algorithms-k1coloring-examples-projection]]
-=== Named graphs and Cypher projections
-
-In the examples below, we will rely on the _implicit_ loading of graphs for the algorithm computation.
-However, like other algorithms K-1 Coloring also accepts _named graphs_ and _Cypher projections_ as inputs.
-See <<graph-catalog-ops>> for more details.
-
-.Using a named graph:
+.Loading the graph into the catalog:
 [source, cypher]
 ----
 CALL gds.graph.create('myGraph', 'User', 'LINK');
+----
 
+This graph has a super node with name "Alice" that connects to all other nodes.
+It should therefore not be possible for any other node to be assigned the same color as the Alice node.
+In the following examples we will demonstrate using the K-1 Coloring algorithm on this graph.
+
+.Running the K-1 Coloring algorithm in stream mode:
+[source, cypher]
+----
 CALL gds.beta.k1coloring.stream('myGraph')
 YIELD nodeId, color
 RETURN gds.util.asNode(nodeId).name AS name, color
@@ -175,27 +172,24 @@ ORDER BY name
 | "Doug"    | 0
 |===
 
-.Using a Cypher projection:
+It is also possible to write the assigned colors back to the database using the `write` mode.
+
+.Running the K-1 Coloring algorithm in write mode:
 [source, cypher]
 ----
-CALL gds.beta.k1coloring.stream({
-  nodeQuery: 'MATCH (n:User) RETURN id(n) AS id',
-  relationshipQuery: 'MATCH (s:User)-[:LINK]->(t:User) RETURN id(s) AS source, id(t) AS target'
-})
-YIELD nodeId, color
-RETURN gds.util.asNode(nodeId).name AS name, color
-ORDER BY name
+CALL gds.beta.k1coloring.write('myGraph', {writeProperty: 'color'})
+YIELD nodes, colorCount, ranIterations, didConverge
 ----
 
+| nodes | colorCount | ranIterations | didConverge
+| 4     | 3          | 3             | true
+
 .Results
-[opts="header",cols="1m,1m"]
+[opts="header",cols="1m,1m,1m,1m"]
 |===
-| name      | color
-| "Alice"   | 2
-| "Bridget" | 1
-| "Charles" | 0
-| "Doug"    | 0
+| nodes | colorCount | ranIterations | didConverge
+| 4     | 3          | 3             | true
 |===
 
-These results are identical to those of the named graph, as the Cypher projection we use mimics the behaviour of the default loading configuration.
-Of course, the Cypher projection feature enables more advanced control over which exact parts of the graph to compute over; please see <<cypher-projection>> for more details.
+When using `write` mode the procedure will return information about the algorithm execution.
+In this example we returned the number of processed nodes, the number of colors used to color the graph, the number of iterations and information whether the algorithm converged.
