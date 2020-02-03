@@ -1,15 +1,35 @@
 [[algorithms-graph-similarity]]
-= Graph similarity algorithms
+= Similarity algorithms
 
 [abstract]
 --
-This chapter provides explanations and examples for each of the graph similarity algorithms in the Neo4j Graph Data Science library.
+This chapter provides explanations and examples for each of the similarity algorithms in the Neo4j Graph Data Science library.
 --
 
-Graph similarity algorithms can help calculate the similarity of nodes.
-The Neo4j GDS library includes the following graph similarity algorithms, grouped by quality tier:
+Similarity algorithms can help calculate the similarity of nodes.
+The Neo4j GDS library includes the following similarity algorithms, grouped by quality tier:
 
 * Production-quality:
 ** <<algorithms-node-similarity, Node Similarity>>
+* Alpha
+** <<labs-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbors>>
+** <<labs-algorithms-similarity-cosine, Cosine Similarity>>
+** <<labs-algorithms-similarity-euclidean, Euclidean Similarity>>
+** <<labs-algorithms-similarity-jaccard, Jaccard Similarity>>
+** <<labs-algorithms-similarity-overlap, Overlap Similarity>>
+** <<labs-algorithms-similarity-pearson, Pearson Similarity>>
 
 include::node-similarity.adoc[leveloffset=+1]
+
+include::alpha/alpha-similarity-ann.adoc[leveloffset=+1]
+
+include::alpha/alpha-similarity-cosine.adoc[leveloffset=+1]
+
+include::alpha/alpha-similarity-euclidean.adoc[leveloffset=+1]
+
+include::alpha/alpha-similarity-jaccard.adoc[leveloffset=+1]
+
+include::alpha/alpha-similarity-overlap.adoc[leveloffset=+1]
+
+include::alpha/alpha-similarity-pearson.adoc[leveloffset=+1]
+
