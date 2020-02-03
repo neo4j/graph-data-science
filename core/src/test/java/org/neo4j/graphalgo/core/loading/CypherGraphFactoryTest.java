@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -31,7 +30,6 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.ExceptionUtil;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -40,8 +38,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -244,48 +240,6 @@ class CypherGraphFactoryTest {
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
 
         loadAndTestGraph(nodeStatement, relStatement, Aggregation.SINGLE, parallel);
-    }
-
-    @Test
-    void shouldThrowOnMissingIdColumn() {
-        String nodeStatement = "MATCH (n) RETURN id(n) AS foo";
-        String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target";
-
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            loadAndTestGraph(nodeStatement, relStatement, Aggregation.SINGLE, false)
-        );
-        Throwable rootCause = ExceptionUtil.rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(
-            rootCause.getMessage(),
-            containsString("Invalid node query, required column(s) not found: id")
-        );
-    }
-
-    @ParameterizedTest
-    @CsvSource(
-        delimiter = ';',
-        value = {
-        "RETURN id(n) AS foo, id(m) AS target;source",
-        "RETURN id(n) AS source, id(m) AS foo;target",
-        "RETURN id(n) AS foo, id(m) AS bar;source, target",
-    })
-    void shouldThrowOnMissingRelationshipColumns(String returnClause, String missingColumns) {
-        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String relStatement = "MATCH (n)-[r:REL]->(m) " + returnClause;
-
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            loadAndTestGraph(nodeStatement, relStatement, Aggregation.SINGLE, false)
-        );
-        Throwable rootCause = ExceptionUtil.rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(
-            rootCause.getMessage(),
-            containsString(String.format(
-                "Invalid relationship query, required column(s) not found: %s",
-                missingColumns
-            ))
-        );
     }
 
     @Test

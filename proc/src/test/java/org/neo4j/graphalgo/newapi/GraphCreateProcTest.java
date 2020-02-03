@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -982,6 +983,40 @@ class GraphCreateProcTest extends BaseProcTest {
             "relationshipCount", relCount,
             "createMillis", instanceOf(Long.class)
         )));
+    }
+
+    @Test
+    void failsOnMissingIdColumn() {
+        String query =
+            "CALL gds.graph.create.cypher(" +
+            "   'cypherGraph', " +
+            "   'RETURN 1 AS foo', " +
+            "   'RETURN 0 AS source, 1 AS target'" +
+            ")";
+
+        assertError(query, "Invalid node query, required column(s) not found: 'id'");
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        delimiter = ';',
+        value = {
+            "RETURN 0 AS foo, 1 AS target;source",
+            "RETURN 0 AS source, 1 AS foo;target",
+            "RETURN 0 AS foo, 1 AS bar;source,target",
+        })
+    void failsOnMissingSourceAndTargetColumns(String returnClause, String missingColumns) {
+        String query = String.format(
+            "CALL gds.graph.create.cypher(" +
+            "   'cypherGraph', " +
+            "   'RETURN 1 AS id', " +
+            "   '%s'" +
+            ")", returnClause);
+
+        assertError(query, String.format(
+            "Invalid relationship query, required column(s) not found: '%s'",
+            String.join("', '", missingColumns.split(","))
+        ));
     }
 
     @Test

@@ -101,7 +101,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             initImporter(propertyMappings);
             initializedFromResult = true;
         } else if (!initializedFromResult) {
-            validatePropertyColumns(propertyColumns, outerDimensions.nodeProperties(), QueryType.NODE);
+            validatePropertyColumns(propertyColumns, outerDimensions.nodeProperties());
             initializedFromResult = true;
         }
 

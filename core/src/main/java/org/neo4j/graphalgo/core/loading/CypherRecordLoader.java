@@ -171,17 +171,16 @@ abstract class CypherRecordLoader<R> {
         missingColumns.removeAll(allColumns);
         if (!missingColumns.isEmpty()) {
             throw new IllegalArgumentException(String.format(
-                "Invalid %s query, required column(s) not found: %s",
+                "Invalid %s query, required column(s) not found: '%s'",
                 queryType().toString().toLowerCase(),
-                String.join(", ", missingColumns)
+                String.join("', '", missingColumns)
             ));
         }
     }
 
     void validatePropertyColumns(
         Collection<String> propertyColumns,
-        ResolvedPropertyMappings resolvedPropertyMappings,
-        QueryType queryType
+        ResolvedPropertyMappings resolvedPropertyMappings
     ) {
         List<String> invalidNodeProperties = resolvedPropertyMappings
             .mappings()
@@ -193,9 +192,9 @@ abstract class CypherRecordLoader<R> {
         if (!invalidNodeProperties.isEmpty()) {
             throw new IllegalArgumentException(String.format(
                 "%s properties not found: '%s'. Available properties from the %s query are: '%s'",
-                queryType.capitalize(),
+                queryType().capitalize(),
                 String.join("', '", invalidNodeProperties),
-                queryType.name().toLowerCase(),
+                queryType().name().toLowerCase(),
                 String.join("', '", propertyColumns)
             ));
         }

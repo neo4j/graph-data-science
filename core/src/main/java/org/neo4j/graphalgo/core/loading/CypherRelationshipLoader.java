@@ -168,7 +168,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             initializedFromResult = true;
         } else if (!initializedFromResult) {
-            validatePropertyColumns(propertyColumns, outerDimensions.relationshipProperties(), QueryType.RELATIONSHIP);
+            validatePropertyColumns(propertyColumns, outerDimensions.relationshipProperties());
             initializedFromResult = true;
         }
 
