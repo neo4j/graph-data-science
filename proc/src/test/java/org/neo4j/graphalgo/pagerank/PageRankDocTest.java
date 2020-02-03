@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
@@ -36,41 +37,54 @@ class PageRankDocTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws KernelException {
-        String createGraph = "CREATE (home:Page {name:'Home'})" +
-                             "CREATE (about:Page {name:'About'})" +
-                             "CREATE (product:Page {name:'Product'})" +
-                             "CREATE (links:Page {name:'Links'})" +
-                             "CREATE (a:Page {name:'Site A'})" +
-                             "CREATE (b:Page {name:'Site B'})" +
-                             "CREATE (c:Page {name:'Site C'})" +
-                             "CREATE (d:Page {name:'Site D'})" +
-
-                             "CREATE (home)-[:LINKS {weight: 0.2}]->(about)" +
-                             "CREATE (home)-[:LINKS {weight: 0.2}]->(links)" +
-                             "CREATE (home)-[:LINKS {weight: 0.6}]->(product)" +
-                             "CREATE (about)-[:LINKS {weight: 1.0}]->(home)" +
-                             "CREATE (product)-[:LINKS {weight: 1.0}]->(home)" +
-                             "CREATE (a)-[:LINKS {weight: 1.0}]->(home)" +
-                             "CREATE (b)-[:LINKS {weight: 1.0}]->(home)" +
-                             "CREATE (c)-[:LINKS {weight: 1.0}]->(home)" +
-                             "CREATE (d)-[:LINKS {weight: 1.0}]->(home)" +
-                             "CREATE (links)-[:LINKS {weight: 0.8}]->(home)" +
-                             "CREATE (links)-[:LINKS {weight: 0.05}]->(a)" +
-                             "CREATE (links)-[:LINKS {weight: 0.05}]->(b)" +
-                             "CREATE (links)-[:LINKS {weight: 0.05}]->(c)" +
-                             "CREATE (links)-[:LINKS {weight: 0.05}]->(d)";
-
         db = TestDatabaseCreator.createTestDatabase(builder ->
                 builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
-        runQuery(createGraph);
+
         registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
+
+        String dbQuery = "CREATE (home:Page {name:'Home'})" +
+                          "CREATE (about:Page {name:'About'})" +
+                          "CREATE (product:Page {name:'Product'})" +
+                          "CREATE (links:Page {name:'Links'})" +
+                          "CREATE (a:Page {name:'Site A'})" +
+                          "CREATE (b:Page {name:'Site B'})" +
+                          "CREATE (c:Page {name:'Site C'})" +
+                          "CREATE (d:Page {name:'Site D'})" +
+
+                          "CREATE (home)-[:LINKS {weight: 0.2}]->(about)" +
+                          "CREATE (home)-[:LINKS {weight: 0.2}]->(links)" +
+                          "CREATE (home)-[:LINKS {weight: 0.6}]->(product)" +
+                          "CREATE (about)-[:LINKS {weight: 1.0}]->(home)" +
+                          "CREATE (product)-[:LINKS {weight: 1.0}]->(home)" +
+                          "CREATE (a)-[:LINKS {weight: 1.0}]->(home)" +
+                          "CREATE (b)-[:LINKS {weight: 1.0}]->(home)" +
+                          "CREATE (c)-[:LINKS {weight: 1.0}]->(home)" +
+                          "CREATE (d)-[:LINKS {weight: 1.0}]->(home)" +
+                          "CREATE (links)-[:LINKS {weight: 0.8}]->(home)" +
+                          "CREATE (links)-[:LINKS {weight: 0.05}]->(a)" +
+                          "CREATE (links)-[:LINKS {weight: 0.05}]->(b)" +
+                          "CREATE (links)-[:LINKS {weight: 0.05}]->(c)" +
+                          "CREATE (links)-[:LINKS {weight: 0.05}]->(d)";
+
+        String graphCreateQuery = "CALL gds.graph.create(" +
+                                   "    'myGraph'," +
+                                   "    'Page'," +
+                                   "    'LINKS'," +
+                                   "    {" +
+                                   "        relationshipProperties: ['weight']" +
+                                   "    }" +
+                                   ")";
+
+        runQuery(dbQuery);
+        runQuery(graphCreateQuery);
     }
 
     @AfterEach
     void tearDown() {
         db.shutdown();
+        GraphCatalog.removeAllLoadedGraphs();
     }
 
     // Queries and results match pagerank.adoc unweighted example section; should read from there in a future
@@ -79,15 +93,13 @@ class PageRankDocTest extends BaseProcTest {
     @Test
     void unweighted() {
         String q1 =
-                "CALL gds.pageRank.stream({ " +
-                "   nodeProjection: 'Page', " +
-                "   relationshipProjection: 'LINKS', " +
-                "   maxIterations: 20, " +
-                "   dampingFactor: 0.85" +
-                "}) " +
-                "YIELD nodeId, score " +
-                "RETURN gds.util.asNode(nodeId).name AS name, score " +
-                "ORDER BY score DESC ";
+                "CALL gds.pageRank.stream('myGraph', {\n" +
+                "  maxIterations: 20,\n" +
+                "  dampingFactor: 0.85\n" +
+                "})\n" +
+                "YIELD nodeId, score\n" +
+                "RETURN gds.util.asNode(nodeId).name AS name, score\n" +
+                "ORDER BY score DESC";
 
         String expectedString = "+--------------------------------+\n" +
                                 "| name      | score              |\n" +
@@ -106,14 +118,13 @@ class PageRankDocTest extends BaseProcTest {
         assertEquals(expectedString, runQuery(q1, Result::resultAsString));
 
         String q2 =
-            "CALL gds.pageRank.write({" +
-            "  nodeProjection: 'Page', " +
-            "  relationshipProjection: 'LINKS'," +
-            "  maxIterations: 20, " +
-            "  dampingFactor: 0.85, " +
-            "  writeProperty: 'pagerank'" +
-            "})" +
+            "CALL gds.pageRank.write('myGraph', {\n" +
+            "  maxIterations: 20,\n" +
+            "  dampingFactor: 0.85,\n" +
+            "  writeProperty: 'pagerank'\n" +
+            "})\n" +
             "YIELD nodePropertiesWritten AS writtenProperties, ranIterations";
+
         String r2 = runQuery(q2, Result::resultAsString);
 
         expectedString = "+-----------------------------------+\n" +
@@ -131,17 +142,11 @@ class PageRankDocTest extends BaseProcTest {
     @Test
     void weighted() {
         String q1 =
-            "CALL gds.pageRank.stream({ " +
-            "  nodeProjection: 'Page', " +
-            "  relationshipProjection: {" +
-            "    LINKS: {" +
-            "      properties: ['weight']" +
-            "    }" +
-            "  }," +
-            "  maxIterations: 20, " +
-            "  dampingFactor: 0.85," +
-            "  relationshipWeightProperty: 'weight'" +
-            "}) " +
+            "CALL gds.pageRank.stream('myGraph', {\n" +
+            "  maxIterations: 20,\n" +
+            "  dampingFactor: 0.85,\n" +
+            "  relationshipWeightProperty: 'weight'\n" +
+            "})\n" +
             "YIELD nodeId, score " +
             "RETURN gds.util.asNode(nodeId).name AS name, score " +
             "ORDER BY score DESC ";
@@ -164,18 +169,12 @@ class PageRankDocTest extends BaseProcTest {
 
 
         String q2 =
-            "CALL gds.pageRank.write({ " +
-            "  nodeProjection: 'Page', " +
-            "  relationshipProjection: {" +
-            "    LINKS: {" +
-            "      properties: ['weight']" +
-            "    }" +
-            "  }," +
-            "  maxIterations: 20, " +
-            "  dampingFactor: 0.85, " +
-            "  writeProperty: 'pagerank', " +
-            "  relationshipWeightProperty: 'weight'" +
-            "})" +
+            "CALL gds.pageRank.write('myGraph', {\n" +
+            "  maxIterations: 20,\n" +
+            "  dampingFactor: 0.85,\n" +
+            "  writeProperty: 'pagerank',\n" +
+            "  relationshipWeightProperty: 'weight'\n" +
+            "})\n" +
             "YIELD nodePropertiesWritten AS writtenProperties, ranIterations";
 
         expectedString = "+-----------------------------------+\n" +
@@ -191,16 +190,14 @@ class PageRankDocTest extends BaseProcTest {
     @Test
     void personalized() {
         String q1 =
-            "MATCH (siteA:Page {name: 'Site A'})" +
-            "CALL gds.pageRank.stream({ " +
-            "  nodeProjection: 'Page', " +
-            "  relationshipProjection: 'LINKS', " +
-            "  maxIterations: 20, " +
-            "  dampingFactor: 0.85, " +
-            "  sourceNodes: [siteA]" +
-            "}) " +
-            "YIELD nodeId, score " +
-            "RETURN gds.util.asNode(nodeId).name AS name, score " +
+            "MATCH (siteA:Page {name: 'Site A'})\n" +
+            "CALL gds.pageRank.stream('myGraph', {\n" +
+            "  maxIterations: 20,\n" +
+            "  dampingFactor: 0.85,\n" +
+            "  sourceNodes: [siteA]\n" +
+            "})\n" +
+            "YIELD nodeId, score\n" +
+            "RETURN gds.util.asNode(nodeId).name AS name, score\n" +
             "ORDER BY score DESC ";
 
         String expectedString = "+---------------------------------+\n" +
@@ -220,15 +217,14 @@ class PageRankDocTest extends BaseProcTest {
         assertEquals(expectedString, runQuery(q1, Result::resultAsString));
 
         String q2 =
-            "MATCH (siteA:Page {name: 'Site A'})" +
-            "CALL gds.pageRank.write({ " +
-            "   nodeProjection: 'Page', " +
-            "   relationshipProjection: 'LINKS', " +
-            "   maxIterations: 20, " +
-            "   dampingFactor: 0.85, " +
-            "   writeProperty: 'pagerank', " +
-            "   sourceNodes: [siteA]})" +
-            "YIELD nodePropertiesWritten, ranIterations " +
+            "MATCH (siteA:Page {name: 'Site A'})\n" +
+            "CALL gds.pageRank.write('myGraph', {\n" +
+            "  maxIterations: 20,\n" +
+            "  dampingFactor: 0.85,\n" +
+            "  writeProperty: 'pagerank',\n" +
+            "  sourceNodes: [siteA]\n" +
+            "})\n" +
+            "YIELD nodePropertiesWritten, ranIterations\n" +
             "RETURN nodePropertiesWritten AS writtenProperties, ranIterations";
 
         expectedString = "+-----------------------------------+\n" +
@@ -241,61 +237,10 @@ class PageRankDocTest extends BaseProcTest {
         assertEquals(expectedString, runQuery(q2, Result::resultAsString));
     }
 
-    // Queries from the named graph and Cypher projection example in pagerank.adoc
-    // used to test that the results are correct in the docs
-    @Test
-    void namedGraphAndCypherProjection() {
-        String loadGraph = "CALL gds.graph.create('myGraph', ['Page'], ['LINKS'])";
-        runQuery(loadGraph);
-
-        String q1 =
-            "CALL gds.pageRank.stream('myGraph')" +
-            "YIELD nodeId, score " +
-            "RETURN gds.util.asNode(nodeId).name AS name, score " +
-            "ORDER BY score DESC ";
-
-        String namedQueryResult = runQuery(q1, Result::resultAsString);
-
-        String expectedString = "+--------------------------------+\n" +
-                                "| name      | score              |\n" +
-                                "+--------------------------------+\n" +
-                                "| \"Home\"    | 3.2362017153762284 |\n" +
-                                "| \"About\"   | 1.0611098567023873 |\n" +
-                                "| \"Product\" | 1.0611098567023873 |\n" +
-                                "| \"Links\"   | 1.0611098567023873 |\n" +
-                                "| \"Site A\"  | 0.3292259009438567 |\n" +
-                                "| \"Site B\"  | 0.3292259009438567 |\n" +
-                                "| \"Site C\"  | 0.3292259009438567 |\n" +
-                                "| \"Site D\"  | 0.3292259009438567 |\n" +
-                                "+--------------------------------+\n" +
-                                "8 rows\n";
-
-        assertEquals(expectedString, namedQueryResult);
-
-        String q2 =
-            "CALL gds.pageRank.stream({" +
-            "  nodeQuery: 'MATCH (p:Page) RETURN id(p) AS id'," +
-            "  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page)" +
-            "                      RETURN id(p1) AS source, id(p2) AS target'," +
-            "   maxIterations:20," +
-            "   dampingFactor:0.85" +
-            "})" +
-            "YIELD nodeId, score " +
-            "RETURN gds.util.asNode(nodeId).name AS name, score " +
-            "ORDER BY score DESC";
-
-        assertEquals(namedQueryResult, runQuery(q2, Result::resultAsString));
-    }
-
     @Test
     void statsMode() {
         String q2 =
-            "CALL gds.pageRank.stats({" +
-            "  nodeProjection: 'Page', " +
-            "  relationshipProjection: 'LINKS'," +
-            "  maxIterations: 20, " +
-            "  dampingFactor: 0.85" +
-            "})" +
+            "CALL gds.pageRank.stats('myGraph')\n" +
             "YIELD ranIterations";
         String r2 = runQuery(q2, Result::resultAsString);
 
@@ -312,19 +257,18 @@ class PageRankDocTest extends BaseProcTest {
     @Test
     void estimateMode() {
         String q2 =
-            "CALL gds.pageRank.write.estimate({" +
-            "  nodeProjection: 'Page', " +
-            "  relationshipProjection: 'LINKS'," +
-            "  writeProperty: 'pagerank'," +
-            "  concurrency: 1"+
-            "})" +
+            "CALL gds.pageRank.write.estimate('myGraph', {\n" +
+            "  writeProperty: 'pageRank',\n" +
+            "  maxIterations: 20,\n" +
+            "  dampingFactor: 0.85\n" +
+            "})\n" +
             "YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory";
         String r2 = runQuery(q2, Result::resultAsString);
 
         String expectedString = "+----------------------------------------------------------------------+\n" +
                                 "| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory |\n" +
                                 "+----------------------------------------------------------------------+\n" +
-                                "| 8         | 14                | 304048   | 304048   | \"296 KiB\"      |\n" +
+                                "| 8         | 14                | 1536     | 1536     | \"1536 Bytes\"   |\n" +
                                 "+----------------------------------------------------------------------+\n" +
                                 "1 row\n";
 

@@ -217,15 +217,27 @@ CREATE (links)-[:LINKS {weight: 0.05}]->(d)
 This graph represents seven pages, linking to another.
 Each relationship has a property called `weight`, which describes the importance of the relationship.
 
+With the following statement we load the graph into the in-memory graph catalog.
+
+[source, cypher]
+----
+CALL gds.graph.create(
+    'myGraph',
+    'Page',
+    'LINKS',
+    {
+        relationshipProperties: ['weight']
+    }
+)
+----
+
 [[algorithms-pagerank-examples-unweighted]]
 === Unweighted
 
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.pageRank.stream({
-  nodeProjection: 'Page',
-  relationshipProjection: 'LINKS',
+CALL gds.pageRank.stream('myGraph', {
   maxIterations: 20,
   dampingFactor: 0.85
 })
@@ -253,9 +265,7 @@ To instead write the page-rank score to a node property in the Neo4j graph, use 
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.pageRank.write({
-  nodeProjection: 'Page',
-  relationshipProjection: 'LINKS',
+CALL gds.pageRank.write('myGraph', {
   maxIterations: 20,
   dampingFactor: 0.85,
   writeProperty: 'pagerank'
@@ -276,13 +286,7 @@ YIELD nodePropertiesWritten AS writtenProperties, ranIterations
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.pageRank.stream({
-  nodeProjection: 'Page',
-  relationshipProjection: {
-    LINKS: {
-      properties: ['weight']
-    }
-  },
+CALL gds.pageRank.stream('myGraph', {
   maxIterations: 20,
   dampingFactor: 0.85,
   relationshipWeightProperty: 'weight'
@@ -311,13 +315,7 @@ To instead write the page-rank score to a node property in the Neo4j graph, use 
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.pageRank.write({
-  nodeProjection: 'Page',
-  relationshipProjection: {
-    LINKS: {
-      properties: ['weight']
-    }
-  },
+CALL gds.pageRank.write('myGraph', {
   maxIterations: 20,
   dampingFactor: 0.85,
   writeProperty: 'pagerank',
@@ -342,14 +340,11 @@ This variant of PageRank is often used as part of https://www.r-bloggers.com/fro
 
 The following examples show how to run PageRank centered around 'Site A'.
 
-
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
 MATCH (siteA:Page {name: 'Site A'})
-CALL gds.pageRank.stream({
-  nodeProjection: 'Page',
-  relationshipProjection: 'LINKS',
+CALL gds.pageRank.stream('myGraph', {
   maxIterations: 20,
   dampingFactor: 0.85,
   sourceNodes: [siteA]
@@ -378,9 +373,7 @@ ORDER BY score DESC
 [source, cypher]
 ----
 MATCH (siteA:Page {name: 'Site A'})
-CALL gds.pageRank.write({
-  nodeProjection: 'Page',
-  relationshipProjection: 'LINKS',
+CALL gds.pageRank.write('myGraph', {
   maxIterations: 20,
   dampingFactor: 0.85,
   writeProperty: 'pagerank',
@@ -403,10 +396,10 @@ RETURN nodePropertiesWritten AS writtenProperties, ranIterations
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher]
 ----
-CALL gds.pageRank.write.estimate({
-  nodeProjection: 'Page',
-  relationshipProjection: 'LINKS',
-  writeProperty: 'pagerank'
+CALL gds.pageRank.write.estimate('myGraph', {
+  writeProperty: 'pageRank',
+  maxIterations: 20,
+  dampingFactor: 0.85
 })
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
@@ -415,7 +408,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header",cols="1,1,1,1,1"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 8         | 14                | 304048   | 304048   | "297 KiB"
+| 8         | 14                | 1536     | 1536     | "1536 Bytes"
 |===
 
 [[algorithms-pagerank-examples-stats]]
@@ -424,12 +417,9 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 .The following will run the algorithm and returns the result in form of statistical and measurement values
 [source, cypher]
 ----
-CALL gds.pageRank.stats({
-  nodeProjection: 'Page',
-  relationshipProjection: 'LINKS',
+CALL gds.pageRank.stats('myGraph', {
   maxIterations: 20,
   dampingFactor: 0.85,
-  writeProperty: 'pagerank'
 })
 YIELD ranIterations
 ----
@@ -440,75 +430,6 @@ YIELD ranIterations
 | ranIterations
 | 20
 |===
-
-[[algorithms-pagerank-examples-projection]]
-=== Named graphs and Cypher projections
-
-In the examples above, we have relied on the _implicit_ creation of graphs for the algorithm computation.
-However, like other algorithms PageRank also accepts _named graphs_ and _Cypher projections_ as inputs.
-See <<graph-catalog-ops>> for more details.
-
-.Using a named graph:
-[source, cypher]
-----
-CALL gds.graph.create('myGraph', ['Page'], ['LINKS']);
-
-CALL gds.pageRank.stream('myGraph')
-YIELD nodeId, score
-RETURN gds.util.asNode(nodeId).name AS name, score
-ORDER BY score DESC
-----
-
-.Results
-[opts="header",cols="1,1"]
-|===
-| name    | score
-| Home    | 3.236
-| Product | 1.061
-| Links   | 1.061
-| About   | 1.061
-| Site A  | 0.329
-| Site B  | 0.329
-| Site C  | 0.329
-| Site D  | 0.329
-|===
-
-As we can see, the results are identical to the results in the <<algorithms-pagerank-examples-unweighted>> example.
-
-.Using a Cypher projection:
-[source, cypher]
-----
-CALL gds.pageRank.stream({
-  graph:'cypher',
-  nodeQuery: 'MATCH (p:Page) RETURN id(p) AS id',
-  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page)"
-                      RETURN id(p1) AS source, id(p2) AS target',
-  maxIterations:20,
-  dampingFactor:0.85
-})
-YIELD nodeId, score
-RETURN gds.util.asNode(nodeId).name AS name, score
-ORDER BY score DESC
-----
-
-.Results
-[opts="header",cols="1,1"]
-|===
-| name    | score
-| Home    | 3.236
-| Product | 1.061
-| Links   | 1.061
-| About   | 1.061
-| Site A  | 0.329
-| Site B  | 0.329
-| Site C  | 0.329
-| Site D  | 0.329
-|===
-
-Again, results are identical, as the Cypher projection we use mimics the behaviour of the default loading configuration.
-Of course, the Cypher projection feature enables more advanced control over which exact parts of the graph to compute over; please see <<cypher-projection>> for more details.
-
-
 
 [[algorithms-pagerank-usage]]
 == Usage
