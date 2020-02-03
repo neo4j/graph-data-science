@@ -29,6 +29,7 @@ The manual covers the following areas:
 * <<introduction>> -- An introduction to Neo4j Graph Data Science library.
 * <<installation>> -- Instructions for how to install and use the Neo4j Graph Data Science library.
 * <<common-usage>> -- General usage patterns and recommendations for getting the most out of the Neo4j Graph Data Science library.
+* <<management-ops>> -- A detailed guide to the graph catalog and utility procedures included in the GDS library.
 * <<projected-graph-model>> -- A detailed guide to the projected graph model.
 * <<yelp-example>> -- An illustration of how to use graph algorithms on a social network of friends.
 * <<procedures>> -- A list of Neo4j Graph Data Science library procedures.
@@ -56,6 +57,8 @@ include::introduction.adoc[leveloffset=+1]
 include::installation.adoc[leveloffset=+1]
 
 include::common-usage.adoc[leveloffset=+1]
+
+include::management-ops.adoc[leveloffset=+1]
 
 include::projected-graph-model.adoc[leveloffset=+1]
 

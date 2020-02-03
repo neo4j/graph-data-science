@@ -19,6 +19,10 @@
             </d:tocentry>
         </d:tocentry>
 
+        <d:tocentry linkend="management-ops">
+            <?dbhtml filename="management-ops/index.html"?>
+        </d:tocentry>
+
         <d:tocentry linkend="projected-graph-model">
             <?dbhtml filename="projected-graph-model/index.html"?>
             <d:tocentry linkend="label-relationship-type-projection">
