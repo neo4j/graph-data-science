@@ -12,4 +12,4 @@ The following feature and procedure can be used as part of the data preparation 
 
 * <<labs-algorithms-one-hot-encoding, One Hot Encoding>>
 
-include::labs-one-hot-encoding.adoc[leveloffset=+1]
+include::alpha-one-hot-encoding.adoc[leveloffset=+1]

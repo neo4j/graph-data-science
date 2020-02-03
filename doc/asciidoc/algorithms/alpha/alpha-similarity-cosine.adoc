@@ -195,7 +195,7 @@ YIELD item1, item2, count1, count2, intersection, similarity
 
 The Cosine Similarity function computes the similarity of two lists of numbers.
 
-include::labs-similarity.adoc[tag=weighted-function-note]
+include::alpha-similarity.adoc[tag=weighted-function-note]
 
 We can use it to compute the similarity of two hardcoded lists.
 
@@ -314,8 +314,8 @@ CREATE (karin)-[:LIKES {score: 10}]->(portuguese)
 == Cosine Similarity algorithm procedures examples
 
 
-include::labs-similarity.adoc[tag=computation]
-include::labs-similarity.adoc[tag=weighted-note]
+include::alpha-similarity.adoc[tag=computation]
+include::alpha-similarity.adoc[tag=weighted-note]
 
 .The following will create a sample graph:
 [source, cypher]
@@ -510,7 +510,7 @@ We then could write a query to find out what types of cuisine that other people 
 [[algorithms-similarity-cosine-source-target-ids]]
 == Specifying source and target ids
 
-include::labs-similarity.adoc[tag=source-target-ids]
+include::alpha-similarity.adoc[tag=source-target-ids]
 
 We could use this technique to compute the similarity of a subset of items to all other items.
 
@@ -579,7 +579,7 @@ CREATE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31
 [[algorithms-similarity-cosine-cypher-projection]]
 == Cypher projection
 
-include::management-ops/cypher-projection.adoc[tag=similarity-explanation]
+include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
 
 .Set `graph:'cypher'` in the config:
 

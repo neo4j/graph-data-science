@@ -15,14 +15,14 @@ These algorithms help calculate the similarity of nodes:
 * <<labs-algorithms-similarity-overlap, Overlap Similarity>>
 * <<labs-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbors>>
 
-include::labs-similarity-jaccard.adoc[leveloffset=+1]
+include::alpha-similarity-jaccard.adoc[leveloffset=+1]
 
-include::labs-similarity-cosine.adoc[leveloffset=+1]
+include::alpha-similarity-cosine.adoc[leveloffset=+1]
 
-include::labs-similarity-pearson.adoc[leveloffset=+1]
+include::alpha-similarity-pearson.adoc[leveloffset=+1]
 
-include::labs-similarity-euclidean.adoc[leveloffset=+1]
+include::alpha-similarity-euclidean.adoc[leveloffset=+1]
 
-include::labs-similarity-overlap.adoc[leveloffset=+1]
+include::alpha-similarity-overlap.adoc[leveloffset=+1]
 
-include::labs-similarity-ann.adoc[leveloffset=+1]
+include::alpha-similarity-ann.adoc[leveloffset=+1]

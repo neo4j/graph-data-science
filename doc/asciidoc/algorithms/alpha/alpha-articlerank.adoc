@@ -99,7 +99,7 @@ Papers 5 and 6 are not cited by any other papers, so their score doesn't increas
 [[algorithms-articlerank-hgp]]
 == Huge graph projection
 
-include::huge-projection.adoc[tag=explanation]
+include::../../huge-projection.adoc[tag=explanation]
 
 .Set `graph:'huge'` in the config:
 
@@ -112,7 +112,7 @@ include::scripts/articlerank.cypher[tag=huge-projection]
 [[algorithms-articlerank-cp]]
 == Cypher projection
 
-include::management-ops/cypher-projection.adoc[tag=explanation]
+include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
 .Set `graph:'cypher'` in the config:
 

@@ -10,5 +10,5 @@ The following procedures can be used to improve your workflow:
 
 * <<algorithms-k1coloring, K-1 Coloring>>
 
-include::k1coloring.adoc[leveloffset=+1]
+include::beta/k1coloring.adoc[leveloffset=+1]
 

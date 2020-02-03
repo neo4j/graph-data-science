@@ -22,13 +22,14 @@ The documentation for the Neo4j Labs algorithms is divided into the following se
 * <<labs-algorithms-preprocessing>>
 * <<labs-graph-generation>>
 
-include::labs-procedures.adoc[leveloffset=+1]
+//TODO: this doesn't belong here. Move to appendix
+include::../../alpha-procedures.adoc[leveloffset=+1]
 
-include::labs-algorithms-similarity.adoc[leveloffset=+1]
+include::alpha-algorithms-similarity.adoc[leveloffset=+1]
 
-include::labs-algorithms-link-prediction.adoc[leveloffset=+1]
+include::alpha-algorithms-link-prediction.adoc[leveloffset=+1]
 
-include::labs-algorithms-preprocessing.adoc[leveloffset=+1]
+include::alpha-algorithms-preprocessing.adoc[leveloffset=+1]
 
-include::labs-graph-generation.adoc[leveloffset=+1]
+include::alpha-graph-generation.adoc[leveloffset=+1]
 

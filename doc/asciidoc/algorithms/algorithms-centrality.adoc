@@ -20,12 +20,12 @@ The Neo4j GDS library includes the following centrality algorithms, grouped by q
 
 include::pagerank.adoc[leveloffset=+1]
 
-include::labs-articlerank.adoc[leveloffset=+1]
+include::alpha/alpha-articlerank.adoc[leveloffset=+1]
 
-include::labs-betweenness-centrality.adoc[leveloffset=+1]
+include::alpha/alpha-betweenness-centrality.adoc[leveloffset=+1]
 
-include::labs-closeness-centrality.adoc[leveloffset=+1]
+include::alpha/alpha-closeness-centrality.adoc[leveloffset=+1]
 
-include::labs-degree-centrality.adoc[leveloffset=+1]
+include::alpha/alpha-degree-centrality.adoc[leveloffset=+1]
 
-include::labs-eigenvector-centrality.adoc[leveloffset=+1]
+include::alpha/alpha-eigenvector-centrality.adoc[leveloffset=+1]

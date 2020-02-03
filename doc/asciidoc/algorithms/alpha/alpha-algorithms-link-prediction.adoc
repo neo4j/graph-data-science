@@ -17,14 +17,14 @@ We would then use the computed scores as part of a link prediction solution:
 * <<labs-algorithms-linkprediction-total-neighbors, Total Neighbors>>
 
 
-include::labs-linkprediction-adamic-adar.adoc[leveloffset=+1]
+include::alpha-linkprediction-adamic-adar.adoc[leveloffset=+1]
 
-include::labs-linkprediction-common-neighbors.adoc[leveloffset=+1]
+include::alpha-linkprediction-common-neighbors.adoc[leveloffset=+1]
 
-include::labs-linkprediction-preferential-attachment.adoc[leveloffset=+1]
+include::alpha-linkprediction-preferential-attachment.adoc[leveloffset=+1]
 
-include::labs-linkprediction-resource-allocation.adoc[leveloffset=+1]
+include::alpha-linkprediction-resource-allocation.adoc[leveloffset=+1]
 
-include::labs-linkprediction-same-community.adoc[leveloffset=+1]
+include::alpha-linkprediction-same-community.adoc[leveloffset=+1]
 
-include::labs-linkprediction-total-neighbors.adoc[leveloffset=+1]
+include::alpha-linkprediction-total-neighbors.adoc[leveloffset=+1]

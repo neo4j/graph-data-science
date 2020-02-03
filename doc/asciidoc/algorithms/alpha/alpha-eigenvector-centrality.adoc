@@ -223,7 +223,7 @@ ORDER BY score DESC
 [[algorithms-eigenvector-cp]]
 == Cypher projection
 
-include::management-ops/cypher-projection.adoc[tag=explanation]
+include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
 .Use `nodeQuery` and `relationshipQuery` in the config:
 

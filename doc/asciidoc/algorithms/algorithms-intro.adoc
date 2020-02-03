@@ -39,4 +39,4 @@ include::algorithms-auxiliary.adoc[leveloffset=+1]
 
 include::algorithms-path-finding.adoc[leveloffset=+1]
 
-include::labs-algorithms.adoc[leveloffset=+1]
+include::alpha/alpha-algorithms.adoc[leveloffset=+1]

@@ -261,7 +261,7 @@ We then could write a query to find out the genre hierarchy for a specific genre
 [[algorithms-similarity-overlap-source-target-ids]]
 == Specifying source and target ids
 
-include::labs-similarity.adoc[tag=source-target-ids]
+include::alpha-similarity.adoc[tag=source-target-ids]
 
 We could use this technique to compute the similarity of a subset of items to all other items.
 

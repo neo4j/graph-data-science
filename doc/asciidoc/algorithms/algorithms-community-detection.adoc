@@ -24,8 +24,8 @@ include::label-propagation.adoc[leveloffset=+1]
 
 include::wcc.adoc[leveloffset=+1]
 
-include::labs-strongly-connected-components.adoc[leveloffset=+1]
+include::alpha/alpha-strongly-connected-components.adoc[leveloffset=+1]
 
-include::alpha-triangle-count.adoc[leveloffset=+1]
+include::alpha/alpha-triangle-count.adoc[leveloffset=+1]
 
-include::labs-balanced-triads.adoc[leveloffset=+1]
+include::alpha/alpha-balanced-triads.adoc[leveloffset=+1]

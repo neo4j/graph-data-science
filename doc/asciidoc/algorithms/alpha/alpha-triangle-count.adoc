@@ -285,7 +285,7 @@ Local triangle count and clustering coefficient of nodes can be used as features
 [[algorithms-triangle-count-clustering-coefficient-cp]]
 == Cypher projection
 
-include::management-ops/cypher-projection.adoc[tag=explanation]
+include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
 .Set `graph:'cypher'` in the config:
 

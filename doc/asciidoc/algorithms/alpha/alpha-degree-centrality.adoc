@@ -291,7 +291,7 @@ Charles and Michael both only have one follower, but those relationships have a 
 [[algorithms-degree-cp]]
 == Cypher projection
 
-include::management-ops/cypher-projection.adoc[tag=explanation]
+include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
 [source, cypher]
 ----

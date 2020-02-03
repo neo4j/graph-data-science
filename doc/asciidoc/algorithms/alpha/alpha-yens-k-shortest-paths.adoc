@@ -246,7 +246,7 @@ Second quickest path is saved as `PATH_1` and third one is saved as`PATH_2`
 [[algorithms-yens-k-shortest-path-cp]]
 == Cypher projection
 
-include::management-ops/cypher-projection.adoc[tag=explanation]
+include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
 [source, cypher]
 ----

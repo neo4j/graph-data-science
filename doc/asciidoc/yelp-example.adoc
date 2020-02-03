@@ -75,30 +75,30 @@ For further information on using Neo4j as a recommendation engine, check out thi
 .Define graph schema (constraint/index)
 [source, cypher]
 ----
-include::scripts/yelp-import.cypher[tag=load-schema]
+include::yelp-import.cypher[tag=load-schema]
 ----
 
 .Load businesses
 [source, cypher]
 ----
-include::scripts/yelp-import.cypher[tag=load-business]
+include::yelp-import.cypher[tag=load-business]
 ----
 
 .Load tips
 [source, cypher]
 ----
-include::scripts/yelp-import.cypher[tag=load-tip]
+include::yelp-import.cypher[tag=load-tip]
 ----
 
 .Load reviews
 [source, cypher]
 ----
-include::scripts/yelp-import.cypher[tag=load-review]
+include::yelp-import.cypher[tag=load-review]
 ----
 .Load users
 [source, cypher]
 ----
-include::scripts/yelp-import.cypher[tag=load-user]
+include::yelp-import.cypher[tag=load-user]
 ----
 
 
@@ -147,7 +147,7 @@ Graph diameter (longest shortest path):
 .Use apoc to calculate local statistics
 [source, cypher]
 ----
-include::scripts/yelp-import.cypher[tag=social-network-local-props]
+include::yelp-import.cypher[tag=social-network-local-props]
 ----
 
 Average number of friends : 7.47
@@ -183,7 +183,7 @@ We will limit our network to those businesses, that have more than 10 reviews an
 .Project a review co-occurence between businesses
 [source, cypher]
 ----
-include::scripts/yelp-import.cypher[tag=coocurence-graph]
+include::yelp-import.cypher[tag=coocurence-graph]
 ----
 
 
@@ -205,7 +205,7 @@ Projecting a review similarity graph is often used in recommendations; similar u
 .Create a review similarity graph
 [source, cypher]
 ----
-include::scripts/yelp-import.cypher[tag=reviewsimilarity-graph]
+include::yelp-import.cypher[tag=reviewsimilarity-graph]
 ----
 
 Prior work:
