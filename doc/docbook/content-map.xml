@@ -100,10 +100,28 @@
                 </d:tocentry>
 
             </d:tocentry>
-            <d:tocentry linkend="algorithms-graph-similarity">
-                <?dbhtml filename="algorithms/graph-similarity/index.html"?>
+            <d:tocentry linkend="algorithms-similarity">
+                <?dbhtml filename="algorithms/similarity/index.html"?>
                 <d:tocentry linkend="algorithms-node-similarity">
                     <?dbhtml filename="algorithms/node-similarity/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-similarity-jaccard">
+                    <?dbhtml filename="labs-algorithms/jaccard/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-similarity-cosine">
+                    <?dbhtml filename="labs-algorithms/cosine/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-similarity-pearson">
+                    <?dbhtml filename="labs-algorithms/pearson/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-similarity-euclidean">
+                    <?dbhtml filename="labs-algorithms/euclidean/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-similarity-overlap">
+                    <?dbhtml filename="labs-algorithms/overlap/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-approximate-nearest-neighbors">
+                    <?dbhtml filename="labs-algorithms/approximate-nearest-neighbors/index.html"?>
                 </d:tocentry>
             </d:tocentry>
 
@@ -132,10 +150,35 @@
                 </d:tocentry>
             </d:tocentry>
 
+            <d:tocentry linkend="algorithms-linkprediction">
+                <?dbhtml filename="algorithms/linkprediction/index.html"?>
+                <d:tocentry linkend="labs-algorithms-linkprediction-adamic-adar">
+                    <?dbhtml filename="labs-algorithms/adamic-adar/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-linkprediction-common-neighbors">
+                    <?dbhtml filename="labs-algorithms/common-neighbors/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-linkprediction-preferential-attachment">
+                    <?dbhtml filename="labs-algorithms/preferential-attachment/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-linkprediction-resource-allocation">
+                    <?dbhtml filename="labs-algorithms/resource-allocation/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-linkprediction-same-community">
+                    <?dbhtml filename="labs-algorithms/same-community/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-linkprediction-total-neighbors">
+                    <?dbhtml filename="labs-algorithms/total-neighbors/index.html"?>
+                </d:tocentry>
+            </d:tocentry>
+
             <d:tocentry linkend="algorithms-auxiliary">
                 <?dbhtml filename="algorithms/auxiliary/index.html"?>
                 <d:tocentry linkend="algorithms-k1coloring">
                     <?dbhtml filename="algorithms/k1coloring/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="labs-algorithms-one-hot-encoding">
+                    <?dbhtml filename="labs-algorithms/one-hot-encoding/index.html"?>
                 </d:tocentry>
             </d:tocentry>
 
@@ -143,57 +186,6 @@
                 <?dbhtml filename="labs-algorithms/index.html"?>
                 <d:tocentry linkend="labs-procedures">
                     <?dbhtml filename="labs-procedures/index.html"?>
-                </d:tocentry>
-
-                <d:tocentry linkend="labs-algorithms-similarity">
-                    <?dbhtml filename="labs-algorithms/similarity/index.html"?>
-                    <d:tocentry linkend="labs-algorithms-similarity-jaccard">
-                        <?dbhtml filename="labs-algorithms/jaccard/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-similarity-cosine">
-                        <?dbhtml filename="labs-algorithms/cosine/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-similarity-pearson">
-                        <?dbhtml filename="labs-algorithms/pearson/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-similarity-euclidean">
-                        <?dbhtml filename="labs-algorithms/euclidean/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-similarity-overlap">
-                        <?dbhtml filename="labs-algorithms/overlap/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-approximate-nearest-neighbors">
-                        <?dbhtml filename="labs-algorithms/approximate-nearest-neighbors/index.html"?>
-                    </d:tocentry>
-                </d:tocentry>
-
-                <d:tocentry linkend="labs-algorithms-linkprediction">
-                    <?dbhtml filename="labs-algorithms/linkprediction/index.html"?>
-                    <d:tocentry linkend="labs-algorithms-linkprediction-adamic-adar">
-                        <?dbhtml filename="labs-algorithms/adamic-adar/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-linkprediction-common-neighbors">
-                        <?dbhtml filename="labs-algorithms/common-neighbors/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-linkprediction-preferential-attachment">
-                        <?dbhtml filename="labs-algorithms/preferential-attachment/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-linkprediction-resource-allocation">
-                        <?dbhtml filename="labs-algorithms/resource-allocation/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-linkprediction-same-community">
-                        <?dbhtml filename="labs-algorithms/same-community/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="labs-algorithms-linkprediction-total-neighbors">
-                        <?dbhtml filename="labs-algorithms/total-neighbors/index.html"?>
-                    </d:tocentry>
-                </d:tocentry>
-
-                <d:tocentry linkend="labs-algorithms-preprocessing">
-                    <?dbhtml filename="labs-algorithms/preprocessing/index.html"?>
-                    <d:tocentry linkend="labs-algorithms-one-hot-encoding">
-                        <?dbhtml filename="labs-algorithms/one-hot-encoding/index.html"?>
-                    </d:tocentry>
                 </d:tocentry>
 
                 <d:tocentry linkend="labs-graph-generation">
