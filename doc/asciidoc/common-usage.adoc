@@ -29,6 +29,23 @@ include::memory-estimation.adoc[leveloffset=+1]
 [[creating-graphs]]
 == Creating graphs
 
+In order for any algorithm in the GDS library to run, we must first create a graph to run on.
+The graph is created as either an _anonymous graph_ or a _named graph_.
+An anonymous graph is created for just a single algorithm and will be lost after its execution has finished.
+A named graph is given a name and stored in the graph catalog.
+For a detailed guide on all graph catalog operations, see <<graph-catalog-ops>>.
+
+Creating a named graph has several advantages:
+
+* it can be used by multiple algorithms
+* the creation is cleanly separated from the algorithm execution
+* the algorithm runtime can be measured in isolation
+* the configuration for creating the graph may be retrieved from the graph catalog
+
+Using an anonymous graph has the advantage that a single query may be used for an entire algorithm computation.
+
+
+[[running-algos]]
 == Running algorithms
 
 All algorithms are exposed as Neo4j procedures.
