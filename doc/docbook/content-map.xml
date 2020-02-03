@@ -17,6 +17,12 @@
             <d:tocentry linkend="memory-estimation">
                 <?dbhtml filename="common-usage/memory-estimation/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="creating-graphs">
+                <?dbhtml filename="common-usage/creating-graphs/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="running-algos">
+                <?dbhtml filename="common-usage/running-algos/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="management-ops">

@@ -23,60 +23,8 @@ This chapter is divided into the following sections:
 * <<running-algos>>
 
 
-include::memory-estimation.adoc[leveloffset=+1]
+include::common-usage-memory-estimation.adoc[leveloffset=+1]
 
+include::common-usage-creating-graphs.adoc[leveloffset=+1]
 
-[[creating-graphs]]
-== Creating graphs
-
-In order for any algorithm in the GDS library to run, we must first create a graph to run on.
-The graph is created as either an _anonymous graph_ or a _named graph_.
-An anonymous graph is created for just a single algorithm and will be lost after its execution has finished.
-A named graph is given a name and stored in the graph catalog.
-For a detailed guide on all graph catalog operations, see <<graph-catalog-ops>>.
-
-Creating a named graph has several advantages:
-
-* it can be used by multiple algorithms
-* the creation is cleanly separated from the algorithm execution
-* the algorithm runtime can be measured in isolation
-* the configuration for creating the graph may be retrieved from the graph catalog
-
-Using an anonymous graph has the advantage that a single query may be used for an entire algorithm computation.
-
-
-[[running-algos]]
-== Running algorithms
-
-All algorithms are exposed as Neo4j procedures.
-They can be called directly from Cypher using Neo4j Browser, `cypher-shell`, or from your client code using a Neo4j Driver in the language of your choice.
-
-For a detailed guide on the syntax to run algorithms, please see the <<algorithms-syntax, Syntax overview>> section.
-In short, there are two main execution modes to consider: `write` and `stream`, which we cover in this chapter.
-
-The execution of any algorithm can be canceled by terminating the Cypher transaction that is executing the procedure call.
-For more on how transactions are used, see <<transaction-handling, Transaction Handling>>.
-
-
-=== Write
-
-The `write` mode will write the results of the algorithm computation back to the graph.
-This is similar to how standard Cypher writing queries operate.
-A statistical summary of the computation is returned as a Cypher result row.
-This is the only execution mode that will make any modifications to the Neo4j database.
-
-The written data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.
-The `write` mode can be very useful for use cases where the algorithm results would be inspected multiple times by separate queries since the computational results are handled entirely by the library.
-
-In order for the results from a `write` mode computation to be used in another algorithm, a new graph must be created from the Neo4j database with the updated graph.
-
-
-=== Stream
-
-The `stream` mode will return the results of the algorithm computation as Cypher result rows.
-This is similar to how standard Cypher reading queries operate.
-
-The returned data can be a node ID and a computed value for the node (such as a PageRank score, or WCC componentID), or two node IDs and a computed value for the node pair (such as a Node Similarity similarity score).
-
-If the graph is very large, the result of a `stream` mode computation will also be very large.
-Using the `ORDER BY` and `LIMIT` subclauses in the Cypher query could be useful to support 'top N'-style use cases.
+include::common-usage-running-algorihms.adoc[leveloffset=+1]
