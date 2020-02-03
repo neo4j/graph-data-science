@@ -8,7 +8,11 @@ This chapter provides explanations and examples for auxiliary procedures in the 
 
 The following procedures can be used to improve your workflow:
 
-* <<algorithms-k1coloring, K-1 Coloring>>
+* Beta
+** <<algorithms-k1coloring, K-1 Coloring>>
+* Alpha
+** <<algorithms-one-hot-encoding-sample, One Hot Encoding>>
 
 include::beta/k1coloring.adoc[leveloffset=+1]
 
+include::alpha/alpha-one-hot-encoding.adoc[leveloffset=+1]
