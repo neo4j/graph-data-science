@@ -1,4 +1,4 @@
-[[algorithms-graph-similarity]]
+[[algorithms-similarity]]
 = Similarity algorithms
 
 [abstract]
