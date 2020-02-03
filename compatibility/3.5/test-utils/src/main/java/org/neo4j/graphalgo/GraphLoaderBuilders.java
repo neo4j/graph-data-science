@@ -156,7 +156,7 @@ final class GraphLoaderBuilders {
         Map<String, Object> params,
         GraphCreateConfig graphCreateConfig
     ) {
-        try(Transaction tx = api.beginTx()) {
+        try (Transaction tx = api.beginTx()) {
             KernelTransaction kernelTransaction = api
                 .getDependencyResolver()
                 .resolveDependency(ThreadToStatementContextBridge.class)

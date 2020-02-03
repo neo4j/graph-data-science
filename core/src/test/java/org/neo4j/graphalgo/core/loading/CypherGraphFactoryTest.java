@@ -39,6 +39,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
@@ -130,6 +132,25 @@ class CypherGraphFactoryTest {
         assertEquals(6.0D, graph.nodeProperties("partition").nodeProperty(node1), 0.01);
         assertEquals(5.0D, graph.nodeProperties("foo").nodeProperty(node1), 0.01);
         assertEquals(4.0D, graph.nodeProperties("foo").nodeProperty(node2), 0.01);
+    }
+
+    @Test
+    void testReadOnly() {
+        String nodes = "MATCH (n) SET n.name='foo' RETURN id(n) AS id";
+        String relationships = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
+
+        IllegalArgumentException readOnlyException = assertThrows(
+            IllegalArgumentException.class,
+            () -> runInTransaction(db, () -> {
+                new CypherLoaderBuilder().api(db)
+                    .nodeQuery(nodes)
+                    .relationshipQuery(relationships)
+                    .build()
+                    .load(CypherGraphFactory.class);
+            })
+        );
+
+        assertTrue(readOnlyException.getMessage().contains("Query must be read only"));
     }
 
     @ParameterizedTest(name = "parallel={0}")
