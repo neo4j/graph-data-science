@@ -139,13 +139,17 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
             return rows;
         }
 
-        List<Map<String, Object>> toMap() {
-            return rows().stream().map(row -> {
-                Map<String, Object> thing = new HashMap<>();
-                IntStream.range(0, row.getCells().size())
-                    .forEach(i -> thing.put(columns().get(i), row.getCells().get(i).getText()));
-                return thing;
-            }).collect(Collectors.toList());
+        List<Map<String, Object>> toMaps() {
+            return rows().stream()
+                .filter(row ->
+                    // Exclude final "n rows" row
+                    !(row.getCells().size() == 1 && row.getCells().get(0).getText().endsWith("rows"))
+                ).map(row -> {
+                    Map<String, Object> thing = new HashMap<>();
+                    IntStream.range(0, row.getCells().size())
+                        .forEach(i -> thing.put(columns().get(i), row.getCells().get(i).getText()));
+                    return thing;
+                }).collect(Collectors.toList());
         }
     }
 

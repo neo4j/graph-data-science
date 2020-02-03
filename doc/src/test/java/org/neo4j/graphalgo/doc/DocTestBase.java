@@ -22,20 +22,28 @@ package org.neo4j.graphalgo.doc;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.ast.Cell;
 import org.asciidoctor.ast.Row;
+import org.hamcrest.Matcher;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.QueryExampleConsumer;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.SetupQueryConsumer;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.Testable;
 import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
+import static java.lang.String.format;
 import static org.asciidoctor.Asciidoctor.Factory.create;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DocTestBase extends BaseProcTest {
@@ -44,7 +52,7 @@ class DocTestBase extends BaseProcTest {
     protected final Asciidoctor asciidoctor = create();
 
     protected QueryExampleConsumer otherQueryExampleConsumer() {
-        return (query, columns, rows) -> assertCypherResult(query, Testable.of(columns, rows).toMap());
+        return (query, columns, rows) -> assertCypherResult(query, Testable.of(columns, rows).toMaps());
     }
 
     protected QueryExampleConsumer defaultQueryExampleConsumer() {
@@ -66,6 +74,48 @@ class DocTestBase extends BaseProcTest {
         };
     }
 
+    protected void assertCypherResult(String query, List<Map<String, Object>> expected) {
+        try (Transaction tx = db.beginTx()) {
+            List<Map<String, Object>> actual = new ArrayList<>();
+            runQueryWithResultConsumer(query, result -> {
+                result.accept(row -> {
+                    Map<String, Object> _row = new HashMap<>();
+                    for (String column : result.columns()) {
+                        _row.put(column, valueToString(row.get(column)));
+                    }
+                    actual.add(_row);
+                    return true;
+                });
+            });
+            String reason = format(
+                "Different amount of rows returned for actual result (%d) than expected (%d)",
+                actual.size(),
+                expected.size()
+            );
+            assertThat(reason, actual.size(), equalTo(expected.size()));
+            for (int i = 0; i < expected.size(); ++i) {
+                Map<String, Object> expectedRow = expected.get(i);
+                Map<String, Object> actualRow = actual.get(i);
+
+                assertThat(actualRow.keySet(), equalTo(expectedRow.keySet()));
+                int rowNumber = i;
+                expectedRow.forEach((key, expectedValue) -> {
+                    Matcher<Object> matcher;
+                    if (expectedValue instanceof Matcher) {
+                        //noinspection unchecked
+                        matcher = (Matcher<Object>) expectedValue;
+                    } else {
+                        matcher = equalTo(expectedValue);
+                    }
+                    Object actualValue = actualRow.get(key);
+                    assertThat(
+                        String.format("Different value for column '%s' of row %d", key, rowNumber),
+                        actualValue, matcher
+                    );
+                });
+            }
+        }
+    }
     protected SetupQueryConsumer defaultSetupQueryConsumer() {
         return setupQueries -> {
             assertEquals(1, setupQueries.size(), "Expected exactly one setup query");
