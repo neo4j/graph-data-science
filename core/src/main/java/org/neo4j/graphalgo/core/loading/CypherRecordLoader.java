@@ -44,7 +44,11 @@ import java.util.stream.Collectors;
 abstract class CypherRecordLoader<R> {
 
     enum QueryType {
-        NODE, RELATIONSHIP
+        NODE, RELATIONSHIP;
+
+        String capitalize() {
+            return name().substring(0, 1) + name().substring(1).toLowerCase();
+        }
     }
 
     static final long NO_COUNT = -1L;
@@ -82,34 +86,11 @@ abstract class CypherRecordLoader<R> {
             int bufferSize
     );
 
-    void validateProperties(
-        Collection<String> propertyColumns,
-        ResolvedPropertyMappings resolvedPropertyMappings,
-        String elementType
-    ) {
-        List<String> invalidNodeProperties = resolvedPropertyMappings
-            .mappings()
-            .stream()
-            .map(ResolvedPropertyMapping::neoPropertyKey)
-            .filter(k -> !propertyColumns.contains(k))
-            .collect(Collectors.toList());
-
-        if (!invalidNodeProperties.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
-                "%s properties not found: '%s'. Available properties from the %s query are: '%s'",
-                elementType,
-                String.join("', '", invalidNodeProperties),
-                elementType.toLowerCase(),
-                String.join("', '", propertyColumns)
-            ));
-        }
-    }
-
     abstract void updateCounts(BatchLoadResult result);
 
     abstract R result();
 
-    Set<String> getRequiredColumns() {
+    Set<String> getMandatoryColumns() {
         return getReservedColumns();
     }
 
@@ -181,18 +162,41 @@ abstract class CypherRecordLoader<R> {
                         ? setup.params()
                         : CypherLoadingUtils.params(setup.params(), offset, batchSize);
         Result result = api.execute(loadQuery, parameters);
-        validateRequiredColumns(Lists.newArrayList(result.columns().iterator()));
+        validateMandatoryColumns(Lists.newArrayList(result.columns().iterator()));
         return result;
     }
 
-    private void validateRequiredColumns(List<String> allColumns) {
-        Set<String> missingColumns = new HashSet<>(getRequiredColumns());
+    private void validateMandatoryColumns(List<String> allColumns) {
+        Set<String> missingColumns = new HashSet<>(getMandatoryColumns());
         missingColumns.removeAll(allColumns);
         if (!missingColumns.isEmpty()) {
             throw new IllegalArgumentException(String.format(
                 "Invalid %s query, required column(s) not found: %s",
                 queryType().toString().toLowerCase(),
                 String.join(", ", missingColumns)
+            ));
+        }
+    }
+
+    void validatePropertyColumns(
+        Collection<String> propertyColumns,
+        ResolvedPropertyMappings resolvedPropertyMappings,
+        QueryType queryType
+    ) {
+        List<String> invalidNodeProperties = resolvedPropertyMappings
+            .mappings()
+            .stream()
+            .map(ResolvedPropertyMapping::neoPropertyKey)
+            .filter(k -> !propertyColumns.contains(k))
+            .collect(Collectors.toList());
+
+        if (!invalidNodeProperties.isEmpty()) {
+            throw new IllegalArgumentException(String.format(
+                "%s properties not found: '%s'. Available properties from the %s query are: '%s'",
+                queryType.capitalize(),
+                String.join("', '", invalidNodeProperties),
+                queryType.name().toLowerCase(),
+                String.join("', '", propertyColumns)
             ));
         }
     }

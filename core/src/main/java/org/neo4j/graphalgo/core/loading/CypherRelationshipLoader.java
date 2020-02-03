@@ -168,7 +168,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             initializedFromResult = true;
         } else if (!initializedFromResult) {
-            validateProperties(propertyColumns, outerDimensions.relationshipProperties(), "Relationship");
+            validatePropertyColumns(propertyColumns, outerDimensions.relationshipProperties(), QueryType.RELATIONSHIP);
             initializedFromResult = true;
         }
 
@@ -220,7 +220,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     }
 
     @Override
-    Set<String> getRequiredColumns() {
+    Set<String> getMandatoryColumns() {
         return RelationshipRowVisitor.REQUIRED_COLUMNS;
     }
 
