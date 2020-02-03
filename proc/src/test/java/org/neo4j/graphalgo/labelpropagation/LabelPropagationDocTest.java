@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
@@ -43,7 +44,7 @@ class LabelPropagationDocTest extends BaseProcTest {
         registerProcedures(LabelPropagationWriteProc.class, LabelPropagationStreamProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
 
-        String createGraph =
+        String dbQuery =
             "CREATE (alice:User {name: 'Alice', seed_label: 52})" +
             "CREATE (bridget:User {name: 'Bridget', seed_label: 21})" +
             "CREATE (charles:User {name: 'Charles', seed_label: 43})" +
@@ -62,7 +63,7 @@ class LabelPropagationDocTest extends BaseProcTest {
             "CREATE (michael)-[:FOLLOW {weight: 1}]->(bridget)" +
             "CREATE (charles)-[:FOLLOW {weight: 1}]->(doug)";
 
-        String loadGraph = "CALL gds.graph.create(" +
+        String createGraphQuery = "CALL gds.graph.create(" +
                            "    'myGraph'," +
                            "    'User'," +
                            "    'FOLLOW'," +
@@ -72,13 +73,14 @@ class LabelPropagationDocTest extends BaseProcTest {
                            "    }" +
                            ")";
 
-        runQuery(createGraph);
-        runQuery(loadGraph);
+        runQuery(dbQuery);
+        runQuery(createGraphQuery);
     }
 
     @AfterEach
     void tearDown() {
         db.shutdown();
+        GraphCatalog.removeAllLoadedGraphs();
     }
 
 

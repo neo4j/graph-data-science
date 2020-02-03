@@ -256,8 +256,7 @@ The `seed_label` property represents a value in the graph used to seed the node 
 For example, this can be a result from a previous run of the Label Propagation algorithm.
 In addition, each relationship has a weight property.
 
-We can load this graph into the in-memory catalog.
-
+.The following statement will load the graph into the in-memory graph catalog.
 [source, cypher]
 ----
 CALL gds.graph.create(
@@ -296,7 +295,7 @@ ORDER BY Community, Name
 |===
 
 
-.The following will load the graph, run the algorithm, and write back results:
+.The following will run the algorithm and write back results:
 [source, cypher]
 ----
 CALL gds.labelPropagation.write('myGraph', { writeProperty: 'community' })
@@ -347,7 +346,7 @@ ORDER BY Community, Name
 Using the weighted relationships, `Alice` and `Charles` are now in the same community as there is a strong link between them.
 
 
-.The following will load the graph, run the algorithm on a weighted graph and write back results:
+.The following will run the algorithm on a weighted graph and write back results:
 [source, cypher]
 ----
 CALL gds.labelPropagation.write('myGraph', {
@@ -402,7 +401,7 @@ ORDER BY Community, Name
 
 As we can see, the communities are based on the `seed_label` property, concretely `19` is from the user `Mark` and `21` from `Doug`.
 
-.The following will load the graph, run the algorithm, and write back results:
+.The following will run the algorithm and write back results:
 [source, cypher]
 ----
 CALL gds.labelPropagation.write('myGraph', {

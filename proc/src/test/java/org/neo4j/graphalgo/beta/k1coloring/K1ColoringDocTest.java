@@ -36,18 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public final class K1ColoringDocTest extends BaseProcTest {
 
     private static final String NL = System.lineSeparator();
-    public static final String DB_CYPHER =
-        "CREATE" +
-        "  (alice:User {name: 'Alice'})" +
-        ", (bridget:User {name: 'Bridget'})" +
-        ", (charles:User {name: 'Charles'})" +
-        ", (doug:User {name: 'Doug'})" +
-        ", (alice)-[:LINK]->(bridget)" +
-        ", (alice)-[:LINK]->(charles)" +
-        ", (alice)-[:LINK]->(doug)" +
-        ", (bridget)-[:LINK]->(charles)";
-
-    public static final String GRAPH_CREATE_CYPHER = "CALL gds.graph.create('myGraph', 'User', 'LINK')";
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -59,8 +47,21 @@ public final class K1ColoringDocTest extends BaseProcTest {
         registerProcedures(GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
 
-        runQuery(DB_CYPHER);
-        runQuery(GRAPH_CREATE_CYPHER);
+        String dbQuery =
+            "CREATE" +
+            "  (alice:User {name: 'Alice'})" +
+            ", (bridget:User {name: 'Bridget'})" +
+            ", (charles:User {name: 'Charles'})" +
+            ", (doug:User {name: 'Doug'})" +
+            ", (alice)-[:LINK]->(bridget)" +
+            ", (alice)-[:LINK]->(charles)" +
+            ", (alice)-[:LINK]->(doug)" +
+            ", (bridget)-[:LINK]->(charles)";
+
+        String graphCreateCypher = "CALL gds.graph.create('myGraph', 'User', 'LINK')";
+
+        runQuery(dbQuery);
+        runQuery(graphCreateCypher);
     }
 
     @AfterEach

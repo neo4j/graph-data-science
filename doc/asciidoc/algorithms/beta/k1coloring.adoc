@@ -143,14 +143,15 @@ CREATE (alice:User {name: 'Alice'}),
        (bridget)-[:LINK]->(charles)
 ----
 
-.Loading the graph into the catalog:
-[source, cypher]
-----
-CALL gds.graph.create('myGraph', 'User', 'LINK');
-----
-
 This graph has a super node with name "Alice" that connects to all other nodes.
 It should therefore not be possible for any other node to be assigned the same color as the Alice node.
+
+.The following statement will load the graph into the in-memory graph catalog.
+[source, cypher]
+----
+CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES')
+----
+
 In the following examples we will demonstrate using the K-1 Coloring algorithm on this graph.
 
 .Running the K-1 Coloring algorithm in stream mode:

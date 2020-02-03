@@ -217,8 +217,7 @@ CREATE (links)-[:LINKS {weight: 0.05}]->(d)
 This graph represents seven pages, linking to another.
 Each relationship has a property called `weight`, which describes the importance of the relationship.
 
-With the following statement we load the graph into the in-memory graph catalog.
-
+.The following statement will load the graph into the in-memory graph catalog.
 [source, cypher]
 ----
 CALL gds.graph.create(

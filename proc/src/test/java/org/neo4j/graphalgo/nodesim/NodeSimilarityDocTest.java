@@ -41,7 +41,7 @@ class NodeSimilarityDocTest extends BaseProcTest {
         registerProcedures(NodeSimilarityStreamProc.class, NodeSimilarityWriteProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
 
-        String createCypher =
+        String dbQuery =
             "CREATE (alice:Person {name: 'Alice'})" +
             "CREATE (bob:Person {name: 'Bob'})" +
             "CREATE (carol:Person {name: 'Carol'})" +
@@ -62,10 +62,10 @@ class NodeSimilarityDocTest extends BaseProcTest {
             "CREATE (dave)-[:LIKES]->(synth)" +
             "CREATE (dave)-[:LIKES]->(bongos);";
 
-        String loadCypher = "CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES')";
+        String createGraphQuery = "CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES')";
 
-        runQuery(createCypher);
-        runQuery(loadCypher);
+        runQuery(dbQuery);
+        runQuery(createGraphQuery);
     }
 
     @AfterEach
