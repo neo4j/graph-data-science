@@ -62,7 +62,7 @@ public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPr
 
     @Procedure(value = "gds.labelPropagation.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<WriteResult> stats(
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -70,7 +70,8 @@ public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPr
             graphNameOrConfig,
             configuration
         );
-        return write(computationResult);
+        return write(computationResult)
+            .map(StatsResult::from);
     }
 
     @Procedure(value = "gds.labelPropagation.stats.estimate", mode = READ)

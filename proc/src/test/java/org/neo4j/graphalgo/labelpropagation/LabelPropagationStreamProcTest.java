@@ -30,9 +30,14 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class LabelPropagationStreamProcTest extends LabelPropagationBaseProcTest<LabelPropagationStreamConfig> {
     @Override
@@ -78,6 +83,29 @@ class LabelPropagationStreamProcTest extends LabelPropagationBaseProcTest<LabelP
             "bytesMin", 1720L,
             "bytesMax", 2232L
         )));
+    }
+
+    @Test
+    void statsShouldNotHaveWriteProperties() {
+        String query = GdsCypher
+            .call()
+            .explicitCreation(TEST_GRAPH_NAME)
+            .algo("labelPropagation")
+            .statsMode()
+            .yields();
+
+        runQueryWithResultConsumer(query, result -> {
+            assertThat(result.columns(), not(hasItems(
+                "writeMillis",
+                "nodePropertiesWritten",
+                "relationshipPropertiesWritten"
+            )));
+
+            if(result.hasNext()) {
+                Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
+                assertFalse(config.containsKey("writeProperty"));
+            }
+        });
     }
 
     @Override

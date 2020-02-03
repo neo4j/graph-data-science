@@ -45,10 +45,6 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
 
         CONFIG config = computationResult.config();
         boolean write = config instanceof LabelPropagationWriteConfig;
-        LabelPropagationWriteConfig writeConfig = ImmutableLabelPropagationWriteConfig.builder()
-            .writeProperty("stats does not support a write property")
-            .from(config)
-            .build();
 
         Graph graph = computationResult.graph();
         LabelPropagation result = computationResult.result();
@@ -113,6 +109,51 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
             this.didConverge = didConverge;
             this.communityDistribution = communityDistribution;
             this.configuration = configuration;
+        }
+    }
+
+    public static class StatsResult {
+
+        public long createMillis;
+        public long computeMillis;
+        public long postProcessingMillis;
+        public long communityCount;
+        public long ranIterations;
+        public boolean didConverge;
+        public Map<String, Object> communityDistribution;
+        public Map<String, Object> configuration;
+
+        StatsResult(
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long communityCount,
+            long ranIterations,
+            boolean didConverge,
+            Map<String, Object> communityDistribution,
+            Map<String, Object> configuration
+        ) {
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.postProcessingMillis = postProcessingMillis;
+            this.communityCount = communityCount;
+            this.ranIterations = ranIterations;
+            this.didConverge = didConverge;
+            this.communityDistribution = communityDistribution;
+            this.configuration = configuration;
+        }
+
+        public static StatsResult from(WriteResult writeResult) {
+            return new StatsResult(
+                writeResult.createMillis,
+                writeResult.computeMillis,
+                writeResult.postProcessingMillis,
+                writeResult.communityCount,
+                writeResult.ranIterations,
+                writeResult.didConverge,
+                writeResult.communityDistribution,
+                writeResult.configuration
+            );
         }
     }
 
