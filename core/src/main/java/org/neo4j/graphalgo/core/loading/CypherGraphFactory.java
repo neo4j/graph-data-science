@@ -43,6 +43,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.NODE;
+import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.RELATIONSHIP;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class CypherGraphFactory extends GraphFactory {
@@ -64,8 +66,8 @@ public class CypherGraphFactory extends GraphFactory {
     }
 
     public final MemoryEstimation memoryEstimation() {
-        BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), api, setup).load();
-        BatchLoadResult relCount = new CountingCypherRecordLoader(relationshipQuery(), api, setup).load();
+        BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, setup).load();
+        BatchLoadResult relCount = new CountingCypherRecordLoader(relationshipQuery(), RELATIONSHIP, api, setup).load();
 
         GraphDimensions estimateDimensions = ImmutableGraphDimensions.builder()
             .from(dimensions)
@@ -85,7 +87,7 @@ public class CypherGraphFactory extends GraphFactory {
     public ImportResult build() {
 //         Temporarily override the security context to enforce read-only access during load
         try (KernelTransaction.Revertable ignored = setReadOnlySecurityContext()) {
-            BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), api, setup).load();
+            BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, setup).load();
 
             CypherNodeLoader.LoadResult loadResult = new CypherNodeLoader(
                 nodeQuery(),

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.apache.commons.compress.utils.Sets;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -27,12 +26,13 @@ import java.util.Set;
 
 class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
 
-    private static final Set<String> RESERVED_COLUMNS = Sets.newHashSet();
+    private final QueryType queryType;
 
     private long total;
 
-    CountingCypherRecordLoader(String cypherQuery, GraphDatabaseAPI api, GraphSetup setup) {
+    CountingCypherRecordLoader(String cypherQuery, QueryType queryType, GraphDatabaseAPI api, GraphSetup setup) {
         super(cypherQuery, NO_COUNT, api, setup);
+        this.queryType = queryType;
     }
 
     @Override
@@ -54,6 +54,13 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
 
     @Override
     Set<String> getReservedColumns() {
-        return RESERVED_COLUMNS;
+        return queryType == QueryType.NODE
+            ? NodeRowVisitor.REQUIRED_COLUMNS
+            : RelationshipRowVisitor.REQUIRED_COLUMNS;
+    }
+
+    @Override
+    QueryType queryType() {
+        return queryType;
     }
 }

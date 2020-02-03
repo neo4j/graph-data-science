@@ -36,6 +36,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private static final String SOURCE_COLUMN = "source";
     private static final String TARGET_COLUMN = "target";
     static final String TYPE_COLUMN = "type";
+    static final Set<String> REQUIRED_COLUMNS = Sets.newHashSet(SOURCE_COLUMN, TARGET_COLUMN);
     static final Set<String> RESERVED_COLUMNS = Sets.newHashSet(SOURCE_COLUMN, TARGET_COLUMN, TYPE_COLUMN);
 
     private final IdMap idMap;

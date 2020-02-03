@@ -220,8 +220,18 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     }
 
     @Override
+    Set<String> getRequiredColumns() {
+        return RelationshipRowVisitor.REQUIRED_COLUMNS;
+    }
+
+    @Override
     Set<String> getReservedColumns() {
         return RelationshipRowVisitor.RESERVED_COLUMNS;
+    }
+
+    @Override
+    QueryType queryType() {
+        return QueryType.RELATIONSHIP;
     }
 
     Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders() {

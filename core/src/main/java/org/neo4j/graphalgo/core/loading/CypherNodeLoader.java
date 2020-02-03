@@ -149,6 +149,11 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         return NodeRowVisitor.RESERVED_COLUMNS;
     }
 
+    @Override
+    QueryType queryType() {
+        return QueryType.NODE;
+    }
+
     private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties(PropertyMappings propertyMappings) {
         return propertyMappings.stream().collect(Collectors.toMap(
             propertyMapping -> propertyMapping,

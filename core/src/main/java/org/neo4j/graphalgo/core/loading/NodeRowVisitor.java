@@ -33,6 +33,7 @@ import java.util.Set;
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private static final String ID_COLUMN = "id";
     static final Set<String> RESERVED_COLUMNS = Sets.newHashSet(ID_COLUMN);
+    static final Set<String> REQUIRED_COLUMNS = RESERVED_COLUMNS;
 
     private long rows;
     private long maxNeoId = 0;
