@@ -43,9 +43,9 @@ apply plugin: 'ch.kk7.spawn'
 ext {
     versionParts = "1.0.0-SNAPSHOT".split('-')
     versions = [
-        'GdsManual' : versionParts[0].split('\\.')[0..1].join('.'),
+        'gdsManual' : versionParts[0].split('\\.')[0..1].join('.'),
     ]
-    if (1 < versionParts.size()) { versions.GdsManual += '-preview' }
+    if (1 < versionParts.size()) { versions.gdsManual += '-preview' }
     versions['neo4jDocs'] = "3.5"
 
     copyrightYear = '2020'
@@ -54,7 +54,7 @@ ext {
             'cypher-manual'     : "${docsBaseUri}/cypher-manual/${versions.neo4jDocs}",
             'driver-manual'     : "${docsBaseUri}/driver-manual/current",
             'operations-manual' : "${docsBaseUri}/operations-manual/${versions.neo4jDocs}",
-            'graph-data-science': "${docsBaseUri}/graph-data-science/${versions.GdsManual}",
+            'graph-data-science': "${docsBaseUri}/graph-data-science/${versions.gdsManual}",
             'java-reference'    : "${docsBaseUri}/java-reference/${versions.neo4jDocs}",
             'rest-docs'         : "${docsBaseUri}/rest-docs/${versions.neo4jDocs}",
             'ogm-manual'        : "${docsBaseUri}/ogm-manual/current",
@@ -66,7 +66,7 @@ ext {
             'doctype'            : 'book',
             'icons'              : 'font',
             'attribute-missing'  : 'warn',
-            'docs-version'       : versions.GdsManual,
+            'docs-version'       : versions.gdsManual,
             'copyright-year'     : copyrightYear,
             'copyright'          : "${copyrightYear} Neo4j, Inc.".toString(),
             'common-license-page-uri': "$docsBaseUri/license/"
@@ -117,7 +117,7 @@ task docbook {
     description 'Build DocBook.'
     ext.sourceDir = asciidocSourceDir
     ext.sourceFile = file("$sourceDir/index.adoc")
-    ext.outputDir = "$buildDir/docbook/${versions.GdsManual}"
+    ext.outputDir = "$buildDir/docbook/${versions.gdsManual}"
     inputs.dir sourceDir
     outputs.dir outputDir
     doLast {
@@ -152,8 +152,8 @@ task makeToc(type: XsltTask, dependsOn: docbook) {
     description 'Create a table of contents aka complete content map.'
     ext.sourceDir = docbook.outputDir
     ext.sourceFile = "$sourceDir/index.xml"
-    ext.outputFile = "$buildDir/docbook/${versions.GdsManual}/toc.xml"
-    def outputDir = "$buildDir/docbook/${versions.GdsManual}/_trash"
+    ext.outputFile = "$buildDir/docbook/${versions.gdsManual}/toc.xml"
+    def outputDir = "$buildDir/docbook/${versions.gdsManual}/_trash"
 
     def url = DocBookPlugin.getClassLoader().getResource("xsl/create-toc/xhtml/maketoc.xsl")
     stylesheet url
@@ -178,7 +178,7 @@ task makeToc(type: XsltTask, dependsOn: docbook) {
 
 task sitemap() {
     ext.contentMapXml = file("${projectDir}/docbook/content-map.xml")
-    def siteMapDir = "$buildDir/sitemap/$versions.GdsManual"
+    def siteMapDir = "$buildDir/sitemap/$versions.gdsManual"
     outputs.dir siteMapDir
 
     doLast {
@@ -208,7 +208,7 @@ html {
     dependsOn docbook
     ext.sourceDir = docbook.outputDir
     ext.sourceFile = "$sourceDir/index.xml"
-    ext.outputDir = "$buildDir/html/${versions.GdsManual}"
+    ext.outputDir = "$buildDir/html/${versions.gdsManual}"
     ext.contentMap = "$projectDir/docbook/content-map.xml"
     inputs.file sourceFile
     inputs.file ext.contentMap
@@ -288,7 +288,7 @@ task packageHtml(type: Tar, dependsOn: [html, sitemap]) {
     description 'Package HTML for distribution, including sitemap.'
     baseName docsArtifactsName
     extension 'tar.gz'
-    version versions.GdsManual
+    version versions.gdsManual
     compression = Compression.GZIP
     from { html }
     from { sitemap }
@@ -303,7 +303,7 @@ task pdf {
     ext.sourceDir = asciidocSourceDir
     ext.sourceFile = file("$sourceDir/index.adoc")
     ext.outputDir = "$buildDir/pdf"
-    ext.outputFilename = "${docsArtifactsName}-${versions.GdsManual}.pdf"
+    ext.outputFilename = "${docsArtifactsName}-${versions.gdsManual}.pdf"
     ext.outputFile = "$outputDir/$outputFilename"
     ext.imagesDir = "$outputDir/images"
     ext.imagesOutDir = imagesDir
