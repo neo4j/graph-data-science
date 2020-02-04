@@ -15,3 +15,4 @@ Creating a named graph has several advantages:
 * the configuration for creating the graph may be retrieved from the graph catalog
 
 Using an anonymous graph has the advantage that a single query may be used for an entire algorithm computation.
+This can be especially useful in the development phase when the workflow is being set up and the graph projections are experimented with.
