@@ -7,7 +7,9 @@ This chapter explains the common usage patterns and operations that constitute t
 --
 
 The GDS library usage pattern is typically split in two phases: development and production.
-In the development phase, it is typical to make use of the memory estimation features of the library.
+In the development phase the goal is to establish a workflow of useful algorithms.
+In order do this, the system must be configured, graph projections must be defined, and algorithms must be selected.
+It is typical to make use of the memory estimation features of the library.
 This enables you to successfully configure your system to handle the amount of data to be processed.
 There are two kinds of resources to keep in mind: the in-memory graph and the algorithm data structures.
 
