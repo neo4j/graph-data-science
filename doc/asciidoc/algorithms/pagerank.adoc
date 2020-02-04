@@ -216,6 +216,10 @@ CREATE (links)-[:LINKS {weight: 0.05}]->(d)
 This graph represents seven pages, linking to another.
 Each relationship has a property called `weight`, which describes the importance of the relationship.
 
+[NOTE]
+In the examples below we will use named graphs and standard projections as the norm.
+However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+
 .The following statement will load the graph into the in-memory graph catalog.
 [source, cypher]
 ----

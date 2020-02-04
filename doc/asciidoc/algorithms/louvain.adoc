@@ -161,11 +161,15 @@ CREATE (nMichael)-[:LINK {weight: 1}]->(nMark);
 This graph has two clusters of _Users_, that are closely connected.
 Between those clusters there is one single edge.
 The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
+
 We can now load the graph into the in-memory graph catalog.
 We load the `LINK` relationships with projection mode set to `UNDIRECTEd` as this works best with the Louvain algorithm.
-This graph will be used to demonstrate the usage of the Louvain algorithm.
 
+[NOTE]
+In the examples below we will use named graphs and standard projections as the norm.
+However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
 
+.The following statement will load the graph into the in-memory graph catalog.
 [source, cypher]
 ----
 CALL gds.graph.create(

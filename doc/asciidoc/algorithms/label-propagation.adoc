@@ -256,6 +256,10 @@ The `seed_label` property represents a value in the graph used to seed the node 
 For example, this can be a result from a previous run of the Label Propagation algorithm.
 In addition, each relationship has a weight property.
 
+[NOTE]
+In the examples below we will use named graphs and standard projections as the norm.
+However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+
 .The following statement will load the graph into the in-memory graph catalog.
 [source, cypher]
 ----
@@ -269,6 +273,9 @@ CALL gds.graph.create(
     }
 )
 ----
+
+4:52
+See the suchandsuch chapters
 
 [[algorithms-label-propagation-examples-unweighted]]
 === Unweighted

@@ -196,6 +196,10 @@ In the example, we want to use the Node Similarity algorithm to compare people b
 The Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1.
 In the example graph, the Eve node will not be compared to other Person nodes.
 
+[NOTE]
+In the examples below we will use named graphs and standard projections as the norm.
+However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+
 .The following statement will load the graph into the in-memory graph catalog.
 [source, cypher, role=setup-query]
 ----

@@ -146,6 +146,10 @@ CREATE (alice:User {name: 'Alice'}),
 This graph has a super node with name "Alice" that connects to all other nodes.
 It should therefore not be possible for any other node to be assigned the same color as the Alice node.
 
+[NOTE]
+In the examples below we will use named graphs and standard projections as the norm.
+However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+
 .The following statement will load the graph into the in-memory graph catalog.
 [source, cypher]
 ----

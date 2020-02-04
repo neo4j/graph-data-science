@@ -179,6 +179,11 @@ In the following examples we will demonstrate using the Weakly Connected Compone
 
 We can load this graph into the in-memory catalog.
 
+[NOTE]
+In the examples below we will use named graphs and standard projections as the norm.
+However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+
+.The following statement will load the graph into the in-memory graph catalog.
 [source, cypher]
 ----
 CALL gds.graph.create(
