@@ -1,4 +1,4 @@
-[[labs-graph-generation]]
+[[graph-generation]]
 = Graph Generation
 
 [abstract]
@@ -23,7 +23,7 @@ The graph generation is parameterized by three dimensions:
  * relationship distribution function - the probability distribution method used to connect generated nodes
 
 
-[[labs-graph-generation-syntax]]
+[[graph-generation-syntax]]
 == Syntax
 
 .The following describes the API for running the algorithm
@@ -50,9 +50,9 @@ YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegre
 [opts="header",cols="1m,1,1m,1,4"]
 |===
 | Name                      | Type      | Default  | Optional | Description
-| relationshipDistribution  | string    | UNIFORM  | yes      | The probability distribution method used to connect generated nodes. For more information see <<labs-graph-generation-distribution>>.
+| relationshipDistribution  | string    | UNIFORM  | yes      | The probability distribution method used to connect generated nodes. For more information see <<graph-generation-distribution>>.
 | relationshipSeed          | long      | null     | yes      | The seed used for generating relationships.
-| relationshipProperty      | map       | {}       | yes      | Describes the method used to generate a relationship property. By default no relationship property is generated. For more information see <<labs-graph-generation-relationship-property>>.
+| relationshipProperty      | map       | {}       | yes      | Describes the method used to generate a relationship property. By default no relationship property is generated. For more information see <<graph-generation-relationship-property>>.
 |===
 
 .Results
@@ -69,7 +69,7 @@ YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegre
 | relationshipProperty      | string     | The configuration of the generated relationship property.
 |===
 
-[[labs-graph-generation-distribution]]
+[[graph-generation-distribution]]
 == Relationship Distribution
 
 The `relationshipDistribution` parameter controls the statistical method used for the generation of new relationships.
@@ -80,14 +80,14 @@ Currently there are three supported methods:
 * `POWER_LAW` - Distributes the incoming relationships using a power law distribution. The out degree is based on a normal distribution.
 
 
-[[labs-graph-generation-seed]]
+[[graph-generation-seed]]
 == Relationship Seed
 
 The `relationshipSeed` parameter allows, to generate graphs with the same relationships, if they have no property.
 Currently the `relationshipProperty` is not seeded, therefore the generated graphs can differ in their property values.
 Hence generated graphs based on the same `relationshipSeed` are not identical.
 
-[[labs-graph-generation-relationship-property]]
+[[graph-generation-relationship-property]]
 == Relationship Property
 
 The graph generator is capable of generating a relationship property.

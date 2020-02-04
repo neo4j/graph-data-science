@@ -10,12 +10,12 @@ The following procedures can be used to improve your workflow:
 
 * Beta
 ** <<algorithms-k1coloring, K-1 Coloring>>
+** <<graph-generation, Graph Generation>>
 * Alpha
 ** <<algorithms-one-hot-encoding-sample, One Hot Encoding>>
-** <<labs-graph-generation, Graph Generation>>
 
 include::beta/k1coloring.adoc[leveloffset=+1]
 
-include::alpha/alpha-one-hot-encoding.adoc[leveloffset=+1]
+include::beta/graph-generation.adoc[leveloffset=+1]
 
-include::alpha/alpha-graph-generation.adoc[leveloffset=+1]
+include::alpha/alpha-one-hot-encoding.adoc[leveloffset=+1]
