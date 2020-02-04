@@ -179,7 +179,7 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @Test
-    void calculatedegreeDistributionForUndirectedNodesWhenAskedTo() {
+    void calculateDegreeDistributionForUndirectedNodesWhenAskedTo() {
         String name = "name";
         runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
 
@@ -202,7 +202,7 @@ class GraphListProcTest extends BaseProcTest {
 
     @Disabled("Disabled until we support REL> syntax for type filter")
     @Test
-    void calculatedegreeDistributionForOutgoingRelationshipsWhenAskedTo() {
+    void calculateDegreeDistributionForOutgoingRelationshipsWhenAskedTo() {
         String name = "name";
         runQuery("CALL gds.graph.create($name, 'A', 'REL>')", map("name", name));
 
@@ -225,7 +225,7 @@ class GraphListProcTest extends BaseProcTest {
 
     @Disabled("Disabled until we support REL> syntax for type filter")
     @Test
-    void calculatedegreeDistributionForIncomingRelationshipsWhenAskedTo() {
+    void calculateDegreeDistributionForIncomingRelationshipsWhenAskedTo() {
         String name = "name";
         runQuery("CALL gds.graph.create($name, 'A', '<REL')", map("name", name));
 
