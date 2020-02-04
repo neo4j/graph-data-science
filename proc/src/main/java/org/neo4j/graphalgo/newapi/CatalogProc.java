@@ -23,10 +23,10 @@ import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 abstract class CatalogProc extends BaseProc {
-    private static final String HISTOGRAM_FIELD_NAME = "histogram";
+    private static final String DEGREE_DISTRIBUTION_FIELD_NAME = "degreeDistribution";
 
     boolean computeHistogram() {
-        return callContext.outputFields().anyMatch(HISTOGRAM_FIELD_NAME::equals);
+        return callContext.outputFields().anyMatch(DEGREE_DISTRIBUTION_FIELD_NAME::equals);
     }
 
     void validateGraphName(String graphName) {
