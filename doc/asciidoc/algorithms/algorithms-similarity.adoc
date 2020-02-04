@@ -6,7 +6,7 @@
 This chapter provides explanations and examples for each of the similarity algorithms in the Neo4j Graph Data Science library.
 --
 
-Similarity algorithms can help calculate the similarity of nodes.
+Similarity algorithms compute the similarity of pairs of nodes using different vector-based metrics.
 The Neo4j GDS library includes the following similarity algorithms, grouped by quality tier:
 
 * Production-quality
@@ -32,4 +32,3 @@ include::alpha/alpha-similarity-jaccard.adoc[leveloffset=+1]
 include::alpha/alpha-similarity-overlap.adoc[leveloffset=+1]
 
 include::alpha/alpha-similarity-pearson.adoc[leveloffset=+1]
-

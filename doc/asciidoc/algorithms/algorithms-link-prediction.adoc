@@ -7,7 +7,7 @@ This chapter provides explanations and examples for each of the link prediction 
 --
 
 Link prediction algorithms help determine the closeness of a pair of nodes.
-The computed scores can then be used to predict new edges between them.
+The computed scores can then be used to predict new relationships between them.
 The Neo4j GDS library includes the following link prediction algorithms, grouped by quality tier:
 
 * Alpha

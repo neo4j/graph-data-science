@@ -6,7 +6,7 @@
 This chapter contains a reference of procedures for using the algorithms in the Neo4j Graph Data Science library.
 --
 
-The following is a procedure reference for calling the algorithms in the Neo4j Graph Data Science library.
+The following is a reference table of procedures used to run algorithms in the Neo4j Graph Data Science library.
 
 [[table-labs]]
 [opts=header,cols="1m,5m"]
@@ -80,4 +80,3 @@ The following is a procedure reference for calling the algorithms in the Neo4j G
 | <<labs-graph-generation, gds.beta.graph.generate>>                                                       | CALL gds.beta.graph.generate(graphName: String, nodeCount: Integer, averageDegree: Integer, { relationshipDistribution: 'UNIFORM', relationshipProperty: {}})YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegree, relationshipDistribution, relationshipProperty - generates a random graph
 | algo.version                                                                                             | RETURN algo.version() - return the current graph algorithms installed version
 |===
-
