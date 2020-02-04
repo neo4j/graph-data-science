@@ -66,7 +66,7 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
             builder.withCommunityFunction(dss::setIdOf);
             builder.withConfig(config);
 
-            if (config instanceof WccWriteConfig) {
+            if (shouldWrite(config)) {
                 writeNodeProperties(builder, computeResult);
                 graph.releaseProperties();
             }

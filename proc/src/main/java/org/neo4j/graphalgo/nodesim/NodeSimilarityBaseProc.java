@@ -74,8 +74,6 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
             );
         }
 
-        boolean write = config instanceof NodeSimilarityWriteConfig;
-
         NodeSimilarityResult result = computationResult.result();
         NodeSimilarity algorithm = computationResult.algorithm();
         SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
@@ -92,10 +90,8 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
         boolean shouldComputeHistogram = callContext
             .outputFields()
             .anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
-        if (write && similarityGraph.relationshipCount() > 0) {
-            NodeSimilarityWriteConfig writeConfig = ImmutableNodeSimilarityWriteConfig.builder()
-                .from(config)
-                .build();
+        if (shouldWrite(config) && similarityGraph.relationshipCount() > 0) {
+            NodeSimilarityWriteConfig writeConfig = (NodeSimilarityWriteConfig) config;
 
             String writeRelationshipType = writeConfig.writeRelationshipType();
             String writeProperty = writeConfig.writeProperty();

@@ -44,7 +44,6 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
         log.debug("Writing results");
 
         CONFIG config = computationResult.config();
-        boolean write = config instanceof LabelPropagationWriteConfig;
 
         Graph graph = computationResult.graph();
         LabelPropagation result = computationResult.result();
@@ -63,7 +62,7 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
                 .didConverge(result.didConverge())
                 .ranIterations(result.ranIterations())
                 .withCommunityFunction((nodeId) -> result.labels().get(nodeId));
-            if (write) {
+            if (shouldWrite(config)) {
                 writeNodeProperties(builder, computationResult);
                 graph.releaseProperties();
             }

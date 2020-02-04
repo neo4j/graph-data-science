@@ -372,6 +372,10 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         );
     }
 
+    protected boolean shouldWrite(CONFIG config) {
+        return config instanceof WriteConfig;
+    }
+
     @ValueClass
     public interface ComputationResult<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends AlgoBaseConfig> {
         long createMillis();

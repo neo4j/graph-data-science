@@ -46,7 +46,6 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
         ComputationResult<Louvain, Louvain, CONFIG> computeResult
     ) {
         CONFIG config = computeResult.config();
-        boolean write = config instanceof LouvainWriteConfig;
         LouvainWriteConfig writeConfig = ImmutableLouvainWriteConfig.builder()
             .writeProperty("stats does not support a write property")
             .from(config)
@@ -80,7 +79,7 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
             .withCommunityFunction(louvain::getCommunity)
             .withConfig(config);
 
-        if (write && !writeConfig.writeProperty().isEmpty()) {
+        if (shouldWrite(config) && !writeConfig.writeProperty().isEmpty()) {
             writeNodeProperties(builder, computeResult);
             graph.releaseProperties();
         }
@@ -170,15 +169,15 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
 
         static StatsResult from(WriteResult writeResult) {
             return new StatsResult(
-            writeResult.createMillis,
-            writeResult.computeMillis,
-            writeResult.postProcessingMillis,
-            writeResult.ranLevels,
-            writeResult.communityCount,
-            writeResult.modularity,
-            writeResult.modularities,
-            writeResult.communityDistribution,
-            writeResult.configuration
+                writeResult.createMillis,
+                writeResult.computeMillis,
+                writeResult.postProcessingMillis,
+                writeResult.ranLevels,
+                writeResult.communityCount,
+                writeResult.modularity,
+                writeResult.modularities,
+                writeResult.communityDistribution,
+                writeResult.configuration
             );
         }
     }

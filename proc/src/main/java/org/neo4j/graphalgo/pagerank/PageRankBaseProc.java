@@ -41,7 +41,6 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
 
     protected Stream<WriteResult> write(ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
         CONFIG config = computeResult.config();
-        boolean write = config instanceof PageRankWriteConfig;
         PageRankWriteConfig writeConfig = ImmutablePageRankWriteConfig.builder()
             .writeProperty("stats does not support a write property")
             .from(config)
@@ -70,7 +69,7 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
             builder.withDidConverge(pageRank.didConverge());
             builder.withConfig(config);
 
-            if (write && !writeConfig.writeProperty().isEmpty()) {
+            if (shouldWrite(config) && !writeConfig.writeProperty().isEmpty()) {
                 writeNodeProperties(builder, computeResult);
                 graph.releaseProperties();
             }

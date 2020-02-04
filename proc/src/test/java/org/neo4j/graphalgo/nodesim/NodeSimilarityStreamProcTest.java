@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.nodesim;
 
 import org.apache.commons.compress.utils.Sets;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -37,6 +38,7 @@ import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.graphalgo.Projection.REVERSE;
 
 class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimilarityStreamConfig> {
@@ -219,5 +221,19 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
                 : EXPECTED_OUTGOING,
             result
         );
+    }
+
+    @Override
+    @Test
+    public void checkStatsModeExists() {
+        applyOnProcedure((proc) -> {
+            boolean inStreamClass = methodExists(proc, "stream");
+            if (inStreamClass) {
+                assertFalse(
+                    methodExists(proc, "stats"),
+                    "Stats method was moved to its own class"
+                );
+            }
+        });
     }
 }
