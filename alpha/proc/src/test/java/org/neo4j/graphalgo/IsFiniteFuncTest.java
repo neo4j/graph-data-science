@@ -81,7 +81,7 @@ class IsFiniteFuncTest extends BaseProcTest {
     @Test
     void testInfinityAndNaN() {
         double[] actual = runQuery(
-            "WITH [42, gds.util.Infinity(), 13.37, 0, gds.util.NaN(), 1.7976931348623157e308, -13] AS values RETURN filter(x IN values WHERE gds.util.isFinite(x)) as xs",
+            "WITH [42, gds.util.infinity(), 13.37, 0, gds.util.NaN(), 1.7976931348623157e308, -13] AS values RETURN filter(x IN values WHERE gds.util.isFinite(x)) as xs",
             result -> result.<List<Number>>columnAs("xs")
                 .stream()
                 .flatMap(Collection::stream)

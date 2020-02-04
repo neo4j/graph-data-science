@@ -37,8 +37,8 @@ public class IsFiniteFunc {
         return value == null || !Double.isFinite(value.doubleValue());
     }
 
-    @UserFunction("gds.util.Infinity")
-    @Description("CALL gds.util.Infinity() - returns Double.POSITIVE_INFINITY as a value.")
+    @UserFunction("gds.util.infinity")
+    @Description("CALL gds.util.infinity() - returns Double.POSITIVE_INFINITY as a value.")
     public double Infinity() {
         return Double.POSITIVE_INFINITY;
     }
