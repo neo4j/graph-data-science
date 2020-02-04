@@ -25,11 +25,14 @@ import org.neo4j.graphalgo.results.SimilarityResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WeightedInputTest {
 
@@ -284,6 +287,18 @@ class WeightedInputTest {
         assertEquals(Double.NaN, similarityResult.similarity, 0.01);
     }
 
+    @Test
+    void prepareDenseWeightsThrowsCorrectClass() {
+        Map<String, Object> badMap = Collections.singletonMap("item", 4L);
+        Map<String, Object> goodMap = new HashMap<>(2);
+        goodMap.put("item", 42L);
+        double[] weights = {3.14, 0.15};
+        goodMap.put("weights", weights);
 
+        // should not throw anything
+        WeightedInput.prepareDenseWeights(Collections.singletonList(goodMap), -1, null);
 
+        assertThrows(IllegalArgumentException.class, () ->
+            WeightedInput.prepareDenseWeights(Arrays.asList(goodMap, badMap), -1, null));
+    }
 }

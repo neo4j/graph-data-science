@@ -73,7 +73,7 @@ public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityA
                     return agg;
                 });
             } catch (NoSuchElementException nse) {
-                throw new IllegalArgumentException(String.format("Query %s does not return expected columns 'item', 'category' and 'weight'", query));
+                throw new IllegalArgumentException(String.format("Query %s does not return expected columns 'item', 'category' and 'weight'.", query));
             }
             return true;
         });
