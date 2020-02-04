@@ -7,10 +7,11 @@ The standard approach to create a graph is detailed in <<label-relationship-type
 It is also possible to use Cypher queries to project a more customised view of your graph.
 The Cypher projection (see <<cypher-projection, Cypher projection>>) is more flexible but does not provide the same level of performance during graph creation.
 
-As it can take some time to create large graphs into the algorithm data structures, you can store a graph in the graph catalog.
+Depending on the size of the projection, it can take some time to initialize the underlying data structures.
+If such a large graph is used multiple times in the analytical workflow, it can be stored in the graph catalog.
 Graphs from the graph catalog can then later be referenced by name when running algorithms.
-Named graphs can be created using either of the projected graph models.
-After usage, named graphs can be removed from memory to free resources used.
+Named graphs can be created using either the standard approach or Cypher queries.
+After usage, named graphs can be removed from the catalog to free up main memory.
 
 * <<label-relationship-type-projection>>
 * <<named-graph>>
