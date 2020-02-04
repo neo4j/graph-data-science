@@ -160,7 +160,7 @@ MATCH (target:Loc) WHERE id(target) = targetNodeId
 WITH source, target, distance WHERE source <> target
 
 RETURN source.name AS source, target.name AS target, distance
-ORDER BY distance DESC
+ORDER BY distance DESC, source ASC, target ASC
 LIMIT 10
 ----
 

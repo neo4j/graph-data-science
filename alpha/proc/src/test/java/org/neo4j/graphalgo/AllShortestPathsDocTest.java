@@ -125,7 +125,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
                        " WITH source, target, distance WHERE source <> target" +
 
                        " RETURN source.name AS source, target.name AS target, distance" +
-                       " ORDER BY distance DESC, source" +
+                       " ORDER BY distance DESC, source ASC, target ASC" +
                        " LIMIT 10";
 
         String actual = runQuery(query, Result::resultAsString);
