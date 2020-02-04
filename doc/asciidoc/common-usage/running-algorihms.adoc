@@ -14,7 +14,7 @@ For more on how transactions are used, see <<transaction-handling, Transaction H
 [[running-algos-write]]
 == Write
 
-The `write` mode will write the results of the algorithm computation back to the graph.
+The `write` mode will write the results of the algorithm computation back to the Neo4j database.
 This is similar to how standard Cypher writing queries operate.
 A statistical summary of the computation is returned as a Cypher result row.
 This is the only execution mode that will make any modifications to the Neo4j database.
