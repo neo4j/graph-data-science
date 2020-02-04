@@ -29,15 +29,14 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LabelPropagationStreamProcTest extends LabelPropagationBaseProcTest<LabelPropagationStreamConfig> {
     @Override
@@ -94,17 +93,25 @@ class LabelPropagationStreamProcTest extends LabelPropagationBaseProcTest<LabelP
             .statsMode()
             .yields();
 
+        List<String> forbiddenResultColumns = Arrays.asList(
+            "writeMillis",
+            "nodePropertiesWritten",
+            "relationshipPropertiesWritten"
+        );
+        List<String> forbiddenConfigKeys = Collections.singletonList("writeProperty");
         runQueryWithResultConsumer(query, result -> {
-            assertThat(result.columns(), not(hasItems(
-                "writeMillis",
-                "nodePropertiesWritten",
-                "relationshipPropertiesWritten"
-            )));
-
-            if(result.hasNext()) {
-                Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
-                assertFalse(config.containsKey("writeProperty"));
-            }
+            List<String> badResultColumns = result.columns()
+                .stream()
+                .filter(forbiddenResultColumns::contains)
+                .collect(Collectors.toList());
+            assertEquals(Collections.emptyList(), badResultColumns);
+            assertTrue(result.hasNext(), "Result must not be empty.");
+            Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
+            List<String> badConfigKeys = config.keySet()
+                .stream()
+                .filter(forbiddenConfigKeys::contains)
+                .collect(Collectors.toList());
+            assertEquals(Collections.emptyList(), badConfigKeys);
         });
     }
 

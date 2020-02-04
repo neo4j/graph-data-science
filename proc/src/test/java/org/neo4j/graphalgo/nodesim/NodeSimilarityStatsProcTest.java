@@ -19,21 +19,26 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class NodeSimilarityStatsTest extends NodeSimilarityBaseProcTest<NodeSimilarityStatsConfig>  {
+public class NodeSimilarityStatsProcTest extends NodeSimilarityBaseProcTest<NodeSimilarityStatsConfig>  {
 
+    @Disabled
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allGraphVariations")
     void statsShouldNotHaveWriteProperties(GdsCypher.QueryBuilder queryBuilder, String testName) {
@@ -42,20 +47,28 @@ public class NodeSimilarityStatsTest extends NodeSimilarityBaseProcTest<NodeSimi
             .statsMode()
             .yields();
 
+        List<String> forbiddenResultColumns = Arrays.asList(
+            "writeMillis",
+            "nodePropertiesWritten",
+            "relationshipPropertiesWritten"
+        );
+        List<String> forbiddenConfigKeys = Arrays.asList(
+            "writeProperty",
+            "writeRelationshipType"
+        );
         runQueryWithResultConsumer(query, result -> {
-            assertThat(result.columns(), not(hasItems(
-                "writeMillis",
-                "nodePropertiesWritten",
-                "relationshipPropertiesWritten"
-            )));
-
-            if(result.hasNext()) {
-                Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
-                assertThat(config.keySet(), not(hasItems(
-                    "writeProperty",
-                    "writeRelationshipType"
-                )));
-            }
+            List<String> badResultColumns = result.columns()
+                .stream()
+                .filter(forbiddenResultColumns::contains)
+                .collect(Collectors.toList());
+            assertEquals(Collections.emptyList(), badResultColumns);
+            assertTrue(result.hasNext(), "Result must not be empty.");
+            Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
+            List<String> badConfigKeys = config.keySet()
+                .stream()
+                .filter(forbiddenConfigKeys::contains)
+                .collect(Collectors.toList());
+            assertEquals(Collections.emptyList(), badConfigKeys);
         });
     }
 

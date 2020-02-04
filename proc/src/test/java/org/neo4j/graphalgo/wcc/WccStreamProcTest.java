@@ -33,13 +33,15 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
 
@@ -109,7 +111,6 @@ class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
         CommunityHelper.assertCommunities(communities, EXPECTED_COMMUNITIES);
     }
 
-
     @Test
     void statsShouldNotHaveWriteProperties() {
         String query = GdsCypher.call()
@@ -119,17 +120,25 @@ class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
             .statsMode()
             .yields();
 
+        List<String> forbiddenResultColumns = Arrays.asList(
+            "writeMillis",
+            "nodePropertiesWritten",
+            "relationshipPropertiesWritten"
+        );
+        List<String> forbiddenConfigKeys = Collections.singletonList("writeProperty");
         runQueryWithResultConsumer(query, result -> {
-            assertThat(result.columns(), not(hasItems(
-                "writeMillis",
-                "nodePropertiesWritten",
-                "relationshipPropertiesWritten"
-            )));
-
-            if(result.hasNext()) {
-                Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
-                assertFalse(config.containsKey("writeProperty"));
-            }
+            List<String> badResultColumns = result.columns()
+                .stream()
+                .filter(forbiddenResultColumns::contains)
+                .collect(Collectors.toList());
+            assertEquals(Collections.emptyList(), badResultColumns);
+            assertTrue(result.hasNext(), "Result must not be empty.");
+            Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
+            List<String> badConfigKeys = config.keySet()
+                .stream()
+                .filter(forbiddenConfigKeys::contains)
+                .collect(Collectors.toList());
+            assertEquals(Collections.emptyList(), badConfigKeys);
         });
     }
 
