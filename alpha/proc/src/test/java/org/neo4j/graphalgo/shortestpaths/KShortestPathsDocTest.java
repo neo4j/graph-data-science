@@ -85,7 +85,7 @@ class KShortestPathsDocTest extends BaseProcTest {
                        "  relationshipWeightProperty: 'cost' " +
                        "})" +
                        " YIELD index, nodeIds, costs " +
-                       " RETURN [node in gds.util.getNodesById(nodeIds) | node.name] AS places, " +
+                       " RETURN [node in gds.util.asNodes(nodeIds) | node.name] AS places, " +
                        "       costs, " +
                        "       reduce(acc = 0.0, cost in costs | acc + cost) AS totalCost";
 

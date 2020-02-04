@@ -104,8 +104,6 @@ class ListProcTest extends BaseProcTest {
     private static final List<String> FUNCTIONS = asList(
         "gds.util.asNode",
         "gds.util.asNodes",
-        "gds.util.getNodeById",
-        "gds.util.getNodesById",
         "gds.version"
     );
 

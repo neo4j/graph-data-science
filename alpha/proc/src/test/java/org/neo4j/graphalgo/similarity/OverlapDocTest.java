@@ -230,7 +230,7 @@ public class OverlapDocTest extends BaseProcTest {
             "  sourceIds: sourceIds " +
             " }) " +
             " YIELD item1, item2, count1, count2, intersection, similarity " +
-            " RETURN gds.util.getNodeById(item1).name AS from, gds.util.getNodeById(item2).name AS to, similarity " +
+            " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity " +
             " ORDER BY similarity DESC";
 
         String expectedResult = "+-----------------------------------------------------+\n" +

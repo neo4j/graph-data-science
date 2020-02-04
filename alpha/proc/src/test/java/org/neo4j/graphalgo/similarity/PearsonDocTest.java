@@ -287,7 +287,7 @@ class PearsonDocTest extends BaseProcTest {
                        "    topK: 1" +
                        " })" +
                        " YIELD item1, item2, similarity" +
-                       " WITH gds.util.getNodeById(item1) AS from, gds.util.getNodeById(item2) AS to, similarity" +
+                       " WITH gds.util.asNode(item1) AS from, gds.util.asNode(item2) AS to, similarity" +
                        " RETURN from.name AS from, to.name AS to, similarity" +
                        " ORDER BY similarity DESC";
 

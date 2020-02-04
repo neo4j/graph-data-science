@@ -86,7 +86,7 @@ class GetNodeFuncTest extends BaseProcTest {
     @Test
     void lookupNonExistentNodes() {
         Map<String, Object> row = runQuery(
-                "RETURN gds.util.getNodesById([3,4,5]) AS nodes", Result::next);
+                "RETURN gds.util.asNodes([3,4,5]) AS nodes", Result::next);
 
         List<Node> nodes = (List<Node>) row.get("nodes");
         assertEquals(0, nodes.size());

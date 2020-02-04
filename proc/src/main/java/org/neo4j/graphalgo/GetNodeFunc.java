@@ -35,9 +35,9 @@ public class GetNodeFunc {
     @Context
     public GraphDatabaseAPI api;
 
-    @UserFunction("gds.util.getNodeById")
-    @Description("CALL gds.util.getNodeById(value) - return node for nodeId. null if none exists")
-    public Node getNodeById(@Name(value = "nodeId") Number nodeId) {
+    @UserFunction("gds.util.asNode")
+    @Description("CALL gds.util.asNode(value) - return node for nodeId. null if none exists")
+    public Node asNode(@Name(value = "nodeId") Number nodeId) {
         try {
             return api.getNodeById(nodeId.longValue());
         } catch (NotFoundException e) {
@@ -45,22 +45,16 @@ public class GetNodeFunc {
         }
     }
 
-    @UserFunction("gds.util.asNode")
-    @Description("CALL gds.util.asNode(value) - return node for nodeId. null if none exists")
-    public Node asNode(@Name(value = "nodeId") Number nodeId) {
-        return getNodeById(nodeId);
-    }
-
-    @UserFunction("gds.util.getNodesById")
-    @Description("CALL gds.util.getNodesById(values) - return nodes for nodeIds. empty if none exists")
-    public List<Node> getNodesById(@Name(value = "nodeIds") List<Number> nodeIds) {
-        return nodeIds.stream().map(this::getNodeById).filter(Objects::nonNull).collect(Collectors.toList());
-    }
-
     @UserFunction("gds.util.asNodes")
     @Description("CALL gds.util.asNodes(values) - return nodes for nodeIds. empty if none exists")
     public List<Node> asNodes(@Name(value = "nodeIds") List<Number> nodeIds) {
-        return getNodesById(nodeIds);
+        return nodeIds.stream().map(nodeId -> {
+            try {
+                return api.getNodeById(nodeId.longValue());
+            } catch (NotFoundException e) {
+                return null;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
 }
