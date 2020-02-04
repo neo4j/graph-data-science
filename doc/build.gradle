@@ -48,7 +48,7 @@ ext {
     if (1 < versionParts.size()) { versions.GdsManual += '-preview' }
     versions['neo4jDocs'] = "3.5"
 
-    copyrightYear = '2019'
+    copyrightYear = '2020'
     docsBaseUri = "https://neo4j.com/docs"
     crossReferenceBase = [ // We have no strategy for cross references; always link to current.
             'cypher-manual'     : "${docsBaseUri}/cypher-manual/${versions.neo4jDocs}",
