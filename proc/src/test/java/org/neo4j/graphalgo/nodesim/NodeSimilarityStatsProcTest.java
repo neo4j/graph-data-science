@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -38,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NodeSimilarityStatsProcTest extends NodeSimilarityBaseProcTest<NodeSimilarityStatsConfig>  {
 
-    @Disabled
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allGraphVariations")
     void statsShouldNotHaveWriteProperties(GdsCypher.QueryBuilder queryBuilder, String testName) {
