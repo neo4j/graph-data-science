@@ -24,18 +24,10 @@ import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.HttpConnector;
 import org.neo4j.kernel.configuration.Settings;
 
-import java.util.function.Function;
-
 public final class SettingsProxy {
 
     private SettingsProxy() {
         throw new UnsupportedOperationException();
-    }
-
-    public static final Function<String, Boolean> BOOLEAN = Settings.BOOLEAN;
-
-    public static <T> Setting<T> setting(String name, Function<String, T> parser, String defaultValue) {
-        return Settings.setting(name, parser, defaultValue);
     }
 
     public static Setting<Boolean> boltEnabled() {
@@ -48,5 +40,9 @@ public final class SettingsProxy {
 
     public static Setting<Boolean> httpsEnabled() {
         return new HttpConnector("https").enabled;
+    }
+
+    public static Setting<Boolean> udc() {
+        return Settings.setting("dbms.udc.enabled", Settings.BOOLEAN, "true");
     }
 }

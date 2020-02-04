@@ -24,6 +24,7 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
+import org.neo4j.graphalgo.compat.SettingsProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -48,15 +49,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-import static org.neo4j.graphalgo.compat.SettingsProxy.BOOLEAN;
-import static org.neo4j.graphalgo.compat.SettingsProxy.setting;
-
 public final class LdbcDownloader {
 
     private static Path DEFAULT_TEMP_DIR;
     private static final Map<String, S3Location> FILES;
 
-    private static final Setting<Boolean> udc = setting( "dbms.udc.enabled", BOOLEAN, "true" );
+    private static final Setting<Boolean> udc = SettingsProxy.udc();
 
     static {
         FILES = new HashMap<>();

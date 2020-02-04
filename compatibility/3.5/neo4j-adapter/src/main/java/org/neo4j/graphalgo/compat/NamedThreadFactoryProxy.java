@@ -17,23 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils;
+package org.neo4j.graphalgo.compat;
 
-import org.neo4j.graphalgo.compat.StatementApi;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.helpers.NamedThreadFactory;
 
-import java.util.concurrent.Callable;
-
-public abstract class StatementFunction<T> extends StatementApi implements RenamesCurrentThread, Callable<T>, StatementApi.TxFunction<T> {
-
-    protected StatementFunction(GraphDatabaseAPI api) {
-        super(api);
-    }
-
-    @Override
-    public T call() {
-        try (Revert ignored = RenamesCurrentThread.renameThread(threadName())) {
-            return applyInTransaction(this);
-        }
+public final class NamedThreadFactoryProxy {
+    public static NamedThreadFactory daemon() {
+        return NamedThreadFactory.daemon("algo");
     }
 }
