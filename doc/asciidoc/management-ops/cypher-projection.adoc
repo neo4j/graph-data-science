@@ -5,151 +5,222 @@
 ifdef::env-docs[]
 [abstract]
 --
-This chapter explains Cypher projection in the Neo4j Graph Data Science library.
+This chapter explains how to create a graph using a Cypher projection.
 --
 endif::env-docs[]
 
-If the node-label and relationship-type projection is not selective enough to describe our subgraph to run the algorithm on, we can use Cypher statements to project subsets of our graph.
-Use a node-statement instead of the label parameter and a relationship-statement instead of the relationship type, and use `graph:'cypher'` in the config.
+If the store projection is not expressive enough to describe the in-memory graph, we can instead use Cypher queries to select nodes and relationships.
+One benefit of using Cypher queries is the possibility to form the graph from data that exists only during query time.
+A common use case is the reduction of paths into single relationships between the start and end node of the path.
 
-Relationships described in the relationship-statement will only be projected if both source and target nodes are described in the node-statement, otherwise they will be ignored.
+.The following query reduces a 2-hop pattern to a single relationship effectively representing co-authors:
+[source,cypher]
+----
+MATCH (p1:Author)-[:WROTE]->(a:Article)<-[:WROTE]-(p2:Author)
+RETURN id(p1) AS source, id(p2) AS target, count(a) AS weight
+----
 
-Cypher projection enables us to be more expressive in describing our subgraph that we want to analyse, but might take longer to project the graph with more complex cypher queries.
+Cypher projections are especially useful during the development phase, when the workflow is being designed and the inputs are not yet clear.
+However, despite being more expressive, a Cypher projection usually increases loading time significantly.
+For the production phase, one might consider adapting the domain model to be eligible for the store projection.
 
-The general call syntax is:
+[[cypher-projection-syntax]]
+== Syntax
+
+A Cypher projection takes three mandatory arguments: `graphName`, `nodeQuery` and `relationshipQuery`.
 
 [source,cypher]
 ----
-CALL algo.<name>(
-  'MATCH (n) RETURN id(n) AS id',
-  "MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target",
-  {graph: "cypher"})
+CALL gds.graph.create.cypher(
+    graphName: string,
+    nodeQuery: string,
+    relationshipQuery: string,
+    configuration: map
+)
 ----
 
-* The first query `MATCH (n) RETURN id(n) AS id` returns node ids.
-The Cypher loader expects the query to return an `id` field.
+.Parameters
+[opts="header",cols="1m,1m,1m"]
+|===
+| Name              | Optional | Description
+| graphName         | no       | The name under which the graph is stored in the catalog.
+| nodeQuery         | no       | Cypher query to project nodes.
+| relationshipQuery | no       | Cypher query to project relationships.
+| configuration     | yes      | Additional parameters to configure the Cypher projection.
+|===
 
-* The second query `MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target` returns pairs of node ids that have a relationship between them in our projected graph.
-The Cypher loader expects the query to return `source` and `target` fields.
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name                   | Type    | Default        | Description
+| nodeProperties         | map     | empty map      | Mappings between the RETURN items and node properties in the graph projection.
+| relationshipProperties | map     | empty map      | Mappings between the RETURN items and relationship properties in the graph projection.
+| concurrency            | int     | available CPUs | The number of concurrent threads used for creating the graph.
+|===
 
-Note that in both queries we use the `id` function to return the node id.
+[[cypher-projection-query-constraints]]
+== Query constraints
 
-[[cypher-projection-weights]]
-== Weights
+The node query projects nodes and optionally their properties to an in-memory graph.
+Each row in the query result represents a node in the projected graph.
 
-We can also return a property value or weight (according to our config) in addition to the ids from these statements.
-We do this by returning an optional `weight` field.
+The query result must contain a column called `id`.
+The value in that column is used to uniquely identify the node.
 
-.The following will run the algortihm over a graph based on Cypher projections for nodes and relationships, using the `score` property of each relationship as weight:
+.Minimal example of a node query used for Cypher projection.
 [source,cypher]
 ----
-CALL algo.<name>(
-  'MATCH (n) RETURN id(n) AS id',
-  "MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target, r.score AS weight",
-  {graph: "cypher"})
+MATCH (n) RETURN id(n) AS id
 ----
 
-[[cypher-projection-parameters]]
-== Parameters
+The relationship query projects relationships and optionally their type and properties to an in-memory graph.
+Each row in the query result represents a relationship in the projected graph.
 
-We can pass through parameters into our Cypher projection queries via the `params` config option.
+The query result must contain a column called `source` and a column called `target`.
+The values in those columns represent the source node id and the target node id of the relationship.
+The values are used to connect the relationships to the nodes selected by the node query.
+If either the source or the target value can not be mapped to a node, the relationship is not projected.
 
-.The following will run the algorithm over a graph based on Cypher projections that use the `$firstName` and `$lastName` parameters:
+.Minimal example of a relationship query used for Cypher projection.
 [source,cypher]
 ----
-CALL algo.<name>(
-  'MATCH (n)
-   WHERE n.name CONTAINS $firstName
-   RETURN id(n) AS id',
-  "MATCH (n)-->(m)
-   WHERE n.name CONTAINS $lastName OR m.name CONTAINS $lastName
-   RETURN id(n) AS source, id(m) AS target",
-  {graph: "cypher", params: {firstName: $firstName, lastName: $lastName} })
+MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target
 ----
 
+Using both example queries in a Cypher projection, we can project the whole Neo4j database into an in-memory graph and store it in the catalog:
 
-[[cypher-projection-basic-usage]]
-== Example Usage
-
-We could use Cypher projections to run the Page Rank algorithm on *DBpedia*, as shown in the following examples.
-
-.The following will run the Page Rank algorithm over a graph based on Cypher projections for nodes and relationships:
 [source,cypher]
 ----
-CALL algo.pageRank(
-  'MATCH (p:Page) RETURN id(p) as id',
-  'MATCH (p1:Page)-[:Link]->(p2:Page) RETURN id(p1) as source, id(p2) as target',
-  {graph:'cypher', iterations:5, write: true});
+CALL gds.graph.create.cypher(
+    'myCypherGraph',
+    'MATCH (n) RETURN id(n) AS id',
+    'MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target'
+)
 ----
 
-Cypher projection can also be used to project a virtual (non-stored) graph.
-Here is an example of how to project an undirected graph of people who visited the same web page and run the Louvain community detection algorithm on it, using the number of common visited web pages between pairs of people as relationship weight:
+[[cypher-projection-properties]]
+== Node and relationship properties
 
-.The following will run the Louvain algortihm over a graph based on Cypher projections for nodes and relationships:
+Similar to the default store projection, we can load node and relationship properties using a Cypher projection.
+
+Both, node and relationship queries, expect mandatory columns to be returned, i.e., `id`, `source` and `target`.
+If a query returns additional columns, we use those columns as node and relationship properties, respectively.
+
+The values stored in property columns need to be numeric.
+If a value is `null`, we load a default value (`Double.NaN`) instead.
+If we want to use a different default value, the `coalesce` function can be used.
+
+The following Cypher projections loads multiple node and relationship properties:
+
+.Projecting query columns into node and relationship properties.
 [source,cypher]
 ----
-CALL algo.louvain(
-  'MATCH (p:Person) RETURN id(p) as id',
-  'MATCH (p1:Person)-[:VISIT]->(:Page)<-[:VISIT]-(p2:Person)
-   RETURN id(p1) as source, id(p2) as target, count(*) as weight',
-  {graph:'cypher', iterations:5, write: true});
+CALL gds.graph.create.cypher(
+    'myCypherGraph',
+    'MATCH (n:City) RETURN id(n) AS id, n.zipCode AS community, n.population AS population',
+    'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, coalesce(r.condition, 0.5) AS quality'
+)
 ----
 
-[[cypher-projection-parallel-loading]]
-== Parallel loading
+The projected properties can be referred to by any algorithm that uses properties as input, for example, Label Propagation.
 
-By default, Cypher projection queries are run on a single thread.
-
-We can parallelize loading by including `SKIP` clause and `$skip` parameter, as well as `LIMIT` clause and `$limit` parameter in our projection queries.
-Parallelization of the queries is based on the `batchSize` key in the config, which has a default value of 10,000.
-
-[NOTE]
-====
-If the parameters are not named `$skip` and `$limit`, they will be ignored, and the sequential loading approach will be used.
-====
-
-.The following runs Page Rank over a graph based on Cypher projections, with nodes loaded in parallel:
 [source,cypher]
 ----
-CALL algo.pageRank(
-  'MATCH (p:Page) WITH p SKIP $skip LIMIT $limit RETURN id(p) as id',
-  'MATCH (p1:Page)-[:Link]->(p2:Page) RETURN id(p1) as source, id(p2) as target',
-  {graph:'cypher', iterations:5, write: true});
+CALL gds.labelPropgation.stream(
+    'myCypherGraph', {
+        seedProperty: 'community',
+        relationshipWeightProperty: 'quality'
+    }
+)
 ----
 
-.The following runs Page Rank over a graph based on Cypher projections, with relationships loaded in parallel:
+[[cypher-projection-relationship-types]]
+== Relationship types
+
+The store graph projection supports loading multiple relationship types which can be filtered in each algorithm execution.
+The Cypher projection can achieve the same feature by returning the relationship type in the query.
+If the `type` column is present in the query result, we use the values in that column to distinguish relationship types.
+
+For the following example, let's assume `City` nodes to be connected by either `ROAD` or `RAIL` relationships.
+
+.Using the `type` column to distinguish between multiple relationship types.
 [source,cypher]
 ----
-CALL algo.pageRank(
-  'MATCH (p:Page) RETURN id(p) as id',
-  'MATCH (p1:Page)-[:Link]->(p2:Page) WITH * SKIP $skip LIMIT $limit RETURN id(p1) as source, id(p2) as target',
-  {graph:'cypher', iterations:5, write: true});
+CALL gds.graph.create.cypher(
+    'myCypherGraph',
+    'MATCH (n:City) RETURN id(n) AS id',
+    'MATCH (n:City)-[r]->(m:City) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
+)
 ----
 
-.The following runs Page Rank over a graph based on Cypher projections, with nodes and relationships loaded in parallel:
+The loaded graph will be composed of the two relationship types.
+This allows us to apply a relationship filter during algorithm execution:
+
+.Using a relationship filter to run the algorithm on a subgraph.
 [source,cypher]
 ----
-CALL algo.pageRank(
-  'MATCH (p:Page) WITH p SKIP $skip LIMIT $limit RETURN id(p) as id',
-  'MATCH (p1:Page)-[:Link]->(p2:Page) WITH * SKIP $skip LIMIT $limit RETURN id(p1) as source, id(p2) as target',
-  {graph:'cypher', iterations:5, write: true});
+CALL gds.labelPropgation.stream(
+    'myCypherGraph', {
+        relationshipFilter: 'ROAD'
+    }
+)
 ----
 
-// end::overview[]
 
-// tag::explanation[]
-If node label and relationship type are not selective enough to describe your subgraph to run the algorithm on, you can use Cypher statements to load or project subsets of your graph.
-This can also be used to run algorithms on a virtual graph.
-You can learn more in the <<cypher-projection>> section of the manual.
-// end::explanation[]
+[[cypher-projection-relationship-aggregation]]
+== Relationship aggregation
 
-// tag::similarity-explanation[]
-If the similarity lists are very large they can take up a lot of memory.
-For cases where those lists contain lots of values that should be skipped, you can use the less memory-intensive approach of using Cypher statements to project the graph instead.
+The property graph model supports parallel relationships, which means two nodes can be connected by multiple relationships of the same relationship type.
+For some algorithms, we want the projected graph to contain at most one relationship between two nodes.
 
-The Cypher loader expects to receive 3 fields:
+The simplest way to achieve this, is using a `DISTINCT` clause in the relationship query:
 
-* `item` - should contain node ids, which we can return using the `id` function.
-* `category` - should contain node ids, which we can return using the `id` function.
-* `weight` - should contain a double value.
-// end::similarity-explanation[]
+[source,cypher]
+----
+MATCH (n:City)-[r:ROAD]->(m:City)
+RETURN DISINCT id(n) AS source, id(m) AS target
+----
+
+If we also want to load relationship properties, aggregating the values of parallel edges can also be achieved using Cypher.
+
+[source,cypher]
+----
+MATCH (n:City)-[r:ROAD]->(m:City)
+RETURN
+    id(n) AS source,
+    id(m) AS target,
+    min(r.distance) AS minDistance,
+    max(coalesce(r.condition, 0.5), 1.0) AS maxQuality
+----
+
+One drawback of that approach is that we put more pressure on the Cypher execution engine and the query result consumes additional memory.
+An alternative approach is to use `relationshipProperties` as part of the optional configuration map.
+The syntax is identical to the property mappings used in the store projection.
+
+[source,cypher]
+----
+CALL gds.graph.create.cypher(
+    'myCypherGraph',
+    'MATCH (n:City) RETURN id(n) AS id, n.zipCode AS community, n.population AS population',
+    'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, r.condition AS quality',
+    {
+        relationshipProperties: {
+            minDistance: {
+                property: 'distance',
+                aggregation: 'MIN',
+                defaultValue: 42.0
+            },
+            maxQuality: {
+                property: 'quality',
+                aggregation: 'MAX',
+                defaultValue: 1.0
+            }
+        }
+    }
+)
+----
+
+* The key of each mapping is the name under which the resulting property is stored in the graph.
+* The `property` entry refers to the column name in the query result.
+* The `aggregation` entry sets the aggregation function for values of parallel relationships (e.g. `MIN` or `MAX`).
+* The `defaultValue` entry is used if the cell contains `null` (instead of `Double.NAN`).

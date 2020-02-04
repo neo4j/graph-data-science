@@ -2,7 +2,7 @@
 = Graph Catalog
 
 Graph algorithms run on a graph data model which is a _projection_ of the Neo4j property graph data model.
-A graph projection can be seen as a view over the stored graph, containing only the selected relevant topological and property information.
+A graph projection can be seen as a view over the stored graph, containing only relevant topological and property information.
 Graph projections are stored entirely in-memory using compressed data structures optimized for topology and property lookup operations.
 The standard approach to create a graph is detailed in <<label-relationship-type-projection, Label and relationship-type projection>>.
 It is also possible to use Cypher queries to project a more customised view of your graph.
