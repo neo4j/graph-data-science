@@ -20,7 +20,6 @@ This section includes:
 ** <<algorithms-pagerank-examples-personalized, Personalized>>
 ** <<algorithms-pagerank-examples-memory-estimation, Memory Estimation>>
 ** <<algorithms-pagerank-examples-stats, Stats>>
-** <<algorithms-pagerank-examples-projection, Named graphs and Cypher projections>>
 * <<algorithms-pagerank-usage, Usage>>
 
 [[algorithms-pagerank-intro]]
