@@ -118,8 +118,7 @@ class DocTestBase extends BaseProcTest {
     }
     protected SetupQueryConsumer defaultSetupQueryConsumer() {
         return setupQueries -> {
-            assertEquals(1, setupQueries.size(), "Expected exactly one setup query");
-            runQuery(setupQueries.get(0));
+            setupQueries.forEach(this::runQuery);
         };
     }
 

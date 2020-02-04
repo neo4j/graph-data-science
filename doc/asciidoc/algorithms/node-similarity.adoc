@@ -197,9 +197,9 @@ The Node Similarity algorithm will only compute similarity for nodes that have a
 In the example graph, the Eve node will not be compared to other Person nodes.
 
 .The following statement will load the graph into the in-memory graph catalog.
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
-CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES')
+CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES');
 ----
 
 [[algorithms-node-similarity-examples-stream]]
@@ -307,7 +307,7 @@ If neither is specified, topK is used.
 .The following will run the algorithm, and stream the top 1 result per node:
 [source, cypher]
 ----
-`CALL gds.nodeSimilarity.stream('myGraph', { topK: 1 })`
+CALL gds.nodeSimilarity.stream('myGraph', { topK: 1 })
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
 ORDER BY Person1

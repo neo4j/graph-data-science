@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.newapi.GraphCreateProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityWriteProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
@@ -40,7 +42,7 @@ public class NodeSimilarityDocTest extends DocTestBase {
         db = TestDatabaseCreator.createTestDatabase(
             builder -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
-        registerProcedures(NodeSimilarityStreamProc.class, NodeSimilarityWriteProc.class);
+        registerProcedures(NodeSimilarityStreamProc.class, NodeSimilarityWriteProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
     }
 
@@ -48,6 +50,7 @@ public class NodeSimilarityDocTest extends DocTestBase {
     void tearDown() {
         asciidoctor.shutdown();
         db.shutdown();
+        GraphCatalog.removeAllLoadedGraphs();
     }
 
     @Test
