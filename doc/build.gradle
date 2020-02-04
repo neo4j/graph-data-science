@@ -46,7 +46,7 @@ ext {
         'GdsManual' : versionParts[0].split('\\.')[0..1].join('.'),
     ]
     if (1 < versionParts.size()) { versions.GdsManual += '-preview' }
-    versions['neo4jDocs'] = versions.graphAlgoDocs
+    versions['neo4jDocs'] = "3.5"
 
     copyrightYear = '2019'
     docsBaseUri = "https://neo4j.com/docs"
