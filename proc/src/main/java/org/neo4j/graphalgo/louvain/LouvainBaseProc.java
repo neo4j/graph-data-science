@@ -90,7 +90,6 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
     public static final class WriteResult {
 
         public long nodePropertiesWritten;
-        public long relationshipPropertiesWritten;
         public long createMillis;
         public long computeMillis;
         public long writeMillis;
@@ -116,7 +115,6 @@ abstract class LouvainBaseProc<CONFIG extends LouvainBaseConfig> extends AlgoBas
             Map<String, Object> configuration
 
         ) {
-            this.relationshipPropertiesWritten = 0;
 
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;

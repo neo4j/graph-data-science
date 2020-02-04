@@ -81,7 +81,6 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
     public static final class WriteResult {
 
         public long nodePropertiesWritten;
-        public long relationshipPropertiesWritten;
         public long createMillis;
         public long computeMillis;
         public long writeMillis;
@@ -98,7 +97,6 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
             boolean didConverge,
             Map<String, Object> configuration
         ) {
-            this.relationshipPropertiesWritten = 0;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;

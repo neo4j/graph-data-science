@@ -73,7 +73,6 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
     public static class WriteResult {
 
         public long nodePropertiesWritten;
-        public long relationshipPropertiesWritten;
         public long createMillis;
         public long computeMillis;
         public long writeMillis;
@@ -86,7 +85,6 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
 
         WriteResult(
             long nodePropertiesWritten,
-            long relationshipPropertiesWritten,
             long createMillis,
             long computeMillis,
             long writeMillis,
@@ -98,7 +96,6 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
             Map<String, Object> configuration
         ) {
             this.nodePropertiesWritten = nodePropertiesWritten;
-            this.relationshipPropertiesWritten = relationshipPropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
@@ -187,7 +184,6 @@ public abstract class LabelPropagationBaseProc<CONFIG extends LabelPropagationBa
         protected WriteResult buildResult() {
             return new WriteResult(
                 nodePropertiesWritten,
-                0L,
                 createMillis,
                 computeMillis,
                 writeMillis,

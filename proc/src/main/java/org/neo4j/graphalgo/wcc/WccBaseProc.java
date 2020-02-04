@@ -113,7 +113,6 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
     public static final class WriteResult {
 
         public final long nodePropertiesWritten;
-        public final long relationshipPropertiesWritten;
         public final long createMillis;
         public final long computeMillis;
         public final long writeMillis;
@@ -144,7 +143,6 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
         ) {
 
             this.nodePropertiesWritten = nodePropertiesWritten;
-            this.relationshipPropertiesWritten = 0L;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
