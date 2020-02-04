@@ -88,7 +88,7 @@ ext {
     ]
     asciidocSourceDir = "$projectDir/asciidoc"
     docId = 'graph-algorithms'
-    docsArtifactsName = 'neo4j-graph-algorithms-user-guide'
+    docsArtifactsName = 'neo4j-graph-data-science-manual'
 }
 
 static def attachFailOnOutputString(Task task, String match) {
