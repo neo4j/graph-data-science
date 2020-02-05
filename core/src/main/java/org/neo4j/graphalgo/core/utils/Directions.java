@@ -31,21 +31,21 @@ import org.neo4j.graphdb.Direction;
  * <div>
  *     <strong>OUTGOING</strong>
  *     <ul>
- *         <li>></li>
+ *         <li>&gt;</li>
  *         <li>o</li>
  *         <li>out</li>
  *         <li>outgoing</li>
  *     </ul>
  *     <strong>INCOMING</strong>
  *     <ul>
- *         <li><</li>
+ *         <li>&lt;</li>
  *         <li>i</li>
  *         <li>in</li>
  *         <li>incoming</li>
  *     </ul>
  *     <strong>BOTH</strong>
  *     <ul>
- *         <li><></li>
+ *         <li>&lt;&gt;</li>
  *         <li>b</li>
  *         <li>both</li>
  *     </ul>

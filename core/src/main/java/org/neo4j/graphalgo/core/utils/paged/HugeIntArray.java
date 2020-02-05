@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
  * <li>The array does not support default values and returns the same default for unset values that a regular {@code int[]} does ({@code 0}).</li>
  * </ul>
  *
- * <header>Basic Usage</header>
+ * <p><em>Basic Usage</em></p>
  * <pre>
  * {@code}
  * AllocationTracker tracker = ...;

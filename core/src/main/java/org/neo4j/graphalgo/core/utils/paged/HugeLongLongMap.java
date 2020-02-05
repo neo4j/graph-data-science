@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * map with long=>long mapping and huge underlying storage, so it can
+ * map with {@code long=>long} mapping and huge underlying storage, so it can
  * store more than 2B values
  */
 public final class HugeLongLongMap implements Iterable<LongLongCursor> {

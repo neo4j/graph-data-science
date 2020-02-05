@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * with some input from an atomic DSS implementation in Rust [3].
  *
  * The major difference for our DSS is, that we don't supported the
- * Union-by-Rank strategy [3], for techincal and performance reasons.
+ * Union-by-Rank strategy [3], for technical and performance reasons.
  *
  * The reference implementation in C++ uses 32bit unsigned integers for
  * both the id values and the rank values. Those two values have to be
@@ -49,17 +49,19 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * We drop the by-Rank functionality and just support Union-by-Min for this DSS.
  *
- * The main difference in implementation comared to the regular DSS is that we
+ * The main difference in implementation compared to the regular DSS is that we
  * use CAS operations to atomically set a set id for some value.
  * We will retry union operations until a thread succeeds in changing the set id
  * for a node. Other threads that might have wanted to write a different value
  * will fail and the CAS operation and redo their union step. This allows for concurrent
  * writes into a single DSS and does not longer necessitate an additional merge step.
  *
- * [1]: https://github.com/wjakob/dset/blob/7967ef0e6041cd9d73b9c7f614ab8ae92e9e587a/dset.h
- * [2]: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&rep=rep1&type=pdf
- * [3]: https://github.com/tov/disjoint-sets-rs/blob/88ab08df21f04fcf7c157b6e042efd561ee873ba/src/concurrent.rs
- * [4]: https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank
+ * <ul>
+ * <li>[1]: <a href="https://github.com/wjakob/dset/blob/7967ef0e6041cd9d73b9c7f614ab8ae92e9e587a/dset.h">{@code https://github.com/wjakob/dset/blob/7967ef0e6041cd9d73b9c7f614ab8ae92e9e587a/dset.h}</a></li>
+ * <li>[2]: <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&rep=rep1&type=pdf">{@code http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&rep=rep1&type=pdf}</a></li>
+ * <li>[3]: <a href="https://github.com/tov/disjoint-sets-rs/blob/88ab08df21f04fcf7c157b6e042efd561ee873ba/src/concurrent.rs">{@code https://github.com/tov/disjoint-sets-rs/blob/88ab08df21f04fcf7c157b6e042efd561ee873ba/src/concurrent.rs}</a></li>
+ * <li>[4]: <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank">{@code https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank}</a></li>
+ * </ul>
  */
 public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
 

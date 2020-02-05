@@ -57,35 +57,34 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  * (as done in the paper since they were concerned with parallelising across multiple nodes),
  * we use integer arrays to write the results to.
  * The actual score is upscaled from a double to an integer by multiplying it with {@code 100_000}.
- * <p>
- * To avoid contention by writing to a shared array, we partition the result array.
+ * <p>To avoid contention by writing to a shared array, we partition the result array.
  * During execution, the scores arrays
- * are shaped like this:
+ * are shaped like this:</p>
  * <pre>
  *     [ executing partition ] -&gt; [ calculated partition ] -&gt; [ local page rank scores ]
  * </pre>
+ * <p>
  * Each single partition writes in a partitioned array, calculation the scores
  * for every receiving partition. A single partition only sees:
  * <pre>
  *     [ calculated partition ] -&gt; [ local page rank scores ]
  * </pre>
- * The coordinating thread then builds the transpose of all written partitions from every partition:
+ * <p>The coordinating thread then builds the transpose of all written partitions from every partition:</p>
  * <pre>
  *     [ calculated partition ] -&gt; [ executing partition ] -&gt; [ local page rank scores ]
  * </pre>
- * This step does not happen in parallel, but does not involve extensive copying.
+ * <p>This step does not happen in parallel, but does not involve extensive copying.
  * The local page rank scores needn't be copied, only the partitioning arrays.
  * All in all, {@code concurrency^2} array element reads and assignments have to
- * be performed.
- * <p>
- * For the next iteration, every partition first updates its scores, in parallel.
- * A single partition now sees:
+ * be performed.</p>
+ * <p>For the next iteration, every partition first updates its scores, in parallel.
+ * A single partition now sees:</p>
  * <pre>
  *     [ executing partition ] -&gt; [ local page rank scores ]
  * </pre>
- * That is, a list of all calculated scores for it self, grouped by the partition that
+ * <p>That is, a list of all calculated scores for it self, grouped by the partition that
  * calculated these scores.
- * This means, most of the synchronization happens in parallel, too.
+ * This means, most of the synchronization happens in parallel, too.</p>
  * <p>
  * Partitioning is not done by number of nodes but by the accumulated degree –
  * as described in "Fast Parallel PageRank: A Linear System Approach" [2].
@@ -94,9 +93,11 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  * all partitions run in approximately equal time.
  * Smaller partitions are merged down until we have at most {@code concurrency} partitions,
  * in order to batch partitions and keep the number of threads in use predictable/configurable.
+ * </p>
  * <p>
  * [1]: <a href="http://delab.csd.auth.gr/~dimitris/courses/ir_spring06/page_rank_computing/01531136.pdf">An Efficient Partition-Based Parallel PageRank Algorithm</a><br>
  * [2]: <a href="https://www.cs.purdue.edu/homes/dgleich/publications/gleich2004-parallel.pdf">Fast Parallel PageRank: A Linear System Approach</a>
+ * </p>
  */
 public class PageRank extends Algorithm<PageRank, PageRank> {
 

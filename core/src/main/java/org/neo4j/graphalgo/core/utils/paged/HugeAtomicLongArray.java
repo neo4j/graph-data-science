@@ -53,7 +53,7 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
  * <li>It only supports a minimal subset of the atomic operations that {@link java.util.concurrent.atomic.AtomicLongArray} provides.</li>
  * </ul>
  *
- * <header>Basic Usage</header>
+ * <p><em>Basic Usage</em></p>
  * <pre>
  * {@code}
  * AllocationTracker tracker = ...;

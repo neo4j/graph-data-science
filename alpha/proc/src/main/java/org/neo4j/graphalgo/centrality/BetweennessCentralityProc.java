@@ -49,7 +49,7 @@ import static org.neo4j.procedure.Mode.READ;
 /**
  * Betweenness Centrality Algorithms
  *
- * all procedures accept {in, incoming, <, out, outgoing, >, both, <>} as direction
+ * all procedures accept {@code in, incoming, <, out, outgoing, >, both, <>} as direction
  */
 public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityConfig> {
 

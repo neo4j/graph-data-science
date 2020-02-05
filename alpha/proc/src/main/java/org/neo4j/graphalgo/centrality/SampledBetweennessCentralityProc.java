@@ -51,7 +51,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 /**
  * Betweenness Centrality Algorithms
  *
- * all procedures accept {in, incoming, <, out, outgoing, >, both, <>} as direction
+ * all procedures accept {@code in, incoming, <, out, outgoing, >, both, <>} as direction
  */
 public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetweennessCentrality, RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> {
 

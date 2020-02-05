@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 
 /**
  * Exports a graph as Cypher statements, so that you could inspect it during tests or similar.
- * Absolutely NOT intented for any kind of larger graph (say, > 100 nodes).
+ * Absolutely NOT intented for any kind of larger graph (say, &gt; 100 nodes).
  *
  * The Cypher statement should be valid, but might not reproduce the input graph 100%.
  */

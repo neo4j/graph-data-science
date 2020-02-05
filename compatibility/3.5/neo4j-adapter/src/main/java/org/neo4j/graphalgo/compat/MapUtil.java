@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.compat;
 import java.util.Map;
 
 /**
- * Compatibility class for {@Link org.neo4j.helpers.collection.MapUtil}.
+ * Compatibility class for {@link org.neo4j.helpers.collection.MapUtil}.
  * By using this class we reduce the number of references to the Neo4j helper class,
  * which means we break less when the Neo4j helper class moves between Neo4j versions.
  */
