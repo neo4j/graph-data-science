@@ -87,7 +87,7 @@ YIELD nodeCount, totalCost, loadMillis, evalMillis, writeMillis
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.shortestPath.stream(configuration: Map)
+CALL gds.alpha.shortestPath.stream(configuration: Map)
 YIELD nodeId, cost
 ----
 

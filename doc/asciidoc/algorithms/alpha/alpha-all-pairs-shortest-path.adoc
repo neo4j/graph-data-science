@@ -72,21 +72,21 @@ image::sssp.png[]
 .The following will create a sample graph:
 [source, cypher]
 ----
-CREATE (a:Loc {name:'A'}),
-      (b:Loc {name:'B'}),
-      (c:Loc {name:'C'}),
-      (d:Loc {name:'D'}),
-      (e:Loc {name:'E'}),
-      (f:Loc {name:'F'}),
-      (a)-[:ROAD {cost:50}]->(b),
-      (a)-[:ROAD {cost:50}]->(c),
-      (a)-[:ROAD {cost:100}]->(d),
-      (b)-[:ROAD {cost:40}]->(d),
-      (c)-[:ROAD {cost:40}]->(d),
-      (c)-[:ROAD {cost:80}]->(e),
-      (d)-[:ROAD {cost:30}]->(e),
-      (d)-[:ROAD {cost:80}]->(f),
-      (e)-[:ROAD {cost:40}]->(f);
+CREATE (a:Loc {name: 'A'}),
+       (b:Loc {name: 'B'}),
+       (c:Loc {name: 'C'}),
+       (d:Loc {name: 'D'}),
+       (e:Loc {name: 'E'}),
+       (f:Loc {name: 'F'}),
+       (a)-[:ROAD {cost: 50}]->(b),
+       (a)-[:ROAD {cost: 50}]->(c),
+       (a)-[:ROAD {cost: 100}]->(d),
+       (b)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 80}]->(e),
+       (d)-[:ROAD {cost: 30}]->(e),
+       (d)-[:ROAD {cost: 80}]->(f),
+       (e)-[:ROAD {cost: 40}]->(f);
 
 ----
 
@@ -106,7 +106,7 @@ CALL gds.alpha.allShortestPaths.stream({
 })
 YIELD sourceNodeId, targetNodeId, distance
 WITH sourceNodeId, targetNodeId, distance
-WHERE algo.isFinite(distance) = true
+WHERE gds.util.isFinite(distance) = true
 
 MATCH (source:Loc) WHERE id(source) = sourceNodeId
 MATCH (target:Loc) WHERE id(target) = targetNodeId
@@ -147,20 +147,20 @@ This is applicable to all other algorithms that use Cypher loading.
 [source, cypher]
 ----
 CALL gds.alpha.allShortestPaths.stream({
-  nodeQuery:'MATCH (n:Loc) RETURN id(n) as id',
-  relationshipQuery:'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) as source, id(p) as target, r.cost as weight',
+  nodeQuery: 'MATCH (n:Loc) RETURN id(n) AS id',
+  relationshipQuery: 'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost',
   relationshipWeightProperty: 'cost'
 })
 YIELD sourceNodeId, targetNodeId, distance
 WITH sourceNodeId, targetNodeId, distance
-WHERE algo.isFinite(distance) = true
+WHERE gds.util.isFinite(distance) = true
 
 MATCH (source:Loc) WHERE id(source) = sourceNodeId
 MATCH (target:Loc) WHERE id(target) = targetNodeId
 WITH source, target, distance WHERE source <> target
 
 RETURN source.name AS source, target.name AS target, distance
-ORDER BY distance DESC
+ORDER BY distance DESC, source ASC, target ASC
 LIMIT 10
 ----
 

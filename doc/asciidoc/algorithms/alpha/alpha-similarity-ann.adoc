@@ -82,7 +82,7 @@ Otherwise a list of maps of the following structure: `{item: nodeId, weights: [d
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-CALL algo.labs.ml.ann.stream(configuration: MAP)
+CALL gds.alpha.ml.ann.stream(configuration: MAP)
 YIELD item1, item2, count1, count2, intersection, similarity
 
 ----
