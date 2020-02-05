@@ -39,11 +39,11 @@ import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
  * <p>
  * This is a parallel implementation of the K1-Coloring algorithm.
  * The Algorithm will assign a color to every node in the graph, trying to optimize for two objectives:
+ * </p>
  * <ul>
  *   <li> given a single node, make sure that every neigbor of that node has a different color </li>
  *   <li> use as little colors as possible </li>
  * </ul>
- * </p>
  *
  * <p>
  * The implementation is a greedy implementation based on:<br>
