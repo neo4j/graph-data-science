@@ -135,7 +135,7 @@ The projected properties can be referred to by any algorithm that uses propertie
 
 [source,cypher]
 ----
-CALL gds.labelPropgation.stream(
+CALL gds.labelPropagation.stream(
     'myCypherGraph', {
         seedProperty: 'community',
         relationshipWeightProperty: 'quality'
@@ -169,9 +169,9 @@ This allows us to apply a relationship filter during algorithm execution:
 .Using a relationship filter to run the algorithm on a subgraph.
 [source,cypher]
 ----
-CALL gds.labelPropgation.stream(
+CALL gds.labelPropagation.stream(
     'myCypherGraph', {
-        relationshipFilter: 'ROAD'
+        relationshipTypes: ['ROAD']
     }
 )
 ----
