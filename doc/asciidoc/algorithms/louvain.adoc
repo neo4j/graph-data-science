@@ -171,7 +171,7 @@ In the following examples we will demonstrate using the Louvain algorithm on thi
 [source, cypher]
 ----
 CALL gds.louvain.stream({
-    nodeProjection: ['User'],
+    nodeProjection: 'User',
     relationshipProjection: {
         LINK: {
             type: 'LINK',
@@ -211,7 +211,7 @@ For each node a property is written that holds the assigned community.
 [source, cypher]
 ----
 CALL gds.louvain.write({
-    nodeProjection: ['User'],
+    nodeProjection: 'User',
     relationshipProjection: {
         LINK: {
             type: 'LINK',
@@ -244,7 +244,7 @@ The Louvain algorithm can also run on weighted graphs, taking the given relation
 [source, cypher]
 ----
 CALL gds.louvain.stream({
-    nodeProjection: ['User'],
+    nodeProjection: 'User',
     relationshipProjection: {
         LINK: {
             type: 'LINK',
@@ -339,7 +339,7 @@ image::louvain-multilevel-graph.svg[align="center"]
 [source, cypher]
 ----
 CALL gds.louvain.stream({
-    nodeProjection: ['Node'],
+    nodeProjection: 'Node',
     relationshipProjection: {
         TYPE: {
             type: 'TYPE',
