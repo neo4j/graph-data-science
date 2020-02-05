@@ -33,25 +33,6 @@ import java.util.Optional;
 class WeightedSimilarityAlgorithmTest {
     private GraphDatabaseAPI db;
 
-    class DummySimilarityAlgorithm extends WeightedSimilarityAlgorithm<DummySimilarityAlgorithm> {
-        public DummySimilarityAlgorithm(SimilarityConfig config, GraphDatabaseAPI api) {
-            super(config, api);
-        }
-
-        @Override
-        SimilarityComputer<WeightedInput> similarityComputer(
-            Double skipValue,
-            int[] sourceIndexIds,
-            int[] targetIndexIds
-        ) {
-            return (decoder, s, t, cutoff) -> new SimilarityResult(0, 0, 0, 0, 0, 0);
-        }
-
-        @Override
-        public void assertRunning() {
-        }
-    }
-
     @BeforeEach
     void setupGraph() {
         db = TestDatabaseCreator.createTestDatabase();
@@ -70,7 +51,33 @@ class WeightedSimilarityAlgorithmTest {
     }
 
     private void runPrepareWeightsOnQuery(String query) {
-        SimilarityConfig similarityConfig = new SimilarityConfig() {
+        SimilarityConfig similarityConfig = getDummyConfig();
+
+        DummySimilarityAlgorithm dummySimilarityAlgorithm = new DummySimilarityAlgorithm(similarityConfig, db);
+        dummySimilarityAlgorithm.prepareInputs(query, similarityConfig);
+    }
+
+    private static class DummySimilarityAlgorithm extends WeightedSimilarityAlgorithm<DummySimilarityAlgorithm> {
+        DummySimilarityAlgorithm(SimilarityConfig config, GraphDatabaseAPI api) {
+            super(config, api);
+        }
+
+        @Override
+        SimilarityComputer<WeightedInput> similarityComputer(
+            Double skipValue,
+            int[] sourceIndexIds,
+            int[] targetIndexIds
+        ) {
+            return (decoder, s, t, cutoff) -> new SimilarityResult(0, 0, 0, 0, 0, 0);
+        }
+
+        @Override
+        public void assertRunning() {
+        }
+    }
+
+    private SimilarityConfig getDummyConfig() {
+        return new SimilarityConfig() {
             @Override
             public Optional<String> graphName() {
                 return Optional.empty();
@@ -86,8 +93,5 @@ class WeightedSimilarityAlgorithmTest {
                 return Optional.empty();
             }
         };
-
-        DummySimilarityAlgorithm dummySimilarityAlgorithm = new DummySimilarityAlgorithm(similarityConfig, db);
-        dummySimilarityAlgorithm.prepareInputs(query, similarityConfig);
     }
 }
