@@ -22,8 +22,3 @@ dependencies {
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 }
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from(javadoc.destinationDir)
-}

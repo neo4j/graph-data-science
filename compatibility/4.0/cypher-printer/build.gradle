@@ -11,8 +11,3 @@ dependencies {
     compileOnly         group: 'org.neo4j',      name: 'neo4j-expressions-4.0', version: ver.'neo4j'
     testCompileOnly     group: 'org.jetbrains',  name: 'annotations',           version: ver.'jetbrains-annotations'
 }
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from(javadoc.destinationDir)
-}
