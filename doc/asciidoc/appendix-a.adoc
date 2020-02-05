@@ -1,117 +1,141 @@
 [appendix]
 [[appendix-a]]
-= Procedures reference
+= Procedures and Functions reference
 
 [abstract]
 --
-This chapter contains a reference of all the procedures in the Neo4j Graph Data Science library.
+This chapter contains a reference of all the procedures and functions in the Neo4j Graph Data Science library.
 --
 
 This chapter contains the following sections:
 
-* <<production-procedures>>
-* <<alpha-procedures>>
+* <<production-tier>>
+* <<beta-tier>>
+* <<alpha-tier>>
 
 
-[[production-procedures]]
-== Production-quality procedures
+[[production-tier]]
+== Product tier
 
 The following table lists all production-quality procedures in the GDS library:
 
 [[table-proc]]
-[opts=header,cols="1m,5a"]
+[opts=header,cols="1m"]
 |===
-| Name                                                                          | Description
-| <<named-graph, algo.graph.load>>                                              | Procedure for pre-loading a graph and giving it a name.
-| <<named-graph, algo.graph.list>>                                              | Procedure to list all pre-loaded graph.
-| <<named-graph, algo.graph.remove>>                                            | Procedure for unloading a pre-loaded graph.
-| <<named-graph, algo.graph.info>>                                              | Procedure to compute statistics about a pre-loaded graph.
-| <<algorithms-label-propagation-syntax, algo.labelPropagation>>                | Label propagation algorithm writing results back to the graph.
-| <<algorithms-label-propagation-syntax, algo.labelPropagation.stream>>         | Label propagation algorithm streaming results back to the user.
-| <<algorithms-louvain-syntax, algo.louvain>>                                   | Louvain algorithm writing results back to the graph.
-| <<algorithms-louvain-syntax, algo.louvain.stream>>                            | Louvain algorithm streaming results back to the user.
-| <<algorithms-pagerank-syntax, algo.pageRank>>                                 | Page rank algorithm writing results back to the graph.
-| <<algorithms-pagerank-syntax, algo.pageRank.stream>>                          | Page rank algorithm streaming results back to the user.
-| <<algorithms-wcc-syntax, algo.unionfind>>                                     | Union find algorithm writing results back to the graph.
-| <<algorithms-wcc-syntax-stream, algo.unionfind.stream>>                       | Union find algorithm streaming results back to the user.
+| Name
+| <<named-graph, gds.graph.load>>
+| <<named-graph, gds.graph.list>>
+| <<named-graph, gds.graph.drop>>
+| <<named-graph, gds.graph.info>>
+| <<algorithms-label-propagation-syntax, gds.labelPropagation.write>>
+| <<algorithms-label-propagation-syntax, gds.labelPropagation.stream>>
+| <<algorithms-louvain-syntax, gds.louvain.write>>
+| <<algorithms-louvain-syntax, gds.louvain.stream>>
+| <<algorithms-pagerank-syntax, gds.pageRank.write>>
+| <<algorithms-pagerank-syntax, gds.pageRank.stream>>
+| <<algorithms-wcc-syntax, gds.wcc.write>>
+| <<algorithms-wcc-syntax-stream, gds.wcc.stream>>
 |===
 
+[[beta-tier]]
+== Beta tier
 
-[[alpha-procedures]]
-== Alpha procedures
+The following table lists all beta procedures in the GDS library:
+
+[[table-labs]]
+[opts=header,cols="1m"]
+|===
+| Name
+| <<graph-generation, gds.beta.graph.generate>>
+| <<algorithms-k1coloring, gds.beta.k1coloring.stream>>
+| <<algorithms-k1coloring, gds.beta.k1coloring.stream.estimate>>
+| <<algorithms-k1coloring, gds.beta.k1coloring.write>>
+| <<algorithms-k1coloring, gds.beta.k1coloring.write.estimate>>
+| gds.beta.modularityOptimization.stream
+| gds.beta.modularityOptimization.stream.estimate
+| gds.beta.modularityOptimization.write
+| gds.beta.modularityOptimization.write.estimate
+
+|===
+
+[[alpha-tier]]
+== Alpha tier
 
 The following table lists all alpha procedures in the GDS library:
 
 [[table-labs]]
-[opts=header,cols="1m,5m"]
+[opts=header,cols="1m"]
 |===
-| Name                                                                                                          | Description
-| <<algorithm-all-pairs-shortest-path-sample, gds.alpha.allShortestPaths.stream>>                               | CALL algo.allShortestPaths.stream(weightProperty:String{nodeQuery:'labelName', relationshipQuery:'relationshipName', defaultValue:1.0, concurrency:4}) YIELD sourceNodeId, targetNodeId, distance - yields a stream of {sourceNodeId, targetNodeId, distance}
-| gds.util.asNode                                                                                               | CALL gds.util.asNode(value) - return node for nodeId. null if none exists
-| gds.util.asNodes                                                                                              | CALL gds.util.asNodes(values) - return nodes for nodeIds. empty if none exists
-| gds.util.asPath                                                                                               | CALL gds.util.asPath - returns a path for the provided node ids and weights
-| <<algorithms-articlerank-syntax, algo.articleRank>>                                                           | CALL algo.articleRank(label:String, relationship:String, {iterations:5, dampingFactor:0.85, weightProperty: null, write: true, writeProperty:'articlerank', concurrency:4}) YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty - calculates page rank and potentially writes back
-| <<algorithms-articlerank-syntax, algo.articleRank.stream>>                                                    | CALL algo.articleRank.stream(label:String, relationship:String, {iterations:20, dampingFactor:0.85, weightProperty: null, concurrency:4}) YIELD node, score - calculates page rank and streams results
-| <<algorithms-balanced-triads-syntax, gds.alpha.balancedTriads.write>>                                         | CALL gds.alpha.balancedTriads.write(configuration: Map) YIELD createMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount
-| <<algorithms-balanced-triads-syntax, gds.alpha.balancedTriads.stream>>                                        | CALL gds.alpha.balancedTriads.stream(configuration: Map) YIELD nodeId, balanced, unbalanced
-| <<algorithms-betweenness-centrality-syntax, algo.betweenness>>                                                | Betweenness centrality algorithm writing results back to the graph.
-| <<algorithms-betweenness-centrality-syntax, algo.betweenness.stream>>                                         | Betweenness centrality algorithm streaming results back to the user.
-| <<algorithms-betweenness-centrality-syntax, algo.betweenness.sampled>>                                        | Approximate betweenness centrality algorithm writing results back to the graph.
-| <<algorithms-betweenness-centrality-syntax, algo.betweenness.sampled.stream>>                                 | Approximate betweenness centrality algorithm streaming results to the user.
-| <<algorithms-closeness-centrality-syntax, algo.closeness>>                                                    | Closeness centrality algorithm writing results back to the graph.
-| <<algorithms-closeness-centrality-syntax, algo.closeness.stream>>                                             | Closeness centrality algorithm streaming results back to the user.
-| <<algorithms-degree-syntax, algo.degree>>                                                                     | Degree centrality algorithm writing results back to the graph.
-| <<algorithms-degree-syntax, algo.degree.stream>>                                                              | Degree centrality algorithm streaming results back to the user.
-| <<algorithms-eigenvector-syntax, algo.eigenvector>>                                                           | CALL algo.eigenvector(label:String, relationship:String, {weightProperty: null, write: true, writeProperty:'eigenvector', concurrency:4}) YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty - calculates eigenvector centrality and potentially writes back
-| <<algorithms-eigenvector-syntax, algo.eigenvector.stream>>                                                    | CALL algo.eigenvector.stream(label:String, relationship:String, {weightProperty: null, concurrency:4}) YIELD node, score - calculates eigenvector centrality and streams results
-| gds.util.asNode                                                                                          | CALL gds.util.asNode(value) - return node for nodeId. null if none exists
-| gds.util.asNodes                                                                                         | CALL gds.util.asNodes(values) - return nodes for nodeIds. empty if none exists
-| algo.infoMap                                                                                                  | CALL algo.infoMap.stream(label:String, relationship:String, {<properties>}) YIELD nodeId, community
-| gds.util.infinity                                                                                             | CALL gds.util.infinity() - returns Double.POSITIVE_INFINITY as a value.
-| gds.util.isFinite                                                                                             | CALL gds.util.isFinite(value) - return true iff the given argument is a finite value (not ±Infinity, NaN, or null), false otherwise.
-| gds.util.isInfinite                                                                                           | CALL gds.util.isInfinite(value) - return true iff the given argument is not a finite value (±Infinity, NaN, or null), false otherwise.
-| <<algorithms-yens-k-shortest-path-syntax, algo.kShortestPaths>>                                               | CALL algo.kShortestPaths(startNode:Node, endNode:Node, k:int, weightProperty:String{nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'OUT', defaultValue:1.0, maxDepth:42, write:'true', writePropertyPrefix:'PATH_'}) YIELD resultCount, loadMillis, evalMillis, writeMillis - yields resultCount, loadMillis, evalMillis, writeMillis
-| <<algorithms-yens-k-shortest-path-syntax, algo.kShortestPaths.stream>>                                        | CALL algo.kShortestPaths.stream(startNode:Node, endNode:Node, k:int, weightProperty:String{nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'OUT', defaultValue:1.0, maxDepth:42}) YIELD sourceNodeId, targetNodeId, nodeIds, costs
-| <<algorithms-linkprediction-adamic-adar-syntax, gds.alpha.linkprediction.adamicAdar>>                         | gds.alpha.linkprediction.adamicAdar(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) given two nodes, calculate Adamic Adar similarity
-| <<algorithms-linkprediction-common-neighbors-syntax, gds.alpha.linkprediction.commonNeighbors>>               | gds.alpha.linkprediction.commonNeighbors(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) given two nodes, returns the number of common neighbors
-| <<algorithms-linkprediction-preferential-attachment-syntax, gds.alpha.linkprediction.preferentialAttachment>> | gds.alpha.linkprediction.preferentialAttachment(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) given two nodes, calculate Preferential Attachment
-| <<algorithms-linkprediction-resource-allocation-syntax, gds.alpha.linkprediction.resourceAllocation>>         | gds.alpha.linkprediction.resourceAllocation(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) given two nodes, calculate Resource Allocation similarity
-| <<algorithms-linkprediction-same-community-syntax, gds.alpha.linkprediction.sameCommunity>>                   | gds.alpha.linkprediction.sameCommunity(node1:Node, node2:Node, communityProperty: String) given two nodes, indicates if they have the same community
-| <<algorithms-linkprediction-total-neighbors-syntax, gds.alpha.linkprediction.totalNeighbors>>                 | gds.alpha.linkprediction.totalNeighbors(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) given two nodes, calculate Total Neighbors
-| <<labs-algorithms-one-hot-encoding, gds.alpha.ml.oneHotEncoding>>                                             | CALL gds.alpha.ml.oneHotEncoding(availableValues, selectedValues) - return a list of selected values in a one hot encoding format.
-| gds.util.NaN                                                                                                  | CALL gds.util.NaN() - returns Double.NaN as a value.
-| <<algorithms-random-walk-syntax, algo.randomWalk.stream>>                                                     | CALL algo.randomWalk.stream(start:null=all/[ids]/label, steps, walks, {graph: 'huge/cypher', nodeQuery:nodeLabel/query, relationshipQuery:relType/query, mode:random/node2vec, return:1.0, inOut:1.0, path:false/true concurrency:4, direction:'BOTH'}) YIELD nodes, path - computes random walks from given starting points
-| <<algorithms-strongly-connected-components-syntax, algo.scc>>                                                 | CALL algo.scc(label:String, relationship:String, config:Map<String, Object>) YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
-| <<algorithms-strongly-connected-components-syntax, algo.scc.stream>>                                          | CALL algo.scc.stream(label:String, relationship:String, config:Map<String, Object>) YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
-| <<algorithms-strongly-connected-components-syntax, algo.scc.forwardBackward.stream>>                          | CALL algo.scc.forwardBackward.stream(long startNodeId, label:String, relationship:String, {write:true, concurrency:4}) YIELD nodeId, partition
-| <<algorithms-shortest-path-syntax, gds.alpha.shortestPath.write>>                                             | CALL gds.alpha.shortestPath.write(configuration: Map) YIELD nodeId, cost, loadMillis, evalMillis, writeMillis - yields nodeCount, totalCost, loadMillis, evalMillis, writeMillis
-| <<algorithms-shortest-path-syntax, gds.alpha.shortestPath.stream>>                                            | CALL gds.alpha.shortestPath.stream(configuration: Map) YIELD nodeId, cost - yields a stream of {nodeId, cost} from start to end (inclusive)
-| <<algorithms-a_star-syntax, algo.shortestPath.astar.streamm>>                                                 | CALL algo.shortestPath.astar.stream(startNode:Node, endNode:Node, weightProperty:String, propertyKeyLat:String,propertyKeyLon:String, {nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'BOTH', defaultValue:1.0}) YIELD nodeId, cost - yields a stream of {nodeId, cost} from start to end (inclusive)
-| <<algorithms-single-source-shortest-path-syntax, gds.alpha.shortestPath.deltaStepping.write>>                 | CALL gds.alpha.shortestPath.deltaStepping.write(configuration: Map) YIELD loadDuration, evalDuration, writeDuration, nodeCount
-| <<algorithms-single-source-shortest-path-syntax, gds.alpha.shortestPath.deltaStepping.stream>>                | CALL gds.alpha.shortestPath.deltaStepping.stream(configuration: Map) YIELD nodeId, distance - yields a stream of {nodeId, distance} from start to end (inclusive)
-| <<algorithms-similarity-cosine-syntax, gds.alpha.similarity.cosine>>                                          | CALL gds.alpha.similarity.cosine([{item:id, weights:[weights]}], {similarityCutoff:-1,degreeCutoff:0}) YIELD p50, p75, p90, p99, p999, p100 - computes cosine similarities
-| <<algorithms-similarity-cosine-syntax, gds.alpha.similarity.cosine>>                                          | gds.alpha.similarity.cosine([vector1], [vector2]) given two collection vectors, calculate cosine similarity
-| <<algorithms-similarity-cosine-syntax, gds.alpha.similarity.cosine.stream>>                                   | CALL gds.alpha.similarity.cosine.stream([{item:id, weights:[weights]}], {similarityCutoff:-1,degreeCutoff:0}) YIELD item1, item2, count1, count2, intersection, similarity - computes cosine distance
-| <<algorithms-similarity-euclidean-syntax, gds.alpha.similarity.euclidean>>                                    | CALL gds.alpha.similarity.euclidean([{item:id, weights:[weights]}], {similarityCutoff:-1,degreeCutoff:0}) YIELD p50, p75, p90, p99, p999, p100 - computes euclidean similarities
-| <<algorithms-similarity-euclidean-syntax, gds.alpha.similarity.euclidean>>                                    | gds.alpha.similarity.euclidean([vector1], [vector2]) given two collection vectors, calculate similarity based on euclidean distance
-| <<algorithms-similarity-euclidean-syntax, gds.alpha.similarity.euclidean.stream>>                             | CALL gds.alpha.similarity.euclidean.stream([{item:id, weights:[weights]}], {similarityCutoff:-1,degreeCutoff:0}) YIELD item1, item2, count1, count2, intersection, similarity - computes euclidean distance
-| gds.alpha.similarity.euclideanDistance                                                                        | gds.alpha.similarity.euclideanDistance([vector1], [vector2]) given two collection vectors, calculate the euclidean distance (square root of the sum of the squared differences)
-| <<labs-algorithms-similarity-jaccard, gds.alpha.similarity.jaccard>>                                          | gds.alpha.similarity.jaccard([vector1], [vector2]) given two collection vectors, calculate jaccard similarity
-| <<algorithms-similarity-overlap-syntax, gds.alpha.similarity.overlap>>                                        | gds.alpha.similarity.overlap([vector1], [vector2]) given two collection vectors, calculate overlap similarity
-| <<algorithms-similarity-overlap-syntax, gds.alpha.similarity.overlap>>                                        | CALL gds.alpha.similarity.overlap([{item:id, targets:[ids]}], {similarityCutoff:-1,degreeCutoff:0}) YIELD p50, p75, p90, p99, p999, p100 - computes overlap similarities
-| <<algorithms-similarity-overlap-syntax, gds.alpha.similarity.overlap.stream>>                                 | CALL gds.alpha.similarity.overlap.stream([{item:id, targets:[ids]}], {similarityCutoff:-1,degreeCutoff:0}) YIELD item1, item2, count1, count2, intersection, similarity - computes overlap similarities
-| <<algorithms-similarity-pearson-syntax, gds.alpha.similarity.pearson>>                                        | gds.alpha.similarity.pearson([vector1], [vector2]) given two collection vectors, calculate pearson similarity
-| <<algorithms-similarity-pearson-syntax, gds.alpha.similarity.pearson>>                                        | CALL gds.alpha.similarity.pearson([{item:id, weights:[weights]}], {similarityCutoff:-1,degreeCutoff:0}) YIELD p50, p75, p90, p99, p999, p100 - computes cosine similarities
-| <<algorithms-similarity-pearson-syntax, gds.alpha.similarity.pearson.stream>>                                 | CALL gds.alpha.similarity.pearson.stream([{item:id, weights:[weights]}], {similarityCutoff:-1,degreeCutoff:0}) YIELD item1, item2, count1, count2, intersection, similarity - computes cosine distance
-| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree>>                                    | CALL gds.alpha.spanningTree.write(configuration: Map) YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
-| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.kmax>>                               | CALL gds.alpha.spanningTree.kmax.write(configuration: Map) YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
-| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.kmin>>                               | CALL gds.alpha.spanningTree.kmin.write(configuration: Map) YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
-| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.maximum>>                            | CALL gds.alpha.spanningTree.maximum.write(configuration: Map) YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
-| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.minimum>>                            | CALL gds.alpha.spanningTree.minimum.write(configuration: Map) YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
-| <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangle.stream>>                        | CALL algo.triangle.stream(configuration: MAP) YIELD nodeA, nodeB, nodeC - yield nodeA, nodeB and nodeC which form a triangle
-| <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.stream>>                   | CALL algo.triangleCount.stream(configuration: MAP) YIELD nodeId, triangles - yield nodeId, number of triangles
-| <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.write>>                    | CALL algo.triangleCount(configuration: MAP) YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
-| <<graph-generation, gds.beta.graph.generate>>                                                            | CALL gds.beta.graph.generate(graphName: String, nodeCount: Integer, averageDegree: Integer, { relationshipDistribution: 'UNIFORM', relationshipProperty: {}})YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegree, relationshipDistribution, relationshipProperty - generates a random graph
-| algo.version                                                                                                  | RETURN algo.version() - return the current graph algorithms installed version
+| Name
+| <<algorithm-all-pairs-shortest-path-sample, gds.alpha.allShortestPaths.stream>>
+| <<algorithms-articlerank-syntax, gds.alpha.articleRank.stream>>
+| <<algorithms-articlerank-syntax, gds.alpha.articleRank.write>>
+| <<algorithms-balanced-triads-syntax, gds.alpha.balancedTriads.stream>>
+| <<algorithms-balanced-triads-syntax, gds.alpha.balancedTriads.write>>
+| <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.stream>>
+| <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.write>>
+| <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.sampled.stream>>
+| <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.sampled.write>>
+| <<algorithms-closeness-centrality-syntax, gds.alpha.closeness.stream>>
+| <<algorithms-closeness-centrality-syntax, gds.alpha.closeness.write>>
+| <<algorithms-degree-syntax, gds.alpha.degree.stream>>
+| <<algorithms-degree-syntax, gds.alpha.degree.write>>
+| <<algorithms-eigenvector-syntax, gds.alpha.eigenvector.stream>>
+| <<algorithms-eigenvector-syntax, gds.alpha.eigenvector.write>>
+| <<algorithms-yens-k-shortest-path-syntax, gds.alpha.kShortestPaths.stream>>
+| <<algorithms-yens-k-shortest-path-syntax, gds.alpha.kShortestPaths.write>>
+| <<algorithms-random-walk-syntax, gds.alpha.randomWalk.stream>>
+| <<algorithms-strongly-connected-components-syntax, gds.alpha.scc.stream>>
+| <<algorithms-strongly-connected-components-syntax, gds.alpha.scc.write>>
+| <<algorithms-shortest-path-syntax, gds.alpha.shortestPath.stream>>
+| <<algorithms-shortest-path-syntax, gds.alpha.shortestPath.write>>
+| <<algorithms-a_star-syntax, gds.alpha.shortestPath.astar.stream>>
+| <<algorithms-single-source-shortest-path-syntax, gds.alpha.shortestPath.deltaStepping.write>>
+| <<algorithms-single-source-shortest-path-syntax, gds.alpha.shortestPath.deltaStepping.stream>>
+| <<algorithms-similarity-cosine-syntax, gds.alpha.similarity.cosine.stream>>
+| <<algorithms-similarity-cosine-syntax, gds.alpha.similarity.cosine.write>>
+| <<algorithms-similarity-euclidean-syntax, gds.alpha.similarity.euclidean.stream>>
+| <<algorithms-similarity-euclidean-syntax, gds.alpha.similarity.euclidean.write>>
+| <<algorithms-similarity-overlap-syntax, gds.alpha.similarity.overlap.stream>>
+| <<algorithms-similarity-overlap-syntax, gds.alpha.similarity.overlap.write>>
+| <<algorithms-similarity-pearson-syntax, gds.alpha.similarity.pearson.write>>
+| <<algorithms-similarity-pearson-syntax, gds.alpha.similarity.pearson.stream>>
+| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.write>>
+| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.kmax.write>>
+| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.kmin.write>>
+| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.maximum.write>>
+| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.minimum.write>>
+| <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangle.stream>>
+| <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.stream>>
+| <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.write>>
+| <<graph-generation, gds.beta.graph.generate>>
 |===
 
+The following table lists all functions in the GDS library:
+
+[[table-labs]]
+[opts=header,cols="1m"]
+|===
+| Name
+| gds.version
+| gds.util.asNode
+| gds.util.asNodes
+| gds.util.asPath
+| gds.util.infinity
+| gds.util.isFinite
+| gds.util.isInfinite
+| gds.util.NaN
+| <<algorithms-linkprediction-adamic-adar-syntax, gds.alpha.linkprediction.adamicAdar>>
+| <<algorithms-linkprediction-common-neighbors-syntax, gds.alpha.linkprediction.commonNeighbors>>
+| <<algorithms-linkprediction-preferential-attachment-syntax, gds.alpha.linkprediction.preferentialAttachment>>
+| <<algorithms-linkprediction-resource-allocation-syntax, gds.alpha.linkprediction.resourceAllocation>>
+| <<algorithms-linkprediction-same-community-syntax, gds.alpha.linkprediction.sameCommunity>>
+| <<algorithms-linkprediction-total-neighbors-syntax, gds.alpha.linkprediction.totalNeighbors>>
+| <<labs-algorithms-one-hot-encoding, gds.alpha.ml.oneHotEncoding>>
+| gds.alpha.similarity.cosine
+| gds.alpha.similarity.euclidean
+| gds.alpha.similarity.jaccard
+| gds.alpha.similarity.euclideanDistance
+| gds.alpha.similarity.overlap
+| gds.alpha.similarity.pearson
+|===
