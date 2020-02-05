@@ -29,7 +29,7 @@ import java.util.function.IntConsumer;
 import java.util.function.IntPredicate;
 
 /**
- * array based path of nodes & a weight
+ * array based path of nodes and a weight
  */
 public class WeightedPath {
 

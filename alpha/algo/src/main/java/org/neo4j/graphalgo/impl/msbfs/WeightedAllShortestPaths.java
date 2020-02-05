@@ -42,7 +42,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  * <p>
  * Since all nodeId's have already been ordered by the idMapping we can use an integer
  * instead of a queue which just count's up for each startNodeId as long as it is
- * < nodeCount. Each thread tries to take one int from the counter at one time and
+ * {@Code < nodeCount}. Each thread tries to take one int from the counter at one time and
  * starts its computation on it.
  * <p>
  * The {@link WeightedAllShortestPaths#concurrency} value determines the count of workers

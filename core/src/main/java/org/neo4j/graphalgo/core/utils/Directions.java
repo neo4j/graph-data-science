@@ -28,7 +28,7 @@ import org.neo4j.graphdb.Direction;
  *
  * <p>
  *      String parsing is case insensitive!
- * </p>
+ * <div>
  *     <strong>OUTGOING</strong>
  *     <ul>
  *         <li>></li>
@@ -49,7 +49,7 @@ import org.neo4j.graphdb.Direction;
  *         <li>b</li>
  *         <li>both</li>
  *     </ul>
- * </p>
+ * </div>
  */
 public class Directions {
 

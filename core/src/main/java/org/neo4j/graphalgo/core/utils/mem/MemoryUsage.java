@@ -273,7 +273,7 @@ public final class MemoryUsage {
     /**
      * This method returns the maximum representation size of an object. <code>sizeSoFar</code>
      * is the object's size measured so far. <code>f</code> is the field being probed.
-     * <p>
+     *
      * <p>The returned offset will be the maximum of whatever was measured so far and
      * <code>f</code> field's offset and representation size (unaligned).
      */

@@ -43,14 +43,14 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
  * <p>
  * It is implemented by paging of smaller double-arrays ({@code double[][]}) to support approx. 32k bn. elements.
  * If the provided size is small enough, an optimized view of a single {@code double[]} might be used.
- * <p>
+ *
  * <ul>
  * <li>The array is of a fixed size and cannot grow or shrink dynamically.</li>
  * <li>The array is not optimized for sparseness and has a large memory overhead if the values written to it are very sparse.</li>
  * <li>The array does not support default values and returns the same default for unset values that a regular {@code double[]} does ({@code 0}).</li>
  * </ul>
- * <p>
- * <h3>Basic Usage</h3>
+ *
+ * <header>Basic Usage</header>
  * <pre>
  * {@code}
  * AllocationTracker tracker = ...;
