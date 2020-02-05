@@ -24,6 +24,13 @@ Cypher projections are especially useful during the development phase, when the 
 However, despite being more expressive, a Cypher projection usually increases loading time significantly.
 For the production phase, one might consider adapting the domain model to be eligible for the store projection.
 
+This section includes:
+
+* <<cypher-projection-syntax>>
+* <<cypher-projection-query-constraints>>
+* <<cypher-projection-relationship-types>>
+* <<cypher-projection-relationship-aggregation>>
+
 [[cypher-projection-syntax]]
 == Syntax
 
