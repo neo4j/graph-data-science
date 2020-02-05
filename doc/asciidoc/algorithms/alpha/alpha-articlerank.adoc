@@ -98,8 +98,6 @@ Papers 5 and 6 are not cited by any other papers, so their score doesn't increas
 
 include::../../huge-projection.adoc[tag=explanation]
 
-.Set `graph:'huge'` in the config:
-
 [source, cypher]
 ----
 include::scripts/articlerank.cypher[tag=huge-projection]
@@ -110,8 +108,6 @@ include::scripts/articlerank.cypher[tag=huge-projection]
 == Cypher projection
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
-
-.Set `graph:'cypher'` in the config:
 
 [source, cypher]
 ----

@@ -217,10 +217,10 @@ If a property is not present on a node in Neo4j, the given default value is used
 .The following query also loads all cities including their `population` and `stateId` properties
 [source,cypher]
 ----
-CALL algo.graph.load('cities',
+CALL gds.graph.create.cypher('cities',
   'MATCH (c:City) RETURN id(c) AS id, c.population AS population, c.stateId AS stateId',
-  'MATCH (a:City)-->(b:City) RETURN id(a) AS sourceId, id(b) AS targetId', {
-    graph: 'cypher',
+  'MATCH (a:City)-->(b:City) RETURN id(a) AS sourceId, id(b) AS targetId',
+  {
     nodeProperties: {
       population: {
           property: 'population'

@@ -197,8 +197,6 @@ RETURN nodeCount, loadDuration, evalDuration, writeDuration
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
-.Set `graph:'cypher'` in the config:
-
 [source, cypher]
 ----
 MATCH (start:Loc {name: 'A'})

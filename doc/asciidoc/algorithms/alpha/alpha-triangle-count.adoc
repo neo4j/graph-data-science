@@ -284,8 +284,6 @@ Local triangle count and clustering coefficient of nodes can be used as features
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
-.Set `graph:'cypher'` in the config:
-
 [source, cypher]
 ----
 CALL gds.alpha.triangleCount.write({
