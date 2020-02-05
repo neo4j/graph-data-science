@@ -41,7 +41,7 @@ CALL algo.pageRank('MyLabel', null)
 == During graph writing
 
 Properties are written to the graph in new transactions, batched over a fixed number of nodes.
-Those transactions are commited independently from the Cypher transaction.
+Those transactions are committed independently from the Cypher transaction.
 This means, if the Cypher transaction is terminated (either by the user or by the database system), already committed write transactions will _not_ be rolled back.
 
 
