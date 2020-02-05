@@ -268,12 +268,6 @@ class GraphListProcTest extends BaseProcTest {
         assertThat(actualNames, containsInAnyOrder(names));
     }
 
-    @ParameterizedTest(name = "Invalid Graph Name: {0}")
-    @ValueSource(strings = {"{ a: 'b' }", "[]", "1", "true", "false", "[1, 2, 3]", "1.4"})
-    void failForInvalidGraphNameTypeDueToObjectSignature(String graphName) {
-        assertError(String.format("CALL gds.graph.list(%s)", graphName), "Type mismatch: expected String but was");
-    }
-
     @Test
     void filterOnExactMatchUsingTheFirstArgument() {
         String[] names = {"b", "bb", "ab", "ba", "B", "ʙ"};
@@ -319,20 +313,8 @@ class GraphListProcTest extends BaseProcTest {
         assertThat(numberOfRows, is(0L));
     }
 
-    @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.newapi.GraphCreateProcTest#invalidGraphNames")
-    void failsOnInvalidGraphName(String invalidName) {
-        if (invalidName != null) { // null is not a valid name, but we use it to mean 'list all'
-            assertError(
-                "CALL gds.graph.list($graphName)",
-                map("graphName", invalidName),
-                String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
-            );
-        }
-    }
-
     @Test
-    void testReverseProjectionForListing() {
+    void reverseProjectionForListing() {
         runQuery("CREATE (a:Person), (b:Person), (a)-[:INTERACTS]->(b)");
         runQuery(
             "CALL gds.graph.create('incoming', 'Person', {" +
@@ -346,9 +328,8 @@ class GraphListProcTest extends BaseProcTest {
         });
     }
 
-    @Disabled
     @Test
-    void shouldListAllAvailableGraphsForUser() {
+    void listAllAvailableGraphsForUser() {
         String loadQuery = "CALL gds.graph.create(" +
                            "    $name, '', '')";
 
@@ -359,5 +340,24 @@ class GraphListProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer("alice", listQuery, resultRow -> Assertions.assertEquals("aliceGraph", resultRow.getString("name")));
         runQueryWithRowConsumer("bob", listQuery, resultRow -> Assertions.assertEquals("bobGraph", resultRow.getString("name")));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.newapi.GraphCreateProcTest#invalidGraphNames")
+    void failsOnInvalidGraphName(String invalidName) {
+        if (invalidName != null) { // null is not a valid name, but we use it to mean 'list all'
+            assertError(
+                "CALL gds.graph.list($graphName)",
+                map("graphName", invalidName),
+                String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+            );
+        }
+    }
+
+
+    @ParameterizedTest(name = "Invalid Graph Name: {0}")
+    @ValueSource(strings = {"{ a: 'b' }", "[]", "1", "true", "false", "[1, 2, 3]", "1.4"})
+    void failsOnInvalidGraphNameTypeDueToObjectSignature(String graphName) {
+        assertError(String.format("CALL gds.graph.list(%s)", graphName), "Type mismatch: expected String but was");
     }
 }
