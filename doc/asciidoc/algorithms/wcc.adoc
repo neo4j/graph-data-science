@@ -187,8 +187,8 @@ In the following examples we will demonstrate using the Weakly Connected Compone
 [source, cypher]
 ----
 CALL gds.wcc.stream({
-  nodeProjection: ["User"],
-  relationshipProjection: ["LINK"]
+  nodeProjection: 'User',
+  relationshipProjection: 'LINK'
 })
 YIELD nodeId, componentId
 RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, name
@@ -212,8 +212,8 @@ To instead write the component ID to a node property in the Neo4j graph, use thi
 [source, cypher]
 ----
 CALL gds.wcc.write({
-  nodeProjection: ["User"],
-  relationshipProjection: ["LINK"],
+  nodeProjection: 'User',
+  relationshipProjection: 'LINK',
   writeProperty: "componentId"
 })
 YIELD nodePropertiesWritten, componentCount;
@@ -244,9 +244,9 @@ The default is zero, and can be configured to another value using the `defaultVa
 [source, cypher]
 ----
 CALL gds.wcc.stream({
-  nodeProjection: ["User"],
-  relationshipProjection: ["LINK"],
-  relationshipProperties: ["weight"],
+  nodeProjection: 'User',
+  relationshipProjection: 'LINK',
+  relationshipProperties: 'weight',
   relationshipWeightProperty: "weight",
   threshold: 1.0
 })
@@ -271,8 +271,8 @@ RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, n
 [source, cypher]
 ----
 CALL gds.wcc.write({
-  nodeProjection: ["User"],
-  relationshipProjection: ["LINK"],
+  nodeProjection: 'User',
+  relationshipProjection: 'LINK',
   writeProperty: "componentId",
   relationshipWeightProperty: "weight",
   threshold: 1.0
@@ -318,8 +318,8 @@ We will use the weighted variant of WCC.
 [source, cypher]
 ----
 CALL gds.wcc.write({
-  nodeProjection: ["User"],
-  relationshipProjection: ["LINK"],
+  nodeProjection: 'User',
+  relationshipProjection: 'LINK',
   writeProperty: "componentId",
   relationshipWeightProperty: "weight",
   threshold: 1.0
@@ -351,10 +351,10 @@ CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})
 [source, cypher]
 ----
 CALL gds.wcc.stream({
-  nodeProjection: ["User"],
-  nodeProperties: ["componentId"],
-  relationshipProjection: ["LINK"],
-  relationshipProperties: ["weight"],
+  nodeProjection: 'User',
+  nodeProperties: 'componentId',
+  relationshipProjection: 'LINK',
+  relationshipProperties: 'weight',
   seedProperty: "componentId",
   relationshipWeightProperty: "weight",
   threshold: 1.0
@@ -380,8 +380,8 @@ RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, n
 [source, cypher]
 ----
 CALL gds.wcc.write({
-  nodeProjection: ["User"],
-  relationshipProjection: ["LINK"],
+  nodeProjection: 'User',
+  relationshipProjection: 'LINK',
   seedProperty: "componentId",
   writeProperty: "componentId",
   relationshipWeightProperty: "weight",
