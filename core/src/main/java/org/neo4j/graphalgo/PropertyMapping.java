@@ -209,6 +209,19 @@ public abstract class PropertyMapping {
     public static PropertyMapping of(
         String propertyKey,
         String neoPropertyKey,
+        Aggregation aggregation
+    ) {
+        return ImmutablePropertyMapping
+            .builder()
+            .propertyKey(propertyKey)
+            .neoPropertyKey(neoPropertyKey)
+            .aggregation(aggregation)
+            .build();
+    }
+
+    public static PropertyMapping of(
+        String propertyKey,
+        String neoPropertyKey,
         double defaultValue,
         Aggregation aggregation
     ) {

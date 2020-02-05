@@ -25,12 +25,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
+import java.util.List;
+import java.util.Map;
+
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 class GraphDropProcTest extends BaseProcTest {
@@ -56,7 +61,7 @@ class GraphDropProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldDropGraphFromCatalog() {
+    void dropGraphFromCatalog() {
         runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
 
         assertCypherResult(
@@ -117,7 +122,7 @@ class GraphDropProcTest extends BaseProcTest {
 
 
     @Test
-    void dropWithdegreeDistributionComputationOptOut() {
+    void dropWithDegreeDistributionComputationOptOut() {
         runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
 
         assertCypherResult(
@@ -164,7 +169,53 @@ class GraphDropProcTest extends BaseProcTest {
     }
 
     @Test
-    void failOnNonExistingGraph() {
+    void removeGraphWithMultipleRelationshipTypes() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(GraphCreateProc.class, GraphExistsProc.class, GraphDropProc.class, GraphListProc.class);
+
+        String testGraph =
+            "CREATE" +
+            "  (a:A {id: 0, partition: 42})" +
+            ", (b:B {id: 1, partition: 42})" +
+            ", (a)-[:X { weight: 1.0 }]->(:A {id: 2,  weight: 1.0, partition: 1})" +
+            ", (b)-[:Y { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})";
+
+        runQuery(testGraph, emptyMap());
+
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipType("X")
+            .withRelationshipType("Y")
+            .graphCreate(GRAPH_NAME)
+            .yields();
+
+        runQuery(query);
+
+        List<Map<String, Object>> expectedGraphInfo = singletonList(
+            map("nodeCount", 4L, "relationshipCount", 2L, "graphName", GRAPH_NAME)
+        );
+
+        assertCypherResult("CALL gds.graph.list($name) YIELD nodeCount, relationshipCount, graphName",
+            singletonMap("name", GRAPH_NAME),
+            expectedGraphInfo
+        );
+
+        assertCypherResult("CALL gds.graph.drop($name) YIELD nodeCount, relationshipCount, graphName",
+            singletonMap("name", GRAPH_NAME),
+            expectedGraphInfo
+        );
+
+        assertCypherResult(
+            "CALL gds.graph.exists($graphName)",
+            map("graphName", GRAPH_NAME),
+            singletonList(
+                map("graphName", GRAPH_NAME, "exists", false)
+            )
+        );
+    }
+
+    @Test
+    void failsOnNonExistingGraph() {
         assertCypherResult(
             "CALL gds.graph.exists($graphName)",
             map("graphName", GRAPH_NAME),
@@ -197,4 +248,5 @@ class GraphDropProcTest extends BaseProcTest {
             String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
     }
+
 }

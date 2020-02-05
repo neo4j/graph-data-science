@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -266,12 +268,6 @@ class GraphListProcTest extends BaseProcTest {
         assertThat(actualNames, containsInAnyOrder(names));
     }
 
-    @ParameterizedTest(name = "Invalid Graph Name: {0}")
-    @ValueSource(strings = {"{ a: 'b' }", "[]", "1", "true", "false", "[1, 2, 3]", "1.4"})
-    void failForInvalidGraphNameTypeDueToObjectSignature(String graphName) {
-        assertError(String.format("CALL gds.graph.list(%s)", graphName), "Type mismatch: expected String but was");
-    }
-
     @Test
     void filterOnExactMatchUsingTheFirstArgument() {
         String[] names = {"b", "bb", "ab", "ba", "B", "ʙ"};
@@ -317,6 +313,35 @@ class GraphListProcTest extends BaseProcTest {
         assertThat(numberOfRows, is(0L));
     }
 
+    @Test
+    void reverseProjectionForListing() {
+        runQuery("CREATE (a:Person), (b:Person), (a)-[:INTERACTS]->(b)");
+        runQuery(
+            "CALL gds.graph.create('incoming', 'Person', {" +
+            "  INTERACTS: {" +
+            "    projection: 'REVERSE'" +
+            "  }" +
+            "})"
+        );
+        runQueryWithRowConsumer("CALL gds.graph.list()", row -> {
+            assertEquals(2, row.getNumber("nodeCount").intValue());
+        });
+    }
+
+    @Test
+    void listAllAvailableGraphsForUser() {
+        String loadQuery = "CALL gds.graph.create(" +
+                           "    $name, '', '')";
+
+        runQuery("alice", loadQuery, MapUtil.map("name", "aliceGraph"));
+        runQuery("bob", loadQuery, MapUtil.map("name", "bobGraph"));
+
+        String listQuery = "CALL gds.graph.list() YIELD graphName as name";
+
+        runQueryWithRowConsumer("alice", listQuery, resultRow -> Assertions.assertEquals("aliceGraph", resultRow.getString("name")));
+        runQueryWithRowConsumer("bob", listQuery, resultRow -> Assertions.assertEquals("bobGraph", resultRow.getString("name")));
+    }
+
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.newapi.GraphCreateProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
@@ -329,18 +354,10 @@ class GraphListProcTest extends BaseProcTest {
         }
     }
 
-    @Test
-    void testReverseProjectionForListing() {
-        runQuery("CREATE (a:Person), (b:Person), (a)-[:INTERACTS]->(b)");
-        runQuery(
-            "CALL gds.graph.create('incoming', 'Person', {" +
-            "  INTERACTS: {" +
-            "    projection: 'REVERSE'" +
-            "  }" +
-            "})"
-        );
-        runQueryWithRowConsumer("CALL gds.graph.list()", row -> {
-            assertEquals(2, row.getNumber("nodeCount").intValue());
-        });
+
+    @ParameterizedTest(name = "Invalid Graph Name: {0}")
+    @ValueSource(strings = {"{ a: 'b' }", "[]", "1", "true", "false", "[1, 2, 3]", "1.4"})
+    void failsOnInvalidGraphNameTypeDueToObjectSignature(String graphName) {
+        assertError(String.format("CALL gds.graph.list(%s)", graphName), "Type mismatch: expected String but was");
     }
 }

@@ -19,11 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.LongArrayList;
-import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
@@ -41,32 +38,6 @@ public final class GraphHelper {
                 });
         return outWeights.build().toArray();
     }
-
-    public static void assertProperties(Graph graph, long node, double... expected) {
-        assertPropertiesWithDelta(graph, 0, node, expected);
-    }
-
-    public static void assertPropertiesWithDelta(Graph graph, double delta, long node, double... expected) {
-        assertProperties(graph, delta, node, expected);
-    }
-
-    private static void assertProperties(Graph graph, double delta, long node, double... expected) {
-        LongArrayList idList = new LongArrayList(expected.length);
-        DoubleArrayList properties = new DoubleArrayList(expected.length);
-        graph.forEachRelationship(node, 0D, (s, t, w) -> {
-            idList.add(t);
-            properties.add(w);
-            return true;
-        });
-        long[] ids = idList.toArray();
-        int[] order = IndirectSort.mergesort(0, ids.length, new AscendingLongComparator(ids));
-        DoubleArrayList sortedProperties = new DoubleArrayList(ids.length);
-        for (int index : order) {
-            sortedProperties.add(properties.get(index));
-        }
-        assertArrayEquals(expected, sortedProperties.toArray(), delta);
-    }
-
 
     public static void assertRelationships(Graph graph, long node, long... expected) {
         LongArrayList idList = new LongArrayList();
