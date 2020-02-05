@@ -6,7 +6,7 @@
 This section describes the ArticleRank algorithm in the Neo4j Graph Data Science library.
 --
 
-ArticleRank is a variant of the <<algorithms-pagerank, PageRank algorithm>>, which measures the *transitive* influence or connectivity of nodes.
+ArticleRank is a variant of the <<algorithms-pagerank, Page Rank algorithm>>, which measures the *transitive* influence or connectivity of nodes.
 
 include::alpha-note.adoc[tag=alpha-note]
 
@@ -25,7 +25,7 @@ This section includes:
 
 // tag::explanation[]
 
-Where ArticleRank differs to PageRank is that PageRank assumes that relationships from nodes that have a low out-degree are more important than relationships from nodes with a higher out-degree.
+Where ArticleRank differs to Page Rank is that Page Rank assumes that relationships from nodes that have a low out-degree are more important than relationships from nodes with a higher out-degree.
 ArticleRank weakens this assumption.
 // end::explanation[]
 
@@ -131,11 +131,11 @@ YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, 
 | Name                          | Type    | Default                | Optional | Description
 | label                         | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
 | relationship                  | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
-| iterations                    | int     | 20                     | yes      | How many iterations of PageRank to run.
+| iterations                    | int     | 20                     | yes      | How many iterations of Page Rank to run.
 | concurrency                   | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| dampingFactor                 | float   | 0.85                   | yes      | The damping factor of the PageRank calculation.
+| dampingFactor                 | float   | 0.85                   | yes      | The damping factor of the Page Rank calculation.
 | relationshipWeightProperty    | string  | null                   | yes      | The name of the relationship property that represents weight. If null, treats the graph as unweighted. Must be numeric.
 | defaultValue                  | float   | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
 | write                         | boolean | true                   | yes      | Specify if the result should be written back as a node property.
@@ -169,11 +169,11 @@ YIELD node, score
 | Name                          | Type   | Default                | Optional | Description
 | label                         | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
 | relationship                  | string | null                   | yes      | The relationship type to load from the graph. If null, load all nodes.
-| iterations                    | int    | 20                     | yes      | Specify how many iterations of PageRank to run.
+| iterations                    | int    | 20                     | yes      | Specify how many iterations of Page Rank to run.
 | concurrency                   | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency               | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int    | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| dampingFactor                 | float  | 0.85                   | yes      | The damping factor of the PageRank calculation.
+| dampingFactor                 | float  | 0.85                   | yes      | The damping factor of the Page Rank calculation.
 | relationshipWeightProperty    | string | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | defaultValue                  | float  | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
 | graph                         | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
@@ -184,7 +184,7 @@ YIELD node, score
 |===
 | Name  | Type  | Description
 | node  | long  | Node ID
-| score | float | PageRank weight
+| score | float | Page Rank weight
 |===
 
 

@@ -33,7 +33,7 @@ It was the first of the centrality measures that considered the transitive impor
 [[algorithms-eigenvector-usecase]]
 == Use-cases - when to use the Eigenvector Centrality algorithm
 
-Eigenvector Centrality can be used in many of the https://arxiv.org/pdf/1407.5107.pdf[same use cases as the PageRank algorithm].
+Eigenvector Centrality can be used in many of the https://arxiv.org/pdf/1407.5107.pdf[same use cases as the Page Rank algorithm].
 
 [[algorithms-eigenvector-syntax]]
 == Syntax

@@ -71,9 +71,9 @@ CALL algo.<name>(
 [[cypher-projection-basic-usage]]
 == Example Usage
 
-We could use Cypher projections to run the PageRank algorithm on *DBpedia*, as shown in the following examples.
+We could use Cypher projections to run the Page Rank algorithm on *DBpedia*, as shown in the following examples.
 
-.The following will run the PageRank algorithm over a graph based on Cypher projections for nodes and relationships:
+.The following will run the Page Rank algorithm over a graph based on Cypher projections for nodes and relationships:
 [source,cypher]
 ----
 CALL algo.pageRank(
@@ -108,7 +108,7 @@ Parallelization of the queries is based on the `batchSize` key in the config, wh
 If the parameters are not named `$skip` and `$limit`, they will be ignored, and the sequential loading approach will be used.
 ====
 
-.The following runs PageRank over a graph based on Cypher projections, with nodes loaded in parallel:
+.The following runs Page Rank over a graph based on Cypher projections, with nodes loaded in parallel:
 [source,cypher]
 ----
 CALL algo.pageRank(
@@ -117,7 +117,7 @@ CALL algo.pageRank(
   {graph:'cypher', iterations:5, write: true});
 ----
 
-.The following runs PageRank over a graph based on Cypher projections, with relationships loaded in parallel:
+.The following runs Page Rank over a graph based on Cypher projections, with relationships loaded in parallel:
 [source,cypher]
 ----
 CALL algo.pageRank(
@@ -126,7 +126,7 @@ CALL algo.pageRank(
   {graph:'cypher', iterations:5, write: true});
 ----
 
-.The following runs PageRank over a graph based on Cypher projections, with nodes and relationships loaded in parallel:
+.The following runs Page Rank over a graph based on Cypher projections, with nodes and relationships loaded in parallel:
 [source,cypher]
 ----
 CALL algo.pageRank(

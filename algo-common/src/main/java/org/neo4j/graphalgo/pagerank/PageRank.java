@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 /**
- * Partition based parallel PageRank based on
+ * Partition based parallel Page Rank based on
  * "An Efficient Partition-Based Parallel PageRank Algorithm" [1]
  * <p>
  * Each partition thread has its local array of only the nodes that it is responsible for,
@@ -333,7 +333,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
                 long newRequired = memoryUsageFor(maxConcurrency, partitions);
                 long available = availableMemory();
                 log.warn(
-                        "Requested concurrency of %d would require %s Heap but only %s are available, PageRank will be throttled to a concurrency of %d to use only %s Heap.",
+                        "Requested concurrency of %d would require %s Heap but only %s are available, Page Rank will be throttled to a concurrency of %d to use only %s Heap.",
                         concurrency,
                         humanReadable(required),
                         humanReadable(available),

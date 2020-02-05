@@ -20,7 +20,7 @@ The general call syntax is:
 CALL algo.<name>('NodeLabel', "RelationshipType", {config})
 ----
 
-For example, running the PageRank algorithm on DBpedia, which contains 11 million nodes and 116 million relationships:
+For example, running the Page Rank algorithm on DBpedia, which contains 11 million nodes and 116 million relationships:
 
 .The following will run the write version of the algorithm, storing results in the `pagerank` property:
 [source,cypher]
@@ -59,7 +59,7 @@ The general call syntax is:
 CALL algo.<name>('NodeLabel', "RelationshipType", {graph: "huge"})
 ----
 
-For example, running the PageRank algorithm on DBpedia:
+For example, running the Page Rank algorithm on DBpedia:
 
 .The following will run the write version of the algorithm, storing results in the `pagerank` property:
 [source,cypher]

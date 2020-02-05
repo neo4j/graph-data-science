@@ -50,7 +50,7 @@ It would also ease the implementation of new operations like a `ConcurrentNodeIt
                :                 :               :
          +-----+-----+     +-----+-----+   +-----+-----+
          |           |     |           |   |           |
-         |  PageRank |     | UnionFind |   | MinSTree  |
+         |  Page Rank |     | UnionFind |   | MinSTree  |
          |    {c}    |     |     {c}   |   |   {c}     |
          +-----------+     +-----------+   +-----+-----+
                                                  ^
@@ -65,7 +65,7 @@ It would also ease the implementation of new operations like a `ConcurrentNodeIt
 
 The Diagram shows the basic idea.
 Each Algorithm needs a set of data sources.
-_PageRank_ for example relies only on nodeIds and their degrees.
+_Page Rank_ for example relies only on nodeIds and their degrees.
 While the underlying structure for  _UnionFind_  can be built just by iterating over all relations (or relationships with a weight property. depends on use case).
 _kMeans_ on the other hand needs the result of a preceding algorithm to work.
 

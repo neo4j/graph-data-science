@@ -1,12 +1,12 @@
 [[algorithms-pagerank]]
-= The PageRank algorithm
+= The Page Rank algorithm
 
 [abstract]
 --
-This section describes the PageRank algorithm in the Neo4j Graph Data Science library.
+This section describes the Page Rank algorithm in the Neo4j Graph Data Science library.
 --
 
-PageRank is an algorithm that measures the *transitive* influence or connectivity of nodes.
+Page Rank is an algorithm that measures the *transitive* influence or connectivity of nodes.
 
 It can be computed by either iteratively distributing one node's rank (originally based on degree) over its neighbours or by randomly traversing the graph and counting the frequency of hitting each node during these walks.
 
@@ -25,10 +25,10 @@ This section includes:
 [[algorithms-pagerank-intro]]
 == Introduction
 
-The PageRank algorithm measures the importance of each node within the graph, based on the number and quality of incoming relationships.
+The Page Rank algorithm measures the importance of each node within the graph, based on the number and quality of incoming relationships.
 The underlying assumption is that pages of importance are more likely to receive a higher volume of links from other pages.
 
-PageRank is defined in the original Google paper as follows:
+Page Rank is defined in the original Google paper as follows:
 
 ----
 PR(A) = (1-d) + d (PR(T1)/C(T1) + ... + PR(Tn)/C(Tn))
@@ -77,8 +77,8 @@ YIELD nodes, createMillis, computeMillis, writeMillis, configuration
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| dampingFactor                 | float   | 0.85                   | yes | The damping factor of the PageRank calculation.
-| maxIterations                 | int     | 20                     | yes | The maximum number of iterations of PageRank to run.
+| dampingFactor                 | float   | 0.85                   | yes | The damping factor of the Page Rank calculation.
+| maxIterations                 | int     | 20                     | yes | The maximum number of iterations of Page Rank to run.
 | tolerance                     | float   | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
 | concurrency                   | int     | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int     | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
@@ -117,8 +117,8 @@ YIELD node, score
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| dampingFactor                 | float  | 0.85                   | yes | The damping factor of the PageRank calculation.
-| maxIterations                 | int    | 20                     | yes | The maximum number of iterations of PageRank to run.
+| dampingFactor                 | float  | 0.85                   | yes | The damping factor of the Page Rank calculation.
+| maxIterations                 | int    | 20                     | yes | The maximum number of iterations of Page Rank to run.
 | tolerance                     | float  | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
 | concurrency                   | int    | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency               | int    | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
@@ -132,7 +132,7 @@ YIELD node, score
 |===
 | Name    | Type  | Description
 | nodeId  | long  | Node ID
-| score   | float | PageRank weight
+| score   | float | Page Rank weight
 |===
 
 .The following will run the algorithm and returns the result in form of statistical and measurement values:
@@ -339,10 +339,10 @@ YIELD nodePropertiesWritten AS writtenProperties, ranIterations
 [[algorithms-pagerank-examples-personalized]]
 === Personalized
 
-Personalized PageRank is a variation of PageRank which is biased towards a set of `sourceNodes`.
-This variant of PageRank is often used as part of https://www.r-bloggers.com/from-random-walks-to-personalized-pagerank/[recommender systems^].
+Personalized Page Rank is a variation of Page Rank which is biased towards a set of `sourceNodes`.
+This variant of Page Rank is often used as part of https://www.r-bloggers.com/from-random-walks-to-personalized-pagerank/[recommender systems^].
 
-The following examples show how to run PageRank centered around 'Site A'.
+The following examples show how to run Page Rank centered around 'Site A'.
 
 .The following will run the algorithm and stream results:
 [source, cypher]
@@ -438,7 +438,7 @@ YIELD ranIterations
 [[algorithms-pagerank-usage]]
 == Usage
 
-There are some things to be aware of when using the PageRank algorithm:
+There are some things to be aware of when using the Page Rank algorithm:
 
 * If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
 * Rank sink can occur when a network of pages form an infinite cycle.

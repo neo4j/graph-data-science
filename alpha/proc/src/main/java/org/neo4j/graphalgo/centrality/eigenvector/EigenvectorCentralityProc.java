@@ -79,7 +79,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         }
 
         // NOTE: could not use `writeNodeProperties` just yet, as this requires changes to
-        //  the PageRank class and therefore to all product PageRank procs as well.
+        //  the Page Rank class and therefore to all product Page Rank procs as well.
         try (ProgressTimer ignored = statsBuilder.timeWrite()) {
             NodePropertyExporter exporter = NodePropertyExporter
                 .of(api, computationResult.graph(), algorithm.getTerminationFlag())

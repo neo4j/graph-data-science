@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoBaseProc<PageRank, PageRank, CONFIG> {
 
     static final String PAGE_RANK_DESCRIPTION =
-        "PageRank is an algorithm that measures the transitive influence or connectivity of nodes.";
+        "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
 
     @Override
     protected final PageRankFactory<CONFIG> algorithmFactory(PageRankBaseConfig config) {

@@ -31,7 +31,7 @@ In order for the results from a `write` mode computation to be used in another a
 The `stream` mode will return the results of the algorithm computation as Cypher result rows.
 This is similar to how standard Cypher reading queries operate.
 
-The returned data can be a node ID and a computed value for the node (such as a PageRank score, or WCC componentID), or two node IDs and a computed value for the node pair (such as a Node Similarity similarity score).
+The returned data can be a node ID and a computed value for the node (such as a Page Rank score, or WCC componentID), or two node IDs and a computed value for the node pair (such as a Node Similarity similarity score).
 
 If the graph is very large, the result of a `stream` mode computation will also be very large.
 Using the `ORDER BY` and `LIMIT` subclauses in the Cypher query could be useful to support 'top N'-style use cases.

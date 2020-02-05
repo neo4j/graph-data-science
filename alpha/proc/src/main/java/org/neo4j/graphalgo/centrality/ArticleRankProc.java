@@ -73,7 +73,7 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
         log.info("ArticleRank: overall memory usage: %s", tracker.getUsageString());
 
         // NOTE: could not use `writeNodeProperties` just yet, as this requires changes to
-        //  the PageRank class and therefore to all product PageRank procs as well.
+        //  the Page Rank class and therefore to all product Page Rank procs as well.
         try (ProgressTimer ignored = statsBuilder.timeWrite()) {
             NodePropertyExporter exporter = NodePropertyExporter
                 .of(api, graph, algo.getTerminationFlag())
