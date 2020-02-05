@@ -107,6 +107,14 @@ CALL gds.graph.create.cypher(
 ----
 
 
+[NOTE]]
+====
+Cypher projections allow creating graph projections with arbitrary node identifiers (e.g. via `UNWIND`).
+Executing an algorithm on such a graph in `write` mode may lead to unexpected changes in the Neo4j database.
+It is highly recommended to use Cypher projections only in development mode and not in production.
+====
+
+
 [[cypher-projection-properties]]
 == Node and relationship properties
 
