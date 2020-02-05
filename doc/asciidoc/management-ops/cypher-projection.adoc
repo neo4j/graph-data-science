@@ -242,3 +242,22 @@ CALL gds.graph.create.cypher(
 * The `property` entry refers to the column name in the query result.
 * The `aggregation` entry sets the aggregation function for values of parallel relationships (e.g. `MIN` or `MAX`).
 * The `defaultValue` entry is used if the cell contains `null` (instead of `Double.NAN`).
+
+// end::overview[]
+
+// tag::explanation[]
+If node label and relationship type are not selective enough to create the graph projection to run the algorithm on, you can use Cypher queries to project your graph.
+This can also be used to run algorithms on a virtual graph.
+You can learn more in the <<cypher-projection>> section of the manual.
+// end::explanation[]
+
+// tag::similarity-explanation[]
+If the similarity lists are very large they can take up a lot of memory.
+For cases where those lists contain lots of values that should be skipped, you can use the less memory-intensive approach of using Cypher statements to project the graph instead.
+
+The Cypher loader expects to receive 3 fields:
+
+* `item` - should contain node ids, which we can return using the `id` function.
+* `category` - should contain node ids, which we can return using the `id` function.
+* `weight` - should contain a double value.
+// end::similarity-explanation[]
