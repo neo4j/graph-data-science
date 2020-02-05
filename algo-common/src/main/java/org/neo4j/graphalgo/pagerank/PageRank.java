@@ -62,16 +62,16 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  * During execution, the scores arrays
  * are shaped like this:
  * <pre>
- *     [ executing partition ] -> [ calculated partition ] -> [ local page rank scores ]
+ *     [ executing partition ] -&gt; [ calculated partition ] -&gt; [ local page rank scores ]
  * </pre>
  * Each single partition writes in a partitioned array, calculation the scores
  * for every receiving partition. A single partition only sees:
  * <pre>
- *     [ calculated partition ] -> [ local page rank scores ]
+ *     [ calculated partition ] -&gt; [ local page rank scores ]
  * </pre>
  * The coordinating thread then builds the transpose of all written partitions from every partition:
  * <pre>
- *     [ calculated partition ] -> [ executing partition ] -> [ local page rank scores ]
+ *     [ calculated partition ] -&gt; [ executing partition ] -&gt; [ local page rank scores ]
  * </pre>
  * This step does not happen in parallel, but does not involve extensive copying.
  * The local page rank scores needn't be copied, only the partitioning arrays.
@@ -81,7 +81,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  * For the next iteration, every partition first updates its scores, in parallel.
  * A single partition now sees:
  * <pre>
- *     [ executing partition ] -> [ local page rank scores ]
+ *     [ executing partition ] -&gt; [ local page rank scores ]
  * </pre>
  * That is, a list of all calculated scores for it self, grouped by the partition that
  * calculated these scores.
