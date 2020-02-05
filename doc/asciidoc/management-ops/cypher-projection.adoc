@@ -1,3 +1,4 @@
+// tag::overview[]
 [[cypher-projection]]
 = Cypher projection
 
@@ -107,11 +108,10 @@ CALL gds.graph.create.cypher(
 ----
 
 
-[NOTE]]
+[NOTE]
 ====
-Cypher projections allow creating graph projections with arbitrary node identifiers (e.g. via `UNWIND`).
+Cypher projections allow creating graphs from arbitrary query results, regardless of whether these map to actual identifiers in the Neo4j graph.
 Executing an algorithm on such a graph in `write` mode may lead to unexpected changes in the Neo4j database.
-It is highly recommended to use Cypher projections only in development mode and not in production.
 ====
 
 
