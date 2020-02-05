@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.newapi;
 
-import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -83,11 +82,27 @@ import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIO
 import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
+/*
+TODO:
+ - node label as LIST OF ANY
+ - multiple relationship types in various sugared forms
+ - no filter -> load everything
+ - different projections
+ - type aliasing
+ - relationship properties in various sugared forms
+ - global definition
+ - local definition
+ - different aggregations
+ - different default values
+ - merging of global + local -> positive
+ - literal Cypher maps + params as Java maps (borders on Neo responsibilty)
+ - uniqueness constraints: -> negative
+ - (rel type + projection)s
+ - properties in global+local
+*/
 class GraphCreateProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER = "CREATE (:A {age: 2})-[:REL {weight: 55}]->(:A)";
-    private static final long nodeCount = 2L;
-    private static final long relCount = 1L;
     private static final String DB_CYPHER_ESTIMATE =
         "CREATE" +
         "  (a:A {id: 0, partition: 42})" +
@@ -119,7 +134,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void createGraph() {
+    void createStoreProjection() {
         assertCypherResult(
             "CALL gds.graph.create('name', 'A', 'REL')",
             singletonList(map(
@@ -138,8 +153,8 @@ class GraphCreateProcTest extends BaseProcTest {
                         PROPERTIES_KEY, emptyMap()
                     )
                 ),
-                "nodeCount", nodeCount,
-                "relationshipCount", relCount,
+                "nodeCount", 2L,
+                "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -148,7 +163,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void createCypherGraph() {
+    void createCypherProjection() {
         String name = "name";
 
         assertCypherResult(
@@ -170,8 +185,8 @@ class GraphCreateProcTest extends BaseProcTest {
                         PROPERTIES_KEY, emptyMap()
                     )
                 ),
-                "nodeCount", nodeCount,
-                "relationshipCount", relCount,
+                "nodeCount", 2L,
+                "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -180,7 +195,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void createCypherGraphWithRelationshipTypes() {
+    void createCypherProjectionWithRelationshipTypes() {
         String name = "name";
 
         String relationshipQuery = "MATCH (a)-[r:REL]->(b) RETURN id(a) AS source, id(b) AS target, type(r) AS type";
@@ -202,8 +217,8 @@ class GraphCreateProcTest extends BaseProcTest {
                         PROPERTIES_KEY, emptyMap()
                     )
                 ),
-                "nodeCount", nodeCount,
-                "relationshipCount", relCount,
+                "nodeCount", 2L,
+                "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -212,7 +227,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldProjectAllNodesWithSpecialStar() {
+    void projectAllNodesWithAsterisk() {
         String query = "CALL gds.graph.create('g', '*', 'REL') YIELD nodeCount";
 
         runQuery("CREATE (), (:B), (:C:D:E)");
@@ -224,7 +239,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldProjectAllRelationshipsWithSpecialStar() {
+    void projectAllRelationshipsWithAsterisk() {
         String query = "CALL gds.graph.create('g', 'A', '*') YIELD relationshipCount";
 
         runQuery("CREATE (:A)-[:R]->(:A), (:B:A)-[:T]->(:A:B), (cde:C:D:E)-[:SELF]->(cde)");
@@ -235,171 +250,9 @@ class GraphCreateProcTest extends BaseProcTest {
         assertGraphExists("g");
     }
 
-    @ParameterizedTest(name = "projections: {0}")
-    @ValueSource(strings = {"'*', {}", "{}, '*'"})
-    void emptyProjectionDisallowed(String projection) {
-        String query = "CALL gds.graph.create('g', " + projection + ")";
-
-        assertErrorRegex(
-            query,
-            ".*An empty ((node)|(relationship)) projection was given; at least one ((node label)|(relationship type)) must be projected."
-        );
-
-        assertGraphDoesNotExist("g");
-    }
-
-    /*
-     TODO:
-      - node label as LIST OF ANY
-      - multiple relationship types in various sugared forms
-      - no filter -> load everything
-      - different projections
-      - type aliasing
-      - relationship properties in various sugared forms
-      - global definition
-      - local definition
-      - different aggregations
-      - different default values
-      - merging of global + local -> positive
-      - literal Cypher maps + params as Java maps (borders on Neo responsibilty)
-      - uniqueness constraints: -> negative
-         - (rel type + projection)s
-         - properties in global+local
-     */
-
-    @Test
-    void failForNulls() {
-        assertError(
-            "CALL gds.graph.create(null, null, null)",
-            "`graphName` can not be null or blank, but it was `null`"
-        );
-        assertError(
-            "CALL gds.graph.create('name', null, null)",
-            "No value specified for the mandatory configuration parameter `nodeProjection`"
-        );
-        assertError(
-            "CALL gds.graph.create('name', 'A', null)",
-            "No value specified for the mandatory configuration parameter `relationshipProjection`"
-        );
-        assertError(
-            "CALL gds.graph.create.cypher(null, null, null)",
-            "`graphName` can not be null or blank, but it was `null`"
-        );
-        assertError(
-            "CALL gds.graph.create.cypher('name', null, null)",
-            "No value specified for the mandatory configuration parameter `nodeQuery`"
-        );
-        assertError(
-            "CALL gds.graph.create.cypher('name', 'MATCH (n) RETURN id(n) AS id', null)",
-            "No value specified for the mandatory configuration parameter `relationshipQuery`"
-        );
-    }
-
-    @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
-    @MethodSource("org.neo4j.graphalgo.newapi.GraphCreateProcTest#invalidGraphNames")
-    void failsOnInvalidGraphName(String invalidName) {
-        assertError(
-            "CALL gds.graph.create($graphName, {}, {})",
-            map("graphName", invalidName),
-            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
-        );
-        assertError(
-            "CALL gds.graph.create.cypher($graphName, $nodeQuery, $relationshipQuery)",
-            map("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
-            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
-        );
-
-        assertGraphDoesNotExist(invalidName);
-    }
-
-    @Test
-    void failOnMissingMandatory() {
-        assertError(
-            "CALL gds.graph.create()",
-            "Procedure call does not provide the required number of arguments"
-        );
-        assertError(
-            "CALL gds.graph.create.cypher()",
-            "Procedure call does not provide the required number of arguments"
-        );
-    }
-
-    @Test
-    void failsOnInvalidNeoLabel() {
-        String name = "g";
-        Map nodeProjection = map("A", map(LABEL_KEY, "INVALID"));
-
-        assertError(
-            "CALL gds.graph.create($name, $nodeProjection, '*')",
-            map("name", name, "nodeProjection", nodeProjection),
-            "Invalid node projection, one or more labels not found: 'INVALID'"
-        );
-
-        assertGraphDoesNotExist(name);
-    }
-
-    @Test
-    void failsOnInvalidAggregation() {
-        Map relProjection = map("A", map(TYPE_KEY, "REL", AGGREGATION_KEY, "INVALID"));
-
-        assertError(
-            "CALL gds.graph.create('g', '*', $relProjection)",
-            map("relProjection", relProjection),
-            "Aggregation `INVALID` is not supported."
-        );
-    }
-
-    @Test
-    void failsOnExistingGraphName() {
-        String name = "g";
-        runQuery("CALL gds.graph.create($name, '*', '*')", map("name", name));
-        assertError(
-            "CALL gds.graph.create($name, '*', '*')",
-            map("name", name),
-            String.format("A graph with name '%s' already exists.", name));
-
-        assertError(
-            "CALL gds.graph.create.cypher($name, '*', '*')",
-            map("name", name),
-            String.format("A graph with name '%s' already exists.", name));
-    }
-
-    @Test
-    void failsOnWriteQuery() {
-        String writeQuery = "CREATE (n) RETURN id(n) AS id";
-        String query = "CALL gds.graph.create.cypher('dragons', $nodeQuery, $relQuery)";
-
-        assertError(
-            query,
-            map("relQuery", ALL_RELATIONSHIPS_QUERY, "nodeQuery", writeQuery),
-            "Query must be read only. Query: "
-        );
-
-        assertError(
-            query,
-            map("nodeQuery", ALL_NODES_QUERY, "relQuery", writeQuery),
-            "Query must be read only. Query: "
-        );
-    }
-
-    // This test will be removed once we have rich multi-label support
-    @ParameterizedTest(name = "argument: {0}")
-    @MethodSource("multipleNodeProjections")
-    void failsOnMultipleLabelProjections(Object argument) {
-        Map<String, Object> nodeProjection = map("A", map(LABEL_KEY, "A"), "B", map(LABEL_KEY, "A"));
-
-        assertError(
-            "CALL gds.graph.create('g', $nodeProjection, {})",
-            map("nodeProjection", nodeProjection),
-            "Multiple node projections are not supported; please use a single projection with a `|` operator to project nodes with different labels into the in-memory graph."
-        );
-
-        assertGraphDoesNotExist("g");
-    }
-
     @ParameterizedTest(name = "{0}, nodeProjection = {1}")
     @MethodSource("nodeProjectionVariants")
-    void testNodeProjectionVariants(String descr, Object nodeProjection, Map<String, Object> desugarednodeProjection) {
+    void nodeProjectionVariants(String descr, Object nodeProjection, Map<String, Object> desugaredNodeProjection) {
         String name = "g";
 
         assertCypherResult(
@@ -407,7 +260,7 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeProjection", nodeProjection),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, desugarednodeProjection,
+                NODE_PROJECTION_KEY, desugaredNodeProjection,
                 RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
@@ -416,32 +269,6 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-    }
-
-    @Test
-    void failsOnInvalidPropertyKey() {
-        String name = "g";
-
-        String graphCreate =
-            "CALL gds.graph.create(" +
-            "$name, " +
-            "{" +
-            "  A: {" +
-            "    label: 'A'," +
-            "    properties: {" +
-            "      property: 'invalid'" +
-            "    }" +
-            "  }" +
-            "}," +
-            "'*')";
-
-        assertError(
-            graphCreate,
-            map("name", name),
-            "Node properties not found: 'invalid'"
-        );
-
-        assertGraphDoesNotExist(name);
     }
 
     @ParameterizedTest(name = "properties = {0}")
@@ -465,8 +292,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph graph = findLoadedGraph(name);
-        assertThat(graph.availableNodeProperties(), contains(expectedProperties.keySet().toArray()));
+        assertThat(findLoadedGraph(name).availableNodeProperties(), contains(expectedProperties.keySet().toArray()));
     }
 
     @ParameterizedTest(name = "properties = {0}")
@@ -487,7 +313,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 NODE_PROJECTION_KEY, expectedNodeProjection,
                 RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
                 "nodeCount", 1L,
-                "relationshipCount", relCount,
+                "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -528,7 +354,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "{0}, relProjection = {1}")
     @MethodSource("relationshipProjectionVariants")
-    void testRelationshipProjectionVariants(String descr, Object relProjection, Map<String, Object> desugaredRelProjection) {
+    void relationshipProjectionVariants(String descr, Object relProjection, Map<String, Object> desugaredRelProjection) {
         String name = "g";
 
         assertCypherResult(
@@ -552,7 +378,7 @@ class GraphCreateProcTest extends BaseProcTest {
     void relationshipProjectionProjections(String projection) {
         String name = "g";
 
-        Long expectedRels = projection.equals("UNDIRECTED") ? relCount * 2 : relCount;
+        Long expectedRels = projection.equals("UNDIRECTED") ? 2L : 1L;
 
         String graphCreate = GdsCypher.call()
             .withAnyLabel()
@@ -578,7 +404,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     AGGREGATION_KEY,
                     Aggregation.DEFAULT.name()
                 )),
-                "nodeCount", nodeCount,
+                "nodeCount", 2L,
                 "relationshipCount", expectedRels,
                 "createMillis", instanceOf(Long.class)
             ))
@@ -615,8 +441,8 @@ class GraphCreateProcTest extends BaseProcTest {
                         AGGREGATION_KEY, "DEFAULT",
                         PROPERTIES_KEY, expectedProperties)
                 ),
-                "nodeCount", nodeCount,
-                "relationshipCount", relCount,
+                "nodeCount", 2L,
+                "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -649,7 +475,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     )
                 ),
                 "nodeCount", 1L,
-                "relationshipCount", relCount,
+                "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -684,43 +510,13 @@ class GraphCreateProcTest extends BaseProcTest {
                         )
                     )
                 ),
-                "nodeCount", nodeCount,
-                "relationshipCount", relCount,
+                "nodeCount", 2L,
+                "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
 
         assertGraphExists(name);
-    }
-
-    @Test
-    void relationshipProjectionPropertyThrowsAnExceptionWhenNoneIsCombinedWithNotNone() {
-        String query =
-            "CALL gds.graph.create('g', '*', " +
-            "{" +
-            "    B: {" +
-            "        type: 'REL'," +
-            "        projection: 'NATURAL'," +
-            "        aggregation: 'NONE'," +
-            "        properties: {" +
-            "            weight: {" +
-            "                aggregation: 'NONE'" +
-            "            }" +
-            "        }" +
-            "    } " +
-            "}, " +
-            "{" +
-            "    relationshipProperties: {" +
-            "        foo: {" +
-            "            property: 'weight'," +
-            "            aggregation: 'MAX'" +
-            "        }" +
-            "    }" +
-            "})";
-
-        assertError(query, "Conflicting relationship property aggregations, it is not allowed to mix `NONE` with aggregations.");
-
-        assertGraphDoesNotExist("g");
     }
 
     @ParameterizedTest(name = "aggregation={0}")
@@ -779,8 +575,8 @@ class GraphCreateProcTest extends BaseProcTest {
                         )
                     )
                 ),
-                "nodeCount", nodeCount,
-                "relationshipCount", relCount,
+                "nodeCount", 2L,
+                "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -825,8 +621,8 @@ class GraphCreateProcTest extends BaseProcTest {
                         "defaultValue", Double.NaN)
                     ))
                 ),
-                "nodeCount", nodeCount,
-                "relationshipCount", relCount,
+                "nodeCount", 2L,
+                "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -876,7 +672,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     )
                 ),
                 "nodeCount", 1L,
-                "relationshipCount", relCount,
+                "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -971,7 +767,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldDefaultRelationshipProjectionProperty() {
+    void defaultRelationshipProjectionProperty() {
         String graphCreateQuery =
             "CALL gds.graph.create(" +
             "  'testGraph', " +
@@ -1003,14 +799,14 @@ class GraphCreateProcTest extends BaseProcTest {
                             "defaultValue", Double.NaN)
                 ))
             ),
-            "nodeCount", nodeCount,
-            "relationshipCount", relCount,
+            "nodeCount", 2L,
+            "relationshipCount", 1L,
             "createMillis", instanceOf(Long.class)
         )));
     }
 
     @Test
-    void shouldDefaultNodeProjectionProperty() {
+    void defaultNodeProjectionProperty() {
         String graphCreateQuery =
             "CALL gds.graph.create(" +
             "  'testGraph', " +
@@ -1041,10 +837,500 @@ class GraphCreateProcTest extends BaseProcTest {
                 )
             ),
             RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
-            "nodeCount", nodeCount,
-            "relationshipCount", relCount,
+            "nodeCount", 2L,
+            "relationshipCount", 1L,
             "createMillis", instanceOf(Long.class)
         )));
+    }
+
+    @Test
+    void computeMemoryEstimationForStoreProjection() throws Exception {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class);
+        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
+
+        Map<String, Object> relProjection = map(
+            "B",
+            map("type", "REL")
+        );
+        String query = "CALL gds.graph.create.estimate('*', $relProjection)";
+        runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
+            row -> {
+                assertEquals(303504, row.getNumber("bytesMin").longValue());
+                assertEquals(303504, row.getNumber("bytesMax").longValue());
+            }
+        );
+    }
+
+    @Test
+    void computeMemoryEstimationForStoreProjectionWithProperties() throws Exception {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class);
+        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
+
+        Map<String, Object> relProjection = map(
+            "B",
+            map("type", "REL", "properties", "weight")
+        );
+        String query = "CALL gds.graph.create.estimate('*', $relProjection)";
+
+        runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
+            row -> {
+                assertEquals(573936, row.getNumber("bytesMin").longValue());
+                assertEquals(573936, row.getNumber("bytesMax").longValue());
+            }
+        );
+    }
+
+    @Test
+    void computeMemoryEstimationForCypherProjection() throws Exception {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class);
+        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
+
+        String nodeQuery = "MATCH (n) RETURN id(n) AS id";
+        String relationshipQuery = "MATCH (n)-[:REL]->(m) RETURN id(n) AS source, id(m) AS target";
+        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery)";
+        runQueryWithRowConsumer(localDb,
+            query,
+            map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
+            row -> {
+                assertEquals(303504, row.getNumber("bytesMin").longValue());
+                assertEquals(303504, row.getNumber("bytesMax").longValue());
+            }
+        );
+    }
+
+    @Test
+    void computeMemoryEstimationForCypherProjectionWithProperties() throws Exception {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class);
+        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
+
+        String nodeQuery = "MATCH (n) RETURN id(n) AS id";
+        String relationshipQuery = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
+        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery, {relationshipProperties: 'weight'})";
+        runQueryWithRowConsumer(localDb,
+            query,
+            map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
+            row -> {
+                assertEquals(573936, row.getNumber("bytesMin").longValue());
+                assertEquals(573936, row.getNumber("bytesMax").longValue());
+            }
+        );
+    }
+
+    @Test
+    void computeMemoryEstimationForVirtualGraph() throws Exception {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class);
+
+        String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
+        runQueryWithRowConsumer(localDb, query,
+            row -> {
+                assertEquals(303744, row.getNumber("bytesMin").longValue());
+                assertEquals(303744, row.getNumber("bytesMax").longValue());
+            }
+        );
+    }
+
+    @Test
+    void computeMemoryEstimationForVirtualGraphWithProperties() throws Exception {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class);
+
+        String query = "CALL gds.graph.create.estimate('*', {`*`: {type: '', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
+        runQueryWithRowConsumer(localDb, query,
+            row -> {
+                assertEquals(574176, row.getNumber("bytesMin").longValue());
+                assertEquals(574176, row.getNumber("bytesMax").longValue());
+            }
+        );
+    }
+
+    @Test
+    void loadGraphWithSaturatedThreadPool() {
+        // ensure that we don't drop task that can't be scheduled while importing a graph.
+
+        // TODO: ensure parallel running via batch-size
+        String query = "CALL gds.graph.create('g', '*', '*')";
+
+        List<Future<?>> futures = new ArrayList<>();
+        // block all available threads
+        for (int i = 0; i < Pools.DEFAULT_CONCURRENCY; i++) {
+            futures.add(
+                Pools.DEFAULT.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
+            );
+        }
+
+        try {
+            runQueryWithRowConsumer(query,
+                row -> {
+                    assertEquals(2, row.getNumber("nodeCount").intValue());
+                    assertEquals(1, row.getNumber("relationshipCount").intValue());
+                }
+            );
+        } finally {
+            ParallelUtil.awaitTermination(futures);
+        }
+    }
+
+    @Test
+    void loadMultipleNodeProperties() {
+        String testGraph =
+            "CREATE" +
+            "  (a: Node { foo: 42, bar: 13.37 })" +
+            ", (b: Node { foo: 43, bar: 13.38 })" +
+            ", (c: Node { foo: 44, bar: 13.39 })" +
+            ", (d: Node { foo: 45 })";
+
+        // TODO: test create.cypher
+        runQuery(testGraph, Collections.emptyMap());
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("Node")
+            .withAnyRelationshipType()
+            .withNodeProperty("fooProp", "foo")
+            .withNodeProperty(PropertyMapping.of("barProp", "bar", 19.84))
+            .graphCreate("g")
+            .yields("nodeCount");
+
+        runQuery(query, map());
+
+        Graph graph = GraphCatalog.get("", "g").getGraph();
+        Graph expected = TestGraph.Builder.fromGdl("({ fooProp: 42, barProp: 13.37D })" +
+                                                   "({ fooProp: 43, barProp: 13.38D })" +
+                                                   "({ fooProp: 44, barProp: 13.39D })" +
+                                                   "({ fooProp: 45, barProp: 19.84D })");
+        assertGraphEquals(expected, graph);
+    }
+
+    @Test
+    void loadMultipleRelationshipProperties() {
+        String testGraph =
+            "CREATE" +
+            "  (a: Node)" +
+            ", (b: Node)" +
+            ", (a)-[:TYPE_1 { weight: 42.1, cost: 1 }]->(b)" +
+            ", (a)-[:TYPE_1 { weight: 43.2, cost: 2 }]->(b)" +
+            ", (a)-[:TYPE_2 { weight: 44.3, cost: 3 }]->(b)" +
+            ", (a)-[:TYPE_2 { weight: 45.4, cost: 4 }]->(b)";
+
+        runQuery(testGraph, Collections.emptyMap());
+
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("Node")
+            .withRelationshipProperty(PropertyMapping.of("sumWeight", "weight", 1.0, Aggregation.SUM))
+            .withRelationshipProperty(PropertyMapping.of("minWeight", "weight", Aggregation.MIN))
+            .withRelationshipProperty(PropertyMapping.of("maxCost", "cost", Aggregation.MAX))
+            .withRelationshipType("TYPE_1")
+            .graphCreate("aggGraph")
+            .yields("relationshipProjection");
+
+        runQueryWithRowConsumer(query, row -> {
+            Map<String, Object> relationshipProjections = (Map<String, Object>) row.get("relationshipProjection");
+            Map<String, Object> type1Projection = (Map<String, Object>) relationshipProjections.get("TYPE_1");
+            Map<String, Object> relProperties = (Map<String, Object>) type1Projection.get("properties");
+            assertEquals(3, relProperties.size());
+
+            Map<String, Object> sumWeightParams = (Map<String, Object>) relProperties.get("sumWeight");
+            Map<String, Object> minWeightParams = (Map<String, Object>) relProperties.get("minWeight");
+            Map<String, Object> maxCostParams = (Map<String, Object>) relProperties.get("maxCost");
+
+            assertEquals("weight", sumWeightParams.get("property").toString());
+            assertEquals("SUM", sumWeightParams.get("aggregation").toString());
+            assertEquals(1.0, sumWeightParams.get("defaultValue"));
+
+            assertEquals("weight", minWeightParams.get("property").toString());
+            assertEquals("MIN", minWeightParams.get("aggregation").toString());
+
+            assertEquals("cost", maxCostParams.get("property").toString());
+            assertEquals("MAX", maxCostParams.get("aggregation").toString());
+        });
+
+        Graph g = GraphCatalog.get("", "aggGraph").getGraph();
+
+        assertNotNull(g);
+        assertEquals(2, g.nodeCount());
+        assertEquals(3, g.relationshipCount());
+
+        assertRelationships(g, 0, 1, 1, 1);
+        assertPropertiesWithDelta(g, 1E-3, 0, 85.3, 42.1, 2.0);
+    }
+
+    @Test
+    void preferRelationshipPropertiesForCypherLoading() {
+        String relationshipQuery = "MATCH (s)-[r]->(t) RETURN id(s) AS source, id(t) AS target " +
+                                   " , 23 AS foo, 42 AS bar, 1984 AS baz, r.weight AS weight";
+
+        String query = "CALL gds.graph.create.cypher(" +
+                       "    'testGraph', $nodeQuery, $relationshipQuery, {" +
+                       "        relationshipProperties: {" +
+                       "            foobar : 'foo'," +
+                       "            foobaz : 'baz'," +
+                       "            raboof : 'weight'" +
+                       "        }" +
+                       "    }" +
+                       ")";
+
+        runQuery(query, map("nodeQuery",
+            ALL_NODES_QUERY, "relationshipQuery", relationshipQuery));
+
+        Graph foobarGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("foobar"));
+        Graph foobazGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("foobaz"));
+        Graph raboofGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("raboof"));
+
+        Graph expectedFoobarGraph = TestGraph.Builder.fromGdl("()-[{w: 23.0D}]->()");
+        Graph expectedFoobazGraph = TestGraph.Builder.fromGdl("()-[{w: 1984.0D}]->()");
+        Graph expectedRaboofGraph = TestGraph.Builder.fromGdl("()-[{w: 55.0D}]->()");
+
+        TestSupport.assertGraphEquals(expectedFoobarGraph, foobarGraph);
+        TestSupport.assertGraphEquals(expectedFoobazGraph, foobazGraph);
+        TestSupport.assertGraphEquals(expectedRaboofGraph, raboofGraph);
+    }
+
+    @Test
+    void multiUseLoadedGraphWithMultipleRelationships() throws KernelException {
+        String graphName = "foo";
+
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class, WccStreamProc.class);
+        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
+
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipType("X")
+            .withRelationshipType("Y")
+            .graphCreate(graphName)
+            .yields("nodeCount", "relationshipCount", "graphName");
+
+        runQueryWithRowConsumer(localDb, query, map(), resultRow -> {
+                assertEquals(12L, resultRow.getNumber("nodeCount"));
+                assertEquals(8L, resultRow.getNumber("relationshipCount"));
+                assertEquals(graphName, resultRow.getString("graphName"));
+            }
+        );
+
+        String algoQuery = GdsCypher.call()
+            .explicitCreation(graphName)
+            .algo("wcc")
+            .statsMode()
+            .addPlaceholder("relationshipTypes", "relType")
+            .yields("componentCount");
+
+        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("X", "Y")), resultRow ->
+            assertEquals(4L, resultRow.getNumber("componentCount"))
+        );
+
+        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("X")), resultRow ->
+            assertEquals(6L, resultRow.getNumber("componentCount"))
+        );
+
+        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("Y")), resultRow ->
+            assertEquals(10L, resultRow.getNumber("componentCount"))
+        );
+    }
+
+    // Failure cases
+
+    @ParameterizedTest(name = "projections: {0}")
+    @ValueSource(strings = {"'*', {}", "{}, '*'"})
+    void failsOnEmptyProjection(String projection) {
+        String query = "CALL gds.graph.create('g', " + projection + ")";
+
+        assertErrorRegex(
+            query,
+            ".*An empty ((node)|(relationship)) projection was given; at least one ((node label)|(relationship type)) must be projected."
+        );
+
+        assertGraphDoesNotExist("g");
+    }
+
+    @Test
+    void failsOnInvalidPropertyKey() {
+        String name = "g";
+
+        String graphCreate =
+            "CALL gds.graph.create(" +
+            "$name, " +
+            "{" +
+            "  A: {" +
+            "    label: 'A'," +
+            "    properties: {" +
+            "      property: 'invalid'" +
+            "    }" +
+            "  }" +
+            "}," +
+            "'*')";
+
+        assertError(
+            graphCreate,
+            map("name", name),
+            "Node properties not found: 'invalid'"
+        );
+
+        assertGraphDoesNotExist(name);
+    }
+
+    @Test
+    void failsOnNulls() {
+        assertError(
+            "CALL gds.graph.create(null, null, null)",
+            "`graphName` can not be null or blank, but it was `null`"
+        );
+        assertError(
+            "CALL gds.graph.create('name', null, null)",
+            "No value specified for the mandatory configuration parameter `nodeProjection`"
+        );
+        assertError(
+            "CALL gds.graph.create('name', 'A', null)",
+            "No value specified for the mandatory configuration parameter `relationshipProjection`"
+        );
+        assertError(
+            "CALL gds.graph.create.cypher(null, null, null)",
+            "`graphName` can not be null or blank, but it was `null`"
+        );
+        assertError(
+            "CALL gds.graph.create.cypher('name', null, null)",
+            "No value specified for the mandatory configuration parameter `nodeQuery`"
+        );
+        assertError(
+            "CALL gds.graph.create.cypher('name', 'MATCH (n) RETURN id(n) AS id', null)",
+            "No value specified for the mandatory configuration parameter `relationshipQuery`"
+        );
+    }
+
+    @Test
+    void failsOnInvalidAggregationCombinations() {
+        String query =
+            "CALL gds.graph.create('g', '*', " +
+            "{" +
+            "    B: {" +
+            "        type: 'REL'," +
+            "        projection: 'NATURAL'," +
+            "        aggregation: 'NONE'," +
+            "        properties: {" +
+            "            weight: {" +
+            "                aggregation: 'NONE'" +
+            "            }" +
+            "        }" +
+            "    } " +
+            "}, " +
+            "{" +
+            "    relationshipProperties: {" +
+            "        foo: {" +
+            "            property: 'weight'," +
+            "            aggregation: 'MAX'" +
+            "        }" +
+            "    }" +
+            "})";
+
+        assertError(query, "Conflicting relationship property aggregations, it is not allowed to mix `NONE` with aggregations.");
+
+        assertGraphDoesNotExist("g");
+    }
+
+    @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
+    @MethodSource("org.neo4j.graphalgo.newapi.GraphCreateProcTest#invalidGraphNames")
+    void failsOnInvalidGraphName(String invalidName) {
+        assertError(
+            "CALL gds.graph.create($graphName, {}, {})",
+            map("graphName", invalidName),
+            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+        );
+        assertError(
+            "CALL gds.graph.create.cypher($graphName, $nodeQuery, $relationshipQuery)",
+            map("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
+            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+        );
+
+        assertGraphDoesNotExist(invalidName);
+    }
+
+    @Test
+    void failsOnMissingMandatory() {
+        assertError(
+            "CALL gds.graph.create()",
+            "Procedure call does not provide the required number of arguments"
+        );
+        assertError(
+            "CALL gds.graph.create.cypher()",
+            "Procedure call does not provide the required number of arguments"
+        );
+    }
+
+    @Test
+    void failsOnInvalidNeoLabel() {
+        String name = "g";
+        Map nodeProjection = map("A", map(LABEL_KEY, "INVALID"));
+
+        assertError(
+            "CALL gds.graph.create($name, $nodeProjection, '*')",
+            map("name", name, "nodeProjection", nodeProjection),
+            "Invalid node projection, one or more labels not found: 'INVALID'"
+        );
+
+        assertGraphDoesNotExist(name);
+    }
+
+    @Test
+    void failsOnInvalidAggregation() {
+        Map relProjection = map("A", map(TYPE_KEY, "REL", AGGREGATION_KEY, "INVALID"));
+
+        assertError(
+            "CALL gds.graph.create('g', '*', $relProjection)",
+            map("relProjection", relProjection),
+            "Aggregation `INVALID` is not supported."
+        );
+    }
+
+    @Test
+    void failsOnExistingGraphName() {
+        String name = "g";
+        runQuery("CALL gds.graph.create($name, '*', '*')", map("name", name));
+        assertError(
+            "CALL gds.graph.create($name, '*', '*')",
+            map("name", name),
+            String.format("A graph with name '%s' already exists.", name));
+
+        assertError(
+            "CALL gds.graph.create.cypher($name, '*', '*')",
+            map("name", name),
+            String.format("A graph with name '%s' already exists.", name));
+    }
+
+    @Test
+    void failsOnWriteQuery() {
+        String writeQuery = "CREATE (n) RETURN id(n) AS id";
+        String query = "CALL gds.graph.create.cypher('dragons', $nodeQuery, $relQuery)";
+
+        assertError(
+            query,
+            map("relQuery", ALL_RELATIONSHIPS_QUERY, "nodeQuery", writeQuery),
+            "Query must be read only. Query: "
+        );
+
+        assertError(
+            query,
+            map("nodeQuery", ALL_NODES_QUERY, "relQuery", writeQuery),
+            "Query must be read only. Query: "
+        );
+    }
+
+    // This test will be removed once we have rich multi-label support
+    @ParameterizedTest(name = "argument: {0}")
+    @MethodSource("multipleNodeProjections")
+    void failsOnMultipleLabelProjections(Object argument) {
+        Map<String, Object> nodeProjection = map("A", map(LABEL_KEY, "A"), "B", map(LABEL_KEY, "A"));
+
+        assertError(
+            "CALL gds.graph.create('g', $nodeProjection, {})",
+            map("nodeProjection", nodeProjection),
+            "Multiple node projections are not supported; please use a single projection with a `|` operator to project nodes with different labels into the in-memory graph."
+        );
+
+        assertGraphDoesNotExist("g");
     }
 
     @Test
@@ -1135,296 +1421,6 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphDoesNotExist(name);
-    }
-
-    @Test
-    void shouldComputeMemoryEstimationForHuge() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        Map<String, Object> relProjection = map(
-            "B",
-            map("type", "REL")
-        );
-        String query = "CALL gds.graph.create.estimate('*', $relProjection)";
-        runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
-            row -> {
-                assertEquals(303504, row.getNumber("bytesMin").longValue());
-                assertEquals(303504, row.getNumber("bytesMax").longValue());
-            }
-        );
-    }
-
-    @Test
-    void shouldComputeMemoryEstimationForHugeWithProperties() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        Map<String, Object> relProjection = map(
-            "B",
-            map("type", "REL", "properties", "weight")
-        );
-        String query = "CALL gds.graph.create.estimate('*', $relProjection)";
-
-        runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
-            row -> {
-                assertEquals(573936, row.getNumber("bytesMin").longValue());
-                assertEquals(573936, row.getNumber("bytesMax").longValue());
-            }
-        );
-    }
-
-    @Test
-    void shouldComputeMemoryEstimationForCypher() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        String nodeQuery = "MATCH (n) RETURN id(n) AS id";
-        String relationshipQuery = "MATCH (n)-[:REL]->(m) RETURN id(n) AS source, id(m) AS target";
-        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery)";
-        runQueryWithRowConsumer(localDb,
-            query,
-            map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
-            row -> {
-                assertEquals(303504, row.getNumber("bytesMin").longValue());
-                assertEquals(303504, row.getNumber("bytesMax").longValue());
-            }
-        );
-    }
-
-    @Test
-    void shouldComputeMemoryEstimationForCypherWithProperties() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        String nodeQuery = "MATCH (n) RETURN id(n) AS id";
-        String relationshipQuery = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
-        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery, {relationshipProperties: 'weight'})";
-        runQueryWithRowConsumer(localDb,
-            query,
-            map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
-            row -> {
-                assertEquals(573936, row.getNumber("bytesMin").longValue());
-                assertEquals(573936, row.getNumber("bytesMax").longValue());
-            }
-        );
-    }
-
-    @Test
-    void shouldComputeMemoryEstimationForVirtualGraph() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-
-        String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
-        runQueryWithRowConsumer(localDb, query,
-            row -> {
-                assertEquals(303744, row.getNumber("bytesMin").longValue());
-                assertEquals(303744, row.getNumber("bytesMax").longValue());
-            }
-        );
-    }
-
-    @Test
-    void shouldComputeMemoryEstimationForVirtualGraphWithProperties() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-
-        String query = "CALL gds.graph.create.estimate('*', {`*`: {type: '', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
-        runQueryWithRowConsumer(localDb, query,
-            row -> {
-                assertEquals(574176, row.getNumber("bytesMin").longValue());
-                assertEquals(574176, row.getNumber("bytesMax").longValue());
-            }
-        );
-    }
-
-    @Test
-    void shouldLoadGraphWithSaturatedThreadPool() {
-        // ensure that we don't drop task that can't be scheduled while importing a graph.
-
-        // TODO: ensure parallel running via batch-size
-        String query = "CALL gds.graph.create('g', '*', '*')";
-
-        List<Future<?>> futures = new ArrayList<>();
-        // block all available threads
-        for (int i = 0; i < Pools.DEFAULT_CONCURRENCY; i++) {
-            futures.add(
-                Pools.DEFAULT.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
-            );
-        }
-
-        try {
-            runQueryWithRowConsumer(query,
-                row -> {
-                    assertEquals(2, row.getNumber("nodeCount").intValue());
-                    assertEquals(1, row.getNumber("relationshipCount").intValue());
-                }
-            );
-        } finally {
-            ParallelUtil.awaitTermination(futures);
-        }
-    }
-
-    @Test
-    void shouldLoadMultipleNodeProperties() throws KernelException {
-        String testGraph =
-            "CREATE" +
-            "  (a: Node { foo: 42, bar: 13.37 })" +
-            ", (b: Node { foo: 43, bar: 13.38 })" +
-            ", (c: Node { foo: 44, bar: 13.39 })" +
-            ", (d: Node { foo: 45 })";
-
-        // TODO: test create.cypher
-        runQuery(testGraph, Collections.emptyMap());
-        String query = GdsCypher
-            .call()
-            .withNodeLabel("Node")
-            .withAnyRelationshipType()
-            .withNodeProperty("fooProp", "foo")
-            .withNodeProperty(PropertyMapping.of("barProp", "bar", 19.84))
-            .graphCreate("g")
-            .yields("nodeCount");
-
-        runQuery(query, map());
-
-        Graph graph = GraphCatalog.get("", "g").getGraph();
-        Graph expected = TestGraph.Builder.fromGdl("({ fooProp: 42, barProp: 13.37D })" +
-                                                   "({ fooProp: 43, barProp: 13.38D })" +
-                                                   "({ fooProp: 44, barProp: 13.39D })" +
-                                                   "({ fooProp: 45, barProp: 19.84D })");
-        assertGraphEquals(expected, graph);
-    }
-
-    @Test
-    void shouldLoadGraphWithMultipleRelationshipProperties() throws KernelException {
-        String testGraph =
-            "CREATE" +
-            "  (a: Node)" +
-            ", (b: Node)" +
-            ", (a)-[:TYPE_1 { weight: 42.1, cost: 1 }]->(b)" +
-            ", (a)-[:TYPE_1 { weight: 43.2, cost: 2 }]->(b)" +
-            ", (a)-[:TYPE_2 { weight: 44.3, cost: 3 }]->(b)" +
-            ", (a)-[:TYPE_2 { weight: 45.4, cost: 4 }]->(b)";
-
-        runQuery(testGraph, Collections.emptyMap());
-
-        String query = GdsCypher
-            .call()
-            .withNodeLabel("Node")
-            .withRelationshipProperty(PropertyMapping.of("sumWeight", "weight", 1.0, Aggregation.SUM))
-            .withRelationshipProperty(PropertyMapping.of("minWeight", "weight", Aggregation.MIN))
-            .withRelationshipProperty(PropertyMapping.of("maxCost", "cost", Aggregation.MAX))
-            .withRelationshipType("TYPE_1")
-            .graphCreate("aggGraph")
-            .yields("relationshipProjection");
-
-        runQueryWithRowConsumer(query, row -> {
-            Map<String, Object> relationshipProjections = (Map<String, Object>) row.get("relationshipProjection");
-            Map<String, Object> type1Projection = (Map<String, Object>) relationshipProjections.get("TYPE_1");
-            Map<String, Object> relProperties = (Map<String, Object>) type1Projection.get("properties");
-            assertEquals(3, relProperties.size());
-
-            Map<String, Object> sumWeightParams = (Map<String, Object>) relProperties.get("sumWeight");
-            Map<String, Object> minWeightParams = (Map<String, Object>) relProperties.get("minWeight");
-            Map<String, Object> maxCostParams = (Map<String, Object>) relProperties.get("maxCost");
-
-            assertEquals("weight", sumWeightParams.get("property").toString());
-            assertEquals("SUM", sumWeightParams.get("aggregation").toString());
-            assertEquals(1.0, sumWeightParams.get("defaultValue"));
-
-            assertEquals("weight", minWeightParams.get("property").toString());
-            assertEquals("MIN", minWeightParams.get("aggregation").toString());
-
-            assertEquals("cost", maxCostParams.get("property").toString());
-            assertEquals("MAX", maxCostParams.get("aggregation").toString());
-        });
-
-        Graph g = GraphCatalog.get("", "aggGraph").getGraph();
-
-        assertNotNull(g);
-        assertEquals(2, g.nodeCount());
-        assertEquals(3, g.relationshipCount());
-
-        assertRelationships(g, 0, 1, 1, 1);
-        assertPropertiesWithDelta(g, 1E-3, 0, 85.3, 42.1, 2.0);
-    }
-
-    @Test
-    void shouldPreferRelationshipPropertiesForCypherLoading() {
-        String relationshipQuery = "MATCH (s)-[r]->(t) RETURN id(s) AS source, id(t) AS target " +
-                                   " , 23 AS foo, 42 AS bar, 1984 AS baz, r.weight AS weight";
-
-        @Language("Cypher")
-        String query = "CALL gds.graph.create.cypher(" +
-                       "    'testGraph', $nodeQuery, $relationshipQuery, {" +
-                       "        relationshipProperties: {" +
-                       "            foobar : 'foo'," +
-                       "            foobaz : 'baz'," +
-                       "            raboof : 'weight'" +
-                       "        }" +
-                       "    }" +
-                       ")";
-
-        runQuery(query, map("nodeQuery",
-            ALL_NODES_QUERY, "relationshipQuery", relationshipQuery));
-
-        Graph foobarGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("foobar"));
-        Graph foobazGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("foobaz"));
-        Graph raboofGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("raboof"));
-
-        Graph expectedFoobarGraph = TestGraph.Builder.fromGdl("()-[{w: 23.0D}]->()");
-        Graph expectedFoobazGraph = TestGraph.Builder.fromGdl("()-[{w: 1984.0D}]->()");
-        Graph expectedRaboofGraph = TestGraph.Builder.fromGdl("()-[{w: 55.0D}]->()");
-
-        TestSupport.assertGraphEquals(expectedFoobarGraph, foobarGraph);
-        TestSupport.assertGraphEquals(expectedFoobazGraph, foobazGraph);
-        TestSupport.assertGraphEquals(expectedRaboofGraph, raboofGraph);
-    }
-
-    @Test
-    void multiUseLoadedGraphWithMultipleRelationships() throws KernelException {
-        String graphName = "foo";
-
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class, WccStreamProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        String query = GdsCypher.call()
-            .withAnyLabel()
-            .withRelationshipType("X")
-            .withRelationshipType("Y")
-            .graphCreate(graphName)
-            .yields("nodeCount", "relationshipCount", "graphName");
-
-        runQueryWithRowConsumer(localDb, query, map(), resultRow -> {
-                assertEquals(12L, resultRow.getNumber("nodeCount"));
-                assertEquals(8L, resultRow.getNumber("relationshipCount"));
-                assertEquals(graphName, resultRow.getString("graphName"));
-            }
-        );
-
-        String algoQuery = GdsCypher.call()
-            .explicitCreation(graphName)
-            .algo("wcc")
-            .statsMode()
-            .addPlaceholder("relationshipTypes", "relType")
-            .yields("componentCount");
-
-        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("X", "Y")), resultRow ->
-            assertEquals(4L, resultRow.getNumber("componentCount"))
-        );
-
-        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("X")), resultRow ->
-            assertEquals(6L, resultRow.getNumber("componentCount"))
-        );
-
-        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("Y")), resultRow ->
-            assertEquals(10L, resultRow.getNumber("componentCount"))
-        );
     }
 
     // Arguments for parameterised tests
