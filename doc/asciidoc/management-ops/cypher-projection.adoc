@@ -1,28 +1,26 @@
-// tag::overview[]
 [[cypher-projection]]
 = Cypher projection
 
-ifdef::env-docs[]
 [abstract]
 --
 This chapter explains how to create a graph using a Cypher projection.
 --
-endif::env-docs[]
 
 If the store projection is not expressive enough to describe the in-memory graph, we can instead use Cypher queries to select nodes and relationships.
-One benefit of using Cypher queries is the possibility to form the graph from data that exists only during query time.
+One benefit of using Cypher queries is the possibility to form the graph from data that exists only at query time.
 A common use case is the reduction of paths into single relationships between the start and end node of the path.
 
-.The following query reduces a 2-hop pattern to a single relationship effectively representing co-authors:
+.The following query reduces a 2-hop path to a single relationship effectively representing co-authors:
 [source,cypher]
 ----
 MATCH (p1:Author)-[:WROTE]->(a:Article)<-[:WROTE]-(p2:Author)
 RETURN id(p1) AS source, id(p2) AS target, count(a) AS weight
 ----
 
-Cypher projections are especially useful during the development phase, when the workflow is being designed and the inputs are not yet clear.
-However, despite being more expressive, a Cypher projection usually increases loading time significantly.
-For the production phase, one might consider adapting the domain model to be eligible for the store projection.
+Cypher projections are especially useful during the development phase.
+Their flexibility is convenient when exploring data and algorithms, and designing a workflow.
+However, creating a graph from a Cypher projection can be significantly slower than creating it directly from the store.
+For production, it is recommended to adapt the domain model in a way that it can take advantage of the loading speed of store projections.
 
 This section includes:
 
@@ -31,10 +29,12 @@ This section includes:
 * <<cypher-projection-relationship-types>>
 * <<cypher-projection-relationship-aggregation>>
 
+
 [[cypher-projection-syntax]]
 == Syntax
 
 A Cypher projection takes three mandatory arguments: `graphName`, `nodeQuery` and `relationshipQuery`.
+In addition, the optional `configuration` parameter allows us to further configure graph creation.
 
 [source,cypher]
 ----
@@ -64,6 +64,7 @@ CALL gds.graph.create.cypher(
 | relationshipProperties | map     | empty map      | Mappings between the RETURN items and relationship properties in the graph projection.
 | concurrency            | int     | available CPUs | The number of concurrent threads used for creating the graph.
 |===
+
 
 [[cypher-projection-query-constraints]]
 == Query constraints
@@ -105,19 +106,20 @@ CALL gds.graph.create.cypher(
 )
 ----
 
+
 [[cypher-projection-properties]]
 == Node and relationship properties
 
 Similar to the default store projection, we can load node and relationship properties using a Cypher projection.
 
-Both, node and relationship queries, expect mandatory columns to be returned, i.e., `id`, `source` and `target`.
-If a query returns additional columns, we use those columns as node and relationship properties, respectively.
+Both node and relationship queries must return their respective mandatory columns, i.e., `id`, `source` and `target`.
+If a query returns additional columns, those columns are used as node and relationship properties, respectively.
 
 The values stored in property columns need to be numeric.
-If a value is `null`, we load a default value (`Double.NaN`) instead.
+If a value is `null` a default value (`Double.NaN`) is loaded instead.
 If we want to use a different default value, the `coalesce` function can be used.
 
-The following Cypher projections loads multiple node and relationship properties:
+The following Cypher projection loads multiple node and relationship properties:
 
 .Projecting query columns into node and relationship properties.
 [source,cypher]
@@ -141,6 +143,7 @@ CALL gds.labelPropgation.stream(
 )
 ----
 
+
 [[cypher-projection-relationship-types]]
 == Relationship types
 
@@ -156,7 +159,7 @@ For the following example, let's assume `City` nodes to be connected by either `
 CALL gds.graph.create.cypher(
     'myCypherGraph',
     'MATCH (n:City) RETURN id(n) AS id',
-    'MATCH (n:City)-[r]->(m:City) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
+    'MATCH (n:City)-[r:ROAD|RAIL]->(m:City) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
 )
 ----
 
@@ -180,7 +183,7 @@ CALL gds.labelPropgation.stream(
 The property graph model supports parallel relationships, which means two nodes can be connected by multiple relationships of the same relationship type.
 For some algorithms, we want the projected graph to contain at most one relationship between two nodes.
 
-The simplest way to achieve this, is using a `DISTINCT` clause in the relationship query:
+The simplest way to achieve this is to use the `DISTINCT` operator in the relationship query:
 
 [source,cypher]
 ----
