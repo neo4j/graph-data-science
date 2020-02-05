@@ -34,8 +34,6 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestGraph;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -66,15 +64,13 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.PROJECTION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
-import static org.neo4j.graphalgo.GraphHelper.assertPropertiesWithDelta;
-import static org.neo4j.graphalgo.GraphHelper.assertRelationships;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
@@ -448,7 +444,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         Graph graph = GraphCatalog.get("", name).getGraph();
-        assertGraphEquals(TestGraph.Builder.fromGdl("()-[{w:55}]->()"), graph);
+        assertGraphEquals(fromGdl("()-[{w:55}]->()"), graph);
     }
 
     @ParameterizedTest(name = "properties = {0}")
@@ -481,7 +477,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         Graph graph = GraphCatalog.get("", name).getGraph();
-        assertGraphEquals(TestGraph.Builder.fromGdl("(a)-[{w: 3}]->(a)"), graph);
+        assertGraphEquals(fromGdl("(a)-[{w: 3}]->(a)"), graph);
     }
 
     @Test
@@ -998,7 +994,7 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query, map());
 
         Graph graph = GraphCatalog.get("", "g").getGraph();
-        Graph expected = TestGraph.Builder.fromGdl("({ fooProp: 42, barProp: 13.37D })" +
+        Graph expected = fromGdl("({ fooProp: 42, barProp: 13.37D })" +
                                                    "({ fooProp: 43, barProp: 13.38D })" +
                                                    "({ fooProp: 44, barProp: 13.39D })" +
                                                    "({ fooProp: 45, barProp: 19.84D })");
@@ -1049,14 +1045,9 @@ class GraphCreateProcTest extends BaseProcTest {
             assertEquals("MAX", maxCostParams.get("aggregation").toString());
         });
 
-        Graph g = GraphCatalog.get("", "aggGraph").getGraph();
-
-        assertNotNull(g);
-        assertEquals(2, g.nodeCount());
-        assertEquals(3, g.relationshipCount());
-
-        assertRelationships(g, 0, 1, 1, 1);
-        assertPropertiesWithDelta(g, 1E-3, 0, 85.3, 42.1, 2.0);
+        Graph actual = GraphCatalog.get("", "aggGraph").getGraph();
+        Graph expected = fromGdl("(a)-[{w:85.3D}]->(b),(a)-[{w:42.1D}]->(b),(a)-[{w:2.0D}]->(b)");
+        assertGraphEquals(expected, actual);
     }
 
     @Test
@@ -1081,13 +1072,13 @@ class GraphCreateProcTest extends BaseProcTest {
         Graph foobazGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("foobaz"));
         Graph raboofGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("raboof"));
 
-        Graph expectedFoobarGraph = TestGraph.Builder.fromGdl("()-[{w: 23.0D}]->()");
-        Graph expectedFoobazGraph = TestGraph.Builder.fromGdl("()-[{w: 1984.0D}]->()");
-        Graph expectedRaboofGraph = TestGraph.Builder.fromGdl("()-[{w: 55.0D}]->()");
+        Graph expectedFoobarGraph = fromGdl("()-[{w: 23.0D}]->()");
+        Graph expectedFoobazGraph = fromGdl("()-[{w: 1984.0D}]->()");
+        Graph expectedRaboofGraph = fromGdl("()-[{w: 55.0D}]->()");
 
-        TestSupport.assertGraphEquals(expectedFoobarGraph, foobarGraph);
-        TestSupport.assertGraphEquals(expectedFoobazGraph, foobazGraph);
-        TestSupport.assertGraphEquals(expectedRaboofGraph, raboofGraph);
+        assertGraphEquals(expectedFoobarGraph, foobarGraph);
+        assertGraphEquals(expectedFoobazGraph, foobazGraph);
+        assertGraphEquals(expectedRaboofGraph, raboofGraph);
     }
 
     @Test
