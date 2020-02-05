@@ -87,7 +87,7 @@ Node label information is not retained in the loaded graph.
 
 Graphs loaded with an empty relationship projection, or a Cypher relationship projection query, do not retain information about relationship types.
 
-.The following example will load the graph `my-graph` with relationships that have the type `REL_TYPE1`, `REL_TYPE2` or `REL_TYPE3`:
+.The following example will create the graph `my-graph` with relationships that have the type `REL_TYPE1`, `REL_TYPE2` or `REL_TYPE3`:
 [source, cypher]
 ----
 CALL algo.graph.load('my-graph', null, 'REL_TYPE1 | REL_TYPE2 | REL_TYPE3', {direction: 'OUTGOING', concurrency: 8 })

@@ -257,10 +257,12 @@ For example, this can be a result from a previous run of the Label Propagation a
 In addition, each relationship has a weight property.
 
 [NOTE]
+====
 In the examples below we will use named graphs and standard projections as the norm.
 However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+====
 
-.The following statement will load the graph into the in-memory graph catalog.
+.The following statement will create the graph and store it in the graph catalog.
 [source, cypher]
 ----
 CALL gds.graph.create(
@@ -268,14 +270,13 @@ CALL gds.graph.create(
     'User',
     'FOLLOW',
     {
-        nodeProperties: ['seed_label'],
-        relationshipProperties: ['weight']
+        nodeProperties: 'seed_label',
+        relationshipProperties: 'weight'
     }
 )
 ----
 
-4:52
-See the suchandsuch chapters
+In the following examples we will demonstrate using the Label Propagation algorithm on this graph.
 
 [[algorithms-label-propagation-examples-unweighted]]
 === Unweighted
@@ -316,7 +317,6 @@ YIELD ranIterations, communityCount
 | 3             | 2
 |===
 
-
 Our algorithm found two communities, with 3 members each.
 
 It appears that Michael, Bridget, and Alice belong together, as do Doug and Mark.
@@ -326,7 +326,7 @@ Only Charles doesn't strongly fit into either side, but ends up with Doug and Ma
 === Weighted
 
 The Label-Propagation algorithm can also take node and relationship weights into account.
-In the example we load the graph with an extra relationship property `weight`.
+When we created `myGraph`, we projected the relationship property `weight`.
 In order to tell the algorithm to consider this property as a relationship weight, we have to set the `relationshipWeightProperty` configuration parameter to `weight`.
 
 .The following will run the algorithm on a graph with weighted relationships and stream results:
@@ -351,7 +351,6 @@ ORDER BY Community, Name
 |===
 
 Using the weighted relationships, `Alice` and `Charles` are now in the same community as there is a strong link between them.
-
 
 .The following will run the algorithm on a weighted graph and write back results:
 [source, cypher]
@@ -378,10 +377,11 @@ As we can see, the weighted example takes 4 iterations to converge, instead of 3
 
 At the beginning of the algorithm, every node is initialized with a unique label and the labels propagate through the network.
 
-It is possible to define preliminary labels of nodes using the `seedProperty` parameter.
-An initial set of labels can be provided by setting the `seedProperty` configuration parameter to a node property present in the loaded graph.
+An initial set of labels can be provided by setting the `seedProperty` configuration parameter.
+When we created `myGraph`, we projected the node property `seed_label`.
+We can use this node property as `seedProperty`.
 
-The algorithm first checks if there is a seed label assigned to the node
+The algorithm first checks if there is a seed label assigned to the node.
 If no seed label is present, a new unique label is assigned to the node.
 Using this preliminary set of labels, it then sequentially updates each node's label to a new one, which is the most frequent label among its neighbors at every iteration of label propagation.
 

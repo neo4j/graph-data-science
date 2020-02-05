@@ -76,7 +76,7 @@ Setting the `nodeCount` and `relationshipCount` parameters allows a memory estim
 == Estimating memory requirements for graphs
 
 The <<named-graph, `gds.graph.create`>> procedures also support `.estimate` to estimate memory usage for just the graph.
-Those procedures don't accept the graph name as the first argument, as they don't actually load the graph.
+Those procedures don't accept the graph name as the first argument, as they don't actually create the graph.
 
 .Syntax
 [source, cypher]

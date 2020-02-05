@@ -41,7 +41,7 @@ class LouvainDocTest extends BaseProcTest {
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
 
-        final String createCypher =
+        final String dbQuery =
             "CREATE" +
             "  (nAlice:User {name: 'Alice', seed: 42})" +
             ", (nBridget:User {name: 'Bridget', seed: 42}) " +
@@ -57,7 +57,7 @@ class LouvainDocTest extends BaseProcTest {
             ", (nMark)-[:LINK {weight: 1}]->(nMichael)" +
             ", (nMichael)-[:LINK {weight: 1}]->(nMark)";
 
-        String loadCypher = "CALL gds.graph.create(" +
+        String graphCreateQuery = "CALL gds.graph.create(" +
                             "    'myGraph'," +
                             "    'User'," +
                             "    {" +
@@ -73,8 +73,8 @@ class LouvainDocTest extends BaseProcTest {
 
         registerProcedures(LouvainWriteProc.class, LouvainStreamProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
-        runQuery(createCypher);
-        runQuery(loadCypher);
+        runQuery(dbQuery);
+        runQuery(graphCreateQuery);
     }
 
     @AfterEach

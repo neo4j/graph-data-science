@@ -58,10 +58,10 @@ public final class K1ColoringDocTest extends BaseProcTest {
             ", (alice)-[:LINK]->(doug)" +
             ", (bridget)-[:LINK]->(charles)";
 
-        String graphCreateCypher = "CALL gds.graph.create('myGraph', 'User', 'LINK')";
+        String graphCreateQuery = "CALL gds.graph.create('myGraph', 'User', 'LINK')";
 
         runQuery(dbQuery);
-        runQuery(graphCreateCypher);
+        runQuery(graphCreateQuery);
     }
 
     @AfterEach

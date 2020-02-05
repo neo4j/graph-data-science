@@ -180,10 +180,12 @@ In the following examples we will demonstrate using the Weakly Connected Compone
 We can load this graph into the in-memory catalog.
 
 [NOTE]
+====
 In the examples below we will use named graphs and standard projections as the norm.
 However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+====
 
-.The following statement will load the graph into the in-memory graph catalog.
+.The following statement will create the graph and store it in the graph catalog.
 [source, cypher]
 ----
 CALL gds.graph.create(
@@ -191,10 +193,13 @@ CALL gds.graph.create(
     'User',
     'LINK',
     {
-        relationshipProperties: ['weight']
+        relationshipProperties: 'weight'
     }
 )
 ----
+
+In the following examples we will demonstrate using the WCC algorithm on this graph.
+
 
 [[algorithms-wcc-examples-unweighted]]
 === Unweighted
@@ -346,10 +351,10 @@ CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})
 |No data returned.
 |===
 
-Note, that we can not use our already loaded graph as the component id is not yet loaded into memory.
-We will therefore create a second in-memory graph that contains the previously computed component id.
+Note, that we can not use our already created graph as it does not contain the component id.
+We will therefore create a second graph that contains the previously computed component id.
 
-.The following will create a new in-memory graph containing the previously computed component id:
+.The following will create a new graph containing the previously computed component id:
 [source, cypher]
 ----
 CALL gds.graph.create(

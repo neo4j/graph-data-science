@@ -162,14 +162,16 @@ This graph has two clusters of _Users_, that are closely connected.
 Between those clusters there is one single edge.
 The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
 
-We can now load the graph into the in-memory graph catalog.
-We load the `LINK` relationships with projection mode set to `UNDIRECTEd` as this works best with the Louvain algorithm.
+We can now create the graph and store it in the graph catalog.
+We load the `LINK` relationships with projection mode set to `UNDIRECTED` as this works best with the Louvain algorithm.
 
 [NOTE]
+====
 In the examples below we will use named graphs and standard projections as the norm.
 However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+====
 
-.The following statement will load the graph into the in-memory graph catalog.
+.The following statement will create the graph and store it in the graph catalog.
 [source, cypher]
 ----
 CALL gds.graph.create(
@@ -187,10 +189,13 @@ CALL gds.graph.create(
 )
 ----
 
+In the following examples we will demonstrate using the Louvain algorithm on this graph.
+
+
 [[algorithms-louvain-examples-stream]]
 === Streaming results
 
-.The following will load the graph, run the algorithm, and stream results:
+.The following will run the algorithm and stream results:
 [source, cypher]
 ----
 CALL gds.louvain.stream('myGraph')

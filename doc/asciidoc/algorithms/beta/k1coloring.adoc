@@ -147,10 +147,12 @@ This graph has a super node with name "Alice" that connects to all other nodes.
 It should therefore not be possible for any other node to be assigned the same color as the Alice node.
 
 [NOTE]
+====
 In the examples below we will use named graphs and standard projections as the norm.
 However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+====
 
-.The following statement will load the graph into the in-memory graph catalog.
+.The following statement will create the graph and store it in the graph catalog.
 [source, cypher]
 ----
 CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES')
@@ -186,9 +188,6 @@ CALL gds.beta.k1coloring.write('myGraph', {writeProperty: 'color'})
 YIELD nodes, colorCount, ranIterations, didConverge
 ----
 
-| nodes | colorCount | ranIterations | didConverge
-| 4     | 3          | 3             | true
-
 .Results
 [opts="header",cols="1m,1m,1m,1m"]
 |===
@@ -197,4 +196,4 @@ YIELD nodes, colorCount, ranIterations, didConverge
 |===
 
 When using `write` mode the procedure will return information about the algorithm execution.
-In this example we returned the number of processed nodes, the number of colors used to color the graph, the number of iterations and information whether the algorithm converged.
+In this example we return the number of processed nodes, the number of colors used to color the graph, the number of iterations and information whether the algorithm converged.

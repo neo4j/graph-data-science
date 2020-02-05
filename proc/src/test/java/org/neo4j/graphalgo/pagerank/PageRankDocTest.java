@@ -73,7 +73,7 @@ class PageRankDocTest extends BaseProcTest {
                                    "    'Page'," +
                                    "    'LINKS'," +
                                    "    {" +
-                                   "        relationshipProperties: ['weight']" +
+                                   "        relationshipProperties: 'weight'" +
                                    "    }" +
                                    ")";
 

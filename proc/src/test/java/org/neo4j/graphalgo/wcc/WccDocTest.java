@@ -61,7 +61,7 @@ class WccDocTest extends BaseProcTest {
                                    "    'User'," +
                                    "    'LINK'," +
                                    "    {" +
-                                   "        relationshipProperties: ['weight']" +
+                                   "        relationshipProperties: 'weight'" +
                                    "    }" +
                                    ")";
 
@@ -180,8 +180,8 @@ class WccDocTest extends BaseProcTest {
                                   "    'User',\n" +
                                   "    'LINK',\n" +
                                   "    {\n" +
-                                  "        nodeProperties: ['componentId'],\n" +
-                                  "        relationshipProperties: ['weight']\n" +
+                                  "        nodeProperties: 'componentId',\n" +
+                                  "        relationshipProperties: 'weight'\n" +
                                   "    }\n" +
                                   ")";
 
@@ -241,8 +241,8 @@ class WccDocTest extends BaseProcTest {
                                   "    'User',\n" +
                                   "    'LINK',\n" +
                                   "    {\n" +
-                                  "        nodeProperties: ['componentId'],\n" +
-                                  "        relationshipProperties: ['weight']\n" +
+                                  "        nodeProperties: 'componentId',\n" +
+                                  "        relationshipProperties: 'weight'\n" +
                                   "    }\n" +
                                   ")";
 

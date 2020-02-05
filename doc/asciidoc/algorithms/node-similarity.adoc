@@ -197,14 +197,19 @@ The Node Similarity algorithm will only compute similarity for nodes that have a
 In the example graph, the Eve node will not be compared to other Person nodes.
 
 [NOTE]
+====
 In the examples below we will use named graphs and standard projections as the norm.
 However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+====
 
-.The following statement will load the graph into the in-memory graph catalog.
+.The following statement will create the graph and store it in the graph catalog.
 [source, cypher, role=setup-query]
 ----
 CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES');
 ----
+
+In the following examples we will demonstrate using the Node Similarity algorithm on this graph.
+
 
 [[algorithms-node-similarity-examples-stream]]
 === Streaming results
@@ -368,10 +373,7 @@ A value of 0 means no global limit is imposed and all results from topK or botto
 .The following will run the algorithm, and stream the 3 highest out of the top 1 results per node:
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.stream('myGraph', {
-  topK: 1,
-  topN: 3
-})
+CALL gds.nodeSimilarity.stream('myGraph', { topK: 1, topN: 3 })
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
 ORDER BY similarity DESC, Person1, Person2

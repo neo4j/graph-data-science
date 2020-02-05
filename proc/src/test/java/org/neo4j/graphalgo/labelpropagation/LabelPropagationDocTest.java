@@ -63,18 +63,18 @@ class LabelPropagationDocTest extends BaseProcTest {
             "CREATE (michael)-[:FOLLOW {weight: 1}]->(bridget)" +
             "CREATE (charles)-[:FOLLOW {weight: 1}]->(doug)";
 
-        String createGraphQuery = "CALL gds.graph.create(" +
-                           "    'myGraph'," +
-                           "    'User'," +
-                           "    'FOLLOW'," +
-                           "    {" +
-                           "        nodeProperties: ['seed_label']," +
-                           "        relationshipProperties: ['weight']" +
-                           "    }" +
-                           ")";
+        String graphCreateQuery = "CALL gds.graph.create(" +
+                                  "    'myGraph'," +
+                                  "    'User'," +
+                                  "    'FOLLOW'," +
+                                  "    {" +
+                                  "        nodeProperties: 'seed_label'," +
+                                  "        relationshipProperties: 'weight'" +
+                                  "    }" +
+                                  ")";
 
         runQuery(dbQuery);
-        runQuery(createGraphQuery);
+        runQuery(graphCreateQuery);
     }
 
     @AfterEach

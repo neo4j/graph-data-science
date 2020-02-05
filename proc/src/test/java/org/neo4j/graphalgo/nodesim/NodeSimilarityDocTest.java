@@ -63,10 +63,10 @@ class NodeSimilarityDocTest extends BaseProcTest {
             "CREATE (dave)-[:LIKES]->(synth)" +
             "CREATE (dave)-[:LIKES]->(bongos);";
 
-        String createGraphQuery = "CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES')";
+        String graphCreateQuery = "CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES')";
 
         runQuery(dbQuery);
-        runQuery(createGraphQuery);
+        runQuery(graphCreateQuery);
     }
 
     @AfterEach
