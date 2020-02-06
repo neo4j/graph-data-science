@@ -1,9 +1,9 @@
 [[management-ops]]
-= Management operations
+= Graph management
 
 [abstract]
 --
-This chapter explains the graph catalog and other management operations in the Neo4j Graph Data Science library.
+This chapter explains the graph catalog, the different graph projection variants and utility functions in the Neo4j Graph Data Science library.
 --
 
 A central concept in the GDS library is the management of in-memory graphs.
@@ -11,7 +11,11 @@ A central concept in the GDS library is the management of in-memory graphs.
 This chapter is divided into the following sections:
 
 * <<graph-catalog-ops>>
+* <<label-relationship-type-projection>>
+* <<cypher-projection>>
 * <<utility-functions>>
 
 include::graph-catalog.adoc[leveloffset=+1]
+include::label-relationship-type-projection.adoc[leveloffset=+1]
+include::cypher-projection.adoc[tag=overview,leveloffset=+1]
 include::utility-functions.adoc[leveloffset=+1]

@@ -1,6 +1,6 @@
 [[label-relationship-type-projection]]
 // tag::header[]
-= Node-label and relationship-type projection
+= Store projection
 // end::header[]
 
 ifdef::env-docs[]
