@@ -41,9 +41,6 @@ import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class HugeGraphWeightTest {
 
-    private static final int WEIGHT_BATCH_SIZE = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF);
-    // make sure that multiple threads are loading the same batch
-    private static final int BATCH_SIZE = 100;
     public static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 
     private GraphDatabaseAPI db;
@@ -60,7 +57,8 @@ final class HugeGraphWeightTest {
 
     @Test
     void shouldLoadCorrectWeights() {
-        mkDb(WEIGHT_BATCH_SIZE * 2, 2);
+        int nodeCount = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF) * 2;
+        mkDb(nodeCount, 2);
 
         Graph graph = loadGraph(db);
 
@@ -82,7 +80,8 @@ final class HugeGraphWeightTest {
     @Test
     @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
     void shouldLoadMoreWeights() {
-        mkDb(WEIGHT_BATCH_SIZE, 4);
+        int nodeCount = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF);
+        mkDb(nodeCount, 4);
         loadGraph(db);
     }
 

@@ -35,8 +35,6 @@ import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 final class HugeGraphNoPropertiesTest {
 
-    private static final int BATCH_SIZE = 100;
-
     private GraphDatabaseAPI db;
 
     private static final String DB_CYPHER =
