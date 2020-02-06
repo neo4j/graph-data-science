@@ -124,7 +124,7 @@ The following table lists all functions in the GDS library:
 |===
 | Name
 | gds.version
-| <<named-graph, gds.graph.exists>>
+| gds.graph.exists
 | gds.util.asNode
 | gds.util.asNodes
 | gds.util.asPath
