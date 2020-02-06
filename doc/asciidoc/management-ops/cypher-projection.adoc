@@ -7,7 +7,7 @@
 This chapter explains how to create a graph using a Cypher projection.
 --
 
-If the Typed projection is not expressive enough to describe the in-memory graph, we can instead use Cypher queries to select nodes and relationships.
+If the <<native-projection>> is not expressive enough to describe the in-memory graph, we can instead use Cypher queries to select nodes and relationships.
 One benefit of using Cypher queries is the possibility to form the graph from data that exists only at query time.
 A common use case is the reduction of paths into single relationships between the start and end node of the path.
 
@@ -21,7 +21,7 @@ RETURN id(p1) AS source, id(p2) AS target, count(a) AS weight
 Cypher projections are especially useful during the development phase.
 Their flexibility is convenient when exploring data and algorithms, and designing a workflow.
 However, creating a graph from a Cypher projection can be significantly slower than creating it directly from the store.
-For production, it is recommended to adapt the domain model in a way that it can take advantage of the loading speed of typed projections.
+For production, it is recommended to adapt the domain model in a way that it can take advantage of the loading speed of native projections.
 
 This section includes:
 
@@ -48,7 +48,7 @@ CALL gds.graph.create.cypher(
 ----
 
 .Parameters
-[opts="header",cols="1m,1m,1m"]
+[opts="header",cols="1,1,1"]
 |===
 | Name              | Optional | Description
 | graphName         | no       | The name under which the graph is stored in the catalog.
@@ -118,7 +118,7 @@ Executing an algorithm on such a graph in `write` mode may lead to unexpected ch
 [[cypher-projection-properties]]
 == Node and relationship properties
 
-Similar to the default typed projection, we can load node and relationship properties using a Cypher projection.
+Similar to the default native projection, we can load node and relationship properties using a Cypher projection.
 
 Both node and relationship queries must return their respective mandatory columns, i.e., `id`, `source` and `target`.
 If a query returns additional columns, those columns are used as node and relationship properties, respectively.
@@ -213,7 +213,7 @@ RETURN
 
 One drawback of that approach is that we put more pressure on the Cypher execution engine and the query result consumes additional memory.
 An alternative approach is to use `relationshipProperties` as part of the optional configuration map.
-The syntax is identical to the property mappings used in the typed projection.
+The syntax is identical to the property mappings used in the native projection.
 
 [source,cypher]
 ----

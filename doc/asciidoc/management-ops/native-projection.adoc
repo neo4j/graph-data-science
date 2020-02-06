@@ -1,79 +1,222 @@
-[[typed-projection]]
+[[native-projection]]
 // tag::header[]
-= Typed projection
+= Native projection
 // end::header[]
 
-ifdef::env-docs[]
 [abstract]
 --
-This chapter explains node-label and relationship-type projection in the Neo4j Graph Data Science library.
+This chapter explains native projections in the Neo4j Graph Data Science library.
 --
-endif::env-docs[]
 
-We can project the subgraph we want to run the algorithm on by using the label parameter to describe nodes, and relationship type to describe relationships.
+A native projection allows us to project a graph from Neo4j into an in-memory graph.
+The projected graph can be described in terms of node labels, relationship types and properties.
+Node labels and node properties are projected using <<native-projection-syntax-node-projections>>.
+Relationship types and relationship properties are projected using <<native-projection-syntax-relationship-projections>>.
 
-The general call syntax is:
+The main benefit of native projections is the performance when creating a graph projection.
+In contrast, a <<cypher-projection>> is more flexible from the declaration point of view, but less performant.
+In most cases it is possible to structure your Neo4j databases in a way that native projections can be used.
 
-.The following will run the algorithm for the label `NodeLabel` and relationship type `RelationshipType`
-[source,cypher]
-----
-CALL algo.<name>('NodeLabel', "RelationshipType", {config})
-----
+This section includes:
 
-For example, running the Page Rank algorithm on DBpedia, which contains 11 million nodes and 116 million relationships:
-
-.The following will run the write version of the algorithm, storing results in the `pagerank` property:
-[source,cypher]
-----
-CALL algo.pageRank('Page','Link',{iterations:5, dampingFactor:0.85, write: true, writeProperty:'pagerank'});
-----
-
-.The following will run the streaming version of the algorithm:
-[source,cypher]
-----
-CALL algo.pageRank.stream('Page','Link',{iterations:5, dampingFactor:0.85})
-YIELD nodeId, score
-RETURN gds.util.asNode(nodeId).title, score
-ORDER BY score DESC LIMIT 10;
-----
-
-If we want to project a subgraph that includes all nodes and relationships in the underlying Neo4j graph, we can achieve this by passing `null` values for the label and relationship type:
-
-.The following will run the algorithm over all nodes and relationships:
-[source,cypher]
-----
-CALL algo.<name>(null, null)
-----
+* <<native-projection-syntax>>
+* <<native-projection-syntax-node-projections>>
+* <<native-projection-syntax-relationship-projections>>
 
 
-[[huge-projection]]
-== Huge graph projection
+[[native-projection-syntax]]
+== Syntax
 
-The default label and relationship type projection has a limitation of 2 billion nodes and 2 billion relationships, so if our project graph is bigger than this we need to use a huge graph projection.
-This can be enabled by setting `graph:'huge'` in the config.
-
-The general call syntax is:
+A native projection takes three mandatory arguments: `graphName`, `nodeProjection`, `relationshipProjection`.
+In addition, the optional `configuration` parameter allows us to further configure graph creation.
 
 [source,cypher]
 ----
-CALL algo.<name>('NodeLabel', "RelationshipType", {graph: "huge"})
+CALL gds.graph.create(
+    graphName: string,
+    nodeProjection: string or map,
+    relationshipProjection: string or map,
+    configuration: map
+)
 ----
 
-For example, running the Page Rank algorithm on DBpedia:
+.Parameters
+[opts="header",cols="1,1,1"]
+|===
+| Name                   | Optional | Description
+| graphName              | no       | The name under which the graph is stored in the catalog.
+| nodeProjection         | no       | One or more <<native-projection-syntax-node-projections, node projections>>.
+| relationshipProjection | no       | One or more <<native-projection-syntax-relationship-projections, relationship projections>>.
+| configuration          | yes      | Additional parameters to configure the Native projection.
+|===
 
-.The following will run the write version of the algorithm, storing results in the `pagerank` property:
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name                   | Type    | Default        | Description
+| concurrency            | int     | available CPUs | The number of concurrent threads used for creating the graph.
+|===
+
+
+[[native-projection-syntax-node-projections]]
+== Node projections
+
+A node projection defines how a specific subset of Neo4j nodes is projected into the in-memory graph.
+
+The following map-like syntax shows the general way of defining node projections:
+
+[source]
+----
+{
+    <node-label-1>: {
+        label: <neo-label>,
+        properties: <node-property-mappings>
+    },
+    <node-label-2>: {
+        label: <neo-label>,
+        properties: <node-property-mappings>
+    },
+    // ...
+    <node-label-n>: {
+        label: <neo-label>,
+        properties: <node-property-mappings>
+    }
+}
+----
+
+* `node-label` denotes the node label used in the projected graph
+* `neo-label` denotes the name of the node label in the Neo4j graph
+** The label must exist in the Neo4j database
+** `neo-label` defaults to `node-label`
+* `node-property-mappings` denotes a set of mappings between Neo4j and in-memory node properties
+
+In the following example, we want to project `Person` and `Music` nodes into the in-memory graph.
+
+.Create a graph from multiple node labels:
 [source,cypher]
 ----
-CALL algo.pageRank('Page','Link',{iterations:5, dampingFactor:0.85, writeProperty:'pagerank',graph:'huge'});
+CALL gds.graph.create(
+    'my-graph', {
+        'Person': { label: 'Person' },
+        'Music': { label: 'Music' }
+    },
+
+    '*'
+)
+YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
-If we want to project a subgraph that includes all nodes and relationships in the underlying Neo4j graph, we can achieve this by passing `null` values for the label and relationship type:
+In the above example, we are using the same labels as in the Neo4j database.
+In that case we can use the following syntactic sugar.
 
-.The following will run the algorithm over all nodes and relationships:
 [source,cypher]
 ----
-CALL algo.<name>(null, null, {graph: 'huge'})
+// Option 1
+CALL gds.graph.create( 'my-graph', 'Person | Music', '*')
+YIELD graphName, nodeCount, relationshipCount, createMillis;
+
+// Option 2
+CALL gds.graph.create( 'my-graph', ['Person', 'Music'], '*')
+YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
+
+To project a Neo4j node label to a custom label, we can use syntactic sugar, too.
+In the following example, we want to project the Neo4j label `Person` to the element identifier `Human`.
+
+[source,cypher]
+----
+CALL gds.graph.create( 'my-graph', [{Human : 'Person'}, 'Music'], '*')
+YIELD graphName, nodeCount, relationshipCount, createMillis;
+----
+
+To project all nodes in the Neo4j graph, we can use the special `*` node projection.
+This node projection can not be combined with any other node projection.
+
+[source,cypher]
+----
+CALL gds.graph.create('my-graph', '*', '*')
+YIELD graphName, nodeCount, relationshipCount, createMillis;
+----
+
+=== Node properties
+
+We can load multiple node properties for each node projection using node property mappings.
+
+The following map-like syntax shows the general way of defining node property mappings:
+
+[source]
+----
+{
+    <node-label-1>: {
+        label: <neo-label>,
+        properties: {
+            <property-key-1>: {
+                property: <neo-property-key>,
+                defaultValue: <numeric-value>
+            },
+            <property-key-2>: {
+                property: <neo-property-key>,
+                defaultValue: <numeric-value>
+            },
+            // ...
+            <property-key-n>: {
+                property: <neo-property-key>,
+                defaultValue: <numeric-value>
+            },
+        }
+    }
+}
+----
+
+* `<property-key>` denotes the name of the property in the projected graph
+** `<neo-property-key>` denotes the name of the property in the Neo4j graph
+*** The property key must exist in the Neo4j database
+*** `<neo-property-key>` defaults to `<property-key>`
+** `<numeric-value>` is used if the property does not exist for a node
+*** `<numeric-value>` defaults to `NaN`
+
+In the following example, we want to project `Person` and their properties nodes into the in-memory graph.
+
+.Create a graph from with multiple node properties:
+[source,cypher]
+----
+CALL gds.graph.create(
+    'my-graph', {
+        'Person': {
+            label: 'Person',
+            properties: {
+                age: {
+                    property: 'age',
+                    defaultValue: 0
+                },
+                zipCode: {
+                    property: 'zip',
+                    defaultValue: -1
+                }
+            }
+        }
+    },
+
+    '*'
+)
+YIELD graphName, nodeCount, relationshipCount, createMillis;
+----
+
+If we want to load the same properties for each node label, we can use the following syntax sugar.
+
+.Project node properties for multiple node labels:
+[source,cypher]
+----
+CALL gds.graph.create( 'my-graph', 'Person', '*', {
+        nodeProperties: ['age', {zipCode: 'zip'}]
+    }
+)
+YIELD graphName, nodeCount, relationshipCount, createMillis;
+----
+
+
+[[native-projection-syntax-relationship-projections]]
+== Relationship projections
 
 // == Loading multiple relationship types and node labels
 //

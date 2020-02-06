@@ -28,7 +28,7 @@
         <d:tocentry linkend="management-ops"><?dbhtml filename="management-ops/index.html"?>
             <d:tocentry linkend="graph-catalog-ops"><?dbhtml filename="management-ops/graph-catalog-ops/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="typed-projection"><?dbhtml filename="management-ops/typed-projection/index.html"?>
+            <d:tocentry linkend="native-projection"><?dbhtml filename="management-ops/native-projection/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="cypher-projection"><?dbhtml filename="management-ops/cypher-projection/index.html"?>
             </d:tocentry>

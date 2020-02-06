@@ -11,11 +11,11 @@ A central concept in the GDS library is the management of in-memory graphs.
 This chapter is divided into the following sections:
 
 * <<graph-catalog-ops>>
-* <<typed-projection>>
+* <<native-projection>>
 * <<cypher-projection>>
 * <<utility-functions>>
 
 include::graph-catalog.adoc[leveloffset=+1]
-include::typed-projection.adoc[leveloffset=+1]
+include::native-projection.adoc[leveloffset=+1]
 include::cypher-projection.adoc[tag=overview,leveloffset=+1]
 include::utility-functions.adoc[leveloffset=+1]
