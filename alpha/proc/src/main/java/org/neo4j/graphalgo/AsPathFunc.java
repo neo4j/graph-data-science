@@ -36,7 +36,7 @@ public class AsPathFunc {
     public GraphDatabaseAPI api;
 
     @UserFunction("gds.util.asPath")
-    @Description("CALL gds.util.asPath - returns a path for the provided node ids and weights")
+    @Description("CALL gds.util.asPath - Return a path object for the provided node ids and weights.")
     public Path asPath(
         @Name(value = "nodeIds", defaultValue = "") List<Long> nodes,
         @Name(value = "weights", defaultValue = "") List<Double> weights,

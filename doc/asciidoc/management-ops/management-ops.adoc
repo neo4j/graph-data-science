@@ -11,11 +11,7 @@ A central concept in the GDS library is the management of in-memory graphs.
 This chapter is divided into the following sections:
 
 * <<graph-catalog-ops>>
-* <<utility-ops>>
+* <<utility-functions>>
 
 include::graph-catalog.adoc[leveloffset=+1]
-
-[[utility-ops]]
-== Utility
-
-// Put stuff like algo.asNode here, gds.version(), gds.list(), etc
+include::utility-functions.adoc[leveloffset=+1]

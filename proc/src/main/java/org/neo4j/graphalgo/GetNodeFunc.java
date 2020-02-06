@@ -36,7 +36,7 @@ public class GetNodeFunc {
     public GraphDatabaseAPI api;
 
     @UserFunction("gds.util.asNode")
-    @Description("CALL gds.util.asNode(value) - return node for nodeId. null if none exists")
+    @Description("CALL gds.util.asNode(nodeId) - Return the node objects for the given node id or null if none exists.")
     public Node asNode(@Name(value = "nodeId") Number nodeId) {
         try {
             return api.getNodeById(nodeId.longValue());
@@ -46,7 +46,7 @@ public class GetNodeFunc {
     }
 
     @UserFunction("gds.util.asNodes")
-    @Description("CALL gds.util.asNodes(values) - return nodes for nodeIds. empty if none exists")
+    @Description("CALL gds.util.asNodes(nodeIds) - Return the node objects for the given node ids or an empty list if none exists.")
     public List<Node> asNodes(@Name(value = "nodeIds") List<Number> nodeIds) {
         return nodeIds.stream().map(nodeId -> {
             try {
