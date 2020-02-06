@@ -359,7 +359,8 @@ task asciidocJar(type: Jar) {
 
 tasks.assemble.dependsOn packageHtml, packagePdf
 
-tasks.ci.dependsOn assemble
+// TODO: Reenable 'check' task for CI once done dryrunning the release build
+//tasks.ci.dependsOn assemble
 tasks.cipr.dependsOn packageHtml
 
 apply from: "${rootProject.projectDir}/build.preview.gradle"
