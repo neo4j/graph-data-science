@@ -137,8 +137,10 @@ CALL gds.graph.create.estimate(
 [source, cypher]
 ----
 CALL algo.memrec(
-  'MATCH (n:MyLabel) RETURN id(n) AS id',
-  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t) RETURN id(s) AS source, id(t) AS target',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target',
   'graph.load',
   {
     graph: 'cypher'
@@ -149,8 +151,10 @@ CALL algo.memrec(
 [source, cypher]
 ----
 CALL gds.graph.create.cypher.estimate(
-  'MATCH (n:MyLabel) RETURN id(n) AS id',
-  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t) RETURN id(s) AS source, id(t) AS target'
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target'
 )
 ----
 |===
@@ -164,8 +168,10 @@ CALL gds.graph.create.cypher.estimate(
 ----
 CALL algo.graph.load(
   'myGraph',
-  'MATCH (n:MyLabel) RETURN id(n) AS id',
-  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t) RETURN id(s) AS source, id(t) AS target',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target',
   {
     graph: 'cypher'
   }
@@ -176,8 +182,10 @@ CALL algo.graph.load(
 ----
 CALL gds.graph.create.cypher(
   'myGraph',
-  'MATCH (n:MyLabel) RETURN id(n) AS id',
-  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t) RETURN id(s) AS source, id(t) AS target'
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target'
 )
 ----
 |
@@ -185,8 +193,10 @@ CALL gds.graph.create.cypher(
 ----
 CALL algo.graph.load(
   'myGraph',
-  'MATCH (n:MyLabel) RETURN id(n) AS id',
-  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t) RETURN id(s) AS source, id(t) AS target, r.myProperty AS weight',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target, r.myProperty AS weight',
   {
     concurrency: 4,
     graph: 'cypher'
@@ -198,8 +208,10 @@ CALL algo.graph.load(
 ----
 CALL gds.graph.create.cypher(
   'myGraph',
-  'MATCH (n:MyLabel) RETURN id(n) AS id',
-  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t) RETURN id(s) AS source, id(t) AS target, r.myProperty AS weight',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target, r.myProperty AS weight',
   {
     readConcurrency: 4
   }
