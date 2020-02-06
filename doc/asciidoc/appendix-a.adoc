@@ -1,6 +1,6 @@
 [appendix]
 [[appendix-a]]
-= Procedures and Functions reference
+= Procedures and functions reference
 
 [abstract]
 --
@@ -9,13 +9,13 @@ This chapter contains a reference of all the procedures and functions in the Neo
 
 This chapter contains the following sections:
 
-* <<production-tier>>
+* <<production-quality-tier>>
 * <<beta-tier>>
 * <<alpha-tier>>
 
 
-[[production-tier]]
-== Product tier
+[[production-quality-tier]]
+== Production-quality tier
 
 The following table lists all production-quality procedures in the GDS library:
 
@@ -23,18 +23,26 @@ The following table lists all production-quality procedures in the GDS library:
 [opts=header,cols="1m"]
 |===
 | Name
-| <<named-graph, gds.graph.load>>
+| <<named-graph, gds.graph.create>>
+| <<named-graph, gds.graph.exists>>
 | <<named-graph, gds.graph.list>>
 | <<named-graph, gds.graph.drop>>
-| <<named-graph, gds.graph.info>>
+| <<cypher-projection, gds.graph.create.cypher>>
 | <<algorithms-label-propagation-syntax, gds.labelPropagation.write>>
 | <<algorithms-label-propagation-syntax, gds.labelPropagation.stream>>
+| <<algorithms-label-propagation-syntax, gds.labelPropagation.stats>>
 | <<algorithms-louvain-syntax, gds.louvain.write>>
 | <<algorithms-louvain-syntax, gds.louvain.stream>>
+| <<algorithms-louvain-syntax, gds.louvain.stats>>
 | <<algorithms-pagerank-syntax, gds.pageRank.write>>
 | <<algorithms-pagerank-syntax, gds.pageRank.stream>>
+| <<algorithms-pagerank-syntax, gds.pageRank.stats>>
 | <<algorithms-wcc-syntax, gds.wcc.write>>
 | <<algorithms-wcc-syntax-stream, gds.wcc.stream>>
+| <<algorithms-wcc-syntax, gds.wcc.stats>>
+| <<algorithms-node-similarity-examples-write, gds.nodeSimilarity.write>>
+| <<algorithms-node-similarity-examples-stream, gds.nodeSimilarity.stream>>
+| <<algorithms-node-similarity, gds.nodeSimilarity.stats>>
 |===
 
 [[beta-tier]]
@@ -55,7 +63,6 @@ The following table lists all beta procedures in the GDS library:
 | gds.beta.modularityOptimization.stream.estimate
 | gds.beta.modularityOptimization.write
 | gds.beta.modularityOptimization.write.estimate
-
 |===
 
 [[alpha-tier]]
@@ -108,7 +115,6 @@ The following table lists all alpha procedures in the GDS library:
 | <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangle.stream>>
 | <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.stream>>
 | <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.write>>
-| <<graph-generation, gds.beta.graph.generate>>
 |===
 
 The following table lists all functions in the GDS library:
@@ -118,6 +124,7 @@ The following table lists all functions in the GDS library:
 |===
 | Name
 | gds.version
+| <<named-graph, gds.graph.exists>>
 | gds.util.asNode
 | gds.util.asNodes
 | gds.util.asPath
