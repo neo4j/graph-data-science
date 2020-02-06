@@ -7,7 +7,7 @@ Graph projections are stored entirely in-memory using compressed data structures
 
 The graph catalog is a concept within the GDS library that allows managing multiple graph projections by name.
 Using that name, a graph can be used in multiple times in the analytical workflow.
-Named graphs can be created using either the <<label-relationship-type-projection, Store projection>> or the <<cypher-projection, Cypher projection>>.
+Named graphs can be created using either the <<typed-projection, Typed projection>> or the <<cypher-projection, Cypher projection>>.
 After usage, named graphs can be removed from the catalog to free up main memory.
 
 The graph catalog exists as long as the Neo4j instance is running.
@@ -19,7 +19,7 @@ This chapter explains the available graph catalog operations.
 [opts=header,cols="1m,1m"]
 |===
 | Name                                              | Description
-| <<catalog-graph-create, gds.graph.create>>        | Creates a graph in the catalog using a <<label-relationship-type-projection, Store projection>>.
+| <<catalog-graph-create, gds.graph.create>>        | Creates a graph in the catalog using a <<typed-projection, Typed projection>>.
 | <<catalog-graph-create, gds.graph.create.cypher>> | Creates a graph in the catalog using a <<cypher-projection, Cypher projection>>.
 | <<catalog-graph-list, gds.graph.list>>            | Prints information about a single graph or all graphs that are currently stored in the catalog.
 | <<catalog-graph-drop, gds.graph.drop>>            | Removes a single graph from the catalog.
@@ -41,19 +41,19 @@ This allows us to run multiple algorithms without creating the graph on each alg
 
 There are two options of projecting a graph from the Neo4j database into main memory:
 
-* <<label-relationship-type-projection>>
-** Provides the best performance by reading from the Neo4j store files.
+* <<typed-projection>>
+** Provides the best performance by reading from the Neo4j store files and filtering on the given type information.
    Recommended to be used during the production phase.
 * <<cypher-projection>>
 ** The more flexible, expressive approach with lesser focus on performance.
-   Recommended to be used during the development phase.
+   Recommended to be primarily used during the development phase.
 
 In this section, we will give brief examples on how to create a graph using both options.
 For detailed about information about the configuration of each projection, we prefer to the specific sections.
 
 In the following two examples we want to create a graph projection that contains `Person` nodes and `LIKES` relationships.
 
-.Create a graph using the Store projection:
+.Create a graph using the Typed projection:
 [source,cypher]
 ----
 CALL gds.graph.create(
