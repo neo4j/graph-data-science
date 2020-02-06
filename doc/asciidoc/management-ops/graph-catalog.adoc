@@ -126,7 +126,4 @@ Once we've finished using the named graph we can remove it from the catalog to f
 CALL gds.graph.drop('my-store-graph') YIELD graphName;
 ----
 
-[[named-graph]]
-== Named graphs
-
 

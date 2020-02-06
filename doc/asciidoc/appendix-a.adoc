@@ -23,11 +23,11 @@ The following table lists all production-quality procedures in the GDS library:
 [opts=header,cols="1m"]
 |===
 | Name
-| <<named-graph, gds.graph.create>>
-| <<named-graph, gds.graph.exists>>
-| <<named-graph, gds.graph.list>>
-| <<named-graph, gds.graph.drop>>
-| <<cypher-projection, gds.graph.create.cypher>>
+| <<catalog-graph-create, gds.graph.create>>
+| <<catalog-graph-create, gds.graph.create.cypher>>
+| <<catalog-graph-exists, gds.graph.exists>>
+| <<catalog-graph-list, gds.graph.list>>
+| <<catalog-graph-drop, gds.graph.drop>>
 | <<algorithms-label-propagation-syntax, gds.labelPropagation.write>>
 | <<algorithms-label-propagation-syntax, gds.labelPropagation.stream>>
 | <<algorithms-label-propagation-syntax, gds.labelPropagation.stats>>
