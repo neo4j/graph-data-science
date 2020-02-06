@@ -9,12 +9,9 @@ This chapter provides explanations and examples for auxiliary procedures in the 
 The following procedures can be used to improve your workflow:
 
 * Beta
-** <<algorithms-k1coloring, K-1 Coloring>>
 ** <<graph-generation, Graph Generation>>
 * Alpha
 ** <<algorithms-one-hot-encoding-sample, One Hot Encoding>>
-
-include::beta/k1coloring.adoc[leveloffset=+1]
 
 include::beta/graph-generation.adoc[leveloffset=+1]
 
