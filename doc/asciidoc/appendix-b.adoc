@@ -1,0 +1,14 @@
+[appendix]
+[[appendix-b]]
+= Additional resources
+
+[abstract]
+--
+This chapter contains additional content and references relevant for using the Neo4j Graph Data Science library.
+--
+
+This chapter contains the following sections:
+
+* <<migration-guide>>
+
+include::migration-guide.adoc[leveloffset=+1]

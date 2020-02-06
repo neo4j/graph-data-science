@@ -185,5 +185,12 @@
             <?dbhtml filename="appendix-a/index.html"?>
         </d:tocentry>
 
+        <d:tocentry linkend="appendix-b">
+            <?dbhtml filename="appendix-b/index.html"?>
+            <d:tocentry linkend="migration-guide">
+                <?dbhtml filename="appendix-b/migration-guide/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
     </d:tocentry>
 </d:toc><!-- vim: set ts=2 sw=2: -->
