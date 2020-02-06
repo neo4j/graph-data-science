@@ -84,13 +84,13 @@ The following map-like syntax shows the general way of defining node projections
 }
 ----
 
-* `node-label` denotes the node label used in the projected graph
-* `neo-label` denotes the name of the node label in the Neo4j graph
-** The label must exist in the Neo4j database
-** `neo-label` defaults to `node-label`
-* `node-property-mappings` denotes a set of mappings between Neo4j and in-memory node properties
+* `node-label-i` denotes the node label used in the projected graph
+** `neo-label` denotes the name of the node label in the Neo4j graph
+*** The label must exist in the Neo4j database
+*** `neo-label` defaults to `node-label-i`
+** `node-property-mappings` denotes a set of mappings between Neo4j and in-memory node properties
 
-In the following example, we want to project `Person` and `Music` nodes into the in-memory graph.
+In the following example, we want to project `Person` and `City` nodes into the in-memory graph.
 
 .Create a graph from multiple node labels:
 [source,cypher]
@@ -98,7 +98,7 @@ In the following example, we want to project `Person` and `Music` nodes into the
 CALL gds.graph.create(
     'my-graph', {
         'Person': { label: 'Person' },
-        'Music': { label: 'Music' }
+        'City': { label: 'City' }
     },
 
     '*'
@@ -112,20 +112,20 @@ In that case we can use the following syntactic sugar.
 [source,cypher]
 ----
 // Option 1
-CALL gds.graph.create( 'my-graph', 'Person | Music', '*')
+CALL gds.graph.create( 'my-graph', 'Person | City', '*')
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 
 // Option 2
-CALL gds.graph.create( 'my-graph', ['Person', 'Music'], '*')
+CALL gds.graph.create( 'my-graph', ['Person', 'City'], '*')
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
 To project a Neo4j node label to a custom label, we can use syntactic sugar, too.
-In the following example, we want to project the Neo4j label `Person` to the element identifier `Human`.
+In the following example, we want to project the Neo4j label `Person` to the element identifier `Employee`.
 
 [source,cypher]
 ----
-CALL gds.graph.create( 'my-graph', [{Human : 'Person'}, 'Music'], '*')
+CALL gds.graph.create( 'my-graph', [{Employee : 'Person'}, 'City'], '*')
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
@@ -162,36 +162,33 @@ The following map-like syntax shows the general way of defining node property ma
             <property-key-n>: {
                 property: <neo-property-key>,
                 defaultValue: <numeric-value>
-            },
+            }
         }
     }
 }
 ----
 
-* `<property-key>` denotes the name of the property in the projected graph
-** `<neo-property-key>` denotes the name of the property in the Neo4j graph
+* `property-key-i` denotes the name of the property in the projected graph
+** `neo-property-key` denotes the name of the property in the Neo4j graph
 *** The property key must exist in the Neo4j database
-*** `<neo-property-key>` defaults to `<property-key>`
-** `<numeric-value>` is used if the property does not exist for a node
-*** `<numeric-value>` defaults to `NaN`
+*** `neo-property-key` defaults to `property-key-i`
+** `numeric-value` is used if the property does not exist for a node
+*** `numeric-value` defaults to `NaN`
 
 In the following example, we want to project `Person` and their properties nodes into the in-memory graph.
 
-.Create a graph from with multiple node properties:
+.Create a graph with multiple node properties:
 [source,cypher]
 ----
 CALL gds.graph.create(
     'my-graph', {
-        'Person': {
-            label: 'Person',
+        'City': {
             properties: {
-                age: {
-                    property: 'age',
-                    defaultValue: 0
+                community: {
+                    property: 'zipCode'
                 },
-                zipCode: {
-                    property: 'zip',
-                    defaultValue: -1
+                population: {
+                    property: 'population'
                 }
             }
         }
@@ -207,57 +204,210 @@ If we want to load the same properties for each node label, we can use the follo
 .Project node properties for multiple node labels:
 [source,cypher]
 ----
-CALL gds.graph.create( 'my-graph', 'Person', '*', {
-        nodeProperties: ['age', {zipCode: 'zip'}]
+CALL gds.graph.create( 'my-graph', 'City', '*', {
+        nodeProperties: ['population', {community: 'zipCode'}]
     }
 )
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
+The projected properties can be referred to by any algorithm that uses properties as input, for example, Label Propagation.
+
+[source,cypher]
+----
+CALL gds.labelPropagation.stream(
+    'my-graph', {
+        seedProperty: 'community'
+    }
+)
+----
 
 [[native-projection-syntax-relationship-projections]]
 == Relationship projections
 
-// == Loading multiple relationship types and node labels
-//
-// Using the `algo.graph.load` procedure it is possible to specify multiple relationship types and node labels.
-// The loaded graph will retain the relationship type information.
-// A graph loaded with multiple relationship types supports filtering subgraphs based on these types.
-// Node label information is not retained in the loaded graph.
-//
-// Graphs loaded with an empty relationship projection, or a Cypher relationship projection query, do not retain information about relationship types.
-//
-// .The following example will create the graph `my-graph` with relationships that have the type `REL_TYPE1`, `REL_TYPE2` or `REL_TYPE3`:
-// [source, cypher]
-// ----
-// CALL algo.graph.load('my-graph', null, 'REL_TYPE1 | REL_TYPE2 | REL_TYPE3', {direction: 'OUTGOING', concurrency: 8 })
-// ----
-//
-// Having loaded the graph with multiple relationship types we can run an algorithm on a filtered subgraph based on these types.
-// To run an algorithm over a subset of the graph we specify one or more of the loaded relationship types in the `relationship` parameter for the algorithm.
-// If the `relationship` parameter is empty, the whole graph is used.
-//
-// .The following example will run Page Rank only on relationships of type `REL_TYPE1` or `REL_TYPE2`:
-// [source,cypher]
-// ----
-// CALL algo.pageRank(null, 'REL_TYPE1 | REL_TYPE2', {graph: 'my-graph'})
-// ----
-//
-// The same syntax used to load multiple relationship types can also be used to load multiple labels.
-//
-// .The following example will load a graph `my-graph` with nodes that have either the `Person` or `Instrument` label:
-// [source, cypher]
-// ----
-// CALL algo.graph.load('my-graph', 'Person | Instrument', null, {direction: 'OUTGOING', concurrency: 8 })
-// ----
-//
-// Unlike multiple relationship types, the node label information is not retained in the loaded graph.
-//
-//
-// [[deduplication-of-parallel-relationships]]
-// == Deduplication of parallel relationships
-//
-// Named graphs offer different ways of handling multiple - so called "parallel" - relationships between a given pair of nodes.
+A relationship projection defines how a specific subset of Neo4j relationships is projected into the in-memory graph.
+
+The following map-like syntax shows the general way of defining relationship projections:
+
+[source]
+----
+{
+    <relationship-type-1>: {
+        type: <neo-type>,
+        projection: <projection-type>,
+        aggregation: <aggregation-type>,
+        properties: <relationship-property-mappings>
+    },
+    <relationship-type-2>: {
+        type: <neo-type>,
+        projection: <projection-type>,
+        aggregation: <aggregation-type>,
+        properties: <relationship-property-mappings>
+    },
+    // ...
+    <relationship-type-n>: {
+        type: <neo-type>,
+        projection: <projection-type>,
+        aggregation: <aggregation-type>,
+        properties: <relationship-property-mappings>
+    }
+}
+----
+
+* `relationship-type-i` denotes the relationship type used in the projected graph
+** `neo-type` denotes the name of the relationship type in the Neo4j graph
+*** The relationship type must exist in the Neo4j database
+*** `neo-type` defaults to `relationship-type-i`
+** `projection-type` denotes how Neo4j relationships are represented in the projected graph.
+    The following values are allowed:
+*** `NATURAL`: each relationship is projected the same way as it is stored in Neo4j (default)
+*** `REVERSE`: each relationship is reversed during graph projection
+*** `UNDIRECTED`: each relationship is projected in both natural and reverse orientation
+** `aggregation-type` denotes how parallel relationships and their properties are handled.
+    The specified value is applied to all property mappings that have no aggregation specified.
+    The following values are allowed:
+*** `NONE`: parallel relationships are not aggregated (default)
+*** `MIN`, `MAX`, `SUM`: applied to the numeric properties of parallel relationships
+*** `SINGLE`: a single, arbitrary relationship out of the parallel relationships is projected
+** `relationship-property-mappings` denotes a set of mappings between Neo4j and in-memory relationship properties
+
+
+In the following example, we want to project `City` nodes and `ROAD` and `RAIL' relationships into the in-memory graph.
+
+[source,cypher]
+----
+CALL gds.graph.create(
+    'my-graph', 'City', {
+        'ROAD': {
+            type: 'ROAD',
+            projection: 'NATURAL'
+        },
+        'RAIL': {
+            type: 'RAIL',
+            projection: 'NATURAL'
+        }
+    }
+)
+YIELD graphName, nodeCount, relationshipCount, createMillis;
+----
+
+In the above example, we are using the same relationship type as in the Neo4j database.
+In that case we can use the following syntactic sugar.
+
+[source,cypher]
+----
+// Option 1
+CALL gds.graph.create( 'my-graph', 'City', 'ROAD | RAIL')
+YIELD graphName, nodeCount, relationshipCount, createMillis;
+
+// Option 2
+CALL gds.graph.create( 'my-graph', 'City', ['ROAD', 'RAIL'])
+YIELD graphName, nodeCount, relationshipCount, createMillis;
+----
+
+Projecting multiple relationship types enables algorithms to only use a subset of those.
+
+[source,cypher]
+----
+// Run on natural relationships
+CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['ROAD'] });
+
+// Run on reversed relationships
+CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['RAIL'] });
+----
+
+
+=== Relationship aggregations
+
+Relationship projections offer different ways of handling multiple - so called "parallel" - relationships between a given pair of nodes.
+The default is the `NONE` aggregation which keeps all parallel relationships and directly projects them into the in-memory graph.
+All other aggregations project all the parallel relationships between a pair of nodes into a single relationship.
+
+=== Relationship properties
+
+We can load multiple relationship properties for each relationship projection using relationship property mappings.
+
+The following map-like syntax shows the general way of defining relationship property mappings:
+
+
+[source]
+----
+{
+    <relationship-type-1>: {
+        type: <neo-type>,
+        projection: <projection-type>,
+        aggregation: <aggregation-type>,
+        properties: {
+            <property-key-1>: {
+                property: <neo-property-key>,
+                defaultValue: <numeric-value>,
+                aggregation: <aggregation-type>
+            },
+            <property-key-2>: {
+                property: <neo-property-key>,
+                defaultValue: <numeric-value>,
+                aggregation: <aggregation-type>
+            },
+            // ...
+            <property-key-n>: {
+                property: <neo-property-key>,
+                defaultValue: <numeric-value>,
+                aggregation: <aggregation-type>
+            }
+        }
+    }
+}
+----
+
+* `property-key-i` denotes the name of the property in the projected graph
+** `neo-property-key` denotes the name of the property in the Neo4j graph
+*** The property key must exist in the Neo4j database
+*** `neo-property-key` defaults to `property-key-i`
+** `numeric-value` is used if the property does not exist for a node
+*** `numeric-value` defaults to `NaN`
+** `aggregation-type` denotes how properties of parallel relationships are handled.
+    The specified value override the aggregation type specified for the enclosing relationship projection.
+    The following values are allowed:
+*** `NONE`: parallel relationships are not aggregated (default)
+*** `MIN`, `MAX`, `SUM`: applied to the numeric properties of parallel relationships
+*** `SINGLE`: a single, arbitrary relationship out of the parallel relationships is projected
+
+
+.Create a graph with multiple node and relationship properties:
+[source,cypher]
+----
+CALL gds.graph.create(
+    'my-graph',
+    {
+        'City': {
+            properties: {
+                community: {
+                    property: 'zipCode'
+                },
+                population: {
+                    property: 'population'
+                }
+            }
+        }
+    },
+    {
+        'ROAD': {
+            properties: {
+                distance: {
+                    aggregation: 'MIN'
+                },
+                quality: {
+                    type: condition,
+                    aggregation: 'MAX'
+                }
+            }
+        }
+    }
+
+)
+YIELD graphName, nodeCount, relationshipCount, createMillis;
+----
+
 //
 //
 // === Node-label and relationship-type projection
