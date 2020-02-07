@@ -10,7 +10,7 @@
 }
 /* END Logo */
 
-#security-checklist ol {
+ol.orderedlist, ul.itemizedlist {
   margin-top: 10px;
   margin-bottom: 10px;
 }
