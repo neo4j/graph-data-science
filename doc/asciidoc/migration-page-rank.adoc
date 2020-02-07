@@ -1,0 +1,194 @@
+[[migration-page-rank]]
+= PageRank Algorithm
+
+.PageRank Stream Mode
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.pageRank.stream(null, null, {graph: 'myGraph'})
+YIELD nodeId, score
+----
+|
+[source, cypher]
+----
+CALL gds.pageRank.stream('myGraph')
+YIELD nodeId, score
+----
+|
+[source, cypher]
+----
+CALL algo.pageRank.stream(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    iterations: 20
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.pageRank.stream(
+  'myGraph',
+  {
+    maxIterations: 20
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL algo.pageRank.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.pageRank.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+})
+----
+|
+[source, cypher]
+----
+CALL algo.pageRank.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  { direction: 'INCOMING' }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.pageRank.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: {
+    MY_RELATIONSHIP_TYPE: {
+      projection: 'REVERSE'
+    }
+  }
+})
+----
+|
+[source, cypher]
+----
+CALL algo.pageRank.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  {
+    weightProperty: 'myWeightProperty',
+    defaultValue: 1.5
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.pageRank.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: {
+    MY_RELATIONSHIP_TYPE: {
+      myWeightProperty: {
+        defaultValue: 1.5
+      }
+    }
+  }
+})
+----
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'pageRank.stream'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.pageRank.stream.estimate({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+})
+----
+|===
+
+.PageRank Write Mode
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.pageRank(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    writeProperty: 'myWriteProperty',
+    write: true
+  }
+)
+YIELD
+  nodes,
+  loadMillis,
+  iterations,
+  p1,
+  writeProperty
+----
+|
+[source, cypher]
+----
+CALL gds.pageRank.write(
+  'myGraph',
+  {
+    writeProperty: 'myWriteProperty'
+  }
+)
+YIELD
+  nodePropertiesMillis,
+  createMillis,
+  ranIterations,
+  configuration AS conf
+RETURN
+  nodesCompared,
+  relationships,
+  writeMillis,
+  ranIterations,
+  conf.writeProperty AS writeProperty
+----
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'pageRank',
+  {
+    writeProperty: 'myWriteProperty',
+    write: true
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.pageRank.write.estimate(
+  {
+    nodeProjection: 'MyLabel',
+    relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+  },
+  {
+    writeProperty: 'myWriteProperty'
+  }
+)
+----
+|===
