@@ -27,7 +27,7 @@ This section includes:
 [[native-projection-syntax]]
 == Syntax
 
-A native projection takes three mandatory arguments: `graphName`, `nodeProjection`, `relationshipProjection`.
+A native projection takes three mandatory arguments: `graphName`, `nodeProjection` and `relationshipProjection`.
 In addition, the optional `configuration` parameter allows us to further configure graph creation.
 
 [source,cypher]
@@ -47,7 +47,7 @@ CALL gds.graph.create(
 | graphName              | no       | The name under which the graph is stored in the catalog.
 | nodeProjection         | no       | One or more <<native-projection-syntax-node-projections, node projections>>.
 | relationshipProjection | no       | One or more <<native-projection-syntax-relationship-projections, relationship projections>>.
-| configuration          | yes      | Additional parameters to configure the Native projection.
+| configuration          | yes      | Additional parameters to configure the native projection.
 |===
 
 .Configuration
@@ -85,10 +85,10 @@ The following map-like syntax shows the general way of defining node projections
 ----
 
 * `node-label-i` denotes the node label used in the projected graph
-** `neo-label` denotes the name of the node label in the Neo4j graph
+** `neo-label` denotes the node label in the Neo4j graph
 *** The label must exist in the Neo4j database
-*** `neo-label` defaults to `node-label-i`
-** `node-property-mappings` denotes a set of mappings between Neo4j and in-memory node properties
+*** If not specified, `neo-label` defaults to `node-label-i`
+** `node-property-mappings` denotes a set of mappings between Neo4j and in-memory properties
 
 In the following example, we want to project `Person` and `City` nodes into the in-memory graph.
 
@@ -111,11 +111,11 @@ In that case we can use the following syntactic sugar.
 
 [source,cypher]
 ----
-// Option 1
+// Option 1: Node labels separated by the | symbol
 CALL gds.graph.create( 'my-graph', 'Person | City', '*')
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 
-// Option 2
+// Option 2: A list of node labels
 CALL gds.graph.create( 'my-graph', ['Person', 'City'], '*')
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
@@ -130,7 +130,7 @@ YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
 To project all nodes in the Neo4j graph, we can use the special `*` node projection.
-This node projection can not be combined with any other node projection.
+Note, that this node projection can not be combined with any other node projection.
 
 [source,cypher]
 ----
@@ -168,14 +168,14 @@ The following map-like syntax shows the general way of defining node property ma
 }
 ----
 
-* `property-key-i` denotes the name of the property in the projected graph
-** `neo-property-key` denotes the name of the property in the Neo4j graph
+* `property-key-i` denotes the property key in the projected graph
+** `neo-property-key` denotes the property key in the Neo4j graph
 *** The property key must exist in the Neo4j database
-*** `neo-property-key` defaults to `property-key-i`
+*** If not specified, `neo-property-key` defaults to `property-key-i`
 ** `numeric-value` is used if the property does not exist for a node
-*** `numeric-value` defaults to `NaN`
+*** If not specified, `numeric-value` defaults to `NaN`
 
-In the following example, we want to project `Person` and their properties nodes into the in-memory graph.
+In the following example, we want to project `City` nodes and their properties into the in-memory graph.
 
 .Create a graph with multiple node properties:
 [source,cypher]
@@ -199,19 +199,19 @@ CALL gds.graph.create(
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
-If we want to load the same properties for each node label, we can use the following syntax sugar.
+If we want to load the same properties for each node label, we can use the following syntactic sugar.
 
 .Project node properties for multiple node labels:
 [source,cypher]
 ----
-CALL gds.graph.create( 'my-graph', 'City', '*', {
+CALL gds.graph.create('my-graph', 'City', '*', {
         nodeProperties: ['population', {community: 'zipCode'}]
     }
 )
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
-The projected properties can be referred to by any algorithm that uses properties as input, for example, Label Propagation.
+The projected properties can be referred to by any algorithm that uses properties as input, for example, <<algorithms-label-propagation, Label Propagation>>.
 
 [source,cypher]
 ----
@@ -254,10 +254,10 @@ The following map-like syntax shows the general way of defining relationship pro
 }
 ----
 
-* `relationship-type-i` denotes the relationship type used in the projected graph
-** `neo-type` denotes the name of the relationship type in the Neo4j graph
+* `relationship-type-i` denotes the relationship type in the projected graph
+** `neo-type` denotes the relationship type in the Neo4j graph
 *** The relationship type must exist in the Neo4j database
-*** `neo-type` defaults to `relationship-type-i`
+*** If not specified, `neo-type` defaults to `relationship-type-i`
 ** `projection-type` denotes how Neo4j relationships are represented in the projected graph.
     The following values are allowed:
 *** `NATURAL`: each relationship is projected the same way as it is stored in Neo4j (default)
@@ -272,12 +272,14 @@ The following map-like syntax shows the general way of defining relationship pro
 ** `relationship-property-mappings` denotes a set of mappings between Neo4j and in-memory relationship properties
 
 
-In the following example, we want to project `City` nodes and `ROAD` and `RAIL' relationships into the in-memory graph.
+In the following example, we want to project `City` nodes as well as `ROAD` and `RAIL` relationships into the in-memory graph.
 
 [source,cypher]
 ----
 CALL gds.graph.create(
-    'my-graph', 'City', {
+    'my-graph',
+    'City',
+    {
         'ROAD': {
             type: 'ROAD',
             projection: 'NATURAL'
@@ -292,7 +294,7 @@ YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
 In the above example, we are using the same relationship type as in the Neo4j database.
-In that case we can use the following syntactic sugar.
+In that case we can use the following syntactic sugar, similar to node projections.
 
 [source,cypher]
 ----
@@ -309,10 +311,10 @@ Projecting multiple relationship types enables algorithms to only use a subset o
 
 [source,cypher]
 ----
-// Run on natural relationships
+// Uses `ROAD` relationships for computing Page Rank of cities
 CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['ROAD'] });
 
-// Run on reversed relationships
+// Uses `RAIL` relationships for computing Page Rank of cities
 CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['RAIL'] });
 ----
 
