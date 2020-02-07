@@ -1,0 +1,260 @@
+= Graph operations
+
+. <<migration-estimate, Memory estimation>>
+. <<migration-named-graph, Graph creation - Named Graph>>
+. <<migration-cypher-queries, Graph creation - Cypher Queries>>
+. <<migration-graph-list, Graph listing>>
+. <<migration-graph-info, Graph info>>
+. <<migration-graph-remove, Graph removal>>
+
+
+[[migration-estimate]]
+.Estimating the memory requirements of loading a named graph:
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'graph.load'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create.estimate(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MATCH (n:MyLabel) RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target',
+  'graph.load',
+  {
+    graph: 'cypher'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create.cypher.estimate(
+  'MATCH (n:MyLabel) RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target'
+)
+----
+|===
+
+[[migration-named-graph]]
+.Loading a named graph in the default way:
+[opts=header,cols="1a,1a"]
+|===
+| GA | GDS
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  {
+    concurrency: 4,
+    graph: 'huge',
+    direction: 'INCOMING'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'MyLabel',
+  {
+    MY_RELATIONSHIP_TYPE: {
+      projection: 'REVERSE'
+    }
+  },
+  {
+    readConcurrency: 4
+  }
+)
+----
+|===
+
+[[migration-cypher-queries]]
+.Loading a named graph using Cypher queries:
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target',
+  {
+    graph: 'cypher'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create.cypher(
+  'myGraph',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target'
+)
+----
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN
+     id(s) AS source,
+     id(t) AS target,
+     r.myProperty AS weight',
+  {
+    concurrency: 4,
+    graph: 'cypher'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create.cypher(
+  'myGraph',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN
+     id(s) AS source,
+     id(t) AS target,
+     r.myProperty AS weight',
+  {
+    readConcurrency: 4
+  }
+)
+----
+|===
+
+[[migration-graph-list]]
+.Listing named graphs:
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.graph.list() YIELD name, nodes, relationships
+----
+|
+[source, cypher]
+----
+CALL gds.graph.list() YIELD name, nodeCount, relationshipCount
+----
+|
+[source, cypher]
+----
+CALL algo.graph.list() YIELD name, type
+----
+|
+[source, cypher]
+----
+/*the query field will be null unless a Cypher projection was used*/
+CALL gds.graph.list() YIELD name, nodeQuery
+----
+|
+[source, cypher]
+----
+CALL algo.graph.list() YIELD name, direction
+----
+|
+[source, cypher]
+----
+CALL gds.graph.list() YIELD name, relationshipProjection
+----
+|===
+
+[[migration-graph-info]]
+.Viewing information about a specific named graph:
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.graph.info('myGraph') YIELD type, direction
+----
+|
+[source, cypher]
+----
+/*the query field will be null unless a Cypher projection was used*/
+CALL gds.graph.list('myGraph') YIELD nodeQuery, relationshipProjection
+----
+|
+[source, cypher]
+----
+CALL algo.graph.info('myGraph') YIELD exists
+----
+|
+[source, cypher]
+----
+CALL gds.graph.exists('myGraph') YIELD exists
+----
+|===
+
+[[migration-graph-remove]]
+.Removing a named graph:
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.graph.remove('myGraph')
+----
+|
+[source, cypher]
+----
+CALL gds.graph.drop('myGraph')
+----
+|===
