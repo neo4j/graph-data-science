@@ -189,7 +189,7 @@ CALL algo.graph.list() YIELD name, nodes, relationships
 |
 [source, cypher]
 ----
-CALL gds.graph.list() YIELD name, nodeCount, relationshipCount
+CALL gds.graph.list() YIELD graphName, nodeCount, relationshipCount
 ----
 |
 [source, cypher]
@@ -200,7 +200,7 @@ CALL algo.graph.list() YIELD name, type
 [source, cypher]
 ----
 /*the query field will be null unless a Cypher projection was used*/
-CALL gds.graph.list() YIELD name, nodeQuery
+CALL gds.graph.list() YIELD graphName, nodeQuery, relationshipQuery
 ----
 |
 [source, cypher]
@@ -210,7 +210,7 @@ CALL algo.graph.list() YIELD name, direction
 |
 [source, cypher]
 ----
-CALL gds.graph.list() YIELD name, relationshipProjection
+CALL gds.graph.list() YIELD graphName, relationshipProjection
 ----
 |===
 
