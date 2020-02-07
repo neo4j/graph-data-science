@@ -135,7 +135,7 @@ The following Cypher projection loads multiple node and relationship properties:
 CALL gds.graph.create.cypher(
     'myCypherGraph',
     'MATCH (n:City) RETURN id(n) AS id, n.zipCode AS community, n.population AS population',
-    'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, coalesce(r.condition, 0.5) AS quality'
+    'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, coalesce(r.condition, 1.0) AS quality'
 )
 ----
 
@@ -208,7 +208,7 @@ RETURN
     id(n) AS source,
     id(m) AS target,
     min(r.distance) AS minDistance,
-    max(coalesce(r.condition, 0.5), 1.0) AS maxQuality
+    max(coalesce(r.condition, 1.0), 1.0) AS maxQuality
 ----
 
 One drawback of that approach is that we put more pressure on the Cypher execution engine and the query result consumes additional memory.
