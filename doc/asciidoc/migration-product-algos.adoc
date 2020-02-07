@@ -7,7 +7,7 @@
 //. <<migration-wcc, Weakly Connected Components>>
 
 [[migration-lpa]]
-.Label Propagation Streaming
+.Label Propagation Stream Mode
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
@@ -15,11 +15,37 @@
 [source, cypher]
 ----
 CALL algo.labelPropagation.stream(null, null, {graph: 'myGraph'})
+YIELD nodeId, label
 ----
 |
 [source, cypher]
 ----
 CALL gds.labelPropagation.stream('myGraph')
+YIELD nodeId, communityId
+----
+|
+[source, cypher]
+----
+CALL algo.labelPropagation.stream(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    iterations: 15,
+    weightProperty: 'myWeightProperty'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.labelPropagation.stream(
+  'myGraph',
+  {
+    maxIterations: 15,
+    relationshipWeightProperty: 'myWeightProperty'
+  }
+)
 ----
 |
 [source, cypher]
@@ -57,5 +83,92 @@ CALL gds.labelPropagation.stream({
     }
   }
 })
+----
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'labelPropagation.stream'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.labelPropagation.stream.estimate({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+})
+----
+|===
+
+.Label Propagation Write Mode
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.labelPropagation(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    writeProperty: 'myWriteProperty',
+    write: true
+  }
+)
+YIELD
+  writeMillis,
+  iterations,
+  p1,
+  writeProperty
+----
+|
+[source, cypher]
+----
+CALL gds.labelPropagation.write(
+  'myGraph',
+  { writeProperty: 'myWriteProperty' }
+)
+YIELD
+  writeMillis,
+  ranIterations,
+  communityDistribution AS cd,
+  configuration AS conf
+RETURN
+  writeMillis,
+  ranIterations,
+  cd.p1 AS p1,
+  conf.writeProperty AS writeProperty
+----
+|
+[source, cypher]
+----
+/* weightProperty is for Nodes and Relationships */
+CALL algo.labelPropagation(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    writeProperty: 'myWriteProperty',
+    weightProperty: 'myRelationshipWeightProperty',
+    write: true
+  }
+)
+----
+|
+[source, cypher]
+----
+/* separate weight properties for Nodes and Relationships */
+CALL gds.labelPropagation.write(
+  'myGraph',
+  {
+    writeProperty: 'myWriteProperty',
+    relationshipWeightProperty: 'myRelationshipWeightProperty',
+    nodeWeightProperty: 'myNodeWeightProperty'
+  }
+)
 ----
 |===
