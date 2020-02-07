@@ -1,0 +1,220 @@
+[[migration-wcc]]
+= Weakly Connected Components
+
+.Weakly Connected Components Stream Mode
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.unionFind.stream(null, null, {graph: 'myGraph'})
+YIELD nodeId, setId
+----
+|
+[source, cypher]
+----
+CALL gds.wcc.stream('myGraph')
+YIELD nodeId, componentId
+----
+|
+[source, cypher]
+----
+CALL algo.unionFind.stream(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    weightProperty: 'myWeightProperty'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.wcc.stream(
+  'myGraph',
+  {
+    relationshipWeightProperty: 'myWeightProperty'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL algo.unionFind.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.wcc.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+})
+----
+|
+[source, cypher]
+----
+CALL algo.unionFind.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  { direction: 'INCOMING' }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.wcc.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: {
+    MY_RELATIONSHIP_TYPE: {
+      projection: 'REVERSE'
+    }
+  }
+})
+----
+|
+[source, cypher]
+----
+CALL algo.unionFind.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  {
+    graph: 'myGraph',
+    weightProperty: 'myWeightProperty',
+    defaultValue: 2.0
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.wcc.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: {
+    MY_RELATIONSHIP_TYPE: {
+      properties: {
+        myWeightProperty: {
+          defaultValue: 2
+        }
+      }
+    }
+  }
+})
+----
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'unionFind.stream'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.wcc.stream.estimate({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+})
+----
+|===
+
+.Weakly Connected Components Write Mode
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.unionFind(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    writeProperty: 'myWriteProperty',
+    write: true
+  }
+)
+YIELD
+  nodes,
+  loadMillis,
+  p1,
+  writeProperty
+----
+|
+[source, cypher]
+----
+CALL gds.wcc.write(
+  'myGraph',
+  { writeProperty: 'myWriteProperty' }
+)
+YIELD
+  nodePropertiesWritten,
+  createMillis,
+  componentDistribution AS cd,
+  configuration AS conf
+RETURN
+  nodePropertiesWritten,
+  createMillis,
+  cd.p1 AS p1,
+  conf.writeProperty AS writeProperty
+----
+|
+[source, cypher]
+----
+CALL algo.unionFind(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    writeProperty: 'myWriteProperty',
+    weightProperty: 'myWeightProperty',
+    write: true
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.wcc.write(
+  'myGraph',
+  {
+    writeProperty: 'myWriteProperty',
+    relationshipWeightProperty: 'myWeightProperty'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'unionFind',
+  {
+    writeProperty: 'myWriteProperty',
+    weightProperty: 'myRelationshipWeightProperty',
+    write: true
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.wcc.write.estimate(
+  {
+    nodeProjection: 'MyLabel',
+    relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+  },
+  {
+    writeProperty: 'myWriteProperty',
+    relationshipWeightProperty: 'myWeightProperty'
+  }
+)
+----
+|===

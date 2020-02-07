@@ -4,7 +4,7 @@
 . <<migration-louvain, Louvain>>
 . <<migration-node-sim, Node Similarity>>
 . <<migration-page-rank, PageRank>>
-//. <<migration-wcc, Weakly Connected Components>>
+. <<migration-wcc, Weakly Connected Components>>
 
 include::migration-lpa.adoc[leveloffset=+2]
 
@@ -13,3 +13,5 @@ include::migration-louvain.adoc[leveloffset=+2]
 include::migration-node-sim.adoc[leveloffset=+2]
 
 include::migration-page-rank.adoc[leveloffset=+2]
+
+include::migration-wcc.adoc[leveloffset=+2]
