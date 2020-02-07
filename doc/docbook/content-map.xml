@@ -32,6 +32,8 @@
             </d:tocentry>
             <d:tocentry linkend="cypher-projection"><?dbhtml filename="management-ops/cypher-projection/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="implicit-projection"><?dbhtml filename="management-ops/implicit-projection/index.html"?>
+            </d:tocentry>
             <d:tocentry linkend="utility-functions"><?dbhtml filename="management-ops/utility-functions/index.html"?>
             </d:tocentry>
         </d:tocentry>
