@@ -4,11 +4,11 @@ This repository hosts the sources of the Neo4j Graph Data Science (GDS) library.
 The GDS library is a plugin for the Neo4j graph database.
 The library consists of a number of graph algorithms, exposed as procedures and executed in Neo4j.
 
-
-== Issues
+== Contributing
 
 Please report any bugs, concerns, or other questions as GitHub issues to this repository.
 
+For more information see the [contribution guidelines for this project](CONTRIBUTING.md).
 
 == License
 
