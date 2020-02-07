@@ -165,4 +165,33 @@ CALL gds.labelPropagation.write(
   }
 )
 ----
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'labelPropagation',
+  {
+    writeProperty: 'myWriteProperty',
+    weightProperty: 'myRelationshipWeightProperty',
+    write: true
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.labelPropagation.write.estimate(
+  {
+    nodeProjection: 'MyLabel',
+    relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+  },
+  {
+    writeProperty: 'myWriteProperty',
+    relationshipWeightProperty: 'myRelationshipWeightProperty',
+    nodeWeightProperty: 'myNodeWeightProperty'
+  }
+)
+----
 |===
