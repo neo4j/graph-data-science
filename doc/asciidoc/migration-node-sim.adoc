@@ -1,0 +1,200 @@
+[[migration-node-sim]]
+= Node Similarity Algorithm
+
+.Node Similarity Stream Mode
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.nodeSimilarity.stream(null, null, {graph: 'myGraph'})
+YIELD node1, node2, similarity
+----
+|
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stream('myGraph')
+YIELD node1, node2, similarity
+----
+|
+[source, cypher]
+----
+CALL algo.nodeSimilarity.stream(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    topK: 1,
+    similarityCutoff: 0.5
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stream(
+  'myGraph',
+  {
+    topK: 1,
+    similarityCutoff: 0.5
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL algo.nodeSimilarity.stream(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    bottomK: 15
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stream(
+  'myGraph',
+  {
+    bottomK: 15
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL algo.nodeSimilarity.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+})
+----
+|
+[source, cypher]
+----
+CALL algo.nodeSimilarity.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  { direction: 'INCOMING' }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: {
+    MY_RELATIONSHIP_TYPE: {
+      projection: 'REVERSE'
+    }
+  }
+})
+----
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'nodeSimilarity.stream'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stream.estimate({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+})
+----
+|===
+
+.Node Similarity Write Mode
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.nodeSimilarity(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    writeRelationshipType: 'MY_WRITE_REL_TYPE',
+    writeProperty: 'myWriteProperty',
+    write: true
+  }
+)
+YIELD
+  nodesCompared,
+  relationships,
+  writeMillis,
+  iterations,
+  p1,
+  writeProperty
+----
+|
+[source, cypher]
+----
+CALL gds.nodeSimilarity.write(
+  'myGraph',
+  {
+    writeRelationshipType: 'MY_WRITE_REL_TYPE',
+    writeProperty: 'myWriteProperty'
+  }
+)
+YIELD
+  nodesCompared,
+  relationships,
+  writeMillis,
+  ranIterations,
+  similarityDistribution AS sd,
+  configuration AS conf
+RETURN
+  nodesCompared,
+  relationships,
+  writeMillis,
+  ranIterations,
+  sd.p1 AS p1,
+  conf.writeProperty AS writeProperty
+----
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'nodeSimilarity',
+  {
+    writeRelationshipType: 'MY_WRITE_REL_TYPE',
+    writeProperty: 'myWriteProperty',
+    write: true
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.nodeSimilarity.write.estimate(
+  {
+    nodeProjection: 'MyLabel',
+    relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+  },
+  {
+    writeRelationshipType: 'MY_WRITE_REL_TYPE',
+    writeProperty: 'myWriteProperty'
+  }
+)
+----
+|===
