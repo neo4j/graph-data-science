@@ -89,6 +89,10 @@
                     <?dbhtml filename="algorithms/wcc/index.html"?>
                 </d:tocentry>
 
+                <d:tocentry linkend="algorithms-k1coloring">
+                    <?dbhtml filename="algorithms/k1coloring/index.html"?>
+                </d:tocentry>
+
                 <d:tocentry linkend="algorithms-strongly-connected-components">
                     <?dbhtml filename="algorithms/strongly-connected-components/index.html"?>
                 </d:tocentry>
@@ -98,8 +102,8 @@
                 <d:tocentry linkend="algorithms-balanced-triads">
                     <?dbhtml filename="algorithms/balanced-triads/index.html"?>
                 </d:tocentry>
-
             </d:tocentry>
+
             <d:tocentry linkend="algorithms-similarity">
                 <?dbhtml filename="algorithms/similarity/index.html"?>
                 <d:tocentry linkend="algorithms-node-similarity">
@@ -174,9 +178,6 @@
 
             <d:tocentry linkend="algorithms-auxiliary">
                 <?dbhtml filename="algorithms/auxiliary/index.html"?>
-                <d:tocentry linkend="algorithms-k1coloring">
-                    <?dbhtml filename="algorithms/k1coloring/index.html"?>
-                </d:tocentry>
                 <d:tocentry linkend="graph-generation">
                     <?dbhtml filename="labs-algorithms/graph-generation/index.html"?>
                 </d:tocentry>
