@@ -204,7 +204,10 @@ CALL algo.graph.load(
   'MATCH (n:MyLabel)
    RETURN id(n) AS id',
   'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
-   RETURN id(s) AS source, id(t) AS target, r.myProperty AS weight',
+   RETURN
+     id(s) AS source,
+     id(t) AS target,
+     r.myProperty AS weight',
   {
     concurrency: 4,
     graph: 'cypher'
@@ -219,7 +222,10 @@ CALL gds.graph.create.cypher(
   'MATCH (n:MyLabel)
    RETURN id(n) AS id',
   'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
-   RETURN id(s) AS source, id(t) AS target, r.myProperty AS weight',
+   RETURN
+     id(s) AS source,
+     id(t) AS target,
+     r.myProperty AS weight',
   {
     readConcurrency: 4
   }
@@ -250,8 +256,8 @@ CALL algo.graph.list() YIELD name, type
 |
 [source, cypher]
 ----
-/* the query fields will be null unless a Cypher projection was used */
-CALL gds.graph.list() YIELD name, nodeQuery, relationshipQuery
+/*the query field will be null unless a Cypher projection was used*/
+CALL gds.graph.list() YIELD name, nodeQuery
 ----
 |
 [source, cypher]
@@ -278,8 +284,8 @@ CALL algo.graph.info('myGraph') YIELD type, direction
 |
 [source, cypher]
 ----
-/* the query fields will be null unless a Cypher projection was used */
-CALL gds.graph.list('myGraph') YIELD nodeQuery, relationshipQuery, relationshipProjection
+/*the query field will be null unless a Cypher projection was used*/
+CALL gds.graph.list('myGraph') YIELD nodeQuery, relationshipProjection
 ----
 |
 [source, cypher]
