@@ -156,13 +156,12 @@ CALL gds.pageRank.write(
   }
 )
 YIELD
-  nodePropertiesMillis,
+  nodePropertiesWritten,
   createMillis,
   ranIterations,
   configuration AS conf
 RETURN
-  nodesCompared,
-  relationships,
+  nodePropertiesWritten,
   writeMillis,
   ranIterations,
   conf.writeProperty AS writeProperty
