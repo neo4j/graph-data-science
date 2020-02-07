@@ -134,7 +134,7 @@ The following Cypher projection loads multiple node and relationship properties:
 ----
 CALL gds.graph.create.cypher(
     'myCypherGraph',
-    'MATCH (n:City) RETURN id(n) AS id, n.zipCode AS community, n.population AS population',
+    'MATCH (n:City) RETURN id(n) AS id, n.stateId AS community, n.population AS population',
     'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, coalesce(r.condition, 1.0) AS quality'
 )
 ----
@@ -219,7 +219,7 @@ The syntax is identical to the property mappings used in the native projection.
 ----
 CALL gds.graph.create.cypher(
     'myCypherGraph',
-    'MATCH (n:City) RETURN id(n) AS id, n.zipCode AS community, n.population AS population',
+    'MATCH (n:City) RETURN id(n) AS id, n.stateId AS community, n.population AS population',
     'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, r.condition AS quality',
     {
         relationshipProperties: {
@@ -261,24 +261,3 @@ The Cypher loader expects to receive 3 fields:
 * `category` - should contain node ids, which we can return using the `id` function.
 * `weight` - should contain a double value.
 // end::similarity-explanation[]
-
-// === Cypher projection
-//
-//A Cypher projected graph will, by default, store all projected relationships without any deduplication (see `none` below).
-//As for the Huge graph, we can specify a `duplicateRelationships` strategy.
-//
-//.The following runs shortest path over a graph based on Cypher projections, picking the `ROAD` relationship with minimum cost:
-//[source,cypher]
-//----
-//MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
-//CALL gds.alpha.shortestPath.write({
-//  nodeQuery:'MATCH(n:Loc) WHERE NOT n.name = "c" RETURN id(n) AS id',
-//  relationshipQuery:'MATCH(n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) AS source, id(m) AS target, r.cost AS weight',
-//  startNode: start,
-//  endNode: end,
-//  weightProperty: 'weight',
-//  writeProperty: 'sssp'
-//})
-//YIELD nodeCount, totalCost
-//RETURN nodeCount,totalCost
-//----

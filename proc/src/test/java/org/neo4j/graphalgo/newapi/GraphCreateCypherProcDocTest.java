@@ -42,8 +42,8 @@ class GraphCreateCypherProcDocTest extends BaseProcTest {
 
         String dbQuery =
             "CREATE " +
-            "  (sanLeetCisco:City {population: 1337, zipCode: 1234})" +
-            ", (newOrwellCity:City {population: 1984, zipCode: 5678})" +
+            "  (sanLeetCisco:City {population: 1337, stateId: 1234})" +
+            ", (newOrwellCity:City {population: 1984, stateId: 5678})" +
             ", (sanLeetCisco)-[:ROAD {distance: 23, quality: 1.0}]->(newOrwellCity)" +
             ", (sanLeetCisco)-[:ROAD {distance: 32}]->(newOrwellCity)" +
             ", (sanLeetCisco)-[:RAIL {distance: 42, quality: 0.8}]->(newOrwellCity)";
@@ -79,7 +79,7 @@ class GraphCreateCypherProcDocTest extends BaseProcTest {
     void loadPropertiesAndRunLPA() {
         String createQuery = "CALL gds.graph.create.cypher(\n" +
                              "    'myCypherGraph',\n" +
-                             "    'MATCH (n:City) RETURN id(n) AS id, n.zipCode AS community, n.population AS population',\n" +
+                             "    'MATCH (n:City) RETURN id(n) AS id, n.stateId AS community, n.population AS population',\n" +
                              "    'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, coalesce(r.condition, 0.5) AS quality'\n" +
                              ") YIELD nodeCount, relationshipCount";
 
@@ -148,7 +148,7 @@ class GraphCreateCypherProcDocTest extends BaseProcTest {
     void loadWithAggregation() {
         String createQuery = "CALL gds.graph.create.cypher(\n" +
                              "    'myCypherGraph',\n" +
-                             "    'MATCH (n:City) RETURN id(n) AS id, n.zipCode AS community, n.population AS population',\n" +
+                             "    'MATCH (n:City) RETURN id(n) AS id, n.stateId AS community, n.population AS population',\n" +
                              "    'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, r.condition AS quality',\n" +
                              "    {\n" +
                              "        relationshipProperties: {\n" +
