@@ -1,5 +1,5 @@
 [[labs-algorithms-approximate-nearest-neighbors]]
-= The Approximate Nearest Neighbors (ANN) algorithm
+= Approximate Nearest Neighbors (ANN)
 
 [abstract]
 --

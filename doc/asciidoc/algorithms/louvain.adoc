@@ -1,5 +1,5 @@
 [[algorithms-louvain]]
-= The Louvain algorithm
+= Louvain
 
 [abstract]
 --

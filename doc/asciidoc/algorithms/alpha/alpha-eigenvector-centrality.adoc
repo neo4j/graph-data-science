@@ -1,5 +1,5 @@
 [[algorithms-eigenvector]]
-= The Eigenvector Centrality algorithm
+= Eigenvector Centrality
 
 [abstract]
 --

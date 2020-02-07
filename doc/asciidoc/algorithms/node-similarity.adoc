@@ -1,5 +1,5 @@
 [[algorithms-node-similarity]]
-= The Node Similarity algorithm
+= Node Similarity
 
 [abstract]
 --

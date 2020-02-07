@@ -1,5 +1,5 @@
 [[algorithms-k1coloring]]
-= The K-1 Coloring algorithm
+= K-1 Coloring
 
 [abstract]
 --

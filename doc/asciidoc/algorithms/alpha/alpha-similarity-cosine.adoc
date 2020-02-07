@@ -1,6 +1,6 @@
 :procedure-name: Cosine Similarity
 [[labs-algorithms-similarity-cosine]]
-= The Cosine Similarity algorithm
+= Cosine Similarity
 
 [abstract]
 --

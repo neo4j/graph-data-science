@@ -1,5 +1,5 @@
 [[algorithms-triangle-count-clustering-coefficient]]
-= The Triangle Counting / Clustering Coefficient algorithm
+= Triangle Counting / Clustering Coefficient
 
 [abstract]
 --

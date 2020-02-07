@@ -1,5 +1,5 @@
 [[labs-algorithms-similarity-overlap]]
-= The Overlap Similarity algorithm
+= Overlap Similarity
 
 [abstract]
 --

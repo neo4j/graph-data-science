@@ -1,5 +1,5 @@
 [[labs-algorithms-linkprediction-adamic-adar]]
-= The Adamic Adar algorithm
+= Adamic Adar
 
 [abstract]
 --

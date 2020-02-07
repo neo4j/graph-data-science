@@ -1,5 +1,5 @@
 [[algorithms-closeness-centrality]]
-= The Closeness Centrality algorithm
+= Closeness Centrality
 
 [abstract]
 --

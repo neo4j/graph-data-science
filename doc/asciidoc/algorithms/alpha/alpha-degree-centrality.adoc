@@ -1,5 +1,5 @@
 [[algorithms-degree-centrality]]
-= The Degree Centrality algorithm
+= Degree Centrality
 
 [abstract]
 --

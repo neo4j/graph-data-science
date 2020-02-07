@@ -1,5 +1,5 @@
 [[algorithms-wcc]]
-= The Weakly Connected Components algorithm
+= Weakly Connected Components
 
 [abstract]
 --

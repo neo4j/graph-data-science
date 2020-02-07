@@ -1,5 +1,5 @@
 [[algorithms-strongly-connected-components]]
-= The Strongly Connected Components algorithm
+= Strongly Connected Components
 
 [abstract]
 --

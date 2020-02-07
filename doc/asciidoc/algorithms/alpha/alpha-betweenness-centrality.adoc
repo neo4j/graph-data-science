@@ -1,5 +1,5 @@
 [[algorithms-betweenness-centrality]]
-= The Betweenness Centrality algorithm
+= Betweenness Centrality
 
 [abstract]
 --

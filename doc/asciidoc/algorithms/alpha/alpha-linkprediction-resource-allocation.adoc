@@ -1,5 +1,5 @@
 [[labs-algorithms-linkprediction-resource-allocation]]
-= The Resource Allocation algorithm
+= Resource Allocation
 
 [abstract]
 --

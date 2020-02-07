@@ -1,5 +1,5 @@
 [[labs-algorithms-linkprediction-same-community]]
-= The Same Community algorithm
+= Same Community
 
 [abstract]
 --

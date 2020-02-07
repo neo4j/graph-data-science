@@ -1,5 +1,5 @@
 [[labs-algorithms-similarity-jaccard]]
-= The Jaccard Similarity algorithm
+= Jaccard Similarity
 
 [abstract]
 --

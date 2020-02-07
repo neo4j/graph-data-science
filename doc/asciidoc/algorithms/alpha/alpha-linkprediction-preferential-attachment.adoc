@@ -1,5 +1,5 @@
 [[labs-algorithms-linkprediction-preferential-attachment]]
-= The Preferential Attachment algorithm
+= Preferential Attachment
 
 [abstract]
 --

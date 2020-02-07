@@ -1,5 +1,5 @@
 [[labs-algorithms-linkprediction-total-neighbors]]
-= The Total Neighbors algorithm
+= Total Neighbors
 
 [abstract]
 --

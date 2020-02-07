@@ -1,6 +1,6 @@
 :procedure-name: Pearson Similarity
 [[labs-algorithms-similarity-pearson]]
-= The Pearson Similarity algorithm
+= Pearson Similarity
 
 [abstract]
 --

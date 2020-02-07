@@ -1,5 +1,5 @@
 [[algorithms-label-propagation]]
-= The Label Propagation algorithm
+= Label Propagation
 
 [abstract]
 --

@@ -1,5 +1,5 @@
 [[algorithms-articlerank]]
-= The ArticleRank algorithm
+= ArticleRank
 
 [abstract]
 --

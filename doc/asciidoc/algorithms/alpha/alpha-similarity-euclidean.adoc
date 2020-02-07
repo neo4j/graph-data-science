@@ -1,7 +1,7 @@
 :procedure-name: Euclidean Distance
 
 [[labs-algorithms-similarity-euclidean]]
-= The Euclidean Distance algorithm
+= Euclidean Distance
 
 [abstract]
 --

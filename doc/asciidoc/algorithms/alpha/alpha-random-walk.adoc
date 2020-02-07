@@ -1,5 +1,5 @@
 [[labs-algorithms-random-walk]]
-= The Random Walk algorithm
+= Random Walk
 
 [abstract]
 --

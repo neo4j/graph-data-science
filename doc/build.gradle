@@ -262,6 +262,7 @@ html {
         "neo.documentation.library.links": libraryLinks,
         "generate.toc": "''",
         "header.rule": "0",
+        "toc.section.depth": "2",
         "neo.newsearch": "1",
         "html.script": scripts,
         "html.stylesheet": styles,

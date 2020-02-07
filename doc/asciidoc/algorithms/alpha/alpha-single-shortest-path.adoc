@@ -1,5 +1,5 @@
 [[labs-algorithms-single-source-shortest-path]]
-= The Single Source Shortest Path algorithm
+= Single Source Shortest Path
 
 [abstract]
 --

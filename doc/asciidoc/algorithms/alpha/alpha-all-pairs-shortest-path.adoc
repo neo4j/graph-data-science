@@ -1,5 +1,5 @@
 [[labs-algorithm-all-pairs-shortest-path]]
-= The All Pairs Shortest Path algorithm
+= All Pairs Shortest Path
 
 [abstract]
 --

@@ -1,5 +1,5 @@
 [[labs-algorithms-linkprediction-common-neighbors]]
-= The Common Neighbors algorithm
+= Common Neighbors
 
 [abstract]
 --

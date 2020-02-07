@@ -1,5 +1,5 @@
 [[labs-algorithms-a_star]]
-= The A* algorithm
+= A*
 
 [abstract]
 --

@@ -1,5 +1,5 @@
 [[labs-algorithms-shortest-path]]
-= The Shortest Path algorithm
+= Shortest Path
 
 [abstract]
 --
@@ -137,7 +137,7 @@ CREATE (a:Loc {name: 'A'}),
 
 
 [[algorithms-shortest-path-dijkstra]]
-=== The Dijkstra Shortest Path algorithm
+=== Dijkstra Shortest Path
 
 .The following will run the algorithm and stream results:
 [source, cypher]

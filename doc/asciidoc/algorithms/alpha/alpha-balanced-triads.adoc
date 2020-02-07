@@ -1,5 +1,5 @@
 [[algorithms-balanced-triads]]
-= The Balanced Triads algorithm
+= Balanced Triads
 
 [abstract]
 --
