@@ -1,5 +1,5 @@
 [[migration-louvain]]
-= Louvain Algorithm
+= Louvain
 
 .Louvain Stream Mode
 [opts=header,cols="1a,1a"]

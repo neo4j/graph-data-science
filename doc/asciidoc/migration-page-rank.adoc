@@ -1,5 +1,5 @@
 [[migration-page-rank]]
-= PageRank Algorithm
+= PageRank
 
 .PageRank Stream Mode
 [opts=header,cols="1a,1a"]

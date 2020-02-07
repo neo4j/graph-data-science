@@ -1,5 +1,5 @@
 [[migration-node-sim]]
-= Node Similarity Algorithm
+= Node Similarity
 
 .Node Similarity Stream Mode
 [opts=header,cols="1a,1a"]
