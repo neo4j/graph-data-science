@@ -1,0 +1,223 @@
+[[migration-louvain]]
+= Louvain Algorithm
+
+.Louvain Stream Mode
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.beta.louvain.stream(null, null, {graph: 'myGraph'})
+YIELD nodeId, community, communities
+----
+|
+[source, cypher]
+----
+CALL gds.louvain.stream('myGraph')
+YIELD nodeId, communityId, communityIds
+----
+|
+[source, cypher]
+----
+CALL algo.beta.louvain.stream(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    levels: 15,
+    innerIterations: 30
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.louvain.stream(
+  'myGraph',
+  {
+    maxLevels: 15,
+    maxIterations: 30
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL algo.beta.louvain.stream(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    weightProperty: 'myWeightProperty'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.louvain.stream(
+  'myGraph',
+  {
+    relationshipWeightProperty: 'myWeightProperty'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL algo.beta.louvain.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.louvain.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+})
+----
+|
+[source, cypher]
+----
+CALL algo.beta.louvain.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  { direction: 'INCOMING' }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.louvain.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: {
+    MY_RELATIONSHIP_TYPE: {
+      projection: 'REVERSE'
+    }
+  }
+})
+----
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'beta.louvain.stream'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.louvain.stream.estimate({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+})
+----
+|===
+
+.Louvain Write Mode
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.beta.louvain(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    writeProperty: 'myWriteProperty',
+    write: true
+  }
+)
+YIELD
+  nodes,
+  writeMillis,
+  levels,
+  iterations,
+  p1,
+  writeProperty
+----
+|
+[source, cypher]
+----
+CALL gds.louvain.write(
+  'myGraph',
+  { writeProperty: 'myWriteProperty' }
+)
+YIELD
+  nodePropertiesWritten,
+  writeMillis,
+  ranLevels,
+  ranIterations,
+  communityDistribution AS cd,
+  configuration AS conf
+RETURN
+  nodePropertiesWritten,
+  writeMillis,
+  ranLevels,
+  ranIterations,
+  cd.p1 AS p1,
+  conf.writeProperty AS writeProperty
+----
+|
+[source, cypher]
+----
+/* weightProperty is for Nodes and Relationships */
+CALL algo.beta.louvain(
+  null,
+  null,
+  {
+    graph: 'myGraph',
+    writeProperty: 'myWriteProperty',
+    weightProperty: 'myWeightProperty',
+    write: true
+  }
+)
+----
+|
+[source, cypher]
+----
+/* separate weight properties for Nodes and Relationships */
+CALL gds.louvain.write(
+  'myGraph',
+  {
+    writeProperty: 'myWriteProperty',
+    relationshipWeightProperty: 'myWeightProperty'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'beta.louvain',
+  {
+    writeProperty: 'myWriteProperty',
+    weightProperty: 'myRelationshipWeightProperty',
+    write: true
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.louvain.write.estimate(
+  {
+    nodeProjection: 'MyLabel',
+    relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+  },
+  {
+    writeProperty: 'myWriteProperty',
+    relationshipWeightProperty: 'myWeightProperty'
+  }
+)
+----
+|===
