@@ -36,10 +36,6 @@
             </d:tocentry>
         </d:tocentry>
 
-        <d:tocentry linkend="yelp-example">
-            <?dbhtml filename="yelp-example/index.html"?>
-        </d:tocentry>
-
         <d:tocentry linkend="procedures">
             <?dbhtml filename="procedures/index.html"?>
         </d:tocentry>
