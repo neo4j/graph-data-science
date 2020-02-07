@@ -1,0 +1,61 @@
+= Production-quality algorithms
+
+. <<migration-lpa, Label Propagation>>
+//. <<migration-louvain, Louvain>>
+//. <<migration-node-sim, Node Similarity>>
+//. <<migration-page-rank, PageRank>>
+//. <<migration-wcc, Weakly Connected Components>>
+
+[[migration-lpa]]
+.Label Propagation Streaming
+[opts=header,cols="1a,1a"]
+|===
+|GA | GDS
+|
+[source, cypher]
+----
+CALL algo.labelPropagation.stream(null, null, {graph: 'myGraph'})
+----
+|
+[source, cypher]
+----
+CALL gds.labelPropagation.stream('myGraph')
+----
+|
+[source, cypher]
+----
+CALL algo.labelPropagation.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.labelPropagation.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+})
+----
+|
+[source, cypher]
+----
+CALL algo.labelPropagation.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  { direction: 'INCOMING' }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.labelPropagation.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: {
+    MY_RELATIONSHIP_TYPE: {
+      projection: 'REVERSE'
+    }
+  }
+})
+----
+|===
