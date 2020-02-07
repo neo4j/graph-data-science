@@ -32,6 +32,7 @@ The manual covers the following areas:
 * <<management-ops>> -- A detailed guide to the graph catalog and utility procedures included in the GDS library.
 * <<yelp-example>> -- An illustration of how to use graph algorithms on a social network of friends.
 * <<algorithms>> -- A detailed guide to each of the algorithms in their respective categories, including use-cases and examples.
+* <<production-deployment>> -- This chapter explains advanced details with regards to common Neo4j components.
 * <<appendix-a>> -- Reference of all procedures contained in the GDS library.
 
 

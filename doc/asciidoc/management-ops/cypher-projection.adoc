@@ -63,7 +63,7 @@ CALL gds.graph.create.cypher(
 | Name                   | Type    | Default        | Description
 | nodeProperties         | MAP     | empty map      | Mappings between the RETURN items and node properties in the graph projection.
 | relationshipProperties | MAP     | empty map      | Mappings between the RETURN items and relationship properties in the graph projection.
-| concurrency            | INTEGER | available CPUs | The number of concurrent threads used for creating the graph.
+| concurrency            | INTEGER | 4              | The number of concurrent threads used for creating the graph.
 |===
 
 
