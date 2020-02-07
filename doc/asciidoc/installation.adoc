@@ -10,27 +10,27 @@ The Neo4j Graph Data Science (GDS) library is delivered as a plugin to the Neo4j
 The plugin needs to be installed into the database and whitelisted in the Neo4j configuration.
 There are two main ways of achieving this, which we will detail in this chapter.
 
+// TODO activate once we have a GDS desktop plugin
+//== Neo4j Desktop
+//
+//The most convenient way of installing the GDS library is through the https://neo4j.com/docs/operations-manual/current/installation/neo4j-desktop/index.html[Neo4j Desktop^] plugin called Neo4j Graph Data Science.
+//The plugin can be found in the 'Plugins' tab of a database.
+//
+//image::neo4j-desktop.jpg[width=500]
+//
+//The installer will download the GDS library and install it in the 'plugins' directory of the database.
+//It will also add the following entry to the settings file:
+//
+//----
+//dbms.security.procedures.unrestricted=gds.*
+//----
+//
+//This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
 
-== Neo4j Desktop
 
-The most convenient way of installing the GDS library is through the https://neo4j.com/docs/operations-manual/current/installation/neo4j-desktop/index.html[Neo4j Desktop^] plugin called Neo4j Graph Data Science.
-The plugin can be found in the 'Plugins' tab of a database.
+== Neo4j Server / Desktop
 
-image::neo4j-desktop.jpg[width=500]
-
-The installer will download the GDS library and install it in the 'plugins' directory of the database.
-It will also add the following entry to the settings file:
-
-----
-dbms.security.procedures.unrestricted=gds.*
-----
-
-This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
-
-
-== Neo4j Server
-
-If we are using a standalone Neo4j Server, the library will need to be installed and configured manually.
+If we are using a standalone Neo4j Server or Neo4j Desktop, the library will need to be installed and configured manually.
 
 1. Download `neo4j-graph-data-science-[version]-standalone.jar` from the https://neo4j.com/download-center/[Neo4j Download Center] and copy it into the `$NEO4J_HOME/plugins` directory.
 
