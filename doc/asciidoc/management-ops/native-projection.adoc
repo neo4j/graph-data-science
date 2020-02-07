@@ -342,17 +342,17 @@ CALL gds.graph.create(
     'my-graph',
     'City',
     {
-        'ROAD': {
+        ROAD: {
             type: 'ROAD',
             projection: 'NATURAL'
         },
-        'RAIL': {
+        RAIL: {
             type: 'RAIL',
             projection: 'NATURAL'
         }
     }
 )
-YIELD graphName, nodeCount, relationshipCount, createMillis;
+YIELD graphName, nodeCount, relationshipCount;
 ----
 
 In the above example, we are using the same relationship type as in the Neo4j database.
@@ -360,13 +360,8 @@ In that case we can use the following syntactic sugar, similar to node projectio
 
 [source,cypher]
 ----
-// Option 1
-CALL gds.graph.create( 'my-graph', 'City', 'ROAD | RAIL')
-YIELD graphName, nodeCount, relationshipCount, createMillis;
-
-// Option 2
 CALL gds.graph.create( 'my-graph', 'City', ['ROAD', 'RAIL'])
-YIELD graphName, nodeCount, relationshipCount, createMillis;
+YIELD graphName, nodeCount, relationshipCount;
 ----
 
 Projecting multiple relationship types enables algorithms to only use a subset of those.
@@ -374,10 +369,10 @@ Projecting multiple relationship types enables algorithms to only use a subset o
 [source,cypher]
 ----
 // Uses `ROAD` relationships for computing Page Rank of cities
-CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['ROAD'] });
+CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['ROAD'] }) YIELD nodeId, score;
 
 // Uses `RAIL` relationships for computing Page Rank of cities
-CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['RAIL'] });
+CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['RAIL'] }) YIELD nodeId, score;
 ----
 
 
@@ -433,14 +428,14 @@ The following map-like syntax shows the general way of defining relationship pro
 *** `SINGLE`: a single, arbitrary relationship out of the parallel relationships is projected
 
 In the following example, we want to project `City` nodes and `ROAD` relationships.
-For nodes we project the `stateId` propertie
+For nodes we project the `stateId` property.
 
 .Create a graph with multiple node and relationship properties:
 [source,cypher]
 ----
 CALL gds.graph.create(
     'my-graph', {
-        'City': {
+        City: {
             properties: {
                 community: {
                     property: 'stateId'
@@ -448,7 +443,7 @@ CALL gds.graph.create(
             }
         }
     }, {
-        'ROAD': {
+        ROAD: {
             properties: {
                 quality: {
                     property: 'condition'
@@ -460,7 +455,7 @@ CALL gds.graph.create(
         }
     }
 )
-YIELD graphName, nodeCount, relationshipCount, createMillis;
+YIELD graphName, nodeCount, relationshipCount;
 ----
 
 We can use the following shorthand syntax to express the same projection.
@@ -473,7 +468,7 @@ CALL gds.graph.create(
         relationshipProperties: [{ quality: 'condition' }, { distance: 'length' }]
     }
 )
-YIELD graphName, nodeCount, relationshipCount, createMillis;
+YIELD graphName, nodeCount, relationshipCount;
 ----
 
 The projected properties can be referred to by any algorithm that uses properties as input, for example, <<algorithms-label-propagation, Label Propagation>>.
@@ -486,14 +481,14 @@ CALL gds.labelPropagation.stream(
         seedProperty: 'community',
         relationshipWeightProperty: 'quality'
     }
-)
+) YIELD nodeId, communityId;
 // Option 2: Use the distance between cities as relationship weight
 CALL gds.labelPropagation.stream(
     'my-graph', {
         seedProperty: 'community',
         relationshipWeightProperty: 'distance'
     }
-)
+) YIELD nodeId, communityId;
 ----
 
 
@@ -511,7 +506,7 @@ While doing so, we compute the maximum quality of the parallel relationships and
 ----
 CALL gds.graph.create(
     'my-graph', {
-        'City': {
+        City: {
             properties: {
                 community: {
                     property: 'stateId'
@@ -519,7 +514,7 @@ CALL gds.graph.create(
             }
         }
     }, {
-        'ROAD': {
+        ROAD: {
             properties: {
                 maxQuality: {
                     property: 'condition',
@@ -530,7 +525,7 @@ CALL gds.graph.create(
         }
     }
 )
-YIELD graphName, nodeCount, relationshipCount, createMillis;
+YIELD graphName, nodeCount, relationshipCount;
 ----
 
 Since we have only one node projection and one relationship projection, we can use the following shorthand syntax.
@@ -543,7 +538,7 @@ CALL gds.graph.create(
         relationshipProperties: { maxQuality: { property: 'condition', aggregation: 'MAX', defaultValue: 1.0 }}
     }
 )
-YIELD graphName, nodeCount, relationshipCount, createMillis;
+YIELD graphName, nodeCount, relationshipCount;
 ----
 
 As before, the projected properties can be referred to by any algorithm that uses properties as input, for example, <<algorithms-label-propagation, Label Propagation>>.
@@ -555,5 +550,5 @@ CALL gds.labelPropagation.stream(
         seedProperty: 'community',
         relationshipWeightProperty: 'maxQuality'
     }
-)
+) YIELD nodeId, communityId;
 ----

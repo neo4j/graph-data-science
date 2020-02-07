@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
+import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
@@ -38,7 +39,7 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
-        registerProcedures(LabelPropagationStreamProc.class, GraphCreateProc.class);
+        registerProcedures(LabelPropagationStreamProc.class, PageRankStreamProc.class, GraphCreateProc.class);
 
         String dbQuery =
             "CREATE " +
@@ -46,9 +47,9 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
             ", (bob:Person)" +
             ", (sanLeetCisco:City {population: 1337, stateId: 1234})" +
             ", (newOrwellCity:City {population: 1984, stateId: 5678})" +
-            ", (sanLeetCisco)-[:ROAD {distance: 23, quality: 1.0}]->(newOrwellCity)" +
-            ", (sanLeetCisco)-[:ROAD {distance: 32}]->(newOrwellCity)" +
-            ", (sanLeetCisco)-[:RAIL {distance: 42, quality: 0.8}]->(newOrwellCity)";
+            ", (sanLeetCisco)-[:ROAD {length: 23, condition: 1.0}]->(newOrwellCity)" +
+            ", (sanLeetCisco)-[:ROAD {length: 32}]->(newOrwellCity)" +
+            ", (sanLeetCisco)-[:RAIL {length: 42, condition: 0.8}]->(newOrwellCity)";
 
         runQuery(dbQuery);
     }
@@ -192,4 +193,292 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
 
         assertEquals(expected, runQuery(algoQuery, Result::resultAsString));
     }
+
+    @Test
+    void loadMultipleRelationshipTypes() {
+        String createQuery = "CALL gds.graph.create(\n" +
+                             "    'my-graph',\n" +
+                             "    'City',\n" +
+                             "    {\n" +
+                             "        ROAD: {\n" +
+                             "            type: 'ROAD',\n" +
+                             "            projection: 'NATURAL'\n" +
+                             "        },\n" +
+                             "        RAIL: {\n" +
+                             "            type: 'RAIL',\n" +
+                             "            projection: 'NATURAL'\n" +
+                             "        }\n" +
+                             "    }\n" +
+                             ")\n" +
+                             "YIELD graphName, nodeCount, relationshipCount;";
+
+        String expected = "+--------------------------------------------+\n" +
+                          "| graphName  | nodeCount | relationshipCount |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| \"my-graph\" | 2         | 3                 |\n" +
+                          "+--------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+    }
+
+    @Test
+    void loadMultipleRelationshipTypesShorthandSyntaxOption() {
+        String createQuery = "CALL gds.graph.create( 'my-graph', 'City', ['ROAD', 'RAIL'])\n" +
+                             "YIELD graphName, nodeCount, relationshipCount;";
+
+        String expected = "+--------------------------------------------+\n" +
+                          "| graphName  | nodeCount | relationshipCount |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| \"my-graph\" | 2         | 3                 |\n" +
+                          "+--------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+    }
+
+    @Test
+    void loadMultipleRelationshipTypesAndRunPageRank() {
+        String createQuery = "CALL gds.graph.create( 'my-graph', 'City', ['ROAD', 'RAIL'])\n" +
+                             "YIELD graphName, nodeCount, relationshipCount;";
+
+        String expected = "+--------------------------------------------+\n" +
+                          "| graphName  | nodeCount | relationshipCount |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| \"my-graph\" | 2         | 3                 |\n" +
+                          "+--------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+
+        String algoQuery = "CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['ROAD'] }) YIELD nodeId, score;";
+
+        expected = "+------------------------------+\n" +
+                   "| nodeId | score               |\n" +
+                   "+------------------------------+\n" +
+                   "| 2      | 0.15000000000000002 |\n" +
+                   "| 3      | 0.27750000506639483 |\n" +
+                   "+------------------------------+\n" +
+                   "2 rows\n";
+
+        assertEquals(expected, runQuery(algoQuery, Result::resultAsString));
+
+        algoQuery = "CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['RAIL'] }) YIELD nodeId, score;";
+
+        expected = "+------------------------------+\n" +
+                   "| nodeId | score               |\n" +
+                   "+------------------------------+\n" +
+                   "| 2      | 0.15000000000000002 |\n" +
+                   "| 3      | 0.27750000506639483 |\n" +
+                   "+------------------------------+\n" +
+                   "2 rows\n";
+
+        assertEquals(expected, runQuery(algoQuery, Result::resultAsString));
+    }
+
+    @Test
+    void loadMultipleRelationshipProperties() {
+        String createQuery = "CALL gds.graph.create(\n" +
+                             "    'my-graph', {\n" +
+                             "        City: {\n" +
+                             "            properties: {\n" +
+                             "                community: {\n" +
+                             "                    property: 'stateId'\n" +
+                             "                }\n" +
+                             "            }\n" +
+                             "        }\n" +
+                             "    }, {\n" +
+                             "        ROAD: {\n" +
+                             "            properties: {\n" +
+                             "                quality: {\n" +
+                             "                    property: 'condition'\n" +
+                             "                },\n" +
+                             "                distance: {\n" +
+                             "                    property: 'length'\n" +
+                             "                }\n" +
+                             "            }\n" +
+                             "        }\n" +
+                             "    }\n" +
+                             ")\n" +
+                             "YIELD graphName, nodeCount, relationshipCount;";
+
+        String expected = "+--------------------------------------------+\n" +
+                          "| graphName  | nodeCount | relationshipCount |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| \"my-graph\" | 2         | 2                 |\n" +
+                          "+--------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+    }
+
+    @Test
+    void loadMultipleRelationshipPropertiesShorthandSyntax() {
+        String createQuery = "CALL gds.graph.create(\n" +
+                             "    'my-graph', 'City', 'ROAD', {\n" +
+                             "        nodeProperties: { community: 'stateId' },\n" +
+                             "        relationshipProperties: [{ quality: 'condition' }, { distance: 'length' }]\n" +
+                             "    }\n" +
+                             ")\n" +
+                             "YIELD graphName, nodeCount, relationshipCount;";
+
+        String expected = "+--------------------------------------------+\n" +
+                          "| graphName  | nodeCount | relationshipCount |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| \"my-graph\" | 2         | 2                 |\n" +
+                          "+--------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+    }
+
+    @Test
+    void loadMultipleRelationshipPropertiesAndRunLPA() {
+        String createQuery = "CALL gds.graph.create(\n" +
+                             "    'my-graph', 'City', 'ROAD', {\n" +
+                             "        nodeProperties: { community: 'stateId' },\n" +
+                             "        relationshipProperties: [{ quality: 'condition' }, { distance: 'length' }]\n" +
+                             "    }\n" +
+                             ")\n" +
+                             "YIELD graphName, nodeCount, relationshipCount;";
+
+        String expected = "+--------------------------------------------+\n" +
+                          "| graphName  | nodeCount | relationshipCount |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| \"my-graph\" | 2         | 2                 |\n" +
+                          "+--------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+
+        String algoQuery = "CALL gds.labelPropagation.stream(\n" +
+                           "    'my-graph', {\n" +
+                           "        seedProperty: 'community',\n" +
+                           "        relationshipWeightProperty: 'quality'\n" +
+                           "    }\n" +
+                           ") YIELD nodeId, communityId;";
+
+        expected = "+----------------------+\n" +
+                   "| nodeId | communityId |\n" +
+                   "+----------------------+\n" +
+                   "| 2      | 1234        |\n" +
+                   "| 3      | 5678        |\n" +
+                   "+----------------------+\n" +
+                   "2 rows\n";
+
+        assertEquals(expected, runQuery(algoQuery, Result::resultAsString));
+
+        algoQuery = "CALL gds.labelPropagation.stream(\n" +
+                    "    'my-graph', {\n" +
+                    "        seedProperty: 'community',\n" +
+                    "        relationshipWeightProperty: 'distance'\n" +
+                    "    }\n" +
+                    ") YIELD nodeId, communityId;";
+
+        expected = "+----------------------+\n" +
+                   "| nodeId | communityId |\n" +
+                   "+----------------------+\n" +
+                   "| 2      | 5678        |\n" +
+                   "| 3      | 5678        |\n" +
+                   "+----------------------+\n" +
+                   "2 rows\n";
+
+        assertEquals(expected, runQuery(algoQuery, Result::resultAsString));
+    }
+
+    @Test
+    void loadRelationshipsWithAggregation() {
+        String createQuery = "CALL gds.graph.create(\n" +
+                             "    'my-graph', {\n" +
+                             "        City: {\n" +
+                             "            properties: {\n" +
+                             "                community: {\n" +
+                             "                    property: 'stateId'\n" +
+                             "                }\n" +
+                             "            }\n" +
+                             "        }\n" +
+                             "    }, {\n" +
+                             "        ROAD: {\n" +
+                             "            properties: {\n" +
+                             "                maxQuality: {\n" +
+                             "                    property: 'condition',\n" +
+                             "                    aggregation: 'MAX',\n" +
+                             "                    defaultValue: 1.0\n" +
+                             "                }\n" +
+                             "            }\n" +
+                             "        }\n" +
+                             "    }\n" +
+                             ")\n" +
+                             "YIELD graphName, nodeCount, relationshipCount;";
+
+        String expected = "+--------------------------------------------+\n" +
+                          "| graphName  | nodeCount | relationshipCount |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| \"my-graph\" | 2         | 1                 |\n" +
+                          "+--------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+    }
+
+    @Test
+    void loadRelationshipsWithAggregationShorthandSyntax() {
+        String createQuery = "CALL gds.graph.create(\n" +
+                             "    'my-graph', 'City', 'ROAD', {\n" +
+                             "        nodeProperties: { community: 'stateId' },\n" +
+                             "        relationshipProperties: { maxQuality: { property: 'condition', aggregation: 'MAX', defaultValue: 1.0 }}\n" +
+                             "    }\n" +
+                             ")\n" +
+                             "YIELD graphName, nodeCount, relationshipCount;";
+
+        String expected = "+--------------------------------------------+\n" +
+                          "| graphName  | nodeCount | relationshipCount |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| \"my-graph\" | 2         | 1                 |\n" +
+                          "+--------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+    }
+
+    @Test
+    void loadRelationshipsWithAggregationAndRunLPA() {
+        String createQuery = "CALL gds.graph.create(\n" +
+                             "    'my-graph', 'City', 'ROAD', {\n" +
+                             "        nodeProperties: { community: 'stateId' },\n" +
+                             "        relationshipProperties: { maxQuality: { property: 'condition', aggregation: 'MAX', defaultValue: 1.0 }}\n" +
+                             "    }\n" +
+                             ")\n" +
+                             "YIELD graphName, nodeCount, relationshipCount;";
+
+        String expected = "+--------------------------------------------+\n" +
+                          "| graphName  | nodeCount | relationshipCount |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| \"my-graph\" | 2         | 1                 |\n" +
+                          "+--------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+
+        String algoQuery = "CALL gds.labelPropagation.stream(\n" +
+                           "    'my-graph', {\n" +
+                           "        seedProperty: 'community',\n" +
+                           "        relationshipWeightProperty: 'maxQuality'\n" +
+                           "    }\n" +
+                           ") YIELD nodeId, communityId;";
+
+        expected = "+----------------------+\n" +
+                   "| nodeId | communityId |\n" +
+                   "+----------------------+\n" +
+                   "| 2      | 5678        |\n" +
+                   "| 3      | 5678        |\n" +
+                   "+----------------------+\n" +
+                   "2 rows\n";
+
+        assertEquals(expected, runQuery(algoQuery, Result::resultAsString));
+    }
+
+
+
+
 }
