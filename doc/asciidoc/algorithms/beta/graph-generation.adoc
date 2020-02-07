@@ -9,7 +9,7 @@ This section describes the graph generation algorithms in the Neo4j Graph Data S
 In certain use cases it is useful to generate random graphs, for example, for testing or benchmarking purposes.
 For that reason the Neo4j Graph Algorithm library comes with a set of built-in graph generators.
 The generator stores the resulting graph in the <<graph-catalog-ops, graph catalog>>.
-That graph can be used as input for all algorithms in the library.
+That graph can be used as input for any algorithm in the library.
 
 [NOTE]
 ====

@@ -6,8 +6,8 @@ A graph projection can be seen as a view over the stored graph, containing only 
 Graph projections are stored entirely in-memory using compressed data structures optimized for topology and property lookup operations.
 
 The graph catalog is a concept within the GDS library that allows managing multiple graph projections by name.
-Using that name, a graph can be used in multiple times in the analytical workflow.
-Named graphs can be created using either the <<native-projection>> or the <<cypher-projection>>.
+Using that name, a created graph can be used many times in the analytical workflow.
+Named graphs can be created using either a <<native-projection>> or a <<cypher-projection>>.
 After usage, named graphs can be removed from the catalog to free up main memory.
 
 The graph catalog exists as long as the Neo4j instance is running.
@@ -16,7 +16,7 @@ When Neo4j is restarted, graphs stored in the catalog are lost and need to be re
 This chapter explains the available graph catalog operations.
 
 [[table-proc]]
-[opts=header,cols="1m,1m"]
+[opts=header,cols="1m,1"]
 |===
 | Name                                              | Description
 | <<catalog-graph-create, gds.graph.create>>        | Creates a graph in the catalog using a <<native-projection>>.
@@ -38,23 +38,23 @@ Graphs created by a different Neo4j user are not accessible at any time.
 
 A projected graph can be stored in the catalog under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
-This allows us to run multiple algorithms without creating the graph on each algorithm run.
+This allows multiple algorithms to use the same graph without having to re-create it on each algorithm run.
 
-There are two options of projecting a graph from the Neo4j database into main memory:
+There are two variants of projecting a graph from the Neo4j database into main memory:
 
 * <<native-projection>>
 ** Provides the best performance by reading from the Neo4j store files.
-   Recommended to be used during the production phase.
+   Recommended to be used during both the development and the production phase.
 * <<cypher-projection>>
 ** The more flexible, expressive approach with lesser focus on performance.
    Recommended to be primarily used during the development phase.
 
-In this section, we will give brief examples on how to create a graph using both options.
-For detailed about information about the configuration of each projection, we prefer to the specific sections.
+In this section, we will give brief examples on how to create a graph using either variant.
+For detailed information about the configuration of each variant, we prefer to the specific sections.
 
-In the following two examples we want to create a graph projection that contains `Person` nodes and `LIKES` relationships.
+In the following two examples we show how to create a graph that contains `Person` nodes and `LIKES` relationships.
 
-.Create a graph using the native projection:
+.Create a graph using a native projection:
 [source,cypher]
 ----
 CALL gds.graph.create(
@@ -65,7 +65,7 @@ CALL gds.graph.create(
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
-.Create a graph using the Cypher projection:
+.Create a graph using a Cypher projection:
 [source,cypher]
 ----
 CALL gds.graph.create.cypher(
@@ -106,7 +106,7 @@ YIELD graphName, nodeQuery, relationshipQuery, nodeCount, relationshipCount;
 
 The information contains basic statistics about the graph, e.g., the node and relationship count.
 The procedure can also compute information about degree distributions, i.e., the number of relationships per node.
-By default, the distribution values are not computed.
+To skip computing the distribution values, use the `YIELD` subclause and omit the `degreeDistribution` column.
 
 .List information about the degree distribution of a specific graph:
 [source,cypher]
@@ -131,7 +131,7 @@ CALL gds.graph.exists('my-store-graph') YIELD exists;
 [[catalog-graph-drop]]
 == Removing graphs from the catalog
 
-Once we've finished using the named graph we can remove it from the catalog to free up memory.
+Once we have finished using the named graph we can remove it from the catalog to free up memory.
 
 .Remove a graph from the catalog:
 [source,cypher]

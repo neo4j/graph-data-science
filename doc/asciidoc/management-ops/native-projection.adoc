@@ -5,17 +5,17 @@
 
 [abstract]
 --
-This chapter explains native projections in the Neo4j Graph Data Science library.
+This section explains native projections in the Neo4j Graph Data Science library.
 --
 
 A native projection allows us to project a graph from Neo4j into an in-memory graph.
-The projected graph can be described in terms of node labels, relationship types and properties.
+The projected graph can be specified in terms of node labels, relationship types and properties.
 Node labels and node properties are projected using <<native-projection-syntax-node-projections>>.
 Relationship types and relationship properties are projected using <<native-projection-syntax-relationship-projections>>.
 
-The main benefit of native projections is the performance when creating a graph projection.
+The main benefit of native projections is their performance.
 In contrast, a <<cypher-projection>> is more flexible from the declaration point of view, but less performant.
-In most cases it is possible to structure your Neo4j databases in a way that native projections can be used.
+In most cases it is possible to structure your Neo4j graph model in a way that enables native projections to be used.
 
 This section includes:
 
@@ -33,10 +33,10 @@ In addition, the optional `configuration` parameter allows us to further configu
 [source,cypher]
 ----
 CALL gds.graph.create(
-    graphName: string,
-    nodeProjection: string or map,
-    relationshipProjection: string or map,
-    configuration: map
+    graphName: STRING,
+    nodeProjection: STRING, LIST or MAP,
+    relationshipProjection: STRING, LIST or MAP,
+    configuration: MAP
 )
 ----
 
@@ -54,8 +54,8 @@ CALL gds.graph.create(
 [opts="header",cols="1,1,1,4"]
 |===
 | Name                   | Type                  | Default        | Description
-| concurrency            | int                   | available CPUs | The number of concurrent threads used for creating the graph.
-| nodeProperties         | string or list or map | empty map      |
+| readConcurrency        | INTEGER               | 4              | The number of concurrent threads used for creating the graph.
+| nodeProperties         | STRING, LIST or MAP   | empty map      |
 |===
 
 
@@ -71,20 +71,20 @@ The following map-like syntax shows the general way of defining node projections
 ----
 {
     <node-label>: {
-        label: <neo-label>,
+        label: <neo4j-label>,
         properties: <node-property-mappings>
     }
 }
 ----
 
 * `node-label` denotes the node label used in the projected graph
-** `neo-label` denotes the node label in the Neo4j graph
+** `neo4j-label` denotes the node label in the Neo4j graph
 *** The label must exist in the Neo4j database
-*** If not specified, `neo-label` defaults to `node-label`
+*** If not specified, `neo4j-label` defaults to `node-label`
 ** `node-property-mappings` denotes a set of mappings between Neo4j and in-memory properties
 
 In the following example, we want to project `Person` nodes into the in-memory graph.
-The resulting graph contains all Neo4j nodes that have a label `Person`.
+The resulting graph contains all Neo4j nodes that have the label `Person`.
 
 [source,cypher]
 ----
@@ -92,7 +92,6 @@ CALL gds.graph.create(
     'my-graph', {
         Person: { label: 'Person' }
     },
-
     '*'
 )
 YIELD graphName, nodeCount, relationshipCount;
@@ -115,7 +114,7 @@ CALL gds.graph.create('my-graph', 'Person | City', '*')
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
-To project all nodes in the Neo4j graph, we can use the special `*` node projection.
+To project all nodes in the Neo4j graph, we can use the special `*` ('star') node projection.
 Note, that this node projection can not be combined with any other node label.
 
 [source,cypher]
@@ -143,7 +142,7 @@ Any algorithm that supports node properties can refer to these user-defined prop
 ----
 {
     <node-label>: {
-        label: <neo-label>,
+        label: <neo4j-label>,
         properties: {
             <property-key-1>: {
                 property: <neo-property-key>,
@@ -190,13 +189,12 @@ CALL gds.graph.create(
             }
         }
     },
-
     '*'
 )
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
-If we retain the node property keys, we can use the following shorthand syntax.
+If we do not need to rename the node property keys or give a default value, we can use the following shorthand syntax.
 
 [source,cypher]
 ----
@@ -209,7 +207,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 It is also possible to rename the property key during projection.
 In the example, we project the property key `stateId` to a custom property key `community`.
-When we use the projected graph in an algorithm, we refer to custom property key instead.
+When we use the projected graph in an algorithm, we refer to the custom property key instead.
 
 .Project node properties for all projected node labels:
 [source,cypher]
@@ -243,20 +241,20 @@ The following map-like syntax shows the general way of defining relationship pro
 ----
 {
     <relationship-type-1>: {
-        type: <neo-type>,
+        type: <neo4j-type>,
         projection: <projection-type>,
         aggregation: <aggregation-type>,
         properties: <relationship-property-mappings>
     },
     <relationship-type-2>: {
-        type: <neo-type>,
+        type: <neo4j-type>,
         projection: <projection-type>,
         aggregation: <aggregation-type>,
         properties: <relationship-property-mappings>
     },
     // ...
     <relationship-type-n>: {
-        type: <neo-type>,
+        type: <neo4j-type>,
         projection: <projection-type>,
         aggregation: <aggregation-type>,
         properties: <relationship-property-mappings>
@@ -265,9 +263,9 @@ The following map-like syntax shows the general way of defining relationship pro
 ----
 
 * `relationship-type-i` denotes the relationship type in the projected graph
-** `neo-type` denotes the relationship type in the Neo4j graph
+** `neo4j-type` denotes the relationship type in the Neo4j graph
 *** The relationship type must exist in the Neo4j database
-*** If not specified, `neo-type` defaults to `relationship-type-i`
+*** If not specified, `neo4j-type` defaults to `relationship-type-i`
 ** `projection-type` denotes how Neo4j relationships are represented in the projected graph.
     The following values are allowed:
 *** `NATURAL`: each relationship is projected the same way as it is stored in Neo4j (default)
@@ -303,7 +301,7 @@ CALL gds.graph.create(
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
-In the above example, we are using the same relationship type as in the Neo4j database.
+In the above example, we are using the same relationship type as in the Neo4j database as well as the default `projection`.
 In that case we can use the following syntactic sugar, similar to node projections.
 
 [source,cypher]
@@ -326,10 +324,10 @@ CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['RAIL'] }) YIELD node
 
 === Relationship properties
 
-Similar to node properties, relationship projections support loading multiple relationship properties.
-We can load multiple relationship properties for each relationship projection using relationship property mappings.
+Similar to node properties, relationship projections support specifying relationship properties.
+We can specify multiple relationship properties for each relationship projection using relationship property mappings.
 A relationship property mapping maps a user-defined property key to a property key in the Neo4j database.
-As for nodes, the parameter is configured using a map in which each key refers to a user-defined property key.
+The parameter is configured using a map in which each key refers to a user-defined property key.
 
 The following map-like syntax shows the general way of defining relationship property mappings:
 
@@ -337,23 +335,23 @@ The following map-like syntax shows the general way of defining relationship pro
 ----
 {
     <relationship-type-1>: {
-        type: <neo-type>,
+        type: <neo4j-type>,
         projection: <projection-type>,
         aggregation: <aggregation-type>,
         properties: {
             <property-key-1>: {
-                property: <neo-property-key>,
+                property: <neo4j-property-key>,
                 defaultValue: <numeric-value>,
                 aggregation: <aggregation-type>
             },
             <property-key-2>: {
-                property: <neo-property-key>,
+                property: <neo4j-property-key>,
                 defaultValue: <numeric-value>,
                 aggregation: <aggregation-type>
             },
             // ...
             <property-key-n>: {
-                property: <neo-property-key>,
+                property: <neo4j-property-key>,
                 defaultValue: <numeric-value>,
                 aggregation: <aggregation-type>
             }
@@ -363,13 +361,13 @@ The following map-like syntax shows the general way of defining relationship pro
 ----
 
 * `property-key-i` denotes the name of the property in the projected graph
-** `neo-property-key` denotes the name of the property in the Neo4j graph
+** `neo4j-property-key` denotes the name of the property in the Neo4j graph
 *** The property key must exist in the Neo4j database
-*** `neo-property-key` defaults to `property-key-i`
-** `numeric-value` is used if the property does not exist for a node
+*** `neo4j-property-key` defaults to `property-key-i`
+** `numeric-value` is used if the property does not exist for a relationship
 *** `numeric-value` defaults to `NaN`
 ** `aggregation-type` denotes how properties of parallel relationships are handled.
-    The specified value override the aggregation type specified for the enclosing relationship projection.
+    The specified value overrides the aggregation type specified for the enclosing relationship projection.
     The following values are allowed:
 *** `NONE`: parallel relationships are not aggregated (default)
 *** `MIN`, `MAX`, `SUM`: applied to the numeric properties of parallel relationships
@@ -419,7 +417,7 @@ CALL gds.graph.create(
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
-The projected properties can be referred to by any algorithm that uses properties as input, for example, <<algorithms-label-propagation, Label Propagation>>.
+The projected properties can be referred to by any algorithm that uses properties as input, for example <<algorithms-label-propagation, Label Propagation>>.
 
 [source,cypher]
 ----
@@ -489,7 +487,7 @@ CALL gds.graph.create(
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
-As before, the projected properties can be referred to by any algorithm that uses properties as input, for example, <<algorithms-label-propagation, Label Propagation>>.
+As before, the projected properties can be referred to by any algorithm that uses properties as input, for example <<algorithms-label-propagation, Label Propagation>>.
 
 [source,cypher]
 ----

@@ -7,7 +7,7 @@ The following table lists all utility functions in the GDS library:
 [opts=header,cols="1m,1m"]
 |===
 | Name                | Description
-| gds.version         | Return the installed graph data science library version.
+| gds.version         | Return the version of the installed Neo4j Graph Data Science library.
 | gds.util.asNode     | Return the node object for the given node id or null if none exists.
 | gds.util.asNodes    | Return the node objects for the given node ids or an empty list if none exists.
 | gds.util.asPath     | Return a path object for the provided node ids and weights.
