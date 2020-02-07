@@ -3,7 +3,7 @@
 
 The following table lists all utility functions in the GDS library:
 
-[[table-proc]]
+[[utility-functions-table]]
 [opts=header,cols="1m,1m"]
 |===
 | Name                | Description
