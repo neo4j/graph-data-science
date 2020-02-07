@@ -1,5 +1,5 @@
 [[labs-algorithms-yens-k-shortest-path]]
-= Yen's K-shortest paths
+= Yen's K-Shortest Paths
 
 [abstract]
 --
