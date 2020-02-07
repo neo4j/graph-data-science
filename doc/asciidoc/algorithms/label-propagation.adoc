@@ -371,8 +371,8 @@ YIELD ranIterations, communityCount
 
 As we can see, the weighted example takes 4 iterations to converge, instead of 3 for the unweighted case.
 
-Additionally by specifying a node weight via the `nodeWeightProperty` key, we can control the influence of a nodes label onto its neighbors.
-During the computation of the weight of a specific label, the node property will be multiplied by the weight of that nodes relationships.
+Additionally by specifying a node weight via the `nodeWeightProperty` key, we can control the influence of a nodes community onto its neighbors.
+During the computation of the weight of a specific community, the node property will be multiplied by the weight of that nodes relationships.
 
 [[algorithms-label-propagation-examples-seeded]]
 === Seeded
@@ -426,4 +426,3 @@ YIELD ranIterations, communityCount
 | ranIterations | communityCount
 | 3             | 2
 |===
-
