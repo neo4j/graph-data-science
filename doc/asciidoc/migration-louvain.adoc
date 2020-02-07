@@ -168,7 +168,6 @@ RETURN
 |
 [source, cypher]
 ----
-/* weightProperty is for Nodes and Relationships */
 CALL algo.beta.louvain(
   null,
   null,
@@ -183,7 +182,6 @@ CALL algo.beta.louvain(
 |
 [source, cypher]
 ----
-/* separate weight properties for Nodes and Relationships */
 CALL gds.louvain.write(
   'myGraph',
   {

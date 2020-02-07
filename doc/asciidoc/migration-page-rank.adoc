@@ -95,8 +95,10 @@ CALL gds.pageRank.stream({
   nodeProjection: 'MyLabel',
   relationshipProjection: {
     MY_RELATIONSHIP_TYPE: {
-      myWeightProperty: {
-        defaultValue: 1.5
+      properties: {
+        myWeightProperty: {
+          defaultValue: 1.5
+        }
       }
     }
   }
