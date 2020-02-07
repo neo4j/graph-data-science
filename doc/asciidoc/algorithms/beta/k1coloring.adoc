@@ -155,7 +155,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 .The following statement will create the graph and store it in the graph catalog.
 [source, cypher]
 ----
-CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES')
+CALL gds.graph.create('myGraph', 'Person', 'LIKES')
 ----
 
 In the following examples we will demonstrate using the K-1 Coloring algorithm on this graph.
