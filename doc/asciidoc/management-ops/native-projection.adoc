@@ -65,15 +65,46 @@ CALL gds.graph.create(
 A node projection enables mapping Neo4j nodes into the in-memory graph.
 When specifying a node projection, we can declare one or more node labels that we want to project.
 
+The following map-like syntax shows the general way of defining node projections:
+
+[source]
+----
+{
+    <node-label>: {
+        label: <neo-label>,
+        properties: <node-property-mappings>
+    }
+}
+----
+
+* `node-label` denotes the node label used in the projected graph
+** `neo-label` denotes the node label in the Neo4j graph
+*** The label must exist in the Neo4j database
+*** If not specified, `neo-label` defaults to `node-label`
+** `node-property-mappings` denotes a set of mappings between Neo4j and in-memory properties
+
 In the following example, we want to project `Person` nodes into the in-memory graph.
-The resulting graph contains all Neo4j nodes that have the label `Person`.
+The resulting graph contains all Neo4j nodes that have a label `Person`.
+
+[source,cypher]
+----
+CALL gds.graph.create(
+    'my-graph', {
+        Person: { label: 'Person' }
+    },
+
+    '*'
+)
+YIELD graphName, nodeCount, relationshipCount;
+----
+
+We can use the following shorthand syntax to project a single node label.
 
 [source,cypher]
 ----
 CALL gds.graph.create('my-graph', 'Person', '*')
 YIELD graphName, nodeCount, relationshipCount;
 ----
-
 
 It is often useful to create an in-memory graph representing more than one node label.
 Let's assume, the database contains `Person` and `City` nodes which we want to project.
@@ -84,76 +115,8 @@ CALL gds.graph.create('my-graph', 'Person | City', '*')
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
-// TODO: Uncomment when we have proper support for multiple node labels
-//
-//The following map-like syntax shows the general way of defining node projections:
-//
-//[source]
-//----
-//{
-//    <node-label-1>: {
-//        label: <neo-label>,
-//        properties: <node-property-mappings>
-//    },
-//    <node-label-2>: {
-//        label: <neo-label>,
-//        properties: <node-property-mappings>
-//    },
-//    // ...
-//    <node-label-n>: {
-//        label: <neo-label>,
-//        properties: <node-property-mappings>
-//    }
-//}
-//----
-//
-//* `node-label-i` denotes the node label used in the projected graph
-//** `neo-label` denotes the node label in the Neo4j graph
-//*** The label must exist in the Neo4j database
-//*** If not specified, `neo-label` defaults to `node-label-i`
-//** `node-property-mappings` denotes a set of mappings between Neo4j and in-memory properties
-//
-//In the following example, we want to project `Person` and `City` nodes into the in-memory graph.
-//
-//.Create a graph from multiple node labels:
-//[source,cypher]
-//----
-//CALL gds.graph.create(
-//    'my-graph', {
-//        'Person': { label: 'Person' },
-//        'City': { label: 'City' }
-//    },
-//
-//    '*'
-//)
-//YIELD graphName, nodeCount, relationshipCount, createMillis;
-//----
-//
-//In the above example, we are using the same labels as in the Neo4j database.
-//In that case we can use the following syntactic sugar.
-//
-//[source,cypher]
-//----
-// // Option 1: Node labels separated by the | symbol
-//CALL gds.graph.create( 'my-graph', 'Person | City', '*')
-//YIELD graphName, nodeCount, relationshipCount, createMillis;
-//
-// // Option 2: A list of node labels
-//CALL gds.graph.create( 'my-graph', ['Person', 'City'], '*')
-//YIELD graphName, nodeCount, relationshipCount, createMillis;
-//----
-//
-//To project a Neo4j node label to a custom label, we can use syntactic sugar, too.
-//In the following example, we want to project the Neo4j label `Person` to the element identifier `Employee`.
-//
-//[source,cypher]
-//----
-//CALL gds.graph.create( 'my-graph', [{Employee : 'Person'}, 'City'], '*')
-//YIELD graphName, nodeCount, relationshipCount, createMillis;
-//----
-
 To project all nodes in the Neo4j graph, we can use the special `*` node projection.
-Note, that this node projection can not be combined with any other node projection.
+Note, that this node projection can not be combined with any other node label.
 
 [source,cypher]
 ----
@@ -163,7 +126,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 [NOTE]
 ====
-In the in-memory graph all projected node labels are merged into single label.
+In the in-memory graph, all projected node labels are merged into a single label.
 Unlike for relationship projections, it is currently not possible to specify a filter on projected labels.
 If the graph is used as input for an algorithm, all nodes will be considered.
 ====
@@ -176,79 +139,64 @@ We can load multiple node properties for each node projection using node propert
 A node property mapping maps a user-defined property key to a property key in the Neo4j database.
 Any algorithm that supports node properties can refer to these user-defined property keys.
 
-// TODO: Uncomment when we have proper support for multiple node labels
-//The following map-like syntax shows the general way of defining node property mappings:
-//
-//[source]
-//----
-//{
-//    <node-label-1>: {
-//        label: <neo-label>,
-//        properties: {
-//            <property-key-1>: {
-//                property: <neo-property-key>,
-//                defaultValue: <numeric-value>
-//            },
-//            <property-key-2>: {
-//                property: <neo-property-key>,
-//                defaultValue: <numeric-value>
-//            },
-//            // ...
-//            <property-key-n>: {
-//                property: <neo-property-key>,
-//                defaultValue: <numeric-value>
-//            }
-//        }
-//    }
-//}
-//----
-//
-//* `property-key-i` denotes the property key in the projected graph
-//** `neo-property-key` denotes the property key in the Neo4j graph
-//*** The property key must exist in the Neo4j database
-//*** If not specified, `neo-property-key` defaults to `property-key-i`
-//** `numeric-value` is used if the property does not exist for a node
-//*** If not specified, `numeric-value` defaults to `NaN`
-//
-//For the following example, let's assume that each `City` node stores two properties: the `population` of the city and an optional `stateId` that identifies the state in which the city is located.
-//We want to project both properties and project `stateId` to the custom property key `community`.
-//
-//.Create a graph with multiple node properties:
-//[source,cypher]
-//----
-//CALL gds.graph.create(
-//    'my-graph', {
-//        City: {
-//            properties: {
-//                community: {
-//                    property: 'stateId'
-//                },
-//                population: {
-//                    property: 'population'
-//                }
-//            }
-//        }
-//    },
-//
-//    '*'
-//)
-//YIELD graphName, nodeCount, relationshipCount, createMillis;
-//----
+[source]
+----
+{
+    <node-label>: {
+        label: <neo-label>,
+        properties: {
+            <property-key-1>: {
+                property: <neo-property-key>,
+                defaultValue: <numeric-value>
+            },
+            <property-key-2>: {
+                property: <neo-property-key>,
+                defaultValue: <numeric-value>
+            },
+            // ...
+            <property-key-n>: {
+                property: <neo-property-key>,
+                defaultValue: <numeric-value>
+            }
+        }
+    }
+}
+----
+
+* `property-key-i` denotes the property key in the projected graph
+** `neo-property-key` denotes the property key in the Neo4j graph
+*** The property key must exist in the Neo4j database
+*** If not specified, `neo-property-key` defaults to `property-key-i`
+** `numeric-value` is used if the property does not exist for a node
+*** If not specified, `numeric-value` defaults to `NaN`
 
 
-For the following example, let's assume that `City` nodes have two properties: `population` and `stateId`.
-To load a single node property, we can just specify the property key as shown in the following Cypher statement.
+For the following example, let's assume that each `City` node stores two properties: the `population` of the city and an optional `stateId` that identifies the state in which the city is located.
+We want to project both properties and project `stateId` to the custom property key `community`.
 
+.Create a graph with multiple node properties:
 [source,cypher]
 ----
-CALL gds.graph.create('my-graph', 'City', '*', {
-        nodeProperties: 'population'
-    }
+CALL gds.graph.create(
+    'my-graph', {
+        City: {
+            properties: {
+                stateId: {
+                    property: 'stateId'
+                },
+                population: {
+                    property: 'population'
+                }
+            }
+        }
+    },
+
+    '*'
 )
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
-To load multiple node properties, we can supply a list of property keys.
+If we retain the node property keys, we can use the following shorthand syntax.
 
 [source,cypher]
 ----

@@ -62,6 +62,27 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
 
     @Test
     void loadSingleNodeLabel() {
+        String createQuery = "CALL gds.graph.create(\n" +
+                             "    'my-graph', {\n" +
+                             "        Person: { label: 'Person' }\n" +
+                             "    },\n" +
+                             "\n" +
+                             "    '*'\n" +
+                             ")\n" +
+                             "YIELD graphName, nodeCount, relationshipCount;";
+
+        String expected = "+--------------------------------------------+\n" +
+                          "| graphName  | nodeCount | relationshipCount |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| \"my-graph\" | 2         | 0                 |\n" +
+                          "+--------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+    }
+
+    @Test
+    void loadSingleNodeLabelShorthandSyntax() {
         String createQuery = "CALL gds.graph.create('my-graph', 'Person', '*')\n" +
                              "YIELD graphName, nodeCount, relationshipCount;";
 
@@ -76,7 +97,7 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
     }
 
     @Test
-    void loadMultipleNodeLabels() {
+    void loadMultipleNodeLabelsShorthandSyntax() {
         String createQuery = "CALL gds.graph.create('my-graph', 'Person | City', '*')\n" +
                              "YIELD graphName, nodeCount, relationshipCount;";
 
@@ -106,10 +127,22 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
     }
 
     @Test
-    void loadSingleNodeProperty() {
-        String createQuery = "CALL gds.graph.create('my-graph', 'City', '*', {\n" +
-                             "        nodeProperties: 'population'\n" +
-                             "    }\n" +
+    void loadMultipleNodeProperties() {
+        String createQuery = "CALL gds.graph.create(\n" +
+                             "    'my-graph', {\n" +
+                             "        City: {\n" +
+                             "            properties: {\n" +
+                             "                stateId: {\n" +
+                             "                    property: 'stateId'\n" +
+                             "                },\n" +
+                             "                population: {\n" +
+                             "                    property: 'population'\n" +
+                             "                }\n" +
+                             "            }\n" +
+                             "        }\n" +
+                             "    },\n" +
+                             "\n" +
+                             "    '*'\n" +
                              ")\n" +
                              "YIELD graphName, nodeCount, relationshipCount;";
 
@@ -123,9 +156,8 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
         assertEquals(expected, runQuery(createQuery, Result::resultAsString));
     }
 
-
     @Test
-    void loadMultipleNodeProperties() {
+    void loadMultipleNodePropertiesShorthandSyntax() {
         String createQuery = "CALL gds.graph.create('my-graph', 'City', '*', {\n" +
                              "        nodeProperties: ['population', 'stateId']\n" +
                              "    }\n" +
@@ -224,7 +256,7 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
 
     @Test
     void loadMultipleRelationshipTypesShorthandSyntaxOption() {
-        String createQuery = "CALL gds.graph.create( 'my-graph', 'City', ['ROAD', 'RAIL'])\n" +
+        String createQuery = "CALL gds.graph.create('my-graph', 'City', ['ROAD', 'RAIL'])\n" +
                              "YIELD graphName, nodeCount, relationshipCount;";
 
         String expected = "+--------------------------------------------+\n" +
