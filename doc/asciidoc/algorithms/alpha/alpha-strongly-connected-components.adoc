@@ -62,7 +62,7 @@ YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 |===
 | Name             | Type    | Default                | Optional | Description
 | writeProperty    | STRING  | 'partition'            | yes      | The property name written back to.
-| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| concurrency      | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 |===
@@ -105,7 +105,7 @@ YIELD nodeId, partition
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type   | Default                | Optional | Description
-| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| concurrency      | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 

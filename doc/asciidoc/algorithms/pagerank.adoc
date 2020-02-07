@@ -80,7 +80,7 @@ YIELD nodes, createMillis, computeMillis, writeMillis, configuration
 | dampingFactor                 | float   | 0.85                   | yes | The damping factor of the Page Rank calculation.
 | maxIterations                 | int     | 20                     | yes | The maximum number of iterations of Page Rank to run.
 | tolerance                     | float   | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
-| concurrency                   | int     | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| concurrency                   | int     | 4                      | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int     | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int     | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
 | relationshipWeightProperty    | string  | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
@@ -120,7 +120,7 @@ YIELD node, score
 | dampingFactor                 | float  | 0.85                   | yes | The damping factor of the Page Rank calculation.
 | maxIterations                 | int    | 20                     | yes | The maximum number of iterations of Page Rank to run.
 | tolerance                     | float  | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
-| concurrency                   | int    | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| concurrency                   | int    | 4                      | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency               | int    | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int    | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
 | relationshipWeightProperty    | string | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.

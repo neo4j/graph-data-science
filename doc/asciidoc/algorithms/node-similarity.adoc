@@ -90,7 +90,7 @@ YIELD nodesCompared, relationshipsWritten, writeRelationshipType, writeProperty
 | Name                   | Type    | Default                | Optional | Description
 | nodeProjection         | string  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
 | relationshipProjection | string  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
-| concurrency            | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| concurrency            | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency        | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | similarityCutoff       | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
@@ -139,7 +139,7 @@ YIELD node1, node2, similarity
 [opts="header",cols="1m,1,1,1,4"]
 |===
 | Name              | Type    | Default                | Optional | Description
-| concurrency       | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| concurrency       | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | similarityCutoff  | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
 | degreeCutoff      | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.

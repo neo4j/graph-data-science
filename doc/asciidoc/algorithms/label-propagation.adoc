@@ -80,7 +80,7 @@ YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMilli
 |===
 | Name                          | Type    | Default                | Optional | Description
 | maxIterations                 | int     | 10                     | yes      | The maximum number of iterations to run.
-| concurrency                   | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | nodeWeightProperty            | string  | null                   | yes      | The name of the node property that represents weight.
@@ -132,7 +132,7 @@ YIELD nodeId, communityId
 |===
 | Name                          | Type   | Default                | Optional | Description
 | maxIterations                 | int    | 10                     | yes      | The maximum number of iterations to run.
-| concurrency                   | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| concurrency                   | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency               | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | nodeWeightProperty            | string | null                   | yes      | The property name of node that contain weight. Must be numeric.
 | relationshipWeightProperty    | string | null                   | yes      | The property name of relationship that contain weight. Must be numeric.

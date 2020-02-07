@@ -73,7 +73,7 @@ YIELD
 | relationshipQuery             | string        | null                      | yes       | The Cypher query used to select the relationships for implicit graph loading via a Cypher projection.
 | nodeProperties                | map or list   | null                      | yes       | The node properties to load during implicit graph loading.
 | relationshipProperties        | map or list   | null                      | yes       | The relationship properties to load during implicit graph loading.
-| concurrency                   | int           | available CPUs            | yes       | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| concurrency                   | int           | 4                         | yes       | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency               | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for implicit graph loading.
 | writeConcurrency              | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for writing the result to Neo4j.
 // algorithm specific
@@ -133,7 +133,7 @@ YIELD
 | relationshipQuery             | string        | null                      | yes       | The Cypher query used to select the relationships for implicit graph loading via a Cypher projection.
 | nodeProperties                | map or list   | null                      | yes       | The node properties to load during implicit graph loading.
 | relationshipProperties        | map or list   | null                      | yes       | The relationship properties to load during implicit graph loading.
-| concurrency                   | int           | available CPUs            | yes       | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| concurrency                   | int           | 4                         | yes       | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency               | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for implicit graph loading.
 | writeConcurrency              | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for writing the result to Neo4j.
 // algorithm specific

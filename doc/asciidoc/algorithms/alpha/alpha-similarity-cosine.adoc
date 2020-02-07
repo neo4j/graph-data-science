@@ -92,8 +92,8 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | `topK`                  | int            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | `similarityCutoff`      | int            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | `degreeCutoff`          | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| `skipValue`             | double         | gds.util.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
-| `concurrency`           | int            | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| `skipValue`             | double         | gds.util.NaN()         | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| `concurrency`           | int            | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | `readConcurrency`       | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | `writeConcurrency`      | int            | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | `graph`                 | string         | dense                  | yes      | The graph type ('dense' or 'cypher').
@@ -167,7 +167,7 @@ YIELD item1, item2, count1, count2, intersection, similarity
 | `similarityCutoff` | int            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | `degreeCutoff`     | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
 | `skipValue`        | double         | null                   | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
-| `concurrency`      | int            | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| `concurrency`      | int            | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | `readConcurrency`  | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | `graph`            | string         | dense                  | yes      | The graph type ('dense' or 'cypher').
 | `sourceIds`        | long[]         | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.

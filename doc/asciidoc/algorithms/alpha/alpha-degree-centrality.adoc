@@ -54,7 +54,7 @@ YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                          | Type    | Default                | Optional | Description
-| concurrency                   | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | relationshipWeightProperty    | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
@@ -83,7 +83,7 @@ YIELD node, score
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type   | Default                | Optional | Description
-| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| concurrency      | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | weightProperty   | string | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | defaultValue     | float  | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.

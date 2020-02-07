@@ -132,7 +132,7 @@ YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, 
 | label                         | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
 | relationship                  | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
 | iterations                    | int     | 20                     | yes      | How many iterations of Page Rank to run.
-| concurrency                   | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | dampingFactor                 | float   | 0.85                   | yes      | The damping factor of the Page Rank calculation.
@@ -170,7 +170,7 @@ YIELD node, score
 | label                         | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
 | relationship                  | string | null                   | yes      | The relationship type to load from the graph. If null, load all nodes.
 | iterations                    | int    | 20                     | yes      | Specify how many iterations of Page Rank to run.
-| concurrency                   | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| concurrency                   | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency               | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int    | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | dampingFactor                 | float  | 0.85                   | yes      | The damping factor of the Page Rank calculation.
