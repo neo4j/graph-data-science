@@ -1,3 +1,5 @@
+apply plugin: 'java'
+
 description = 'Neo4j Graph Algorithms :: Cypher Printer for Neo4j Version 4.0'
 
 dependencies {
