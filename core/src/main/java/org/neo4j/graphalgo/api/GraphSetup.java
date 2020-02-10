@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.logging.Log;
-import org.neo4j.stream.Streams;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GraphSetup {
 
@@ -118,7 +118,7 @@ public class GraphSetup {
     @Deprecated
     public Optional<Double> relationshipDefaultPropertyValue() {
         return createConfig.relationshipProjections().allProjections().stream().flatMap(
-            f -> Streams.ofOptional(f.properties().defaultWeight())
+            f -> f.properties().defaultWeight().map(Stream::of).orElse(Stream.empty())
         ).findFirst();
     }
 

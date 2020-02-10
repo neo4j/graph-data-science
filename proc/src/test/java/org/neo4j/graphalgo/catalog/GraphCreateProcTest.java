@@ -1101,7 +1101,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void multiUseLoadedGraphWithMultipleRelationships() throws KernelException {
+    void multiUseLoadedGraphWithMultipleRelationships() throws Exception {
         String graphName = "foo";
 
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
