@@ -1,3 +1,4 @@
+[[product-algos]]
 = Production-quality algorithms
 
 . <<migration-lpa, Label Propagation>>

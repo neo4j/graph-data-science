@@ -54,6 +54,9 @@ This section explains how to migrate from the Neo4j Graph Algorithms (GA) librar
 
 == Syntax
 
+. <<graph-ops, Graph Operations>>
+. <<product-algos, Production-quality algorithms>>
+
 include::migration-graph-ops.adoc[leveloffset=+2]
 
 include::migration-product-algos.adoc[leveloffset=+2]

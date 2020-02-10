@@ -1,3 +1,4 @@
+[[graph-ops]]
 = Graph operations
 
 . <<migration-estimate, Memory estimation>>
@@ -9,10 +10,26 @@
 
 
 [[migration-estimate]]
+== Memory estimation
+
+.Memory estimation - YIELD fields
+[opts=header,cols="1,1"]
+|===
+|GA | GDS
+| requiredMemory    | requiredMemory
+| bytesMin          | bytesMin
+| bytesMax          | bytesMax
+| mapView           | mapView
+| -                 | treeView
+| -                 | nodeCount
+| -                 | relationshipCount
+|===
+
 .Estimating the memory requirements of loading a named graph:
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
+2+| Native Projections
 |
 [source, cypher]
 ----
@@ -30,6 +47,7 @@ CALL gds.graph.create.estimate(
   'MY_RELATIONSHIP_TYPE'
 )
 ----
+2+| Cypher Projections
 |
 [source, cypher]
 ----
@@ -55,10 +73,33 @@ CALL gds.graph.create.cypher.estimate(
 |===
 
 [[migration-named-graph]]
+== Graph creation - Named Graph
+
+.YIELD fields
+[opts=hewader, cols="1,1"]
+|====
+| GA                        | GDS
+| name                      | graphName
+| graph                     | -
+| direction                 | -
+| undirected                | -
+| sorted                    | -
+| nodes                     | nodesCount
+| loadMillis                | createMillis
+| alreadyLoaded             | -
+| nodeProperties            | -
+| relationshipProperties    | relationshipCount
+| relationshipWeight        | -
+| loadNodes                 | -
+| loadRelationships         | -
+| -                         | nodeProjection
+| -                         | relationshipProjection
+|====
 .Loading a named graph in the default way:
 [opts=header,cols="1a,1a"]
 |===
 | GA | GDS
+2+| Minimal Native Projection
 |
 [source, cypher]
 ----
@@ -77,6 +118,7 @@ CALL gds.graph.create(
   'MY_RELATIONSHIP_TYPE'
 )
 ----
+2+| Native Projection with additional properties
 |
 [source, cypher]
 ----
@@ -110,10 +152,13 @@ CALL gds.graph.create(
 |===
 
 [[migration-cypher-queries]]
+== Graph creation - Cypher Queries
+
 .Loading a named graph using Cypher queries:
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
+2+| Basic Cypher queries, defining source and target
 |
 [source, cypher]
 ----
@@ -139,6 +184,7 @@ CALL gds.graph.create.cypher(
    RETURN id(s) AS source, id(t) AS target'
 )
 ----
+2+| With concurrency property and Cypher query with relationship property
 |
 [source, cypher]
 ----
@@ -177,6 +223,24 @@ CALL gds.graph.create.cypher(
 |===
 
 [[migration-graph-list]]
+== Graph listing
+
+.YIELD fields
+[opts=header,cols="1,1"]
+|===
+|GA                 | GDS
+| name              | graphName
+| nodes             | nodeCount
+| relationships     | relationshipCount
+| type              | -
+| direction         | -
+| -                 | nodeProjection
+| -                 | relationshipProjection
+| -                 | nodeQuery footnote:list-cypher[Field will be `null` unless a Cypher projection was used]
+| -                 | relationshipQuery footnote:list-cypher[]
+| -                 | degreeDistribution footnote:[Graph statistics map, i.e. min, max, percentiles, etc.]
+|===
+
 .Listing named graphs:
 [opts=header,cols="1a,1a"]
 |===
@@ -184,52 +248,53 @@ CALL gds.graph.create.cypher(
 |
 [source, cypher]
 ----
-CALL algo.graph.list() YIELD name, nodes, relationships
+CALL algo.graph.list()
 ----
 |
 [source, cypher]
 ----
-CALL gds.graph.list() YIELD graphName, nodeCount, relationshipCount
-----
-|
-[source, cypher]
-----
-CALL algo.graph.list() YIELD name, type
-----
-|
-[source, cypher]
-----
-/*the query field will be null unless a Cypher projection was used*/
-CALL gds.graph.list() YIELD graphName, nodeQuery, relationshipQuery
-----
-|
-[source, cypher]
-----
-CALL algo.graph.list() YIELD name, direction
-----
-|
-[source, cypher]
-----
-CALL gds.graph.list() YIELD graphName, relationshipProjection
+CALL gds.graph.list()
 ----
 |===
 
 [[migration-graph-info]]
+== Graph info
+
+.YIELD fields
+[opts=header,cols="1,1"]
+|===
+|GA                 | GDS
+| name              | graphName
+| nodes             | nodeCount
+| relationships     | relationshipCount
+| exists            | -
+| removed           | -
+| type              | -
+| direction         | -
+| -                 | nodeProjection
+| -                 | relationshipProjection
+| -                 | nodeQuery footnote:info-cypher[Field will be `null` unless a Cypher projection was used]
+| -                 | relationshipQuery footnote:info-cypher[]
+| -                 | degreeDistribution footnote:[Graph statistics map, i.e. min, max, percentiles, etc.]
+| min, max, mean, p50, p75, p90, p95, p99, p999 footnote:info-degreeDistribution[Inlined into `degreeDistribution`]              | -
+|===
+
 .Viewing information about a specific named graph:
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
+2+| View information for a Named graph
 |
 [source, cypher]
 ----
-CALL algo.graph.info('myGraph') YIELD type, direction
+CALL algo.graph.info('myGraph')
 ----
 |
 [source, cypher]
 ----
-/*the query field will be null unless a Cypher projection was used*/
-CALL gds.graph.list('myGraph') YIELD nodeQuery, relationshipProjection
+CALL gds.graph.list('myGraph')
 ----
+2+| Check graph existence
 |
 [source, cypher]
 ----
@@ -240,9 +305,43 @@ CALL algo.graph.info('myGraph') YIELD exists
 ----
 CALL gds.graph.exists('myGraph') YIELD exists
 ----
+2+| View graph statistics
+|
+[source, cypher]
+----
+CALL algo.graph.info('myGraph', true)
+YIELD min, max, mean, p50
+----
+|
+[source, cypher]
+----
+CALL gds.graph.list('myGraph')
+YIELD degreeDistribution as dd
+RETURN dd.min, dd.max, dd.mean, dd.p50
+----
 |===
 
 [[migration-graph-remove]]
+== Graph removal
+
+.YIELD fields
+[opts=header,cols="1,1"]
+|===
+|GA                 | GDS
+| name              | graphName
+| nodes             | nodeCount
+| relationships     | relationshipCount
+| exists            | -
+| removed           | -
+| type              | -
+| direction         | -
+| -                 | nodeProjection
+| -                 | relationshipProjection
+| -                 | nodeQuery footnote:remove-cypher[Field will be `null` unless a Cypher projection was used]
+| -                 | relationshipQuery footnote:remove-cypher[]
+| -                 | degreeDistribution
+|===
+
 .Removing a named graph:
 [opts=header,cols="1a,1a"]
 |===
