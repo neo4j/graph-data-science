@@ -24,6 +24,7 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.stream.Streams;
 
 import java.util.Collection;
@@ -65,16 +66,20 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         ));
     }
 
-    public static RelationshipProjections fromString(@Nullable String type) {
-        if (StringUtils.isEmpty(type)) {
+    public static RelationshipProjections fromString(@Nullable String typeString) {
+        if (StringUtils.isEmpty(typeString)) {
             return empty();
         }
-        if (type.equals(PROJECT_ALL.name)) {
+        if (typeString.equals(PROJECT_ALL.name)) {
             return create(singletonMap(PROJECT_ALL, RelationshipProjection.of()));
         }
-        ElementIdentifier identifier = new ElementIdentifier(type);
-        RelationshipProjection filter = RelationshipProjection.fromString(type);
-        return create(singletonMap(identifier, filter));
+
+        return create(ProjectionParser.parse(typeString).stream()
+            .collect(Collectors.toMap(
+                ElementIdentifier::new,
+                RelationshipProjection::fromString
+            ))
+        );
     }
 
     public static RelationshipProjections fromMap(Map<String, ?> map) {

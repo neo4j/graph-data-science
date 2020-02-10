@@ -90,23 +90,22 @@ class NodeProjectionsTest {
         assertThat(actual.labelProjection(), equalTo(Optional.of("A")));
     }
 
-    @Test
-    void shouldParseMultipleLabels() {
-        NodeProjections actual = NodeProjections.fromObject(Arrays.asList("A", "B"));
+    static Stream<Object> multipleNodeLabels() {
+        return Stream.of("A | B", Arrays.asList("A", "B"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("multipleNodeLabels")
+    void shouldParseMultipleLabels(Object input) {
+        NodeProjections actual = NodeProjections.fromObject(input);
 
         NodeProjections expected = NodeProjections.builder()
-            .putProjection(ElementIdentifier.of("A"), NodeProjection.builder().label("A").properties(PropertyMappings.of()).build())
-            .putProjection(ElementIdentifier.of("B"), NodeProjection.builder().label("B").properties(PropertyMappings.of()).build())
+            .putProjection(ElementIdentifier.of("A"), NodeProjection.builder().label("A").build())
+            .putProjection(ElementIdentifier.of("B"), NodeProjection.builder().label("B").build())
             .build();
 
         assertThat(actual, equalTo(expected));
-    }
-
-    @Test
-    void shouldParseSpecialMultipleLabels() {
-        NodeProjections actual = NodeProjections.fromObject("A | B");
-
-        assertThat(actual.labelProjection(), equalTo(Optional.of("A | B")));
+        assertThat(actual.labelProjection().get(), equalTo("A|B"));
     }
 
     @Test

@@ -130,6 +130,24 @@ class RelationshipProjectionsTest {
         assertThat(actual.typeFilter(), equalTo(""));
     }
 
+    static Stream<Object> multipleRelationshipTypes() {
+        return Stream.of("A | B", Arrays.asList("A", "B"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("multipleRelationshipTypes")
+    void shouldParseMultipleRelationshipTypes(Object input) {
+        RelationshipProjections actual = RelationshipProjections.fromObject(input);
+
+        RelationshipProjections expected = RelationshipProjections.builder()
+            .putProjection(ElementIdentifier.of("A"), RelationshipProjection.builder().type("A").build())
+            .putProjection(ElementIdentifier.of("B"), RelationshipProjection.builder().type("B").build())
+            .build();
+
+        assertThat(actual, equalTo(expected));
+        assertThat(actual.typeFilter(), equalTo("A|B"));
+    }
+
     @Test
     void shouldPropagateAggregationToProperty() {
         Map<String, Object> projection = map(
