@@ -248,7 +248,8 @@ As we can see from the results, the nodes connected to one another are calculate
 
 By configuring the algorithm to use a weight we can increase granularity in the way the algorithm calculates component assignment.
 We do this by specifying the property key with the `relationshipWeightProperty` configuration parameter.
-Additionally, we can specify a threshold for the weight value.  Then, only weights greater than the threshold value will be considered by the algorithm.
+Additionally, we can specify a threshold for the weight value.
+Then, only weights greater than the threshold value will be considered by the algorithm.
 We do this by specifying the threshold value with the `threshold` configuration parameter.
 
 If a relationship does not have a weight property, a default weight is used.
