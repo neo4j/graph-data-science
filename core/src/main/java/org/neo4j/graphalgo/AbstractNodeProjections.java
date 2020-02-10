@@ -23,12 +23,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
+import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.stream.Streams;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -66,16 +68,20 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
         ));
     }
 
-    public static NodeProjections fromString(@Nullable String label) {
-        if (StringUtils.isEmpty(label)) {
+    public static NodeProjections fromString(@Nullable String labelString) {
+        if (StringUtils.isEmpty(labelString)) {
             return empty();
         }
-        if (label.equals(PROJECT_ALL.name)) {
+        if (labelString.equals(PROJECT_ALL.name)) {
             return create(singletonMap(PROJECT_ALL, NodeProjection.of()));
         }
-        ElementIdentifier identifier = new ElementIdentifier(label);
-        NodeProjection projection = NodeProjection.fromString(label);
-        return create(singletonMap(identifier, projection));
+
+        return create(ProjectionParser.parse(labelString).stream()
+            .collect(Collectors.toMap(
+                ElementIdentifier::new,
+                NodeProjection::fromString
+            ))
+        );
     }
 
     private static NodeProjections fromMap(Map<String, ?> map) {
@@ -104,11 +110,6 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
         if (projections.isEmpty()) {
             throw new IllegalArgumentException(
                 "An empty node projection was given; at least one node label must be projected."
-            );
-        }
-        if (projections.size() > 1) {
-            throw new IllegalArgumentException(
-                "Multiple node projections are not supported; please use a single projection with a `|` operator to project nodes with different labels into the in-memory graph."
             );
         }
         return NodeProjections.of(unmodifiableMap(projections));
@@ -153,7 +154,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
             .stream()
             .map(NodeProjection::label)
             .flatMap(Streams::ofOptional)
-            .collect(joining(""))
+            .collect(joining(" | "))
         );
     }
 

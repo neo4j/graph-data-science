@@ -109,7 +109,6 @@ class RelationshipProjectionsTest {
         assertThat(actual.typeFilter(), equalTo("T"));
     }
 
-
     @Test
     void shouldSupportStar() {
         RelationshipProjections actual = RelationshipProjections.fromObject("*");

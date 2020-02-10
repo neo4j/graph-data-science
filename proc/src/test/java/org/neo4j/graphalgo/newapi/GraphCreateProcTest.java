@@ -1309,21 +1309,6 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
-    // This test will be removed once we have rich multi-label support
-    @ParameterizedTest(name = "argument: {0}")
-    @MethodSource("multipleNodeProjections")
-    void failsOnMultipleLabelProjections(Object argument) {
-        Map<String, Object> nodeProjection = map("A", map(LABEL_KEY, "A"), "B", map(LABEL_KEY, "A"));
-
-        assertError(
-            "CALL gds.graph.create('g', $nodeProjection, {})",
-            map("nodeProjection", nodeProjection),
-            "Multiple node projections are not supported; please use a single projection with a `|` operator to project nodes with different labels into the in-memory graph."
-        );
-
-        assertGraphDoesNotExist("g");
-    }
-
     @Test
     void failsOnMissingIdColumn() {
         String query =
@@ -1415,13 +1400,6 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     // Arguments for parameterised tests
-
-    static Stream<Arguments> multipleNodeProjections() {
-        return Stream.of(
-            Arguments.of(Arrays.asList("A", "B")),
-            Arguments.of(map("A", map(LABEL_KEY, "B"), "B", map(LABEL_KEY, "X")))
-        );
-    }
 
     static Stream<Arguments> nodeProjectionVariants() {
         return Stream.of(
