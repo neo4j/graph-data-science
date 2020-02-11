@@ -70,17 +70,26 @@ The following map-like syntax shows the general way of defining node projections
 [source]
 ----
 {
-    <node-label>: {
+    <node-label-1>: {
+        label: <neo4j-label>,
+        properties: <node-property-mappings>
+    },
+    <node-label-2>: {
+        label: <neo4j-label>,
+        properties: <node-property-mappings>
+    },
+    // ...
+    <node-label-n>: {
         label: <neo4j-label>,
         properties: <node-property-mappings>
     }
 }
 ----
 
-* `node-label` denotes the node label used in the projected graph
+* `node-label-i` denotes the node label used in the projected graph
 ** `neo4j-label` denotes the node label in the Neo4j graph
 *** The label must exist in the Neo4j database
-*** If not specified, `neo4j-label` defaults to `node-label`
+*** If not specified, `neo4j-label` defaults to `node-label-i`
 ** `node-property-mappings` denotes a set of mappings between Neo4j and in-memory properties
 
 In the following example, we want to project `Person` nodes into the in-memory graph.
@@ -110,7 +119,21 @@ Let's assume, the database contains `Person` and `City` nodes which we want to p
 
 [source,cypher]
 ----
-CALL gds.graph.create('my-graph', 'Person | City', '*')
+CALL gds.graph.create(
+    'my-graph', {
+        Person: { label: 'Person' },
+        City: { label: 'City' }
+    },
+    '*'
+)
+YIELD graphName, nodeCount, relationshipCount;
+----
+
+The following shorthand syntax can be used to project multiple labels.
+
+[source,cypher]
+----
+CALL gds.graph.create('my-graph', ['Person', 'City'], '*')
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
