@@ -36,11 +36,12 @@ import java.util.concurrent.TimeoutException;
 public final class Pools {
 
     private static final int MAX_CONCURRENCY;
-    public static final int DEFAULT_CONCURRENCY = 4;
+    public static final int DEFAULT_CONCURRENCY;
 
     static {
         ConcurrencyConfig concurrencyConfig = ConcurrencyConfig.of();
         MAX_CONCURRENCY = concurrencyConfig.maxConcurrency;
+        DEFAULT_CONCURRENCY = concurrencyConfig.defaultConcurrency;
     }
 
     public static int allowedConcurrency(int concurrency) {

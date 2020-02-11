@@ -27,6 +27,7 @@ final class ConcurrencyConfig {
     private static final int MAX_CE_CONCURRENCY = 4;
 
     final int maxConcurrency;
+    final int defaultConcurrency;
 
     static ConcurrencyConfig of() {
         Integer definedProcessors = null;
@@ -43,8 +44,10 @@ final class ConcurrencyConfig {
     /* test-private */ ConcurrencyConfig(int availableProcessors, boolean isOnEnterprise) {
         if (isOnEnterprise) {
             maxConcurrency = Integer.MAX_VALUE;
+            defaultConcurrency = availableProcessors;
         } else {
             maxConcurrency = MAX_CE_CONCURRENCY;
+            defaultConcurrency = Math.min(availableProcessors, MAX_CE_CONCURRENCY);
         }
     }
 }
