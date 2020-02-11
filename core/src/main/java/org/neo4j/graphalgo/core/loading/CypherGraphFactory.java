@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
@@ -156,6 +157,7 @@ public class CypherGraphFactory extends GraphFactory {
 
                     AdjacencyList adjacencyList = relationshipsBuilder.adjacencyListBuilder.build();
                     AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets;
+                    boolean loadAsUndirected = relationshipProjectionMapping.projection() == Projection.UNDIRECTED;
 
                     long relationshipCount = relationshipCounts.getOrDefault(relationshipProjectionMapping, 0L);
 
@@ -167,7 +169,7 @@ public class CypherGraphFactory extends GraphFactory {
                             adjacencyList,
                             adjacencyOffsets,
                             relationshipCount,
-                            setup.loadAsUndirected()
+                            loadAsUndirected
                         );
                         return Collections.singletonMap(ANY_REL_TYPE, graph);
                     } else {
@@ -184,7 +186,7 @@ public class CypherGraphFactory extends GraphFactory {
                                 propertyKeyId,
                                 propertyMapping,
                                 relationshipCount,
-                                setup.loadAsUndirected()
+                                loadAsUndirected
                             );
                             return Tuples.pair(propertyMapping.propertyKey(), graph);
                         }).collect(Collectors.toMap(Pair::getOne, Pair::getTwo));

@@ -114,19 +114,6 @@ public class GraphSetup {
     }
 
     /**
-     * @deprecated There is no global direction anymore
-     */
-    @Deprecated
-    public boolean loadAsUndirected() {
-        return createConfig
-            .relationshipProjection()
-            .allProjections()
-            .stream()
-            .map(RelationshipProjection::projection)
-            .anyMatch(p -> p == Projection.UNDIRECTED);
-    }
-
-    /**
      * @deprecated There is no global relationship property anymore
      */
     @Deprecated
