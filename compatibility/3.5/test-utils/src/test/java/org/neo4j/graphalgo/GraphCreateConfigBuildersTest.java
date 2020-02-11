@@ -54,10 +54,10 @@ class GraphCreateConfigBuildersTest {
                 new StoreConfigBuilder().loadAnyLabel().loadAnyRelationshipType().build(),
                 ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
                     .nodeProjection(NodeProjections.builder()
-                        .putProjection(PROJECT_ALL, NodeProjection.empty())
+                        .putProjection(PROJECT_ALL, NodeProjection.all())
                         .build())
                     .relationshipProjection(RelationshipProjections.builder()
-                        .putProjection(PROJECT_ALL, RelationshipProjection.empty())
+                        .putProjection(PROJECT_ALL, RelationshipProjection.all())
                         .build())
                     .nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of())
@@ -115,7 +115,7 @@ class GraphCreateConfigBuildersTest {
                 new StoreConfigBuilder()
                     .addNodeLabel("Foo")
                     .addRelationshipType("BAR")
-                    .addRelationshipProjection(RelationshipProjection.empty().withType("BAZ").withProjection(Projection.NATURAL))
+                    .addRelationshipProjection(RelationshipProjection.of("BAZ", Projection.NATURAL))
                     .globalProjection(Projection.UNDIRECTED)
                     .build(),
                 ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")

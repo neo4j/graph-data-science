@@ -43,6 +43,8 @@ public abstract class ElementProjection {
 
     public abstract ElementProjection withAdditionalPropertyMappings(PropertyMappings mappings);
 
+    public abstract boolean projectAll();
+
     public final Map<String, Object> toObject() {
         Map<String, Object> value = new LinkedHashMap<>();
         writeToObject(value);

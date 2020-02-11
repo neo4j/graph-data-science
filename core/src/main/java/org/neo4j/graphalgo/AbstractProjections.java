@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,6 +36,17 @@ public abstract class AbstractProjections<P extends ElementProjection> {
             .stream()
             .flatMap(p -> p.properties().mappings().stream().map(PropertyMapping::propertyKey))
             .collect(Collectors.toSet());
+    }
+
+    public Collection<P> allProjections() {
+        return projections().values();
+    }
+
+    /**
+     * Returns all projections except PROJECT_ALL projections.
+     */
+    public Collection<P> explicitProjections() {
+        return allProjections().stream().filter(p -> !p.projectAll()).collect(Collectors.toList());
     }
 
 }

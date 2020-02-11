@@ -81,7 +81,7 @@ class BetweennessCentralityProcTest_148 extends BaseProcTest {
         Consumer mock = mock(Consumer.class);
         String query = GdsCypher.call()
             .withNodeLabel("User")
-            .withRelationshipType("FRIEND", RelationshipProjection.builder().projection(Projection.UNDIRECTED).build())
+            .withRelationshipType("FRIEND", Projection.UNDIRECTED)
             .algo("gds.alpha.betweenness")
             .streamMode()
             .yields("nodeId", "centrality");

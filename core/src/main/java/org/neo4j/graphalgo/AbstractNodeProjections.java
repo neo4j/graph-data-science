@@ -24,12 +24,9 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
-import org.neo4j.stream.Streams;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
@@ -73,7 +70,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
             return empty();
         }
         if (labelString.equals(PROJECT_ALL.name)) {
-            return create(singletonMap(PROJECT_ALL, NodeProjection.of()));
+            return create(singletonMap(PROJECT_ALL, NodeProjection.all()));
         }
 
         return create(ProjectionParser.parse(labelString).stream()
@@ -119,18 +116,6 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
         return NodeProjections.of();
     }
 
-    public NodeProjection getProjection(ElementIdentifier identifier) {
-        NodeProjection projection = projections().get(identifier);
-        if (projection == null) {
-            throw new IllegalArgumentException("Node label identifier does not exist: " + identifier);
-        }
-        return projection;
-    }
-
-    public Collection<NodeProjection> allProjections() {
-        return projections().values();
-    }
-
     public NodeProjections addPropertyMappings(PropertyMappings mappings) {
         if (!mappings.hasMappings()) {
             return NodeProjections.copyOf(this);
@@ -140,21 +125,20 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
             e -> e.getValue().withAdditionalPropertyMappings(mappings)
         ));
         if (newProjections.isEmpty()) {
-            newProjections.put(PROJECT_ALL, NodeProjection.empty().withAdditionalPropertyMappings(mappings));
+            newProjections.put(PROJECT_ALL, NodeProjection.all().withAdditionalPropertyMappings(mappings));
         }
         return create(newProjections);
     }
 
-    public Optional<String> labelProjection() {
+    public String labelProjection() {
         if (isEmpty()) {
-            return Optional.empty();
+            return "";
         }
-        return Optional.of(projections()
+        return projections()
             .values()
             .stream()
             .map(NodeProjection::label)
-            .flatMap(Streams::ofOptional)
-            .collect(joining("|"))
+            .collect(joining("|")
         );
     }
 

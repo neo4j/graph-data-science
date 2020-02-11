@@ -154,22 +154,23 @@ public final class TestGraphLoader {
     private GraphLoader storeLoader() {
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().api(db);
         if (maybeLabel.isPresent()) {
-            storeLoaderBuilder.addNodeLabel(maybeLabel.get());
+            ProjectionParser.parse(maybeLabel.get()).forEach(storeLoaderBuilder::addNodeLabel);
         } else {
             storeLoaderBuilder.loadAnyLabel();
         }
         if (maybeRelType.isPresent()) {
             ProjectionParser.parse(maybeRelType.get())
                 .forEach(relType -> {
-                    RelationshipProjection template = RelationshipProjection.empty()
-                        .withType(relType)
-                        .withAggregation(maybeAggregation.orElse(DEFAULT));
+                    RelationshipProjection template = RelationshipProjection.builder()
+                        .type(relType)
+                        .aggregation(maybeAggregation.orElse(DEFAULT))
+                        .build();
                     storeLoaderBuilder.addRelationshipProjection(template.withProjection(NATURAL));
                 });
         } else {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(
                 "*",
-                RelationshipProjection.empty().withAggregation(maybeAggregation.orElse(DEFAULT))
+                RelationshipProjection.all().withAggregation(maybeAggregation.orElse(DEFAULT))
             );
         }
         storeLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));

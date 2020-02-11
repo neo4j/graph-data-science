@@ -55,7 +55,7 @@ class NodeProjectionsTest {
             actual,
             equalTo(expected)
         );
-        assertThat(actual.labelProjection(), equalTo(Optional.of("A")));
+        assertThat(actual.labelProjection(), equalTo("A"));
     }
 
     @Test
@@ -87,7 +87,7 @@ class NodeProjectionsTest {
             actual,
             equalTo(expected)
         );
-        assertThat(actual.labelProjection(), equalTo(Optional.of("A")));
+        assertThat(actual.labelProjection(), equalTo("A"));
     }
 
     static Stream<Object> multipleNodeLabels() {
@@ -105,7 +105,7 @@ class NodeProjectionsTest {
             .build();
 
         assertThat(actual, equalTo(expected));
-        assertThat(actual.labelProjection().get(), equalTo("A|B"));
+        assertThat(actual.labelProjection(), equalTo("A|B"));
     }
 
     @Test
@@ -116,7 +116,7 @@ class NodeProjectionsTest {
             PROJECT_ALL,
             NodeProjection
                 .builder()
-                .label((String) null)
+                .label("*")
                 .properties(PropertyMappings.of())
                 .build()
         )).build();
@@ -125,7 +125,7 @@ class NodeProjectionsTest {
             actual,
             equalTo(expected)
         );
-        assertThat(actual.labelProjection(), equalTo(Optional.of("")));
+        assertThat(actual.labelProjection(), equalTo(PROJECT_ALL.name));
     }
 
     static Stream<Arguments> syntacticSugarsSimple() {

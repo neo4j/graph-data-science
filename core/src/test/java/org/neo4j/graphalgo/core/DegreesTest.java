@@ -144,15 +144,15 @@ class DegreesTest extends AlgoTestBase {
             .api(db)
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_OUT",
-                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL)
+                RelationshipProjection.of("TYPE", Projection.NATURAL)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_IN",
-                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE)
+                RelationshipProjection.of("TYPE", Projection.REVERSE)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_UNDIRECTED",
-                RelationshipProjection.empty().withType("TYPE").withProjection(Projection.UNDIRECTED)
+                RelationshipProjection.of("TYPE", Projection.UNDIRECTED)
             )
             .build()
             .graphs(HugeGraphFactory.class);

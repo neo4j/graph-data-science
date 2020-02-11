@@ -25,16 +25,17 @@ import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 
 @DataClass
-@Value.Immutable(singleton = true)
 public abstract class AbstractRelationshipProjection extends ElementProjection {
 
-    public abstract Optional<String> type();
+    private static final RelationshipProjection ALL = of(PROJECT_ALL.name, Projection.NATURAL);
+
+    public abstract String type();
 
     @Value.Default
     public Projection projection() {
@@ -51,6 +52,11 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
     @Override
     public PropertyMappings properties() {
         return super.properties();
+    }
+
+    @Override
+    public boolean projectAll() {
+        return type().equals(PROJECT_ALL.name);
     }
 
     public static final String TYPE_KEY = "type";
@@ -89,7 +95,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     public static RelationshipProjection fromObject(Object object, ElementIdentifier identifier) {
         if (object == null) {
-            return empty();
+            return all();
         }
         if (object instanceof String) {
             return fromString((String) object);
@@ -119,7 +125,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     @Override
     void writeToObject(Map<String, Object> value) {
-        value.put(TYPE_KEY, type().orElse(""));
+        value.put(TYPE_KEY, type());
         value.put(PROJECTION_KEY, projection().name());
         value.put(AGGREGATION_KEY, aggregation().name());
     }
@@ -139,8 +145,8 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
             : RelationshipProjection.copyOf(this).withProperties(newMappings);
     }
 
-    public static RelationshipProjection empty() {
-        return RelationshipProjection.of();
+    public static RelationshipProjection all() {
+        return ALL;
     }
 
     public static Builder builder() {

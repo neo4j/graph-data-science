@@ -88,8 +88,8 @@ class ModularityOptimizationTest extends AlgoTestBase {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE))
+            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Projection.NATURAL))
+            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Projection.REVERSE))
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -117,8 +117,8 @@ class ModularityOptimizationTest extends AlgoTestBase {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE))
+            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Projection.NATURAL))
+            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Projection.REVERSE))
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
             .build()
             .graph(HugeGraphFactory.class);
@@ -147,8 +147,8 @@ class ModularityOptimizationTest extends AlgoTestBase {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE))
+            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Projection.NATURAL))
+            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Projection.REVERSE))
             .addNodeProperty(PropertyMapping.of("seed2", -1))
             .build()
             .graph(HugeGraphFactory.class);
@@ -179,8 +179,8 @@ class ModularityOptimizationTest extends AlgoTestBase {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE))
+            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Projection.NATURAL))
+            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Projection.REVERSE))
             .addNodeProperty(PropertyMapping.of("seed1", -1))
             .build()
             .graph(HugeGraphFactory.class);
@@ -219,8 +219,8 @@ class ModularityOptimizationTest extends AlgoTestBase {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE))
+            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Projection.NATURAL))
+            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Projection.REVERSE))
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -250,8 +250,8 @@ class ModularityOptimizationTest extends AlgoTestBase {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE))
+            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Projection.NATURAL))
+            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Projection.REVERSE))
             .build()
             .graph(HugeGraphFactory.class);
 

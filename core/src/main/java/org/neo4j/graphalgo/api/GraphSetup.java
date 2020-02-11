@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.api;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.logging.Log;
 import org.neo4j.stream.Streams;
@@ -90,12 +89,12 @@ public class GraphSetup {
         return createConfig.concurrency();
     }
 
-    public @NotNull String nodeLabel() {
-        return createConfig.nodeProjection().labelProjection().orElse("");
-    }
-
     public @NotNull String relationshipType() {
         return createConfig.relationshipProjection().typeFilter();
+    }
+
+    public @NotNull NodeProjections nodeProjections() {
+        return createConfig.nodeProjection();
     }
 
     public @NotNull RelationshipProjections relationshipProjections() {
@@ -121,7 +120,7 @@ public class GraphSetup {
     public boolean loadAsUndirected() {
         return createConfig
             .relationshipProjection()
-            .allFilters()
+            .allProjections()
             .stream()
             .map(RelationshipProjection::projection)
             .anyMatch(p -> p == Projection.UNDIRECTED);
@@ -132,7 +131,7 @@ public class GraphSetup {
      */
     @Deprecated
     public Optional<Double> relationshipDefaultPropertyValue() {
-        return createConfig.relationshipProjection().allFilters().stream().flatMap(
+        return createConfig.relationshipProjection().allProjections().stream().flatMap(
             f -> Streams.ofOptional(f.properties().defaultWeight())
         ).findFirst();
     }
@@ -165,7 +164,7 @@ public class GraphSetup {
     @Deprecated
     public PropertyMappings relationshipPropertyMappings() {
         Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.relationshipProjection()
-            .allFilters()
+            .allProjections()
             .stream()
             .flatMap(e -> e.properties().stream())
             .collect(Collectors.groupingBy(PropertyMapping::propertyKey));
@@ -188,7 +187,7 @@ public class GraphSetup {
     public Aggregation aggregation() {
         return createConfig
             .relationshipProjection()
-            .allFilters()
+            .allProjections()
             .stream()
             .map(RelationshipProjection::aggregation)
             .findFirst()

@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.compat.InternalReadOps;
-import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
@@ -64,38 +63,37 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         NodeLabelIds nodeLabelIds = new NodeLabelIds();
         if (readTokens) {
-            ProjectionParser.parse(setup.nodeLabel())
+            setup.nodeProjections()
+                .explicitProjections()
                 .stream()
+                .map(NodeProjection::label)
                 .map(tokenRead::nodeLabel)
                 .forEach(nodeLabelIds.ids::add);
         }
 
         RelationshipProjectionMappings.Builder mappingsBuilder = new RelationshipProjectionMappings.Builder();
         if (readTokens) {
-            for (Map.Entry<ElementIdentifier, RelationshipProjection> entry : setup.relationshipProjections().projections().entrySet()) {
-                RelationshipProjection relationshipProjection = entry.getValue();
+            setup.relationshipProjections().projections().entrySet().stream()
+                .forEach(e -> {
+                    String elementIdentifier = e.getKey().name;
+                    RelationshipProjection relationshipProjection = e.getValue();
 
-                if (!relationshipProjection.type().isPresent()) {
-                    mappingsBuilder.addMapping(RelationshipProjectionMapping.all(relationshipProjection.projection()));
-                } else {
-                    String elementIdentifier = entry.getKey().name;
-                    String typeName = relationshipProjection.type().get();
+                    String typeName = relationshipProjection.type();
                     Projection projection = relationshipProjection.projection();
-                    int typeId = tokenRead.relationshipType(typeName);
 
-                    RelationshipProjectionMapping typeMapping = RelationshipProjectionMapping.of(
-                        elementIdentifier,
-                        typeName,
-                        projection,
-                        typeId
-                    );
-                    mappingsBuilder.addMapping(typeMapping);
-                }
-            }
+                    RelationshipProjectionMapping mapping = relationshipProjection.projectAll()
+                        ? RelationshipProjectionMapping.all(projection)
+                        : RelationshipProjectionMapping.of(
+                            elementIdentifier,
+                            typeName,
+                            projection,
+                            tokenRead.relationshipType(typeName)
+                        );
+                    mappingsBuilder.addMapping(mapping);
+                });
         }
 
         RelationshipProjectionMappings relationshipProjectionMappings = mappingsBuilder.build();
-
         ResolvedPropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings());
         ResolvedPropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
 

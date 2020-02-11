@@ -134,11 +134,11 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
             NodeProjections expectedNodeProjections = NodeProjections
                 .builder()
-                .putProjection(PROJECT_ALL, NodeProjection.empty())
+                .putProjection(PROJECT_ALL, NodeProjection.all())
                 .build();
             RelationshipProjections expectedRelationshipProjections = RelationshipProjections
                 .builder()
-                .putProjection(PROJECT_ALL, RelationshipProjection.empty())
+                .putProjection(PROJECT_ALL, RelationshipProjection.all())
                 .build();
 
             assertEquals(expectedNodeProjections, actual.nodeProjection());

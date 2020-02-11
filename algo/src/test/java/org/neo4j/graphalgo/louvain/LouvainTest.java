@@ -404,10 +404,10 @@ class LouvainTest extends AlgoTestBase {
                 .addNodeLabel("Node")
                 .putRelationshipProjectionsWithIdentifier(
                     "TYPE_OUT",
-                    RelationshipProjection.empty().withType("TYPE").withProjection(Projection.NATURAL))
+                    RelationshipProjection.of("TYPE", Projection.NATURAL))
                 .putRelationshipProjectionsWithIdentifier(
                     "TYPE_IN",
-                    RelationshipProjection.empty().withType("TYPE").withProjection(Projection.REVERSE))
+                    RelationshipProjection.of("TYPE", Projection.REVERSE))
                 .addNodeProperties(nodePropertyMappings)
                 .addRelationshipProperty(relWeightProperty)
                 .build()

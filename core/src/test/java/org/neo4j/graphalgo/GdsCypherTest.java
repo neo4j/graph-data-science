@@ -284,7 +284,7 @@ class GdsCypherTest {
         assertEquals(
             String.format(
                 "CALL gds.foo.write({nodeProjection: \"*\", relationshipProjection: %s})",
-                "{`*`: {type: \"\", projection: \"UNDIRECTED\"}}"
+                "{`*`: {type: \"*\", projection: \"UNDIRECTED\"}}"
             ),
             query
         );
@@ -306,7 +306,7 @@ class GdsCypherTest {
               "nodeProjection: \"*\", " +
               "relationshipProjection: {" +
                 "`*`: {" +
-                  "type: \"\", " +
+                  "type: \"*\", " +
                   "properties: \"weight\"" +
                 "}" +
               "}" +

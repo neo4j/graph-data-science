@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.api.GraphSetup;
 
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_LABEL;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 
@@ -42,10 +43,10 @@ public final class GraphDimensionsValidation {
     }
 
     private static void checkValidNodePredicate(GraphDimensions dimensions, GraphSetup setup) {
-        if (isNotEmpty(setup.nodeLabel()) && dimensions.nodeLabelIds().contains(NO_SUCH_LABEL)) {
+        if (!setup.nodeProjections().isEmpty() && dimensions.nodeLabelIds().contains(NO_SUCH_LABEL)) {
             throw new IllegalArgumentException(String.format(
                 "Invalid node projection, one or more labels not found: '%s'",
-                setup.nodeLabel()
+                setup.nodeProjections().labelProjection()
             ));
         }
     }
@@ -54,7 +55,7 @@ public final class GraphDimensionsValidation {
         if (isNotEmpty(setup.relationshipType())) {
             String missingTypes = dimensions.relationshipProjectionMappings()
                 .stream()
-                .filter(m -> !m.exists())
+                .filter(m -> !m.exists() && !m.typeName().equals(PROJECT_ALL.name))
                 .map(RelationshipProjectionMapping::typeName)
                 .collect(joining("', '"));
             if (!missingTypes.isEmpty()) {

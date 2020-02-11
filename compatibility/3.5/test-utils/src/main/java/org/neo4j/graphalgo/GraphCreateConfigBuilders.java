@@ -68,11 +68,11 @@ final class GraphCreateConfigBuilders {
         // Node projections
         Map<String, NodeProjection> tempNP = new LinkedHashMap<>();
         nodeLabels.forEach(label -> tempNP.put(label, NodeProjection.of(label, PropertyMappings.of())));
-        nodeProjections.forEach(np -> tempNP.put(np.label().orElse("*"), np));
+        nodeProjections.forEach(np -> tempNP.put(np.label(), np));
         nodeProjectionsWithIdentifier.forEach(tempNP::put);
 
         if (tempNP.isEmpty() && anyLabel == AnyLabel.LOAD) {
-            tempNP.put("*", NodeProjection.empty());
+            tempNP.put("*", NodeProjection.all());
         }
 
         // Relationship projections
@@ -84,11 +84,15 @@ final class GraphCreateConfigBuilders {
             relType,
             RelationshipProjection.of(relType, projection, aggregation)
         ));
-        relationshipProjections.forEach(rp -> tempRP.put(rp.type().orElse("*"), rp));
+        relationshipProjections.forEach(rp -> tempRP.put(rp.type(), rp));
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
 
         if (tempRP.isEmpty() && anyRelationshipType == AnyRelationshipType.LOAD) {
-            tempRP.put("*", RelationshipProjection.empty().withProjection(projection).withAggregation(aggregation));
+            tempRP.put("*", RelationshipProjection.builder()
+                .type("*")
+                .projection(projection)
+                .aggregation(aggregation)
+                .build());
         }
 
         PropertyMappings relationshipPropertyMappings = PropertyMappings.builder()

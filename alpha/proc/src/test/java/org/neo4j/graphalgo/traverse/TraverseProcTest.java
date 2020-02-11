@@ -135,7 +135,7 @@ class TraverseProcTest extends BaseProcTest {
         long id = runQuery("MATCH (n:Node {name: 'g'}) RETURN id(n) AS id", result -> result.<Long>columnAs("id").next());
         String query = GdsCypher.call()
             .withNodeLabel("Node")
-            .withRelationshipType("TYPE", RelationshipProjection.builder().projection(Projection.REVERSE).build())
+            .withRelationshipType("TYPE", Projection.REVERSE)
             .algo("gds.alpha.dfs")
             .streamMode()
             .addParameter("startNode", id)

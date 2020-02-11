@@ -23,11 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.ProjectionParser;
-import org.neo4j.stream.Streams;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -71,7 +68,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             return empty();
         }
         if (typeString.equals(PROJECT_ALL.name)) {
-            return create(singletonMap(PROJECT_ALL, RelationshipProjection.of()));
+            return create(singletonMap(PROJECT_ALL, RelationshipProjection.all()));
         }
 
         return create(ProjectionParser.parse(typeString).stream()
@@ -144,17 +141,6 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         return filter;
     }
 
-    public Collection<RelationshipProjection> allFilters() {
-        return projections().values();
-    }
-
-    public RelationshipProjections addAggregation(Aggregation aggregation) {
-        if (aggregation == Aggregation.DEFAULT) {
-            return RelationshipProjections.copyOf(this);
-        }
-        return modifyProjections(p -> p.withAggregation(aggregation));
-    }
-
     public RelationshipProjections addPropertyMappings(PropertyMappings mappings) {
         if (!mappings.hasMappings()) {
             return RelationshipProjections.copyOf(this);
@@ -170,7 +156,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         if (newProjections.isEmpty()) {
             newProjections.put(
                 PROJECT_ALL,
-                operator.apply(RelationshipProjection.empty())
+                operator.apply(RelationshipProjection.all())
             );
         }
         return create(newProjections);
@@ -184,7 +170,6 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             .values()
             .stream()
             .map(RelationshipProjection::type)
-            .flatMap(Streams::ofOptional)
             .distinct()
             .collect(Collectors.joining("|"));
     }

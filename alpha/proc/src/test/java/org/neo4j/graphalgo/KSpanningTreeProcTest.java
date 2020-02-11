@@ -101,7 +101,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
     void testMin() {
         String query = GdsCypher.call()
             .withAnyLabel()
-            .withRelationshipType("*", RelationshipProjection.builder().projection(Projection.UNDIRECTED).build())
+            .withRelationshipType("*", Projection.UNDIRECTED)
             .withRelationshipProperty("w")
             .algo("gds.alpha.spanningTree.kmin")
             .writeMode()

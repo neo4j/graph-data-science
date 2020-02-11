@@ -64,7 +64,7 @@ class RelationshipProjectionsTest {
         );
 
         RelationshipProjections projections = RelationshipProjections.fromObject(noProperties);
-        assertThat(projections.allFilters(), hasSize(2));
+        assertThat(projections.allProjections(), hasSize(2));
         assertThat(
             projections.getFilter(ElementIdentifier.of("MY_TYPE")),
             equalTo(RelationshipProjection.of("T", Projection.NATURAL, SINGLE))
@@ -102,10 +102,7 @@ class RelationshipProjectionsTest {
                 .build()
         )).build();
 
-        assertThat(
-            actual,
-            equalTo(expected)
-        );
+        assertThat(actual, equalTo(expected));
         assertThat(actual.typeFilter(), equalTo("T"));
     }
 
@@ -113,21 +110,12 @@ class RelationshipProjectionsTest {
     void shouldSupportStar() {
         RelationshipProjections actual = RelationshipProjections.fromObject("*");
 
-        RelationshipProjections expected = RelationshipProjections.builder().projections(singletonMap(
-            PROJECT_ALL,
-            RelationshipProjection
-                .builder()
-                .type((String) null)
-                .aggregation(Aggregation.DEFAULT)
-                .properties(PropertyMappings.of())
-                .build()
-        )).build();
+        RelationshipProjections expected = RelationshipProjections.builder()
+            .projections(singletonMap(PROJECT_ALL, RelationshipProjection.all()))
+            .build();
 
-        assertThat(
-            actual,
-            equalTo(expected)
-        );
-        assertThat(actual.typeFilter(), equalTo(""));
+        assertThat(actual, equalTo(expected));
+        assertThat(actual.typeFilter(), equalTo("*"));
     }
 
     static Stream<Object> multipleRelationshipTypes() {

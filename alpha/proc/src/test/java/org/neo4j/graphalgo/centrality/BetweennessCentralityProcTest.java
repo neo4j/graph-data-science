@@ -137,7 +137,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     void testParallelBetweennessWriteWithDirection() {
         String query = GdsCypher.call()
             .withNodeLabel("Node")
-            .withRelationshipType("TYPE", RelationshipProjection.builder().projection(Projection.UNDIRECTED).build())
+            .withRelationshipType("TYPE", Projection.UNDIRECTED)
             .algo("gds.alpha.betweenness")
             .writeMode()
             .addParameter("concurrency", 4)
@@ -181,7 +181,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     void testBetweennessWriteWithDirection() {
         String query = GdsCypher.call()
             .withNodeLabel("Node")
-            .withRelationshipType("TYPE", RelationshipProjection.builder().projection(Projection.UNDIRECTED).build())
+            .withRelationshipType("TYPE", Projection.UNDIRECTED)
             .algo("gds.alpha.betweenness")
             .writeMode()
             .addParameter("concurrency", 4)

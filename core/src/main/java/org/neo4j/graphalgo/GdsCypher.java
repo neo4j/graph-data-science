@@ -100,12 +100,12 @@ public abstract class GdsCypher {
          */
         default QueryBuilder loadEverything(Projection projection) {
             return this
-                .withNodeLabel("*", NodeProjection.empty())
-                .withRelationshipType("*", RelationshipProjection.empty().withProjection(projection));
+                .withNodeLabel("*", NodeProjection.all())
+                .withRelationshipType("*", RelationshipProjection.all().withProjection(projection));
         }
 
         default ImplicitCreationBuildStage withAnyLabel() {
-            return withNodeLabel("*", NodeProjection.empty());
+            return withNodeLabel("*", NodeProjection.all());
         }
 
         default ImplicitCreationBuildStage withNodeLabel(String label) {
@@ -119,7 +119,7 @@ public abstract class GdsCypher {
         ImplicitCreationBuildStage withNodeLabel(String labelKey, NodeProjection nodeProjection);
 
         default ImplicitCreationBuildStage withAnyRelationshipType() {
-            return withRelationshipType("*", RelationshipProjection.empty());
+            return withRelationshipType("*", RelationshipProjection.all());
         }
 
         default ImplicitCreationBuildStage withRelationshipType(String type) {
@@ -757,13 +757,13 @@ public abstract class GdsCypher {
         }
 
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put(AbstractNodeProjection.LABEL_KEY, projection.label().orElse(""));
+        value.put(AbstractNodeProjection.LABEL_KEY, projection.label());
         properties.toObject().ifPresent(o -> value.put(PROPERTIES_KEY, o));
         return MinimalObject.map(value);
     }
 
     private static boolean matchesLabel(String label, AbstractNodeProjection projection) {
-        return projection.label().map(s -> s.equals(label)).orElse(true);
+        return Objects.equals(projection.label(), label);
     }
 
     private static MinimalObject toMinimalObject(
@@ -776,7 +776,7 @@ public abstract class GdsCypher {
         }
 
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put(TYPE_KEY, projection.type().orElse(""));
+        value.put(TYPE_KEY, projection.type());
         if (projection.projection() != NATURAL) {
             value.put(PROJECTION_KEY, projection.projection().name());
         }
@@ -790,7 +790,7 @@ public abstract class GdsCypher {
     private static boolean matchesType(String type, AbstractRelationshipProjection projection) {
         return projection.projection() == NATURAL
                && projection.aggregation() == DEFAULT
-               && projection.type().map(s -> s.equals(type)).orElse(true);
+               && projection.type().equals(type);
     }
 
     private static MinimalObject toMinimalObject(

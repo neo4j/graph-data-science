@@ -24,13 +24,15 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 
 import java.util.Map;
-import java.util.Optional;
+
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 
 @DataClass
-@Value.Immutable(singleton = true)
 public abstract class AbstractNodeProjection extends ElementProjection {
 
-    public abstract Optional<String> label();
+    private static final NodeProjection ALL = of(PROJECT_ALL.name);
+
+    public abstract String label();
 
     @Value.Default
     @Override
@@ -38,10 +40,19 @@ public abstract class AbstractNodeProjection extends ElementProjection {
         return super.properties();
     }
 
+    @Override
+    public boolean projectAll() {
+        return label().equals(PROJECT_ALL.name);
+    }
+
     public static final String LABEL_KEY = "label";
 
-    public static NodeProjection empty() {
-        return NodeProjection.of();
+    public static NodeProjection of(String label) {
+        return NodeProjection.of(label, PropertyMappings.of());
+    }
+
+    public static NodeProjection all() {
+        return ALL;
     }
 
     public static NodeProjection fromObject(Object object, ElementIdentifier identifier) {
@@ -74,7 +85,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
 
     @Override
     void writeToObject(Map<String, Object> value) {
-        value.put(LABEL_KEY, label().orElse(""));
+        value.put(LABEL_KEY, label());
     }
 
     @Override
