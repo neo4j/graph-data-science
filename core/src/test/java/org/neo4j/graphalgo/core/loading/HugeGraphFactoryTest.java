@@ -65,19 +65,4 @@ class HugeGraphFactoryTest {
         assertEquals(3_205_950_312L * 2 - idMapMemoryUsage - instanceSize, estimate.memoryUsage().min);
         assertEquals(6_011_568_216L, estimate.memoryUsage().max);
     }
-
-    @Test
-    void shouldThrowOnMissingRelationshipProjection() {
-        GraphDimensions graphDimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(1L)
-            .maxRelCount(1L)
-            .build();
-
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> HugeGraphFactory.getMemoryEstimation(graphDimensions).estimate(graphDimensions, 1)
-        );
-        assertTrue(exception.getMessage().contains("No relationship projection"));
-    }
-
 }

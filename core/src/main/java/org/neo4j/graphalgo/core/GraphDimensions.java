@@ -62,8 +62,10 @@ public interface GraphDimensions {
         return ResolvedPropertyMappings.empty();
     }
 
-    @Nullable
-    RelationshipProjectionMappings relationshipProjectionMappings();
+    @Value.Default
+    default RelationshipProjectionMappings relationshipProjectionMappings() {
+        return RelationshipProjectionMappings.all();
+    }
 
     default Aggregation[] aggregations(Aggregation defaultAggregation) {
         Aggregation[] aggregations = relationshipProperties().stream()
