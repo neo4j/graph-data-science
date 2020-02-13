@@ -36,7 +36,7 @@ import java.util.concurrent.TimeoutException;
 public final class Pools {
 
     static final int MAXIMUM_POOL_SIZE;
-    public static final int CORE_POOL_SIZE;
+    private static final int CORE_POOL_SIZE;
 
     static {
         ConcurrencyConfig concurrencyConfig = ConcurrencyConfig.of();
@@ -48,7 +48,7 @@ public final class Pools {
         return Math.min(MAXIMUM_POOL_SIZE, concurrency);
     }
 
-    public static final int DEFAULT_QUEUE_SIZE = CORE_POOL_SIZE * 50;
+    private static final int DEFAULT_QUEUE_SIZE = CORE_POOL_SIZE * 50;
 
     public static final ExecutorService DEFAULT = createDefaultPool();
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createDefaultSingleThreadPool();
@@ -58,7 +58,7 @@ public final class Pools {
         throw new UnsupportedOperationException();
     }
 
-    public static ExecutorService createDefaultPool() {
+    private static ExecutorService createDefaultPool() {
         return new ThreadPoolExecutor(
             CORE_POOL_SIZE,
             CORE_POOL_SIZE * 2,
@@ -74,11 +74,11 @@ public final class Pools {
         return Executors.newSingleThreadExecutor(NamedThreadFactoryProxy.daemon());
     }
 
-    public static ForkJoinPool createFJPool() {
+    private static ForkJoinPool createFJPool() {
         return createFJPool(CORE_POOL_SIZE);
     }
 
-    public static ForkJoinPool createFJPool(int concurrency) {
+    static ForkJoinPool createFJPool(int concurrency) {
         return new ForkJoinPool(concurrency);
     }
 
