@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -88,7 +89,7 @@ class MSBFSAllShortestPathsTest {
             .addRelationshipType(RELATIONSHIP)
             .build()
             .load(HugeGraphFactory.class);
-        testASP(new MSBFSAllShortestPaths(graph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT));
+        testASP(new MSBFSAllShortestPaths(graph, AllocationTracker.EMPTY, AlgoBaseConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT));
     }
 
     private void testASP(final MSBFSASPAlgorithm hugeMSBFSAllShortestPaths) {

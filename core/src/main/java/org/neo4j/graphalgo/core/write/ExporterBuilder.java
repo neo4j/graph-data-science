@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLoggerAdapter;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -47,7 +48,7 @@ public abstract class ExporterBuilder<T> {
         this.db = Objects.requireNonNull(db);
         this.nodeCount = idMapping.nodeCount();
         this.toOriginalId = idMapping::toOriginalNodeId;
-        this.writeConcurrency = Pools.DEFAULT_CONCURRENCY;
+        this.writeConcurrency = AlgoBaseConfig.DEFAULT_CONCURRENCY;
         this.terminationFlag = terminationFlag;
     }
 

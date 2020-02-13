@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -953,7 +954,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         List<Future<?>> futures = new ArrayList<>();
         // block all available threads
-        for (int i = 0; i < Pools.DEFAULT_CONCURRENCY; i++) {
+        for (int i = 0; i < AlgoBaseConfig.DEFAULT_CONCURRENCY; i++) {
             futures.add(
                 Pools.DEFAULT.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
             );

@@ -24,6 +24,7 @@ import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
 
 import java.util.AbstractCollection;
@@ -100,12 +101,12 @@ final class ParallelUtilTest {
     @Test
     void shouldParallelizeStreamsWithLimitedConcurrency() {
         LongStream data = LongStream.range(0, 100_000);
-        parallelStream(data, Pools.DEFAULT_CONCURRENCY - 1, (s) -> {
+        parallelStream(data, AlgoBaseConfig.DEFAULT_CONCURRENCY - 1, (s) -> {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-            assertEquals(Pools.DEFAULT_CONCURRENCY - 1, threadPool.getParallelism());
+            assertEquals(AlgoBaseConfig.DEFAULT_CONCURRENCY - 1, threadPool.getParallelism());
 
             return s.reduce(0L, Long::sum);
         });
@@ -114,12 +115,12 @@ final class ParallelUtilTest {
     @Test
     void shouldParallelizeAndConsumeStreamsWithLimitedConcurrency() {
         LongStream data = LongStream.range(0, 100_000);
-        parallelStreamConsume(data, Pools.DEFAULT_CONCURRENCY - 1, (s) -> {
+        parallelStreamConsume(data, AlgoBaseConfig.DEFAULT_CONCURRENCY - 1, (s) -> {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-            assertEquals(Pools.DEFAULT_CONCURRENCY - 1, threadPool.getParallelism());
+            assertEquals(AlgoBaseConfig.DEFAULT_CONCURRENCY - 1, threadPool.getParallelism());
         });
     }
 

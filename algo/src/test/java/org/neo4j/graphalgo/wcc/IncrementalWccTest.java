@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -89,7 +90,7 @@ class IncrementalWccTest extends AlgoTestBase {
             .graph(HugeGraphFactory.class);
 
         WccStreamConfig config = ImmutableWccStreamConfig.builder()
-            .concurrency(Pools.DEFAULT_CONCURRENCY)
+            .concurrency(AlgoBaseConfig.DEFAULT_CONCURRENCY)
             .seedProperty(SEED_PROPERTY)
             .threshold(0D)
             .build();
@@ -161,7 +162,7 @@ class IncrementalWccTest extends AlgoTestBase {
         return new Wcc(
             graph,
             Pools.DEFAULT,
-            COMMUNITY_SIZE / Pools.DEFAULT_CONCURRENCY,
+            COMMUNITY_SIZE / AlgoBaseConfig.DEFAULT_CONCURRENCY,
             config,
             AllocationTracker.EMPTY
         ).compute();

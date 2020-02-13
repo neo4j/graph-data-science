@@ -25,13 +25,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
+
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
@@ -96,7 +96,7 @@ class ClosenessCentralityTest extends AlgoTestBase {
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
             AllocationTracker.EMPTY,
-            Pools.DEFAULT_CONCURRENCY,
+            AlgoBaseConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
             false
         );
@@ -114,7 +114,7 @@ class ClosenessCentralityTest extends AlgoTestBase {
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
             AllocationTracker.EMPTY,
-            Pools.DEFAULT_CONCURRENCY,
+            AlgoBaseConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
             false
         );

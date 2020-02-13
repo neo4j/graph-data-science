@@ -227,14 +227,14 @@ class WccTest extends AlgoTestBase {
     }
 
     DisjointSetStruct run(Graph graph, WccBaseConfig config) {
-        return run(graph, config, communitySize() / Pools.DEFAULT_CONCURRENCY);
+        return run(graph, config, communitySize() / config.concurrency());
     }
 
     DisjointSetStruct run(Graph graph, WccBaseConfig config, int concurrency) {
         return new Wcc(
             graph,
             Pools.DEFAULT,
-            communitySize() / Pools.DEFAULT_CONCURRENCY,
+            communitySize() / concurrency,
             config,
             AllocationTracker.EMPTY
         ).compute();

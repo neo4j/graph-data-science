@@ -36,10 +36,10 @@ import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -223,7 +223,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
         assertEquals(0, config.normalizedN());
         assertEquals(1, config.degreeCutoff());
         assertEquals(1E-42, config.similarityCutoff());
-        assertEquals(Pools.DEFAULT_CONCURRENCY, config.concurrency());
+        assertEquals(AlgoBaseConfig.DEFAULT_CONCURRENCY, config.concurrency());
     }
 
     @ParameterizedTest(name = "top or bottom: {0}")

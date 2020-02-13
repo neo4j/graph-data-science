@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -414,9 +415,10 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
             .load(HugeGraphFactory.class);
         List<Result> expected = calculateExpected(graph, true);
         WeightedAllShortestPaths shortestPaths = new WeightedAllShortestPaths(
-                graph,
-                Pools.DEFAULT,
-                Pools.DEFAULT_CONCURRENCY);
+            graph,
+            Pools.DEFAULT,
+            AlgoBaseConfig.DEFAULT_CONCURRENCY
+        );
         compare(shortestPaths, expected);
     }
 
@@ -430,10 +432,11 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
             .load(HugeGraphFactory.class);
         List<Result> expectedNonWeighted = calculateExpected(graph, false);
         MSBFSAllShortestPaths shortestPaths = new MSBFSAllShortestPaths(
-                graph,
-                AllocationTracker.EMPTY,
-                Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT);
+            graph,
+            AllocationTracker.EMPTY,
+            AlgoBaseConfig.DEFAULT_CONCURRENCY,
+            Pools.DEFAULT
+        );
         compare(shortestPaths, expectedNonWeighted);
     }
 

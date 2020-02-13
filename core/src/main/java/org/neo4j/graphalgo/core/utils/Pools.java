@@ -35,20 +35,20 @@ import java.util.concurrent.TimeoutException;
 
 public final class Pools {
 
-    private static final int MAX_CONCURRENCY;
-    public static final int DEFAULT_CONCURRENCY;
+    static final int MAXIMUM_POOL_SIZE;
+    public static final int CORE_POOL_SIZE;
 
     static {
         ConcurrencyConfig concurrencyConfig = ConcurrencyConfig.of();
-        MAX_CONCURRENCY = concurrencyConfig.maxConcurrency;
-        DEFAULT_CONCURRENCY = concurrencyConfig.defaultConcurrency;
+        MAXIMUM_POOL_SIZE = concurrencyConfig.maximumPoolSize;
+        CORE_POOL_SIZE = concurrencyConfig.corePoolSize;
     }
 
     public static int allowedConcurrency(int concurrency) {
-        return Math.min(MAX_CONCURRENCY, concurrency);
+        return Math.min(MAXIMUM_POOL_SIZE, concurrency);
     }
 
-    public static final int DEFAULT_QUEUE_SIZE = DEFAULT_CONCURRENCY * 50;
+    public static final int DEFAULT_QUEUE_SIZE = CORE_POOL_SIZE * 50;
 
     public static final ExecutorService DEFAULT = createDefaultPool();
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createDefaultSingleThreadPool();
@@ -60,8 +60,8 @@ public final class Pools {
 
     public static ExecutorService createDefaultPool() {
         return new ThreadPoolExecutor(
-            DEFAULT_CONCURRENCY,
-            DEFAULT_CONCURRENCY * 2,
+            CORE_POOL_SIZE,
+            CORE_POOL_SIZE * 2,
             30L,
             TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(DEFAULT_QUEUE_SIZE),
@@ -75,7 +75,7 @@ public final class Pools {
     }
 
     public static ForkJoinPool createFJPool() {
-        return createFJPool(DEFAULT_CONCURRENCY);
+        return createFJPool(CORE_POOL_SIZE);
     }
 
     public static ForkJoinPool createFJPool(int concurrency) {
