@@ -29,20 +29,20 @@ final class ConcurrencyConfigTest {
     void limitConcurrencyOnCommunityEdition() {
         ConcurrencyConfig config = new ConcurrencyConfig(/* cpus */ 42, /* isOnEnterprise */ false);
         assertEquals(4, config.corePoolSize);
-        assertEquals(4, config.maximumPoolSize);
+        assertEquals(4, config.maximumConcurrency);
     }
 
     @Test
     void allowLowerThanMaxSettingsOnCommunityEdition() {
         ConcurrencyConfig config = new ConcurrencyConfig(/* cpus */ 2, /* isOnEnterprise */ false);
-        assertEquals(4, config.maximumPoolSize);
         assertEquals(2, config.corePoolSize);
+        assertEquals(4, config.maximumConcurrency);
     }
 
     @Test
     void unlimitedDefaultConcurrencyOnEnterpriseEdition() {
         ConcurrencyConfig config = new ConcurrencyConfig(/* cpus */ 42, /* isOnEnterprise */ true);
         assertEquals(42, config.corePoolSize);
-        assertEquals(Integer.MAX_VALUE, config.maximumPoolSize);
+        assertEquals(Integer.MAX_VALUE, config.maximumConcurrency);
     }
 }

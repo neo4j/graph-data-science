@@ -35,17 +35,17 @@ import java.util.concurrent.TimeoutException;
 
 public final class Pools {
 
-    static final int MAXIMUM_POOL_SIZE;
+    static final int MAXIMUM_CONCURRENCY;
     private static final int CORE_POOL_SIZE;
 
     static {
         ConcurrencyConfig concurrencyConfig = ConcurrencyConfig.of();
-        MAXIMUM_POOL_SIZE = concurrencyConfig.maximumPoolSize;
+        MAXIMUM_CONCURRENCY = concurrencyConfig.maximumConcurrency;
         CORE_POOL_SIZE = concurrencyConfig.corePoolSize;
     }
 
     public static int allowedConcurrency(int concurrency) {
-        return Math.min(MAXIMUM_POOL_SIZE, concurrency);
+        return Math.min(MAXIMUM_CONCURRENCY, concurrency);
     }
 
     private static final int DEFAULT_QUEUE_SIZE = CORE_POOL_SIZE * 50;
