@@ -1277,6 +1277,17 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
+    void failsOnInvalidProjection() {
+        Map relProjection = map("A", map(TYPE_KEY, "REL", PROJECTION_KEY, "INVALID"));
+
+        assertError(
+            "CALL gds.graph.create('g', '*', $relProjection)",
+            map("relProjection", relProjection),
+            "Projection `INVALID` is not supported."
+        );
+    }
+
+    @Test
     void failsOnExistingGraphName() {
         String name = "g";
         runQuery("CALL gds.graph.create($name, '*', '*')", map("name", name));

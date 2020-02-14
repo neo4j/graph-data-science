@@ -21,6 +21,9 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphdb.Direction;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public enum Projection {
 
     NATURAL,
@@ -28,7 +31,18 @@ public enum Projection {
     UNDIRECTED;
 
     public static Projection of(String value) {
-        return Projection.valueOf(value.toUpperCase());
+        try {
+            return Projection.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            String availableProjections = Arrays
+                .stream(Projection.values())
+                .map(Projection::name)
+                .collect(Collectors.joining(", "));
+            throw new IllegalArgumentException(String.format(
+                "Projection `%s` is not supported. Must be one of: %s.",
+                value,
+                availableProjections));
+        }
     }
 
     public static Direction parseDirection(Object object) {
