@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.LogProvider;
@@ -47,5 +48,9 @@ public class TestDatabaseCreator {
         return (GraphDatabaseAPI)new TestGraphDatabaseFactory(logProvider)
                 .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
                 .newGraphDatabase();
+    }
+
+    public static GraphDatabaseAPI createTestDatabase(File storeDir) {
+        return (GraphDatabaseAPI) new TestGraphDatabaseFactory().newEmbeddedDatabase(storeDir);
     }
 }
