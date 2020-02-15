@@ -34,6 +34,7 @@ import org.neo4j.unsafe.impl.batchimport.input.Inputs;
 import org.neo4j.values.storable.Value;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.function.ToIntFunction;
 
 public final class GraphInput implements Input {
@@ -49,7 +50,7 @@ public final class GraphInput implements Input {
 
     @Override
     public InputIterable nodes() {
-        return () -> new NodeImporter(graph.nodeCount(), batchSize);
+        return () -> new NodeImporter(graph, batchSize);
     }
 
     @Override
@@ -69,13 +70,18 @@ public final class GraphInput implements Input {
 
     @Override
     public Estimates calculateEstimates(ToIntFunction<Value[]> valueSizeCalculator) {
+        long nodeCount = graph.nodeCount();
+        long relationshipCount = graph.relationshipCount();
+        long numberOfNodeProperties = graph.availableNodeProperties().size() * nodeCount;
+        long numberOfRelationshipProperties = graph.hasRelationshipProperty() ? relationshipCount : 0;
+
         return Inputs.knownEstimates(
-            graph.nodeCount(),
-            graph.relationshipCount(),
-            graph.nodeCount(),
-            graph.relationshipCount(),
-            Long.BYTES,
-            Long.BYTES,
+            nodeCount,
+            relationshipCount,
+            numberOfNodeProperties,
+            numberOfRelationshipProperties,
+            numberOfNodeProperties * Double.BYTES,
+            numberOfRelationshipProperties * Double.BYTES,
             0
         );
     }
@@ -111,13 +117,16 @@ public final class GraphInput implements Input {
 
     static class NodeImporter extends GraphImporter {
 
-        NodeImporter(long nodeCount, int batchSize) {
-            super(nodeCount, batchSize);
+        private final Graph graph;
+
+        NodeImporter(Graph graph, int batchSize) {
+            super(graph.nodeCount(), batchSize);
+            this.graph = graph;
         }
 
         @Override
         public InputChunk newChunk() {
-            return new NodeChunk();
+            return new NodeChunk(graph);
         }
     }
 
@@ -150,11 +159,22 @@ public final class GraphInput implements Input {
     }
 
     static class NodeChunk extends EntityChunk {
+
+        private final Graph graph;
+        private final Set<String> nodeProperties;
+
+        NodeChunk(Graph graph) {
+            this.graph = graph;
+            this.nodeProperties = graph.availableNodeProperties();
+        }
+
         @Override
         public boolean next(InputEntityVisitor visitor) throws IOException {
             if (id < endId) {
-                visitor.id(id++);
+                visitor.id(id);
+                nodeProperties.forEach(p -> visitor.property(p, graph.nodeProperties(p).nodeProperty(id)));
                 visitor.endOfEntity();
+                id++;
                 return true;
             }
             return false;

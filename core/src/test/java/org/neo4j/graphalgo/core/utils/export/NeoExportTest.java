@@ -42,12 +42,16 @@ class NeoExportTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a { prop1: 23.0 })" +
-        ", (b { prop1: 42.0 })" +
-        ", (c { prop1: 84.0 })" +
+        "  (a { prop1: 0, prop2: 42 })" +
+        ", (b { prop1: 1, prop2: 43 })" +
+        ", (c { prop1: 2, prop2: 44 })" +
+        ", (d { prop1: 3 })" +
+        ", (a)-[:REL]->(a)" +
         ", (a)-[:REL]->(b)" +
         ", (b)-[:REL]->(a)" +
-        ", (b)-[:REL]->(c)";
+        ", (b)-[:REL]->(c)" +
+        ", (c)-[:REL]->(d)" +
+        ", (d)-[:REL]->(a)";
 
     @TempDir
     File tempDir;
@@ -90,11 +94,12 @@ class NeoExportTest {
         exportDb.shutdown();
     }
 
-    @Disabled
+    @Test
     void exportTopologyAndNodeProperties() {
         StoreLoaderBuilder loaderBuilder = new StoreLoaderBuilder()
             .loadAnyLabel()
-            .addNodeProperty(PropertyMapping.of("prop1", 23.0))
+            .addNodeProperty(PropertyMapping.of("prop1", 0))
+            .addNodeProperty(PropertyMapping.of("prop2", 42))
             .loadAnyRelationshipType();
 
         Graph inputGraph = loaderBuilder.api(db).build().graph(HugeGraphFactory.class);
