@@ -170,15 +170,19 @@ public final class GraphInput implements Input {
         }
 
         @Override
-        public boolean next(InputEntityVisitor visitor) throws IOException {
+        public boolean next(InputEntityVisitor visitor) {
             if (id < endId) {
                 relationshipIterator.forEachRelationship(id, (s, t) -> {
                     visitor.startId(s);
                     visitor.endId(t);
                     visitor.type(0);
+                    try {
+                        visitor.endOfEntity();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     return true;
                 });
-                visitor.endOfEntity();
                 id++;
                 return true;
             }

@@ -37,7 +37,6 @@ import org.neo4j.unsafe.impl.batchimport.staging.ExecutionMonitors;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.neo4j.graphdb.factory.GraphDatabaseSettings.store_internal_log_path;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
@@ -63,7 +62,6 @@ public class NeoExport {
         File storeDir;
         Config dbConfig;
         DatabaseLayout databaseLayout;
-        InputStream in;
         Configuration configuration;
         File internalLogFile;
         LogService logService;
