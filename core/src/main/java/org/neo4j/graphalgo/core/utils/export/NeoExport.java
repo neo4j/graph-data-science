@@ -75,7 +75,7 @@ public class NeoExport {
             dbConfig = Config.defaults();
             databaseLayout = DatabaseLayout.of(storeDir);
             configuration = ImportTool.importConfiguration(
-                config.processors(),
+                config.writeConcurrency(),
                 defaultSettingsSuitableForTests,
                 dbConfig,
                 storeDir,

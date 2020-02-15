@@ -35,18 +35,13 @@ public interface NeoExportConfig {
     String dbName();
 
     @Value.Default
-    default int processors() {
+    default int writeConcurrency() {
         return Pools.DEFAULT_CONCURRENCY;
     }
 
     @Value.Default
     default int batchSize() {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
-    }
-
-    @Value.Default
-    default boolean stacktrace() {
-        return false;
     }
 
     static NeoExportConfig of(CypherMapWrapper config) {
