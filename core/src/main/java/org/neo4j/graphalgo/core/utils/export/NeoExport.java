@@ -25,6 +25,7 @@ import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
+import org.neo4j.kernel.impl.util.Validators;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.StoreLogService;
@@ -33,6 +34,7 @@ import org.neo4j.tooling.ImportTool;
 import org.neo4j.unsafe.impl.batchimport.BatchImporter;
 import org.neo4j.unsafe.impl.batchimport.BatchImporterFactory;
 import org.neo4j.unsafe.impl.batchimport.Configuration;
+import org.neo4j.unsafe.impl.batchimport.input.Input;
 import org.neo4j.unsafe.impl.batchimport.staging.ExecutionMonitors;
 
 import java.io.File;
@@ -59,40 +61,35 @@ public class NeoExport {
      *      * test environments, for example lower default buffer sizes.
      */
     public void run(boolean defaultSettingsSuitableForTests) {
-        File storeDir;
-        Config dbConfig;
-        DatabaseLayout databaseLayout;
-        Configuration configuration;
-        File internalLogFile;
-        LogService logService;
-        JobScheduler jobScheduler;
-        BatchImporter importer;
+        File storeDir = new File(config.storeDir());
+        Validators.DIRECTORY_IS_WRITABLE.validate(storeDir);
+
+        DatabaseLayout databaseLayout = DatabaseLayout.of(storeDir);
+        Config dbConfig = Config.defaults();
+        File internalLogFile = dbConfig.get(store_internal_log_path);
+        Configuration importConfig = ImportTool.importConfiguration(
+            config.writeConcurrency(),
+            defaultSettingsSuitableForTests,
+            dbConfig,
+            storeDir,
+            false
+        );
 
         LifeSupport life = new LifeSupport();
 
         try (FileSystemAbstraction fs = new DefaultFileSystemAbstraction()) {
-            storeDir = new File(config.storeDir());
-            dbConfig = Config.defaults();
-            databaseLayout = DatabaseLayout.of(storeDir);
-            configuration = ImportTool.importConfiguration(
-                config.writeConcurrency(),
-                defaultSettingsSuitableForTests,
-                dbConfig,
-                storeDir,
-                false
-            );
-
-            internalLogFile = dbConfig.get(store_internal_log_path);
-            logService = life.add(StoreLogService.withInternalLog(internalLogFile).build(fs));
-            jobScheduler = life.add(createScheduler());
+            LogService logService = life.add(StoreLogService.withInternalLog(internalLogFile).build(fs));
+            JobScheduler jobScheduler = life.add(createScheduler());
 
             life.start();
 
-            importer = BatchImporterFactory.withHighestPriority().instantiate(
+            Input input = new GraphInput(graph, config.batchSize());
+
+            BatchImporter importer = BatchImporterFactory.withHighestPriority().instantiate(
                 databaseLayout,
                 fs,
                 null, // no external page cache
-                configuration,
+                importConfig,
                 logService,
                 ExecutionMonitors.invisible(),
                 EMPTY,
@@ -101,7 +98,7 @@ public class NeoExport {
                 NO_MONITOR,
                 jobScheduler
             );
-            importer.doImport(new GraphInput(graph, config.batchSize()));
+            importer.doImport(input);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
