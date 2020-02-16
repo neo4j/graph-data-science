@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -66,7 +65,6 @@ class NeoExportTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        GraphCatalog.removeAllLoadedGraphs();
     }
 
     @Test
@@ -77,9 +75,11 @@ class NeoExportTest {
 
         Graph inputGraph = loaderBuilder.api(db).build().graph(HugeGraphFactory.class);
 
-        NeoExportConfig config = NeoExportConfig.of(CypherMapWrapper.empty()
-            .withString("storeDir", tempDir.getAbsolutePath())
-            .withString("dbName", "test-db")
+        NeoExportConfig config = NeoExportConfig.of(
+            "test-user",
+            CypherMapWrapper.empty()
+                .withString("storeDir", tempDir.getAbsolutePath())
+                .withString("dbName", "test-db")
         );
 
         NeoExport neoExport = new NeoExport(inputGraph, config);
@@ -103,9 +103,11 @@ class NeoExportTest {
 
         Graph inputGraph = loaderBuilder.api(db).build().graph(HugeGraphFactory.class);
 
-        NeoExportConfig config = NeoExportConfig.of(CypherMapWrapper.empty()
-            .withString("storeDir", tempDir.getAbsolutePath())
-            .withString("dbName", "test-db")
+        NeoExportConfig config = NeoExportConfig.of(
+            "test-user",
+            CypherMapWrapper.empty()
+                .withString("storeDir", tempDir.getAbsolutePath())
+                .withString("dbName", "test-db")
         );
 
         NeoExport neoExport = new NeoExport(inputGraph, config);

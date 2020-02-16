@@ -51,7 +51,7 @@ public class NeoExport {
 
     private final NeoExportConfig config;
 
-    NeoExport(Graph graph, NeoExportConfig config) {
+    public NeoExport(Graph graph, NeoExportConfig config) {
         this.graph = graph;
         this.config = config;
     }

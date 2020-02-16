@@ -25,10 +25,11 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.newapi.BaseConfig;
 
 @ValueClass
 @Configuration("NeoExportConfigImpl")
-public interface NeoExportConfig {
+public interface NeoExportConfig extends BaseConfig {
 
     String storeDir();
 
@@ -44,7 +45,7 @@ public interface NeoExportConfig {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
 
-    static NeoExportConfig of(CypherMapWrapper config) {
-        return new NeoExportConfigImpl(config);
+    static NeoExportConfig of(String username, CypherMapWrapper config) {
+        return new NeoExportConfigImpl(username, config);
     }
 }
