@@ -33,9 +33,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
-import java.util.Collection;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 public abstract class BaseProc {
 
@@ -101,20 +99,4 @@ public abstract class BaseProc {
             ));
         }
     }
-
-    static final class OutputFieldParser {
-        private static final Pattern PERCENTILE_FIELD_REGEXP = Pattern.compile("^p\\d{1,3}$");
-        private static final Pattern COMMUNITY_COUNT_REGEXP = Pattern.compile("^(community|set)Count$");
-
-        private OutputFieldParser() {}
-
-        static boolean computeHistogram(Collection<String> returnItems) {
-            return returnItems.stream().anyMatch(PERCENTILE_FIELD_REGEXP.asPredicate());
-        }
-
-        static boolean computeCommunityCount(Collection<String> returnItems) {
-            return computeHistogram(returnItems) || returnItems.stream().anyMatch(COMMUNITY_COUNT_REGEXP.asPredicate());
-        }
-    }
-
 }
