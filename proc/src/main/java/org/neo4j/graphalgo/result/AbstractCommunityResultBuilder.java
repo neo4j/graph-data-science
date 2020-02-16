@@ -93,7 +93,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
     public WRITE_RESULT build() {
         final ProgressTimer timer = ProgressTimer.start();
 
-        if (buildCommunityCount && communityFunction != null || buildHistogram) {
+        if (communityFunction != null && (buildCommunityCount || buildHistogram)) {
             long expectedNumberOfCommunities = maybeExpectedCommunityCount.orElse(EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT);
             HugeLongLongMap communitySizeMap = new HugeLongLongMap(expectedNumberOfCommunities, tracker);
             for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
