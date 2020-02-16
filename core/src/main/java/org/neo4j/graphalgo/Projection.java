@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphdb.Direction;
-
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -43,18 +41,5 @@ public enum Projection {
                 value,
                 availableProjections));
         }
-    }
-
-    public static Direction parseDirection(Object object) {
-        if (object == null) {
-            return null;
-        }
-        if (object instanceof String) {
-            return Direction.valueOf((String) object);
-        }
-        if (object instanceof Direction) {
-            return (Direction) object;
-        }
-        return null;
     }
 }
