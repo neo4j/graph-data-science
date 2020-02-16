@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityResult;

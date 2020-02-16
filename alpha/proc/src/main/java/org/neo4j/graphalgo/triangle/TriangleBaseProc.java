@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 
 public abstract class TriangleBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends TriangleConfig>
     extends AlgoBaseProc<A, RESULT, CONFIG> {

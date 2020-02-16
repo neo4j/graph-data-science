@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.logging.Log;
 
 public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {

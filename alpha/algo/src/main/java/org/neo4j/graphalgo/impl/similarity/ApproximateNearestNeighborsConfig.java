@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.similarity;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.newapi.IterationsConfig;
+import org.neo4j.graphalgo.config.IterationsConfig;
 
 import java.util.Collections;
 import java.util.List;

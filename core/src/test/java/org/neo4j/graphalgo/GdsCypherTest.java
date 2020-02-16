@@ -27,8 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.impl.proc.MapConverter;
 

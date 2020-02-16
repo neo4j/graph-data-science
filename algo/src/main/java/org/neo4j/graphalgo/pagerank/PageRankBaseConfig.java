@@ -21,11 +21,11 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.IterationsConfig;
-import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
-import org.neo4j.graphalgo.newapi.SourceNodesConfig;
-import org.neo4j.graphalgo.newapi.ToleranceConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.graphalgo.config.SourceNodesConfig;
+import org.neo4j.graphalgo.config.ToleranceConfig;
 
 public interface PageRankBaseConfig extends
     AlgoBaseConfig,

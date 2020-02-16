@@ -31,10 +31,10 @@ import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -59,13 +59,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.compat.ExceptionUtil.rootCause;
-import static org.neo4j.graphalgo.newapi.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
-import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 /**
  * Base test that should be used for every algorithm procedure.

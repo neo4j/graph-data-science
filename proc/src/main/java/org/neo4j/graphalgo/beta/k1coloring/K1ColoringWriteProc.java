@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.k1coloring;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;

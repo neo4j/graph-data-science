@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;

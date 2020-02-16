@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;

@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.WriteConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.MapUtil;
 

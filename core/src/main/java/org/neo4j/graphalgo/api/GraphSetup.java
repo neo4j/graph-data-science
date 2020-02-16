@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -29,8 +28,8 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.logging.Log;
 import org.neo4j.stream.Streams;

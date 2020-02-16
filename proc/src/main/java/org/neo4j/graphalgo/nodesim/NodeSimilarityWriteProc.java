@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;

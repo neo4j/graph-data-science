@@ -33,8 +33,8 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.newapi.GraphCreateProc;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 

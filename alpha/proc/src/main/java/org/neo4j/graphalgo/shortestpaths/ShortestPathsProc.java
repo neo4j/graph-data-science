@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.shortestpaths.ShortestPaths;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.ShortestPathResult;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;

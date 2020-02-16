@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.impl.similarity;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.WriteConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.WriteConfig;
 
 import java.util.Collections;
 import java.util.List;

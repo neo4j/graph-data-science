@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Result;
 
 import java.util.Arrays;

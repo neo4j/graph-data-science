@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.IsFiniteFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.newapi.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;

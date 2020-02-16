@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

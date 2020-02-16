@@ -22,11 +22,11 @@ package org.neo4j.graphalgo.beta.modularity;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.IterationsConfig;
-import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
-import org.neo4j.graphalgo.newapi.SeedConfig;
-import org.neo4j.graphalgo.newapi.ToleranceConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.graphalgo.config.ToleranceConfig;
 
 public interface ModularityOptimizationConfig extends
     AlgoBaseConfig,

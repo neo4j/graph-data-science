@@ -36,7 +36,7 @@ import org.neo4j.graphalgo.impl.betweenness.RABrandesBetweennessCentrality;
 import org.neo4j.graphalgo.impl.betweenness.RandomDegreeSelectionStrategy;
 import org.neo4j.graphalgo.impl.betweenness.RandomSelectionStrategy;
 import org.neo4j.graphalgo.impl.betweenness.SampledBetweennessCentralityConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

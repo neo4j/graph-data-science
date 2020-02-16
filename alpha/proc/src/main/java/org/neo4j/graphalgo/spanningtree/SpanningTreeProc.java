@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningGraph;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;

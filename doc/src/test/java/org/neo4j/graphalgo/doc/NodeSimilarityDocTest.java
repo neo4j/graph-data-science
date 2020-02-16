@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.newapi.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityWriteProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;

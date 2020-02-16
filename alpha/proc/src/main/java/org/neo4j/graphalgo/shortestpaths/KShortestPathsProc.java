@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.impl.shortestpaths.YensKShortestPaths;
 import org.neo4j.graphalgo.impl.shortestpaths.YensKShortestPathsConfig;
 import org.neo4j.graphalgo.impl.shortestpaths.YensKShortestPathsConfigImpl;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphdb.Path;
 import org.neo4j.helpers.collection.Pair;

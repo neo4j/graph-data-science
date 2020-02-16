@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.nodesim;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
 public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
 

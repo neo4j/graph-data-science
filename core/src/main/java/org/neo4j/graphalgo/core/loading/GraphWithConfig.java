@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 
 @ValueClass
 public interface GraphWithConfig {

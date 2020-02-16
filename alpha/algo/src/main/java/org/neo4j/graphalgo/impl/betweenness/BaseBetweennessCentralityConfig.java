@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.impl.betweenness;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.WriteConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.WriteConfig;
 
 public interface BaseBetweennessCentralityConfig extends WriteConfig {
 

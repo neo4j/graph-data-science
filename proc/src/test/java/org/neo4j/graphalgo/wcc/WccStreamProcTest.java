@@ -30,8 +30,8 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 
 import java.util.Arrays;
 import java.util.Collections;

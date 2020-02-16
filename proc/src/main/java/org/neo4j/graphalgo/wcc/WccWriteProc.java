@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

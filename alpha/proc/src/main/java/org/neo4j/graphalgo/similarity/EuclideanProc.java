@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.similarity.EuclideanAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.EuclideanConfig;
 import org.neo4j.graphalgo.impl.similarity.EuclideanConfigImpl;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Name;

@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

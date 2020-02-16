@@ -35,7 +35,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 
 class NonStabilizingLabelPropagationTest extends AlgoTestBase {
 

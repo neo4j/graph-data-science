@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 import org.neo4j.graphalgo.impl.triangle.TriangleStream;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

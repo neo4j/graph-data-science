@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphalgo.impl.triangle.TriangleCountConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;

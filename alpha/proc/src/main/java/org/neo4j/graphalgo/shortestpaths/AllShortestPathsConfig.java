@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.shortestpaths;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
-import org.neo4j.graphalgo.newapi.RelationshipWeightConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
 import java.util.Optional;
 

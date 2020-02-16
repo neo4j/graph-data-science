@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
 public abstract class AlphaAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> extends AlgorithmFactory<ALGO, CONFIG> {
     @Override

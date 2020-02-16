@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
 import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

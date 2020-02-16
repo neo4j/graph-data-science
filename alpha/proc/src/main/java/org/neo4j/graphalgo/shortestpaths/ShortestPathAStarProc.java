@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.shortestpaths.ShortestPathAStar;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

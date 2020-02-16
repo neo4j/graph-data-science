@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.impl.traverse.Traverse;
 import org.neo4j.graphalgo.impl.traverse.TraverseConfig;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.walking.WalkResult;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

@@ -39,7 +39,7 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.newapi.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;

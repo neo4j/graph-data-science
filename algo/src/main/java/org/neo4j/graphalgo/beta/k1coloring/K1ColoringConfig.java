@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.IterationsConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.IterationsConfig;
 
 interface K1ColoringConfig extends AlgoBaseConfig, IterationsConfig {
     int DEFAULT_ITERATIONS = 10;

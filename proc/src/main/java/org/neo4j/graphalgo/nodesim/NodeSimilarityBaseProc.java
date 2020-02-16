@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 
 import java.util.Optional;
 

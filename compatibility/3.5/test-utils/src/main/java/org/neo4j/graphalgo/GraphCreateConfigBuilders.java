@@ -24,10 +24,10 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,8 +36,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
-import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.graphalgo.newapi.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 final class GraphCreateConfigBuilders {

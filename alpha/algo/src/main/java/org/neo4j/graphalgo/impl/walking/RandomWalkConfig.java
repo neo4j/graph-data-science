@@ -25,8 +25,8 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 
 import java.util.Optional;
 

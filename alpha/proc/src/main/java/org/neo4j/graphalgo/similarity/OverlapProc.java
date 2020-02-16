@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.similarity.OverlapAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.OverlapConfig;
 import org.neo4j.graphalgo.impl.similarity.OverlapConfigImpl;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Name;

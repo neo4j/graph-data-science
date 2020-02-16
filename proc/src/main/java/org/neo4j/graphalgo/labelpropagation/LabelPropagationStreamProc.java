@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.labelpropagation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

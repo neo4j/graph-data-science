@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.ProcedureConstants;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import static org.junit.jupiter.api.Assertions.assertThrows;

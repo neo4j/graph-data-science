@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.GraphCreateProc;
-import org.neo4j.graphalgo.newapi.GraphDropProc;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphDropProc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;

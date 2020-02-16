@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.ShortestPathDeltaStepping;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.DeltaSteppingProcResult;
 import org.neo4j.logging.Log;

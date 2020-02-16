@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.result;
 
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
 public abstract class AbstractResultBuilder<WRITE_RESULT> {
 

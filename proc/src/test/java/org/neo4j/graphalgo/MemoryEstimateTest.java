@@ -21,7 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
 import java.lang.reflect.InvocationTargetException;
