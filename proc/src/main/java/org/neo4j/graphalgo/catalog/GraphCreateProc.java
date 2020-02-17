@@ -178,23 +178,30 @@ public class GraphCreateProc extends CatalogProc {
     private Stream<MemoryEstimateResult> estimateGraph(GraphCreateConfig config, Class<? extends GraphFactory> factoryClazz) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(factoryClazz);
-        GraphDimensions dimensions = graphFactory.dimensions();
-        MemoryTree memoryTree = estimate(graphFactory, config);
+        GraphDimensions dimensions = updateDimensions(config, graphFactory, graphFactory.dimensions());
+
+        MemoryTree memoryTree = estimate(graphFactory, dimensions, config);
         return Stream.of(new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
     }
 
-    public MemoryTree estimate(GraphFactory factory, GraphCreateConfig config) {
-        if (config.nodeCount() <= -1) {
-            return factory.memoryEstimation().estimate(factory.dimensions(), config.concurrency());
+    private GraphDimensions updateDimensions(
+        GraphCreateConfig config,
+        GraphFactory graphFactory,
+        GraphDimensions dimensions
+    ) {
+        if (config.nodeCount() > -1) {
+            dimensions = ImmutableGraphDimensions.builder()
+                .from(graphFactory.dimensions())
+                .nodeCount(config.nodeCount())
+                .highestNeoId(config.nodeCount())
+                .relationshipProjectionMappings(RelationshipProjectionMappings.all())
+                .maxRelCount(Math.max(config.relationshipCount(), 0))
+                .build();
         }
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .from(factory.dimensions())
-            .nodeCount(config.nodeCount())
-            .highestNeoId(config.nodeCount())
-            .relationshipProjectionMappings(RelationshipProjectionMappings.all())
-            .maxRelCount(Math.max(config.relationshipCount(), 0))
-            .build();
+        return dimensions;
+    }
 
+    public MemoryTree estimate(GraphFactory factory, GraphDimensions dimensions, GraphCreateConfig config) {
         return factory.memoryEstimation(dimensions).estimate(dimensions, config.concurrency());
     }
 
