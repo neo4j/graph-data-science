@@ -12,7 +12,7 @@
 [[migration-estimate]]
 == Memory estimation
 
-.Memory estimation - YIELD fields
+.Changes in the YIELD fields
 [opts=header,cols="1,1"]
 |===
 |GA | GDS
@@ -24,6 +24,8 @@
 | -                 | nodeCount
 | -                 | relationshipCount
 |===
+
+The most significant change in memory estimation is that in GDS to estimate an operation you suffix it with `.estimate` while in GA the operation had to be passed as parameter to `algo.memrec`.
 
 .Estimating the memory requirements of loading a named graph:
 [opts=header,cols="1a,1a"]
@@ -75,8 +77,8 @@ CALL gds.graph.create.cypher.estimate(
 [[migration-named-graph]]
 == Graph creation - Named Graph
 
-.YIELD fields
-[opts=hewader, cols="1,1"]
+.Changes in the YIELD fields
+[opts=header, cols="1,1"]
 |====
 | GA                        | GDS
 | name                      | graphName
@@ -225,7 +227,7 @@ CALL gds.graph.create.cypher(
 [[migration-graph-list]]
 == Graph listing
 
-.YIELD fields
+.Changes in the YIELD fields
 [opts=header,cols="1,1"]
 |===
 |GA                 | GDS
@@ -260,7 +262,7 @@ CALL gds.graph.list()
 [[migration-graph-info]]
 == Graph info
 
-.YIELD fields
+.Changes in the YIELD fields
 [opts=header,cols="1,1"]
 |===
 |GA                 | GDS
@@ -324,7 +326,7 @@ RETURN dd.min, dd.max, dd.mean, dd.p50
 [[migration-graph-remove]]
 == Graph removal
 
-.YIELD fields
+.Changes in the YIELD fields
 [opts=header,cols="1,1"]
 |===
 |GA                 | GDS
