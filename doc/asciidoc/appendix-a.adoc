@@ -77,8 +77,6 @@ The following table lists all alpha procedures in the GDS library:
 | <<algorithm-all-pairs-shortest-path-sample, gds.alpha.allShortestPaths.stream>>
 | <<algorithms-articlerank-syntax, gds.alpha.articleRank.stream>>
 | <<algorithms-articlerank-syntax, gds.alpha.articleRank.write>>
-| <<algorithms-balanced-triads-syntax, gds.alpha.balancedTriads.stream>>
-| <<algorithms-balanced-triads-syntax, gds.alpha.balancedTriads.write>>
 | <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.stream>>
 | <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.write>>
 | <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.sampled.stream>>

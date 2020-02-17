@@ -18,7 +18,6 @@ The Neo4j GDS library includes the following community detection algorithms, gro
 * Alpha
 ** <<algorithms-strongly-connected-components, Strongly Connected Components>>
 ** <<algorithms-triangle-count-clustering-coefficient, Triangle Counting / Clustering Coefficient>>
-** <<algorithms-balanced-triads, Balanced Triads>>
 
 include::louvain.adoc[leveloffset=+1]
 
@@ -31,5 +30,3 @@ include::beta/k1coloring.adoc[leveloffset=+1]
 include::alpha/alpha-strongly-connected-components.adoc[leveloffset=+1]
 
 include::alpha/alpha-triangle-count.adoc[leveloffset=+1]
-
-include::alpha/alpha-balanced-triads.adoc[leveloffset=+1]

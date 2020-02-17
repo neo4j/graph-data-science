@@ -86,9 +86,6 @@
                 <d:tocentry linkend="algorithms-triangle-count-clustering-coefficient">
                     <?dbhtml filename="algorithms/triangle-counting-clustering-coefficient/index.html"?>
                 </d:tocentry>
-                <d:tocentry linkend="algorithms-balanced-triads">
-                    <?dbhtml filename="algorithms/balanced-triads/index.html"?>
-                </d:tocentry>
             </d:tocentry>
 
             <d:tocentry linkend="algorithms-similarity">
