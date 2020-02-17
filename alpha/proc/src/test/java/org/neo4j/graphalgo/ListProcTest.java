@@ -47,7 +47,6 @@ import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphalgo.traverse.TraverseProc;
-import org.neo4j.graphalgo.triangle.BalancedTriadsProc;
 import org.neo4j.graphalgo.triangle.TriangleCountProc;
 import org.neo4j.graphalgo.triangle.TriangleProc;
 import org.neo4j.graphalgo.walking.RandomWalkProc;
@@ -69,8 +68,6 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.allShortestPaths.stream",
         "gds.alpha.articleRank.write",
         "gds.alpha.articleRank.stream",
-        "gds.alpha.balancedTriads.write",
-        "gds.alpha.balancedTriads.stream",
         "gds.alpha.betweenness.write",
         "gds.alpha.betweenness.stream",
         "gds.alpha.betweenness.sampled.write",
@@ -148,7 +145,6 @@ class ListProcTest extends BaseProcTest {
             ApproxNearestNeighborsProc.class,
             ArticleRankProc.class,
             AsPathFunc.class,
-            BalancedTriadsProc.class,
             BetweennessCentralityProc.class,
             ClosenessCentralityProc.class,
             DegreeCentralityProc.class,

@@ -75,7 +75,7 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(TriangleProc.class, TriangleCountProc.class, BalancedTriadsProc.class);
+        registerProcedures(TriangleProc.class, TriangleCountProc.class);
         runQuery(dbCypher());
     }
 

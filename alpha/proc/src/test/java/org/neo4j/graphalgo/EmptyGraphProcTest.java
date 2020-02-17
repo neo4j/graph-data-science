@@ -26,15 +26,14 @@ import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
 import org.neo4j.graphalgo.scc.SccProc;
+import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.graphalgo.shortestpaths.AllShortestPathsProc;
 import org.neo4j.graphalgo.shortestpaths.ShortestPathAStarProc;
 import org.neo4j.graphalgo.shortestpaths.ShortestPathsProc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
-import org.neo4j.graphalgo.triangle.BalancedTriadsProc;
 import org.neo4j.graphalgo.triangle.TriangleCountProc;
 import org.neo4j.graphalgo.triangle.TriangleProc;
-import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +48,6 @@ class EmptyGraphProcTest extends BaseProcTest {
 
         registerProcedures(
             AllShortestPathsProc.class,
-            BalancedTriadsProc.class,
             BetweennessCentralityProc.class,
             ClosenessCentralityProc.class,
             KSpanningTreeProc.class,
@@ -200,26 +198,6 @@ class EmptyGraphProcTest extends BaseProcTest {
             .streamMode()
             .yields();
         runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
-    }
-
-    @Test
-    void testBalancedTriadsStream() {
-        String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
-            .algo("gds.alpha.balancedTriads")
-            .streamMode()
-            .yields();
-        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
-    }
-
-    @Test
-    void testBalancedTriadsWrite() {
-        String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
-            .algo("gds.alpha.balancedTriads")
-            .writeMode()
-            .yields();
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodeCount")));
     }
 
     @Test
