@@ -50,9 +50,9 @@ public class GraphExportProc extends BaseProc {
                 Graph graph = GraphCatalog.get(getUsername(), graphName).getGraph();
                 NeoExport neoExport = new NeoExport(graph, config);
 
-                long start = System.currentTimeMillis();
-                neoExport.run(false);
-                long end = System.currentTimeMillis();
+                long start = System.nanoTime();
+                neoExport.run();
+                long end = System.nanoTime();
 
                 return new GraphExportResult(
                     graphName,
@@ -61,7 +61,7 @@ public class GraphExportProc extends BaseProc {
                     graph.nodeCount(),
                     graph.relationshipCount(),
                     graph.availableNodeProperties().size() * graph.nodeCount(),
-                    end - start
+                    java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(end - start)
                 );
             }
         );

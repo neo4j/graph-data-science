@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.io.fs.DefaultFileSystemAbstraction;
 import org.neo4j.io.fs.FileSystemAbstraction;
@@ -31,9 +32,11 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.StoreLogService;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.tooling.ImportTool;
+import org.neo4j.unsafe.impl.batchimport.AdditionalInitialIds;
 import org.neo4j.unsafe.impl.batchimport.BatchImporter;
 import org.neo4j.unsafe.impl.batchimport.BatchImporterFactory;
 import org.neo4j.unsafe.impl.batchimport.Configuration;
+import org.neo4j.unsafe.impl.batchimport.ImportLogic;
 import org.neo4j.unsafe.impl.batchimport.input.Input;
 import org.neo4j.unsafe.impl.batchimport.staging.ExecutionMonitors;
 
@@ -42,8 +45,6 @@ import java.io.IOException;
 
 import static org.neo4j.graphdb.factory.GraphDatabaseSettings.store_internal_log_path;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
-import static org.neo4j.unsafe.impl.batchimport.AdditionalInitialIds.EMPTY;
-import static org.neo4j.unsafe.impl.batchimport.ImportLogic.NO_MONITOR;
 
 public class NeoExport {
 
@@ -56,11 +57,21 @@ public class NeoExport {
         this.config = config;
     }
 
+    public void run() {
+        run(false);
+    }
+
     /**
-     * @param defaultSettingsSuitableForTests default configuration geared towards unit/integration
-     *      * test environments, for example lower default buffer sizes.
+     * Runs with default configuration geared towards
+     * unit/integration test environments, for example,
+     * lower default buffer sizes.
      */
-    public void run(boolean defaultSettingsSuitableForTests) {
+    @TestOnly
+    public void runFromTests() {
+        run(true);
+    }
+
+    private void run(boolean defaultSettingsSuitableForTests) {
         File storeDir = new File(config.storeDir());
         Validators.DIRECTORY_IS_WRITABLE.validate(storeDir);
 
@@ -92,10 +103,10 @@ public class NeoExport {
                 importConfig,
                 logService,
                 ExecutionMonitors.invisible(),
-                EMPTY,
+                AdditionalInitialIds.EMPTY,
                 dbConfig,
                 RecordFormatSelector.selectForConfig(dbConfig, logService.getInternalLogProvider()),
-                NO_MONITOR,
+                ImportLogic.NO_MONITOR,
                 jobScheduler
             );
             importer.doImport(input);

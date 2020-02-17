@@ -34,6 +34,7 @@ import org.neo4j.unsafe.impl.batchimport.input.Inputs;
 import org.neo4j.values.storable.Value;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Set;
 import java.util.function.ToIntFunction;
 
@@ -199,7 +200,7 @@ public final class GraphInput implements Input {
                     try {
                         visitor.endOfEntity();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        throw new UncheckedIOException(e);
                     }
                     return true;
                 });

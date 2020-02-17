@@ -83,7 +83,7 @@ class NeoExportTest {
         );
 
         NeoExport neoExport = new NeoExport(inputGraph, config);
-        neoExport.run(true);
+        neoExport.runFromTests();
 
         GraphDatabaseAPI exportDb = TestDatabaseCreator.createTestDatabase(tempDir);
         Graph outputGraph = loaderBuilder.api(exportDb).build().graph(HugeGraphFactory.class);
@@ -111,7 +111,7 @@ class NeoExportTest {
         );
 
         NeoExport neoExport = new NeoExport(inputGraph, config);
-        neoExport.run(true);
+        neoExport.runFromTests();
 
         GraphDatabaseAPI exportDb = TestDatabaseCreator.createTestDatabase(tempDir);
         Graph outputGraph = loaderBuilder.api(exportDb).build().graph(HugeGraphFactory.class);

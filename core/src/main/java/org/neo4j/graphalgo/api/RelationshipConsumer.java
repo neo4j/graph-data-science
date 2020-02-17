@@ -33,9 +33,7 @@ public interface RelationshipConsumer {
      * @param targetNodeId mapped target node id
      * @return {@code true} if the iteration shall continue, otherwise {@code false}.
      */
-    boolean accept(
-            long sourceNodeId,
-            long targetNodeId);
+    boolean accept(long sourceNodeId, long targetNodeId);
 
     default RelationshipConsumer andThen(RelationshipConsumer after) {
         return (sourceNodeId, targetNodeId) -> {
