@@ -31,4 +31,9 @@ public interface WriteConfig extends AlgoBaseConfig {
     default int writeConcurrency() {
         return concurrency();
     }
+
+    @Override
+    default int concurrencyToValidate() {
+        return writeConcurrency();
+    }
 }

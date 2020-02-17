@@ -21,33 +21,25 @@ package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.core.utils.Pools;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+public interface ConcurrencyValidation {
 
-public interface AlgoBaseConfig extends BaseConfig, ConcurrencyValidation {
+    @Configuration.Ignore
+    int concurrencyToValidate();
 
-    int DEFAULT_CONCURRENCY = 4;
-
-    @Value.Default
-    default int concurrency() {
-        return DEFAULT_CONCURRENCY;
-    }
-
-    @Configuration.Parameter
-    Optional<String> graphName();
-
-    @Value.Default
-    default List<String> relationshipTypes() {
-        return Collections.singletonList("*");
-    }
-
-    @Configuration.Parameter
-    Optional<GraphCreateConfig> implicitCreateConfig();
-
-    @Override
-    default int concurrencyToValidate() {
-        return concurrency();
+    @Value.Check
+    default void validateConcurrency() {
+        int requestedConcurrency = concurrencyToValidate();
+        int allowedConcurrency = Pools.allowedConcurrency(requestedConcurrency);
+        if (requestedConcurrency > allowedConcurrency) {
+            throw new IllegalArgumentException(String.format(
+                "The configured concurrency value is too high. " +
+                "The maximum allowed concurrency value is %d but %d was configured. " +
+                "Please see the documentation for how to increase the limitation.",
+                allowedConcurrency,
+                requestedConcurrency
+            ));
+        }
     }
 }
