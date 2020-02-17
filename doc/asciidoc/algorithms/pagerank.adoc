@@ -85,7 +85,6 @@ YIELD nodes, createMillis, computeMillis, writeMillis, configuration
 | writeConcurrency              | int     | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
 | relationshipWeightProperty    | string  | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | writeProperty                 | string  | n/a                    | no  | The property name written back to.
-| graph                         | string  | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
@@ -124,7 +123,6 @@ YIELD node, score
 | readConcurrency               | int    | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int    | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
 | relationshipWeightProperty    | string | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| graph                         | string | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
