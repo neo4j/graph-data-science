@@ -927,6 +927,25 @@ class GraphCreateProcTest extends BaseProcTest {
             row -> {
                 assertEquals(303744, row.getNumber("bytesMin").longValue());
                 assertEquals(303744, row.getNumber("bytesMax").longValue());
+                assertEquals(42, row.getNumber("nodeCount").longValue());
+                assertEquals(1337, row.getNumber("relationshipCount").longValue());
+            }
+        );
+    }
+
+    @Test
+    void computeMemoryEstimationForVirtualGraphNonEmptyGraph() throws Exception {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class);
+        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
+
+        String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
+        runQueryWithRowConsumer(localDb, query,
+            row -> {
+                assertEquals(303744, row.getNumber("bytesMin").longValue());
+                assertEquals(303744, row.getNumber("bytesMax").longValue());
+                assertEquals(42, row.getNumber("nodeCount").longValue());
+                assertEquals(1337, row.getNumber("relationshipCount").longValue());
             }
         );
     }
