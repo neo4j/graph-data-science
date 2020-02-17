@@ -24,12 +24,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
+
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -327,6 +328,88 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
                    "| 3      | 0.27750000506639483 |\n" +
                    "+------------------------------+\n" +
                    "2 rows\n";
+
+        assertEquals(expected, runQuery(algoQuery, Result::resultAsString));
+    }
+
+    @Test
+    void loadMultipleRelationshipTypesWithDifferentProjectionAndRunPageRank() {
+        runQuery("MATCH (n) DETACH DELETE n");
+        String dbQuery = "CREATE (alice:Person {name: 'Alice'})\n" +
+                         "CREATE (bob:Person {name: 'Bob'})\n" +
+                         "CREATE (eve:Person {name: 'Eve'})\n" +
+                         "CREATE (alice)-[:KNOWS]->(bob)\n" +
+                         "CREATE (bob)-[:KNOWS]->(eve)\n" +
+                         "CREATE (eve)-[:KNOWS]->(bob);";
+
+        runQuery(dbQuery, Collections.emptyMap());
+
+
+        String createQuery = "CALL gds.graph.create(\n" +
+                             "    'my-graph',\n" +
+                             "    'Person',\n" +
+                             "    {\n" +
+                             "        KNOWS: {\n" +
+                             "            type: 'KNOWS',\n" +
+                             "            projection: 'NATURAL'\n" +
+                             "        },\n" +
+                             "        KNOWN_BY: {\n" +
+                             "            type: 'KNOWS',\n" +
+                             "            projection: 'REVERSE'\n" +
+                             "        },\n" +
+                             "        FRIEND_OF: {\n" +
+                             "            type: 'KNOWS',\n" +
+                             "            projection: 'UNDIRECTED'\n" +
+                             "        }\n" +
+                             "    }\n" +
+                             ")\n" +
+                             "YIELD graphName, nodeCount, relationshipCount;";
+
+        String expected = "+--------------------------------------------+\n" +
+                          "| graphName  | nodeCount | relationshipCount |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| \"my-graph\" | 3         | 12                |\n" +
+                          "+--------------------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+
+        String algoQuery = "CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['KNOWS'] }) YIELD nodeId, score;";
+
+        expected = "+------------------------------+\n" +
+                   "| nodeId | score               |\n" +
+                   "+------------------------------+\n" +
+                   "| 0      | 0.15000000000000002 |\n" +
+                   "| 1      | 1.4087054309435185  |\n" +
+                   "| 2      | 1.3424577686004342  |\n" +
+                   "+------------------------------+\n" +
+                   "3 rows\n";
+
+        assertEquals(expected, runQuery(algoQuery, Result::resultAsString));
+
+        algoQuery = "CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['KNOWN_BY'] }) YIELD nodeId, score;";
+
+        expected = "+------------------------------+\n" +
+                   "| nodeId | score               |\n" +
+                   "+------------------------------+\n" +
+                   "| 0      | 0.33463097699113864 |\n" +
+                   "| 1      | 0.43443150687467097 |\n" +
+                   "| 2      | 0.33463097699113864 |\n" +
+                   "+------------------------------+\n" +
+                   "3 rows\n";
+
+        assertEquals(expected, runQuery(algoQuery, Result::resultAsString));
+
+        algoQuery = "CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['FRIEND_OF'] }) YIELD nodeId, score;";
+
+        expected = "+-----------------------------+\n" +
+                   "| nodeId | score              |\n" +
+                   "+-----------------------------+\n" +
+                   "| 0      | 0.5474859261652454 |\n" +
+                   "| 1      | 1.408705436484888  |\n" +
+                   "| 2      | 0.944971852330491  |\n" +
+                   "+-----------------------------+\n" +
+                   "3 rows\n";
 
         assertEquals(expected, runQuery(algoQuery, Result::resultAsString));
     }

@@ -345,6 +345,86 @@ CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['RAIL'] }) YIELD node
 ----
 
 
+=== Projection types
+
+By default, relationships are projected in their natural representation, i.e., in the same way as they are stored in Neo4j.
+Using the `projection` key within a relationship projection definition, we can alter that behaviour.
+There are three possible values: `NATURAL`, `REVERSE` and `UNDIRECTED` which can be best described from a node's perspective:
+
+* `NATURAL` is the default behaviour and projects relationships that are pointing away from a node, i.e., outgoing relationships.
+* `REVERSE` projects relationships that are pointing towards a node, i.e., incoming relationships.
+* `UNDIRECTED` projects relationships in both, natural and reversed order.
+
+Consider the following graph containing `Person` nodes connected by `KNOWS` relationships.
+A `KNOWS` relationship is directed, as one person might know another person, but not necessarily the other way around.
+
+[source,cypher]
+----
+CREATE (alice:Person {name: 'Alice'})
+CREATE (bob:Person {name: 'Bob'})
+CREATE (eve:Person {name: 'Eve'})
+
+CREATE (alice)-[:KNOWS]->(bob)
+CREATE (bob)-[:KNOWS]->(eve)
+CREATE (eve)-[:KNOWS]->(bob);
+----
+
+In a `NATURAL` projection, Alice has one relationship to Bob, Bob has one relationship to Eve who in turn also has one relationship to Bob.
+In a `REVERSE` projection, Alice has no relationships as there is no relationship pointing towards Alice.
+Bob and Eve would have one relationship each, as they point to each other.
+In an `UNDIRECTED` projection, Alice would have one relationship representing the outgoing relationship.
+However, Bob and Eve would have two relationships each as the outgoing and incoming relationships are viewed independently.
+
+To create a graph projection with different projection types, we use the following syntax:
+
+[source,cypher]
+----
+CALL gds.graph.create(
+    'my-graph',
+    'Person',
+    {
+        KNOWS: {
+            type: 'KNOWS',
+            projection: 'NATURAL'
+        },
+        KNOWN_BY: {
+            type: 'KNOWS',
+            projection: 'REVERSE'
+        },
+        FRIEND_OF: {
+            type: 'KNOWS',
+            projection: 'UNDIRECTED'
+        }
+    }
+)
+YIELD graphName, nodeCount, relationshipCount;
+----
+
+As in the previous example, we can refer to a subset of the projected relationships when running an algorithm.
+If we run the examples, we can see different ranks for the individual nodes.
+The Page Rank algorithm evenly distributes ranks along the relationships of a node.
+In the reverse case, Alice has no relationships which leads to a different result.
+
+[source,cypher]
+----
+// Uses `KNOWS` relationships for computing Page Rank of persons
+CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['KNOWS'] }) YIELD nodeId, score;
+
+// Uses `KNOWN_BY` relationships for computing Page Rank based on reversed relationships
+CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['KNOWN_BY'] }) YIELD nodeId, score;
+
+// Uses `FRIEND_OF` relationships for computing Page Rank based on both projection types
+CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['FRIEND_OF'] }) YIELD nodeId, score;
+----
+
+[NOTE]
+====
+Creating a projection consumes additional memory as those projections are stored in individual in-memory data structures.
+Sometimes it is possible to combine relationship projections instead of creating a new one.
+In the above example, the `FRIEND_OF` projection is equivalent to using `['KNOWS', 'KNOWN_BY']` as a relationship type predicate.
+This is not possible, if we use different aggregations for the single projections.
+====
+
 === Relationship properties
 
 Similar to node properties, relationship projections support specifying relationship properties.
