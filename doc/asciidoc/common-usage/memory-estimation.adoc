@@ -47,17 +47,6 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 
 The configuration parameter accepts the same configuration parameters as the estimated algorithm.
 See the algorithm documentation for more information.
-Additionally the following parameters are supported:
-
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type      | Default           | Optional  | Description
-| nodeCount         | int       | 0                 | yes       | The number of nodes in a fictive graph.
-| relationshipCount | int       | 0                 | yes       | The number of relationships in a fictive graph.
-|===
-
-Setting the `nodeCount` and `relationshipCount` parameters allows a memory estimation without loading the graph.
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -85,6 +74,8 @@ CALL gds.graph.create.estimate(nodeProjection: String|List|Map, relationshipProj
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
 ----
 
+The `nodeProjection` and `relationshipProjection` parameters follow the same syntax as in <<catalog-graph-create, `gds.graph.create`>>.
+
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
@@ -92,6 +83,42 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 | nodeProjection         | string or list or map | -         | no        | The node projection to estimate for.
 | relationshipProjection | string or list or map | -         | no        | The relationship projection to estimate for.
 | config                 | map                   | {}        | yes       | Additional configuration, such as concurrency.
+|===
+
+It is furthermore possible to estimate the memory of a graph, by explicitly specifying its number of nodes and relationships.
+This will work even if no graph with such node and relationship counts exists in the database.
+To achieve this, use the following configuration options:
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type      | Default           | Optional  | Description
+| nodeCount         | int       | 0                 | yes       | The number of nodes in a fictive graph.
+| relationshipCount | int       | 0                 | yes       | The number of relationships in a fictive graph.
+|===
+
+In estimating a fictive graph, syntactically valid `nodeProjection` and `relationshipProjection` need to be specified.
+However, it is recommended to specify `'*'` for both in the fictive graph case as this does not interfere with the specified values above.
+
+The query below is an example of estimating a fictive graph with 100 nodes and 1000 relationships.
+
+.Example
+[source, cypher]
+----
+CALL gds.graph.create.estimate('*', '*', {
+  nodeCount: 100,
+  relationshipCount: 1000,
+  nodeProperties: 'foo',
+  relationshipProperties: 'bar'
+})
+YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
+----
+
+.Results
+[opts="header",cols="2,1,1,1,1"]
+|===
+| requiredMemory          | bytesMin | bytesMax | nodeCount | relationshipCount
+| "[561 KiB ... 564 KiB]" | 574712   | 577896   | 100       | 1000
 |===
 
 The <<cypher-projection, `gds.graph.create.cypher`>> procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
@@ -111,6 +138,3 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 | relationshipQuery | string | -         | no        | The relationship query to estimate for.
 | config            | map    | {}        | yes       | Additional configuration, such as concurrency.
 |===
-
-Both estimate procedures also accept `nodeCount` and `relationshipCount` as configuration keys.
-Setting those parameters allows a memory estimation without having to read from the underlying database.
