@@ -47,12 +47,20 @@ This section explains how to migrate from the Neo4j Graph Algorithms (GA) librar
 //installation changes?
 //- unrestricted_procedures: algo.* -> gds.*
 
+== Who should read this guide
 
-*GDS* refers to the Graph Data Science library.
+This migration guide is intended for users who are familiar with the Graph Algorithms library.
+We assume that most of the mentioned operations and concepts can be understood with little explanation.
+Thus we are intentionally brief in the examples and comparisons.
+Please see the dedicated chapters in this manual for details on all the features in the Graph Data Science library.
 
-*GA* refers to the Graph Algorithms library
 
 == Syntax
+
+In this section we will focus on side-by-side examples of operations using the syntax of the Graph Algorithms library and Graph Data Science library, respectively.
+In the tables below *GA* refers to the Graph Algorithms library and *GDS* refers to the Graph Data Science library.
+
+This section is divided into the following sub-sections:
 
 . <<graph-ops, Graph Operations>>
 . <<product-algos, Production-quality algorithms>>
