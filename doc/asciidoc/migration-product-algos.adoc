@@ -7,12 +7,12 @@
 . <<migration-page-rank, PageRank>>
 . <<migration-wcc, Weakly Connected Components>>
 
-include::migration-lpa.adoc[leveloffset=+2]
+include::migration-lpa.adoc[leveloffset=+1]
 
-include::migration-louvain.adoc[leveloffset=+2]
+include::migration-louvain.adoc[leveloffset=+1]
 
-include::migration-node-sim.adoc[leveloffset=+2]
+include::migration-node-sim.adoc[leveloffset=+1]
 
-include::migration-page-rank.adoc[leveloffset=+2]
+include::migration-page-rank.adoc[leveloffset=+1]
 
-include::migration-wcc.adoc[leveloffset=+2]
+include::migration-wcc.adoc[leveloffset=+1]
