@@ -13,11 +13,11 @@ This chapter is divided into the following sections:
 * <<graph-catalog-ops>>
 * <<native-projection>>
 * <<cypher-projection>>
-* <<implicit-projection>>
+* <<anonymous-graph>>
 * <<utility-functions>>
 
 include::graph-catalog.adoc[leveloffset=+1]
 include::native-projection.adoc[leveloffset=+1]
 include::cypher-projection.adoc[tag=overview,leveloffset=+1]
-include::implicit-projection.adoc[leveloffset=+1]
+include::anonymous-graph.adoc[leveloffset=+1]
 include::utility-functions.adoc[leveloffset=+1]
