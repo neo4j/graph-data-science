@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;

@@ -30,7 +30,7 @@ CREATE (dave)-[:LIKES]->(bongos);
 [source, cypher]
 ----
 CALL gds.nodeSimilarity.stream({
-  nodeProjection: 'Person | Instrument',
+  nodeProjection: ['Person', 'Instrument'],
   relationshipProjection: 'LIKES'
 })
 YIELD node1, node2, similarity

@@ -204,7 +204,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
         });
 
         runQuery("CALL  gds.graph.create('personalisedGraph', " +
-                 "'Person | Product'," +
+                 "  ['Person', 'Product']," +
                  "  {" +
                  "      Product:{" +
                  "        type:'PURCHASED'," +

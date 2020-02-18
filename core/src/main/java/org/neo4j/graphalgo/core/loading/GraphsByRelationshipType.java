@@ -21,12 +21,11 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
-import org.neo4j.graphalgo.core.utils.ProjectionParser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -63,35 +62,20 @@ public final class GraphsByRelationshipType {
         this.graphs = graphs;
     }
 
-    @Deprecated
-    public Graph getGraph(String relationshipType) {
-        return getGraph(relationshipType, Optional.empty());
+    public Graph getGraphProjection(String... relationshipTypes) {
+        return getGraphProjection(Arrays.asList(relationshipTypes), Optional.empty());
     }
 
-    @Deprecated
-    public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
-        Set<String> types = ProjectionParser.parse(relationshipType);
-
-        ArrayList<String> relationshipTypes = new ArrayList<>(types);
-        if (types.isEmpty()) {
-            relationshipTypes.add("*");
-        }
-        return getGraphProjection(relationshipTypes, maybeRelationshipProperty);
-    }
-
-    public Graph getGraphProjection(String relationshipProjection) {
-        return getGraphProjection(Collections.singletonList(relationshipProjection), Optional.empty());
-    }
-
-    public Graph getGraphProjection(String relationshipProjection, String relationshipProperty) {
-        return getGraphProjection(Collections.singletonList(relationshipProjection), Optional.of(relationshipProperty));
+    public Graph getGraphProjection(String relationshipType, Optional<String> relationshipProperty) {
+        return getGraphProjection(Collections.singletonList(relationshipType), relationshipProperty);
     }
 
     public Graph getGraphProjection(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         if (relationshipTypes.isEmpty()) {
-            throw new IllegalArgumentException(String.format("The parameter %s should not be empty. Use `*` to load all relationship types.",
-                ProcedureConstants.RELATIONSHIP_TYPES
-            ));
+            relationshipTypes.add("*");
+//            throw new IllegalArgumentException(String.format("The parameter %s should not be empty. Use `*` to load all relationship types.",
+//                ProcedureConstants.RELATIONSHIP_TYPES
+//            ));
         }
 
         Map<String, Map<String, Graph>> graphsWithRelTypes = relationshipTypes.contains("*") ?

@@ -92,7 +92,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
         String graphCreate =
             "CALL gds.graph.create(" +
             "    'myGraphNATURAL'," +
-            "    'Person | Item'," +
+            "    ['Person', 'Item']," +
             "    'LIKES'" +
             ")";
 

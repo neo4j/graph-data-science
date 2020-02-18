@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -90,14 +89,9 @@ class NodeProjectionsTest {
         assertThat(actual.labelProjection(), equalTo("A"));
     }
 
-    static Stream<Object> multipleNodeLabels() {
-        return Stream.of("A | B", Arrays.asList("A", "B"));
-    }
-
-    @ParameterizedTest
-    @MethodSource("multipleNodeLabels")
-    void shouldParseMultipleLabels(Object input) {
-        NodeProjections actual = NodeProjections.fromObject(input);
+    @Test
+    void shouldParseMultipleLabels() {
+        NodeProjections actual = NodeProjections.fromObject(Arrays.asList("A", "B"));
 
         NodeProjections expected = NodeProjections.builder()
             .putProjection(ElementIdentifier.of("A"), NodeProjection.builder().label("A").build())

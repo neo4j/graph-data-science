@@ -205,7 +205,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 .The following statement will create the graph and store it in the graph catalog.
 [source, cypher, role=setup-query]
 ----
-CALL gds.graph.create('myGraph', 'Person | Instrument', 'LIKES');
+CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 ----
 
 In the following examples we will demonstrate using the Node Similarity algorithm on this graph.

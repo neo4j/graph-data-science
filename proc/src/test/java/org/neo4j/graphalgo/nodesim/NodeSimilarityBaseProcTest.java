@@ -98,7 +98,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
             arguments(
                 GdsCypher
                     .call()
-                    .withNodeLabel("Person | Item")
+                    .withNodeLabels("Person", "Item")
                     .withRelationshipType("LIKES", RelationshipProjection
                         .builder()
                         .type("LIKES")

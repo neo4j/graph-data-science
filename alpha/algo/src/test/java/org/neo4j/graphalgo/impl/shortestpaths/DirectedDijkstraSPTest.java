@@ -35,6 +35,8 @@ import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Label;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
@@ -110,7 +112,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testOutgoing() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
-        Graph graph = graphs.getGraphProjection("REL_OUT", "cost");
+        Graph graph = graphs.getGraphProjection("REL_OUT", Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -124,7 +126,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testIncoming() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
-        Graph graph = graphs.getGraphProjection("REL_IN", "cost");
+        Graph graph = graphs.getGraphProjection("REL_IN", Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -138,7 +140,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testBoth() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
-        Graph graph = graphs.getGraphProjection("REL_BOTH", "cost");
+        Graph graph = graphs.getGraphProjection("REL_BOTH", Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute(id("a"), id("f"));
 
@@ -153,7 +155,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testUnreachableOutgoing() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
-        Graph graph = graphs.getGraphProjection("REL_OUT", "cost");
+        Graph graph = graphs.getGraphProjection("REL_OUT", Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -167,7 +169,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testUnreachableIncoming() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
-        Graph graph = graphs.getGraphProjection("REL_IN", "cost");
+        Graph graph = graphs.getGraphProjection("REL_IN", Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -181,7 +183,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testUnreachableBoth() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
-        Graph graph = graphs.getGraphProjection("REL_BOTH", "cost");
+        Graph graph = graphs.getGraphProjection("REL_BOTH", Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 

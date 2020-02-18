@@ -29,7 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
-import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;

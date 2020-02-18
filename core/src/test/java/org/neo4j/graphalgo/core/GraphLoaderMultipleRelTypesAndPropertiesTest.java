@@ -183,9 +183,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         assertEquals(2, graphs.availableRelationshipTypes().size());
         assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));
 
-        Graph rel1Graph = graphs.getGraph("REL1");
-        Graph rel2Graph = graphs.getGraph("REL2");
-        Graph unionGraph = graphs.getGraph("REL1 | REL2");
+        Graph rel1Graph = graphs.getGraphProjection("REL1");
+        Graph rel2Graph = graphs.getGraphProjection("REL2");
+        Graph unionGraph = graphs.getGraphProjection("REL1", "REL2");
 
         assertGraphEquals(fromGdl("(a)-->(b)-->(c)"), rel1Graph);
         assertGraphEquals(fromGdl("(a)-->(c), (b)"), rel2Graph);
@@ -202,9 +202,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         assertEquals(2, graphs.availableRelationshipTypes().size());
         assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));
 
-        Graph rel1Graph = graphs.getGraph("REL1");
-        Graph rel2Graph = graphs.getGraph("REL2");
-        Graph unionGraph = graphs.getGraph("REL1 | REL2");
+        Graph rel1Graph = graphs.getGraphProjection("REL1");
+        Graph rel2Graph = graphs.getGraphProjection("REL2");
+        Graph unionGraph = graphs.getGraphProjection("REL1", "REL2");
 
         assertGraphEquals(fromGdl("(a)-[]->(b)-[]->(c)"), rel1Graph);
         assertGraphEquals(fromGdl("(a)-[]->(c), (b)"), rel2Graph);
@@ -235,7 +235,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             )
             .buildGraphs(graphFactory);
 
-        Graph p1Graph = graphs.getGraph("", Optional.of("agg1"));
+        Graph p1Graph = graphs.getGraphProjection("", Optional.of("agg1"));
         Graph expectedP1Graph = fromGdl(
             "(a)-[{w: 42}]->(a)" +
             "(a)-[{w: 43}]->(a)" +
@@ -245,7 +245,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         );
         assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2Graph = graphs.getGraph("", Optional.of("agg2"));
+        Graph p2Graph = graphs.getGraphProjection("", Optional.of("agg2"));
         Graph expectedP2Graph = fromGdl(
             "(a)-[{w: 1337}]->(a)" +
             "(a)-[{w: 1338}]->(a)" +
@@ -255,7 +255,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         );
         assertGraphEquals(expectedP2Graph, p2Graph);
 
-        Graph p3Graph = graphs.getGraph("", Optional.of("agg3"));
+        Graph p3Graph = graphs.getGraphProjection("", Optional.of("agg3"));
         Graph expectedP3Graph = fromGdl(
             "(a)-[{w: 2}]->(a)" +
             "(a)-[{w: 10}]->(a)" +
@@ -287,21 +287,21 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             )
             .buildGraphs(graphFactory);
 
-        Graph p1Graph = graphs.getGraph("", Optional.of("agg1"));
+        Graph p1Graph = graphs.getGraphProjection("", Optional.of("agg1"));
         Graph expectedP1Graph = fromGdl(
             "(a)-[{w: 1.0d}]->(a)" +
             "(b)-[{w: 1.0d}]->(b)"
         );
         assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2Graph = graphs.getGraph("", Optional.of("agg2"));
+        Graph p2Graph = graphs.getGraphProjection("", Optional.of("agg2"));
         Graph expectedP2Graph = fromGdl(
             "(a)-[{w: 51.0d}]->(a)" +
             "(b)-[{w: 50.0d}]->(b)"
         );
         assertGraphEquals(expectedP2Graph, p2Graph);
 
-        Graph p3Graph = graphs.getGraph("", Optional.of("agg3"));
+        Graph p3Graph = graphs.getGraphProjection("", Optional.of("agg3"));
         Graph expectedP3Graph = fromGdl(
             "(a)-[{w: 93.0d}]->(a)" +
             "(b)-[{w: 48.0d}]->(b)"
@@ -362,14 +362,14 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             )
             .buildGraphs(graphFactory);
 
-        Graph p1Graph = graphs.getGraph("", Optional.of("agg1"));
+        Graph p1Graph = graphs.getGraphProjection("", Optional.of("agg1"));
         Graph expectedP1Graph = fromGdl(
             "(a)-[{w: 44.0d}]->(a)" +
             "(b)-[{w: 46.0d}]->(b)"
         );
         assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2Graph = graphs.getGraph("", Optional.of("agg2"));
+        Graph p2Graph = graphs.getGraphProjection("", Optional.of("agg2"));
         Graph expectedP2Graph = fromGdl(
             "(a)-[{w: 42.0d}]->(a)" +
             "(b)-[{w: 45.0d}]->(b)"
@@ -430,7 +430,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             )
             .buildGraphs(graphFactory);
 
-        Graph p1Graph = graphs.getGraph("", Optional.of("p1"));
+        Graph p1Graph = graphs.getGraphProjection("", Optional.of("p1"));
         Graph expectedP1Graph = fromGdl(String.format(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)" +
@@ -440,7 +440,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         ));
         assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2Graph = graphs.getGraph("", Optional.of("p2"));
+        Graph p2Graph = graphs.getGraphProjection("", Optional.of("p2"));
         Graph expectedP2Graph = fromGdl(String.format(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)" +
@@ -470,7 +470,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             )
             .buildGraphs(graphFactory);
 
-        Graph graph = graphs.getGraph("", Optional.of("agg"));
+        Graph graph = graphs.getGraphProjection("*", Optional.of("agg"));
         assertEquals(3L, graph.relationshipCount());
         Graph expectedGraph = fromGdl(
             "(a)-[{w: 42.0d}]->(a)" +
@@ -514,7 +514,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             )
             .buildGraphs(graphFactory);
 
-        Graph p1Graph = graphs.getGraph("", Optional.of("p1"));
+        Graph p1Graph = graphs.getGraphProjection("", Optional.of("p1"));
         Graph expectedP1Graph = fromGdl(String.format(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)",
@@ -523,7 +523,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         ));
         assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2Graph = graphs.getGraph("", Optional.of("p2"));
+        Graph p2Graph = graphs.getGraphProjection("", Optional.of("p2"));
         Graph expectedP2Graph = fromGdl(String.format(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)",
@@ -554,12 +554,12 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)";
 
-        Graph p1Graph = graphs.getGraph("", Optional.of("p1"));
+        Graph p1Graph = graphs.getGraphProjection("", Optional.of("p1"));
         Graph expectedP1GraphOption1 = fromGdl(String.format(expectedGraphTemplate, 43D, 46D));
         Graph expectedP1GraphOption2 = fromGdl(String.format(expectedGraphTemplate, 42D, 46D));
         assertGraphEquals(Arrays.asList(expectedP1GraphOption1, expectedP1GraphOption2), p1Graph);
 
-        Graph p2Graph = graphs.getGraph("", Optional.of("p2"));
+        Graph p2Graph = graphs.getGraphProjection("", Optional.of("p2"));
         Graph expectedP2GraphOption1 = fromGdl(String.format(expectedGraphTemplate, 1338D, 1341D));
         Graph expectedP2GraphOption2 = fromGdl(String.format(expectedGraphTemplate, 1337D, 1341D));
         assertGraphEquals(Arrays.asList(expectedP2GraphOption1, expectedP2GraphOption2), p2Graph);
@@ -571,7 +571,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withRelationshipTypes("REL1", "REL2")
             .buildGraphs(graphFactory);
 
-        Graph rel1Graph = graphs.getGraph("REL1");
+        Graph rel1Graph = graphs.getGraphProjection("REL1");
         Graph unionGraph = graphs.getUnion();
 
         rel1Graph.release();
@@ -595,7 +595,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withRelationshipTypes("REL1", "REL2", "REL3")
             .buildGraphs(graphFactory);
 
-        Graph rel1Graph = graphs.getGraph("REL1");
+        Graph rel1Graph = graphs.getGraphProjection("REL1");
         Graph unionGraph = graphs.getUnion();
 
         long[] expectedCounts = new long[4];

@@ -19,23 +19,21 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.core.utils.Directions;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.WriteConfig;
+import org.neo4j.graphalgo.core.utils.Directions;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
 
@@ -127,9 +125,10 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
 
     @Override
     public List<String> relationshipTypes() {
-        String relationshipTypes = configurationMap.getString(ProcedureConstants.RELATIONSHIP_TYPES).orElse("");
-        Set<String> parsedRelationshipTypes = ProjectionParser.parse(relationshipTypes);
-        return new ArrayList<>(parsedRelationshipTypes);
+        List<String> relationshipTypes = configurationMap.getList(ProcedureConstants.RELATIONSHIP_TYPES);
+        return relationshipTypes.isEmpty()
+            ? Collections.singletonList("*")
+            : relationshipTypes;
     }
 
     @Override

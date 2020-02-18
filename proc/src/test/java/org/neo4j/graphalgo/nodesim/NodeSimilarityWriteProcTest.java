@@ -26,10 +26,8 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Projection;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Map;
 import java.util.Optional;
@@ -44,8 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.Projection.REVERSE;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphdb.Direction.INCOMING;
-import static org.neo4j.graphdb.Direction.OUTGOING;
 
 public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<NodeSimilarityWriteConfig> {
 

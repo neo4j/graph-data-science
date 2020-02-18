@@ -24,10 +24,10 @@ import org.immutables.value.Value;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.cypher.CypherPrinter;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.cypher.CypherPrinter;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -109,14 +109,21 @@ public abstract class GdsCypher {
         }
 
         default ImplicitCreationBuildStage withNodeLabel(String label) {
-            return withNodeLabel(label, NodeProjection.builder().label(label).build());
+            return withNodeLabels(label);
         }
 
-        default ImplicitCreationBuildStage withNodeLabel(String label, String neoLabel) {
-            return withRelationshipType(label, RelationshipProjection.builder().type(neoLabel).build());
+        default ImplicitCreationBuildStage withNodeLabel(String label, NodeProjection nodeProjection) {
+            return withNodeLabels(singletonMap(label, nodeProjection));
         }
 
-        ImplicitCreationBuildStage withNodeLabel(String labelKey, NodeProjection nodeProjection);
+        default ImplicitCreationBuildStage withNodeLabels(String... labels) {
+            return withNodeLabels(Arrays.stream(labels).collect(Collectors.toMap(
+                label -> label,
+                label -> NodeProjection.builder().label(label).build()
+            )));
+        }
+
+        ImplicitCreationBuildStage withNodeLabels(Map<String, NodeProjection> nodeProjections);
 
         default ImplicitCreationBuildStage withAnyRelationshipType() {
             return withRelationshipType("*", RelationshipProjection.all());
@@ -475,11 +482,11 @@ public abstract class GdsCypher {
         }
 
         @Override
-        public StagedBuilder withNodeLabel(
-            String labelKey,
-            NodeProjection nodeProjection
-        ) {
-            graphCreateBuilder().putNodeProjection(ElementIdentifier.of(labelKey), nodeProjection);
+        public ImplicitCreationBuildStage withNodeLabels(Map<String, NodeProjection> nodeProjections) {
+            nodeProjections.forEach((label, nodeProjection) -> graphCreateBuilder().putNodeProjection(
+                ElementIdentifier.of(label),
+                nodeProjection
+            ));
             return this;
         }
 

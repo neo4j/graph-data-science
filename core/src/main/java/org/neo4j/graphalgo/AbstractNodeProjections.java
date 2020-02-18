@@ -23,11 +23,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
-import org.neo4j.graphalgo.core.utils.ProjectionParser;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -73,12 +71,9 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
             return create(singletonMap(PROJECT_ALL, NodeProjection.all()));
         }
 
-        return create(ProjectionParser.parse(labelString).stream()
-            .collect(Collectors.toMap(
-                ElementIdentifier::new,
-                NodeProjection::fromString
-            ))
-        );
+        ElementIdentifier identifier = new ElementIdentifier(labelString);
+        NodeProjection projection = NodeProjection.fromString(labelString);
+        return create(singletonMap(identifier, projection));
     }
 
     private static NodeProjections fromMap(Map<String, ?> map) {

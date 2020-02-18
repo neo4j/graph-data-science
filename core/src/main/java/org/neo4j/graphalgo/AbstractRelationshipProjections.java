@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
-import org.neo4j.graphalgo.core.utils.ProjectionParser;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -71,12 +70,9 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             return create(singletonMap(PROJECT_ALL, RelationshipProjection.all()));
         }
 
-        return create(ProjectionParser.parse(typeString).stream()
-            .collect(Collectors.toMap(
-                ElementIdentifier::new,
-                RelationshipProjection::fromString
-            ))
-        );
+        ElementIdentifier identifier = new ElementIdentifier(typeString);
+        RelationshipProjection filter = RelationshipProjection.fromString(typeString);
+        return create(singletonMap(identifier, filter));
     }
 
     public static RelationshipProjections fromMap(Map<String, ?> map) {

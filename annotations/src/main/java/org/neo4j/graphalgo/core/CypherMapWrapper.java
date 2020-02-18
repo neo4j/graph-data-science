@@ -24,10 +24,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
 /**
@@ -66,6 +68,11 @@ public final class CypherMapWrapper {
     @SuppressWarnings("unchecked")
     public Map<String, Object> getMap(String key) {
         return getChecked(key, emptyMap(), Map.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> getList(String key) {
+        return getChecked(key, emptyList(), List.class);
     }
 
     // TODO: this is a special case as it's treating the empty string as null
