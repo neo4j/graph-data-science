@@ -22,12 +22,12 @@ package org.neo4j.graphalgo;
 
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -117,7 +117,7 @@ final class GraphCreateConfigBuilders {
             .relationshipProjection(rp)
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
-            .concurrency(concurrency.orElse(Pools.DEFAULT_CONCURRENCY))
+            .concurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
             .build()
             .withNormalizedPropertyMappings();
     }
@@ -175,7 +175,7 @@ final class GraphCreateConfigBuilders {
             .relationshipProjection(relationshipProjections)
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
-            .concurrency(concurrency.orElse(Pools.DEFAULT_CONCURRENCY))
+            .concurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
             .build();
     }
 

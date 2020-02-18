@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ProcedureConstants;
-import org.neo4j.graphalgo.core.utils.Pools;
 
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
@@ -60,7 +59,7 @@ public interface GraphCreateConfig extends BaseConfig {
     @Value.Parameter(false)
     @Configuration.Key(ProcedureConstants.READ_CONCURRENCY_KEY)
     default int concurrency() {
-        return Pools.DEFAULT_CONCURRENCY;
+        return AlgoBaseConfig.DEFAULT_CONCURRENCY;
     }
 
     @Value.Default

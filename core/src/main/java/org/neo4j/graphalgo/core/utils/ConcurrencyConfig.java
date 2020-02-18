@@ -24,9 +24,10 @@ import org.neo4j.graphalgo.compat.Editions;
 final class ConcurrencyConfig {
 
     private static final String PROCESSORS_OVERRIDE_PROPERTY = "neo4j.graphalgo.processors";
-    private static final int MAX_CE_CONCURRENCY = 4;
+    private static final int CONCURRENCY_LIMITATION = 4;
 
-    final int maxConcurrency;
+    final int maximumConcurrency;
+    final int corePoolSize;
 
     static ConcurrencyConfig of() {
         Integer definedProcessors = null;
@@ -42,9 +43,11 @@ final class ConcurrencyConfig {
 
     /* test-private */ ConcurrencyConfig(int availableProcessors, boolean isOnEnterprise) {
         if (isOnEnterprise) {
-            maxConcurrency = Integer.MAX_VALUE;
+            maximumConcurrency = Integer.MAX_VALUE;
+            corePoolSize = availableProcessors;
         } else {
-            maxConcurrency = MAX_CE_CONCURRENCY;
+            maximumConcurrency = CONCURRENCY_LIMITATION;
+            corePoolSize = Math.min(availableProcessors, CONCURRENCY_LIMITATION);
         }
     }
 }

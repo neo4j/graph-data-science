@@ -28,7 +28,7 @@ class PoolsTest {
 
     @Test
     void forkJoinPoolShouldBeLimited() {
-        assertThat(Pools.FJ_POOL.getParallelism(), equalTo(Pools.DEFAULT_CONCURRENCY));
+        assertThat(Pools.FJ_POOL.getParallelism(), equalTo(Pools.MAXIMUM_CONCURRENCY));
     }
 
 }

@@ -35,19 +35,20 @@ import java.util.concurrent.TimeoutException;
 
 public final class Pools {
 
-    private static final int MAX_CONCURRENCY;
-    public static final int DEFAULT_CONCURRENCY = 4;
+    static final int MAXIMUM_CONCURRENCY;
+    private static final int CORE_POOL_SIZE;
 
     static {
         ConcurrencyConfig concurrencyConfig = ConcurrencyConfig.of();
-        MAX_CONCURRENCY = concurrencyConfig.maxConcurrency;
+        MAXIMUM_CONCURRENCY = concurrencyConfig.maximumConcurrency;
+        CORE_POOL_SIZE = concurrencyConfig.corePoolSize;
     }
 
     public static int allowedConcurrency(int concurrency) {
-        return Math.min(MAX_CONCURRENCY, concurrency);
+        return Math.min(MAXIMUM_CONCURRENCY, concurrency);
     }
 
-    public static final int DEFAULT_QUEUE_SIZE = DEFAULT_CONCURRENCY * 50;
+    private static final int DEFAULT_QUEUE_SIZE = CORE_POOL_SIZE * 50;
 
     public static final ExecutorService DEFAULT = createDefaultPool();
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createDefaultSingleThreadPool();
@@ -57,10 +58,10 @@ public final class Pools {
         throw new UnsupportedOperationException();
     }
 
-    public static ExecutorService createDefaultPool() {
+    private static ExecutorService createDefaultPool() {
         return new ThreadPoolExecutor(
-            DEFAULT_CONCURRENCY,
-            DEFAULT_CONCURRENCY * 2,
+            CORE_POOL_SIZE,
+            CORE_POOL_SIZE * 2,
             30L,
             TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(DEFAULT_QUEUE_SIZE),
@@ -73,11 +74,11 @@ public final class Pools {
         return Executors.newSingleThreadExecutor(NamedThreadFactoryProxy.daemon());
     }
 
-    public static ForkJoinPool createFJPool() {
-        return createFJPool(DEFAULT_CONCURRENCY);
+    private static ForkJoinPool createFJPool() {
+        return createFJPool(CORE_POOL_SIZE);
     }
 
-    public static ForkJoinPool createFJPool(int concurrency) {
+    static ForkJoinPool createFJPool(int concurrency) {
         return new ForkJoinPool(concurrency);
     }
 

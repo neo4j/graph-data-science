@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -97,13 +98,13 @@ class StronglyConnectedComponentsPregelTest extends AlgoTestBase {
             .build();
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
-                graph,
-                config,
-                new ConnectedComponentsPregel(),
-                batchSize,
-                Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT,
-                AllocationTracker.EMPTY
+            graph,
+            config,
+            new ConnectedComponentsPregel(),
+            batchSize,
+            AlgoBaseConfig.DEFAULT_CONCURRENCY,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
         );
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);

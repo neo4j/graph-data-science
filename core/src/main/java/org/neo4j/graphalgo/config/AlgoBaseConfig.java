@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.core.utils.Pools;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,9 +28,11 @@ import java.util.Optional;
 
 public interface AlgoBaseConfig extends BaseConfig {
 
+    int DEFAULT_CONCURRENCY = 4;
+
     @Value.Default
     default int concurrency() {
-        return Pools.DEFAULT_CONCURRENCY;
+        return DEFAULT_CONCURRENCY;
     }
 
     @Configuration.Parameter

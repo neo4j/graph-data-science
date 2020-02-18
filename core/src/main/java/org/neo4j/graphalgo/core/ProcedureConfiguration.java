@@ -142,7 +142,7 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
     @Override
     public int concurrency() {
         int requestedConcurrency = configurationMap
-            .getNumber(ProcedureConstants.CONCURRENCY_KEY, Pools.DEFAULT_CONCURRENCY)
+            .getNumber(ProcedureConstants.CONCURRENCY_KEY, AlgoBaseConfig.DEFAULT_CONCURRENCY)
             .intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
     }
@@ -152,7 +152,7 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
         Number writeConcurrency = configurationMap.getNumber(
             ProcedureConstants.WRITE_CONCURRENCY_KEY,
             ProcedureConstants.CONCURRENCY_KEY,
-            Pools.DEFAULT_CONCURRENCY
+            AlgoBaseConfig.DEFAULT_CONCURRENCY
         );
         int requestedConcurrency = writeConcurrency.intValue();
         return Pools.allowedConcurrency(requestedConcurrency);

@@ -23,6 +23,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.ExceptionUtil;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
 
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public final class ParallelUtil {
      * Executes the given function in parallel on the given {@link BaseStream}, using {@link Pools#FJ_POOL}.
      */
     public static <T extends BaseStream<?, T>, R> R parallelStream(T data, Function<T, R> fn) {
-        return parallelStream(data, Pools.DEFAULT_CONCURRENCY, fn);
+        return parallelStream(data, AlgoBaseConfig.DEFAULT_CONCURRENCY, fn);
     }
 
     /**
@@ -95,7 +96,7 @@ public final class ParallelUtil {
      * Executes the given function in parallel on the given {@link BaseStream}, using {@link Pools#FJ_POOL}
      */
     public static <T extends BaseStream<?, T>> void parallelStreamConsume(T data, Consumer<T> fn) {
-        parallelStreamConsume(data, Pools.DEFAULT_CONCURRENCY, fn);
+        parallelStreamConsume(data, AlgoBaseConfig.DEFAULT_CONCURRENCY, fn);
     }
 
     /**
@@ -1105,6 +1106,8 @@ public final class ParallelUtil {
 
     private static ForkJoinPool getFJPoolWithConcurrency(int concurrency) {
         int actualConcurrency = Pools.allowedConcurrency(concurrency);
-        return actualConcurrency == Pools.DEFAULT_CONCURRENCY ? Pools.FJ_POOL : Pools.createFJPool(actualConcurrency);
+        return actualConcurrency == AlgoBaseConfig.DEFAULT_CONCURRENCY
+            ? Pools.FJ_POOL
+            : Pools.createFJPool(actualConcurrency);
     }
 }
