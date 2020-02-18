@@ -31,14 +31,13 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CosineDocTest extends BaseProcTest {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         String createGraph = "CREATE (french:Cuisine {name:'French'})" +
                              "CREATE (italian:Cuisine {name:'Italian'})" +
                              "CREATE (indian:Cuisine {name:'Indian'})" +

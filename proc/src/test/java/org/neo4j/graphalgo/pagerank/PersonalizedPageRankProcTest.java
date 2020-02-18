@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +75,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
     private static final Label PRODUCT_LABEL = Label.label("Product");
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);

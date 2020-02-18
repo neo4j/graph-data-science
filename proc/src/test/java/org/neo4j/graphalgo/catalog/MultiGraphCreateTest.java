@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -40,7 +39,7 @@ import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 class MultiGraphCreateTest {
 
     @Test
-    void testMultipleGraphLoadsAfterDbChange() throws KernelException {
+    void testMultipleGraphLoadsAfterDbChange() throws Exception {
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
         db
             .getDependencyResolver()

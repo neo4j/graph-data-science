@@ -36,12 +36,11 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.IterationsConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.catalog.IterationsConfigTest;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.graphalgo.newapi.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -74,7 +73,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
     }
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws Exception {
 
         db = TestDatabaseCreator.createTestDatabase();
 

@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.catalog.GraphDropProc;
 import org.neo4j.graphalgo.catalog.GraphExistsProc;
 import org.neo4j.graphalgo.catalog.GraphListProc;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,7 @@ class GraphDropProcTest extends BaseProcTest {
     private static final String GRAPH_NAME = "graphNameToDrop";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphCreateProc.class,
@@ -173,7 +172,7 @@ class GraphDropProcTest extends BaseProcTest {
     }
 
     @Test
-    void removeGraphWithMultipleRelationshipTypes() throws KernelException {
+    void removeGraphWithMultipleRelationshipTypes() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphCreateProc.class, GraphExistsProc.class, GraphDropProc.class, GraphListProc.class);
 

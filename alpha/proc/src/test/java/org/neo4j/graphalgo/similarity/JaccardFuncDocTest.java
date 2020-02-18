@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -67,7 +66,7 @@ class JaccardFuncDocTest extends BaseProcTest {
     String NL = System.lineSeparator();
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );

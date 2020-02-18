@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -54,7 +53,7 @@ public class ClosenessCentralityDocTest extends BaseProcTest {
        " ,(e)-[:LINK]->(d);";
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );

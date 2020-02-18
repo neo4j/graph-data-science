@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.helpers.collection.Pair;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -292,7 +291,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
                 .getDependencyResolver()
                 .resolveDependency(Procedures.class, DependencyResolver.SelectionStrategy.ONLY);
             procedures.registerProcedure(GraphCreateProc.class);
-        } catch (KernelException ke) {
+        } catch (Exception ke) {
             ke.printStackTrace();
         }
 

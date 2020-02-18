@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,7 +36,7 @@ final class GraphGenerateDocTest extends BaseProcTest {
     private static final String NL = System.lineSeparator();
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphGenerateProc.class);
     }

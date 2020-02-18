@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.stream.Stream;
 
@@ -57,7 +56,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
         ", (michael)-[:FOLLOWS {score: 1.5}]->(doug)";
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(builder ->
             builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );

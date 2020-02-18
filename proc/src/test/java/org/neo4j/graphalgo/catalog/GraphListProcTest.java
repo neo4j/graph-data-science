@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collections;
 import java.util.List;
@@ -54,7 +53,7 @@ class GraphListProcTest extends BaseProcTest {
     private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphCreateProc.class,

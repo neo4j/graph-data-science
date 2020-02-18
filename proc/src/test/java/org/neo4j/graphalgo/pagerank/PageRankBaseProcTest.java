@@ -41,7 +41,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.IterationsConfigTest;
 import org.neo4j.graphdb.Label;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
@@ -69,7 +68,7 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
     }
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws Exception {
 
         db = TestDatabaseCreator.createTestDatabase();
 

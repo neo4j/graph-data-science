@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
@@ -36,7 +35,7 @@ import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
 class ConfigKeyValidationTest extends BaseProcTest {
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphCreateProc.class, PageRankStreamProc.class);
     }

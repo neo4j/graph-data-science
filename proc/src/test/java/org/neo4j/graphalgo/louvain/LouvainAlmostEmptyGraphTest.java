@@ -27,9 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
 
 import java.util.stream.Stream;
 
@@ -39,7 +38,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 final class LouvainAlmostEmptyGraphTest extends BaseProcTest {
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(LouvainStreamProc.class, GraphCreateProc.class);
         runQuery("CREATE (:Node)");

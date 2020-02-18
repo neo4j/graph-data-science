@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.catalog.GraphExistsFunc;
 import org.neo4j.graphalgo.catalog.GraphExistsProc;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.stream.Stream;
 
@@ -43,7 +42,7 @@ class GraphExistsProcTest extends BaseProcTest {
     private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(
             GraphDatabaseSettings.procedure_unrestricted,
             "gds.*"
