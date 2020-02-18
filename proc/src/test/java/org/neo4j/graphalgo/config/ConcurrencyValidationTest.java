@@ -23,12 +23,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.BaseProc.CORE_LIMITATION_SETTING;
 
 class ConcurrencyValidationTest extends BaseProcTest {
 
@@ -36,11 +41,13 @@ class ConcurrencyValidationTest extends BaseProcTest {
     void setupGraph() throws KernelException {
         // we start a non-EE database
         db = TestDatabaseCreator.createTestDatabase();
+        initDb(db, "'myG'");
+    }
 
-        registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
-        runQuery("CREATE (:A)");
-        String createGraph = "CALL gds.graph.create('myG', '*', '*')";
-        runQuery(createGraph);
+    private void initDb(GraphDatabaseAPI db, String graphName) throws KernelException {
+        registerProcedures(db, PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
+        QueryRunner.runQuery(db, "CREATE (:A)");
+        QueryRunner.runQuery(db, "CALL gds.graph.create(" + graphName + ", '*', '*')");
     }
 
     @AfterEach
@@ -80,5 +87,52 @@ class ConcurrencyValidationTest extends BaseProcTest {
             "The configured concurrency value is too high. " +
             "The maximum allowed concurrency value is 4 but 12 was configured."
         );
+    }
+
+    @Test
+    void shouldAllowHighConcurrencyForEE() throws KernelException {
+        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createTestDatabase(builder -> {
+            builder.setConfig(CORE_LIMITATION_SETTING, "true");
+        });
+        initDb(unlimitedDb, "'myG2'");
+
+        String query = "CALL gds.pageRank.write('myG2', {concurrency: 10, writeProperty: 'p'}) " +
+                       "YIELD configuration " +
+                       "RETURN configuration.concurrency AS concurrency";
+
+        QueryRunner.runQueryWithRowConsumer(unlimitedDb, query,
+            row -> assertEquals(10, row.getNumber("concurrency"))
+        );
+        unlimitedDb.shutdown();
+    }
+
+    @Test
+    void shouldAllowHighReadConcurrencyForEE() throws KernelException {
+        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createTestDatabase(builder -> {
+            builder.setConfig(CORE_LIMITATION_SETTING, "true");
+        });
+        initDb(unlimitedDb, "'myG2'");
+
+        String query = "CALL gds.graph.create('myG3', '*', '*', {readConcurrency: 12})";
+
+        QueryRunner.runQuery(unlimitedDb, query);
+        unlimitedDb.shutdown();
+    }
+
+    @Test
+    void shouldAllowHighWriteConcurrencyForEE() throws KernelException {
+        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createTestDatabase(builder -> {
+            builder.setConfig(CORE_LIMITATION_SETTING, "true");
+        });
+        initDb(unlimitedDb, "'myG2'");
+
+        String query = "CALL gds.pageRank.write('myG2', {writeConcurrency: 9, writeProperty: 'p'}) " +
+                       "YIELD configuration " +
+                       "RETURN configuration.writeConcurrency AS concurrency";
+
+        QueryRunner.runQueryWithRowConsumer(unlimitedDb, query,
+            row -> assertEquals(9, row.getNumber("concurrency"))
+        );
+        unlimitedDb.shutdown();
     }
 }

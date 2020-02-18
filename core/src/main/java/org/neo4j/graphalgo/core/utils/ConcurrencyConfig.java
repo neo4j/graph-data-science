@@ -24,6 +24,9 @@ import org.neo4j.graphalgo.compat.Editions;
 import java.util.concurrent.ForkJoinPool;
 
 final class ConcurrencyConfig {
+import static org.neo4j.graphalgo.config.ConcurrencyValidation.CONCURRENCY_LIMITATION;
+
+public final class ConcurrencyConfig {
 
     private static final String PROCESSORS_OVERRIDE_PROPERTY = "neo4j.graphalgo.processors";
     private static final int CONCURRENCY_LIMITATION = 4;

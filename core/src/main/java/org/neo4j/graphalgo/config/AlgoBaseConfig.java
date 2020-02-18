@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public interface AlgoBaseConfig extends BaseConfig, ConcurrencyValidation {
+public interface AlgoBaseConfig extends BaseConfig {
 
     int DEFAULT_CONCURRENCY = 4;
 
@@ -46,8 +46,4 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyValidation {
     @Configuration.Parameter
     Optional<GraphCreateConfig> implicitCreateConfig();
 
-    @Override
-    default int concurrencyToValidate() {
-        return concurrency();
-    }
 }

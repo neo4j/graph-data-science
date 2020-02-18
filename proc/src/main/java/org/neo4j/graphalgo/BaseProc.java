@@ -19,16 +19,20 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.config.BaseConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphdb.DependencyResolver;
+import org.neo4j.graphdb.config.Configuration;
+import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.configuration.Settings;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
@@ -36,6 +40,12 @@ import org.neo4j.procedure.Context;
 import java.util.function.Supplier;
 
 public abstract class BaseProc {
+
+    public static final Setting<Boolean> CORE_LIMITATION_SETTING = Settings.setting(
+        "gds.unlimited.cores",
+        Settings.BOOLEAN,
+        "false"
+    );
 
     protected static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
 
@@ -50,6 +60,9 @@ public abstract class BaseProc {
 
     @Context
     public ProcedureCallContext callContext;
+
+    @Context
+    public DependencyResolver resolver;
 
     protected String getUsername() {
         return transaction.subjectOrAnonymous().username();
@@ -88,6 +101,13 @@ public abstract class BaseProc {
 
     protected void validateConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
         cypherConfig.withoutAny(config.configKeys()).requireEmpty();
+
+        boolean unlimitedCores = resolver
+            .resolveDependency(Configuration.class, DependencyResolver.SelectionStrategy.ONLY)
+            .get(CORE_LIMITATION_SETTING);
+        if (!unlimitedCores) {
+            config.validateConcurrency();
+        }
     }
 
     protected void validateGraphName(String username, String graphName) {

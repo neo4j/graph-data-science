@@ -44,6 +44,10 @@ public final class Pools {
         CORE_POOL_SIZE = concurrencyConfig.corePoolSize;
     }
 
+    /**
+     * @deprecated legacy only; we validate this on the config classes now
+     */
+    @Deprecated
     public static int allowedConcurrency(int concurrency) {
         return Math.min(Pools.CORE_POOL_SIZE, concurrency);
     }

@@ -19,27 +19,38 @@
  */
 package org.neo4j.graphalgo.config;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.core.utils.Pools;
 
 public interface ConcurrencyValidation {
 
-    @Configuration.Ignore
-    int concurrencyToValidate();
+    int CONCURRENCY_LIMITATION = 4;
 
-    @Value.Check
+    @Configuration.Ignore
     default void validateConcurrency() {
-        int requestedConcurrency = concurrencyToValidate();
-        int allowedConcurrency = Pools.allowedConcurrency(requestedConcurrency);
-        if (requestedConcurrency > allowedConcurrency) {
-            throw new IllegalArgumentException(String.format(
-                "The configured concurrency value is too high. " +
-                "The maximum allowed concurrency value is %d but %d was configured. " +
-                "Please see the documentation for how to increase the limitation.",
-                allowedConcurrency,
-                requestedConcurrency
-            ));
+        if (this instanceof WriteConfig) {
+            WriteConfig wc = (WriteConfig) this;
+            Validator.validate(wc.concurrency());
+            Validator.validate(wc.writeConcurrency());
+        } else if (this instanceof AlgoBaseConfig) {
+            AlgoBaseConfig wc = (AlgoBaseConfig) this;
+            Validator.validate(wc.concurrency());
+        } else if (this instanceof GraphCreateConfig) {
+            GraphCreateConfig gcc = (GraphCreateConfig) this;
+            Validator.validate(gcc.concurrency());
+        }
+    }
+
+    class Validator {
+        private static void validate(int requestedConcurrency) {
+            if (requestedConcurrency > CONCURRENCY_LIMITATION) {
+                throw new IllegalArgumentException(String.format(
+                    "The configured concurrency value is too high. " +
+                    "The maximum allowed concurrency value is %d but %d was configured. " +
+                    "Please see the documentation for how to increase the limitation.",
+                    CONCURRENCY_LIMITATION,
+                    requestedConcurrency
+                ));
+            }
         }
     }
 }

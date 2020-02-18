@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-public interface BaseConfig {
+public interface BaseConfig extends ConcurrencyValidation {
     @Configuration.Parameter
     @Value.Default
     default String username() {

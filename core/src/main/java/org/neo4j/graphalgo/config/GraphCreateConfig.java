@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.ProcedureConstants;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 
-public interface GraphCreateConfig extends BaseConfig, ConcurrencyValidation {
+public interface GraphCreateConfig extends BaseConfig {
 
     String IMPLICIT_GRAPH_NAME = "";
 
@@ -79,11 +79,6 @@ public interface GraphCreateConfig extends BaseConfig, ConcurrencyValidation {
     @Configuration.Key(ProcedureConstants.RELCOUNT_KEY)
     default int relationshipCount() {
         return -1;
-    }
-
-    @Override
-    default int concurrencyToValidate() {
-        return concurrency();
     }
 
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
