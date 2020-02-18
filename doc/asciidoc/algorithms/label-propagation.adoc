@@ -87,12 +87,9 @@ YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMilli
 | relationshipWeightProperty    | string  | null                   | yes      | The name of the relationship property that represents weight.
 | seedProperty                  | string  | n/a                    | yes      | Used to define initial set of labels (must be a number).
 | writeProperty                 | string  | n/a                    | yes      | The property name written back to the partition of the graph in which the node resides.
-| graph                         | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 
-
-// TODO: return nodes, relationships for estimate mode
 .Results
 [opts="header",cols="1,1,6"]
 |===
@@ -137,7 +134,6 @@ YIELD nodeId, communityId
 | nodeWeightProperty            | string | null                   | yes      | The property name of node that contain weight. Must be numeric.
 | relationshipWeightProperty    | string | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
 | seedProperty                  | string | n/a                    | yes      | Used to define initial set of labels (must be a number).
-| graph                         | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
