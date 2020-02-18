@@ -28,7 +28,8 @@ class PoolsTest {
 
     @Test
     void forkJoinPoolShouldBeLimited() {
-        assertThat(Pools.FJ_POOL.getParallelism(), equalTo(Pools.MAXIMUM_CONCURRENCY));
+        int maximumConcurrency = Math.min(Runtime.getRuntime().availableProcessors(), Pools.MAXIMUM_CONCURRENCY);
+        assertThat(Pools.FJ_POOL.getParallelism(), equalTo(maximumConcurrency));
     }
 
 }
