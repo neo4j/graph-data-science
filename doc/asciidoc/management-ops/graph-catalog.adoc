@@ -10,6 +10,9 @@ Using that name, a created graph can be used many times in the analytical workfl
 Named graphs can be created using either a <<native-projection>> or a <<cypher-projection>>.
 After usage, named graphs can be removed from the catalog to free up main memory.
 
+Graphs can also be created when running an algorithm without placing them in the catalog.
+We refer to such graphs as <<anonymous-graph, Anonymous graphs>>.
+
 The graph catalog exists as long as the Neo4j instance is running.
 When Neo4j is restarted, graphs stored in the catalog are lost and need to be re-created.
 

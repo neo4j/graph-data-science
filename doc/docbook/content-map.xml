@@ -32,6 +32,8 @@
             </d:tocentry>
             <d:tocentry linkend="cypher-projection"><?dbhtml filename="management-ops/cypher-projection/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="anonymous-graph"><?dbhtml filename="management-ops/anonymous-graph/index.html"?>
+            </d:tocentry>
             <d:tocentry linkend="utility-functions"><?dbhtml filename="management-ops/utility-functions/index.html"?>
             </d:tocentry>
         </d:tocentry>
