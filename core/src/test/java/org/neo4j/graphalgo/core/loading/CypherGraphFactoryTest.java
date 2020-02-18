@@ -302,17 +302,17 @@ class CypherGraphFactoryTest {
 
         assertGraphEquals(
             fromGdl(String.format(expectedGraph, 1.0, prop1.defaultValue(), prop1.defaultValue())),
-            graphs.getGraphProjection("", Optional.of(addSuffix(prop1.propertyKey(), 0)))
+            graphs.getGraphProjection("*", Optional.of(addSuffix(prop1.propertyKey(), 0)))
         );
 
         assertGraphEquals(
             fromGdl(String.format(expectedGraph, prop2.defaultValue(), 2.0, prop2.defaultValue())),
-            graphs.getGraphProjection("", Optional.of(addSuffix(prop2.propertyKey(), 1)))
+            graphs.getGraphProjection("*", Optional.of(addSuffix(prop2.propertyKey(), 1)))
         );
 
         assertGraphEquals(
             fromGdl(String.format(expectedGraph, prop3.defaultValue(), prop3.defaultValue(), 3.0)),
-            graphs.getGraphProjection("", Optional.of(addSuffix(prop3.propertyKey(), 2)))
+            graphs.getGraphProjection("*", Optional.of(addSuffix(prop3.propertyKey(), 2)))
         );
     }
 

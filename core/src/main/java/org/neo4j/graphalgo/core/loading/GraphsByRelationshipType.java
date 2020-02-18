@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 
@@ -72,10 +73,10 @@ public final class GraphsByRelationshipType {
 
     public Graph getGraphProjection(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         if (relationshipTypes.isEmpty()) {
-            relationshipTypes.add("*");
-//            throw new IllegalArgumentException(String.format("The parameter %s should not be empty. Use `*` to load all relationship types.",
-//                ProcedureConstants.RELATIONSHIP_TYPES
-//            ));
+            throw new IllegalArgumentException(String.format(
+                "The parameter %s should not be empty. Use `*` to load all relationship types.",
+                ProcedureConstants.RELATIONSHIP_TYPES
+            ));
         }
 
         Map<String, Map<String, Graph>> graphsWithRelTypes = relationshipTypes.contains("*") ?
