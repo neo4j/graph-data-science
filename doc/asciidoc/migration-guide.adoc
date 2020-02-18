@@ -62,8 +62,11 @@ In the tables below *GA* refers to the Graph Algorithms library and *GDS* refers
 
 This section is divided into the following sub-sections:
 
+. <<migration-algos-common, Common Changes>>
 . <<graph-ops, Graph Operations>>
 . <<product-algos, Production-quality algorithms>>
+
+include::migration-algos-common.adoc[leveloffset=+2]
 
 include::migration-graph-ops.adoc[leveloffset=+2]
 

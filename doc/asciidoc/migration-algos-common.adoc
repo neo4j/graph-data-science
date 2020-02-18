@@ -1,0 +1,35 @@
+[[migration-algos-common]]
+= Common changes
+
+This section describes changes between Graph Analytics library  and Graph Data Science library that are common to all procedures.
+
+.Namespace
+[opts=header,cols="1,1"]
+|===
+|GA     | GDS
+|algo.* | gds.*
+|===
+
+.Changes in Parameters
+[opts=header,cols="1,1,1"]
+|===
+|GA                 | GDS Named Graph   | GDS Anonymous Graph
+| -                 | graphName         | graphConfiguration
+| node label footnote:common-inlined[Parameter is inlined into `graphConfiguration`]        | -                 | -
+| relationship type footnote:common-inlined[] | -                 | -
+| direction         | -                 | -
+| config            | configuration     | -
+|===
+
+.Changes in configuration parameter map
+[opts=header,cols="1,1"]
+|===
+|GA     | GDS
+|write: true | Replaced by dedicated `write` mode
+|graph: 'cypher'\|'huge' | Removed. Always using `huge` graph
+footnote:graph-param[Graph creation with cypher queries has dedicate `gds.graph.create.cypher` procedure. There are parameters `nodeQuery` and `relationshipQuery` for anonymous graphs]
+|direction | Replaced by `projection` parameter of `relationshipProjection`
+|direction: 'OUTGOING' | projection: 'NATURAL'
+|direction: 'INCOMING' | projection: 'REVERSE'
+|direction: 'BOTH' | projection: 'UNDIRECTED'
+|===
