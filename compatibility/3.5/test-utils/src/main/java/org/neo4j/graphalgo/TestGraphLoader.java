@@ -27,11 +27,13 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.utils.ProjectionParser;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.Projection.NATURAL;
@@ -41,8 +43,8 @@ public final class TestGraphLoader {
 
     private final GraphDatabaseAPI db;
 
-    private Optional<String> maybeLabel = Optional.empty();
-    private Optional<String> maybeRelType = Optional.empty();
+    private final Set<String> nodeLabels;
+    private final Set<String> relTypes;
 
     private PropertyMappings nodeProperties = PropertyMappings.of();
     private boolean addNodePropertiesToLoader;
@@ -57,15 +59,17 @@ public final class TestGraphLoader {
 
     private TestGraphLoader(GraphDatabaseAPI db) {
         this.db = db;
+        this.nodeLabels = new HashSet<>();
+        this.relTypes = new HashSet<>();
     }
 
-    public TestGraphLoader withLabel(String label) {
-        this.maybeLabel = Optional.of(label);
+    public TestGraphLoader withLabels(String... labels) {
+        nodeLabels.addAll(Arrays.asList(labels));
         return this;
     }
 
-    public TestGraphLoader withRelationshipType(String relType) {
-        this.maybeRelType = Optional.of(relType);
+    public TestGraphLoader withRelationshipTypes(String... types) {
+        relTypes.addAll(Arrays.asList(types));
         return this;
     }
 
@@ -118,23 +122,27 @@ public final class TestGraphLoader {
         CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder().api(db);
 
         String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s";
-        String labelString = maybeLabel
-            .map(s -> ProjectionParser
-                .parse(s)
+
+        String labelString = nodeLabels.isEmpty()
+            ? ""
+            : nodeLabels
                 .stream()
                 .map(l -> "n:" + l)
-                .collect(Collectors.joining(" OR ", "WHERE ", "")))
-            .orElse("");
+                .collect(Collectors.joining(" OR ", "WHERE ", ""));
+
         nodeProperties = getUniquePropertyMappings(nodeProperties);
         String nodePropertiesString = getPropertiesString(nodeProperties, "n");
 
         cypherLoaderBuilder.nodeQuery(String.format(nodeQueryTemplate, labelString, nodePropertiesString));
 
-        String relationshipQueryTemplate = maybeRelType.isPresent()
-            ? "MATCH (n)-[r%s]->(m) RETURN type(r) AS type, id(n) AS source, id(m) AS target%s"
-            : "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s";
+        String relationshipQueryTemplate = relTypes.isEmpty()
+            ? "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s"
+            : "MATCH (n)-[r%s]->(m) RETURN type(r) AS type, id(n) AS source, id(m) AS target%s";
 
-        String relTypeString = maybeRelType.map(s -> ":" + s).orElse("");
+        String relTypeString = relTypes.isEmpty()
+            ? ""
+            : relTypes.stream().collect(Collectors.joining("|", ":", ""));
+
         relProperties = getUniquePropertyMappings(relProperties);
         String relPropertiesString = getPropertiesString(relProperties, "r");
 
@@ -153,25 +161,25 @@ public final class TestGraphLoader {
 
     private GraphLoader storeLoader() {
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().api(db);
-        if (maybeLabel.isPresent()) {
-            ProjectionParser.parse(maybeLabel.get()).forEach(storeLoaderBuilder::addNodeLabel);
-        } else {
+        if (nodeLabels.isEmpty()) {
             storeLoaderBuilder.loadAnyLabel();
-        }
-        if (maybeRelType.isPresent()) {
-            ProjectionParser.parse(maybeRelType.get())
-                .forEach(relType -> {
-                    RelationshipProjection template = RelationshipProjection.builder()
-                        .type(relType)
-                        .aggregation(maybeAggregation.orElse(DEFAULT))
-                        .build();
-                    storeLoaderBuilder.addRelationshipProjection(template.withProjection(NATURAL));
-                });
         } else {
+            nodeLabels.forEach(storeLoaderBuilder::addNodeLabel);
+        }
+
+        if (relTypes.isEmpty()) {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(
                 "*",
                 RelationshipProjection.all().withAggregation(maybeAggregation.orElse(DEFAULT))
             );
+        } else {
+            relTypes.forEach(relType -> {
+                RelationshipProjection template = RelationshipProjection.builder()
+                    .type(relType)
+                    .aggregation(maybeAggregation.orElse(DEFAULT))
+                    .build();
+                storeLoaderBuilder.addRelationshipProjection(template.withProjection(NATURAL));
+            });
         }
         storeLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));
         if (addNodePropertiesToLoader) storeLoaderBuilder.nodeProperties(nodeProperties);

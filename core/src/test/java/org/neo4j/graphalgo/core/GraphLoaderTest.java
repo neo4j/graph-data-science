@@ -72,13 +72,13 @@ class GraphLoaderTest {
 
     @AllGraphTypesTest
     void testWithLabel(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = TestGraphLoader.from(db).withLabel("Node1").buildGraph(graphFactory);
+        Graph graph = TestGraphLoader.from(db).withLabels("Node1").buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("()"));
     }
 
     @AllGraphTypesTest
     void testWithMultipleLabels(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = TestGraphLoader.from(db).withLabel("Node1 | Node2").buildGraph(graphFactory);
+        Graph graph = TestGraphLoader.from(db).withLabels("Node1", "Node2").buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a)-->(b)"));
     }
 
@@ -91,13 +91,13 @@ class GraphLoaderTest {
         );
 
         Graph graph = TestGraphLoader.from(db)
-            .withLabel("Node1 | Node2")
+            .withLabels("Node1", "Node2")
             .withNodeProperties(properties)
             .buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a {prop1: 1.0})-->(b {prop1: 42.0})"));
 
         graph = TestGraphLoader.from(db)
-            .withLabel("Node1 | Node2")
+            .withLabels("Node1", "Node2")
             .withNodeProperties(multipleProperties)
             .buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(a {prop1: 1.0, prop2: 42.0})-->(b {prop1: 42.0, prop2: 2.0})"));
@@ -112,7 +112,7 @@ class GraphLoaderTest {
     @AllGraphTypesTest
     void testWithBothWeightedRelationship(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
-            .withRelationshipType("REL3")
+            .withRelationshipTypes("REL3")
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .buildGraph(graphFactory);
 
@@ -122,7 +122,7 @@ class GraphLoaderTest {
     @AllGraphTypesTest
     void testWithOutgoingRelationship(Class<? extends GraphFactory> graphFactory) {
         Graph graph = TestGraphLoader.from(db)
-            .withRelationshipType("REL3")
+            .withRelationshipTypes("REL3")
             .buildGraph(graphFactory);
         assertGraphEquals(graph, fromGdl("(), ()-->()"));
     }
