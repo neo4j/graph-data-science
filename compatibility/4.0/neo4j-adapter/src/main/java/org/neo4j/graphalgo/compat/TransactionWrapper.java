@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.Consumer;
@@ -40,33 +40,24 @@ import java.util.function.Function;
  */
 public final class TransactionWrapper {
     private final GraphDatabaseAPI db;
-    private final ThreadToStatementContextBridge bridge;
 
-    public TransactionWrapper(
-            final GraphDatabaseAPI db) {
-        this(db, db.getDependencyResolver().resolveDependency(ThreadToStatementContextBridge.class));
-    }
-
-    public TransactionWrapper(
-            final GraphDatabaseAPI db,
-            final ThreadToStatementContextBridge bridge) {
+    public TransactionWrapper(GraphDatabaseAPI db) {
         this.db = db;
-        this.bridge = bridge;
     }
 
     public void accept(Consumer<KernelTransaction> block) {
-        try (final Transaction tx = db.beginTx()) {
-            final KernelTransaction transaction = bridge.getKernelTransactionBoundToThisThread(true);
+        try (Transaction tx = db.beginTx()) {
+            KernelTransaction transaction = ((InternalTransaction) tx).kernelTransaction();
             block.accept(transaction);
-            tx.success();
+            tx.commit();
         }
     }
 
     public <T> T apply(Function<KernelTransaction, T> block) {
-        try (final Transaction tx = db.beginTx()) {
-            final KernelTransaction transaction = bridge.getKernelTransactionBoundToThisThread(true);
+        try (Transaction tx = db.beginTx()) {
+            KernelTransaction transaction = ((InternalTransaction) tx).kernelTransaction();
             T result = block.apply(transaction);
-            tx.success();
+            tx.commit();
             return result;
         }
     }
