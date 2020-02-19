@@ -59,7 +59,7 @@ class PageRankDocTest extends DocTestBase {
     void should() {
         asciidoctor
             .javaExtensionRegistry()
-            .treeprocessor(new QueryConsumingTreeProcessor(defaultSetupQueryConsumer(), defaultQueryExampleConsumer()));
+            .treeprocessor(defaultQueryConsumingTreeProcessor());
         File file = ASCIIDOC_PATH.resolve("algorithms/pagerank.adoc").toFile();
         assertTrue(file.exists() && file.canRead());
         asciidoctor.loadFile(file, Collections.emptyMap());

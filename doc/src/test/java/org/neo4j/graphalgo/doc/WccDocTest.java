@@ -24,34 +24,35 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class QueryConsumingTreeProcessorTest extends DocTestBase {
-
-    private File file;
+class WccDocTest extends DocTestBase {
 
     @BeforeEach
-    void beforeEach() throws Exception {
-        this.db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
+    void setUp() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase(
+            builder -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
-        registerProcedures(NodeSimilarityStreamProc.class);
+        registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
-        file = Paths.get(getClass().getClassLoader().getResource("treeprocessor.adoc").toURI()).toFile();
-        assertTrue(file.exists() && file.canRead());
     }
 
     @AfterEach
-    void afterEach() {
-        db.shutdown();
+    void tearDown() {
         asciidoctor.shutdown();
+        db.shutdown();
+        GraphCatalog.removeAllLoadedGraphs();
     }
 
     @Test
@@ -59,15 +60,10 @@ class QueryConsumingTreeProcessorTest extends DocTestBase {
         asciidoctor
             .javaExtensionRegistry()
             .treeprocessor(defaultQueryConsumingTreeProcessor());
-        asciidoctor.loadFile(file, Collections.emptyMap());
-    }
-
-    @Test
-    void should2() {
-        asciidoctor
-            .javaExtensionRegistry()
-            .treeprocessor(defaultQueryConsumingTreeProcessor());
+        File file = ASCIIDOC_PATH.resolve("algorithms/wcc.adoc").toFile();
+        assertTrue(file.exists() && file.canRead());
         asciidoctor.loadFile(file, Collections.emptyMap());
     }
 
 }
+

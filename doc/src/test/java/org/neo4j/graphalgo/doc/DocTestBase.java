@@ -51,6 +51,10 @@ class DocTestBase extends BaseProcTest {
     static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
     protected final Asciidoctor asciidoctor = create();
 
+    QueryConsumingTreeProcessor defaultQueryConsumingTreeProcessor() {
+        return new QueryConsumingTreeProcessor(defaultSetupQueryConsumer(), defaultQueryExampleConsumer(), defaultQueryExampleNoResultConsumer());
+    }
+
     protected QueryExampleConsumer otherQueryExampleConsumer() {
         return (query, columns, rows) -> assertCypherResult(query, Testable.of(columns, rows).toMaps());
     }
@@ -72,6 +76,10 @@ class DocTestBase extends BaseProcTest {
             });
             result.close();
         };
+    }
+
+    protected QueryConsumingTreeProcessor.QueryExampleNoResultConsumer defaultQueryExampleNoResultConsumer() {
+        return this::runQuery;
     }
 
     protected void assertCypherResult(String query, List<Map<String, Object>> expected) {

@@ -27,6 +27,7 @@ import org.asciidoctor.ast.Table;
 import org.asciidoctor.extension.Treeprocessor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,15 +49,20 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
 
     private static final String SETUP_QUERY_ROLE = "setup-query";
     private static final String QUERY_EXAMPLE_ROLE = "query-example";
+    private static final String QUERY_EXAMPLE_NO_RESULT_ROLE = "query-example-no-result";
+
     private final SetupQueryConsumer setupQueryConsumer;
     private final QueryExampleConsumer queryExampleConsumer;
+    private final QueryExampleNoResultConsumer queryExampleNoResultConsumer;
 
     public QueryConsumingTreeProcessor(
         SetupQueryConsumer setupQueryConsumer,
-        QueryExampleConsumer queryExampleConsumer
+        QueryExampleConsumer queryExampleConsumer,
+        QueryExampleNoResultConsumer queryExampleNoResultConsumer
     ) {
         this.setupQueryConsumer = setupQueryConsumer;
         this.queryExampleConsumer = queryExampleConsumer;
+        this.queryExampleNoResultConsumer = queryExampleNoResultConsumer;
     }
 
     @Override
@@ -89,6 +95,8 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
             .forEach(it -> {
                 if (it.getRoles().contains(QUERY_EXAMPLE_ROLE)) {
                     processCypherExample(it);
+                } else if (it.getRoles().contains(QUERY_EXAMPLE_NO_RESULT_ROLE)) {
+                    processCypherNoResultExample(it);
                 } else {
                     consumeQueryExamples(it);
                 }
@@ -98,17 +106,31 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     private void processCypherExample(StructuralNode cypherExample) {
         List<StructuralNode> blocks = cypherExample.getBlocks();
         StructuralNode queryBlock = blocks.get(0);
-        Table resultTable = (Table) blocks.get(1);
+        String query = undoReplacements(queryBlock.getContent().toString());
 
-        String query = queryBlock.getContent().toString();
-        List<String> headers = headers(resultTable);
-        List<Row> rows = resultTable.getBody();
+        if (cypherExample.hasRole(QUERY_EXAMPLE_NO_RESULT_ROLE)) {
+            queryExampleNoResultConsumer.consume(query);
+        } else {
+            Table resultTable = (Table) blocks.get(1);
+            List<String> headers = resultTable != null ? headers(resultTable) : Collections.emptyList();
+            List<Row> rows = resultTable != null ? resultTable.getBody() : Collections.emptyList();
 
-        queryExampleConsumer.consume(query, headers, rows);
+            queryExampleConsumer.consume(query, headers, rows);
+        }
+    }
+
+    private void processCypherNoResultExample(StructuralNode cypherExample) {
+        List<StructuralNode> blocks = cypherExample.getBlocks();
+        StructuralNode queryBlock = blocks.get(0);
+        String query = undoReplacements(queryBlock.getContent().toString());
+
+        queryExampleNoResultConsumer.consume(query);
     }
 
     private List<String> headers(Table table) {
-        return table.getHeader().get(0).getCells().stream().map(Cell::getText).collect(Collectors.toList());
+        return table.getHeader().isEmpty()
+            ? Collections.emptyList()
+            : table.getHeader().get(0).getCells().stream().map(Cell::getText).collect(Collectors.toList());
     }
 
     private String undoReplacements(String content) {
@@ -156,6 +178,11 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     @FunctionalInterface
     interface QueryExampleConsumer {
         void consume(String query, List<String> columns, List<Row> rows);
+    }
+
+    @FunctionalInterface
+    interface QueryExampleNoResultConsumer {
+        void consume(String query);
     }
 
     @FunctionalInterface
