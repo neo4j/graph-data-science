@@ -1,10 +1,55 @@
 [[migration-louvain]]
 = Louvain
 
+.Changes in Configuration
+[opts=header,cols="1a,1a"]
+|===
+|GA                                 | GDS
+| direction                         | -
+| levels                            | maxLevels
+| concurrency                       | concurrency
+| readConcurrency                   | readConcurrency footnote:louvain-read[Only when using anonymous graph]
+| writeConcurrency                  | writeConcurrency footnote:louvain-write[Only for `write` mode]
+| weightProperty                    | relationshipWeightProperty
+| seedProperty                      | seedProperty
+| innerIterations                   | maxIterations
+| includeIntermediateCommunities    | includeIntermediateCommunities
+| tolerance                         | tolerance
+| writeProperty                     | writeProperty footnote:louvain-write[]
+| write                             | -
+| graph                             | -
+|===
+
+.Changes in YIELD fields
+[opts=header,cols="1a,1a"]
+|===
+| GA                     | GDS
+| loadMillis             | createMillis
+| computeMillis          | computeMillis
+| writeMillis            | writeMillis
+| postProcessingMillis   | postProcessingMillis
+| nodes                  | nodePropertiesWritten
+| communityCount         | communityCount
+| levels                 | ranLevels
+| nodeId                 | nodeId footnote:louvain-yield-stream[Only for `stream` mode]
+| community              | communityId footnote:louvain-yield-stream[]
+| communities            | communityIds footnote:louvain-yield-stream[]
+| modularity             | modularity footnote:louvain-yield-write[Only for `write` mode]
+| modularities           | modularities footnote:louvain-yield-write[]
+| write                  | -
+| -                      | communityDistribution
+| -                      | configuration footnote:louvain-gds-config[The configuration used to run the algorithm]
+| includeIntermediateCommunities footnote:louvain-config[Inlined into `configuration`]         | -
+| writeProperty footnote:louvain-config[]         | -
+| weightProperty footnote:louvain-weight-config[Inlined into `configuration` as `relationshipWeightProperty`]        | -
+| min, max, mean, p50, p75, p90, p95, p99, p999 footnote:louvain-distribution[Inlined into `communityDistribution`] | -
+|===
+
 .Louvain Stream Mode
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
+2+|Minimalistic streaming over named graph
 |
 [source, cypher]
 ----
@@ -17,6 +62,7 @@ YIELD nodeId, community, communities
 CALL gds.louvain.stream('myGraph')
 YIELD nodeId, communityId, communityIds
 ----
+2+|Streaming over named graph using additional properties - `maxLevels` and `maxIterations`
 |
 [source, cypher]
 ----
@@ -41,6 +87,7 @@ CALL gds.louvain.stream(
   }
 )
 ----
+2+| Streaming over named graph with weight property
 |
 [source, cypher]
 ----
@@ -63,6 +110,7 @@ CALL gds.louvain.stream(
   }
 )
 ----
+2+| Minimalistic streaming over anonymous graph
 |
 [source, cypher]
 ----
@@ -79,6 +127,7 @@ CALL gds.louvain.stream({
   relationshipProjection: 'MY_RELATIONSHIP_TYPE'
 })
 ----
+2+| Streaming over anonymous graph with `REVERSE` relationship projection
 |
 [source, cypher]
 ----
@@ -100,21 +149,31 @@ CALL gds.louvain.stream({
   }
 })
 ----
+2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]
 |
 [source, cypher]
 ----
-CALL algo.memrec(
+CALL algo.louvain.stream(
   'MyLabel',
   'MY_RELATIONSHIP_TYPE',
-  'beta.louvain.stream'
+  { direction: 'BOTH' }
 )
 ----
 |
 [source, cypher]
 ----
-CALL gds.louvain.stream.estimate({
+CALL gds.louvain.stream({
   nodeProjection: 'MyLabel',
-  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+  relationshipProjection: {
+    MY_RELATIONSHIP_TYPE_NATURAL: {
+      type: 'MY_RELATIONSHIP_TYPE',
+      projection: 'NATURAL'
+    },
+    MY_RELATIONSHIP_TYPE_REVERSE: {
+      type: 'MY_RELATIONSHIP_TYPE',
+      projection: 'REVERSE'
+    }
+  }
 })
 ----
 |===
@@ -123,6 +182,7 @@ CALL gds.louvain.stream.estimate({
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
+2+| Minimalistic write with just `writeProperty`
 |
 [source, cypher]
 ----
@@ -165,6 +225,7 @@ RETURN
   cd.p1 AS p1,
   conf.writeProperty AS writeProperty
 ----
+2+| Running in `write` mode over weighted graph
 |
 [source, cypher]
 ----
@@ -190,6 +251,7 @@ CALL gds.louvain.write(
   }
 )
 ----
+2+| Memory estimation of the algorithm
 |
 [source, cypher]
 ----
