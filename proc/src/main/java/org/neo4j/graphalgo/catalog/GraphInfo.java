@@ -47,8 +47,8 @@ public class GraphInfo {
 
     GraphInfo(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
         this.graphName = config.graphName();
-        this.nodeProjection = config.nodeProjection().toObject();
-        this.relationshipProjection = config.relationshipProjection().toObject();
+        this.nodeProjection = config.nodeProjections().toObject();
+        this.relationshipProjection = config.relationshipProjections().toObject();
         this.nodeQuery = config instanceof GraphCreateFromCypherConfig
             ? ((GraphCreateFromCypherConfig) config).nodeQuery()
             : null;

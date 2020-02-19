@@ -415,8 +415,8 @@ public abstract class GdsCypher {
                 parameters.size() + ADDITIONAL_PARAMETERS_FOR_IMPLICIT_GRAPH_CREATION
             );
 
-            Optional<Object> nodeProjection = toMinimalObject(config.nodeProjection()).toObject();
-            Optional<Object> relationshipProjection = toMinimalObject(config.relationshipProjection()).toObject();
+            Optional<Object> nodeProjection = toMinimalObject(config.nodeProjections()).toObject();
+            Optional<Object> relationshipProjection = toMinimalObject(config.relationshipProjections()).toObject();
             if (executionMode == InternalExecutionMode.GRAPH_CREATE) {
                 queryArguments.add(PRINTER.toCypherString(nodeProjection.orElse(emptyMap())));
                 queryArguments.add(PRINTER.toCypherString(relationshipProjection.orElse(emptyMap())));
@@ -473,8 +473,8 @@ public abstract class GdsCypher {
         public StagedBuilder implicitCreation(GraphCreateConfig config) {
             graphCreateBuilder()
                 .graphName("")
-                .nodeProjections(config.nodeProjection().projections())
-                .relProjections(config.relationshipProjection().projections())
+                .nodeProjections(config.nodeProjections().projections())
+                .relProjections(config.relationshipProjections().projections())
                 .nodeProperties(config.nodeProperties())
                 .relProperties(config.relationshipProperties());
             builder.explicitGraphName(Optional.empty());
@@ -633,8 +633,8 @@ public abstract class GdsCypher {
     ) {
         return ImmutableGraphCreateFromStoreConfig.builder()
             .graphName(graphName.orElse(""))
-            .nodeProjection(NodeProjections.create(nodeProjections))
-            .relationshipProjection(RelationshipProjections.builder().putAllProjections(relProjections).build())
+            .nodeProjections(NodeProjections.create(nodeProjections))
+            .relationshipProjections(RelationshipProjections.builder().putAllProjections(relProjections).build())
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(PropertyMappings.of(relProperties))
             .build();

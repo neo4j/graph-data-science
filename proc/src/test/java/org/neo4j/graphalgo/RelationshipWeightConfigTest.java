@@ -300,8 +300,8 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
         GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName(graphName)
-            .nodeProjection(NodeProjections.empty())
-            .relationshipProjection(relationshipProjections)
+            .nodeProjections(NodeProjections.empty())
+            .relationshipProjections(relationshipProjections)
             .build();
 
         GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig)

@@ -210,7 +210,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             return;
         }
         if (config instanceof SeedConfig) {
-            Set<String> nodeProperties = graphCreateConfig.nodeProjection().allProperties();
+            Set<String> nodeProperties = graphCreateConfig.nodeProjections().allProperties();
             String seedProperty = ((SeedConfig) config).seedProperty();
             if (seedProperty != null && !nodeProperties.contains(seedProperty)) {
                 throw new IllegalArgumentException(String.format(
@@ -221,7 +221,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             }
         }
         if (config instanceof NodeWeightConfig) {
-            Set<String> properties = new HashSet<>(graphCreateConfig.nodeProjection().allProperties());
+            Set<String> properties = new HashSet<>(graphCreateConfig.nodeProjections().allProperties());
 
             String weightProperty = ((NodeWeightConfig) config).nodeWeightProperty();
             if (weightProperty != null && !properties.contains(weightProperty)) {
@@ -233,7 +233,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             }
         }
         if (config instanceof RelationshipWeightConfig) {
-            Set<String> properties = new HashSet<>(graphCreateConfig.relationshipProjection().allProperties());
+            Set<String> properties = new HashSet<>(graphCreateConfig.relationshipProjections().allProperties());
 
             String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
             if (weightProperty != null && !properties.contains(weightProperty)) {

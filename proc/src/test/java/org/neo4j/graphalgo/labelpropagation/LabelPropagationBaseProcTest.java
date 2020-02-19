@@ -124,9 +124,9 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
             .implicitCreation(ImmutableGraphCreateFromStoreConfig
                 .builder()
                 .graphName("")
-                .nodeProjection(NodeProjections.fromObject(MapUtil.map("A", "A", "B", "B")))
+                .nodeProjections(NodeProjections.fromObject(MapUtil.map("A", "A", "B", "B")))
                 .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed", "weight")))
-                .relationshipProjection(RelationshipProjections.builder()
+                .relationshipProjections(RelationshipProjections.builder()
                     .putProjection(
                         RelationshipProjections.PROJECT_ALL,
                         RelationshipProjection.builder()

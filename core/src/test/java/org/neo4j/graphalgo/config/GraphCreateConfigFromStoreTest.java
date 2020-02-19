@@ -54,9 +54,9 @@ class GraphCreateConfigFromStoreTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
             ImmutableGraphCreateFromStoreConfig.builder()
                 .graphName("graph")
-                .relationshipProjection(RelationshipProjections.of())
+                .relationshipProjections(RelationshipProjections.of())
                 .nodeProperties(propertyMappings)
-                .nodeProjection(nodeProjections)
+                .nodeProjections(nodeProjections)
                 .build()
         );
 
@@ -82,8 +82,8 @@ class GraphCreateConfigFromStoreTest {
             ImmutableGraphCreateFromStoreConfig.builder()
                 .graphName("graph")
                 .relationshipProperties(propertyMappings)
-                .relationshipProjection(relProjections)
-                .nodeProjection(NodeProjections.empty())
+                .relationshipProjections(relProjections)
+                .nodeProjections(NodeProjections.empty())
                 .build()
         );
 
@@ -106,12 +106,12 @@ class GraphCreateConfigFromStoreTest {
 
         GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName("graph")
-            .relationshipProjection(RelationshipProjections.of())
+            .relationshipProjections(RelationshipProjections.of())
             .nodeProperties(propertyMappings1)
-            .nodeProjection(nodeProjections)
+            .nodeProjections(nodeProjections)
             .build();
 
-        Set<String> allProperties = graphCreateConfig.nodeProjection().allProperties();
+        Set<String> allProperties = graphCreateConfig.nodeProjections().allProperties();
         assertTrue(allProperties.contains("foo"));
         assertTrue(allProperties.contains("bar"));
         assertEquals(0, graphCreateConfig.nodeProperties().numberOfMappings());
@@ -138,12 +138,12 @@ class GraphCreateConfigFromStoreTest {
 
         GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName("graph")
-            .nodeProjection(NodeProjections.empty())
+            .nodeProjections(NodeProjections.empty())
             .relationshipProperties(propertyMappings1)
-            .relationshipProjection(relProjections)
+            .relationshipProjections(relProjections)
             .build();
 
-        Set<String> allProperties = graphCreateConfig.relationshipProjection().allProperties();
+        Set<String> allProperties = graphCreateConfig.relationshipProjections().allProperties();
         assertTrue(allProperties.contains("foo"));
         assertTrue(allProperties.contains("bar"));
         assertEquals(0, graphCreateConfig.relationshipProperties().numberOfMappings());

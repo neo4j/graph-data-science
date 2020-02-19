@@ -89,15 +89,15 @@ public class GraphSetup {
     }
 
     public @NotNull String relationshipType() {
-        return createConfig.relationshipProjection().typeFilter();
+        return createConfig.relationshipProjections().typeFilter();
     }
 
     public @NotNull NodeProjections nodeProjections() {
-        return createConfig.nodeProjection();
+        return createConfig.nodeProjections();
     }
 
     public @NotNull RelationshipProjections relationshipProjections() {
-        return createConfig.relationshipProjection();
+        return createConfig.relationshipProjections();
     }
 
     public Optional<String> nodeQuery() {
@@ -117,7 +117,7 @@ public class GraphSetup {
      */
     @Deprecated
     public Optional<Double> relationshipDefaultPropertyValue() {
-        return createConfig.relationshipProjection().allProjections().stream().flatMap(
+        return createConfig.relationshipProjections().allProjections().stream().flatMap(
             f -> Streams.ofOptional(f.properties().defaultWeight())
         ).findFirst();
     }
@@ -127,7 +127,7 @@ public class GraphSetup {
      */
     @Deprecated
     public PropertyMappings nodePropertyMappings() {
-        Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.nodeProjection()
+        Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.nodeProjections()
             .allProjections()
             .stream()
             .flatMap(e -> e.properties().stream())
@@ -149,7 +149,7 @@ public class GraphSetup {
      */
     @Deprecated
     public PropertyMappings relationshipPropertyMappings() {
-        Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.relationshipProjection()
+        Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.relationshipProjections()
             .allProjections()
             .stream()
             .flatMap(e -> e.properties().stream())
@@ -172,7 +172,7 @@ public class GraphSetup {
     @Deprecated
     public Aggregation aggregation() {
         return createConfig
-            .relationshipProjection()
+            .relationshipProjections()
             .allProjections()
             .stream()
             .map(RelationshipProjection::aggregation)

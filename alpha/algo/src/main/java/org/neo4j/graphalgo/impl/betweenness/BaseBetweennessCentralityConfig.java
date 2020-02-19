@@ -39,7 +39,7 @@ public interface BaseBetweennessCentralityConfig extends WriteConfig {
 
     @Configuration.Ignore
     default void validate(GraphCreateConfig graphCreateConfig) {
-        if (graphCreateConfig.relationshipProjection().projections().size() > 1) {
+        if (graphCreateConfig.relationshipProjections().projections().size() > 1) {
             throw new IllegalArgumentException(
                 "Betweenness Centrality does not support multiple relationship projections.");
         }
@@ -49,7 +49,7 @@ public interface BaseBetweennessCentralityConfig extends WriteConfig {
     default boolean undirected() {
         return implicitCreateConfig()
             .map(config -> config
-                .relationshipProjection()
+                .relationshipProjections()
                 .projections()
                 .values()
                 .stream()

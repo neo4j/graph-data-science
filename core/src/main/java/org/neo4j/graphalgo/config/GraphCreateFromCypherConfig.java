@@ -56,13 +56,15 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     @Override
     @Value.Default
-    default NodeProjections nodeProjection() {
+    @Configuration.Key(KEY_NODE_PROJECTIONS)
+    default NodeProjections nodeProjections() {
         return NodeProjections.of();
     }
 
     @Override
     @Value.Default
-    default RelationshipProjections relationshipProjection() {
+    @Configuration.Key(KEY_RELATIONSHIP_PROJECTIONS)
+    default RelationshipProjections relationshipProjections() {
         return RelationshipProjections.of();
     }
 
@@ -102,8 +104,8 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         return ImmutableGraphCreateFromCypherConfig
             .builder()
             .from(this)
-            .nodeProjection(nodeProjections)
-            .relationshipProjection(relProjectionBuilder.build())
+            .nodeProjections(nodeProjections)
+            .relationshipProjections(relProjectionBuilder.build())
             .build();
     }
 

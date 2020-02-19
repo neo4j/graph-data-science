@@ -141,8 +141,8 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
                 .putProjection(PROJECT_ALL, RelationshipProjection.all())
                 .build();
 
-            assertEquals(expectedNodeProjections, actual.nodeProjection());
-            assertEquals(expectedRelationshipProjections, actual.relationshipProjection());
+            assertEquals(expectedNodeProjections, actual.nodeProjections());
+            assertEquals(expectedRelationshipProjections, actual.relationshipProjections());
             assertEquals(IMPLICIT_GRAPH_NAME, actual.graphName());
             assertEquals(TEST_USERNAME, actual.username());;
         });
@@ -167,8 +167,8 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
             GraphCreateFromCypherConfig actualConfig = (GraphCreateFromCypherConfig) maybeGraphCreateConfig.get();
 
-            assertEquals(NodeProjections.of(), actualConfig.nodeProjection());
-            assertEquals(RelationshipProjections.of(), actualConfig.relationshipProjection());
+            assertEquals(NodeProjections.of(), actualConfig.nodeProjections());
+            assertEquals(RelationshipProjections.of(), actualConfig.relationshipProjections());
             assertEquals(ALL_NODES_QUERY, actualConfig.nodeQuery());
             assertEquals(ALL_RELATIONSHIPS_QUERY, actualConfig.relationshipQuery());
             assertEquals(IMPLICIT_GRAPH_NAME, actualConfig.graphName());

@@ -35,7 +35,7 @@ public abstract class TriangleBaseProc<A extends Algorithm<A, RESULT>, RESULT, C
 
     @Override
     protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
-        graphCreateConfig.relationshipProjection().projections().entrySet().stream()
+        graphCreateConfig.relationshipProjections().projections().entrySet().stream()
             .filter(entry -> entry.getValue().projection() != Projection.UNDIRECTED)
             .forEach(entry -> {
                 throw new IllegalArgumentException(String.format(

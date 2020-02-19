@@ -86,8 +86,8 @@ class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
         GraphCreateConfig createGraphConfig = ImmutableGraphCreateFromStoreConfig
             .builder()
             .graphName("testGraph")
-            .nodeProjection(NodeProjections.empty())
-            .relationshipProjection(RelationshipProjections.empty())
+            .nodeProjections(NodeProjections.empty())
+            .relationshipProjections(RelationshipProjections.empty())
             .build();
 
         GraphCatalog.set(

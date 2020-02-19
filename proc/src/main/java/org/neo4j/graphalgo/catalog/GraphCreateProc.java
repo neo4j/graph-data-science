@@ -166,8 +166,8 @@ public class GraphCreateProc extends CatalogProc {
 
             builder
                 .withGraph(graphs)
-                .withNodeProjections(catalogConfig.nodeProjection())
-                .withRelationshipProjections(catalogConfig.relationshipProjection());
+                .withNodeProjections(catalogConfig.nodeProjections())
+                .withRelationshipProjections(catalogConfig.relationshipProjections());
 
             GraphCatalog.set(catalogConfig, graphs);
         }
@@ -240,8 +240,8 @@ public class GraphCreateProc extends CatalogProc {
 
             Builder(GraphCreateConfig config) {
                 this.graphName = config.graphName();
-                this.nodeProjections = config.nodeProjection();
-                this.relationshipProjections = config.relationshipProjection();
+                this.nodeProjections = config.nodeProjections();
+                this.relationshipProjections = config.relationshipProjections();
             }
 
             Builder withGraph(GraphsByRelationshipType graph) {

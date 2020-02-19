@@ -169,8 +169,8 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     .implicitCreation(
                         ImmutableGraphCreateFromStoreConfig.builder()
                             .graphName("implicitWeightedGraph")
-                            .nodeProjection(NodeProjections.fromString("User"))
-                            .relationshipProjection(RelationshipProjections.builder()
+                            .nodeProjections(NodeProjections.fromString("User"))
+                            .relationshipProjections(RelationshipProjections.builder()
                                 .putProjection(
                                     ElementIdentifier.of("LINK"),
                                     RelationshipProjection.builder()
@@ -194,8 +194,8 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     .implicitCreation(
                         ImmutableGraphCreateFromStoreConfig.builder()
                             .graphName("implicitWeightedGraph")
-                            .nodeProjection(NodeProjections.fromString("User"))
-                            .relationshipProjection(RelationshipProjections.builder()
+                            .nodeProjections(NodeProjections.fromString("User"))
+                            .relationshipProjections(RelationshipProjections.builder()
                                 .putProjection(
                                     ElementIdentifier.of("LINK"),
                                     RelationshipProjection.builder()
@@ -237,8 +237,8 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     .implicitCreation(
                         ImmutableGraphCreateFromStoreConfig.builder()
                             .graphName("implicitWeightedGraph")
-                            .nodeProjection(NodeProjections.fromString("User"))
-                            .relationshipProjection(RelationshipProjections.builder()
+                            .nodeProjections(NodeProjections.fromString("User"))
+                            .relationshipProjections(RelationshipProjections.builder()
                                 .putProjection(
                                     ElementIdentifier.of("LINK"),
                                     RelationshipProjection.builder()

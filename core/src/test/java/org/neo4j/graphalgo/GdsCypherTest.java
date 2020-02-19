@@ -133,8 +133,8 @@ class GdsCypherTest {
             .builder()
             .username("")
             .graphName("")
-            .nodeProjection(NodeProjections.fromObject(map.get("nodeProjection")))
-            .relationshipProjection(RelationshipProjections.fromObject(map.get("relationshipProjection")))
+            .nodeProjections(NodeProjections.fromObject(map.get("nodeProjection")))
+            .relationshipProjections(RelationshipProjections.fromObject(map.get("relationshipProjection")))
             .nodeProperties(PropertyMappings.fromObject(map.get("nodeProperties")))
             .relationshipProperties(PropertyMappings.fromObject(map.get("relationshipProperties")))
             .build();
@@ -155,7 +155,7 @@ class GdsCypherTest {
             .builder()
             .username("")
             .graphName("")
-            .nodeProjection(NodeProjections.create(Collections.singletonMap(
+            .nodeProjections(NodeProjections.create(Collections.singletonMap(
                 new ElementIdentifier("FooNode"), fooNode
             )))
             .nodeProperties(PropertyMappings.of(ImmutablePropertyMapping
@@ -163,7 +163,7 @@ class GdsCypherTest {
                 .propertyKey("GlobalNodeProp")
                 .build()
             ))
-            .relationshipProjection(RelationshipProjections
+            .relationshipProjections(RelationshipProjections
                 .builder()
                 .putProjection(
                     new ElementIdentifier("Rel"),

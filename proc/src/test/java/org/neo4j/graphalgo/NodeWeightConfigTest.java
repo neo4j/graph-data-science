@@ -187,8 +187,8 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
 
         GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName(graphName)
-            .nodeProjection(nodeProjections)
-            .relationshipProjection(RelationshipProjections.empty())
+            .nodeProjections(nodeProjections)
+            .relationshipProjections(RelationshipProjections.empty())
             .build();
 
         GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig)

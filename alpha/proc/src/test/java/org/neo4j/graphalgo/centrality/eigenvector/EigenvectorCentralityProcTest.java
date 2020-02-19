@@ -182,8 +182,8 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         String eigenvectorStreamQuery = GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
             .builder()
             .graphName("eigenvectorImplicitNorm")
-            .nodeProjection(NodeProjections.fromString("Character"))
-            .relationshipProjection(RelationshipProjections.single(
+            .nodeProjections(NodeProjections.fromString("Character"))
+            .relationshipProjections(RelationshipProjections.single(
                 ElementIdentifier.of("INTERACTS_SEASON1"),
                 RelationshipProjection.builder()
                     .type("INTERACTS_SEASON1")
@@ -251,8 +251,8 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         String eigenvectorWriteQuery = GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
             .builder()
             .graphName("eigenvectorImplicitNorm")
-            .nodeProjection(NodeProjections.fromString("Character"))
-            .relationshipProjection(RelationshipProjections.single(
+            .nodeProjections(NodeProjections.fromString("Character"))
+            .relationshipProjections(RelationshipProjections.single(
                 ElementIdentifier.of("INTERACTS_SEASON1"),
                 RelationshipProjection.builder()
                     .type("INTERACTS_SEASON1")
@@ -376,8 +376,8 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                 GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
                     .builder()
                     .graphName("eigenvectorImplicitTest")
-                    .nodeProjection(NodeProjections.fromString("Character"))
-                    .relationshipProjection(RelationshipProjections.single(
+                    .nodeProjections(NodeProjections.fromString("Character"))
+                    .relationshipProjections(RelationshipProjections.single(
                         ElementIdentifier.of("INTERACTS_SEASON1"),
                         RelationshipProjection.builder()
                             .type("INTERACTS_SEASON1")

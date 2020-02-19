@@ -108,8 +108,8 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
         String query = GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
             .builder()
             .graphName("personalisedGraph")
-            .nodeProjection(NodeProjections.fromObject(map("Person", "Person", "Product", "Product")))
-            .relationshipProjection(RelationshipProjections.builder()
+            .nodeProjections(NodeProjections.fromObject(map("Person", "Person", "Product", "Product")))
+            .relationshipProjections(RelationshipProjections.builder()
                 .putProjection(
                     ElementIdentifier.of("Product"),
                     RelationshipProjection.builder()
@@ -151,8 +151,8 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
         String query = GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
             .builder()
             .graphName("personalisedGraph")
-            .nodeProjection(NodeProjections.fromObject(map("Person", "Person", "Product", "Product")))
-            .relationshipProjection(RelationshipProjections.builder()
+            .nodeProjections(NodeProjections.fromObject(map("Person", "Person", "Product", "Product")))
+            .relationshipProjections(RelationshipProjections.builder()
                 .putProjection(
                     ElementIdentifier.of("Product"),
                     RelationshipProjection.builder()
