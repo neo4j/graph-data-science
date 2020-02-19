@@ -1,10 +1,52 @@
 [[migration-node-sim]]
 = Node Similarity
 
+.Changes in Configuration
+[opts=header,cols="1a,1a"]
+|===
+|GA                                 | GDS
+| direction                         | -
+| concurrency                       | concurrency
+| readConcurrency                   | readConcurrency footnote:node-sim-read[Only when using anonymous graph]
+| writeConcurrency                  | writeConcurrency footnote:node-sim-write[Only for `write` mode]
+| topK                              | topK
+| bottomK                           | bottomK
+| topN                              | topN
+| bottomN                           | bottomN
+| similarityCutoff                  | similarityCutoff
+| degreeCutoff                      | degreeCutoff
+| writeProperty                     | writeProperty footnote:node-sim-write[]
+| writeRelationshipType             | writeRelationshipType footnote:node-sim-write[]
+| write                             | -
+| graph                             | -
+|===
+
+.Changes in YIELD fields
+[opts=header,cols="1a,1a"]
+|===
+| GA                     | GDS
+| loadMillis             | createMillis
+| computeMillis          | computeMillis
+| writeMillis            | writeMillis
+| postProcessingMillis   | postProcessingMillis
+| node1                  | node1 footnote:node-sim-stream-yield[Only for `stream` mode]
+| node2                  | node2 footnote:node-sim-stream-yield[]
+| similarity             | similarity footnote:node-sim-stream-yield[]
+| nodesCompared          | nodesCompared footnote:node-sim-write-yield[Only for `write` mode]
+| relationships          | relationshipsWritten footnote:node-sim-write-yield[]
+| write                  | -
+| -                      | similarityDistribution
+| -                      | configuration footnote:node-sim-gds-config[The configuration used to run the algorithm]
+| writeProperty footnote:node-sim-config[Inlined into `configuration`]         | -
+| writeRelationshipType footnote:node-sim-config[]         | -
+| min, max, mean, p50, p75, p90, p95, p99, p999 footnote:node-sim-distribution[Inlined into `similarityDistribution`] | -
+|===
+
 .Node Similarity Stream Mode
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
+2+| Minimalistic streaming over named graph
 |
 [source, cypher]
 ----
@@ -17,6 +59,7 @@ YIELD node1, node2, similarity
 CALL gds.nodeSimilarity.stream('myGraph')
 YIELD node1, node2, similarity
 ----
+2+| Streaming over named graph using `topK` and `similarityCutoff` configuration properties
 |
 [source, cypher]
 ----
@@ -41,6 +84,7 @@ CALL gds.nodeSimilarity.stream(
   }
 )
 ----
+2+| Streaming over named graph using `bottomK` configuration property
 |
 [source, cypher]
 ----
@@ -63,6 +107,7 @@ CALL gds.nodeSimilarity.stream(
   }
 )
 ----
+2+| Minimalistic streaming over anonymous graph
 |
 [source, cypher]
 ----
@@ -79,6 +124,7 @@ CALL gds.nodeSimilarity.stream({
   relationshipProjection: 'MY_RELATIONSHIP_TYPE'
 })
 ----
+2+| Streaming over anonymous graph using `REVERSE` relationship projection
 |
 [source, cypher]
 ----
@@ -100,21 +146,31 @@ CALL gds.nodeSimilarity.stream({
   }
 })
 ----
+2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]
 |
 [source, cypher]
 ----
-CALL algo.memrec(
+CALL algo.nodeSimilarity.stream(
   'MyLabel',
   'MY_RELATIONSHIP_TYPE',
-  'nodeSimilarity.stream'
+  { direction: 'BOTH' }
 )
 ----
 |
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.stream.estimate({
+CALL gds.nodeSimilarity.stream({
   nodeProjection: 'MyLabel',
-  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+  relationshipProjection: {
+    MY_RELATIONSHIP_TYPE_NATURAL: {
+      type: 'MY_RELATIONSHIP_TYPE',
+      projection: 'NATURAL'
+    },
+    MY_RELATIONSHIP_TYPE_REVERSE: {
+      type: 'MY_RELATIONSHIP_TYPE',
+      projection: 'REVERSE'
+    }
+  }
 })
 ----
 |===
@@ -123,6 +179,7 @@ CALL gds.nodeSimilarity.stream.estimate({
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
+2+|Minimalistic `write` with `writeRelationshipType` and `writeProperty`
 |
 [source, cypher]
 ----
@@ -169,6 +226,7 @@ RETURN
   sd.p1 AS p1,
   conf.writeProperty AS writeProperty
 ----
+2+| Memory estimation of the algorithm
 |
 [source, cypher]
 ----
