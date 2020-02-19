@@ -24,10 +24,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
-import org.neo4j.graphalgo.nodesim.NodeSimilarityWriteProc;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.louvain.LouvainStreamProc;
+import org.neo4j.graphalgo.louvain.LouvainWriteProc;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.io.File;
@@ -35,14 +37,14 @@ import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class NodeSimilarityDocTest extends DocTestBase {
+class LouvainDocTest extends DocTestBase {
 
     @BeforeEach
     void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase(
             builder -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
         );
-        registerProcedures(NodeSimilarityStreamProc.class, NodeSimilarityWriteProc.class, GraphCreateProc.class);
+        registerProcedures(LouvainStreamProc.class, LouvainWriteProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
     }
 
@@ -58,7 +60,7 @@ class NodeSimilarityDocTest extends DocTestBase {
         asciidoctor
             .javaExtensionRegistry()
             .treeprocessor(defaultQueryConsumingTreeProcessor());
-        File file = ASCIIDOC_PATH.resolve("algorithms/node-similarity.adoc").toFile();
+        File file = ASCIIDOC_PATH.resolve("algorithms/louvain.adoc").toFile();
         assertTrue(file.exists() && file.canRead());
         asciidoctor.loadFile(file, Collections.emptyMap());
     }

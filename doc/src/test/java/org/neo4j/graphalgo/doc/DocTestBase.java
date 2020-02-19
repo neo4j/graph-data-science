@@ -133,7 +133,9 @@ class DocTestBase extends BaseProcTest {
     protected String valueToString(Object value) {
         // TODO: Do we want to use the Values API here? We would get single-quote strings instead of double quotes.
         // return Values.of(value).prettyPrint();
-        return value instanceof String ? "\"" + value.toString() + "\"" : value.toString();
+        return value instanceof String
+            ? "\"" + value.toString() + "\""
+            : value != null ? value.toString() : "null";
     }
 
 }
