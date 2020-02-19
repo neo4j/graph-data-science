@@ -1,10 +1,50 @@
 [[migration-lpa]]
 = Label Propagation
 
+.Changes in Configuration
+[opts=header,cols="1a,1a"]
+|===
+|GA                 | GDS
+| direction         | -
+| iterations        | maxIterations
+| concurrency       | concurrency
+| readConcurrency   | readConcurrency footnote:lpa-read[Only when using anonymous graph]
+| writeConcurrency  | writeConcurrency footnote:lpa-write[Only for `write` mode]
+| weightProperty footnote:weight-prop[Can be configured separately by using `nodeWeightProperty` and `relationshipWeightProperty`]    | -
+| -                 | nodeWeightProperty
+| -                 | relationshipWeightProperty
+| seedProperty      | seedProperty
+| partitionProperty | -
+| writeProperty     | writeProperty footnote:lpa-write[]
+| write             | -
+| graph             | -
+|===
+
+.Changes in YIELD fields
+[opts=header,cols="1a,1a"]
+|===
+|GA                     | GDS
+|loadMillis             |createMillis
+|computeMillis          |computeMillis
+|writeMillis            |writeMillis
+|postProcessingMillis   |postProcessingMillis
+|nodes                  |nodePropertiesWritten
+|communityCount         |communityCount
+|didConverge            |didConverge
+|-                      |ranIterations
+|write                  |-
+|-                      |communityDistribution
+|-                      |configuration footnote:lpa-gds-config[The configuration used to run the algorithm]
+|writeProperty footnote:lpa-write-config[Inlined into `configuration`]         |-
+|weightProperty footnote:lpa-weight-config[Inlined into `configuration` as `nodeWeightProperty` and/or `relationshipWeightProperty`]        |-
+| min, max, mean, p50, p75, p90, p95, p99, p999 footnote:lpa-distribution[Inlined into `communityDistribution`] | -
+|===
+
 .Label Propagation Stream Mode
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
+2+| Streaming over a named graph
 |
 [source, cypher]
 ----
@@ -17,6 +57,7 @@ YIELD nodeId, label
 CALL gds.labelPropagation.stream('myGraph')
 YIELD nodeId, communityId
 ----
+2+| Streaming over a named graph using configuration for iterations and relationship weight property
 |
 [source, cypher]
 ----
@@ -41,6 +82,7 @@ CALL gds.labelPropagation.stream(
   }
 )
 ----
+2+| Streaming over anonymous graph
 |
 [source, cypher]
 ----
@@ -57,6 +99,7 @@ CALL gds.labelPropagation.stream({
   relationshipProjection: 'MY_RELATIONSHIP_TYPE'
 })
 ----
+2+| Streaming over anonymous graph using relationship with `REVERSE` projection
 |
 [source, cypher]
 ----
@@ -78,21 +121,31 @@ CALL gds.labelPropagation.stream({
   }
 })
 ----
+2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]
 |
 [source, cypher]
 ----
-CALL algo.memrec(
+CALL algo.labelPropagation.stream(
   'MyLabel',
   'MY_RELATIONSHIP_TYPE',
-  'labelPropagation.stream'
+  { direction: 'BOTH' }
 )
 ----
 |
 [source, cypher]
 ----
-CALL gds.labelPropagation.stream.estimate({
+CALL gds.labelPropagation.stream({
   nodeProjection: 'MyLabel',
-  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
+  relationshipProjection: {
+    MY_RELATIONSHIP_TYPE_NATURAL: {
+      type: 'MY_RELATIONSHIP_TYPE',
+      projection: 'NATURAL'
+    },
+    MY_RELATIONSHIP_TYPE_REVERSE: {
+      type: 'MY_RELATIONSHIP_TYPE',
+      projection: 'REVERSE'
+    }
+  }
 })
 ----
 |===
@@ -101,6 +154,7 @@ CALL gds.labelPropagation.stream.estimate({
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
+2+|Minimalistic write
 |
 [source, cypher]
 ----
@@ -137,10 +191,10 @@ RETURN
   cd.p1 AS p1,
   conf.writeProperty AS writeProperty
 ----
+2+|Write using weight properties footnote:lpa-write-weighted[In GA the weightProperty is for Nodes and Relationships while in GDS there are separate properties ]
 |
 [source, cypher]
 ----
-/* weightProperty is for Nodes and Relationships */
 CALL algo.labelPropagation(
   null,
   null,
@@ -155,7 +209,6 @@ CALL algo.labelPropagation(
 |
 [source, cypher]
 ----
-/* separate weight properties for Nodes and Relationships */
 CALL gds.labelPropagation.write(
   'myGraph',
   {
@@ -165,6 +218,7 @@ CALL gds.labelPropagation.write(
   }
 )
 ----
+2+|Memory estimation of the algorithm
 |
 [source, cypher]
 ----
