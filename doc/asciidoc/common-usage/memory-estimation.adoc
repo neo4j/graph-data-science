@@ -85,8 +85,9 @@ The `nodeProjection` and `relationshipProjection` parameters follow the same syn
 | config                 | map                   | {}        | yes       | Additional configuration, such as concurrency.
 |===
 
-It is furthermore possible to estimate the memory of a graph, by explicitly specifying its number of nodes and relationships.
-This will work even if no graph with such node and relationship counts exists in the database.
+It is also possible to estimate the memory of a fictive graph, by explicitly specifying its node and relationship count.
+Using this feature, one can estimate the memory consumption of an arbitrarily sized graph.
+
 To achieve this, use the following configuration options:
 
 .Configuration
@@ -97,7 +98,7 @@ To achieve this, use the following configuration options:
 | relationshipCount | int       | 0                 | yes       | The number of relationships in a fictive graph.
 |===
 
-In estimating a fictive graph, syntactically valid `nodeProjection` and `relationshipProjection` need to be specified.
+When estimating a fictive graph, syntactically valid `nodeProjection` and `relationshipProjection` must be specified.
 However, it is recommended to specify `'*'` for both in the fictive graph case as this does not interfere with the specified values above.
 
 The query below is an example of estimating a fictive graph with 100 nodes and 1000 relationships.
