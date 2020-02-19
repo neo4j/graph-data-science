@@ -1,10 +1,49 @@
 [[migration-wcc]]
 = Weakly Connected Components
 
+.Changes in Configuration
+[opts=header,cols="1a,1a"]
+|===
+|GA                                 | GDS
+| direction                         | -
+| concurrency                       | concurrency
+| readConcurrency                   | readConcurrency footnote:wcc-read[Only when using anonymous graph]
+| writeConcurrency                  | writeConcurrency footnote:wcc-write[Only for `write` mode]
+| writeProperty                     | writeProperty footnote:wcc-write[]
+| weightProperty                    | relationshipWeightProperty
+| defaultValue                      | defaultValue
+| seedProperty                      | seedProperty
+| threshold                         | threshold
+| consecutiveIds                    | consecutiveIds
+| write                             | -
+| graph                             | -
+|===
+
+.Changes in YIELD fields
+[opts=header,cols="1a,1a"]
+|===
+| GA                     | GDS
+| loadMillis             | createMillis
+| computeMillis          | computeMillis
+| writeMillis            | writeMillis
+| postProcessingMillis   | postProcessingMillis
+| nodeId                 | nodeId footnote:wcc-stream-yield[Only for `stream` mode]
+| setId                  | componentId footnote:wcc-stream-yield[]
+| nodes                  | nodePropertiesWritten footnote:wcc-write-yield[Only for `write` mode]
+| -                      | relationshipPropertiesWritten footnote:wcc-write-yield[]
+| write                  | -
+| -                      | componentDistribution
+| -                      | configuration footnote:wcc-gds-config[The configuration used to run the algorithm]
+| writeProperty footnote:wcc-config[Inlined into `configuration`]         | -
+| weightProperty footnote:wcc-weight-config[Inlined into `configuration` as `relationshipWeightProperty`]         | -
+| min, max, mean, p50, p75, p90, p95, p99, p999 footnote:wcc-distribution[Inlined into `componentDistribution`] | -
+|===
+
 .Weakly Connected Components Stream Mode
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
+2+| Minimalistic stream over named graph
 |
 [source, cypher]
 ----
@@ -17,6 +56,7 @@ YIELD nodeId, setId
 CALL gds.wcc.stream('myGraph')
 YIELD nodeId, componentId
 ----
+2+| Streaming over weighted named graph
 |
 [source, cypher]
 ----
@@ -39,6 +79,7 @@ CALL gds.wcc.stream(
   }
 )
 ----
+2+| Minimalistic streaming over anonymous graph
 |
 [source, cypher]
 ----
@@ -55,6 +96,7 @@ CALL gds.wcc.stream({
   relationshipProjection: 'MY_RELATIONSHIP_TYPE'
 })
 ----
+2+| Streaming over anonymous graph with `REVERSE` relationship projection
 |
 [source, cypher]
 ----
@@ -76,6 +118,7 @@ CALL gds.wcc.stream({
   }
 })
 ----
+2+| Streaming over anonymous graph with relationship specifying default value for the weight property
 |
 [source, cypher]
 ----
@@ -105,29 +148,13 @@ CALL gds.wcc.stream({
   }
 })
 ----
-|
-[source, cypher]
-----
-CALL algo.memrec(
-  'MyLabel',
-  'MY_RELATIONSHIP_TYPE',
-  'unionFind.stream'
-)
-----
-|
-[source, cypher]
-----
-CALL gds.wcc.stream.estimate({
-  nodeProjection: 'MyLabel',
-  relationshipProjection: 'MY_RELATIONSHIP_TYPE'
-})
-----
 |===
 
 .Weakly Connected Components Write Mode
 [opts=header,cols="1a,1a"]
 |===
 |GA | GDS
+2+| Minimalistic `write` mode
 |
 [source, cypher]
 ----
@@ -164,6 +191,7 @@ RETURN
   cd.p1 AS p1,
   conf.writeProperty AS writeProperty
 ----
+2+| Running `write` mode over weighted named graph
 |
 [source, cypher]
 ----
@@ -189,6 +217,7 @@ CALL gds.wcc.write(
   }
 )
 ----
+2+| Memory estimation of the algorithm
 |
 [source, cypher]
 ----
