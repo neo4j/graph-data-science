@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+description = 'Neo4j Graph Algorithms :: Copy of Neo4j Collections from 3.5'
+
+dependencies {
+    compileOnly group: 'org.neo4j',     name: 'neo4j',              version: ver.'neo4j'
+
+    testCompile group: 'org.neo4j',     name: 'neo4j',              version: ver.'neo4j'
+    testCompile group: 'org.hamcrest',  name: 'hamcrest-library',   version: ver.'hamcrest'
+
+    testCompile     platform(dep.junit5bom)
+    testCompile     dep.junit5jupiter
+    testRuntimeOnly dep.junit5platform
+}
