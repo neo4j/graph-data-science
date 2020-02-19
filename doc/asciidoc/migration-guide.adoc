@@ -49,7 +49,7 @@ This section explains how to migrate from the Neo4j Graph Algorithms (GA) librar
 
 == Who should read this guide
 
-This migration guide is intended for users who are familiar with the Graph Algorithms library.
+This guide is intended for users who are familiar with the Graph Algorithms library.
 We assume that most of the mentioned operations and concepts can be understood with little explanation.
 Thus we are intentionally brief in the examples and comparisons.
 Please see the dedicated chapters in this manual for details on all the features in the Graph Data Science library.

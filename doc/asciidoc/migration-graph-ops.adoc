@@ -151,6 +151,65 @@ CALL gds.graph.create(
   }
 )
 ----
+2+|[[direction-both-example]]Native Projection with `direction: 'BOTH'`
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  {
+    graph: 'huge',
+    direction: 'BOTH'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'MyLabel',
+  {
+    MY_RELATIONSHIP_TYPE_NATURAL: {
+      type: 'MY_RELATIONSHIP_TYPE',
+      projection: 'NATURAL'
+    },
+    MY_RELATIONSHIP_TYPE_REVERSE: {
+      type: 'MY_RELATIONSHIP_TYPE',
+      projection: 'REVERSE'
+    }
+  }
+)
+----
+2+| Undirected Native Projection
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  {
+    graph: 'huge',
+    undirected: true
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'MyLabel',
+  {
+    MY_RELATIONSHIP_TYPE: {
+      projection: 'UNDIRECTED'
+    }
+  }
+)
+----
 |===
 
 [[migration-cypher-queries]]
