@@ -19,10 +19,13 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.neo4j.configuration.SettingValueParsers;
+import org.neo4j.configuration.connectors.BoltConnector;
+import org.neo4j.configuration.connectors.HttpConnector;
+import org.neo4j.configuration.connectors.HttpsConnector;
 import org.neo4j.graphdb.config.Setting;
-import org.neo4j.kernel.configuration.BoltConnector;
-import org.neo4j.kernel.configuration.HttpConnector;
-import org.neo4j.kernel.configuration.Settings;
+
+import static org.neo4j.configuration.SettingImpl.newBuilder;
 
 public final class SettingsProxy {
 
@@ -31,18 +34,18 @@ public final class SettingsProxy {
     }
 
     public static Setting<Boolean> boltEnabled() {
-        return new BoltConnector("bolt").enabled;
+        return BoltConnector.enabled;
     }
 
     public static Setting<Boolean> httpEnabled() {
-        return new HttpConnector("http").enabled;
+        return HttpConnector.enabled;
     }
 
     public static Setting<Boolean> httpsEnabled() {
-        return new HttpConnector("https").enabled;
+        return HttpsConnector.enabled;
     }
 
     public static Setting<Boolean> udc() {
-        return Settings.setting("dbms.udc.enabled", Settings.BOOLEAN, "true");
+        return newBuilder("dbms.udc.enabled", SettingValueParsers.BOOL, true).build();
     }
 }
