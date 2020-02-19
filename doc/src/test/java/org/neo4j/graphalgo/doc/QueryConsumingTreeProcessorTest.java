@@ -19,55 +19,39 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.GetNodeFunc;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class QueryConsumingTreeProcessorTest extends DocTestBase {
 
-    private File file;
-
-    @BeforeEach
-    void beforeEach() throws Exception {
-        this.db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
-        );
-        registerProcedures(NodeSimilarityStreamProc.class);
-        registerFunctions(GetNodeFunc.class);
-        file = Paths.get(getClass().getClassLoader().getResource("treeprocessor.adoc").toURI()).toFile();
-        assertTrue(file.exists() && file.canRead());
+    @Override
+    List<Class<?>> procedures() {
+        return Collections.singletonList(NodeSimilarityStreamProc.class);
     }
 
-    @AfterEach
-    void afterEach() {
-        db.shutdown();
-        asciidoctor.shutdown();
+    @Override
+    String adocFile() {
+        return "treeprocessor.adoc";
     }
 
     @Test
-    void should() {
-        asciidoctor
-            .javaExtensionRegistry()
-            .treeprocessor(defaultQueryConsumingTreeProcessor());
-        asciidoctor.loadFile(file, Collections.emptyMap());
-    }
-
-    @Test
-    void should2() {
-        asciidoctor
-            .javaExtensionRegistry()
-            .treeprocessor(defaultQueryConsumingTreeProcessor());
-        asciidoctor.loadFile(file, Collections.emptyMap());
+    void runTest() {
+        asciidoctor.javaExtensionRegistry().treeprocessor(defaultTreeProcessor());
+        try {
+            File file = Paths.get(getClass().getClassLoader().getResource("treeprocessor.adoc").toURI()).toFile();
+            assertTrue(file.exists() && file.canRead());
+            asciidoctor.loadFile(file, Collections.emptyMap());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -105,26 +105,18 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
 
     private void processCypherExample(StructuralNode cypherExample) {
         List<StructuralNode> blocks = cypherExample.getBlocks();
-        StructuralNode queryBlock = blocks.get(0);
-        String query = undoReplacements(queryBlock.getContent().toString());
-
-        if (cypherExample.hasRole(QUERY_EXAMPLE_NO_RESULT_ROLE)) {
-            queryExampleNoResultConsumer.consume(query);
-        } else {
-            Table resultTable = (Table) blocks.get(1);
-            List<String> headers = resultTable != null ? headers(resultTable) : Collections.emptyList();
-            List<Row> rows = resultTable != null ? resultTable.getBody() : Collections.emptyList();
-
-            queryExampleConsumer.consume(query, headers, rows);
-        }
+        Table resultTable = (Table) blocks.get(1);
+        List<String> headers = resultTable != null ? headers(resultTable) : Collections.emptyList();
+        List<Row> rows = resultTable != null ? resultTable.getBody() : Collections.emptyList();
+        queryExampleConsumer.consume(getCypherQuery(cypherExample), headers, rows);
     }
 
     private void processCypherNoResultExample(StructuralNode cypherExample) {
-        List<StructuralNode> blocks = cypherExample.getBlocks();
-        StructuralNode queryBlock = blocks.get(0);
-        String query = undoReplacements(queryBlock.getContent().toString());
+        queryExampleNoResultConsumer.consume(getCypherQuery(cypherExample));
+    }
 
-        queryExampleNoResultConsumer.consume(query);
+    private String getCypherQuery(StructuralNode cypherExample) {
+        return undoReplacements(cypherExample.getBlocks().get(0).getContent().toString());
     }
 
     private List<String> headers(Table table) {

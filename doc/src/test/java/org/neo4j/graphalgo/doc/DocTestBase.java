@@ -23,16 +23,25 @@ import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.ast.Cell;
 import org.asciidoctor.ast.Row;
 import org.hamcrest.Matcher;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GetNodeFunc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.QueryExampleConsumer;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.SetupQueryConsumer;
-import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.Testable;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -45,43 +54,49 @@ import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class DocTestBase extends BaseProcTest {
+abstract class DocTestBase extends BaseProcTest {
 
-    static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
-    protected final Asciidoctor asciidoctor = create();
+    private static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
 
-    QueryConsumingTreeProcessor defaultQueryConsumingTreeProcessor() {
-        return new QueryConsumingTreeProcessor(defaultSetupQueryConsumer(), defaultQueryExampleConsumer(), defaultQueryExampleNoResultConsumer());
+    final Asciidoctor asciidoctor = create();
+
+    QueryConsumingTreeProcessor defaultTreeProcessor() {
+        return new QueryConsumingTreeProcessor(
+            defaultSetupQueryConsumer(),
+            defaultQueryExampleConsumer(),
+            defaultQueryExampleNoResultConsumer()
+        );
     }
 
-    protected QueryExampleConsumer otherQueryExampleConsumer() {
-        return (query, columns, rows) -> assertCypherResult(query, Testable.of(columns, rows).toMaps());
+    @BeforeEach
+    void setUp() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase(
+            builder -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
+        );
+        Class<?>[] clazzArray = new Class<?>[0];
+        registerProcedures(procedures().toArray(clazzArray));
+        registerFunctions(functions().toArray(clazzArray));
     }
 
-    protected QueryExampleConsumer defaultQueryExampleConsumer() {
-        return (query, expectedColumns, expectedRows) -> {
-            Result result = runQueryWithoutClosing(query, Collections.emptyMap());
-            assertEquals(expectedColumns, result.columns());
-            AtomicInteger index = new AtomicInteger(0);
-            result.accept(actualRow -> {
-                Row expectedRow = expectedRows.get(index.getAndIncrement());
-                List<Cell> cells = expectedRow.getCells();
-                IntStream.range(0, expectedColumns.size()).forEach(i -> {
-                    String expected = cells.get(i).getText();
-                    String actual = valueToString(actualRow.get(expectedColumns.get(i)));
-                    assertEquals(expected, actual);
-                });
-                return true;
-            });
-            result.close();
-        };
+    abstract List<Class<?>> procedures();
+
+    abstract String adocFile();
+
+    List<Class<?>> functions() {
+        return Collections.singletonList(GetNodeFunc.class);
     }
 
-    protected QueryConsumingTreeProcessor.QueryExampleNoResultConsumer defaultQueryExampleNoResultConsumer() {
-        return this::runQuery;
+    @Test
+    void runTest() {
+        asciidoctor.javaExtensionRegistry().treeprocessor(defaultTreeProcessor());
+        File file = ASCIIDOC_PATH.resolve(adocFile()).toFile();
+        assertTrue(file.exists() && file.canRead());
+        asciidoctor.loadFile(file, Collections.emptyMap());
     }
 
+    @Override
     protected void assertCypherResult(String query, List<Map<String, Object>> expected) {
         try (Transaction tx = db.beginTx()) {
             List<Map<String, Object>> actual = new ArrayList<>();
@@ -124,13 +139,37 @@ class DocTestBase extends BaseProcTest {
             }
         }
     }
-    protected SetupQueryConsumer defaultSetupQueryConsumer() {
+
+    private SetupQueryConsumer defaultSetupQueryConsumer() {
         return setupQueries -> {
             setupQueries.forEach(this::runQuery);
         };
     }
 
-    protected String valueToString(Object value) {
+    private QueryExampleConsumer defaultQueryExampleConsumer() {
+        return (query, expectedColumns, expectedRows) -> {
+            Result result = runQueryWithoutClosing(query, Collections.emptyMap());
+            assertEquals(expectedColumns, result.columns());
+            AtomicInteger index = new AtomicInteger(0);
+            result.accept(actualRow -> {
+                Row expectedRow = expectedRows.get(index.getAndIncrement());
+                List<Cell> cells = expectedRow.getCells();
+                IntStream.range(0, expectedColumns.size()).forEach(i -> {
+                    String expected = cells.get(i).getText();
+                    String actual = valueToString(actualRow.get(expectedColumns.get(i)));
+                    assertEquals(expected, actual);
+                });
+                return true;
+            });
+            result.close();
+        };
+    }
+
+    private QueryConsumingTreeProcessor.QueryExampleNoResultConsumer defaultQueryExampleNoResultConsumer() {
+        return this::runQuery;
+    }
+
+    private String valueToString(Object value) {
         // TODO: Do we want to use the Values API here? We would get single-quote strings instead of double quotes.
         // return Values.of(value).prettyPrint();
         return value instanceof String

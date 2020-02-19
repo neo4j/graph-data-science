@@ -19,50 +19,23 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.GetNodeFunc;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
-import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
-import java.io.File;
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Arrays;
+import java.util.List;
 
 class WccDocTest extends DocTestBase {
 
-    @BeforeEach
-    void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase(
-            builder -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
-        );
-        registerProcedures(WccStreamProc.class, WccWriteProc.class, GraphCreateProc.class);
-        registerFunctions(GetNodeFunc.class);
+    @Override
+    List<Class<?>> procedures() {
+        return Arrays.asList(WccStreamProc.class, WccWriteProc.class, GraphCreateProc.class);
     }
 
-    @AfterEach
-    void tearDown() {
-        asciidoctor.shutdown();
-        db.shutdown();
-        GraphCatalog.removeAllLoadedGraphs();
-    }
-
-    @Test
-    void should() {
-        asciidoctor
-            .javaExtensionRegistry()
-            .treeprocessor(defaultQueryConsumingTreeProcessor());
-        File file = ASCIIDOC_PATH.resolve("algorithms/wcc.adoc").toFile();
-        assertTrue(file.exists() && file.canRead());
-        asciidoctor.loadFile(file, Collections.emptyMap());
+    @Override
+    String adocFile() {
+        return "algorithms/wcc.adoc";
     }
 
 }
