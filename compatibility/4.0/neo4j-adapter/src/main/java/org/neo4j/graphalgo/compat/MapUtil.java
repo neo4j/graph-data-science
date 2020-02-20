@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.compat;
 import java.util.Map;
 
 /**
- * Compatibility class for {@link org.neo4j.helpers.collection.MapUtil}.
+ * Compatibility class for {@link org.neo4j.internal.helpers.collection.MapUtil}.
  * By using this class we reduce the number of references to the Neo4j helper class,
  * which means we break less when the Neo4j helper class moves between Neo4j versions.
  */
@@ -33,30 +33,30 @@ public final class MapUtil {
     }
 
     /**
-     * Delegates to {@link org.neo4j.helpers.collection.MapUtil#map(Object...)} and allows static import.
+     * Delegates to {@link org.neo4j.internal.helpers.collection.MapUtil#map(Object...)} and allows static import.
      */
     public static Map<String, Object> map(Object... objects) {
-        return org.neo4j.helpers.collection.MapUtil.map(objects);
+        return org.neo4j.internal.helpers.collection.MapUtil.map(objects);
     }
 
     /**
-     * Delegates to {@link org.neo4j.helpers.collection.MapUtil#map(Map, Object...)} and allows static import.
+     * Delegates to {@link org.neo4j.internal.helpers.collection.MapUtil#map(Map, Object...)} and allows static import.
      */
     public static Map<String, Object> map(Map<String, Object> targetMap, Object... objects) {
-        return org.neo4j.helpers.collection.MapUtil.map(targetMap, objects);
+        return org.neo4j.internal.helpers.collection.MapUtil.map(targetMap, objects);
     }
 
     /**
-     * Delegates to {@link org.neo4j.helpers.collection.MapUtil#genericMap(Object...)} and allows static import.
+     * Delegates to {@link org.neo4j.internal.helpers.collection.MapUtil#genericMap(Object...)} and allows static import.
      */
     public static <K, V> Map<K, V> genericMap(Object... objects) {
-        return org.neo4j.helpers.collection.MapUtil.genericMap(objects);
+        return org.neo4j.internal.helpers.collection.MapUtil.genericMap(objects);
     }
 
     /**
-     * Delegates to {@link org.neo4j.helpers.collection.MapUtil#genericMap(Map, Object...)} and allows static import.
+     * Delegates to {@link org.neo4j.internal.helpers.collection.MapUtil#genericMap(Map, Object...)} and allows static import.
      */
     public static <K, V> Map<K, V> genericMap(Map<K, V> targetMap, Object... objects) {
-        return org.neo4j.helpers.collection.MapUtil.genericMap(targetMap, objects);
+        return org.neo4j.internal.helpers.collection.MapUtil.genericMap(targetMap, objects);
     }
 }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.helpers.NamedThreadFactory;
+import org.neo4j.internal.helpers.NamedThreadFactory;
 
 public final class NamedThreadFactoryProxy {
     public static NamedThreadFactory daemon() {
