@@ -60,4 +60,7 @@ public final class SettingsProxy {
         return GraphDatabaseSettings.allow_upgrade;
     }
 
+    public static Setting<Path> storeInternalLogPath() {
+        return GraphDatabaseSettings.store_internal_log_path;
+    }
 }

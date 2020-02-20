@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.SettingsProxy;
 import org.neo4j.io.fs.DefaultFileSystemAbstraction;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -44,7 +45,6 @@ import org.neo4j.unsafe.impl.batchimport.staging.ExecutionMonitors;
 import java.io.File;
 import java.io.IOException;
 
-import static org.neo4j.graphdb.factory.GraphDatabaseSettings.store_internal_log_path;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
 
 public class NeoExport {
@@ -90,7 +90,7 @@ public class NeoExport {
 
         try (FileSystemAbstraction fs = new DefaultFileSystemAbstraction()) {
             LogService logService = config.enableDebugLog()
-                ? life.add(StoreLogService.withInternalLog(dbConfig.get(store_internal_log_path)).build(fs))
+                ? life.add(StoreLogService.withInternalLog(dbConfig.get(SettingsProxy.storeInternalLogPath()).toFile()).build(fs))
                 : NullLogService.getInstance();
 
             JobScheduler jobScheduler = life.add(createScheduler());

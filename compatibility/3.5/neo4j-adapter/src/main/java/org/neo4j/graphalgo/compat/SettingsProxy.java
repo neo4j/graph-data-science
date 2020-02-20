@@ -25,6 +25,10 @@ import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.HttpConnector;
 import org.neo4j.kernel.configuration.Settings;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public final class SettingsProxy {
 
     private SettingsProxy() {
@@ -55,4 +59,12 @@ public final class SettingsProxy {
         return GraphDatabaseSettings.allow_upgrade;
     }
 
+    public static Setting<Path> storeInternalLogPath() {
+        return Settings.derivedSetting(
+            "dbms.logs.debug.path",
+            GraphDatabaseSettings.logs_directory,
+            logs -> logs.toPath().resolve("debug.log"),
+            Settings.PATH.andThen(File::toPath)
+        );
+    }
 }

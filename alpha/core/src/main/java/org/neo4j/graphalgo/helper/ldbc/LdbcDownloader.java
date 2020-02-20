@@ -26,9 +26,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.neo4j.graphalgo.compat.SettingsProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.config.Setting;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.io.ByteUnit;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -53,8 +51,6 @@ public final class LdbcDownloader {
 
     private static Path DEFAULT_TEMP_DIR;
     private static final Map<String, S3Location> FILES;
-
-    private static final Setting<Boolean> udc = SettingsProxy.udc();
 
     static {
         FILES = new HashMap<>();
@@ -108,10 +104,9 @@ public final class LdbcDownloader {
     private static GraphDatabaseAPI openDb(Path dbLocation, final String pageCache) {
         GraphDatabaseService db = new GraphDatabaseFactory()
                 .newEmbeddedDatabaseBuilder(dbLocation.toFile())
-                .setConfig(GraphDatabaseSettings.pagecache_memory, pageCache)
-                .setConfig(GraphDatabaseSettings.allow_upgrade, "true")
-                .setConfig(GraphDatabaseSettings.allow_store_upgrade, "true")
-                .setConfig(udc, "false")
+                .setConfig(SettingsProxy.pagecacheMemory(), pageCache)
+                .setConfig(SettingsProxy.allowUpgrade(), "true")
+                .setConfig(SettingsProxy.udc(), "false")
                 .newGraphDatabase();
         return (GraphDatabaseAPI) db;
     }
