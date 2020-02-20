@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.compat;
 
 import org.neo4j.graphdb.config.Setting;
+import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.HttpConnector;
 import org.neo4j.kernel.configuration.Settings;
@@ -45,4 +46,13 @@ public final class SettingsProxy {
     public static Setting<Boolean> udc() {
         return Settings.setting("dbms.udc.enabled", Settings.BOOLEAN, "true");
     }
+
+    public static Setting<String> pagecacheMemory() {
+        return GraphDatabaseSettings.pagecache_memory;
+    }
+
+    public static Setting<Boolean> allowUpgrade() {
+        return GraphDatabaseSettings.allow_upgrade;
+    }
+
 }
