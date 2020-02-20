@@ -351,8 +351,8 @@ By default, relationships are projected in their natural representation, i.e., i
 Using the `projection` key within a relationship projection definition, we can alter that behaviour.
 There are three possible values: `NATURAL`, `REVERSE` and `UNDIRECTED` which can be best described from a node's perspective:
 
-* `NATURAL` is the default behaviour and projects relationships that are pointing away from a node, i.e., outgoing relationships.
-* `REVERSE` projects relationships that are pointing towards a node, i.e., incoming relationships.
+* `NATURAL` is the default behaviour and projects relationships that are pointing away from a node.
+* `REVERSE` projects relationships that are pointing towards a node.
 * `UNDIRECTED` projects relationships in both, natural and reversed order.
 
 Consider the following graph containing `Person` nodes connected by `KNOWS` relationships.
