@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.util.Map;
 
@@ -46,7 +45,7 @@ class TotalNeighborsFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*"));
+        db = TestDatabaseCreator.createTestDatabase();
         registerFunctions(LinkPredictionFunc.class);
         runQuery(DB_CYPHER);
     }

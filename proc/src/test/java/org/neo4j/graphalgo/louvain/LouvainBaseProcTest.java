@@ -43,7 +43,6 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.catalog.IterationsConfigTest;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -77,9 +76,7 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Bas
     @BeforeEach
     void setupGraph() throws Exception {
 
-        db = TestDatabaseCreator.createTestDatabase(
-            dbBuilder -> dbBuilder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
-        );
+        db = TestDatabaseCreator.createTestDatabase();
 
         registerProcedures(LouvainStreamProc.class, LouvainWriteProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);

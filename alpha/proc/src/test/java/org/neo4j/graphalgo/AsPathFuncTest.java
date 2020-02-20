@@ -27,7 +27,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,9 +50,7 @@ class AsPathFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
-        );
+        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
         registerFunctions(AsPathFunc.class);
     }

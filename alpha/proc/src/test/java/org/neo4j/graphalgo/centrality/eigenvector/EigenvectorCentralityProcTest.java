@@ -36,7 +36,6 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.io.File;
 import java.util.HashMap;
@@ -67,12 +66,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
     void setup() throws Exception {
         ClassLoader classLoader = EigenvectorCentralityProcTest.class.getClassLoader();
         File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
-
-        db = TestDatabaseCreator.createTestDatabase((dbBuilder) -> {
-            dbBuilder
-                .setConfig(GraphDatabaseSettings.load_csv_file_url_root, file.getParent())
-                .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
-        });
+        db = TestDatabaseCreator.createTestDatabaseWithCustomLoadCsvRoot(file.getParent());
 
         runQuery("CREATE CONSTRAINT ON (c:Character)\n" +
                  "ASSERT c.id IS UNIQUE;");

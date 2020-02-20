@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.walking.RandomWalkProc;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -61,9 +60,7 @@ public class RandomWalkDocTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.util.*")
-        );
+        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(RandomWalkProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.shortestpaths.AllShortestPathsProc;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -50,9 +49,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "algo.*")
-        );
+        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(AllShortestPathsProc.class);
         registerFunctions(IsFiniteFunc.class);
 

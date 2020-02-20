@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -39,9 +38,7 @@ public final class K1ColoringDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase(builder ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.util.*")
-        );
+        db = TestDatabaseCreator.createTestDatabase();
 
         registerProcedures(K1ColoringWriteProc.class, K1ColoringStreamProc.class);
         registerProcedures(GraphCreateProc.class);

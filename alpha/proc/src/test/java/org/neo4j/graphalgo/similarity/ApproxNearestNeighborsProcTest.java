@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.util.Map;
 
@@ -76,9 +75,7 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(
-            GraphDatabaseSettings.procedure_unrestricted, "gds.*"
-        ));
+        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ApproxNearestNeighborsProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);

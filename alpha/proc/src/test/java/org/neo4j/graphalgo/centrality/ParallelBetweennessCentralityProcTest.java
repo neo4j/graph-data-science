@@ -56,7 +56,7 @@ public class ParallelBetweennessCentralityProcTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws Exception {
 
-        db = TestDatabaseCreator.createTestDatabase();;
+        db = TestDatabaseCreator.createTestDatabase();
 
         DefaultBuilder builder = GraphBuilder.create(db)
             .setLabel("Node")

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
+import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.LogProvider;
 import org.neo4j.test.TestGraphDatabaseFactory;
@@ -31,22 +32,24 @@ import java.util.function.Consumer;
 public class TestDatabaseCreator {
 
     public static GraphDatabaseAPI createTestDatabase() {
-        return (GraphDatabaseAPI)new TestGraphDatabaseFactory()
-                .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
-                .newGraphDatabase();
+        return (GraphDatabaseAPI) new TestGraphDatabaseFactory()
+            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
+            .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
+            .newGraphDatabase();
     }
 
-    public static GraphDatabaseAPI createTestDatabase(Consumer<GraphDatabaseBuilder> configuration) {
-        GraphDatabaseBuilder builder = new TestGraphDatabaseFactory()
-                .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()));
-        configuration.accept(builder);
-        return (GraphDatabaseAPI) builder.newGraphDatabase();
+    public static GraphDatabaseAPI createTestDatabaseWithCustomLoadCsvRoot(String value) {
+        return (GraphDatabaseAPI) new TestGraphDatabaseFactory()
+            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
+            .setConfig(GraphDatabaseSettings.load_csv_file_url_root, value)
+            .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
+            .newGraphDatabase();
     }
 
     public static GraphDatabaseAPI createTestDatabase(LogProvider logProvider) {
-        return (GraphDatabaseAPI)new TestGraphDatabaseFactory(logProvider)
-                .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
-                .newGraphDatabase();
+        return (GraphDatabaseAPI) new TestGraphDatabaseFactory(logProvider)
+            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
+            .newGraphDatabase();
     }
 
     public static GraphDatabaseAPI createTestDatabase(File storeDir) {

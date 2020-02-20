@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -63,9 +62,7 @@ class ArticleRankProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(
-            GraphDatabaseSettings.procedure_unrestricted, "gds.*"
-        ));
+        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ArticleRankProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);

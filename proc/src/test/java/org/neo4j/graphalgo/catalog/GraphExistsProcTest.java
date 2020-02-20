@@ -26,11 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.catalog.GraphExistsFunc;
-import org.neo4j.graphalgo.catalog.GraphExistsProc;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.util.stream.Stream;
 
@@ -43,10 +39,7 @@ class GraphExistsProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) -> builder.setConfig(
-            GraphDatabaseSettings.procedure_unrestricted,
-            "gds.*"
-        ));
+        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphCreateProc.class, GraphExistsProc.class);
         registerFunctions(GraphExistsFunc.class);
 

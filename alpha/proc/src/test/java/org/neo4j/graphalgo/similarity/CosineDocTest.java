@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.IsFiniteFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -73,11 +72,7 @@ class CosineDocTest extends BaseProcTest {
                              "CREATE (karin)-[:LIKES {score: 7}]->(italian)" +
                              "CREATE (karin)-[:LIKES {score: 10}]->(portuguese)";
 
-        db = TestDatabaseCreator.createTestDatabase(builder -> {
-                builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
-                builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
-            }
-        );
+        db = TestDatabaseCreator.createTestDatabase();
         runQuery(createGraph);
         registerProcedures(CosineProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);

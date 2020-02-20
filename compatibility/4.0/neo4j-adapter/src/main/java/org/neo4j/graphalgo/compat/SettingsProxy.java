@@ -26,6 +26,8 @@ import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
 import org.neo4j.graphdb.config.Setting;
 
+import java.nio.file.Path;
+
 import static org.neo4j.configuration.SettingImpl.newBuilder;
 
 public final class SettingsProxy {
