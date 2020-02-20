@@ -225,7 +225,7 @@ Additionally algorithm specific parameters can also be provided as config.
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
 CREATE (alice:User {name: 'Alice', seed_label: 52})
 CREATE (bridget:User {name: 'Bridget', seed_label: 21})
@@ -259,7 +259,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 ====
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
 CALL gds.graph.create(
     'myGraph',
@@ -277,6 +277,8 @@ In the following examples we will demonstrate using the Label Propagation algori
 [[algorithms-label-propagation-examples-unweighted]]
 === Unweighted
 
+[role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
@@ -297,8 +299,11 @@ ORDER BY Community, Name
 | "Doug"    | 4
 | "Mark"    | 4
 |===
+--
 
 
+[role=query-example]
+--
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
@@ -312,6 +317,7 @@ YIELD ranIterations, communityCount
 | ranIterations | communityCount
 | 3             | 2
 |===
+--
 
 Our algorithm found two communities, with 3 members each.
 
@@ -325,6 +331,8 @@ The Label-Propagation algorithm can also take node and relationship weights into
 When we created `myGraph`, we projected the relationship property `weight`.
 In order to tell the algorithm to consider this property as a relationship weight, we have to set the `relationshipWeightProperty` configuration parameter to `weight`.
 
+[role=query-example]
+--
 .The following will run the algorithm on a graph with weighted relationships and stream results:
 [source, cypher]
 ----
@@ -345,9 +353,12 @@ ORDER BY Community, Name
 | "Doug"    | 4
 | "Mark"    | 4
 |===
+--
 
 Using the weighted relationships, `Alice` and `Charles` are now in the same community as there is a strong link between them.
 
+[role=query-example]
+--
 .The following will run the algorithm on a weighted graph and write back results:
 [source, cypher]
 ----
@@ -364,6 +375,7 @@ YIELD ranIterations, communityCount
 | ranIterations | communityCount
 | 4             | 2
 |===
+--
 
 As we can see, the weighted example takes 4 iterations to converge, instead of 3 for the unweighted case.
 
@@ -383,6 +395,8 @@ The algorithm first checks if there is a seed label assigned to the node.
 If no seed label is present, a new unique label is assigned to the node.
 Using this preliminary set of labels, it then sequentially updates each node's label to a new one, which is the most frequent label among its neighbors at every iteration of label propagation.
 
+[role=query-example]
+--
 .The following will run the algorithm with pre-defined labels:
 [source, cypher]
 ----
@@ -395,17 +409,20 @@ ORDER BY Community, Name
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name    | Community
-| "Alice"   | 19
-| "Bridget" | 19
+| Name      | Community
 | "Charles" | 19
-| "Doug"    | 21
-| "Mark"    | 21
+| "Doug"    | 19
+| "Mark"    | 19
+| "Alice"   | 21
+| "Bridget" | 21
 | "Michael" | 21
 |===
+--
 
 As we can see, the communities are based on the `seed_label` property, concretely `19` is from the user `Mark` and `21` from `Doug`.
 
+[role=query-example]
+--
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
@@ -422,3 +439,4 @@ YIELD ranIterations, communityCount
 | ranIterations | communityCount
 | 3             | 2
 |===
+--

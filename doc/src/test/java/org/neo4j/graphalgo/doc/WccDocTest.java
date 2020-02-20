@@ -19,39 +19,24 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
+import org.neo4j.graphalgo.wcc.WccWriteProc;
 
-import java.io.File;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-class QueryConsumingTreeProcessorTest extends DocTestBase {
+class WccDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {
-        return Collections.singletonList(NodeSimilarityStreamProc.class);
+        return Arrays.asList(WccStreamProc.class, WccWriteProc.class, GraphCreateProc.class);
     }
 
     @Override
     String adocFile() {
-        return "treeprocessor.adoc";
-    }
-
-    @Test
-    void runTest() {
-        asciidoctor.javaExtensionRegistry().treeprocessor(defaultTreeProcessor());
-        try {
-            File file = Paths.get(getClass().getClassLoader().getResource("treeprocessor.adoc").toURI()).toFile();
-            assertTrue(file.exists() && file.canRead());
-            asciidoctor.loadFile(file, Collections.emptyMap());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        return "algorithms/wcc.adoc";
     }
 
 }
+

@@ -184,7 +184,7 @@ Additionally algorithm specific parameters can also be provided as config.
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
 CREATE (home:Page {name:'Home'})
 CREATE (about:Page {name:'About'})
@@ -221,7 +221,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 ====
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
 CALL gds.graph.create(
     'myGraph',
@@ -239,31 +239,36 @@ In the following examples we will demonstrate using the Page Rank algorithm on t
 [[algorithms-pagerank-examples-unweighted]]
 === Unweighted
 
+[role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
 CALL gds.pageRank.stream('myGraph', { maxIterations: 20, dampingFactor: 0.85 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
-ORDER BY score DESC
+ORDER BY score DESC, name ASC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| name    | score
-| Home    | 3.236
-| Product | 1.061
-| Links   | 1.061
-| About   | 1.061
-| Site A  | 0.329
-| Site B  | 0.329
-| Site C  | 0.329
-| Site D  | 0.329
+| name      | score
+| "Home"    | 3.2362017153762284
+| "About"   | 1.0611098567023873
+| "Links"   | 1.0611098567023873
+| "Product" | 1.0611098567023873
+| "Site A"  | 0.3292259009438567
+| "Site B"  | 0.3292259009438567
+| "Site C"  | 0.3292259009438567
+| "Site D"  | 0.3292259009438567
 |===
+--
 
 To instead write the page-rank score to a node property in the Neo4j graph, use this query:
 
+[role=query-example]
+--
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
@@ -281,10 +286,13 @@ YIELD nodePropertiesWritten AS writtenProperties, ranIterations
 | writtenProperties | ranIterations
 | 8                 | 20
 |===
+--
 
 [[algorithms-pagerank-examples-weighted]]
 === Weighted
 
+[role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
@@ -295,25 +303,28 @@ CALL gds.pageRank.stream('myGraph', {
 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
-ORDER BY score DESC
+ORDER BY score DESC, name ASC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| name    | score
-| Home    | 3.550
-| Product | 1.954
-| Links   | 0.751
-| About   | 0.751
-| Site A  | 0.182
-| Site B  | 0.182
-| Site C  | 0.182
-| Site D  | 0.182
+| name      | score
+| "Home"    | 3.5528567278757683
+| "Product" | 1.9541301048360766
+| "About"   | 0.7513767024036497
+| "Links"   | 0.7513767024036497
+| "Site A"  | 0.18167360233856014
+| "Site B"  | 0.18167360233856014
+| "Site C"  | 0.18167360233856014
+| "Site D"  | 0.18167360233856014
 |===
+--
 
 To instead write the page-rank score to a node property in the Neo4j graph, use this query:
 
+[role=query-example]
+--
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
@@ -332,6 +343,7 @@ YIELD nodePropertiesWritten AS writtenProperties, ranIterations
 | writtenProperties | ranIterations
 | 8                 | 20
 |===
+--
 
 
 [[algorithms-pagerank-examples-personalized]]
@@ -342,6 +354,8 @@ This variant of Page Rank is often used as part of https://www.r-bloggers.com/fr
 
 The following examples show how to run Page Rank centered around 'Site A'.
 
+[role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
@@ -353,24 +367,27 @@ CALL gds.pageRank.stream('myGraph', {
 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
-ORDER BY score DESC
+ORDER BY score DESC, name ASC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| name    | score
-| Home    | 0.402
-| Site A  | 0.169
-| About   | 0.113
-| Product | 0.113
-| Links   | 0.113
-| Site B  | 0.019
-| Site C  | 0.019
-| Site D  | 0.019
+| name      | score
+| "Home"    | 0.4015879109501838
+| "Site A"  | 0.1690742586266424
+| "About"   | 0.11305649263085797
+| "Links"   | 0.11305649263085797
+| "Product" | 0.11305649263085797
+| "Site B"  | 0.01907425862664241
+| "Site C"  | 0.01907425862664241
+| "Site D"  | 0.01907425862664241
 |===
+--
 
 
+[role=query-example]
+--
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
@@ -391,10 +408,13 @@ RETURN nodePropertiesWritten AS writtenProperties, ranIterations
 | writtenProperties | ranIterations
 | 8                 | 20
 |===
+--
 
 [[algorithms-pagerank-examples-memory-estimation]]
 === Memory Estimation
 
+[role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher]
 ----
@@ -412,16 +432,19 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 8         | 14                | 1536     | 1536     | "1536 Bytes"
 |===
+--
 
 [[algorithms-pagerank-examples-stats]]
 === Stats
 
+[role=query-example]
+--
 .The following will run the algorithm and returns the result in form of statistical and measurement values
 [source, cypher]
 ----
 CALL gds.pageRank.stats('myGraph', {
   maxIterations: 20,
-  dampingFactor: 0.85,
+  dampingFactor: 0.85
 })
 YIELD ranIterations
 ----
@@ -432,6 +455,8 @@ YIELD ranIterations
 | ranIterations
 | 20
 |===
+--
+
 
 [[algorithms-pagerank-usage]]
 == Usage
