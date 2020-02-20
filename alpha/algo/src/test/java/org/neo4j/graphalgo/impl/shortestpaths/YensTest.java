@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
@@ -94,7 +94,7 @@ class YensTest extends AlgoTestBase {
             .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier(
                 "REL",
-                RelationshipProjection.of("REL", Projection.UNDIRECTED, Aggregation.NONE)
+                RelationshipProjection.of("REL", Orientation.UNDIRECTED, Aggregation.NONE)
             )
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()

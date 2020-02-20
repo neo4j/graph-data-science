@@ -266,10 +266,10 @@ public final class TestGraph implements Graph {
         private Builder() {}
 
         public static Graph fromGdl(String gdl) {
-            return fromGdl(gdl, Projection.NATURAL);
+            return fromGdl(gdl, Orientation.NATURAL);
         }
 
-        public static Graph fromGdl(String gdl, Projection projection) {
+        public static Graph fromGdl(String gdl, Orientation orientation) {
             Objects.requireNonNull(gdl);
 
             GDLHandler gdlHandler = new GDLHandler.Builder().buildFromString(gdl);
@@ -278,7 +278,7 @@ public final class TestGraph implements Graph {
 
             validateInput(vertices, edges);
 
-            Map<Long, Adjacency> adjacencyList = buildAdjacencyList(vertices, edges, projection);
+            Map<Long, Adjacency> adjacencyList = buildAdjacencyList(vertices, edges, orientation);
             Map<String, NodeProperties> nodeProperties = buildWeightMappings(vertices);
             Map<String, NodeProperties> relationshipProperties = buildWeightMappings(edges);
 
@@ -320,7 +320,7 @@ public final class TestGraph implements Graph {
         private static Map<Long, Adjacency> buildAdjacencyList(
             Collection<Vertex> vertices,
             Collection<Edge> edges,
-            Projection projection
+            Orientation orientation
         ) {
             Map<Long, Adjacency> adjacencyList = new HashMap<>();
 
@@ -335,11 +335,11 @@ public final class TestGraph implements Graph {
                     .map(e -> new Relationship(e.getId(), e.getTargetVertexId(), e.getSourceVertexId()))
                     .collect(toList());
 
-                if (projection == Projection.UNDIRECTED) {
+                if (orientation == Orientation.UNDIRECTED) {
                     outgoing.addAll(incoming);
                 }
 
-                adjacencyList.put(vertex.getId(), new Adjacency(projection == Projection.REVERSE ? incoming : outgoing));
+                adjacencyList.put(vertex.getId(), new Adjacency(orientation == Orientation.REVERSE ? incoming : outgoing));
             }
 
             return adjacencyList;

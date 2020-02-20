@@ -77,7 +77,7 @@ class SpanningTreeDocTest extends BaseProcTest {
                        "     LINK: {" +
                        "       type: 'LINK'," +
                        "       properties: 'cost'," +
-                       "       projection: 'UNDIRECTED'" +
+                       "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
                        "   startNodeId: id(n)," +
@@ -120,7 +120,7 @@ class SpanningTreeDocTest extends BaseProcTest {
                        "     LINK: {" +
                        "       type: 'LINK'," +
                        "       properties: 'cost'," +
-                       "       projection: 'UNDIRECTED'" +
+                       "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
                        "   startNodeId: id(n)," +

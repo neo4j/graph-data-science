@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -187,7 +187,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                 ElementIdentifier.of("INTERACTS_SEASON1"),
                 RelationshipProjection.builder()
                     .type("INTERACTS_SEASON1")
-                    .projection(Projection.UNDIRECTED)
+                    .orientation(Orientation.UNDIRECTED)
                     .build()
             )).build())
             .algo("gds", "alpha", "eigenvector")
@@ -256,7 +256,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                 ElementIdentifier.of("INTERACTS_SEASON1"),
                 RelationshipProjection.builder()
                     .type("INTERACTS_SEASON1")
-                    .projection(Projection.UNDIRECTED)
+                    .orientation(Orientation.UNDIRECTED)
                     .build()
             )).build())
             .algo("gds", "alpha", "eigenvector")
@@ -381,7 +381,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                         ElementIdentifier.of("INTERACTS_SEASON1"),
                         RelationshipProjection.builder()
                             .type("INTERACTS_SEASON1")
-                            .projection(Projection.UNDIRECTED)
+                            .orientation(Orientation.UNDIRECTED)
                             .build()
                     )).build())
                     .algo("gds", "alpha", "eigenvector")
@@ -396,7 +396,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                 "INTERACTS_SEASON1",
                 RelationshipProjection.builder()
                     .type("INTERACTS_SEASON1")
-                    .projection(Projection.UNDIRECTED)
+                    .orientation(Orientation.UNDIRECTED)
                     .build()
             )
             .graphCreate(graphName)

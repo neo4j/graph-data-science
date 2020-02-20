@@ -258,11 +258,11 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
                              "    {\n" +
                              "        ROAD: {\n" +
                              "            type: 'ROAD',\n" +
-                             "            projection: 'NATURAL'\n" +
+                             "            orientation: 'NATURAL'\n" +
                              "        },\n" +
                              "        RAIL: {\n" +
                              "            type: 'RAIL',\n" +
-                             "            projection: 'NATURAL'\n" +
+                             "            orientation: 'NATURAL'\n" +
                              "        }\n" +
                              "    }\n" +
                              ")\n" +
@@ -351,15 +351,15 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
                              "    {\n" +
                              "        KNOWS: {\n" +
                              "            type: 'KNOWS',\n" +
-                             "            projection: 'NATURAL'\n" +
+                             "            orientation: 'NATURAL'\n" +
                              "        },\n" +
                              "        KNOWN_BY: {\n" +
                              "            type: 'KNOWS',\n" +
-                             "            projection: 'REVERSE'\n" +
+                             "            orientation: 'REVERSE'\n" +
                              "        },\n" +
                              "        FRIEND_OF: {\n" +
                              "            type: 'KNOWS',\n" +
-                             "            projection: 'UNDIRECTED'\n" +
+                             "            orientation: 'UNDIRECTED'\n" +
                              "        }\n" +
                              "    }\n" +
                              ")\n" +
@@ -615,8 +615,5 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
 
         assertEquals(expected, runQuery(algoQuery, Result::resultAsString));
     }
-
-
-
 
 }

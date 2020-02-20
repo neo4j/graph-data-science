@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -157,7 +157,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .api(db)
                 .addNodeLabel(label.name())
                 .addRelationshipType("TYPE1")
-                .globalProjection(Projection.REVERSE)
+                .globalOrientation(Orientation.REVERSE)
                 .build()
                 .graph(factoryType);
         }
@@ -187,7 +187,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
                 .api(db)
                 .addNodeLabel(label.name())
                 .addRelationshipType("TYPE1")
-                .globalProjection(Projection.UNDIRECTED)
+                .globalOrientation(Orientation.UNDIRECTED)
                 .globalAggregation(Aggregation.SINGLE)
                 .build()
                 .graph(factoryType);

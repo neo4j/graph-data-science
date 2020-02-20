@@ -22,11 +22,10 @@ package org.neo4j.graphalgo.triangle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountConfig;
 import org.neo4j.graphalgo.impl.triangle.TriangleStream;
 
 import java.util.HashSet;
@@ -86,7 +85,7 @@ class TriangleProcTest extends TriangleBaseProcTest<TriangleStream, Stream<Trian
         TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
         String query = GdsCypher
             .call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "triangle")
             .streamMode()
             .yields();

@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -68,7 +68,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
-import static org.neo4j.graphalgo.AbstractRelationshipProjection.PROJECTION_KEY;
+import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
@@ -145,7 +145,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 RELATIONSHIP_PROJECTION_KEY, map(
                     "REL", map(
                         TYPE_KEY, "REL",
-                        PROJECTION_KEY, Projection.NATURAL.name(),
+                        ORIENTATION_KEY, Orientation.NATURAL.name(),
                         AGGREGATION_KEY, Aggregation.DEFAULT.name(),
                         PROPERTIES_KEY, emptyMap()
                     )
@@ -177,7 +177,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 RELATIONSHIP_PROJECTION_KEY, map(
                     "*", map(
                         TYPE_KEY, "*",
-                        PROJECTION_KEY, Projection.NATURAL.name(),
+                        ORIENTATION_KEY, Orientation.NATURAL.name(),
                         AGGREGATION_KEY, Aggregation.DEFAULT.name(),
                         PROPERTIES_KEY, emptyMap()
                     )
@@ -209,7 +209,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 ),
                 RELATIONSHIP_PROJECTION_KEY, map("REL", map(
                         TYPE_KEY, "REL",
-                        PROJECTION_KEY, Projection.NATURAL.name(),
+                    ORIENTATION_KEY, Orientation.NATURAL.name(),
                         AGGREGATION_KEY, Aggregation.DEFAULT.name(),
                         PROPERTIES_KEY, emptyMap()
                     )
@@ -383,7 +383,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 "B",
                 RelationshipProjection.builder()
                     .type("REL")
-                    .projection(Projection.of(projection))
+                    .orientation(Orientation.of(projection))
                     .build()
             )
             .graphCreate(name)
@@ -397,7 +397,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, map("B", MapUtil.genericMap(
-                    map("type", "REL", PROJECTION_KEY, projection, PROPERTIES_KEY, emptyMap()),
+                    map("type", "REL", ORIENTATION_KEY, projection, PROPERTIES_KEY, emptyMap()),
                     AGGREGATION_KEY,
                     Aggregation.DEFAULT.name()
                 )),
@@ -434,7 +434,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 RELATIONSHIP_PROJECTION_KEY, map(
                     "B",
                     map("type", "REL",
-                        PROJECTION_KEY, "NATURAL",
+                        ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
                         PROPERTIES_KEY, expectedProperties)
                 ),
@@ -466,7 +466,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, map(
                     "*", map("type", "*",
-                        PROJECTION_KEY, "NATURAL",
+                        ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
                         PROPERTIES_KEY, expectedProperties
                     )
@@ -496,7 +496,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 RELATIONSHIP_PROJECTION_KEY, map(
                     "*", map(
                         "type", "*",
-                        PROJECTION_KEY, "NATURAL",
+                        ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
                         PROPERTIES_KEY, map(
                             "weight", map(
@@ -556,7 +556,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 RELATIONSHIP_PROJECTION_KEY, map(
                     "B", map(
                         "type", "REL",
-                        PROJECTION_KEY, "NATURAL",
+                        ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, aggregation,
                         PROPERTIES_KEY, map(
                             "weight", map(
@@ -610,7 +610,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, map("B", map(
                     "type", "REL",
-                    PROJECTION_KEY, "NATURAL",
+                    ORIENTATION_KEY, "NATURAL",
                     AGGREGATION_KEY, "DEFAULT",
                     PROPERTIES_KEY, map("weight", map(
                         "property", "weight",
@@ -658,7 +658,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 RELATIONSHIP_PROJECTION_KEY, map(
                     "*",
                     map("type", "*",
-                        PROJECTION_KEY, "NATURAL",
+                        ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
                         PROPERTIES_KEY, map("weight", map(
                                 "property", "weight",
@@ -698,7 +698,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 "KNOWS",
                 RelationshipProjection.builder()
                     .type("KNOWS")
-                    .projection(Projection.NATURAL)
+                    .orientation(Orientation.NATURAL)
                     .addProperty("weight", "weight", Double.NaN, Aggregation.lookup(aggregation))
                     .build()
             )
@@ -787,7 +787,7 @@ class GraphCreateProcTest extends BaseProcTest {
             RELATIONSHIP_PROJECTION_KEY, map(
                 "REL", map(
                     "type", "REL",
-                    PROJECTION_KEY, "NATURAL",
+                    ORIENTATION_KEY, "NATURAL",
                     AGGREGATION_KEY, "DEFAULT",
                     PROPERTIES_KEY,  map(
                     "weight", map(
@@ -1298,12 +1298,12 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void failsOnInvalidProjection() {
-        Map relProjection = map("A", map(TYPE_KEY, "REL", PROJECTION_KEY, "INVALID"));
+        Map relProjection = map("A", map(TYPE_KEY, "REL", ORIENTATION_KEY, "INVALID"));
 
         assertError(
             "CALL gds.graph.create('g', '*', $relProjection)",
             map("relProjection", relProjection),
-            "Projection `INVALID` is not supported."
+            "Orientation `INVALID` is not supported."
         );
     }
 
@@ -1534,7 +1534,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     map(
                         "type",
                         "REL",
-                        PROJECTION_KEY,
+                        ORIENTATION_KEY,
                         "NATURAL",
                         AGGREGATION_KEY,
                         "DEFAULT",
@@ -1551,7 +1551,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     map(
                         "type",
                         "REL",
-                        PROJECTION_KEY,
+                        ORIENTATION_KEY,
                         "NATURAL",
                         AGGREGATION_KEY,
                         "DEFAULT",
@@ -1568,7 +1568,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     map(
                         "type",
                         "REL",
-                        PROJECTION_KEY,
+                        ORIENTATION_KEY,
                         "NATURAL",
                         AGGREGATION_KEY,
                         "DEFAULT",

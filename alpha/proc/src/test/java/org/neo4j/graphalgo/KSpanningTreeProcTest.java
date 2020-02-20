@@ -70,7 +70,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
     void testMax() {
         String query = GdsCypher.call()
             .withRelationshipProperty("w")
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds.alpha.spanningTree.kmax")
             .writeMode()
             .addParameter("startNodeId", id("a"))
@@ -101,7 +101,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
     void testMin() {
         String query = GdsCypher.call()
             .withAnyLabel()
-            .withRelationshipType("*", Projection.UNDIRECTED)
+            .withRelationshipType("*", Orientation.UNDIRECTED)
             .withRelationshipProperty("w")
             .algo("gds.alpha.spanningTree.kmin")
             .writeMode()

@@ -107,7 +107,7 @@ CALL gds.alpha.shortestPath.astar.stream({
   relationshipProjection: {
     CONNECTION: {
       type: 'CONNECTION',
-      projection: 'UNDIRECTED',
+      orientation: 'UNDIRECTED',
       properties: 'time'
     }
   },

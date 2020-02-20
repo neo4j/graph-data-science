@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -206,7 +206,7 @@ final class PageRankTest extends AlgoTestBase {
                 .api(db)
                 .addNodeLabel(LABEL.name())
                 .addRelationshipType(RELATIONSHIP_TYPE)
-                .globalProjection(Projection.REVERSE)
+                .globalOrientation(Orientation.REVERSE)
                 .build()
                 .graph(factoryType);
 

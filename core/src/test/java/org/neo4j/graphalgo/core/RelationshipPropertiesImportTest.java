@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -59,76 +59,76 @@ class RelationshipPropertiesImportTest {
 
     @Test
     void testPropertiesOfInterconnectedNodesWithOutgoing() {
-        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Projection.NATURAL);
+        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Orientation.NATURAL);
 
-        checkProperties(0, Projection.NATURAL, 1.0);
-        checkProperties(1, Projection.NATURAL, 2.0);
+        checkProperties(0, Orientation.NATURAL, 1.0);
+        checkProperties(1, Orientation.NATURAL, 2.0);
     }
 
     @Test
     void testPropertiesOfTriangledNodesWithOutgoing() {
-        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Projection.NATURAL);
+        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Orientation.NATURAL);
 
-        checkProperties(0, Projection.NATURAL, 1.0);
-        checkProperties(1, Projection.NATURAL, 2.0);
-        checkProperties(2, Projection.NATURAL, 3.0);
+        checkProperties(0, Orientation.NATURAL, 1.0);
+        checkProperties(1, Orientation.NATURAL, 2.0);
+        checkProperties(2, Orientation.NATURAL, 3.0);
     }
 
     @Test
     void testPropertiesOfInterconnectedNodesWithIncoming() {
-        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Projection.REVERSE);
+        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Orientation.REVERSE);
 
-        checkProperties(0, Projection.REVERSE, 2.0);
-        checkProperties(1, Projection.REVERSE, 1.0);
+        checkProperties(0, Orientation.REVERSE, 2.0);
+        checkProperties(1, Orientation.REVERSE, 1.0);
     }
 
     @Test
     void testPropertiesOfTriangledNodesWithIncoming() {
-        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Projection.REVERSE);
+        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Orientation.REVERSE);
 
-        checkProperties(0, Projection.REVERSE, 3.0);
-        checkProperties(1, Projection.REVERSE, 1.0);
-        checkProperties(2, Projection.REVERSE, 2.0);
+        checkProperties(0, Orientation.REVERSE, 3.0);
+        checkProperties(1, Orientation.REVERSE, 1.0);
+        checkProperties(2, Orientation.REVERSE, 2.0);
     }
 
     @Test
     void testPropertiesOfInterconnectedNodesWithUndirected() {
-        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Projection.UNDIRECTED);
+        setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Orientation.UNDIRECTED);
 
-        checkProperties(0, Projection.UNDIRECTED, 1.0, 2.0);
-        checkProperties(1, Projection.UNDIRECTED, 2.0, 1.0);
+        checkProperties(0, Orientation.UNDIRECTED, 1.0, 2.0);
+        checkProperties(1, Orientation.UNDIRECTED, 2.0, 1.0);
     }
 
     @Test
     void testPropertiesOfTriangledNodesWithUndirected() {
-        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Projection.UNDIRECTED);
+        setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Orientation.UNDIRECTED);
 
-        checkProperties(0, Projection.UNDIRECTED, 1.0, 3.0);
-        checkProperties(1, Projection.UNDIRECTED, 1.0, 2.0);
-        checkProperties(2, Projection.UNDIRECTED, 3.0, 2.0);
+        checkProperties(0, Orientation.UNDIRECTED, 1.0, 3.0);
+        checkProperties(1, Orientation.UNDIRECTED, 1.0, 2.0);
+        checkProperties(2, Orientation.UNDIRECTED, 3.0, 2.0);
     }
 
-    private void setup(String cypher, Projection projection) {
+    private void setup(String cypher, Orientation orientation) {
         runQuery(db, cypher);
 
         graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .addRelationshipProperty(PropertyMapping.of("w", 0.0))
             .build()
             .load(HugeGraphFactory.class);
 
     }
 
-    private void checkProperties(int nodeId, Projection projection, double... expecteds) {
+    private void checkProperties(int nodeId, Orientation orientation, double... expecteds) {
         AtomicInteger i = new AtomicInteger();
         int limit = expecteds.length;
         List<Executable> assertions = new ArrayList<>();
 
         RelationshipWithPropertyConsumer consumer = (s, t, w) -> {
-            String rel = String.format("(%d %s %d)", s, arrow(projection), t);
+            String rel = String.format("(%d %s %d)", s, arrow(orientation), t);
             if (i.get() >= limit) {
                 assertions.add(() -> assertFalse(
                     i.get() >= limit,
@@ -151,8 +151,8 @@ class RelationshipPropertiesImportTest {
         assertAll(assertions);
     }
 
-    private static String arrow(Projection projection) {
-        switch (projection) {
+    private static String arrow(Orientation orientation) {
+        switch (orientation) {
             case NATURAL:
                 return "->";
             case REVERSE:
@@ -160,7 +160,7 @@ class RelationshipPropertiesImportTest {
             case UNDIRECTED:
                 return "<->";
             default:
-                throw new IllegalArgumentException("Unknown projection: " + projection);
+                throw new IllegalArgumentException("Unknown projection: " + orientation);
         }
     }
 }

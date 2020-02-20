@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
@@ -363,7 +363,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
             graph = new StoreLoaderBuilder()
                     .api(db)
                     .addNodeLabel(label.name())
-                    .addRelationshipProjection(RelationshipProjection.of("TYPE1", Projection.REVERSE))
+                    .addRelationshipProjection(RelationshipProjection.of("TYPE1", Orientation.REVERSE))
                     .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                     .build()
                     .graph(graphFactory);

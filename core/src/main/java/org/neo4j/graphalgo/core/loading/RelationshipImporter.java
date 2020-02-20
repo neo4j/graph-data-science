@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -46,21 +46,21 @@ class RelationshipImporter {
         long importRelationships(RelationshipsBatchBuffer batches, PropertyReader propertyReader);
     }
 
-    Imports imports(Projection projection, boolean loadProperties) {
-        if (projection == Projection.UNDIRECTED) {
+    Imports imports(Orientation orientation, boolean loadProperties) {
+        if (orientation == Orientation.UNDIRECTED) {
             return loadProperties
                 ? this::importUndirectedWithProperties
                 : this::importUndirected;
-        } else if (projection == Projection.NATURAL) {
+        } else if (orientation == Orientation.NATURAL) {
             return loadProperties
                 ? this::importNaturalWithProperties
                 : this::importNatural;
-        } else if (projection == Projection.REVERSE) {
+        } else if (orientation == Orientation.REVERSE) {
             return loadProperties
                 ? this::importReverseWithProperties
                 : this::importReverse;
         } else {
-            throw new IllegalArgumentException(String.format("Unexpected projection: %s", projection));
+            throw new IllegalArgumentException(String.format("Unexpected projection: %s", orientation));
         }
     }
 

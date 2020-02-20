@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -142,8 +142,8 @@ class K1ColoringTest extends AlgoTestBase {
             AllocationTracker.EMPTY
         );
 
-        Graph naturalGraph = outGenerator.generate(Projection.NATURAL);
-        Graph reverseGraph = inGenerator.generate(Projection.REVERSE);
+        Graph naturalGraph = outGenerator.generate(Orientation.NATURAL);
+        Graph reverseGraph = inGenerator.generate(Orientation.REVERSE);
         Graph graph = UnionGraph.of(Arrays.asList(naturalGraph, reverseGraph));
 
         K1Coloring k1Coloring = new K1Coloring(

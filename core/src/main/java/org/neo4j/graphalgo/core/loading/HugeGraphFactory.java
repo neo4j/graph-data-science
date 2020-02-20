@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
@@ -86,7 +86,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 : Optional.of(relationshipProjectionMapping.typeName());
             String elementIdentifier = relationshipProjectionMapping.elementIdentifier();
 
-            boolean undirected = relationshipProjectionMapping.projection() == Projection.UNDIRECTED;
+            boolean undirected = relationshipProjectionMapping.orientation() == Orientation.UNDIRECTED;
 
             // adjacency list
             builder.add(
@@ -123,7 +123,7 @@ public final class HugeGraphFactory extends GraphFactory {
         long relationshipCount = setup.relationshipProjections().projections().entrySet().stream()
             .map(entry -> {
                 Long relCount = dimensions.relationshipCounts().getOrDefault(entry.getKey().name, 0L);
-                return entry.getValue().projection() == Projection.UNDIRECTED
+                return entry.getValue().orientation() == Orientation.UNDIRECTED
                     ? relCount * 2
                     : relCount;
             }).mapToLong(Long::longValue).sum();
@@ -199,7 +199,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 AdjacencyList adjacencyList = relationshipsBuilder.adjacencyListBuilder.build();
                 AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets;
                 long relationshipCount = relationshipCounts.getOrDefault(relProjectionMapping, 0L);
-                boolean isUndirected = relProjectionMapping.projection() == Projection.UNDIRECTED;
+                boolean isUndirected = relProjectionMapping.orientation() == Orientation.UNDIRECTED;
 
                 if (!dimensions.relationshipProperties().hasMappings()) {
                     HugeGraph graph = HugeGraph.create(

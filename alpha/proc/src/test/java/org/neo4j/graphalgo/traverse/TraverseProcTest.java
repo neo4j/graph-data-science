@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import java.util.Arrays;
@@ -134,7 +134,7 @@ class TraverseProcTest extends BaseProcTest {
         long id = runQuery("MATCH (n:Node {name: 'g'}) RETURN id(n) AS id", result -> result.<Long>columnAs("id").next());
         String query = GdsCypher.call()
             .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Projection.REVERSE)
+            .withRelationshipType("TYPE", Orientation.REVERSE)
             .algo("gds.alpha.dfs")
             .streamMode()
             .addParameter("startNode", id)

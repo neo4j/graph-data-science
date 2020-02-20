@@ -121,7 +121,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
             "   relationshipProjection: {" +
             "       TYPE: {" +
             "         type: 'TYPE'," +
-            "         projection: 'REVERSE'," +
+            "         orientation: 'REVERSE'," +
             "         properties: 'cost'" +
             "       }" +
             "   }," +

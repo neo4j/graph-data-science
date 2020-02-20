@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.Projection.REVERSE;
+import static org.neo4j.graphalgo.Orientation.REVERSE;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
@@ -57,7 +57,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
 
     @ParameterizedTest(name = "{2}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
-    void shouldWriteResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
+    void shouldWriteResults(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         String query = queryBuilder
             .algo("nodeSimilarity")
             .writeMode()
@@ -107,10 +107,10 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
             );
         });
 
-        String resultGraphName = "simGraph_" + projection.name();
+        String resultGraphName = "simGraph_" + orientation.name();
         String loadQuery = GdsCypher.call()
-            .withNodeLabel(projection == REVERSE ? "Item" : "Person")
-            .withRelationshipType("SIMILAR", projection)
+            .withNodeLabel(orientation == REVERSE ? "Item" : "Person")
+            .withRelationshipType("SIMILAR", orientation)
             .withNodeProperty("id")
             .withRelationshipProperty("score")
             .graphCreate(resultGraphName)
@@ -121,7 +121,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
         Graph simGraph = GraphCatalog.getUnion(getUsername(), resultGraphName).orElse(null);
         assertNotNull(simGraph);
         assertGraphEquals(
-            projection == REVERSE
+            orientation == REVERSE
                 ? fromGdl(
                 String.format(
                     "  (i1 {id: 10})" +

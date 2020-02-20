@@ -28,14 +28,14 @@ import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_RELATIO
 public interface RelationshipProjectionMapping {
 
     static RelationshipProjectionMapping all() {
-        return all(Projection.NATURAL);
+        return all(Orientation.NATURAL);
     }
 
-    static RelationshipProjectionMapping all(Projection projection) {
+    static RelationshipProjectionMapping all(Orientation orientation) {
         return ImmutableRelationshipProjectionMapping.builder()
             .typeName("")
             .elementIdentifier("")
-            .projection(projection)
+            .orientation(orientation)
             .typeId(ANY_RELATIONSHIP_TYPE)
             .exists(true)
             .build();
@@ -45,26 +45,26 @@ public interface RelationshipProjectionMapping {
 
     String typeName();
 
-    Projection projection();
+    Orientation orientation();
 
     int typeId();
 
     boolean exists();
 
     static RelationshipProjectionMapping of(String typeName, int typeId) {
-        return of(typeName, typeName, Projection.NATURAL, typeId);
+        return of(typeName, typeName, Orientation.NATURAL, typeId);
     }
 
     static RelationshipProjectionMapping of(
         String elementIdentifier,
         String typeName,
-        Projection projection,
+        Orientation orientation,
         int typeId
     ) {
         return ImmutableRelationshipProjectionMapping.builder()
             .elementIdentifier(elementIdentifier)
             .typeName(typeName)
-            .projection(projection)
+            .orientation(orientation)
             .typeId(typeId)
             .exists(typeId != NO_SUCH_RELATIONSHIP_TYPE)
             .build();

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -83,7 +83,7 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
     void shouldReturnNodesAndCosts() {
         String algoCall = GdsCypher.call()
             .withRelationshipProperty("cost")
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds.alpha.kShortestPaths")
             .streamMode()
             .addVariable("startNode", "a")
@@ -119,7 +119,7 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
     void shouldReturnPaths() {
         String algoCall = GdsCypher.call()
             .withRelationshipProperty("cost")
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds.alpha.kShortestPaths")
             .streamMode()
             .addVariable("startNode", "a")
@@ -160,7 +160,7 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
     @Test
     void shouldNotStoreWeightsOnVirtualPathIfIgnoringProperty() {
         String algoCall = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds.alpha.kShortestPaths")
             .streamMode()
             .addVariable("startNode", "a")

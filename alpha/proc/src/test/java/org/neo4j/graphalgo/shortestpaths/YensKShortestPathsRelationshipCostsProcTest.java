@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.MapUtil;
 
@@ -65,7 +65,7 @@ class YensKShortestPathsRelationshipCostsProcTest extends BaseProcTest {
     void test() {
         String algoCall = GdsCypher.call()
             .withRelationshipProperty("cost")
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds.alpha.kShortestPaths")
             .writeMode()
             .addVariable("startNode", "c")

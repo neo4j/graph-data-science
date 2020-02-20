@@ -82,7 +82,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "   relationshipProjection: {" +
             "       FOLLOWS: {" +
             "           type: 'FOLLOWS'," +
-            "           projection: '" + projection + "'" +
+            "           orientation: '" + projection + "'" +
             "       }" +
             "   }" +
             "})" +
@@ -103,7 +103,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "   relationshipProjection: {" +
             "       FOLLOWS: {" +
             "           type: 'FOLLOWS'," +
-            "           projection: '" + projection + "'," +
+            "           orientation: '" + projection + "'," +
             "           properties: 'score'" +
             "       }" +
             "   }," +
@@ -126,7 +126,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "   relationshipProjection: {" +
             "       FOLLOWS: {" +
             "           type: 'FOLLOWS'," +
-            "           projection: '" + projection + "'" +
+            "           orientation: '" + projection + "'" +
             "       }" +
             "   }," +
             "   writeProperty: 'following'" +
@@ -147,7 +147,7 @@ public class DegreeCentralityDocTest extends BaseProcTest {
             "   relationshipProjection: {" +
             "       FOLLOWS: {" +
             "           type: 'FOLLOWS'," +
-            "           projection: '" + projection + "'," +
+            "           orientation: '" + projection + "'," +
             "           properties: 'score'" +
             "       }" +
             "   }," +

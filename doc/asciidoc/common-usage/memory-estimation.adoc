@@ -14,7 +14,7 @@ image::graph-model-memory.png[width=500]
 The model contains three types of data:
 
 * Node ids - up to 2^45^ ("35 trillion")
-* Relationships - pairs of node ids. Relationships are stored twice if `projection: "UNDIRECTED"` is used.
+* Relationships - pairs of node ids. Relationships are stored twice if `orientation: "UNDIRECTED"` is used.
 * Weights - stored as doubles (8 bytes per node) in an array-like data structure next to the relationships
 
 Memory configuration depends on the graph projection that we're using.

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.shortestpaths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
@@ -76,8 +76,8 @@ public class YensDebugTest extends AlgoTestBase {
         graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .putRelationshipProjectionsWithIdentifier("REL_OUT", RelationshipProjection.of("REL", Projection.NATURAL, Aggregation.NONE))
-            .putRelationshipProjectionsWithIdentifier("REL_IN", RelationshipProjection.of("REL", Projection.REVERSE, Aggregation.NONE))
+            .putRelationshipProjectionsWithIdentifier("REL_OUT", RelationshipProjection.of("REL", Orientation.NATURAL, Aggregation.NONE))
+            .putRelationshipProjectionsWithIdentifier("REL_IN", RelationshipProjection.of("REL", Orientation.REVERSE, Aggregation.NONE))
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
             .graph(HugeGraphFactory.class);

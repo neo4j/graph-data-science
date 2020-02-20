@@ -91,7 +91,7 @@ class GraphDropProcTest extends BaseProcTest {
                     "relationshipProjection", map(
                         "REL", map(
                             "type", "REL",
-                            "projection", "NATURAL",
+                            "orientation", "NATURAL",
                             "aggregation", "DEFAULT",
                             "properties", emptyMap()
                         )
@@ -153,7 +153,7 @@ class GraphDropProcTest extends BaseProcTest {
                     "relationshipProjection", map(
                         "REL", map(
                             "type", "REL",
-                            "projection", "NATURAL",
+                            "orientation", "NATURAL",
                             "aggregation", "DEFAULT",
                             "properties", emptyMap()
                         )),

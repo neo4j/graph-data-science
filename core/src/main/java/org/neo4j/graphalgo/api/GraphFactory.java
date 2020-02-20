@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsReader;
@@ -81,7 +81,7 @@ public abstract class GraphFactory implements Assessable {
         long relationshipCount = dimensions.relationshipProjectionMappings().stream()
             .mapToLong(mapping -> {
                 Long typeCount = dimensions.relationshipCounts().get(mapping.elementIdentifier());
-                return mapping.projection() == Projection.UNDIRECTED
+                return mapping.orientation() == Orientation.UNDIRECTED
                     ? typeCount * 2
                     : typeCount;
             })

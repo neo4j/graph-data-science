@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -75,7 +75,7 @@ class GraphLoaderDirectionalityTest {
 
     @AllGraphTypesTest
     void loadUndirected(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_BOTH, Projection.UNDIRECTED);
+        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_BOTH, Orientation.UNDIRECTED);
         assertEquals(4L, graph.nodeCount());
         assertRelationships(graph, 0, 0, 1);
         assertRelationships(graph, 1, 0, 1, 2, 3);
@@ -85,7 +85,7 @@ class GraphLoaderDirectionalityTest {
 
     @AllGraphTypesTest
     void loadNatural(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_OUTGOING, Projection.NATURAL);
+        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_OUTGOING, Orientation.NATURAL);
 
         assertEquals(4L, graph.nodeCount());
         assertRelationships(graph, 0, 0, 1);
@@ -96,7 +96,7 @@ class GraphLoaderDirectionalityTest {
 
     @AllGraphTypesTest
     void loadReverse(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_INCOMING, Projection.REVERSE);
+        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_INCOMING, Orientation.REVERSE);
 
         assertEquals(4L, graph.nodeCount());
         assertRelationships(graph, 0, 0);
@@ -107,7 +107,7 @@ class GraphLoaderDirectionalityTest {
 
     @AllGraphTypesTest
     void loadNaturalWithoutAggregation(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_OUTGOING, Projection.NATURAL);
+        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_OUTGOING, Orientation.NATURAL);
 
         assertEquals(4L, graph.nodeCount());
         assertRelationships(graph, 0, 0, 1);
@@ -201,7 +201,7 @@ class GraphLoaderDirectionalityTest {
             cypher,
             graphImpl,
             RELATIONSHIP_QUERY_UNDIRECTED,
-            Projection.UNDIRECTED,
+            Orientation.UNDIRECTED,
             Aggregation.SINGLE
         );
 
@@ -215,7 +215,7 @@ class GraphLoaderDirectionalityTest {
             cypher,
             graphImpl,
             RELATIONSHIP_QUERY_UNDIRECTED,
-            Projection.UNDIRECTED,
+            Orientation.UNDIRECTED,
             Aggregation.SINGLE
         );
 
@@ -229,9 +229,9 @@ class GraphLoaderDirectionalityTest {
     private Graph loadDirectedGraph(
         Class<? extends GraphFactory> graphImpl,
         String relationshipQuery,
-        Projection projection
+        Orientation orientation
     ) {
-        return loadGraph(DB_CYPHER, graphImpl, relationshipQuery, projection, Aggregation.SINGLE);
+        return loadGraph(DB_CYPHER, graphImpl, relationshipQuery, orientation, Aggregation.SINGLE);
     }
 
     private Graph loadUndirectedGraph(
@@ -239,7 +239,7 @@ class GraphLoaderDirectionalityTest {
         Aggregation aggregation
     ) {
         return loadGraph(DB_CYPHER, graphImpl,
-            GraphLoaderDirectionalityTest.RELATIONSHIP_QUERY_UNDIRECTED, Projection.UNDIRECTED, aggregation
+            GraphLoaderDirectionalityTest.RELATIONSHIP_QUERY_UNDIRECTED, Orientation.UNDIRECTED, aggregation
         );
     }
 
@@ -247,7 +247,7 @@ class GraphLoaderDirectionalityTest {
         String dbQuery,
         Class<? extends GraphFactory> graphImpl,
         String relationshipQuery,
-        Projection projection,
+        Orientation orientation,
         Aggregation aggregation
     ) {
         runQuery(db, dbQuery);
@@ -266,7 +266,7 @@ class GraphLoaderDirectionalityTest {
                 .api(db)
                 .loadAnyLabel()
                 .loadAnyRelationshipType()
-                .globalProjection(projection)
+                .globalOrientation(orientation)
                 .globalAggregation(aggregation)
                 .build();
         }

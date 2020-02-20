@@ -146,7 +146,7 @@ CALL gds.alpha.randomWalk.stream({
   relationshipProjection: {
     LINKS: {
       type: 'LINKS',
-      projection: 'UNDIRECTED'
+      orientation: 'UNDIRECTED'
     }
   },
   start: id(home),

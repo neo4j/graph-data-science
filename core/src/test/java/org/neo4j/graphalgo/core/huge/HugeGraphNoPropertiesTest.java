@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -65,9 +65,9 @@ final class HugeGraphNoPropertiesTest {
     }
 
     @ParameterizedTest
-    @EnumSource(Projection.class)
-    void relationshipIteratorShouldReturnFallbackWeight(Projection projection) {
-        Graph graph = loadGraph(db, projection);
+    @EnumSource(Orientation.class)
+    void relationshipIteratorShouldReturnFallbackWeight(Orientation orientation) {
+        Graph graph = loadGraph(db, orientation);
 
         double fallbackWeight = 42D;
         graph.forEachNode((nodeId) -> {
@@ -80,9 +80,9 @@ final class HugeGraphNoPropertiesTest {
     }
 
     @ParameterizedTest
-    @EnumSource(Projection.class)
-    void weightOfShouldReturnFallbackWeight(Projection projection) {
-        Graph graph = loadGraph(db, projection);
+    @EnumSource(Orientation.class)
+    void weightOfShouldReturnFallbackWeight(Orientation orientation) {
+        Graph graph = loadGraph(db, orientation);
 
         double fallbackWeight = 42D;
         graph.forEachNode((nodeId) -> {
@@ -94,12 +94,12 @@ final class HugeGraphNoPropertiesTest {
         });
     }
 
-    private Graph loadGraph(final GraphDatabaseAPI db, Projection projection) {
+    private Graph loadGraph(final GraphDatabaseAPI db, Orientation orientation) {
         return new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .load(HugeGraphFactory.class);
     }

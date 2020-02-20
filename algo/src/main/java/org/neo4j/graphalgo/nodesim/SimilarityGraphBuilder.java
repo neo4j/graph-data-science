@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -95,7 +95,7 @@ class SimilarityGraphBuilder {
 
         GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
             idMap,
-            baseGraph.isUndirected() ? Projection.UNDIRECTED : Projection.NATURAL,
+            baseGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL,
             true,
             Aggregation.NONE,
             executorService,

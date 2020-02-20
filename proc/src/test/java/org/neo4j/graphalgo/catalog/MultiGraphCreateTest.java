@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.catalog;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -49,13 +49,13 @@ class MultiGraphCreateTest {
 
         String create1 = GdsCypher.call()
             .withNodeLabel("Node1")
-            .withRelationshipType("TYPE1", Projection.UNDIRECTED)
+            .withRelationshipType("TYPE1", Orientation.UNDIRECTED)
             .graphCreate("graph1")
             .yields();
 
         String create2 = GdsCypher.call()
             .withNodeLabel("Node2")
-            .withRelationshipType("TYPE2", Projection.UNDIRECTED)
+            .withRelationshipType("TYPE2", Orientation.UNDIRECTED)
             .graphCreate("graph2")
             .yields();
 

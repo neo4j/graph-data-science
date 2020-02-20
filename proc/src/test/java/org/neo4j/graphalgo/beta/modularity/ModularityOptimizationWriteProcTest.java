@@ -23,7 +23,7 @@ package org.neo4j.graphalgo.beta.modularity;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.compat.MapUtil;
 
 import java.util.Map;
@@ -59,7 +59,7 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcBase
     void testWritingWeighted() {
         String query = GdsCypher.call()
             .withRelationshipProperty("weight")
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("relationshipWeightProperty", "weight")
@@ -80,7 +80,7 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcBase
     void testWritingSeeded() {
         String query = GdsCypher.call()
             .withNodeProperty("seed1")
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("seedProperty", "seed1")
@@ -100,7 +100,7 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcBase
     @Test
     void testWritingTolerance() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("tolerance", 1)
@@ -116,7 +116,7 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcBase
     @Test
     void testWritingIterations() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("maxIterations", 1)

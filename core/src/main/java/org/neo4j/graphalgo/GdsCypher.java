@@ -47,10 +47,10 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
-import static org.neo4j.graphalgo.AbstractRelationshipProjection.PROJECTION_KEY;
+import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
-import static org.neo4j.graphalgo.Projection.NATURAL;
+import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_VALUE_KEY;
 import static org.neo4j.graphalgo.PropertyMapping.PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
@@ -78,7 +78,7 @@ public abstract class GdsCypher {
 
         /**
          * Loads all nodes of any label and relationships of any type in the
-         * {@link Projection#NATURAL} projection.
+         * {@link Orientation#NATURAL} projection.
          *
          * Does <strong>not</strong> load any properties.
          *
@@ -98,10 +98,10 @@ public abstract class GdsCypher {
          * To load properties, call one of {@link #withNodeProperty(String)}
          * or {@link #withRelationshipProperty(String)} or their variants.
          */
-        default QueryBuilder loadEverything(Projection projection) {
+        default QueryBuilder loadEverything(Orientation orientation) {
             return this
                 .withNodeLabel("*", NodeProjection.all())
-                .withRelationshipType("*", RelationshipProjection.all().withProjection(projection));
+                .withRelationshipType("*", RelationshipProjection.all().withOrientation(orientation));
         }
 
         default ImplicitCreationBuildStage withAnyLabel() {
@@ -133,10 +133,10 @@ public abstract class GdsCypher {
             return withRelationshipType(type, RelationshipProjection.builder().type(type).build());
         }
 
-        default ImplicitCreationBuildStage withRelationshipType(String type, Projection projection) {
+        default ImplicitCreationBuildStage withRelationshipType(String type, Orientation orientation) {
             return withRelationshipType(
                 type,
-                RelationshipProjection.builder().type(type).projection(projection).build()
+                RelationshipProjection.builder().type(type).orientation(orientation).build()
             );
         }
 
@@ -734,7 +734,7 @@ public abstract class GdsCypher {
     private static boolean isAllDefault(ElementProjection projection) {
         if (projection instanceof AbstractRelationshipProjection) {
             AbstractRelationshipProjection rel = (AbstractRelationshipProjection) projection;
-            if (rel.projection() != NATURAL || rel.aggregation() != DEFAULT) {
+            if (rel.orientation() != NATURAL || rel.aggregation() != DEFAULT) {
                 return false;
             }
         }
@@ -784,8 +784,8 @@ public abstract class GdsCypher {
 
         Map<String, Object> value = new LinkedHashMap<>();
         value.put(TYPE_KEY, projection.type());
-        if (projection.projection() != NATURAL) {
-            value.put(PROJECTION_KEY, projection.projection().name());
+        if (projection.orientation() != NATURAL) {
+            value.put(ORIENTATION_KEY, projection.orientation().name());
         }
         if (projection.aggregation() != DEFAULT) {
             value.put(AGGREGATION_KEY, projection.aggregation().name());
@@ -795,7 +795,7 @@ public abstract class GdsCypher {
     }
 
     private static boolean matchesType(String type, AbstractRelationshipProjection projection) {
-        return projection.projection() == NATURAL
+        return projection.orientation() == NATURAL
                && projection.aggregation() == DEFAULT
                && projection.type().equals(type);
     }

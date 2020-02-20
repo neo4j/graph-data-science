@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.ImmutablePropertyMapping;
 import org.neo4j.graphalgo.MemoryEstimateTest;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
@@ -250,7 +250,7 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
                         "TYPE3",
                         RelationshipProjection.builder()
                             .type("TYPE3")
-                            .projection(Projection.UNDIRECTED)
+                            .orientation(Orientation.UNDIRECTED)
                             .addProperty(ImmutablePropertyMapping.builder().propertyKey("equalWeight").build())
                             .build()
                     )

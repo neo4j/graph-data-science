@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Label;
@@ -35,9 +35,9 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.Projection.NATURAL;
-import static org.neo4j.graphalgo.Projection.REVERSE;
-import static org.neo4j.graphalgo.Projection.UNDIRECTED;
+import static org.neo4j.graphalgo.Orientation.NATURAL;
+import static org.neo4j.graphalgo.Orientation.REVERSE;
+import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 class DegreeCentralityProcTest extends BaseProcTest {
@@ -273,13 +273,13 @@ class DegreeCentralityProcTest extends BaseProcTest {
         assertResult("degree", outgoingWeightedExpected);
     }
 
-    private GdsCypher.ModeBuildStage queryBuilder(Projection projection) {
+    private GdsCypher.ModeBuildStage queryBuilder(Orientation orientation) {
         return GdsCypher
             .call()
             .withNodeLabel("Label1")
             .withRelationshipType(
                 "TYPE1",
-                RelationshipProjection.builder().type("TYPE1").projection(projection).build()
+                RelationshipProjection.builder().type("TYPE1").orientation(orientation).build()
             )
             .withRelationshipProperty("foo")
             .algo("gds.alpha.degree");

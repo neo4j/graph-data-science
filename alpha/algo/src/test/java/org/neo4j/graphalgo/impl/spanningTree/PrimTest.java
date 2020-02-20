@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -148,7 +148,7 @@ class PrimTest extends AlgoTestBase {
             .api(db)
             .addNodeLabel(label.name())
             .addRelationshipType("TYPE")
-            .globalProjection(Projection.UNDIRECTED)
+            .globalOrientation(Orientation.UNDIRECTED)
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
             .graph(HugeGraphFactory.class);

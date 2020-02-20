@@ -80,7 +80,7 @@ public class TriangleDocTest extends BaseProcTest {
                        "   relationshipProjection: {" +
                        "     KNOWS: {" +
                        "       type: 'KNOWS'," +
-                       "       projection: 'UNDIRECTED'" +
+                       "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }" +
                        " })" +
@@ -109,7 +109,7 @@ public class TriangleDocTest extends BaseProcTest {
                        "   relationshipProjection: {" +
                        "     KNOWS: {" +
                        "       type: 'KNOWS'," +
-                       "       projection: 'UNDIRECTED'" +
+                       "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
                        "   writeProperty: 'triangles'" +
@@ -136,7 +136,7 @@ public class TriangleDocTest extends BaseProcTest {
                        "   relationshipProjection: {" +
                        "     KNOWS: {" +
                        "       type: 'KNOWS'," +
-                       "       projection: 'UNDIRECTED'" +
+                       "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
                        "   concurrency: 4" +
@@ -171,7 +171,7 @@ public class TriangleDocTest extends BaseProcTest {
                        "   relationshipProjection: {" +
                        "     FRIEND: {" +
                        "       type: 'FRIEND'," +
-                       "       projection: 'UNDIRECTED'" +
+                       "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
                        "   concurrency: 4," +

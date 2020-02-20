@@ -99,7 +99,7 @@ CALL gds.graph.create(
   'MyLabel',
   {
     MY_RELATIONSHIP_TYPE: {
-      projection: 'REVERSE'
+      orientation: 'REVERSE'
     }
   },
   {

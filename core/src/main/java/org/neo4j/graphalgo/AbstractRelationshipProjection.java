@@ -33,13 +33,13 @@ import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 @DataClass
 public abstract class AbstractRelationshipProjection extends ElementProjection {
 
-    private static final RelationshipProjection ALL = of(PROJECT_ALL.name, Projection.NATURAL);
+    private static final RelationshipProjection ALL = of(PROJECT_ALL.name, Orientation.NATURAL);
 
     public abstract String type();
 
     @Value.Default
-    public Projection projection() {
-        return Projection.NATURAL;
+    public Orientation orientation() {
+        return Orientation.NATURAL;
     }
 
     @Value.Default
@@ -60,15 +60,15 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
     }
 
     public static final String TYPE_KEY = "type";
-    public static final String PROJECTION_KEY = "projection";
+    public static final String ORIENTATION_KEY = "orientation";
     public static final String AGGREGATION_KEY = "aggregation";
 
     public static RelationshipProjection fromMap(Map<String, Object> map, ElementIdentifier identifier) {
         RelationshipProjection.Builder builder = RelationshipProjection.builder();
         String type = String.valueOf(map.getOrDefault(TYPE_KEY, identifier.name));
         builder.type(type);
-        if (map.containsKey(PROJECTION_KEY)) {
-            builder.projection(Projection.of(nonEmptyString(map, PROJECTION_KEY)));
+        if (map.containsKey(ORIENTATION_KEY)) {
+            builder.orientation(Orientation.of(nonEmptyString(map, ORIENTATION_KEY)));
         }
         if (map.containsKey(AGGREGATION_KEY)) {
             Aggregation aggregation = Aggregation.lookup(nonEmptyString(map, AGGREGATION_KEY));
@@ -110,8 +110,8 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         ));
     }
 
-    public static RelationshipProjection of(String type, Projection projection) {
-        return RelationshipProjection.builder().type(type).projection(projection).build();
+    public static RelationshipProjection of(String type, Orientation orientation) {
+        return RelationshipProjection.builder().type(type).orientation(orientation).build();
     }
 
     public boolean hasMappings() {
@@ -126,7 +126,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
     @Override
     void writeToObject(Map<String, Object> value) {
         value.put(TYPE_KEY, type());
-        value.put(PROJECTION_KEY, projection().name());
+        value.put(ORIENTATION_KEY, orientation().name());
         value.put(AGGREGATION_KEY, aggregation().name());
     }
 
@@ -172,9 +172,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
             if (propertiesBuilder == null) {
                 propertiesBuilder = new InlinePropertiesBuilder(
                     () -> this.properties,
-                    newProperties -> {
-                        this.properties = newProperties;
-                    }
+                    newProperties -> this.properties = newProperties
                 );
             }
             return propertiesBuilder;

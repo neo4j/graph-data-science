@@ -22,22 +22,22 @@ package org.neo4j.graphalgo;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public enum Projection {
+public enum Orientation {
 
     NATURAL,
     REVERSE,
     UNDIRECTED;
 
-    public static Projection of(String value) {
+    public static Orientation of(String value) {
         try {
-            return Projection.valueOf(value.toUpperCase());
+            return Orientation.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
             String availableProjections = Arrays
-                .stream(Projection.values())
-                .map(Projection::name)
+                .stream(Orientation.values())
+                .map(Orientation::name)
                 .collect(Collectors.joining(", "));
             throw new IllegalArgumentException(String.format(
-                "Projection `%s` is not supported. Must be one of: %s.",
+                "Orientation `%s` is not supported. Must be one of: %s.",
                 value,
                 availableProjections));
         }

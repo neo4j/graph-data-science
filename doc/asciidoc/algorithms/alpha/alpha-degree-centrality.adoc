@@ -240,7 +240,7 @@ CALL gds.alpha.degree.stream({
    relationshipProjection: {
        FOLLOWS: {
            type: 'FOLLOWS',
-           projection: 'REVERSE',
+           orientation: 'REVERSE',
            properties: 'score'
        }
    },
@@ -259,7 +259,7 @@ CALL gds.alpha.degree.write({
    relationshipProjection: {
        FOLLOWS: {
            type: 'FOLLOWS',
-           projection: 'REVERSE',
+           orientation: 'REVERSE',
            properties: 'score'
        }
    },

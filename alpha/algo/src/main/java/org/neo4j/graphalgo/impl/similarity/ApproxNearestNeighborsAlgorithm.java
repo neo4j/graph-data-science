@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.cursors.LongCursor;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
@@ -561,7 +561,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {
             GraphGenerator.RelImporter outImporter = new GraphGenerator.RelImporter(
                 idMap,
-                Projection.NATURAL,
+                Orientation.NATURAL,
                 false,
                 Aggregation.NONE,
                 executorService,
@@ -570,7 +570,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
             GraphGenerator.RelImporter inImporter = new GraphGenerator.RelImporter(
                 idMap,
-                Projection.REVERSE,
+                Orientation.REVERSE,
                 false,
                 Aggregation.NONE,
                 executorService,

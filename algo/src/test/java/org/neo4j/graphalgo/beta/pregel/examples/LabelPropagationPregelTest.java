@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -76,7 +76,7 @@ class LabelPropagationPregelTest extends AlgoTestBase {
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(Projection.UNDIRECTED)
+            .globalOrientation(Orientation.UNDIRECTED)
             .globalAggregation(Aggregation.NONE)
             .build()
             .load(HugeGraphFactory.class);

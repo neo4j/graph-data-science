@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.WriteConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -192,7 +192,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
         String graphName = "myGraphUndirected";
         String writeProperty = "community";
 
-        runQuery(graphCreateQuery(Projection.UNDIRECTED, graphName));
+        runQuery(graphCreateQuery(Orientation.UNDIRECTED, graphName));
         @Language("Cypher")
         String query = "CALL gds.labelPropagation.write(" +
                        "        $graph, {" +
@@ -233,7 +233,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
     void shouldRunLabelPropagationReverse() {
         String writeProperty = "community";
 
-        String query = graphCreateQuery(Projection.REVERSE)
+        String query = graphCreateQuery(Orientation.REVERSE)
             .algo("gds.labelPropagation")
             .writeMode()
             .addParameter("writeProperty", writeProperty)

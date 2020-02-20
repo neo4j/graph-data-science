@@ -173,7 +173,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testTriangleCountStream() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds.alpha.triangleCount")
             .streamMode()
             .yields();
@@ -183,7 +183,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testTriangleCountWrite() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds.alpha.triangleCount")
             .writeMode()
             .yields();
@@ -193,7 +193,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testTriangleStream() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds.alpha.triangle")
             .streamMode()
             .yields();

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 
@@ -36,12 +36,12 @@ public abstract class TriangleBaseProc<A extends Algorithm<A, RESULT>, RESULT, C
     @Override
     protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
         graphCreateConfig.relationshipProjections().projections().entrySet().stream()
-            .filter(entry -> entry.getValue().projection() != Projection.UNDIRECTED)
+            .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
             .forEach(entry -> {
                 throw new IllegalArgumentException(String.format(
-                    "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses projection `%s`",
+                    "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
                     entry.getKey().name,
-                    entry.getValue().projection()
+                    entry.getValue().orientation()
                 ));
             });
     }

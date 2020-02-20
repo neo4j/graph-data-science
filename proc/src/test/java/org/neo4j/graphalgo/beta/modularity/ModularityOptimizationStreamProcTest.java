@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.modularity;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
@@ -49,7 +49,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcBas
     void testStreamingWeighted() {
         String query = GdsCypher.call()
             .withRelationshipProperty("weight")
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "beta", "modularityOptimization")
             .streamMode()
             .addParameter("relationshipWeightProperty", "weight")
@@ -68,7 +68,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcBas
     void testStreamingSeeded() {
         String query = GdsCypher.call()
             .withNodeProperty("seed1")
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "beta", "modularityOptimization")
             .streamMode()
             .addParameter("seedProperty", "seed1")

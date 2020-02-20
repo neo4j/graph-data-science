@@ -71,7 +71,7 @@ final class SingleTypeRelationshipImporter {
         }
 
         WithImporter loadImporter(boolean loadProperties) {
-            RelationshipImporter.Imports imports = importer.imports(mapping.projection(), loadProperties);
+            RelationshipImporter.Imports imports = importer.imports(mapping.orientation(), loadProperties);
             return new WithImporter(imports);
         }
 

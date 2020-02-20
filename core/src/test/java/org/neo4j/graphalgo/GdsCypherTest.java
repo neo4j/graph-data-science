@@ -110,7 +110,7 @@ class GdsCypherTest {
             "    Rel: 'TYPE'," +
             "    BarRel: {" +
             "      type: 'Bar'," +
-            "      projection: 'UNDIRECTED'," +
+            "      orientation: 'UNDIRECTED'," +
             "      aggregation: 'SINGLE'," +
             "      properties: {" +
             "        relProp: {" +
@@ -146,7 +146,7 @@ class GdsCypherTest {
 
         RelationshipProjection barRel = RelationshipProjection.builder()
             .type("Bar")
-            .projection(Projection.UNDIRECTED)
+            .orientation(Orientation.UNDIRECTED)
             .aggregation(Aggregation.SINGLE)
             .addProperty("relProp", "RelationshipPropertyName", 1337, Aggregation.MAX)
             .build();
@@ -276,7 +276,7 @@ class GdsCypherTest {
     void loadEverythingWithProjectionShortcut() {
         String query = GdsCypher
             .call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("foo")
             .writeMode()
             .yields();
@@ -284,7 +284,7 @@ class GdsCypherTest {
         assertEquals(
             String.format(
                 "CALL gds.foo.write({nodeProjection: \"*\", relationshipProjection: %s})",
-                "{`*`: {type: \"*\", projection: \"UNDIRECTED\"}}"
+                "{`*`: {type: \"*\", orientation: \"UNDIRECTED\"}}"
             ),
             query
         );
@@ -363,7 +363,7 @@ class GdsCypherTest {
                 "}, " +
                 "BarRel: {" +
                     "type: \"Bar\", " +
-                    "projection: \"UNDIRECTED\", " +
+                    "orientation: \"UNDIRECTED\", " +
                     "aggregation: \"SINGLE\", " +
                     "properties: {" +
                         "relProp: {" +
@@ -561,7 +561,7 @@ class GdsCypherTest {
             arguments("string with \"", "'string with \"'"),
             arguments("string with both ' and \"", "\"string with both ' and \\\"\""),
             arguments(Direction.BOTH, "\"BOTH\""),
-            arguments(Projection.NATURAL, "\"NATURAL\""),
+            arguments(Orientation.NATURAL, "\"NATURAL\""),
             arguments(Arrays.asList("foo", 42, true), "[\"foo\", 42, true]"),
             arguments(MapUtil.map(new LinkedHashMap<>(), "foo", 42, "bar", true), "{foo: 42, bar: true}")
         );

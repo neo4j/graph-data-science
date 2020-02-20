@@ -77,7 +77,7 @@ final class GraphLoaderBuilders {
         Optional<Integer> concurrency,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
-        Optional<Projection> globalProjection,
+        Optional<Orientation> globalOrientation,
         Optional<Aggregation> globalAggregation
         ) {
 
@@ -95,7 +95,7 @@ final class GraphLoaderBuilders {
             concurrency,
             anyLabel,
             anyRelationshipType,
-            globalProjection,
+            globalOrientation,
             globalAggregation
         );
 

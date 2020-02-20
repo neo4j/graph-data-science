@@ -86,7 +86,7 @@ class GraphListProcTest extends BaseProcTest {
                 "relationshipProjection", map(
                     "REL", map(
                         "type", "REL",
-                        "projection", "NATURAL",
+                        "orientation", "NATURAL",
                         "aggregation", "DEFAULT",
                         "properties", emptyMap()
                     )
@@ -129,7 +129,7 @@ class GraphListProcTest extends BaseProcTest {
                 "relationshipProjection", map(
                     "*", map(
                         "type", "*",
-                        "projection", "NATURAL",
+                        "orientation", "NATURAL",
                         "aggregation", "DEFAULT",
                         "properties", emptyMap()
                     )
@@ -170,7 +170,7 @@ class GraphListProcTest extends BaseProcTest {
                 "relationshipProjection", map(
                     "REL", map(
                         "type", "REL",
-                        "projection", "NATURAL",
+                        "orientation", "NATURAL",
                         "aggregation", "DEFAULT",
                         "properties", emptyMap()
                     )),
@@ -319,7 +319,7 @@ class GraphListProcTest extends BaseProcTest {
         runQuery(
             "CALL gds.graph.create('incoming', 'Person', {" +
             "  INTERACTS: {" +
-            "    projection: 'REVERSE'" +
+            "    orientation: 'REVERSE'" +
             "  }" +
             "})"
         );
@@ -353,7 +353,6 @@ class GraphListProcTest extends BaseProcTest {
             );
         }
     }
-
 
     @ParameterizedTest(name = "Invalid Graph Name: {0}")
     @ValueSource(strings = {"{ a: 'b' }", "[]", "1", "true", "false", "[1, 2, 3]", "1.4"})

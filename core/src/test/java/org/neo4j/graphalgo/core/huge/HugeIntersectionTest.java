@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -79,7 +79,7 @@ final class HugeIntersectionTest {
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(Projection.UNDIRECTED)
+            .globalOrientation(Orientation.UNDIRECTED)
             .build()
             .graph(HugeGraphFactory.class);
 

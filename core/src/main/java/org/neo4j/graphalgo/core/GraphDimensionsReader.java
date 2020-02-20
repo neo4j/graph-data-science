@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.neo4j.graphalgo.NodeProjection;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -79,14 +79,14 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                     RelationshipProjection relationshipProjection = e.getValue();
 
                     String typeName = relationshipProjection.type();
-                    Projection projection = relationshipProjection.projection();
+                    Orientation orientation = relationshipProjection.orientation();
 
                     RelationshipProjectionMapping mapping = relationshipProjection.projectAll()
-                        ? RelationshipProjectionMapping.all(projection)
+                        ? RelationshipProjectionMapping.all(orientation)
                         : RelationshipProjectionMapping.of(
                             elementIdentifier,
                             typeName,
-                            projection,
+                            orientation,
                             tokenRead.relationshipType(typeName)
                         );
                     mappingsBuilder.addMapping(mapping);

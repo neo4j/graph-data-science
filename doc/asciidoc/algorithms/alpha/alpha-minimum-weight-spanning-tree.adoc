@@ -172,7 +172,7 @@ CALL gds.alpha.spanningTree.minimum.write({
     LINK: {
       type: 'LINK',
       properties: 'cost',
-      projection: 'UNDIRECTED'
+      orientation: 'UNDIRECTED'
     },
     startNodeId: id(n),
     relationshipWeightProperty: 'cost',

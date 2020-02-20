@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -51,8 +51,8 @@ class HugeGraphFactoryTest {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
             .relationshipProjectionMappings(RelationshipProjectionMappings.of(
-                RelationshipProjectionMapping.of("TYPE1", "TYPE1", Projection.NATURAL, -1),
-                RelationshipProjectionMapping.of("TYPE2", "TYPE2", Projection.REVERSE, -1)
+                RelationshipProjectionMapping.of("TYPE1", "TYPE1", Orientation.NATURAL, -1),
+                RelationshipProjectionMapping.of("TYPE2", "TYPE2", Orientation.REVERSE, -1)
             ))
             .putRelationshipCount("TYPE1", 250_000_000L)
             .putRelationshipCount("TYPE2", 250_000_000L)

@@ -30,8 +30,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Projection;
-import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
@@ -62,9 +61,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.Projection.NATURAL;
-import static org.neo4j.graphalgo.Projection.REVERSE;
-import static org.neo4j.graphalgo.Projection.UNDIRECTED;
+import static org.neo4j.graphalgo.Orientation.NATURAL;
+import static org.neo4j.graphalgo.Orientation.REVERSE;
+import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.TestSupport.assertAlgorithmTermination;
@@ -233,14 +232,14 @@ final class NodeSimilarityTest extends AlgoTestBase {
         db.shutdown();
     }
 
-    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeForSupportedDirections(Projection projection, int concurrency) {
+    void shouldComputeForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -257,17 +256,17 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .collect(Collectors.toSet());
         nodeSimilarity.release();
 
-        assertEquals(projection == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
+        assertEquals(orientation == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
 
-    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeTopNForSupportedDirections(Projection projection, int concurrency) {
+    void shouldComputeTopNForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -284,18 +283,17 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .collect(Collectors.toSet());
         nodeSimilarity.release();
 
-        assertEquals(projection == REVERSE ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
+        assertEquals(orientation == REVERSE ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
     }
 
-    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeNegativeTopNForSupportedDirections(Projection projection, int concurrency
-    ) {
+    void shouldComputeNegativeTopNForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -309,7 +307,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph similarityGraph = nodeSimilarity.computeToGraph().similarityGraph();
 
         assertGraphEquals(
-            projection == REVERSE
+            orientation == REVERSE
                 ? fromGdl(
                 "(i1)-[{w: 0.50000D}]->(i3), (i2), (i4), (a), (b), (c), (d)")
                 : fromGdl(
@@ -318,14 +316,14 @@ final class NodeSimilarityTest extends AlgoTestBase {
         );
     }
 
-    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeTopKForSupportedDirections(Projection projection, int concurrency) {
+    void shouldComputeTopKForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -342,17 +340,17 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .collect(Collectors.toSet());
         nodeSimilarity.release();
 
-        assertEquals(projection == REVERSE ? EXPECTED_INCOMING_TOP_K_1 : EXPECTED_OUTGOING_TOP_K_1, result);
+        assertEquals(orientation == REVERSE ? EXPECTED_INCOMING_TOP_K_1 : EXPECTED_OUTGOING_TOP_K_1, result);
     }
 
-    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeNegativeTopKForSupportedDirections(Projection projection, int concurrency) {
+    void shouldComputeNegativeTopKForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -370,7 +368,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
         Graph similarityGraph = nodeSimilarity.computeToGraph().similarityGraph();
 
         assertGraphEquals(
-            projection == REVERSE
+            orientation == REVERSE
                 ? fromGdl(
                 "(i1)-[{w: 0.50000D}]->(i3), (i2)-[{w: 0.50000D}]->(i3), (i3)-[{w: 0.500000D}]->(i1), (d), (e), (f), (g), (h)")
                 : fromGdl(
@@ -379,14 +377,14 @@ final class NodeSimilarityTest extends AlgoTestBase {
         );
     }
 
-    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeWithSimilarityCutoffForSupportedDirections(Projection projection, int concurrency) {
+    void shouldComputeWithSimilarityCutoffForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -404,19 +402,19 @@ final class NodeSimilarityTest extends AlgoTestBase {
         nodeSimilarity.release();
 
         assertEquals(
-            projection == REVERSE ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF,
+            orientation == REVERSE ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF,
             result
         );
     }
 
-    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeWithDegreeCutoffForSupportedDirections(Projection projection, int concurrency) {
+    void shouldComputeWithDegreeCutoffForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -434,7 +432,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
         nodeSimilarity.release();
 
         assertEquals(
-            projection == REVERSE ? EXPECTED_INCOMING_DEGREE_CUTOFF : EXPECTED_OUTGOING_DEGREE_CUTOFF,
+            orientation == REVERSE ? EXPECTED_INCOMING_DEGREE_CUTOFF : EXPECTED_OUTGOING_DEGREE_CUTOFF,
             result
         );
     }
@@ -446,7 +444,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(UNDIRECTED)
+            .globalOrientation(UNDIRECTED)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -461,14 +459,14 @@ final class NodeSimilarityTest extends AlgoTestBase {
         assertNotEquals(Collections.emptySet(), result);
     }
 
-    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeSimilarityGraphInAllSupportedDirections(Projection projection, int concurrency) {
+    void shouldComputeSimilarityGraphInAllSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -481,12 +479,12 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph();
         assertEquals(
-            projection == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
+            orientation == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
             similarityGraphResult.comparedNodes()
         );
         Graph resultGraph = similarityGraphResult.similarityGraph();
         assertGraphEquals(
-            projection == REVERSE
+            orientation == REVERSE
                 ? fromGdl(
                 "(a), (b), (c), (d), (e)" +
                 ", (f)-[{property: 1.000000D}]->(g)" +
@@ -517,9 +515,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
         resultGraph.release();
     }
 
-    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeToGraphWithUnusedNodesInInputGraph(Projection projection, int concurrency) {
+    void shouldComputeToGraphWithUnusedNodesInInputGraph(Orientation orientation, int concurrency) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb, "UNWIND range(0, 1024) AS unused CREATE (:Unused)");
         runQuery(localDb, DB_CYPHER);
@@ -528,7 +526,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(localDb)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -545,12 +543,12 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph();
         assertEquals(
-            projection == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
+            orientation == REVERSE ? COMPARED_ITEMS : COMPARED_PERSONS,
             similarityGraphResult.comparedNodes()
         );
 
         Graph resultGraph = similarityGraphResult.similarityGraph();
-        String expected = projection == REVERSE ? resultString(1029, 1030, 1.00000) : resultString(
+        String expected = orientation == REVERSE ? resultString(1029, 1030, 1.00000) : resultString(
             1025,
             1028,
             1.00000
@@ -568,9 +566,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
         resultGraph.release();
     }
 
-    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldIgnoreLoops(Projection projection, int concurrency) {
+    void shouldIgnoreLoops(Orientation orientation, int concurrency) {
         // Add loops
         runQuery("" +
                  " MATCH (alice {name: 'Alice'})" +
@@ -582,7 +580,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .graph(HugeGraphFactory.class);
 
@@ -599,12 +597,12 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .collect(Collectors.toSet());
         nodeSimilarity.release();
 
-        assertEquals(projection == REVERSE ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
+        assertEquals(orientation == REVERSE ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
     }
 
-    @ParameterizedTest(name = "projection: {0}, concurrency: {1}")
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldIgnoreParallelEdges(Projection projection, int concurrency) {
+    void shouldIgnoreParallelEdges(Orientation orientation, int concurrency) {
         // Add parallel edges
         runQuery("" +
                  " MATCH (person {name: 'Alice'})" +
@@ -623,7 +621,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .globalAggregation(Aggregation.NONE)
             .build()
             .graph(HugeGraphFactory.class);
@@ -641,7 +639,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .collect(Collectors.toSet());
         nodeSimilarity.release();
 
-        assertEquals(projection == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
+        assertEquals(orientation == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
 
     @Disabled("Unsure how to proceed with direction BOTH")
@@ -652,7 +650,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
-            .globalProjection(UNDIRECTED)
+            .globalOrientation(UNDIRECTED)
             .build()
             .graph(HugeGraphFactory.class);
 

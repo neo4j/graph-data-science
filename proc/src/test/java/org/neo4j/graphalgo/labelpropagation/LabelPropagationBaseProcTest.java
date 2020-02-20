@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.NodeWeightConfigTest;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -99,7 +99,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
         runQuery(cypher);
 
         // Create explicit graphs with both projection variants
-        runQuery(graphCreateQuery(Projection.NATURAL, TEST_GRAPH_NAME));
+        runQuery(graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME));
         runQuery(String.format(
             "CALL gds.graph.create.cypher('%s', '%s', '%s', {nodeProperties: ['seed', 'weight']})",
             TEST_CYPHER_GRAPH_NAME,
@@ -114,11 +114,11 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
         GraphCatalog.removeAllLoadedGraphs();
     }
 
-    static String graphCreateQuery(Projection projection, String graphName) {
-        return graphCreateQuery(projection).graphCreate(graphName).yields();
+    static String graphCreateQuery(Orientation orientation, String graphName) {
+        return graphCreateQuery(orientation).graphCreate(graphName).yields();
     }
 
-    static GdsCypher.QueryBuilder graphCreateQuery(Projection projection) {
+    static GdsCypher.QueryBuilder graphCreateQuery(Orientation orientation) {
         return GdsCypher
             .call()
             .implicitCreation(ImmutableGraphCreateFromStoreConfig
@@ -131,7 +131,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
                         RelationshipProjections.PROJECT_ALL,
                         RelationshipProjection.builder()
                             .type("X")
-                            .projection(projection)
+                            .orientation(orientation)
                             .build()
                     )
                     .build()
@@ -147,7 +147,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
                 "explicit graph"
             ),
             arguments(
-                graphCreateQuery(Projection.NATURAL),
+                graphCreateQuery(Orientation.NATURAL),
                 "implicit graph"
             )
         );

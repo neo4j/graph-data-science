@@ -28,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
@@ -136,7 +136,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     void testParallelBetweennessWriteWithDirection() {
         String query = GdsCypher.call()
             .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Projection.UNDIRECTED)
+            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
             .algo("gds.alpha.betweenness")
             .writeMode()
             .addParameter("concurrency", 4)
@@ -180,7 +180,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
     void testBetweennessWriteWithDirection() {
         String query = GdsCypher.call()
             .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Projection.UNDIRECTED)
+            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
             .algo("gds.alpha.betweenness")
             .writeMode()
             .addParameter("concurrency", 4)

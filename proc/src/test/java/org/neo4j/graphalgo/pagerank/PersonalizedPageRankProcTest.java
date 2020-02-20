@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -114,7 +114,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
                     ElementIdentifier.of("Product"),
                     RelationshipProjection.builder()
                         .type("PURCHASED")
-                        .projection(Projection.UNDIRECTED)
+                        .orientation(Orientation.UNDIRECTED)
                         .build()
                 )
                 .build()
@@ -157,7 +157,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
                     ElementIdentifier.of("Product"),
                     RelationshipProjection.builder()
                         .type("PURCHASED")
-                        .projection(Projection.UNDIRECTED)
+                        .orientation(Orientation.UNDIRECTED)
                         .build()
                 )
                 .build()
@@ -208,7 +208,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
                  "  {" +
                  "      Product:{" +
                  "        type:'PURCHASED'," +
-                 "        projection:'UNDIRECTED'," +
+                 "        orientation:'UNDIRECTED'," +
                  "        aggregation: 'DEFAULT'" +
                  "      }" +
                  "  }" +

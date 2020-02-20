@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
@@ -55,13 +55,13 @@ public final class GraphGenerator {
 
     public static RelImporter createRelImporter(
         NodeImporter nodeImporter,
-        Projection projection,
+        Orientation orientation,
         boolean loadRelationshipProperty,
         Aggregation aggregation
     ) {
         return createRelImporter(
             nodeImporter.idMap(),
-            projection,
+            orientation,
             loadRelationshipProperty,
             aggregation,
             nodeImporter.executorService,
@@ -71,7 +71,7 @@ public final class GraphGenerator {
 
     public static RelImporter createRelImporter(
         IdMap idMap,
-        Projection projection,
+        Orientation orientation,
         boolean loadRelationshipProperty,
         Aggregation aggregation,
         ExecutorService executorService,
@@ -79,7 +79,7 @@ public final class GraphGenerator {
     ) {
         return new RelImporter(
             idMap,
-            projection,
+            orientation,
             loadRelationshipProperty,
             aggregation,
             executorService,
@@ -155,7 +155,7 @@ public final class GraphGenerator {
 
         public RelImporter(
             IdMap idMap,
-            Projection projection,
+            Orientation orientation,
             boolean loadRelationshipProperty,
             Aggregation aggregation,
             ExecutorService executorService,
@@ -165,7 +165,7 @@ public final class GraphGenerator {
             this.executorService = executorService;
             this.tracker = tracker;
             this.idMap = idMap;
-            this.loadUndirected = projection == Projection.UNDIRECTED;
+            this.loadUndirected = orientation == Orientation.UNDIRECTED;
 
             ImportSizing importSizing = ImportSizing.of(1, idMap.nodeCount());
             int pageSize = importSizing.pageSize();
@@ -190,7 +190,7 @@ public final class GraphGenerator {
             );
 
             this.relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);
-            this.imports = relationshipImporter.imports(projection, loadRelationshipProperty);
+            this.imports = relationshipImporter.imports(orientation, loadRelationshipProperty);
             this.relationshipBuffer = new RelationshipsBatchBuffer(idMap, -1, ParallelUtil.DEFAULT_BATCH_SIZE);
         }
 

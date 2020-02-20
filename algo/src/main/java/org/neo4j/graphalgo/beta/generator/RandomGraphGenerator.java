@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.generator;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -90,10 +90,10 @@ public final class RandomGraphGenerator {
     }
 
     public HugeGraph generate() {
-        return generate(Projection.NATURAL);
+        return generate(Orientation.NATURAL);
     }
 
-    public HugeGraph generate(Projection projection) {
+    public HugeGraph generate(Orientation orientation) {
         GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
             nodeCount,
             Pools.DEFAULT,
@@ -104,7 +104,7 @@ public final class RandomGraphGenerator {
 
         GraphGenerator.RelImporter relationshipsImporter = GraphGenerator.createRelImporter(
             nodeImporter,
-            projection,
+            orientation,
             maybePropertyProducer.isPresent(),
             Aggregation.NONE
         );

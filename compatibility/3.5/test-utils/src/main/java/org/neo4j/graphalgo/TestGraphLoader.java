@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.Projection.NATURAL;
+import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
 
 public final class TestGraphLoader {
@@ -178,7 +178,7 @@ public final class TestGraphLoader {
                     .type(relType)
                     .aggregation(maybeAggregation.orElse(DEFAULT))
                     .build();
-                storeLoaderBuilder.addRelationshipProjection(template.withProjection(NATURAL));
+                storeLoaderBuilder.addRelationshipProjection(template.withOrientation(NATURAL));
             });
         }
         storeLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));

@@ -161,7 +161,7 @@ Between those clusters there is one single edge.
 The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
 
 We can now create the graph and store it in the graph catalog.
-We load the `LINK` relationships with projection mode set to `UNDIRECTED` as this works best with the Louvain algorithm.
+We load the `LINK` relationships with orientation set to `UNDIRECTED` as this works best with the Louvain algorithm.
 
 [NOTE]
 ====
@@ -177,7 +177,7 @@ CALL gds.graph.create(
     'User',
     {
         LINK: {
-            projection: 'UNDIRECTED'
+            orientation: 'UNDIRECTED'
         }
     },
     {
@@ -388,7 +388,7 @@ CALL gds.louvain.stream({
     relationshipProjection: {
         TYPE: {
             type: 'TYPE',
-            projection: 'undirected',
+            orientation: 'undirected',
             aggregation: 'NONE'
         }
     },

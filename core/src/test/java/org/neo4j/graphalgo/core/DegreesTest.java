@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -84,7 +84,7 @@ class DegreesTest extends AlgoTestBase {
 
     @Test
     void testUnidirectionalNatural() {
-        setup(UNI_DIRECTIONAL, Projection.NATURAL);
+        setup(UNI_DIRECTIONAL, Orientation.NATURAL);
         assertEquals(2, graph.degree(nodeId("a")));
         assertEquals(1, graph.degree(nodeId("b")));
         assertEquals(0, graph.degree(nodeId("c")));
@@ -92,7 +92,7 @@ class DegreesTest extends AlgoTestBase {
 
     @Test
     void testUnidirectionalReverse() {
-        setup(UNI_DIRECTIONAL, Projection.REVERSE);
+        setup(UNI_DIRECTIONAL, Orientation.REVERSE);
         assertEquals(0, graph.degree(nodeId("a")));
         assertEquals(1, graph.degree(nodeId("b")));
         assertEquals(2, graph.degree(nodeId("c")));
@@ -108,7 +108,7 @@ class DegreesTest extends AlgoTestBase {
 
     @Test
     void testBidirectionalNatural() {
-        setup(BI_DIRECTIONAL, Projection.NATURAL);
+        setup(BI_DIRECTIONAL, Orientation.NATURAL);
         assertEquals(2, graph.degree(nodeId("a")));
         assertEquals(2, graph.degree(nodeId("b")));
         assertEquals(2, graph.degree(nodeId("c")));
@@ -116,7 +116,7 @@ class DegreesTest extends AlgoTestBase {
 
     @Test
     void testBidirectionalReverse() {
-        setup(BI_DIRECTIONAL, Projection.REVERSE);
+        setup(BI_DIRECTIONAL, Orientation.REVERSE);
         assertEquals(2, graph.degree(nodeId("a")));
         assertEquals(2, graph.degree(nodeId("b")));
         assertEquals(2, graph.degree(nodeId("c")));
@@ -132,38 +132,38 @@ class DegreesTest extends AlgoTestBase {
 
     @Test
     void testBidirectionalUndirected() {
-        setup(BI_DIRECTIONAL, Projection.UNDIRECTED);
+        setup(BI_DIRECTIONAL, Orientation.UNDIRECTED);
         assertEquals(4, graph.degree(nodeId("a")));
         assertEquals(4, graph.degree(nodeId("b")));
         assertEquals(4, graph.degree(nodeId("c")));
     }
 
-    private void setup(String cypher, Projection projection) {
+    private void setup(String cypher, Orientation orientation) {
         runQuery(cypher);
         GraphsByRelationshipType graphs = new StoreLoaderBuilder()
             .api(db)
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_OUT",
-                RelationshipProjection.of("TYPE", Projection.NATURAL)
+                RelationshipProjection.of("TYPE", Orientation.NATURAL)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_IN",
-                RelationshipProjection.of("TYPE", Projection.REVERSE)
+                RelationshipProjection.of("TYPE", Orientation.REVERSE)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_UNDIRECTED",
-                RelationshipProjection.of("TYPE", Projection.UNDIRECTED)
+                RelationshipProjection.of("TYPE", Orientation.UNDIRECTED)
             )
             .build()
             .graphs(HugeGraphFactory.class);
 
-        if (projection == Projection.NATURAL) {
+        if (orientation == Orientation.NATURAL) {
             graph = graphs.getGraphProjection("TYPE_OUT");
-        } else if (projection == Projection.REVERSE) {
+        } else if (orientation == Orientation.REVERSE) {
             graph = graphs.getGraphProjection("TYPE_IN");
-        } else if (projection == Projection.UNDIRECTED) {
+        } else if (orientation == Orientation.UNDIRECTED) {
             graph = graphs.getGraphProjection("TYPE_UNDIRECTED");
-        } else if (projection == null) { // BOTH case
+        } else if (orientation == null) { // BOTH case
             graph = graphs.getGraphProjection(Arrays.asList("TYPE_OUT", "TYPE_IN"), Optional.empty());
         }
     }

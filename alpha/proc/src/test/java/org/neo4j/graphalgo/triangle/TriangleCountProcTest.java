@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.triangle;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
@@ -60,7 +60,7 @@ class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCou
         TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
 
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "triangleCount")
             .streamMode()
             .yields();
@@ -78,7 +78,7 @@ class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCou
     @Test
     void testWriting() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "triangleCount")
             .writeMode()
             .yields();
@@ -106,7 +106,7 @@ class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCou
     @Test
     void testWritingWithClusterCoefficientProperty() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "triangleCount")
             .writeMode()
             .addParameter("clusteringCoefficientProperty", "c")

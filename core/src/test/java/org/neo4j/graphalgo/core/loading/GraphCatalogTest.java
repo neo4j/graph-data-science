@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
@@ -93,7 +93,7 @@ class GraphCatalogTest {
     private List<RelationshipProjection> relationshipProjections() {
         RelationshipProjection t1Mapping = RelationshipProjection.builder()
             .type("T1")
-            .projection(Projection.NATURAL)
+            .orientation(Orientation.NATURAL)
             .aggregation(Aggregation.NONE)
             .properties(
                 PropertyMappings.builder()
@@ -104,7 +104,7 @@ class GraphCatalogTest {
 
         RelationshipProjection t2Mapping = RelationshipProjection.builder()
             .type("T2")
-            .projection(Projection.NATURAL)
+            .orientation(Orientation.NATURAL)
             .aggregation(Aggregation.NONE)
             .properties(
                 PropertyMappings.builder()
@@ -114,7 +114,7 @@ class GraphCatalogTest {
 
         RelationshipProjection t3Mapping = RelationshipProjection.builder()
             .type("T3")
-            .projection(Projection.NATURAL)
+            .orientation(Orientation.NATURAL)
             .aggregation(Aggregation.NONE)
             .properties(
                 PropertyMappings.builder()

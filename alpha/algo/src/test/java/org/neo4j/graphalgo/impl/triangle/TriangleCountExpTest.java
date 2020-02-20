@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.triangle;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -187,7 +187,7 @@ class TriangleCountExpTest {
             .api(DB)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
-            .globalProjection(Projection.UNDIRECTED)
+            .globalOrientation(Orientation.UNDIRECTED)
             .build()
             .graph(HugeGraphFactory.class);
     }

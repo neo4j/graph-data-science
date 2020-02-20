@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.triangle;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphGenerator;
@@ -49,7 +49,7 @@ class IntersectingTriangleCountTest {
 
         GraphGenerator.RelImporter importer = new GraphGenerator.RelImporter(
             idMap,
-            Projection.NATURAL,
+            Orientation.NATURAL,
             false,
             Aggregation.NONE,
             Pools.DEFAULT,
@@ -78,7 +78,7 @@ class IntersectingTriangleCountTest {
 
         GraphGenerator.RelImporter importer = new GraphGenerator.RelImporter(
             idMap,
-            Projection.NATURAL,
+            Orientation.NATURAL,
             false,
             Aggregation.NONE,
             Pools.DEFAULT,
@@ -104,7 +104,7 @@ class IntersectingTriangleCountTest {
 
         GraphGenerator.RelImporter importer = new GraphGenerator.RelImporter(
             idMap,
-            Projection.NATURAL,
+            Orientation.NATURAL,
             false,
             Aggregation.NONE,
             Pools.DEFAULT,

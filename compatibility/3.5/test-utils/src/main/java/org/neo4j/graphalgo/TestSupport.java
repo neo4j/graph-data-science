@@ -53,8 +53,8 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.Projection.NATURAL;
-import static org.neo4j.graphalgo.Projection.REVERSE;
+import static org.neo4j.graphalgo.Orientation.NATURAL;
+import static org.neo4j.graphalgo.Orientation.REVERSE;
 import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
 public final class TestSupport {
@@ -113,7 +113,7 @@ public final class TestSupport {
         return Arrays.stream(Direction.values()).map(Direction::name);
     }
 
-    public static Stream<Projection> allDirectedProjections() {
+    public static Stream<Orientation> allDirectedProjections() {
         return Stream.of(NATURAL, REVERSE);
     }
 

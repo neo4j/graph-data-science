@@ -149,7 +149,7 @@ CALL gds.alpha.shortestPath.stream({
     ROAD: {
       type: 'ROAD',
       properties: 'cost',
-      projection: 'UNDIRECTED'
+      orientation: 'UNDIRECTED'
     }
   },
   startNode: start,
@@ -188,7 +188,7 @@ CALL gds.alpha.shortestPath.write({
     ROAD: {
       type: 'ROAD',
       properties: 'cost',
-      projection: 'UNDIRECTED'
+      orientation: 'UNDIRECTED'
     }
   },
   startNode: start,

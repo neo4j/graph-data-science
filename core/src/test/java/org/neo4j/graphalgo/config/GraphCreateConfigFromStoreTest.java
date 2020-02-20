@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -73,7 +73,7 @@ class GraphCreateConfigFromStoreTest {
             ElementIdentifier.of("A"),
             RelationshipProjection.builder()
                 .type("A")
-                .projection(Projection.NATURAL)
+                .orientation(Orientation.NATURAL)
                 .properties(propertyMappings)
                 .build()
         );
@@ -131,7 +131,7 @@ class GraphCreateConfigFromStoreTest {
             ElementIdentifier.of("A"),
             RelationshipProjection.builder()
                 .type("A")
-                .projection(Projection.NATURAL)
+                .orientation(Orientation.NATURAL)
                 .properties(propertyMappings2)
                 .build()
         );

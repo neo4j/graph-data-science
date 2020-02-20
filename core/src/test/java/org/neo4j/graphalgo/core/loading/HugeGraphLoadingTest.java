@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
@@ -180,15 +180,15 @@ final class HugeGraphLoadingTest {
             .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_NATURAL",
-                RelationshipProjection.of("TYPE", Projection.NATURAL)
+                RelationshipProjection.of("TYPE", Orientation.NATURAL)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_REVERSE",
-                RelationshipProjection.of("TYPE", Projection.REVERSE)
+                RelationshipProjection.of("TYPE", Orientation.REVERSE)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_UNDIRECTED",
-                RelationshipProjection.of("TYPE", Projection.UNDIRECTED)
+                RelationshipProjection.of("TYPE", Orientation.UNDIRECTED)
             )
             .addNodeProperty(PropertyMapping.of("id", 42.0))
             .build()

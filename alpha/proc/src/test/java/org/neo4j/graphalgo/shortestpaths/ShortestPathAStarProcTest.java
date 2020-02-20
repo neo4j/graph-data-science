@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Node;
 
@@ -109,7 +109,7 @@ class ShortestPathAStarProcTest extends BaseProcTest {
         String query = "MATCH (start:Node {name: 'SINGAPORE'}), (end:Node {name: 'CHIBA'}) " +
                        GdsCypher.call()
                            .withRelationshipProperty("cost")
-                           .loadEverything(Projection.UNDIRECTED)
+                           .loadEverything(Orientation.UNDIRECTED)
                            .algo("gds.alpha.shortestPath.astar")
                            .streamMode()
                            .addVariable("startNode", "start")

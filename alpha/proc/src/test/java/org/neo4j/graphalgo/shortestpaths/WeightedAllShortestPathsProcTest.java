@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Label;
 
@@ -128,7 +128,7 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
         final Consumer consumer = mock(Consumer.class);
 
         String query = GdsCypher.call()
-            .loadEverything(Projection.REVERSE)
+            .loadEverything(Orientation.REVERSE)
             .algo("gds", "alpha", "allShortestPaths")
             .streamMode()
             .yields();

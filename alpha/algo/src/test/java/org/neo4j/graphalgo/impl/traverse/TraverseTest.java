@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
@@ -82,9 +82,9 @@ class TraverseTest extends AlgoTestBase {
         graphs = new StoreLoaderBuilder()
             .api(db)
             .addNodeLabel("Node")
-            .putRelationshipProjectionsWithIdentifier("REL_OUT", RelationshipProjection.of("REL", Projection.NATURAL, Aggregation.NONE))
-            .putRelationshipProjectionsWithIdentifier("REL_IN", RelationshipProjection.of("REL", Projection.REVERSE, Aggregation.NONE))
-            .putRelationshipProjectionsWithIdentifier("REL_BOTH", RelationshipProjection.of("REL", Projection.UNDIRECTED, Aggregation.NONE))
+            .putRelationshipProjectionsWithIdentifier("REL_OUT", RelationshipProjection.of("REL", Orientation.NATURAL, Aggregation.NONE))
+            .putRelationshipProjectionsWithIdentifier("REL_IN", RelationshipProjection.of("REL", Orientation.REVERSE, Aggregation.NONE))
+            .putRelationshipProjectionsWithIdentifier("REL_BOTH", RelationshipProjection.of("REL", Orientation.UNDIRECTED, Aggregation.NONE))
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
             .graphs(HugeGraphFactory.class);

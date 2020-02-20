@@ -178,7 +178,7 @@ CALL gds.alpha.triangle.stream({
   relationshipProjection: {
     KNOWS: {
       type: 'KNOWS',
-      projection: 'UNDIRECTED'
+      orientation: 'UNDIRECTED'
     }
   }
 })
@@ -206,7 +206,7 @@ CALL gds.alpha.triangleCount.write({
   relationshipProjection: {
     KNOWS: {
       type: 'KNOWS',
-      projection: 'UNDIRECTED'
+      orientation: 'UNDIRECTED'
     }
   },
   writeProperty: 'triangles'
@@ -222,7 +222,7 @@ CALL gds.alpha.triangleCount.stream({
   relationshipProjection: {
     KNOWS: {
       type: 'KNOWS',
-      projection: 'UNDIRECTED'
+      orientation: 'UNDIRECTED'
     }
   },
   concurrency: 4
@@ -262,7 +262,7 @@ CALL gds.alpha.triangleCount.write({
   relationshipProjection: {
     FRIEND: {
       type: 'FRIEND',
-      projection: 'UNDIRECTED'
+      orientation: 'UNDIRECTED'
     }
   },
   concurrency: 4,

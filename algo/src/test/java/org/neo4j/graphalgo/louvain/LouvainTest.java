@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -404,10 +404,10 @@ class LouvainTest extends AlgoTestBase {
                 .addNodeLabel("Node")
                 .putRelationshipProjectionsWithIdentifier(
                     "TYPE_OUT",
-                    RelationshipProjection.of("TYPE", Projection.NATURAL))
+                    RelationshipProjection.of("TYPE", Orientation.NATURAL))
                 .putRelationshipProjectionsWithIdentifier(
                     "TYPE_IN",
-                    RelationshipProjection.of("TYPE", Projection.REVERSE))
+                    RelationshipProjection.of("TYPE", Orientation.REVERSE))
                 .addNodeProperties(nodePropertyMappings)
                 .addRelationshipProperty(relWeightProperty)
                 .build()

@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -82,14 +82,14 @@ class WccTest extends AlgoTestBase {
         return SET_SIZE;
     }
 
-    @ParameterizedTest(name = "projection = {1}")
-    @EnumSource(Projection.class)
-    void shouldComputeComponents(Projection projection) {
+    @ParameterizedTest(name = "orientation = {1}")
+    @EnumSource(Orientation.class)
+    void shouldComputeComponents(Orientation orientation) {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .addRelationshipType(RELATIONSHIP_TYPE.name())
-            .globalProjection(projection)
+            .globalOrientation(orientation)
             .build()
             .graph(HugeGraphFactory.class);
 

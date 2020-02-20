@@ -72,7 +72,7 @@ class GraphCreateConfigBuildersTest {
                     .relationshipProjections(RelationshipProjections.builder()
                         .putProjection(
                             ElementIdentifier.of("BAR"),
-                            RelationshipProjection.of("BAR", Projection.NATURAL, Aggregation.DEFAULT)
+                            RelationshipProjection.of("BAR", Orientation.NATURAL, Aggregation.DEFAULT)
                         )
                         .build())
                     .nodeProperties(PropertyMappings.of())
@@ -88,7 +88,7 @@ class GraphCreateConfigBuildersTest {
                     .relationshipProjections(RelationshipProjections.builder()
                         .putProjection(
                             ElementIdentifier.of("BAR"),
-                            RelationshipProjection.of("BAR", Projection.NATURAL, Aggregation.DEFAULT)
+                            RelationshipProjection.of("BAR", Orientation.NATURAL, Aggregation.DEFAULT)
                         )
                         .build())
                     .nodeProperties(PropertyMappings.of())
@@ -96,7 +96,7 @@ class GraphCreateConfigBuildersTest {
                     .build()
             ),
             Arguments.arguments(
-                new StoreConfigBuilder().addNodeLabel("Foo").addRelationshipType("BAR").globalProjection(Projection.UNDIRECTED).build(),
+                new StoreConfigBuilder().addNodeLabel("Foo").addRelationshipType("BAR").globalProjection(Orientation.UNDIRECTED).build(),
                 ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.builder()
                         .putProjection(ElementIdentifier.of("Foo"), NodeProjection.of("Foo", PropertyMappings.of()))
@@ -104,7 +104,7 @@ class GraphCreateConfigBuildersTest {
                     .relationshipProjections(RelationshipProjections.builder()
                         .putProjection(
                             ElementIdentifier.of("BAR"),
-                            RelationshipProjection.of("BAR", Projection.UNDIRECTED, Aggregation.DEFAULT)
+                            RelationshipProjection.of("BAR", Orientation.UNDIRECTED, Aggregation.DEFAULT)
                         )
                         .build())
                     .nodeProperties(PropertyMappings.of())
@@ -115,8 +115,8 @@ class GraphCreateConfigBuildersTest {
                 new StoreConfigBuilder()
                     .addNodeLabel("Foo")
                     .addRelationshipType("BAR")
-                    .addRelationshipProjection(RelationshipProjection.of("BAZ", Projection.NATURAL))
-                    .globalProjection(Projection.UNDIRECTED)
+                    .addRelationshipProjection(RelationshipProjection.of("BAZ", Orientation.NATURAL))
+                    .globalProjection(Orientation.UNDIRECTED)
                     .build(),
                 ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.builder()
@@ -125,11 +125,11 @@ class GraphCreateConfigBuildersTest {
                     .relationshipProjections(RelationshipProjections.builder()
                         .putProjection(
                             ElementIdentifier.of("BAR"),
-                            RelationshipProjection.of("BAR", Projection.UNDIRECTED, Aggregation.DEFAULT)
+                            RelationshipProjection.of("BAR", Orientation.UNDIRECTED, Aggregation.DEFAULT)
                         )
                         .putProjection(
                             ElementIdentifier.of("BAZ"),
-                            RelationshipProjection.of("BAZ", Projection.NATURAL, Aggregation.DEFAULT)
+                            RelationshipProjection.of("BAZ", Orientation.NATURAL, Aggregation.DEFAULT)
                         )
                         .build())
                     .nodeProperties(PropertyMappings.of())
@@ -248,7 +248,7 @@ class GraphCreateConfigBuildersTest {
                     .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
                     .nodeProjections(NodeProjections.empty())
                     .relationshipProjections(RelationshipProjections.builder()
-                        .putProjection(PROJECT_ALL, RelationshipProjection.of("*", Projection.NATURAL, Aggregation.MAX))
+                        .putProjection(PROJECT_ALL, RelationshipProjection.of("*", Orientation.NATURAL, Aggregation.MAX))
                         .build())
                     .nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of(PropertyMapping.of("foo", 42.0D, Aggregation.MAX)))

@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MemoryEstimateTest;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport;
@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.Projection.NATURAL;
+import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
@@ -87,13 +87,13 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
         return TestSupport.allDirectedProjections().flatMap(NodeSimilarityBaseProcTest::graphVariationForProjection);
     }
 
-    private static Stream<Arguments> graphVariationForProjection(Projection projection) {
-        String name = "myGraph" + projection.name();
+    private static Stream<Arguments> graphVariationForProjection(Orientation orientation) {
+        String name = "myGraph" + orientation.name();
         return Stream.of(
             arguments(
                 GdsCypher.call().explicitCreation(name),
-                projection,
-                "explicit graph - " + projection
+                orientation,
+                "explicit graph - " + orientation
             ),
             arguments(
                 GdsCypher
@@ -102,11 +102,11 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
                     .withRelationshipType("LIKES", RelationshipProjection
                         .builder()
                         .type("LIKES")
-                        .projection(projection)
+                        .orientation(orientation)
                         .build()
                     ),
-                projection,
-                "implicit graph - " + projection
+                orientation,
+                "implicit graph - " + orientation
             )
         );
     }
@@ -117,13 +117,13 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
         registerProcedures(NodeSimilarityWriteProc.class, NodeSimilarityStreamProc.class, NodeSimilarityStatsProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
 
-        TestSupport.allDirectedProjections().forEach(projection -> {
-            String name = "myGraph" + projection.name();
+        TestSupport.allDirectedProjections().forEach(orientation -> {
+            String name = "myGraph" + orientation.name();
             String createQuery = GdsCypher.call()
                 .withAnyLabel()
                 .withRelationshipType(
                     "LIKES",
-                    RelationshipProjection.builder().type("LIKES").projection(projection).build()
+                    RelationshipProjection.builder().type("LIKES").orientation(orientation).build()
                 )
                 .graphCreate(name)
                 .yields();

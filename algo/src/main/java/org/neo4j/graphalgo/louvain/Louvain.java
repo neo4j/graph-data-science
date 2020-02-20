@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimization;
@@ -178,7 +178,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
             nodeImporter,
-            rootGraph.isUndirected() ? Projection.UNDIRECTED : Projection.NATURAL,
+            rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL,
             true,
             Aggregation.SUM
         );

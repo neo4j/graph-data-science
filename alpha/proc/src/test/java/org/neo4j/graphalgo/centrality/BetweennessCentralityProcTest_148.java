@@ -28,7 +28,7 @@ import org.mockito.Matchers;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import static org.mockito.Mockito.mock;
@@ -80,7 +80,7 @@ class BetweennessCentralityProcTest_148 extends BaseProcTest {
         Consumer mock = mock(Consumer.class);
         String query = GdsCypher.call()
             .withNodeLabel("User")
-            .withRelationshipType("FRIEND", Projection.UNDIRECTED)
+            .withRelationshipType("FRIEND", Orientation.UNDIRECTED)
             .algo("gds.alpha.betweenness")
             .streamMode()
             .yields("nodeId", "centrality");

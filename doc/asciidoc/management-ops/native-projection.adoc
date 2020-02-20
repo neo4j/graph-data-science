@@ -265,20 +265,20 @@ The following map-like syntax shows the general way of defining relationship pro
 {
     <relationship-type-1>: {
         type: <neo4j-type>,
-        projection: <projection-type>,
+        orientation: <orientation>,
         aggregation: <aggregation-type>,
         properties: <relationship-property-mappings>
     },
     <relationship-type-2>: {
         type: <neo4j-type>,
-        projection: <projection-type>,
+        orientation: <orientation>,
         aggregation: <aggregation-type>,
         properties: <relationship-property-mappings>
     },
     // ...
     <relationship-type-n>: {
         type: <neo4j-type>,
-        projection: <projection-type>,
+        orientation: <orientation>,
         aggregation: <aggregation-type>,
         properties: <relationship-property-mappings>
     }
@@ -289,7 +289,7 @@ The following map-like syntax shows the general way of defining relationship pro
 ** `neo4j-type` denotes the relationship type in the Neo4j graph
 *** The relationship type must exist in the Neo4j database
 *** If not specified, `neo4j-type` defaults to `relationship-type-i`
-** `projection-type` denotes how Neo4j relationships are represented in the projected graph.
+** `orientation` denotes how Neo4j relationships are represented in the projected graph.
     The following values are allowed:
 *** `NATURAL`: each relationship is projected the same way as it is stored in Neo4j (default)
 *** `REVERSE`: each relationship is reversed during graph projection
@@ -345,10 +345,10 @@ CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['RAIL'] }) YIELD node
 ----
 
 
-=== Projection types
+=== Projection orientation
 
 By default, relationships are projected in their natural representation, i.e., in the same way as they are stored in Neo4j.
-Using the `projection` key within a relationship projection definition, we can alter that behaviour.
+Using the `orientation` key within a relationship projection definition, we can alter that behaviour.
 There are three possible values: `NATURAL`, `REVERSE` and `UNDIRECTED` which can be best described from a node's perspective:
 
 * `NATURAL` is the default behaviour and projects relationships that are pointing away from a node.
@@ -385,15 +385,15 @@ CALL gds.graph.create(
     {
         KNOWS: {
             type: 'KNOWS',
-            projection: 'NATURAL'
+            orientation: 'NATURAL'
         },
         KNOWN_BY: {
             type: 'KNOWS',
-            projection: 'REVERSE'
+            orientation: 'REVERSE'
         },
         FRIEND_OF: {
             type: 'KNOWS',
-            projection: 'UNDIRECTED'
+            orientation: 'UNDIRECTED'
         }
     }
 )

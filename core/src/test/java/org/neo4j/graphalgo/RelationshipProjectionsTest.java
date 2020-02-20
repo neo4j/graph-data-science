@@ -39,7 +39,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
-import static org.neo4j.graphalgo.AbstractRelationshipProjection.PROJECTION_KEY;
+import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
@@ -67,7 +67,7 @@ class RelationshipProjectionsTest {
         assertThat(projections.allProjections(), hasSize(2));
         assertThat(
             projections.getFilter(ElementIdentifier.of("MY_TYPE")),
-            equalTo(RelationshipProjection.of("T", Projection.NATURAL, SINGLE))
+            equalTo(RelationshipProjection.of("T", Orientation.NATURAL, SINGLE))
         );
         assertThat(
             projections.getFilter(ElementIdentifier.of("ANOTHER")),
@@ -96,7 +96,7 @@ class RelationshipProjectionsTest {
             RelationshipProjection
                 .builder()
                 .type("T")
-                .projection(Projection.NATURAL)
+                .orientation(Orientation.NATURAL)
                 .aggregation(Aggregation.DEFAULT)
                 .properties(PropertyMappings.of())
                 .build()
@@ -187,7 +187,7 @@ class RelationshipProjectionsTest {
                 MapUtil.map("T", MapUtil.map(TYPE_KEY, "T"))
             ),
             Arguments.of(
-                MapUtil.map("T", MapUtil.map(TYPE_KEY, "T", PROJECTION_KEY, Projection.NATURAL.name()))
+                MapUtil.map("T", MapUtil.map(TYPE_KEY, "T", ORIENTATION_KEY, Orientation.NATURAL.name()))
             ),
             Arguments.of(
                 MapUtil.map("T", MapUtil.map(TYPE_KEY, "T", PROPERTIES_KEY, emptyMap()))
@@ -195,7 +195,7 @@ class RelationshipProjectionsTest {
             Arguments.of(
                 MapUtil.map(
                     "T",
-                    MapUtil.map(TYPE_KEY, "T", PROJECTION_KEY, Projection.NATURAL.name(), PROPERTIES_KEY, emptyMap())
+                    MapUtil.map(TYPE_KEY, "T", ORIENTATION_KEY, Orientation.NATURAL.name(), PROPERTIES_KEY, emptyMap())
                 )
             )
         );

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -52,25 +52,25 @@ class GraphGeneratorTest {
     private static final String EXPECTED_UNWEIGHTED_GRAPH =
         "(a)-->(b)-->(c)-->(d)-->(a)";
 
-    private static Graph expectedWithAggregation(Projection projection) {
-        return fromGdl(EXPECTED_WITH_AGGREGATION, projection);
+    private static Graph expectedWithAggregation(Orientation orientation) {
+        return fromGdl(EXPECTED_WITH_AGGREGATION, orientation);
     }
 
-    private static Graph expectedWithoutAggregation(Projection projection) {
-        return fromGdl(EXPECTED_WITHOUT_AGGREGATION_GRAPH, projection);
+    private static Graph expectedWithoutAggregation(Orientation orientation) {
+        return fromGdl(EXPECTED_WITHOUT_AGGREGATION_GRAPH, orientation);
     }
 
-    private static Graph expectedUnweighted(Projection projection) {
-        return fromGdl(EXPECTED_UNWEIGHTED_GRAPH, projection);
+    private static Graph expectedUnweighted(Orientation orientation) {
+        return fromGdl(EXPECTED_UNWEIGHTED_GRAPH, orientation);
     }
 
-    static Stream<Projection> validProjections() {
-        return Stream.of(Projection.NATURAL, Projection.REVERSE);
+    static Stream<Orientation> validProjections() {
+        return Stream.of(Orientation.NATURAL, Orientation.REVERSE);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("validProjections")
-    void unweighted(Projection projection) {
+    void unweighted(Orientation orientation) {
         int nodeCount = 4;
         GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
             nodeCount,
@@ -84,7 +84,7 @@ class GraphGeneratorTest {
 
         GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
             nodeImporter,
-            projection,
+            orientation,
             false,
             Aggregation.SUM
         );
@@ -93,37 +93,37 @@ class GraphGeneratorTest {
             relImporter.add(i, (i + 1) % nodeCount);
         }
         Graph graph = relImporter.buildGraph();
-        assertGraphEquals(expectedUnweighted(projection), graph);
+        assertGraphEquals(expectedUnweighted(orientation), graph);
         assertEquals(nodeCount, graph.relationshipCount());
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("validProjections")
-    void weightedWithAggregation(Projection projection) {
-        Graph graph = generateGraph(projection, Aggregation.SUM);
-        assertGraphEquals(expectedWithAggregation(projection), graph);
+    void weightedWithAggregation(Orientation orientation) {
+        Graph graph = generateGraph(orientation, Aggregation.SUM);
+        assertGraphEquals(expectedWithAggregation(orientation), graph);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("validProjections")
-    void weightedWithoutAggregation(Projection projection) {
-        Graph graph = generateGraph(projection, Aggregation.NONE);
-        assertGraphEquals(expectedWithoutAggregation(projection), graph);
+    void weightedWithoutAggregation(Orientation orientation) {
+        Graph graph = generateGraph(orientation, Aggregation.NONE);
+        assertGraphEquals(expectedWithoutAggregation(orientation), graph);
     }
 
     @Test
     void undirectedWithAggregation() {
-        Graph graph = generateGraph(Projection.UNDIRECTED, Aggregation.SUM);
-        assertGraphEquals(expectedWithAggregation(Projection.UNDIRECTED), graph);
+        Graph graph = generateGraph(Orientation.UNDIRECTED, Aggregation.SUM);
+        assertGraphEquals(expectedWithAggregation(Orientation.UNDIRECTED), graph);
     }
 
     @Test
     void undirectedWithoutAggregation() {
-        Graph graph = generateGraph(Projection.UNDIRECTED, Aggregation.NONE);
-        assertGraphEquals(expectedWithoutAggregation(Projection.UNDIRECTED), graph);
+        Graph graph = generateGraph(Orientation.UNDIRECTED, Aggregation.NONE);
+        assertGraphEquals(expectedWithoutAggregation(Orientation.UNDIRECTED), graph);
     }
 
-    private Graph generateGraph(Projection projection, Aggregation aggregation) {
+    private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
         int nodeCount = 4;
 
         GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
@@ -138,7 +138,7 @@ class GraphGeneratorTest {
 
         GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
             nodeImporter,
-            projection,
+            orientation,
             true,
             aggregation
         );

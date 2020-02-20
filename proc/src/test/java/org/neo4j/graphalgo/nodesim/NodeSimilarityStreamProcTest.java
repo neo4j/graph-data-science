@@ -25,7 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -39,7 +39,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.neo4j.graphalgo.Projection.REVERSE;
+import static org.neo4j.graphalgo.Orientation.REVERSE;
 
 class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimilarityStreamConfig> {
 
@@ -135,7 +135,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
 
     @ParameterizedTest(name = "{2}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
-    void shouldStreamResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
+    void shouldStreamResults(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         String query = queryBuilder
             .algo("nodeSimilarity")
             .streamMode()
@@ -151,7 +151,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
         });
 
         assertEquals(
-            projection == REVERSE
+            orientation == REVERSE
                 ? EXPECTED_INCOMING
                 : EXPECTED_OUTGOING,
             result
@@ -160,7 +160,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
 
     @ParameterizedTest(name = "{2}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
-    void shouldStreamTopResults(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
+    void shouldStreamTopResults(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         int topN = 2;
         String query = queryBuilder
             .algo("nodeSimilarity")
@@ -177,7 +177,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
         });
 
         assertEquals(
-            projection == REVERSE
+            orientation == REVERSE
                 ? EXPECTED_TOP_INCOMING
                 : EXPECTED_TOP_OUTGOING,
             result
@@ -186,7 +186,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
 
     @ParameterizedTest(name = "{2}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
-    void shouldIgnoreParallelEdges(GdsCypher.QueryBuilder queryBuilder, Projection projection, String testName) {
+    void shouldIgnoreParallelEdges(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         // Add parallel edges
         runQuery("" +
                  " MATCH (person {name: 'Alice'})" +
@@ -216,7 +216,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityBaseProcTest<NodeSimila
         });
 
         assertEquals(
-            projection == REVERSE
+            orientation == REVERSE
                 ? EXPECTED_INCOMING
                 : EXPECTED_OUTGOING,
             result

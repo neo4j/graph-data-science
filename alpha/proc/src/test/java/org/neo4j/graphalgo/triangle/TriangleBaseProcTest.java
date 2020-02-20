@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -93,7 +93,7 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
         RelationshipProjections invalidRelationshipProjections = RelationshipProjections.builder()
             .putProjection(
                 ElementIdentifier.of("TYPE"),
-                RelationshipProjection.of("TYPE", Projection.NATURAL, Aggregation.DEFAULT)
+                RelationshipProjection.of("TYPE", Orientation.NATURAL, Aggregation.DEFAULT)
             )
             .build();
 
@@ -109,6 +109,6 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> proc.validateGraphCreateConfig(graphCreateFromStoreConfig, newConfig()));
 
-        assertThat(ex.getMessage(), containsString("Projection for `TYPE` uses projection `NATURAL`"));
+        assertThat(ex.getMessage(), containsString("Projection for `TYPE` uses orientation `NATURAL`"));
     }
 }

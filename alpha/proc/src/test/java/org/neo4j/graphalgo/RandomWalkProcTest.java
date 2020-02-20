@@ -76,7 +76,7 @@ class RandomWalkProcTest extends BaseProcTest {
     @Test
     void shouldHaveGivenStartNodeRandom() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "randomWalk")
             .streamMode()
             .addParameter("start", 1)
@@ -97,7 +97,7 @@ class RandomWalkProcTest extends BaseProcTest {
     @Test
     void shouldHaveResultsRandom() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "randomWalk")
             .streamMode()
             .addParameter("steps", 1)
@@ -110,7 +110,7 @@ class RandomWalkProcTest extends BaseProcTest {
     @Test
     void shouldHaveSameTypesForStartNodesRandom() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "randomWalk")
             .streamMode()
             .addParameter("start", "Fred")
@@ -138,7 +138,7 @@ class RandomWalkProcTest extends BaseProcTest {
     @Test
     void shouldHaveStartedFromEveryNodeRandom() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "randomWalk")
             .streamMode()
             .addParameter("steps", 1)
@@ -158,7 +158,7 @@ class RandomWalkProcTest extends BaseProcTest {
     @Test
     void shouldNotFailRandom() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "randomWalk")
             .streamMode()
             .addParameter("start", 2)
@@ -179,7 +179,7 @@ class RandomWalkProcTest extends BaseProcTest {
     @Test
     void shouldHaveGivenStartNode() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "randomWalk")
             .streamMode()
             .addParameter("start", 1)
@@ -197,7 +197,7 @@ class RandomWalkProcTest extends BaseProcTest {
     @Test
     void shouldHaveResultsN2V() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "randomWalk")
             .streamMode()
             .addParameter("steps", 1)
@@ -215,7 +215,7 @@ class RandomWalkProcTest extends BaseProcTest {
     @Test
     void shouldHaveStartedFromEveryNodeN2V() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "randomWalk")
             .streamMode()
             .addParameter("steps", 1)
@@ -238,7 +238,7 @@ class RandomWalkProcTest extends BaseProcTest {
     @Test
     void shouldNotFailN2V() {
         String query = GdsCypher.call()
-            .loadEverything(Projection.UNDIRECTED)
+            .loadEverything(Orientation.UNDIRECTED)
             .algo("gds", "alpha", "randomWalk")
             .streamMode()
             .addParameter("start", 2)

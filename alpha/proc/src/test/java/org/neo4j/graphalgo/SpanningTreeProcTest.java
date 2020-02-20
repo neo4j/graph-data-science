@@ -76,7 +76,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
     void testMinimum() {
         String query = GdsCypher.call()
             .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Projection.UNDIRECTED)
+            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
             .withRelationshipProperty("cost", 1.0D)
             .algo("gds.alpha.spanningTree")
             .writeMode()
@@ -105,7 +105,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
     void testMaximum() {
         String query = GdsCypher.call()
             .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Projection.UNDIRECTED)
+            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
             .withRelationshipProperty("cost", 1.0D)
             .algo("gds.alpha.spanningTree.maximum")
             .writeMode()

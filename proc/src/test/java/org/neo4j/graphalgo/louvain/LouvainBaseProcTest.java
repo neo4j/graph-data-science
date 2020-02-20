@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -100,7 +100,7 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Bas
                     "TYPE",
                     RelationshipProjection.of(
                         "TYPE",
-                        Projection.UNDIRECTED,
+                        Orientation.UNDIRECTED,
                         Aggregation.DEFAULT
                     )
                 )
@@ -177,7 +177,7 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Bas
                             ElementIdentifier.of("TYPE"),
                             RelationshipProjection.builder()
                                 .type("TYPE")
-                                .projection(Projection.UNDIRECTED)
+                                .orientation(Orientation.UNDIRECTED)
                                 .build()
                         )
                         .build()

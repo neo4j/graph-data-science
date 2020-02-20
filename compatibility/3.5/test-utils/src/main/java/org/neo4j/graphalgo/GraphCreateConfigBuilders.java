@@ -62,7 +62,7 @@ final class GraphCreateConfigBuilders {
         Optional<Integer> concurrency,
         @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
-        Optional<Projection> globalProjection,
+        Optional<Orientation> globalProjection,
         Optional<Aggregation> globalAggregation
     ) {
         // Node projections
@@ -77,12 +77,12 @@ final class GraphCreateConfigBuilders {
 
         // Relationship projections
         Map<String, RelationshipProjection> tempRP = new LinkedHashMap<>();
-        Projection projection = globalProjection.orElse(Projection.NATURAL);
+        Orientation orientation = globalProjection.orElse(Orientation.NATURAL);
         Aggregation aggregation = globalAggregation.orElse(Aggregation.DEFAULT);
 
         relationshipTypes.forEach(relType -> tempRP.put(
             relType,
-            RelationshipProjection.of(relType, projection, aggregation)
+            RelationshipProjection.of(relType, orientation, aggregation)
         ));
         relationshipProjections.forEach(rp -> tempRP.put(rp.type(), rp));
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
@@ -90,7 +90,7 @@ final class GraphCreateConfigBuilders {
         if (tempRP.isEmpty() && anyRelationshipType == AnyRelationshipType.LOAD) {
             tempRP.put("*", RelationshipProjection.builder()
                 .type("*")
-                .projection(projection)
+                .orientation(orientation)
                 .aggregation(aggregation)
                 .build());
         }
@@ -155,7 +155,7 @@ final class GraphCreateConfigBuilders {
             relationshipProjections = RelationshipProjections.builder()
                 .putProjection(
                     PROJECT_ALL,
-                    RelationshipProjection.of("*", Projection.NATURAL, aggregation)
+                    RelationshipProjection.of("*", Orientation.NATURAL, aggregation)
                 )
                 .build();
             relationshipPropertyMappings = PropertyMappings.builder()
