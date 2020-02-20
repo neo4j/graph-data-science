@@ -47,19 +47,16 @@ ext {
     ]
     if (1 < versionParts.size()) { versions.gdsManual += '-preview' }
     versions['neo4jDocs'] = "3.5"
+    versions['neo4jDrivers'] = "1.7"
 
     copyrightYear = '2020'
     docsBaseUri = "https://neo4j.com/docs"
     crossReferenceBase = [ // We have no strategy for cross references; always link to current.
             'cypher-manual'     : "${docsBaseUri}/cypher-manual/${versions.neo4jDocs}",
-            'driver-manual'     : "${docsBaseUri}/driver-manual/current",
+            'driver-manual'     : "${docsBaseUri}/driver-manual/${versions.neo4jDrivers}",
             'operations-manual' : "${docsBaseUri}/operations-manual/${versions.neo4jDocs}",
             'graph-data-science': "${docsBaseUri}/graph-data-science/${versions.gdsManual}",
-            'java-reference'    : "${docsBaseUri}/java-reference/${versions.neo4jDocs}",
-            'rest-docs'         : "${docsBaseUri}/rest-docs/${versions.neo4jDocs}",
-            'ogm-manual'        : "${docsBaseUri}/ogm-manual/current",
-            'getting-started'   : "${docsBaseUri}/getting-started/${versions.neo4jDocs}",
-            'kerberos-add-on'   : "${docsBaseUri}/add-on/kerberos/current"
+            'docs-library'      : "${docsBaseUri}",
     ]
     asciidoctorAttributes = [
         'common': [
@@ -221,9 +218,8 @@ html {
         "Operations_Manual=${crossReferenceBase['operations-manual']}/",
         "Cypher_Manual=${crossReferenceBase['cypher-manual']}/",
         "Driver_Manual=${crossReferenceBase['driver-manual']}/",
-        "OGM_Manual=${crossReferenceBase['ogm-manual']}/",
         "Graph_Data_Science=${crossReferenceBase['graph-data-science']}/",
-        "Java_Reference=${crossReferenceBase['java-reference']}/",
+        "Docs_Library=${crossReferenceBase['docs-library']}/",
     ].join(" ")
     def scripts = [
         '//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js',
