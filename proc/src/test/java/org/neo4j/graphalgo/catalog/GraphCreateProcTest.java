@@ -41,7 +41,6 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.time.Duration;
@@ -72,6 +71,7 @@ import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -395,7 +395,7 @@ class GraphCreateProcTest extends BaseProcTest {
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
-                RELATIONSHIP_PROJECTION_KEY, map("B", MapUtil.genericMap(
+                RELATIONSHIP_PROJECTION_KEY, map("B", genericMap(
                     map("type", "REL", ORIENTATION_KEY, projection, PROPERTIES_KEY, emptyMap()),
                     AGGREGATION_KEY,
                     Aggregation.DEFAULT.name()

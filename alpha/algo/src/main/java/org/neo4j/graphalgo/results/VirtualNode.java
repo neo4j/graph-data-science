@@ -19,14 +19,13 @@
  */
 package org.neo4j.graphalgo.results;
 
+import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.helpers.collection.FilteringIterable;
-import org.neo4j.helpers.collection.Iterables;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +33,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static java.util.Arrays.asList;
 
@@ -140,7 +141,15 @@ public class VirtualNode implements Node {
 
     @Override
     public Relationship getSingleRelationship(RelationshipType relationshipType, Direction direction) {
-        return Iterables.single(getRelationships(relationshipType, direction));
+        Relationship relationship = null;
+        Iterator<Relationship> iterator = getRelationships(relationshipType, direction).iterator();
+        if (iterator.hasNext()) {
+            relationship = iterator.next();
+            if (iterator.hasNext()) {
+                throw new IllegalStateException("There is more than one relationship.");
+            }
+        }
+        return relationship;
     }
 
     @Override
@@ -162,17 +171,17 @@ public class VirtualNode implements Node {
 
     @Override
     public int getDegree(RelationshipType relationshipType) {
-        return (int) Iterables.count(getRelationships(relationshipType));
+        return (int) StreamSupport.stream(getRelationships(relationshipType).spliterator(), false).count();
     }
 
     @Override
     public int getDegree(Direction direction) {
-        return (int) Iterables.count(getRelationships(direction));
+        return (int) StreamSupport.stream(getRelationships(direction).spliterator(), false).count();
     }
 
     @Override
     public int getDegree(RelationshipType relationshipType, Direction direction) {
-        return (int) Iterables.count(getRelationships(relationshipType,direction));
+        return (int) StreamSupport.stream(getRelationships(relationshipType, direction).spliterator(), false).count();
     }
 
     @Override
@@ -269,4 +278,55 @@ public class VirtualNode implements Node {
     {
         return "VirtualNode{" + "labels=" + labels + ", props=" + props + ", rels=" + rels + '}';
     }
+
+    /**
+     * An iterator which filters another iterator, only letting items with certain
+     * criteria pass through. All iteration/filtering is done lazily.
+     *
+     * @param <T> the type of items in the iteration.
+     */
+    static class FilteringIterator<T> extends AbstractIterator<T> {
+        private final Iterator<T> source;
+        private final Predicate<T> predicate;
+
+        public FilteringIterator(Iterator<T> source, Predicate<T> predicate) {
+            this.source = source;
+            this.predicate = predicate;
+        }
+
+        @Override
+        protected T fetch() {
+            while (source.hasNext()) {
+                T testItem = source.next();
+                if (predicate.test(testItem)) {
+                    return testItem;
+                }
+            }
+            return done();
+        }
+
+    }
+
+
+    /**
+     * An iterable which filters another iterable, only letting items with certain
+     * criteria pass through. All iteration/filtering is done lazily.
+     *
+     * @param <T> the type of items in the iteration.
+     */
+    static class FilteringIterable<T> implements Iterable<T> {
+        private final Iterable<T> source;
+        private final Predicate<T> predicate;
+
+        public FilteringIterable(Iterable<T> source, Predicate<T> predicate) {
+            this.source = source;
+            this.predicate = predicate;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return new FilteringIterator<>(source.iterator(), predicate);
+        }
+    }
+
 }

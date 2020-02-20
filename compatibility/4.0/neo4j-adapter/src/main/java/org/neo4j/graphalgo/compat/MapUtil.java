@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.compat;
 
 import java.util.Map;
 
+import org.neo4j.graphalgo.annotation.SuppressForbidden;
+
 /**
  * Compatibility class for {@link org.neo4j.internal.helpers.collection.MapUtil}.
  * By using this class we reduce the number of references to the Neo4j helper class,
@@ -35,6 +37,7 @@ public final class MapUtil {
     /**
      * Delegates to {@link org.neo4j.internal.helpers.collection.MapUtil#map(Object...)} and allows static import.
      */
+    @SuppressForbidden(reason = "Only allowed usage of org.neo4j.internal.helpers.collection.MapUtil")
     public static Map<String, Object> map(Object... objects) {
         return org.neo4j.internal.helpers.collection.MapUtil.map(objects);
     }
@@ -42,6 +45,7 @@ public final class MapUtil {
     /**
      * Delegates to {@link org.neo4j.internal.helpers.collection.MapUtil#map(Map, Object...)} and allows static import.
      */
+    @SuppressForbidden(reason = "Only allowed usage of org.neo4j.internal.helpers.collection.MapUtil")
     public static Map<String, Object> map(Map<String, Object> targetMap, Object... objects) {
         return org.neo4j.internal.helpers.collection.MapUtil.map(targetMap, objects);
     }
@@ -49,6 +53,7 @@ public final class MapUtil {
     /**
      * Delegates to {@link org.neo4j.internal.helpers.collection.MapUtil#genericMap(Object...)} and allows static import.
      */
+    @SuppressForbidden(reason = "Only allowed usage of org.neo4j.internal.helpers.collection.MapUtil")
     public static <K, V> Map<K, V> genericMap(Object... objects) {
         return org.neo4j.internal.helpers.collection.MapUtil.genericMap(objects);
     }
@@ -56,6 +61,7 @@ public final class MapUtil {
     /**
      * Delegates to {@link org.neo4j.internal.helpers.collection.MapUtil#genericMap(Map, Object...)} and allows static import.
      */
+    @SuppressForbidden(reason = "Only allowed usage of org.neo4j.internal.helpers.collection.MapUtil")
     public static <K, V> Map<K, V> genericMap(Map<K, V> targetMap, Object... objects) {
         return org.neo4j.internal.helpers.collection.MapUtil.genericMap(targetMap, objects);
     }

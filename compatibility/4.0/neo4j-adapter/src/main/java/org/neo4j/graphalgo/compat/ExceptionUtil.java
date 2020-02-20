@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.compat;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.kernel.api.exceptions.Status;
 
+import java.util.Objects;
+
 public final class ExceptionUtil {
 
     /**
@@ -77,6 +79,41 @@ public final class ExceptionUtil {
             newMessage = codeString + ": " + message;
         }
         throw new RuntimeException(newMessage, e);
+    }
+
+    /**
+     * Rethrows {@code exception} if it is an instance of {@link RuntimeException} or {@link Error}. Typical usage is:
+     *
+     * <pre>
+     * catch (Throwable e) {
+     *   ......common code......
+     *   throwIfUnchecked(e);
+     *   throw new RuntimeException(e);
+     * }
+     * </pre>
+     *
+     * This will only wrap checked exception in a {@code RuntimeException}. Do note that if the segment {@code common code}
+     * is missing, it's preferable to use this instead:
+     *
+     * <pre>
+     * catch (RuntimeException | Error e) {
+     *   throw e;
+     * }
+     * catch (Throwable e) {
+     *   throw new RuntimeException(e);
+     * }
+     * </pre>
+     *
+     * @param exception to rethrow.
+     */
+    public static void throwIfUnchecked(Throwable exception) {
+        Objects.requireNonNull(exception);
+        if (exception instanceof RuntimeException) {
+            throw (RuntimeException) exception;
+        }
+        if (exception instanceof Error) {
+            throw (Error) exception;
+        }
     }
 
     private ExceptionUtil() {

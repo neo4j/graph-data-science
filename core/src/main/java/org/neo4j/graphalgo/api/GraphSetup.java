@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.logging.Log;
 
 import java.util.Collections;
@@ -135,7 +134,7 @@ public class GraphSetup {
 
         PropertyMappings.Builder builder = PropertyMappings.builder();
         groupedPropertyMappings.values().stream()
-            .map(Iterables::first)
+            .map(l -> l.iterator().next())
             .forEach(builder::addMapping);
 
         // Necessary for Cypher projections
@@ -157,7 +156,7 @@ public class GraphSetup {
 
         PropertyMappings.Builder builder = PropertyMappings.builder();
         groupedPropertyMappings.values().stream()
-            .map(Iterables::first)
+            .map(l -> l.iterator().next())
             .forEach(builder::addMapping);
 
         // Necessary for Cypher projections

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Arrays;
@@ -42,8 +41,8 @@ import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
-import static org.neo4j.helpers.collection.MapUtil.map;
 
 class RelationshipProjectionsTest {
 
@@ -184,18 +183,18 @@ class RelationshipProjectionsTest {
                 singletonList("T")
             ),
             Arguments.of(
-                MapUtil.map("T", MapUtil.map(TYPE_KEY, "T"))
+                map("T", map(TYPE_KEY, "T"))
             ),
             Arguments.of(
-                MapUtil.map("T", MapUtil.map(TYPE_KEY, "T", ORIENTATION_KEY, Orientation.NATURAL.name()))
+                map("T", map(TYPE_KEY, "T", ORIENTATION_KEY, Orientation.NATURAL.name()))
             ),
             Arguments.of(
-                MapUtil.map("T", MapUtil.map(TYPE_KEY, "T", PROPERTIES_KEY, emptyMap()))
+                map("T", map(TYPE_KEY, "T", PROPERTIES_KEY, emptyMap()))
             ),
             Arguments.of(
-                MapUtil.map(
+                map(
                     "T",
-                    MapUtil.map(TYPE_KEY, "T", ORIENTATION_KEY, Orientation.NATURAL.name(), PROPERTIES_KEY, emptyMap())
+                    map(TYPE_KEY, "T", ORIENTATION_KEY, Orientation.NATURAL.name(), PROPERTIES_KEY, emptyMap())
                 )
             )
         );

@@ -35,6 +35,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -56,7 +57,6 @@ import static org.neo4j.graphalgo.core.Aggregation.MIN;
 import static org.neo4j.graphalgo.core.Aggregation.NONE;
 import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
 import static org.neo4j.graphalgo.core.Aggregation.SUM;
-import static org.neo4j.helpers.collection.Iterables.asSet;
 
 class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
@@ -181,7 +181,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .buildGraphs(graphFactory);
 
         assertEquals(2, graphs.availableRelationshipTypes().size());
-        assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));
+        assertEquals(graphs.availableRelationshipTypes(), new HashSet<>(asList("REL1", "REL2")));
 
         Graph rel1Graph = graphs.getGraphProjection("REL1");
         Graph rel2Graph = graphs.getGraphProjection("REL2");
@@ -200,7 +200,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .buildGraphs(graphFactory);
 
         assertEquals(2, graphs.availableRelationshipTypes().size());
-        assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));
+        assertEquals(graphs.availableRelationshipTypes(), new HashSet<>(asList("REL1", "REL2")));
 
         Graph rel1Graph = graphs.getGraphProjection("REL1");
         Graph rel2Graph = graphs.getGraphProjection("REL2");

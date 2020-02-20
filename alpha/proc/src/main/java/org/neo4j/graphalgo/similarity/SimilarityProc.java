@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
+import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
@@ -33,7 +34,6 @@ import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
 import org.neo4j.graphalgo.results.SimilarityExporter;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
-import org.neo4j.helpers.collection.Pair;
 import org.neo4j.logging.Log;
 
 import java.util.Map;
@@ -100,7 +100,7 @@ abstract class SimilarityProc
 
     @Override
     protected final Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
-        if (configAndName.other().isPresent()) {
+        if (configAndName.getTwo().isPresent()) {
             throw new IllegalArgumentException("Similarity does not run on an explicitly created graph");
         }
         return new NullGraph();

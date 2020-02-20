@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.shortestpaths;
 
+import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
@@ -37,7 +38,6 @@ import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphdb.Path;
-import org.neo4j.helpers.collection.Pair;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;

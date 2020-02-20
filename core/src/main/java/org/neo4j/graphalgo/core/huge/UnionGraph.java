@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.helpers.collection.Iterables;
 
 import java.util.Collection;
 import java.util.Set;
@@ -43,13 +42,13 @@ public final class UnionGraph implements Graph {
             throw new IllegalArgumentException("no graphs");
         }
         if (graphs.size() == 1) {
-            return Iterables.single(graphs);
+            return graphs.iterator().next();
         }
         return new UnionGraph(graphs);
     }
 
     private UnionGraph(Collection<? extends Graph> graphs) {
-        first = Iterables.first(graphs);
+        first = graphs.iterator().next();
         this.graphs = graphs;
     }
 

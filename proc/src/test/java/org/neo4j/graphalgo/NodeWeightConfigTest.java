@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -36,7 +38,6 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphdb.DependencyResolver;
-import org.neo4j.helpers.collection.Pair;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -154,7 +155,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
             CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", propertyName));
             CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
             CONFIG config = proc.newConfig(Optional.of(graphName), algoConfig);
-            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(graphName));
+            Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.of(graphName));
 
             Graph graph = proc.createGraph(configAndName);
             graph.forEachNode(nodeId -> {

@@ -28,9 +28,9 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.WriteConfigTest;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.ArrayList;
 import java.util.List;

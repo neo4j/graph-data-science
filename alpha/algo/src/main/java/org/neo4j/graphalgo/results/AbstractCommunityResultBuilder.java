@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.results;
 
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.HdrHistogram.Histogram;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
-import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.Map;
 import java.util.Optional;

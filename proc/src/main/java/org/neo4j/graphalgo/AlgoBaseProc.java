@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -50,7 +52,6 @@ import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.helpers.collection.Pair;
 
 import java.util.HashSet;
 import java.util.List;
@@ -173,12 +174,12 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             );
         }
 
-        return Pair.of(config, graphName);
+        return Tuples.pair(config, graphName);
     }
 
     protected Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
-        CONFIG config = configAndName.first();
-        Optional<String> maybeGraphName = configAndName.other();
+        CONFIG config = configAndName.getOne();
+        Optional<String> maybeGraphName = configAndName.getTwo();
 
         Optional<String> weightProperty = config instanceof RelationshipWeightConfig
             ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
@@ -267,7 +268,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         AllocationTracker tracker = AllocationTracker.create();
 
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
-        CONFIG config = input.first();
+        CONFIG config = input.getOne();
 
         Graph graph;
 
@@ -366,7 +367,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             configuration
         );
 
-        MemoryTreeWithDimensions memoryTreeWithDimensions = memoryEstimation(configAndGraphName.first());
+        MemoryTreeWithDimensions memoryTreeWithDimensions = memoryEstimation(configAndGraphName.getOne());
         return Stream.of(
             new MemoryEstimateResult(memoryTreeWithDimensions)
         );

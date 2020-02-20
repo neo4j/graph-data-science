@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -36,7 +38,6 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphdb.DependencyResolver;
-import org.neo4j.helpers.collection.Pair;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -182,7 +183,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
 
             CONFIG config = proc.newConfig(Optional.of(graphName), algoConfig);
-            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(graphName));
+            Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.of(graphName));
 
             Graph graph = proc.createGraph(configAndName);
             graph.forEachNode(nodeId -> {
@@ -216,7 +217,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             CypherMapWrapper algoConfig = createMinimalConfig(configWithoutRelWeight);
 
             CONFIG config = proc.newConfig(Optional.of(weightedGraphName), algoConfig);
-            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(weightedGraphName));
+            Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.of(weightedGraphName));
 
             Graph graph = proc.createGraph(configAndName);
             assertGraphEquals(fromGdl(expectedGraph), graph);
@@ -237,7 +238,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             CypherMapWrapper algoConfig = createMinimalConfig(CypherMapWrapper.empty());
 
             CONFIG config = proc.newConfig(Optional.of(noRelGraph), algoConfig);
-            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(noRelGraph));
+            Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.of(noRelGraph));
 
             Graph graph = proc.createGraph(configAndName);
             assertGraphEquals(fromGdl("(a)-->(b)-->(c)-->(a)-->(c)"), graph);
@@ -257,7 +258,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
         applyOnProcedure((proc) -> {
             CONFIG config = proc.newConfig(Optional.empty(), algoConfig);
-            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.empty());
+            Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.empty());
             Graph graph = proc.createGraph(configAndName);
             assertGraphEquals(fromGdl("(a)-->(b)-->(c)-->(a)-->(c)"), graph);
         });
@@ -276,7 +277,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
 
             CONFIG config = proc.newConfig(Optional.of(graphName), algoConfig);
-            Pair<CONFIG, Optional<String>> configAndName = Pair.of(config, Optional.of(graphName));
+            Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.of(graphName));
 
             Graph graph = proc.createGraph(configAndName);
             assertGraphEquals(fromGdl("()-[{w1: 0.0}]->(), ()"), graph);

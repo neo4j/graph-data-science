@@ -29,7 +29,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.Iterables;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -37,6 +36,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Exports a graph as Cypher statements, so that you could inspect it during tests or similar.
@@ -215,7 +215,7 @@ public final class CypherExporter {
 
         @Override
         public Iterable<String> labels(Node node) {
-            return Iterables.stream(node.getLabels())
+            return StreamSupport.stream(node.getLabels().spliterator(), false)
                     .map(Label::name)
                     .collect(Collectors.toList());
         }

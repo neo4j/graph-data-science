@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
-import static org.neo4j.helpers.collection.MapUtil.map;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class PersonalizedPageRankProcTest extends BaseProcTest {
     @Language("Cypher")

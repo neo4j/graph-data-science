@@ -44,9 +44,9 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.helpers.collection.MapUtil.map;
 
 class GraphListProcTest extends BaseProcTest {
 
@@ -332,8 +332,8 @@ class GraphListProcTest extends BaseProcTest {
         String loadQuery = "CALL gds.graph.create(" +
                            "    $name, '', '')";
 
-        runQuery("alice", loadQuery, MapUtil.map("name", "aliceGraph"));
-        runQuery("bob", loadQuery, MapUtil.map("name", "bobGraph"));
+        runQuery("alice", loadQuery, map("name", "aliceGraph"));
+        runQuery("bob", loadQuery, map("name", "bobGraph"));
 
         String listQuery = "CALL gds.graph.list() YIELD graphName as name";
 

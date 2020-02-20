@@ -39,7 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
+import static org.neo4j.graphalgo.compat.ExceptionUtil.throwIfUnchecked;
 
 @ValueClass
 public interface GraphLoader {

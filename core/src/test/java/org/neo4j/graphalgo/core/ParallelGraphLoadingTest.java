@@ -30,7 +30,6 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.lang.invoke.MethodHandle;
@@ -48,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -143,8 +143,8 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
 
     private boolean testRelationships(Graph graph, long nodeId) {
         final Node node = db.getNodeById(graph.toOriginalNodeId(nodeId));
-        final Map<Long, Relationship> relationships = Iterables
-                .stream(node.getRelationships(Direction.OUTGOING))
+        final Map<Long, Relationship> relationships = StreamSupport
+                .stream(node.getRelationships(Direction.OUTGOING).spliterator(), false)
                 .collect(Collectors.toMap(
                         rel -> combineIntInt((int) rel.getStartNode().getId(), (int) rel.getEndNode().getId()),
                         Function.identity()));

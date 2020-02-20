@@ -57,7 +57,7 @@ import java.util.stream.BaseStream;
 import java.util.stream.LongStream;
 
 import static java.lang.String.format;
-import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
+import static org.neo4j.graphalgo.compat.ExceptionUtil.throwIfUnchecked;
 
 public final class ParallelUtil {
 
