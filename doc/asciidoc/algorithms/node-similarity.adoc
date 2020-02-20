@@ -78,37 +78,36 @@ YIELD nodesCompared, relationshipsWritten, writeRelationshipType, writeProperty
 
 include::common-parameters.adoc[]
 
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
+include::common-configuration.adoc[]
+
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                   | Type    | Default                | Optional | Description
-| nodeProjection         | string  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
-| relationshipProjection | string  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
-| concurrency            | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency        | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| similarityCutoff       | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
-| degreeCutoff           | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| topK                   | int     | 10                     | yes      | Limit on the number of scores per node. The K largest results are returned.
-| bottomK                | int     | 10                     | yes      | Limit on the number of scores per node. The K smallest results are returned.
-| topN                   | int     | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned.
-| bottomN                | int     | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
-| writeRelationshipType  | string  | SIMILAR                | yes      | The relationship type used to represent a similarity score.
-| writeProperty          | string  | 'score'                | yes      | The relationship property that stores the similarity score.
+| nodeProjection         | STRING  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
+| relationshipProjection | STRING  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
+| similarityCutoff       | FLOAT   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
+| degreeCutoff           | INTEGER | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
+| topK                   | INTEGER | 10                     | yes      | Limit on the number of scores per node. The K largest results are returned.
+| bottomK                | INTEGER | 10                     | yes      | Limit on the number of scores per node. The K smallest results are returned.
+| topN                   | INTEGER | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned.
+| bottomN                | INTEGER | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
+| writeRelationshipType  | STRING  | SIMILAR                | yes      | The relationship type used to represent a similarity score.
+| writeProperty          | STRING  | 'score'                | yes      | The relationship property that stores the similarity score.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                   | Type   | Description
-| nodesCompared          | int    | The number of nodes compared.
-| relationships          | int    | The number of relationships created.
-| loadMillis             | int    | Milliseconds for loading data.
-| computeMillis          | int    | Milliseconds for running the algorithm.
-| writeMillis            | int    | Milliseconds for writing result data back to Neo4j.
-| postProcessingMillis   | int    | Milliseconds for computing percentiles.
-| similarityDistribution | map    | Min, max, mean, stdDev and percentile distribution of the computed similarity results.
-| configuration          | map    | The configuration used for running the algorithm.
+| Name                   | Type    | Description
+| nodesCompared          | INTEGER | The number of nodes compared.
+| relationships          | INTEGER | The number of relationships created.
+| loadMillis             | INTEGER | Milliseconds for loading data.
+| computeMillis          | INTEGER | Milliseconds for running the algorithm.
+| writeMillis            | INTEGER | Milliseconds for writing result data back to Neo4j.
+| postProcessingMillis   | INTEGER | Milliseconds for computing percentiles.
+| similarityDistribution | MAP     | Min, max, mean, stdDev and percentile distribution of the computed similarity results.
+| configuration          | MAP     | The configuration used for running the algorithm.
 |===
 
 [[algorithms-node-similarity-syntax-stream]]
@@ -121,35 +120,29 @@ CALL gds.nodeSimilarity.stream(graphName: STRING, {
 YIELD node1, node2, similarity
 ----
 
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name      | Type    | Default | Optional | Description
-| graphName | string  | null    | yes      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the config map must contain configuration for creating a graph.
-| config    | map     | {}      | yes      | Additional configuration, see below.
-|===
+include::common-parameters.adoc[]
 
-.Configuration
-[opts="header",cols="1m,1,1,1,4"]
+include::common-configuration.adoc[]
+
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
 |===
-| Name              | Type    | Default                | Optional | Description
-| concurrency       | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| similarityCutoff  | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
-| degreeCutoff      | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| topK              | int     | 10                     | yes      | Limit on the number of scores per node. The K largest results are returned.
-| bottomK           | int     | 10                     | yes      | Limit on the number of scores per node. The K smallest results are returned.
-| topN              | int     | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned.
-| bottomN           | int     | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
+| Name             | Type    | Default | Optional | Description
+| similarityCutoff | FLOAT   | 1E-42   | yes      | Lower limit for the similarity score to be present in the result.
+| degreeCutoff     | INTEGER | 1       | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
+| topK             | INTEGER | 10      | yes      | Limit on the number of scores per node. The K largest results are returned.
+| bottomK          | INTEGER | 10      | yes      | Limit on the number of scores per node. The K smallest results are returned.
+| topN             | INTEGER | 0       | yes      | Global limit on the number of scores computed. The N largest total results are returned.
+| bottomN          | INTEGER | 0       | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
 |===
 
 .Results
 [opts="header",cols="1m,1,6"]
 |===
-| Name          | Type     | Description
-| node1         | int      | The Neo4j ID of the first node.
-| node2         | int      | The Neo4j ID of the second node.
-| similarity    | double   | The similarity score for the two nodes.
+| Name       | Type    | Description
+| node1      | INTEGER | The Neo4j ID of the first node.
+| node2      | INTEGER | The Neo4j ID of the second node.
+| similarity | FLOAT   | The similarity score for the two nodes.
 |===
 
 

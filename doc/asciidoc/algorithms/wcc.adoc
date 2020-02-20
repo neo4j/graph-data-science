@@ -56,42 +56,33 @@ YIELD
 
 include::common-parameters.adoc[]
 
-.Configuration
-[opts="header",cols="1m,1,1,1,4"]
+include::common-configuration.adoc[]
+
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                          | Type          | Default                   | Optional  | Description
-// general configuration
-| nodeProjection                | map or list   | null                      | yes       | The node projection used for implicit graph loading or filtering nodes of an explicitly loaded graph.
-| relationshipProjection        | map or list   | null                      | yes       | The relationship projection used for implicit graph loading or filtering relationship of an explicitly loaded graph.
-| nodeQuery                     | string        | null                      | yes       | The Cypher query used to select the nodes for implicit graph loading via a Cypher projection.
-| relationshipQuery             | string        | null                      | yes       | The Cypher query used to select the relationships for implicit graph loading via a Cypher projection.
-| nodeProperties                | map or list   | null                      | yes       | The node properties to load during implicit graph loading.
-| relationshipProperties        | map or list   | null                      | yes       | The relationship properties to load during implicit graph loading.
-| concurrency                   | int           | 4                         | yes       | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency               | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for implicit graph loading.
-| writeConcurrency              | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for writing the result to Neo4j.
-// algorithm specific
-| writeProperty                 | string        | n/a                       | no        | The node property to which the component ID is written to.
-| relationshipWeightProperty    | string        | `null`                    | yes       | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
-| defaultValue                  | float         | `null`                    | yes       | The default value of the relationship weight in case it is missing or invalid.
-| seedProperty                  | string        | n/a                       | yes       | Used to set the initial community for a node. The property value needs to be a number.
-| threshold                     | float         | `null`                    | yes       | The value of the weight above which the relationship is considered in the computation.
-| consecutiveIds                | boolean       | `false`                   | yes       | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
+| Name                       | Type    | Default | Optional  | Description
+| writeProperty              | STRING  | n/a     | no        | The node property to which the component ID is written to.
+| relationshipWeightProperty | STRING  | null    | yes       | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
+| defaultValue               | FLOAT   | null    | yes       | The default value of the relationship weight in case it is missing or invalid.
+| seedProperty               | STRING  | n/a     | yes       | Used to set the initial community for a node. The property value needs to be a number.
+| threshold                  | FLOAT   | null    | yes       | The value of the weight above which the relationship is considered in the computation.
+| consecutiveIds             | BOOLEAN | false   | yes       | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
 [opts="header",cols="1m,1,6"]
 |===
 | Name                          | Type    | Description
-| createMillis                  | int     | Milliseconds for loading data.
-| computeMillis                 | int     | Milliseconds for running the algorithm.
-| writeMillis                   | int     | Milliseconds for writing result data back.
-| postProcessingMillis          | int     | Milliseconds for computing component count and distribution statistics.
-| nodePropertiesWritten         | int     | The number of node properties written.
-| relationshipPropertiesWritten | int     | The number of relationship properties written.
-| componentCount                | int     | The number of computed components.
-| componentDistribution         | map     | Statistical information about the component sizes.
-| configuration                 | map     | The configuration used for running the algorithm.
+| createMillis                  | INTEGER | Milliseconds for loading data.
+| computeMillis                 | INTEGER | Milliseconds for running the algorithm.
+| writeMillis                   | INTEGER | Milliseconds for writing result data back.
+| postProcessingMillis          | INTEGER | Milliseconds for computing component count and distribution statistics.
+| nodePropertiesWritten         | INTEGER | The number of node properties written.
+| relationshipPropertiesWritten | INTEGER | The number of relationship properties written.
+| componentCount                | INTEGER | The number of computed components.
+| componentDistribution         | MAP     | Statistical information about the component sizes.
+| configuration                 | MAP     | The configuration used for running the algorithm.
 |===
 
 [[algorithms-wcc-syntax-stream]]
@@ -108,42 +99,27 @@ YIELD
   communityId: int
 ----
 
-.Parameters
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name          | Type      | Default | Optional | Description
-| graphName     | string    | null    | yes      | Name of an explicitly loaded graph to run the algorithm on.
-| configuration | map       | {}      | yes      | Configuration for implicit graph creation, algorithm-specifics and/or graph filtering.
-|===
+include::common-parameters.adoc[]
 
-.Configuration
+include::common-configuration.adoc[]
+
+.Algorithm specific configuration
 [opts="header",cols="1m,1,1,1,4"]
 |===
-| Name                          | Type          | Default                   | Optional  | Description
-// general configuration
-| nodeProjection                | map or list   | null                      | yes       | The node projection used for implicit graph loading or filtering nodes of an explicitly loaded graph.
-| relationshipProjection        | map or list   | null                      | yes       | The relationship projection used for implicit graph loading or filtering relationship of an explicitly loaded graph.
-| nodeQuery                     | string        | null                      | yes       | The Cypher query used to select the nodes for implicit graph loading via a Cypher projection.
-| relationshipQuery             | string        | null                      | yes       | The Cypher query used to select the relationships for implicit graph loading via a Cypher projection.
-| nodeProperties                | map or list   | null                      | yes       | The node properties to load during implicit graph loading.
-| relationshipProperties        | map or list   | null                      | yes       | The relationship properties to load during implicit graph loading.
-| concurrency                   | int           | 4                         | yes       | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency               | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for implicit graph loading.
-| writeConcurrency              | int           | value of 'concurrency'    | yes       | The number of concurrent threads used for writing the result to Neo4j.
-// algorithm specific
-| relationshipWeightProperty    | string        | `null`                    | yes       | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
-| defaultValue                  | float         | `null`                    | yes       | The default value of the relationship weight in case it is missing or invalid.
-| seedProperty                  | string        | n/a                       | yes       | Used to set the initial community for a node. The property value needs to be a number.
-| threshold                     | float         | `null`                    | yes       | The value of the weight above which the relationship is considered in the computation.
-| consecutiveIds                | boolean       | `false`                   | yes       | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
+| Name                       | Type    | Default | Optional | Description
+| relationshipWeightProperty | STRING  | null    | yes      | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
+| defaultValue               | FLOAT   | null    | yes      | The default value of the relationship weight in case it is missing or invalid.
+| seedProperty               | STRING  | n/a     | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| threshold                  | FLOAT   | null    | yes      | The value of the weight above which the relationship is considered in the computation.
+| consecutiveIds             | BOOLEAN | false   | yes      | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
 [opts="header",cols="1m,1,6"]
 |===
-| Name          | Type | Description
-| nodeId        | int  | The Neo4j node ID.
-| componentId   | int  | The component ID.
+| Name        | Type    | Description
+| nodeId      | INTEGER | The Neo4j node ID.
+| componentId | INTEGER | The component ID.
 |===
 
 
