@@ -66,13 +66,7 @@ CALL gds.pageRank.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD nodes, createMillis, computeMillis, writeMillis, configuration
 ----
 
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type    | Default        | Optional | Description
-| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
-| configuration     | map     | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
-|===
+include::common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]

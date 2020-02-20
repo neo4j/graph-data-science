@@ -47,14 +47,7 @@ CALL gds.louvain.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
 YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 ----
 
-.Parameters
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name         | Type    | Default | Optional | Description
-| node label   | string  | null    | yes      | The node label to load from the graph. If `null`, load all nodes.
-| relationship | string  | null    | yes      | The relationship type to load from the graph. If `null`, load all relationships.
-| config       | map     | {}      | yes      | Additional configuration, see below.
-|===
+include::common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="1m,1,1,1,4"]

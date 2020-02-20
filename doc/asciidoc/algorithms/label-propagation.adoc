@@ -66,14 +66,7 @@ CALL gds.labelPropagation.write(graphNameOrConfig: STRING|MAP, configuration: MA
 YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
 
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type    | Default        | Optional | Description
-| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
-| configuration     | map     | n/a            | yes      | Additional configuration, optional if the first parameter was a map.
-|===
+include::common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]

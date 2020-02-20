@@ -1,0 +1,7 @@
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name              | Type          | Default   | Optional | Description
+| graphNameOrConfig | STRING or MAP | null      | no       | Either the name of a graph stored in the catalog or a graph projection config.
+| configuration     | MAP           | {}        | yes      | Configuration for algorithm-specifics and/or graph filtering.
+|===
