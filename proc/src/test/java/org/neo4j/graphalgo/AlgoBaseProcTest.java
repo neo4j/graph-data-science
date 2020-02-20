@@ -111,6 +111,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             proc.api = graphDb();
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
+            proc.resolver = proc.api.getDependencyResolver();
 
             func.accept(proc);
         }));
