@@ -62,8 +62,7 @@ public interface GraphCreateConfig extends BaseConfig {
 
     @Value.Default
     @Value.Parameter(false)
-    @Configuration.Key(ProcedureConstants.READ_CONCURRENCY_KEY)
-    default int concurrency() {
+    default int readConcurrency() {
         return AlgoBaseConfig.DEFAULT_CONCURRENCY;
     }
 

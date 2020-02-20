@@ -36,7 +36,7 @@ public interface ConcurrencyValidation {
             Validator.validate(wc.concurrency());
         } else if (this instanceof GraphCreateConfig) {
             GraphCreateConfig gcc = (GraphCreateConfig) this;
-            Validator.validate(gcc.concurrency());
+            Validator.validate(gcc.readConcurrency());
         }
     }
 

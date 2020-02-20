@@ -84,7 +84,7 @@ public class GraphSetup {
         if (!loadConcurrent()) {
             return 1;
         }
-        return createConfig.concurrency();
+        return createConfig.readConcurrency();
     }
 
     public @NotNull String relationshipType() {

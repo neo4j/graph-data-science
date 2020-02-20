@@ -203,7 +203,7 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     public MemoryTree estimate(GraphStoreFactory factory, GraphDimensions dimensions, GraphCreateConfig config) {
-        return factory.memoryEstimation(dimensions).estimate(dimensions, config.concurrency());
+        return factory.memoryEstimation(dimensions).estimate(dimensions, config.readConcurrency());
     }
 
     public static class GraphCreateResult {

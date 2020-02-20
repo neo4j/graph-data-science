@@ -117,7 +117,7 @@ final class GraphCreateConfigBuilders {
             .relationshipProjections(rp)
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
-            .concurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
+            .readConcurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
             .build()
             .withNormalizedPropertyMappings();
     }
@@ -175,7 +175,7 @@ final class GraphCreateConfigBuilders {
             .relationshipProjections(relationshipProjections)
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
-            .concurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
+            .readConcurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
             .build();
     }
 
