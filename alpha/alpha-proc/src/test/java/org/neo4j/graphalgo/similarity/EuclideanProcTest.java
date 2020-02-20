@@ -88,7 +88,7 @@ class EuclideanProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         registerProcedures(EuclideanProc.class);
         runQuery(buildDatabaseQuery());
     }
@@ -137,7 +137,7 @@ class EuclideanProcTest extends BaseProcTest {
     }
 
     @Test
-    void euclideanSingleMultiThreadComparision() {
+    void euclideanSingleMultiThreadComparison() {
         int size = 333;
         buildRandomDB(size);
         try(
@@ -160,7 +160,7 @@ class EuclideanProcTest extends BaseProcTest {
     }
 
     @Test
-    void euclideanSingleMultiThreadComparisionTopK() {
+    void euclideanSingleMultiThreadComparisonTopK() {
         int size = 333;
         buildRandomDB(size);
 

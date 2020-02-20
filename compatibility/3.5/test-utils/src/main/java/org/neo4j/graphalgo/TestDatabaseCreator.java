@@ -29,7 +29,9 @@ import java.io.File;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class TestDatabaseCreator {
+import static org.neo4j.graphalgo.config.ConcurrencyValidation.CORE_LIMITATION_SETTING;
+
+public final class TestDatabaseCreator {
 
     public static GraphDatabaseAPI createTestDatabase() {
         return (GraphDatabaseAPI) new TestGraphDatabaseFactory()
@@ -44,6 +46,10 @@ public class TestDatabaseCreator {
             .setConfig(GraphDatabaseSettings.load_csv_file_url_root, value)
             .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
             .newGraphDatabase();
+    }
+
+    public static GraphDatabaseAPI createUnlimitedConcurrencyTestDatabase() {
+        return createTestDatabase(builder -> builder.setConfig(CORE_LIMITATION_SETTING, "true"));
     }
 
     public static GraphDatabaseAPI createTestDatabase(LogProvider logProvider) {

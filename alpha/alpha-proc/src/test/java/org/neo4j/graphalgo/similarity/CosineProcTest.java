@@ -102,7 +102,7 @@ class CosineProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         registerProcedures(CosineProc.class);
         registerFunctions(IsFiniteFunc.class);
         runQuery(DB_CYPHER);
@@ -127,7 +127,7 @@ class CosineProcTest extends BaseProcTest {
 
 
     @Test
-    void cosineSingleMultiThreadComparision() {
+    void cosineSingleMultiThreadComparison() {
         int size = 333;
         buildRandomDB(size);
         try (
@@ -163,7 +163,7 @@ class CosineProcTest extends BaseProcTest {
     }
 
     @Test
-    void cosineSingleMultiThreadComparisionTopK() {
+    void cosineSingleMultiThreadComparisonTopK() {
         int size = 333;
         buildRandomDB(size);
         try (
@@ -277,7 +277,6 @@ class CosineProcTest extends BaseProcTest {
     @Test
     void topKCosineStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "topK", 1), "missingValue", 0);
-        System.out.println(runQuery(STATEMENT_STREAM, params, Result::resultAsString));
         runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert02(results.next());
@@ -297,7 +296,6 @@ class CosineProcTest extends BaseProcTest {
 
         );
         Map<String, Object> params = map("config", config, "missingValue", 0);
-        System.out.println(runQuery(STATEMENT_STREAM, params, Result::resultAsString));
         runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
             assert02(results.next());
@@ -349,8 +347,6 @@ class CosineProcTest extends BaseProcTest {
     @Test
     void topK3cosineStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3), "missingValue", 0);
-
-        System.out.println(runQuery(STATEMENT_STREAM, params, Result::resultAsString));
 
         runQueryWithResultConsumer(STATEMENT_STREAM, params,
             results -> {
@@ -426,7 +422,6 @@ class CosineProcTest extends BaseProcTest {
                                         "RETURN a.name AS node1, b.name as node2, similar.score AS score " +
                                         "ORDER BY id(a), id(b)";
 
-        System.out.println(runQuery(checkSimilaritiesQuery, Result::resultAsString));
         runQueryWithResultConsumer(checkSimilaritiesQuery, result -> {
             assertTrue(result.hasNext());
             Map<String, Object> row = result.next();

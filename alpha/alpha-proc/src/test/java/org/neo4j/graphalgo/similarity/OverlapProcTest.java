@@ -88,7 +88,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         registerProcedures(OverlapProc.class);
         runQuery(DB_CYPHER);
     }
@@ -113,7 +113,7 @@ class OverlapProcTest extends BaseProcTest {
     }
 
     @Test
-    void overlapSingleMultiThreadComparision() {
+    void overlapSingleMultiThreadComparison() {
         int size = 333;
         buildRandomDB(size);
         try(
@@ -136,7 +136,7 @@ class OverlapProcTest extends BaseProcTest {
     }
 
     @Test
-    void overlapSingleMultiThreadComparisionTopK() {
+    void overlapSingleMultiThreadComparisonTopK() {
         int size = 333;
         buildRandomDB(size);
         try(

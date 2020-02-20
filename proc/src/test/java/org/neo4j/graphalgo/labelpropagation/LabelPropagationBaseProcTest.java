@@ -75,7 +75,7 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
     @BeforeEach
     void setupGraph() throws Exception {
 
-        db = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
 
         @Language("Cypher") String cypher =
             "CREATE" +

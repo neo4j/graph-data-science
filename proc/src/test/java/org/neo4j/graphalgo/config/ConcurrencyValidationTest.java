@@ -33,7 +33,6 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.BaseProc.CORE_LIMITATION_SETTING;
 
 class ConcurrencyValidationTest extends BaseProcTest {
 
@@ -91,9 +90,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
 
     @Test
     void shouldAllowHighConcurrencyForEE() throws KernelException {
-        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createTestDatabase(builder -> {
-            builder.setConfig(CORE_LIMITATION_SETTING, "true");
-        });
+        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         initDb(unlimitedDb, "'myG2'");
 
         String query = "CALL gds.pageRank.write('myG2', {concurrency: 10, writeProperty: 'p'}) " +
@@ -108,9 +105,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
 
     @Test
     void shouldAllowHighReadConcurrencyForEE() throws KernelException {
-        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createTestDatabase(builder -> {
-            builder.setConfig(CORE_LIMITATION_SETTING, "true");
-        });
+        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         initDb(unlimitedDb, "'myG2'");
 
         String query = "CALL gds.graph.create('myG3', '*', '*', {readConcurrency: 12})";
@@ -121,9 +116,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
 
     @Test
     void shouldAllowHighWriteConcurrencyForEE() throws KernelException {
-        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createTestDatabase(builder -> {
-            builder.setConfig(CORE_LIMITATION_SETTING, "true");
-        });
+        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         initDb(unlimitedDb, "'myG2'");
 
         String query = "CALL gds.pageRank.write('myG2', {writeConcurrency: 9, writeProperty: 'p'}) " +

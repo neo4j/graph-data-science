@@ -89,7 +89,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @BeforeEach
     void beforeClass() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         registerProcedures(PearsonProc.class);
         registerFunctions(IsFiniteFunc.class);
         runQuery(buildDatabaseQuery());
@@ -146,7 +146,7 @@ class PearsonProcTest extends BaseProcTest {
     }
 
     @Test
-    void pearsonSingleMultiThreadComparision() {
+    void pearsonSingleMultiThreadComparison() {
         int size = 333;
         buildRandomDB(size);
         try (
@@ -182,7 +182,7 @@ class PearsonProcTest extends BaseProcTest {
     }
 
     @Test
-    void pearsonSingleMultiThreadComparisionTopK() {
+    void pearsonSingleMultiThreadComparisonTopK() {
         int size = 333;
         buildRandomDB(size);
         try (

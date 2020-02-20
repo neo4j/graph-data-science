@@ -29,23 +29,17 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.config.Configuration;
-import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.configuration.Settings;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
 import java.util.function.Supplier;
 
-public abstract class BaseProc {
+import static org.neo4j.graphalgo.config.ConcurrencyValidation.CORE_LIMITATION_SETTING;
 
-    public static final Setting<Boolean> CORE_LIMITATION_SETTING = Settings.setting(
-        "gds.unlimited.cores",
-        Settings.BOOLEAN,
-        "false"
-    );
+public abstract class BaseProc {
 
     protected static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
 
