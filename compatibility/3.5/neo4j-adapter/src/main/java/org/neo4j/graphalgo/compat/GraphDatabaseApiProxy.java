@@ -21,9 +21,12 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.impl.storageengine.impl.recordstorage.RecordStorageEngine;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+
+import java.util.Map;
 
 public final class GraphDatabaseApiProxy {
 
@@ -35,6 +38,10 @@ public final class GraphDatabaseApiProxy {
 
     public static NeoStores neoStores(GraphDatabaseService db) {
         return resolveDependency(db, RecordStorageEngine.class).testAccessNeoStores();
+    }
+
+    public static Result runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
+        return db.execute(query, params);
     }
 
     private GraphDatabaseApiProxy() {

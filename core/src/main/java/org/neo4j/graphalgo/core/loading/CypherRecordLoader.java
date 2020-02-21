@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphdb.Result;
@@ -165,7 +166,7 @@ abstract class CypherRecordLoader<R> {
                 batchSize == CypherLoadingUtils.NO_BATCHING
                         ? setup.parameters()
                         : CypherLoadingUtils.params(setup.parameters(), offset, batchSize);
-        Result result = api.execute(loadQuery, parameters);
+        Result result = GraphDatabaseApiProxy.runQuery(api, loadQuery, parameters);
         validateMandatoryColumns(Lists.newArrayList(result.columns().iterator()));
         return result;
     }
