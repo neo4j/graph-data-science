@@ -29,7 +29,7 @@ This section includes:
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.ml.ann.write(configuration: MAP)
+CALL gds.alpha.ml.ann.write(configuration: Map)
 YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
@@ -82,7 +82,7 @@ Otherwise a list of maps of the following structure: `{item: nodeId, weights: [d
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-CALL gds.alpha.ml.ann.stream(configuration: MAP)
+CALL gds.alpha.ml.ann.stream(configuration: Map)
 YIELD item1, item2, count1, count2, intersection, similarity
 
 ----

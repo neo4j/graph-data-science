@@ -1,0 +1,14 @@
+.General configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                   | Type        | Default                | Optional | Description
+| concurrency            | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency        | Integer     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency       | Integer     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result (applicable in WRITE mode).
+| nodeProjection         | Map or List | null                   | yes      | The node projection used for implicit graph loading or filtering nodes of an explicitly loaded graph.
+| relationshipProjection | Map or List | null                   | yes      | The relationship projection used for implicit graph loading or filtering relationship of an explicitly loaded graph.
+| nodeQuery              | String      | null                   | yes      | The Cypher query used to select the nodes for implicit graph loading via a Cypher projection.
+| relationshipQuery      | String      | null                   | yes      | The Cypher query used to select the relationships for implicit graph loading via a Cypher projection.
+| nodeProperties         | Map or List | null                   | yes      | The node properties to load during implicit graph loading.
+| relationshipProperties | Map or List | null                   | yes      | The relationship properties to load during implicit graph loading.
+|===

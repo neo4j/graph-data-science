@@ -38,8 +38,8 @@ The library contains a function to calculate closeness between two nodes.
 [source, cypher]
 ----
 RETURN gds.alpha.linkprediction.commonNeighbors(node1:Node, node2:Node, {
-    relationshipQuery:STRING,
-    direction:STRING
+    relationshipQuery:String,
+    direction:String
 })
 ----
 

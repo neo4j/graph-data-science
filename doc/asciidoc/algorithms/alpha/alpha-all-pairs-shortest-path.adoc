@@ -49,7 +49,7 @@ Plain cypher does not support filtering `Infinity` values, so `gds.util.isFinite
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.allShortestPaths.stream(configuration: MAP)
+CALL gds.alpha.allShortestPaths.stream(configuration: Map)
 YIELD startNodeId, targetNodeId, distance
 ----
 

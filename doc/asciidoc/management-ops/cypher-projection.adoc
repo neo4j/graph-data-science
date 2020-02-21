@@ -40,10 +40,10 @@ In addition, the optional `configuration` parameter allows us to further configu
 [source,cypher]
 ----
 CALL gds.graph.create.cypher(
-    graphName: STRING,
-    nodeQuery: STRING,
-    relationshipQuery: STRING,
-    configuration: MAP
+    graphName: String,
+    nodeQuery: String,
+    relationshipQuery: String,
+    configuration: Map
 )
 ----
 
@@ -61,9 +61,9 @@ CALL gds.graph.create.cypher(
 [opts="header",cols="1,1,1,4"]
 |===
 | Name                   | Type    | Default        | Description
-| nodeProperties         | MAP     | empty map      | Mappings between the RETURN items and node properties in the graph projection.
-| relationshipProperties | MAP     | empty map      | Mappings between the RETURN items and relationship properties in the graph projection.
-| concurrency            | INTEGER | 4              | The number of concurrent threads used for creating the graph.
+| nodeProperties         | Map     | empty map      | Mappings between the RETURN items and node properties in the graph projection.
+| relationshipProperties | Map     | empty map      | Mappings between the RETURN items and relationship properties in the graph projection.
+| concurrency            | Integer | 4              | The number of concurrent threads used for creating the graph.
 |===
 
 

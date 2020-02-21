@@ -56,7 +56,7 @@ The algorithm assumes that adding a relationship to a path can never make a path
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.kShortestPaths.write(configuration: MAP)
+CALL gds.alpha.kShortestPaths.write(configuration: Map)
 YIELD resultCount, loadMillis, evalMillis, writeMillis
 ----
 
@@ -87,7 +87,7 @@ YIELD resultCount, loadMillis, evalMillis, writeMillis
 .The following will run the algorithm and stream the results:
 [source, cypher]
 ----
-CALL gds.alpha.kShortestPaths.stream(configuration: MAP)
+CALL gds.alpha.kShortestPaths.stream(configuration: Map)
 YIELD index, sourceNodeId, targetNodeId, nodeIds, costs, path
 ----
 

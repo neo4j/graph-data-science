@@ -41,7 +41,7 @@ Eigenvector Centrality can be used in many of the https://arxiv.org/pdf/1407.510
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.eigenvector.write(configuration: MAP)
+CALL gds.alpha.eigenvector.write(configuration: Map)
 YIELD nodes, iterations, dampingFactor, writeProperty, write, loadMillis, computeMillis, writeMillis
 ----
 
@@ -75,7 +75,7 @@ YIELD nodes, iterations, dampingFactor, writeProperty, write, loadMillis, comput
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.eigenvector.stream(configuration: MAP)
+CALL gds.alpha.eigenvector.stream(configuration: Map)
 YIELD node, score
 ----
 

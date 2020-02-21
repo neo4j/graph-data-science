@@ -43,50 +43,42 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL gds.louvain.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.louvain.write(graphNameOrConfig: String|Map, configuration: Map)
 YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 ----
 
-.Parameters
+include::common-parameters.adoc[]
+
+include::common-configuration.adoc[]
+
+.Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name         | Type    | Default | Optional | Description
-| node label   | string  | null    | yes      | The node label to load from the graph. If `null`, load all nodes.
-| relationship | string  | null    | yes      | The relationship type to load from the graph. If `null`, load all relationships.
-| config       | map     | {}      | yes      | Additional configuration, see below.
-|===
-
-.Configuration
-[opts="header",cols="1m,1,1,1,4"]
-|===
-| Name                              | Type      | Default                   | Optional | Description
-| concurrency                       | int       | 4                         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency                   | int       | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency                  | int       | value of 'concurrency'    | yes      | The number of concurrent threads used for writing the result.
-| weightProperty                    | string    | `null`                    | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
-| seedProperty                      | string    | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| write                             | boolean   | `true`                    | yes      | Specifies if the result should be written back as a node property.
-| writeProperty                     | string    | `'partition'`             | yes      | The property name written back the ID of the partition particular node belongs to.
-| maxLevels                         | int       | 10                        | yes      | The maximum number of levels in which the graph is clustered and then condensed.
-| maxIterations                     | int       | 10                        | yes      | The maximum number of iterations that the modularity optimization will run for each level.
-| tolerance                         | float     | 0.0001                    | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
-| includeIntermediateCommunities    | boolean   | false                     | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
+| Name                           | Type    | Default     | Optional | Description
+| weightProperty                 | String  | null        | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
+| seedProperty                   | String  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| write                          | Boolean | true        | yes      | Specifies if the result should be written back as a node property.
+| writeProperty                  | String  | 'partition' | yes      | The property name written back the ID of the partition particular node belongs to.
+| maxLevels                      | Integer | 10          | yes      | The maximum number of levels in which the graph is clustered and then condensed.
+| maxIterations                  | Integer | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
+| tolerance                      | Float   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+| includeIntermediateCommunities | Boolean | false       | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
 |===
 
 .Results
-[opts="header",cols="1m,1,6"]
+[opts="header",cols="1,1,6"]
 |===
-| Name                              | Type          | Description
-| loadMillis                        | int           | Milliseconds for loading data.
-| computeMillis                     | int           | Milliseconds for running the algorithm.
-| writeMillis                       | int           | Milliseconds for writing result data back.
-| postProcessingMillis              | int           | Milliseconds for computing percentiles and community count.
-| nodes                             | int           | The number of nodes considered.
-| communityCount                    | int           | The number of communities found.
-| levels                            | int           | The number of supersteps the algorithm actually ran.
-| modularity                        | float         | The final modularity score.
-| modularities                      | list of int   | The final modularity scores for each level.
-| configuration                     | map           | The configuration used for running the algorithm.
+| Name                 | Type      | Description
+| loadMillis           | Integer   | Milliseconds for loading data.
+| computeMillis        | Integer   | Milliseconds for running the algorithm.
+| writeMillis          | Integer   | Milliseconds for writing result data back.
+| postProcessingMillis | Integer   | Milliseconds for computing percentiles and community count.
+| nodes                | Integer   | The number of nodes considered.
+| communityCount       | Integer   | The number of communities found.
+| levels               | Integer   | The number of supersteps the algorithm actually ran.
+| modularity           | Float     | The final modularity score.
+| modularities         | Integer[] | The final modularity scores for each level.
+| configuration        | Map       | The configuration used for running the algorithm.
 |===
 
 
@@ -94,41 +86,34 @@ YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.louvain.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.louvain.stream(graphNameOrConfig: String|Map, configuration: Map)
 YIELD nodeId, community, communities
 ----
 
-.Parameters
+include::common-parameters.adoc[]
+
+include::common-configuration.adoc[]
+
+.Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name         | Type    | Default | Optional | Description
-| node label   | string  | null    | yes      | The node label to load from the graph. If `null`, load all nodes.
-| relationship | string  | null    | yes      | The relationship type to load from the graph. If `null`, load all relationships.
-| config       | map     | {}      | yes      | Additional configuration, see below.
-|===
-
-.Configuration
-[opts="header",cols="1m,1,1,1,4"]
-|===
-| Name                              | Type      | Default                   | Optional | Description
-| concurrency                       | int       | 4                         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency                   | int       | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
-| relationshipWeightProperty        | string    | `null`                    | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
-| seedProperty                      | string    | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| levels                            | int       | 10                        | yes      | The maximum number of levels in which the graph is clustered and then condensed.
-| innerIterations                   | int       | 10                        | yes      | The maximum number of iterations that the modularity optimization will run for each level.
-| tolerance                         | float     | 0.0001                    | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
-| includeIntermediateCommunities    | boolean   | false                     | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
+| Name                           | Type     | Default | Optional | Description
+| relationshipWeightProperty     | String   | null    | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
+| seedProperty                   | String   | n/a     | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| levels                         | Integer  | 10      | yes      | The maximum number of levels in which the graph is clustered and then condensed.
+| innerIterations                | Integer  | 10      | yes      | The maximum number of iterations that the modularity optimization will run for each level.
+| tolerance                      | Float    | 0.0001  | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+| includeIntermediateCommunities | Boolean  | false   | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
 |===
 
 
 .Results
-[opts="header",cols="1m,1,6"]
+[opts="header",cols="1,1,6"]
 |===
-| Name          | Type         | Description
-| nodeId        | int          | Node ID.
-| community     | int          | The community ID of the final level.
-| communities   | list of int  | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
+| Name        | Type      | Description
+| nodeId      | Integer   | Node ID.
+| community   | Integer   | The community ID of the final level.
+| communities | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
 |===
 
 [[algorithms-louvain-examples]]

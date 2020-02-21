@@ -296,7 +296,7 @@ We could use this technique to compute the similarity of a subset of items to al
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.similarity.overlap.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.alpha.similarity.overlap.write(graphNameOrConfig: String|Map, configuration: Map)
 YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
@@ -355,7 +355,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-CALL gds.alpha.similarity.overlap.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.alpha.similarity.overlap.stream(graphNameOrConfig: String|Map, configuration: Map)
 YIELD item1, item2, count1, count2, similarity
 ----
 

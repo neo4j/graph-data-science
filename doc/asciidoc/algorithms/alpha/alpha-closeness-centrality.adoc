@@ -83,7 +83,7 @@ In practice, a variation on the original formula is used so that we don't run in
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.closeness.write(configuration: MAP)
+CALL gds.alpha.closeness.write(configuration: Map)
 YIELD nodes, loadMillis, computeMillis, writeMillis
 ----
 
@@ -112,7 +112,7 @@ YIELD nodes, loadMillis, computeMillis, writeMillis
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.closeness.stream(configuration: MAP)
+CALL gds.alpha.closeness.stream(configuration: Map)
 YIELD nodeId, centrality
 ----
 

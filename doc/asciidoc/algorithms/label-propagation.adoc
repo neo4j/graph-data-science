@@ -62,145 +62,118 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.labelPropagation.write(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.write(graphNameOrConfig: String|Map, configuration: Map})
 YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
 
+include::common-parameters.adoc[]
 
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type    | Default        | Optional | Description
-| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
-| configuration     | map     | n/a            | yes      | Additional configuration, optional if the first parameter was a map.
-|===
+include::common-configuration.adoc[]
 
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                          | Type    | Default                | Optional | Description
-| maxIterations                 | int     | 10                     | yes      | The maximum number of iterations to run.
-| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| nodeWeightProperty            | string  | null                   | yes      | The name of the node property that represents weight.
-| relationshipWeightProperty    | string  | null                   | yes      | The name of the relationship property that represents weight.
-| seedProperty                  | string  | n/a                    | yes      | Used to define initial set of labels (must be a number).
-| writeProperty                 | string  | n/a                    | yes      | The property name written back to the partition of the graph in which the node resides.
+| Name                       | Type    | Default | Optional | Description
+| maxIterations              | Integer | 10      | yes      | The maximum number of iterations to run.
+| nodeWeightProperty         | String  | null    | yes      | The name of the node property that represents weight.
+| relationshipWeightProperty | String  | null    | yes      | The name of the relationship property that represents weight.
+| seedProperty               | String  | n/a     | yes      | Used to define initial set of labels (must be a number).
+| writeProperty              | String  | n/a     | yes      | The node property to which the community ID is written to.
 |===
-
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name | Type | Description
-| createMillis | int | Milliseconds for loading data.
-| computeMillis | int | Milliseconds for running the algorithm.
-| writeMillis | int | Milliseconds for writing result data back.
-| postProcessingMillis    | int  | Milliseconds for computing percentiles and community count.
+| Name                  | Type    | Description
+| createMillis          | Integer | Milliseconds for loading data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| writeMillis           | Integer | Milliseconds for writing result data back.
+| postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
 
-| nodes | int | The number of nodes considered.
-| communityCount | int  | The number of communities found.
-| ranIterations | int | The number of iterations that were executed.
-| didConverge | boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
+| nodes                 | Integer | The number of nodes considered.
+| communityCount        | Integer | The number of communities found.
+| ranIterations         | Integer | The number of iterations that were executed.
+| didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
 
-| communityDistribution    | map  | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
-| configuration | map     | The configuration used for running the algorithm.
+| communityDistribution | Map     | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
+| configuration         | Map     | The configuration used for running the algorithm.
 
 |===
 
 .The following will run the algorithm and stream back results:
 [source,cypher]
 ----
-CALL gds.labelPropagation.stream(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.stream(graphNameOrConfig: String|Map, configuration: Map})
 YIELD nodeId, communityId
 ----
 
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type    | Default        | Optional | Description
-| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
-| configuration     | map     | n/a            | yes      | Additional configuration, optional if the first parameter was a map.
-|===
+include::common-parameters.adoc[]
 
-.Configuration
+include::common-configuration.adoc[]
+
+.Algorithm specific configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                          | Type   | Default                | Optional | Description
-| maxIterations                 | int    | 10                     | yes      | The maximum number of iterations to run.
-| concurrency                   | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency               | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| nodeWeightProperty            | string | null                   | yes      | The property name of node that contain weight. Must be numeric.
-| relationshipWeightProperty    | string | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
-| seedProperty                  | string | n/a                    | yes      | Used to define initial set of labels (must be a number).
+| Name                       | Type    | Default                | Optional | Description
+| maxIterations              | Integer | 10                     | yes      | The maximum number of iterations to run.
+| nodeWeightProperty         | String  | null                   | yes      | The property name of node that contain weight. Must be numeric.
+| relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
+| seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
 |===
 
 .Results
 [opts="header"]
 |===
-| Name          | Type | Description
-| nodeId        | int  | Node ID
-| communityId   | int  | Community ID
+| Name        | Type    | Description
+| nodeId      | Integer | Node ID
+| communityId | Integer | Community ID
 |===
 
 .The following will run the algorithm and returns the result in form of statistical and measurement values:
 [source, cypher]
 ----
-CALL gds.labelPropagation.stats(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.stats(graphNameOrConfig: String|Map, configuration: Map})
 YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
 
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type    | Default        | Optional   | Description
-| graphNameOrConfig | string  | null           | no         | Either then name of a loaded graph or directly the config.
-| configuration     | map     | n/a            | yes        | Additional configuration, optional if the first parameter was a map.
-|===
+include::common-parameters.adoc[]
 
 The configuration is the same as for the `write` mode.
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                          | Type      | Description
-| createMillis                  | int       | Milliseconds for loading data.
-| computeMillis                 | int       | Milliseconds for running the algorithm.
+| Name                  | Type    | Description
+| createMillis          | Integer | Milliseconds for loading data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
 // TODO: stats mode should not have writeMillis in the result
-| writeMillis                   | int       | Milliseconds for writing result data back.
-| postProcessingMillis          | int       | Milliseconds for computing percentiles and community count.
-| nodes                         | int       | The number of nodes considered.
-| communityCount                | int       | The number of communities found.
-| ranIterations                 | int       | The number of iterations that were executed.
-| didConverge                   | boolean   | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
-| communityDistribution         | map       | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
-| configuration                 | map       | The configuration used for running the algorithm.
+| writeMillis           | Integer | Milliseconds for writing result data back.
+| postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
+| nodes                 | Integer | The number of nodes considered.
+| communityCount        | Integer | The number of communities found.
+| ranIterations         | Integer | The number of iterations that were executed.
+| didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
+| communityDistribution | Map     | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
+| configuration         | Map     | The configuration used for running the algorithm.
 |===
 
 .The following will estimate the memory requirements for running the algorithm:
 [source,cypher]
 ----
-CALL gds.labelPropagation.<mode>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.<mode>.estimate(graphNameOrConfig: String|Map, configuration: Map})
 YIELD nodes, relationships, bytesMin, bytesMax, requiredMemory, mapView
 ----
 
 The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
 
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type    | Default        | Optional | Description
-| graphNameOrConfig | string  | null           | no      | Either then name of a loaded graph or directly the config.
-| configuration     | map     | n/a            | yes      | Additional configuration, optional if the first parameter was a map.
-|===
+include::common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type   | Default                | Optional | Description
-| nodeCount         | int       | 0                 | yes       | The number of nodes in a fictive graph.
-| relationshipCount | int       | 0                 | yes       | The number of relationships in a fictive graph.
+| Name              | Type    | Default  | Optional | Description
+| nodeCount         | Integer | 0        | yes      | The number of nodes in a fictive graph.
+| relationshipCount | Integer | 0        | yes      | The number of relationships in a fictive graph.
 |===
 
 Setting the `nodeCount` and `relationshipCount` parameters allows a memory estimation without loading the graph.
@@ -210,14 +183,14 @@ Additionally algorithm specific parameters can also be provided as config.
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type    | Description
-| requiredMemory         | String     | The required memory in human readable format.
-| bytesMin    | int     | The minimum number of bytes required.
-| bytesMax | int   | The maximum number of bytes required.
-| mapView | Map  | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
+| Name           | Type    | Description
+| requiredMemory | String  | The required memory in human readable format.
+| bytesMin       | Integer | The minimum number of bytes required.
+| bytesMax       | Integer | The maximum number of bytes required.
+| mapView        | Map     | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
 
-| nodes         | int     | The number of nodes in the graph.
-| relationships         | int     | The number of relationships in the graph.
+| nodes          | Integer | The number of nodes in the graph.
+| relationships  | Integer | The number of relationships in the graph.
 |===
 
 [[algorithms-label-propagation-examples]]
@@ -345,7 +318,7 @@ ORDER BY Community, Name
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name    | Community
+| Name      | Community
 | "Bridget" | 2
 | "Michael" | 2
 | "Alice"   | 4
