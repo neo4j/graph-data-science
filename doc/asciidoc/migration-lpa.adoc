@@ -5,39 +5,39 @@
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| direction         | -
-| iterations        | maxIterations
-| concurrency       | concurrency
-| readConcurrency   | readConcurrency footnote:lpa-read[Only when using anonymous graph]
-| writeConcurrency  | writeConcurrency footnote:lpa-write[Only for `write` mode]
-| weightProperty footnote:weight-prop[Can be configured separately by using `nodeWeightProperty` and `relationshipWeightProperty`]    | -
-| -                 | nodeWeightProperty
-| -                 | relationshipWeightProperty
-| seedProperty      | seedProperty
-| partitionProperty | -
-| writeProperty     | writeProperty footnote:lpa-write[]
-| write             | -
-| graph             | -
+| `direction`         | -
+| `iterations`        | `maxIterations`
+| `concurrency`       | `concurrency`
+| `readConcurrency`   | `readConcurrency` footnote:lpa-read[Only when using anonymous graph]
+| `writeConcurrency`  | `writeConcurrency` footnote:lpa-write[Only for `write` mode]
+| `weightProperty` footnote:weight-prop[Can be configured separately by using `nodeWeightProperty` and `relationshipWeightProperty`]    | -
+| -                 | `nodeWeightProperty`
+| -                 | `relationshipWeightProperty`
+| `seedProperty`      | `seedProperty`
+| `partitionProperty` | -
+| `writeProperty`     | `writeProperty` footnote:lpa-write[]
+| `write`             | -
+| `graph`             | -
 |===
 
 .Changes in YIELD fields
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-|loadMillis             |createMillis
-|computeMillis          |computeMillis
-|writeMillis            |writeMillis
-|postProcessingMillis   |postProcessingMillis
-|nodes                  |nodePropertiesWritten
-|communityCount         |communityCount
-|didConverge            |didConverge
-|-                      |ranIterations
-|write                  |-
-|-                      |communityDistribution
-|-                      |configuration footnote:lpa-gds-config[The configuration used to run the algorithm]
-|writeProperty footnote:lpa-write-config[Inlined into `configuration`]         |-
-|weightProperty footnote:lpa-weight-config[Inlined into `configuration` as `nodeWeightProperty` and/or `relationshipWeightProperty`]        |-
-| min, max, mean, p50, p75, p90, p95, p99, p999 footnote:lpa-distribution[Inlined into `communityDistribution`] | -
+|`loadMillis`             |`createMillis`
+|`computeMillis`          |`computeMillis`
+|`writeMillis`            |`writeMillis`
+|`postProcessingMillis`   |`postProcessingMillis`
+|`nodes`                  |`nodePropertiesWritten`
+|`communityCount`         |`communityCount`
+|`didConverge`            |`didConverge`
+|-                      |`ranIterations`
+|`write`                  |-
+|-                      |`communityDistribution`
+|-                      |`configuration` footnote:lpa-gds-config[The configuration used to run the algorithm]
+|`writeProperty` footnote:lpa-write-config[Inlined into `configuration`]         |-
+|`weightProperty` footnote:lpa-weight-config[Inlined into `configuration` as `nodeWeightProperty` and/or `relationshipWeightProperty`]        |-
+| `min, max, mean, p50, p75, p90, p95, p99, p999` footnote:lpa-distribution[Inlined into `communityDistribution`] | -
 |===
 
 .Label Propagation Stream Mode

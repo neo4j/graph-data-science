@@ -5,37 +5,37 @@
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| direction                         | -
-| iterations                        | maxIterations
-| tolerance                         | tolerance
-| dampingFactor                     | dampingFactor
-| concurrency                       | concurrency
-| readConcurrency                   | readConcurrency footnote:page-rank-read[Only when using anonymous graph]
-| writeConcurrency                  | writeConcurrency footnote:page-rank-write[Only for `write` mode]
-| writeProperty                     | writeProperty footnote:page-rank-write[]
-| weightProperty                    | relationshipWeightProperty
-| write                             | -
-| graph                             | -
+| `direction`                         | -
+| `iterations`                        | `maxIterations`
+| `tolerance`                         | `tolerance`
+| `dampingFactor`                     | `dampingFactor`
+| `concurrency`                       | `concurrency`
+| `readConcurrency`                   | `readConcurrency` footnote:page-rank-read[Only when using anonymous graph]
+| `writeConcurrency`                  | `writeConcurrency` footnote:page-rank-write[Only for `write` mode]
+| `writeProperty`                     | `writeProperty` footnote:page-rank-write[]
+| `weightProperty`                    | `relationshipWeightProperty`
+| `write`                             | -
+| `graph`                             | -
 |===
 
 .Changes in YIELD fields
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| loadMillis             | createMillis
-| computeMillis          | computeMillis
-| writeMillis            | writeMillis
-| postProcessingMillis   | postProcessingMillis
-| node                   | nodeId footnote:page-rank-stream-yield[Only for `stream` mode]
-| score                  | score footnote:page-rank-stream-yield[]
-| nodes                  | nodePropertiesWritten footnote:page-rank-write-yield[Only for `write` mode]
-| iterations             | ranIterations
-| write                  | -
-| -                      | configuration footnote:page-rank-gds-config[The configuration used to run the algorithm]
-| writeProperty footnote:page-rank-config[Inlined into `configuration`]         | -
-| dampingFactor footnote:page-rank-config[]         | -
-| tolerance footnote:page-rank-config[]         | -
-| weightProperty footnote:page-rank-weight-config[Inlined into `configuration` as `relationshipWeightProperty`]         | -
+| `loadMillis`             | `createMillis`
+| `computeMillis`          | `computeMillis`
+| `writeMillis`            | `writeMillis`
+| `postProcessingMillis`   | `postProcessingMillis`
+| `node`                   | `nodeId` footnote:page-rank-stream-yield[Only for `stream` mode]
+| `score`                  | `score` footnote:page-rank-stream-yield[]
+| `nodes`                  | `nodePropertiesWritten` footnote:page-rank-write-yield[Only for `write` mode]
+| `iterations`             | `ranIterations`
+| `write`                  | -
+| -                      | `configuration` footnote:page-rank-gds-config[The configuration used to run the algorithm]
+| `writeProperty` footnote:page-rank-config[Inlined into `configuration`]         | -
+| `dampingFactor` footnote:page-rank-config[]         | -
+| `tolerance` footnote:page-rank-config[]         | -
+| `weightProperty` footnote:page-rank-weight-config[Inlined into `configuration` as `relationshipWeightProperty`]         | -
 |===
 
 .PageRank Stream Mode

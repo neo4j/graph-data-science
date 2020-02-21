@@ -14,11 +14,11 @@ This section describes changes between Graph Algorithms library  and Graph Data 
 [opts=header,cols="1,1,1"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0 Named Graph |Graph Data Science v1.0 Anonymous Graph
-| -                 | graphName         | graphConfiguration
+| -                 | `graphName`         | `graphConfiguration`
 | node label footnote:common-node-inlined[Moved to `graphConfiguration` as `nodeProjection`]        | -                 | -
 | relationship type footnote:common-rel-inlined[Moved to `graphConfiguration` as `relationshipProjection`] | -                 | -
-| direction         | -                 | -
-| config            | configuration     | -
+| `direction`         | -                 | -
+| `config`            | `configuration`     | -
 |===
 
 .Changes in configuration parameter map
@@ -27,12 +27,12 @@ This section describes changes between Graph Algorithms library  and Graph Data 
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 |`write: true` | Replaced by dedicated `write` mode
 |`graph: 'cypher'\|'huge'` | Removed. Always using `huge` graph footnote:graph-param[Graph creation with cypher queries has dedicate `gds.graph.create.cypher` procedure. There are parameters `nodeQuery` and `relationshipQuery` for anonymous graphs]
-|direction | Replaced by `projection` parameter of `relationshipProjection`
+|`direction` | Replaced by `projection` parameter of `relationshipProjection`
 |`direction: 'OUTGOING'` | `orientation: 'NATURAL'`
 |`direction: 'INCOMING'` | `orientation: 'REVERSE'`
 |`direction: 'BOTH'` | Removed footnote:direction-both[This behaviour can be achieved by creating two relationship projections - one with `orientation: 'NATURAL'` and one with `orientation: 'REVERSE'`. See <<direction-both-example, this example>>]
 |`undirected: true` | Replaced by `orientation: 'UNDIRECTED'` parameter of `relationshipProjection`
-|duplicateRelationships | Replaced by `aggregation` parameter of `relationshipProjection`
+|`duplicateRelationships` | Replaced by `aggregation` parameter of `relationshipProjection`
 |`duplicateRelationships: 'SKIP'` | `aggregation: 'SINGLE'`
 |`iterations` | `maxIterations`
 |===

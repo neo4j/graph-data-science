@@ -5,44 +5,44 @@
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| direction                         | -
-| levels                            | maxLevels
-| concurrency                       | concurrency
-| readConcurrency                   | readConcurrency footnote:louvain-read[Only when using anonymous graph]
-| writeConcurrency                  | writeConcurrency footnote:louvain-write[Only for `write` mode]
-| weightProperty                    | relationshipWeightProperty
-| seedProperty                      | seedProperty
-| innerIterations                   | maxIterations
-| includeIntermediateCommunities    | includeIntermediateCommunities
-| tolerance                         | tolerance
-| writeProperty                     | writeProperty footnote:louvain-write[]
-| write                             | -
-| graph                             | -
+| `direction`                         | -
+| `levels`                            | `maxLevels`
+| `concurrency`                       | `concurrency`
+| `readConcurrency`                   | `readConcurrency` footnote:louvain-read[Only when using anonymous graph]
+| `writeConcurrency`                  | `writeConcurrency` footnote:louvain-write[Only for `write` mode]
+| `weightProperty`                    | `relationshipWeightProperty`
+| `seedProperty`                      | `seedProperty`
+| `innerIterations`                   | `maxIterations`
+| `includeIntermediateCommunities`    | `includeIntermediateCommunities`
+| `tolerance`                         | `tolerance`
+| `writeProperty`                     | `writeProperty` footnote:louvain-write[]
+| `write`                             | -
+| `graph`                             | -
 |===
 
 .Changes in YIELD fields
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| loadMillis             | createMillis
-| computeMillis          | computeMillis
-| writeMillis            | writeMillis
-| postProcessingMillis   | postProcessingMillis
-| nodes                  | nodePropertiesWritten
-| communityCount         | communityCount
-| levels                 | ranLevels
-| nodeId                 | nodeId footnote:louvain-yield-stream[Only for `stream` mode]
-| community              | communityId footnote:louvain-yield-stream[]
-| communities            | communityIds footnote:louvain-yield-stream[]
-| modularity             | modularity footnote:louvain-yield-write[Only for `write` mode]
-| modularities           | modularities footnote:louvain-yield-write[]
-| write                  | -
-| -                      | communityDistribution
-| -                      | configuration footnote:louvain-gds-config[The configuration used to run the algorithm]
-| includeIntermediateCommunities footnote:louvain-config[Inlined into `configuration`]         | -
-| writeProperty footnote:louvain-config[]         | -
-| weightProperty footnote:louvain-weight-config[Inlined into `configuration` as `relationshipWeightProperty`]        | -
-| min, max, mean, p50, p75, p90, p95, p99, p999 footnote:louvain-distribution[Inlined into `communityDistribution`] | -
+| `loadMillis`             | `createMillis`
+| `computeMillis`          | `computeMillis`
+| `writeMillis`            | `writeMillis`
+| `postProcessingMillis`   | `postProcessingMillis`
+| `nodes`                  | `nodePropertiesWritten`
+| `communityCount`         | `communityCount`
+| `levels`                 | `ranLevels`
+| `nodeId`                 | `nodeId` footnote:louvain-yield-stream[Only for `stream` mode]
+| `community`              | `communityId` footnote:louvain-yield-stream[]
+| `communities`            | `communityIds` footnote:louvain-yield-stream[]
+| `modularity`             | `modularity` footnote:louvain-yield-write[Only for `write` mode]
+| `modularities`           | `modularities` footnote:louvain-yield-write[]
+| `write`                  | -
+| -                      | `communityDistribution`
+| -                      | `configuration` footnote:louvain-gds-config[The configuration used to run the algorithm]
+| `includeIntermediateCommunities` footnote:louvain-config[Inlined into `configuration`]         | -
+| `writeProperty` footnote:louvain-config[]         | -
+| `weightProperty` footnote:louvain-weight-config[Inlined into `configuration` as `relationshipWeightProperty`]        | -
+| `min, max, mean, p50, p75, p90, p95, p99, p999` footnote:louvain-distribution[Inlined into `communityDistribution`] | -
 |===
 
 .Louvain Stream Mode

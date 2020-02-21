@@ -5,41 +5,41 @@
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| direction                         | -
-| concurrency                       | concurrency
-| readConcurrency                   | readConcurrency footnote:node-sim-read[Only when using anonymous graph]
-| writeConcurrency                  | writeConcurrency footnote:node-sim-write[Only for `write` mode]
-| topK                              | topK
-| bottomK                           | bottomK
-| topN                              | topN
-| bottomN                           | bottomN
-| similarityCutoff                  | similarityCutoff
-| degreeCutoff                      | degreeCutoff
-| writeProperty                     | writeProperty footnote:node-sim-write[]
-| writeRelationshipType             | writeRelationshipType footnote:node-sim-write[]
-| write                             | -
-| graph                             | -
+| `direction`                         | -
+| `concurrency`                       | `concurrency`
+| `readConcurrency`                   | `readConcurrency` footnote:node-sim-read[Only when using anonymous graph]
+| `writeConcurrency`                  | `writeConcurrency` footnote:node-sim-write[Only for `write` mode]
+| `topK`                              | `topK`
+| `bottomK`                           | `bottomK`
+| `topN`                              | `topN`
+| `bottomN`                           | `bottomN`
+| `similarityCutoff`                  | `similarityCutoff`
+| `degreeCutoff`                      | `degreeCutoff`
+| `writeProperty`                     | `writeProperty` footnote:node-sim-write[]
+| `writeRelationshipType`             | `writeRelationshipType` footnote:node-sim-write[]
+| `write`                             | -
+| `graph`                             | -
 |===
 
 .Changes in YIELD fields
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| loadMillis             | createMillis
-| computeMillis          | computeMillis
-| writeMillis            | writeMillis
-| postProcessingMillis   | postProcessingMillis
-| node1                  | node1 footnote:node-sim-stream-yield[Only for `stream` mode]
-| node2                  | node2 footnote:node-sim-stream-yield[]
-| similarity             | similarity footnote:node-sim-stream-yield[]
-| nodesCompared          | nodesCompared footnote:node-sim-write-yield[Only for `write` mode]
-| relationships          | relationshipsWritten footnote:node-sim-write-yield[]
-| write                  | -
-| -                      | similarityDistribution
-| -                      | configuration footnote:node-sim-gds-config[The configuration used to run the algorithm]
-| writeProperty footnote:node-sim-config[Inlined into `configuration`]         | -
-| writeRelationshipType footnote:node-sim-config[]         | -
-| min, max, mean, p50, p75, p90, p95, p99, p999 footnote:node-sim-distribution[Inlined into `similarityDistribution`] | -
+| `loadMillis`             | `createMillis`
+| `computeMillis`          | `computeMillis`
+| `writeMillis`            | `writeMillis`
+| `postProcessingMillis`   | `postProcessingMillis`
+| `node1`                  | `node1` footnote:node-sim-stream-yield[Only for `stream` mode]
+| `node2`                  | `node2` footnote:node-sim-stream-yield[]
+| `similarity`             | `similarity` footnote:node-sim-stream-yield[]
+| `nodesCompared`          | `nodesCompared` footnote:node-sim-write-yield[Only for `write` mode]
+| `relationships`          | `relationshipsWritten` footnote:node-sim-write-yield[]
+| `write`                  | -
+| -                      | `similarityDistribution`
+| -                      | `configuration` footnote:node-sim-gds-config[The configuration used to run the algorithm]
+| `writeProperty` footnote:node-sim-config[Inlined into `configuration`]         | -
+| `writeRelationshipType` footnote:node-sim-config[]         | -
+| `min, max, mean, p50, p75, p90, p95, p99, p999` footnote:node-sim-distribution[Inlined into `similarityDistribution`] | -
 |===
 
 .Node Similarity Stream Mode

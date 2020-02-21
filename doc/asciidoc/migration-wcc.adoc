@@ -5,38 +5,38 @@
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| direction                         | -
-| concurrency                       | concurrency
-| readConcurrency                   | readConcurrency footnote:wcc-read[Only when using anonymous graph]
-| writeConcurrency                  | writeConcurrency footnote:wcc-write[Only for `write` mode]
-| writeProperty                     | writeProperty footnote:wcc-write[]
-| weightProperty                    | relationshipWeightProperty
-| defaultValue                      | defaultValue
-| seedProperty                      | seedProperty
-| threshold                         | threshold
-| consecutiveIds                    | consecutiveIds
-| write                             | -
-| graph                             | -
+| `direction`                         | -
+| `concurrency`                       | `concurrency`
+| `readConcurrency`                   | `readConcurrency` footnote:wcc-read[Only when using anonymous graph]
+| `writeConcurrency`                  | `writeConcurrency` footnote:wcc-write[Only for `write` mode]
+| `writeProperty`                     | `writeProperty` footnote:wcc-write[]
+| `weightProperty`                    | `relationshipWeightProperty`
+| `defaultValue`                      | `defaultValue`
+| `seedProperty`                      | `seedProperty`
+| `threshold`                         | `threshold`
+| `consecutiveIds`                    | `consecutiveIds`
+| `write`                             | -
+| `graph`                             | -
 |===
 
 .Changes in YIELD fields
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| loadMillis             | createMillis
-| computeMillis          | computeMillis
-| writeMillis            | writeMillis
-| postProcessingMillis   | postProcessingMillis
-| nodeId                 | nodeId footnote:wcc-stream-yield[Only for `stream` mode]
-| setId                  | componentId footnote:wcc-stream-yield[]
-| nodes                  | nodePropertiesWritten footnote:wcc-write-yield[Only for `write` mode]
-| -                      | relationshipPropertiesWritten footnote:wcc-write-yield[]
-| write                  | -
-| -                      | componentDistribution
-| -                      | configuration footnote:wcc-gds-config[The configuration used to run the algorithm]
-| writeProperty footnote:wcc-config[Inlined into `configuration`]         | -
-| weightProperty footnote:wcc-weight-config[Inlined into `configuration` as `relationshipWeightProperty`]         | -
-| min, max, mean, p50, p75, p90, p95, p99, p999 footnote:wcc-distribution[Inlined into `componentDistribution`] | -
+| `loadMillis`             | `createMillis`
+| `computeMillis`          | `computeMillis`
+| `writeMillis`            | `writeMillis`
+| `postProcessingMillis`   | `postProcessingMillis`
+| `nodeId`                 | `nodeId` footnote:wcc-stream-yield[Only for `stream` mode]
+| `setId`                  | `componentId` footnote:wcc-stream-yield[]
+| `nodes`                  | `nodePropertiesWritten` footnote:wcc-write-yield[Only for `write` mode]
+| -                      | `relationshipPropertiesWritten` footnote:wcc-write-yield[]
+| `write`                  | -
+| -                      | `componentDistribution`
+| -                      | `configuration` footnote:wcc-gds-config[The configuration used to run the algorithm]
+| `writeProperty` footnote:wcc-config[Inlined into `configuration`]         | -
+| `weightProperty` footnote:wcc-weight-config[Inlined into `configuration` as `relationshipWeightProperty`]         | -
+| `min, max, mean, p50, p75, p90, p95, p99, p999` footnote:wcc-distribution[Inlined into `componentDistribution`] | -
 |===
 
 .Weakly Connected Components Stream Mode

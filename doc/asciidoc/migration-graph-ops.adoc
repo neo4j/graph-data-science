@@ -16,13 +16,13 @@
 [opts=header,cols="1,1"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| requiredMemory    | requiredMemory
-| bytesMin          | bytesMin
-| bytesMax          | bytesMax
-| mapView           | mapView
-| -                 | treeView
-| -                 | nodeCount
-| -                 | relationshipCount
+| `requiredMemory`    | `requiredMemory`
+| `bytesMin`          | `bytesMin`
+| `bytesMax`          | `bytesMax`
+| `mapView`           | `mapView`
+| -                 | `treeView`
+| -                 | `nodeCount`
+| -                 | `relationshipCount`
 |===
 
 The most significant change in memory estimation is that in GDS to estimate an operation you suffix it with `.estimate` while in GA the operation had to be passed as parameter to `algo.memrec`.
@@ -81,21 +81,21 @@ CALL gds.graph.create.cypher.estimate(
 [opts=header, cols="1,1"]
 |====
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| name                      | graphName
-| graph                     | -
-| direction                 | -
-| undirected                | -
-| sorted                    | -
-| nodes                     | nodesCount
-| loadMillis                | createMillis
-| alreadyLoaded             | -
-| nodeProperties            | -
-| relationshipProperties    | relationshipCount
-| relationshipWeight        | -
-| loadNodes                 | -
-| loadRelationships         | -
-| -                         | nodeProjection
-| -                         | relationshipProjection
+| `name`                      | `graphName`
+| `graph`                     | -
+| `direction`                 | -
+| `undirected`                | -
+| `sorted`                    | -
+| `nodes`                     | `nodesCount`
+| `loadMillis`                | `createMillis`
+| `alreadyLoaded`             | -
+| `nodeProperties`            | -
+| `relationshipProperties`    | `relationshipCount`
+| `relationshipWeight`        | -
+| `loadNodes`                 | -
+| `loadRelationships`         | -
+| -                         | `nodeProjection`
+| -                         | `relationshipProjection`
 |====
 .Loading a named graph in the default way:
 [opts=header,cols="1a,1a"]
@@ -290,16 +290,16 @@ CALL gds.graph.create.cypher(
 [opts=header,cols="1,1"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| name              | graphName
-| nodes             | nodeCount
-| relationships     | relationshipCount
-| type              | -
-| direction         | -
-| -                 | nodeProjection
-| -                 | relationshipProjection
-| -                 | nodeQuery footnote:list-cypher[Field will be `null` unless a Cypher projection was used]
-| -                 | relationshipQuery footnote:list-cypher[]
-| -                 | degreeDistribution footnote:[Graph statistics map, i.e. min, max, percentiles, etc.]
+| `name`              | `graphName`
+| `nodes`             | `nodeCount`
+| `relationships`     | `relationshipCount`
+| `type`              | -
+| `direction`         | -
+| -                 | `nodeProjection`
+| -                 | `relationshipProjection`
+| -                 | `nodeQuery` footnote:list-cypher[Field will be `null` unless a Cypher projection was used]
+| -                 | `relationshipQuery` footnote:list-cypher[]
+| -                 | `degreeDistribution` footnote:[Graph statistics map, i.e. min, max, percentiles, etc.]
 |===
 
 .Listing named graphs:
@@ -325,19 +325,19 @@ CALL gds.graph.list()
 [opts=header,cols="1,1"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| name              | graphName
-| nodes             | nodeCount
-| relationships     | relationshipCount
-| exists            | -
-| removed           | -
-| type              | -
-| direction         | -
-| -                 | nodeProjection
-| -                 | relationshipProjection
-| -                 | nodeQuery footnote:info-cypher[Field will be `null` unless a Cypher projection was used]
-| -                 | relationshipQuery footnote:info-cypher[]
-| -                 | degreeDistribution footnote:[Graph statistics map, i.e. min, max, percentiles, etc.]
-| min, max, mean, p50, p75, p90, p95, p99, p999 footnote:info-degreeDistribution[Inlined into `degreeDistribution`]              | -
+| `name`              | `graphName`
+| `nodes`             | `nodeCount`
+| `relationships`     | `relationshipCount`
+| `exists`            | -
+| `removed`           | -
+| `type`              | -
+| `direction`         | -
+| -                 | `nodeProjection`
+| -                 | `relationshipProjection`
+| -                 | `nodeQuery` footnote:info-cypher[Field will be `null` unless a Cypher projection was used]
+| -                 | `relationshipQuery` footnote:info-cypher[]
+| -                 | `degreeDistribution` footnote:[Graph statistics map, i.e. min, max, percentiles, etc.]
+| `min, max, mean, p50, p75, p90, p95, p99, p999` footnote:info-degreeDistribution[Inlined into `degreeDistribution`]              | -
 |===
 
 .Viewing information about a specific named graph:
@@ -389,18 +389,18 @@ RETURN dd.min, dd.max, dd.mean, dd.p50
 [opts=header,cols="1,1"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-| name              | graphName
-| nodes             | nodeCount
-| relationships     | relationshipCount
-| exists            | -
-| removed           | -
-| type              | -
-| direction         | -
-| -                 | nodeProjection
-| -                 | relationshipProjection
-| -                 | nodeQuery footnote:remove-cypher[Field will be `null` unless a Cypher projection was used]
-| -                 | relationshipQuery footnote:remove-cypher[]
-| -                 | degreeDistribution
+| `name`              | `graphName`
+| `nodes`             | `nodeCount`
+| `relationships`     | `relationshipCount`
+| `exists`            | -
+| `removed`           | -
+| `type`              | -
+| `direction`         | -
+| -                 | `nodeProjection`
+| -                 | `relationshipProjection`
+| -                 | `nodeQuery` footnote:remove-cypher[Field will be `null` unless a Cypher projection was used]
+| -                 | `relationshipQuery` footnote:remove-cypher[]
+| -                 | `degreeDistribution`
 |===
 
 .Removing a named graph:
