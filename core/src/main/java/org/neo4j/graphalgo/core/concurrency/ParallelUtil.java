@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.concurrency;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.ExceptionUtil;
+import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
 import org.neo4j.graphalgo.core.utils.BiLongConsumer;
 import org.neo4j.graphalgo.core.utils.BitUtil;
@@ -60,7 +60,7 @@ import java.util.stream.BaseStream;
 import java.util.stream.LongStream;
 
 import static java.lang.String.format;
-import static org.neo4j.graphalgo.compat.ExceptionUtil.throwIfUnchecked;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 
 public final class ParallelUtil {
 
