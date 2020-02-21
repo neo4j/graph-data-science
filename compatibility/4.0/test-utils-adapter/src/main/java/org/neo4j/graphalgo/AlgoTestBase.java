@@ -19,29 +19,27 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.annotation.IdenticalCompat;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.Consumer;
 
+@IdenticalCompat
 public class AlgoTestBase {
 
-    public GraphDatabaseAPI db;
+    public TestDatabaseApi db;
 
     protected void runQuery(String query) {
-        runQuery(db, query);
+        db.runQuery(query);
     }
 
     protected void runQuery(String query, Consumer<Result.ResultRow> check) {
-        runQuery(db, query, check);
+        db.runQuery(query, check);
     }
 
-    protected void runQuery(GraphDatabaseAPI passedInDb, String query) {
-        QueryRunner.runInTransaction(passedInDb, () -> passedInDb
-            .execute(query).close());
-    }
-
-    protected void runQuery(GraphDatabaseAPI passedInDatabase, String query, Consumer<Result.ResultRow> check) {
-        QueryRunner.runQueryWithRowConsumer(passedInDatabase, query, check);
+    protected void runQuery(GraphDatabaseService passedInDb, String query) {
+        QueryRunner.runInTransaction(passedInDb, () ->
+            QueryRunner.runQuery(passedInDb, query));
     }
 }

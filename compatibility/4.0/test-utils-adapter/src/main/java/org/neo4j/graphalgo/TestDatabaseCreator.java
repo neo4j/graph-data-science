@@ -20,39 +20,63 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.SettingImpl;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.LogProvider;
-import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import java.io.File;
-import java.nio.file.Paths;
-import java.util.Collections;
+import java.nio.file.Path;
 import java.util.UUID;
 
-public class TestDatabaseCreator {
+import static java.util.Collections.singletonList;
 
-    public static GraphDatabaseAPI createTestDatabase() {
-        return (GraphDatabaseAPI) new TestGraphDatabaseFactory()
-            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
-            .setConfig(GraphDatabaseSettings.procedure_unrestricted, Collections.singletonList("gds.*"))
-            .newGraphDatabase();
+public final class TestDatabaseCreator {
+
+    public static TestDatabaseApi createTestDatabase() {
+        return new TestDatabaseApi(createDefault());
     }
 
     public static GraphDatabaseAPI createTestDatabaseWithCustomLoadCsvRoot(String value) {
-        return (GraphDatabaseAPI) new TestGraphDatabaseFactory()
-            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
-            .setConfig(GraphDatabaseSettings.load_csv_file_url_root, Paths.get(value))
-            .setConfig(GraphDatabaseSettings.procedure_unrestricted, Collections.singletonList("gds.*"))
-            .newGraphDatabase();
+        return new TestDatabaseApi(createWithCustomLoadCsvRoot(value));
     }
 
     public static GraphDatabaseAPI createTestDatabase(LogProvider logProvider) {
-        return (GraphDatabaseAPI) new TestGraphDatabaseFactory(logProvider)
-            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
-            .newGraphDatabase();
+        return new TestDatabaseApi(createWithLogger(logProvider));
     }
 
     public static GraphDatabaseAPI createTestDatabase(File storeDir) {
-        return (GraphDatabaseAPI) new TestGraphDatabaseFactory().newEmbeddedDatabase(storeDir);
+        return new TestDatabaseApi(createEmbedded(storeDir));
     }
+
+    private static DatabaseManagementService createDefault() {
+        return builder()
+            .setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*"))
+            .build();
+    }
+
+    private static DatabaseManagementService createWithCustomLoadCsvRoot(String value) {
+        return builder()
+            .setConfig(
+                GraphDatabaseSettings.load_csv_file_url_root,
+                (((SettingImpl<Path>) GraphDatabaseSettings.load_csv_file_url_root)).parse(value))
+            .setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*"))
+            .build();
+    }
+
+    private static DatabaseManagementService createWithLogger(LogProvider logProvider) {
+        return builder().setUserLogProvider(logProvider).build();
+    }
+
+    private static DatabaseManagementService createEmbedded(File storeDir) {
+        return new TestDatabaseManagementServiceBuilder(storeDir).build();
+    }
+
+    private static TestDatabaseManagementServiceBuilder builder() {
+        File testDir = new File(UUID.randomUUID().toString());
+        return new TestDatabaseManagementServiceBuilder(testDir).impermanent();
+    }
+
+    private TestDatabaseCreator() {}
 }

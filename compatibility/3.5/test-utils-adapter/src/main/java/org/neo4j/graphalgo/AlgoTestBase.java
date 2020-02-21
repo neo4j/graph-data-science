@@ -19,11 +19,13 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 
 import java.util.function.Consumer;
 
+@IdenticalCompat
 public class AlgoTestBase {
 
     public TestDatabaseApi db;
@@ -38,6 +40,6 @@ public class AlgoTestBase {
 
     protected void runQuery(GraphDatabaseService passedInDb, String query) {
         QueryRunner.runInTransaction(passedInDb, () ->
-            passedInDb.execute(query).close());
+            QueryRunner.runQuery(passedInDb, query));
     }
 }
