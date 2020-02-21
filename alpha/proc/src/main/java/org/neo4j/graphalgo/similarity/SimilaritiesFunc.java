@@ -40,8 +40,7 @@ import static org.neo4j.graphalgo.impl.similarity.SimilarityVectorAggregator.WEI
 public class SimilaritiesFunc {
 
     @UserFunction("gds.alpha.similarity.jaccard")
-    @Description("gds.alpha.similarity.jaccard([vector1], [vector2]) " +
-            "given two collection vectors, calculate jaccard similarity")
+    @Description("Given two collection vectors, calculate Jaccard similarity")
     public double jaccardSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
         if (vector1 == null || vector2 == null) return 0;
 
@@ -54,8 +53,7 @@ public class SimilaritiesFunc {
     }
 
     @UserFunction("gds.alpha.similarity.cosine")
-    @Description("gds.alpha.similarity.cosine([vector1], [vector2]) " +
-            "given two collection vectors, calculate cosine similarity")
+    @Description("Given two collection vectors, calculate cosine similarity")
     public double cosineSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
         if (vector1.size() != vector2.size() || vector1.size() == 0) {
             throw new RuntimeException("Vectors must be non-empty and of the same size");
@@ -74,14 +72,13 @@ public class SimilaritiesFunc {
     }
 
     @UserAggregationFunction("gds.alpha.similarity.asVector")
-    @Description("gds.alpha.similarity.asVector - builds a vector of maps containing items and weights")
+    @Description("Builds a vector of maps containing items and weights")
     public SimilarityVectorAggregator asVector() {
         return new SimilarityVectorAggregator();
     }
 
     @UserFunction("gds.alpha.similarity.pearson")
-    @Description("gds.alpha.similarity.pearson([vector1], [vector2]) " +
-            "given two collection vectors, calculate pearson similarity")
+    @Description("Given two collection vectors, calculate pearson similarity")
     public double pearsonSimilarity(@Name("vector1") Object rawVector1, @Name("vector2") Object rawVector2, @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
         String listType = config.getOrDefault("vectorType", "numbers").toString();
 
@@ -138,8 +135,7 @@ public class SimilaritiesFunc {
     }
 
     @UserFunction("gds.alpha.similarity.euclideanDistance")
-    @Description("gds.alpha.similarity.euclideanDistance([vector1], [vector2]) " +
-            "given two collection vectors, calculate the euclidean distance (square root of the sum of the squared differences)")
+    @Description("Given two collection vectors, calculate the euclidean distance (square root of the sum of the squared differences)")
     public double euclideanDistance(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
         if (vector1.size() != vector2.size() || vector1.size() == 0) {
             throw new RuntimeException("Vectors must be non-empty and of the same size");
@@ -158,15 +154,13 @@ public class SimilaritiesFunc {
     }
 
     @UserFunction("gds.alpha.similarity.euclidean")
-    @Description("gds.alpha.similarity.euclidean([vector1], [vector2]) " +
-            "given two collection vectors, calculate similarity based on euclidean distance")
+    @Description("Given two collection vectors, calculate similarity based on euclidean distance")
     public double euclideanSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
         return 1.0D / (1 + euclideanDistance(vector1, vector2));
     }
 
     @UserFunction("gds.alpha.similarity.overlap")
-    @Description("gds.alpha.similarity.overlap([vector1], [vector2]) " +
-            "given two collection vectors, calculate overlap similarity")
+    @Description("Given two collection vectors, calculate overlap similarity")
     public double overlapSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
         if (vector1 == null || vector2 == null) return 0;
 

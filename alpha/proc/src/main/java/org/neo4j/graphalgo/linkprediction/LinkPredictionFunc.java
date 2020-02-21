@@ -34,8 +34,7 @@ import java.util.Set;
 public class LinkPredictionFunc extends BaseProc {
 
     @UserFunction("gds.alpha.linkprediction.adamicAdar")
-    @Description("gds.alpha.linkprediction.adamicAdar(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
-            "given two nodes, calculate Adamic Adar similarity")
+    @Description("Given two nodes, calculate Adamic Adar similarity")
     public double adamicAdarSimilarity(@Name("node1") Node node1, @Name("node2") Node node2,
                                        @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
         // https://en.wikipedia.org/wiki/Adamic/Adar_index
@@ -53,8 +52,7 @@ public class LinkPredictionFunc extends BaseProc {
     }
 
     @UserFunction("gds.alpha.linkprediction.resourceAllocation")
-    @Description("gds.alpha.linkprediction.resourceAllocation(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
-            "given two nodes, calculate Resource Allocation similarity")
+    @Description("Given two nodes, calculate Resource Allocation similarity")
     public double resourceAllocationSimilarity(@Name("node1") Node node1, @Name("node2") Node node2,
                                                @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
         // https://arxiv.org/pdf/0901.0553.pdf
@@ -72,8 +70,7 @@ public class LinkPredictionFunc extends BaseProc {
     }
 
     @UserFunction("gds.alpha.linkprediction.commonNeighbors")
-    @Description("gds.alpha.linkprediction.commonNeighbors(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
-            "given two nodes, returns the number of common neighbors")
+    @Description("Given two nodes, returns the number of common neighbors")
     public double commonNeighbors(@Name("node1") Node node1, @Name("node2") Node node2,
                                                @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
         if (node1 == null || node2 == null) {
@@ -89,8 +86,7 @@ public class LinkPredictionFunc extends BaseProc {
     }
 
     @UserFunction("gds.alpha.linkprediction.preferentialAttachment")
-    @Description("gds.alpha.linkprediction.preferentialAttachment(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
-            "given two nodes, calculate Preferential Attachment")
+    @Description("Given two nodes, calculate Preferential Attachment")
     public double preferentialAttachment(@Name("node1") Node node1, @Name("node2") Node node2,
                                        @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
         if (node1 == null || node2 == null) {
@@ -105,8 +101,7 @@ public class LinkPredictionFunc extends BaseProc {
     }
 
     @UserFunction("gds.alpha.linkprediction.totalNeighbors")
-    @Description("gds.alpha.linkprediction.totalNeighbors(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
-            "given two nodes, calculate Total Neighbors")
+    @Description("Given two nodes, calculate Total Neighbors")
     public double totalNeighbors(@Name("node1") Node node1, @Name("node2") Node node2,
                                          @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
@@ -118,8 +113,7 @@ public class LinkPredictionFunc extends BaseProc {
     }
 
     @UserFunction("gds.alpha.linkprediction.sameCommunity")
-    @Description("gds.alpha.linkprediction.sameCommunity(node1:Node, node2:Node, communityProperty: String) " +
-            "given two nodes, indicates if they have the same community")
+    @Description("Given two nodes, indicates if they have the same community")
     public double sameCommunity(@Name("node1") Node node1, @Name("node2") Node node2,
                                  @Name(value = "communityProperty", defaultValue = "community") String communityProperty) {
         if(!node1.hasProperty(communityProperty) || !node2.hasProperty(communityProperty)) {
