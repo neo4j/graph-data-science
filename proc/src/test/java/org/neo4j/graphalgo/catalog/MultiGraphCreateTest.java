@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -34,16 +35,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
 class MultiGraphCreateTest {
 
     @Test
     void testMultipleGraphLoadsAfterDbChange() throws Exception {
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
-        db
-            .getDependencyResolver()
-            .resolveDependency(Procedures.class, ONLY)
+        GraphDatabaseApiProxy
+            .resolveDependency(db, Procedures.class)
             .registerProcedure(GraphCreateProc.class);
 
         String create1 = GdsCypher.call()

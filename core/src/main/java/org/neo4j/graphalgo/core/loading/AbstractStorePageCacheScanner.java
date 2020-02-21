@@ -19,24 +19,22 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.PaddedAtomicLong;
-import org.neo4j.graphdb.DependencyResolver;
-import org.neo4j.graphdb.DependencyResolver.SelectionStrategy;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
-import org.neo4j.kernel.impl.storageengine.impl.recordstorage.RecordStorageEngine;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.RecordStore;
-import org.neo4j.kernel.impl.store.UnderlyingStorageException;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.store.record.RecordLoad;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.kernel.impl.store.RecordPageLocationCalculator.offsetForId;
@@ -65,7 +63,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         /**
          * Create a new scanner for the selected access type
          */
-        AbstractStorePageCacheScanner<Record> newScanner(GraphDatabaseAPI api, int prefetchSize);
+        AbstractStorePageCacheScanner<Record> newScanner(GraphDatabaseService api, int prefetchSize);
     }
 
     public interface RecordConsumer<Record extends AbstractBaseRecord> {
@@ -124,7 +122,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             try {
                 return bulkNext0(consumer);
             } catch (IOException e) {
-                throw new UnderlyingStorageException(e);
+                throw new UncheckedIOException(e);
             }
         }
 
@@ -246,14 +244,11 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
     private final PagedFile pagedFile;
 
     AbstractStorePageCacheScanner(
-            int prefetchSize,
-            GraphDatabaseAPI api,
-            Access<Record> access) {
+        int prefetchSize,
+        GraphDatabaseService api,
+        Access<Record> access) {
 
-        DependencyResolver resolver = api.getDependencyResolver();
-        NeoStores neoStores = resolver
-                .resolveDependency(RecordStorageEngine.class, SelectionStrategy.ONLY)
-                .testAccessNeoStores();
+        NeoStores neoStores = GraphDatabaseApiProxy.neoStores(api);
 
         RecordStore<Record> store = access.store(neoStores);
         int recordSize = store.getRecordSize();
@@ -261,7 +256,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         int pageSize = recordsPerPage * recordSize;
 
         PagedFile pagedFile = null;
-        PageCache pageCache = resolver.resolveDependency(PageCache.class, SelectionStrategy.ONLY);
+        PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(api, PageCache.class);
         String storeFileName = access.storeFileName();
         try {
             for (PagedFile pf : pageCache.listExistingMappings()) {
@@ -305,7 +300,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
                     pageCursor = store.openPageCursorForReading(recordId);
                 }
             } catch (IOException e) {
-                throw new UnderlyingStorageException(e);
+                throw new UncheckedIOException(e);
             }
             Record record = store.newRecord();
             cursor = new Cursor(pageCursor, record);

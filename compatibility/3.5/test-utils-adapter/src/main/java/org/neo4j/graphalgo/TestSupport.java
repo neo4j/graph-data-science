@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
@@ -55,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.Orientation.REVERSE;
-import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
 public final class TestSupport {
 
@@ -125,6 +125,7 @@ public final class TestSupport {
         return () -> fn.get().map(Arguments::of);
     }
 
+    @SafeVarargs
     public static Stream<Arguments> crossArguments(Supplier<Stream<Arguments>> firstFn, Supplier<Stream<Arguments>>... otherFns) {
         return Arrays
                 .stream(otherFns)
@@ -177,15 +178,14 @@ public final class TestSupport {
      */
     public static void assertAlgorithmTermination(
         GraphDatabaseAPI db,
-        Algorithm algorithm,
-        Consumer<Algorithm> algoConsumer,
+        Algorithm<?, ?> algorithm,
+        Consumer<Algorithm<?, ?>> algoConsumer,
         long sleepMillis
     ) {
         assert sleepMillis >= 100 && sleepMillis <= 10_000;
 
-        KernelTransaction kernelTx = db
-            .getDependencyResolver()
-            .resolveDependency(KernelTransactions.class, ONLY)
+        KernelTransaction kernelTx = GraphDatabaseApiProxy
+            .resolveDependency(db, KernelTransactions.class)
             .newInstance(
                 KernelTransaction.Type.explicit,
                 LoginContext.AUTH_DISABLED,

@@ -26,6 +26,8 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -33,6 +35,7 @@ import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -57,7 +60,6 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECT
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRegex;
-import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
 public class BaseProcTest {
 
@@ -69,14 +71,14 @@ public class BaseProcTest {
     }
 
     protected void registerFunctions(Class<?>... functionClasses) throws Exception {
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
+        Procedures procedures = resolveDependency(Procedures.class);
         for (Class<?> clazz : functionClasses) {
             procedures.registerFunction(clazz);
         }
     }
 
     protected void registerAggregationFunctions(Class<?>... functionClasses) throws Exception {
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
+        Procedures procedures = resolveDependency(Procedures.class);
         for (Class<?> clazz : functionClasses) {
             procedures.registerAggregationFunction(clazz);
         }
@@ -86,15 +88,15 @@ public class BaseProcTest {
         registerProcedures(db, procedureClasses);
     }
 
-    protected void registerProcedures(GraphDatabaseAPI db, Class<?>... procedureClasses) throws Exception {
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
+    protected void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws Exception {
+        Procedures procedures = GraphDatabaseApiProxy.resolveDependency(db, Procedures.class);
         for (Class<?> clazz : procedureClasses) {
             procedures.registerProcedure(clazz);
         }
     }
 
     <T> T resolveDependency(Class<T> dependency) {
-        return db.getDependencyResolver().resolveDependency(dependency, ONLY);
+        return GraphDatabaseApiProxy.resolveDependency(db, dependency);
     }
 
     protected String getUsername() {
@@ -214,7 +216,7 @@ public class BaseProcTest {
 
     protected void assertMapEquals(Map<Long, Double> expected, Map<Long, Double> actual) {
         assertEquals(expected.size(), actual.size(), "number of elements");
-        HashSet<Long> expectedKeys = new HashSet<>(expected.keySet());
+        Collection<Long> expectedKeys = new HashSet<>(expected.keySet());
         for (Map.Entry<Long, Double> entry : actual.entrySet()) {
             assertTrue(
                 expectedKeys.remove(entry.getKey()),

@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -37,15 +38,14 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
-import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,7 +98,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
             "nodeWeightProperty", "foo",
             "nodeProjection", MapUtil.map(
                 "A", MapUtil.map(
-                    "properties", Arrays.asList("a")
+                    "properties", singletonList("a")
                 )
             ),
             "relationshipProjection", "*"
@@ -109,7 +109,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
         IllegalArgumentException e = assertThrows(
             IllegalArgumentException.class,
             () -> {
-                applyOnProcedure(proc -> proc.compute(config, Collections.emptyMap()));
+                applyOnProcedure(proc -> proc.compute(config, emptyMap()));
             }
         );
         assertThat(e.getMessage(), containsString("foo"));
@@ -142,7 +142,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
             Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
             assertMissingProperty(error, () -> proc.compute(
                 implicitConfigMap,
-                Collections.emptyMap()
+                emptyMap()
             ));
         });
     }
@@ -172,9 +172,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
 
         try {
-            Procedures procedures = db
-                .getDependencyResolver()
-                .resolveDependency(Procedures.class, DependencyResolver.SelectionStrategy.ONLY);
+            Procedures procedures = GraphDatabaseApiProxy.resolveDependency(db, Procedures.class);
             procedures.registerProcedure(GraphCreateProc.class);
         } catch (Exception ke) {
             ke.printStackTrace();

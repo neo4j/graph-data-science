@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -120,9 +121,8 @@ public final class QueryRunner {
 
     public static <R> R runWithKernelTransaction(GraphDatabaseAPI db, Function<KernelTransaction, R> function) {
         try (Transaction tx = db.beginTx()) {
-            KernelTransaction kernelTransaction = db
-                .getDependencyResolver()
-                .resolveDependency(ThreadToStatementContextBridge.class)
+            KernelTransaction kernelTransaction = GraphDatabaseApiProxy
+                .resolveDependency(db, ThreadToStatementContextBridge.class)
                 .getKernelTransactionBoundToThisThread(true);
             R t = function.apply(kernelTransaction);
             tx.success();

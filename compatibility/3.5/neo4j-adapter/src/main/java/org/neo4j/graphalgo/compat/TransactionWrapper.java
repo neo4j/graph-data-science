@@ -44,7 +44,7 @@ public final class TransactionWrapper {
 
     public TransactionWrapper(
             final GraphDatabaseAPI db) {
-        this(db, db.getDependencyResolver().resolveDependency(ThreadToStatementContextBridge.class));
+        this(db, GraphDatabaseApiProxy.resolveDependency(db, ThreadToStatementContextBridge.class));
     }
 
     public TransactionWrapper(

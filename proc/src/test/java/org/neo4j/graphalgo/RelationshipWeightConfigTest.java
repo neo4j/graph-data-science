@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -37,16 +38,15 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -117,7 +117,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
     @Test
     default void testRelationshipWeightPropertyValidation() {
         runQuery(graphDb(), "CREATE ()-[:A {a: 1}]->()");
-        List<String> relationshipProperties = Arrays.asList("a");
+        List<String> relationshipProperties = singletonList("a");
         Map<String, Object> tempConfig = map(
             "relationshipWeightProperty", "foo",
             NODE_PROJECTION_KEY, PROJECT_ALL.name,
@@ -180,7 +180,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             loadExplicitGraphWithRelationshipWeights(graphName, MULTI_RELATIONSHIPS_PROJECTION);
 
             CypherMapWrapper weightConfig = CypherMapWrapper.create(map(
-                "relationshipTypes", Collections.singletonList("*"),
+                "relationshipTypes", singletonList("*"),
                 "relationshipWeightProperty", propertyName
                 )
             );
@@ -217,7 +217,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
             CypherMapWrapper configWithoutRelWeight = CypherMapWrapper.create(map(
                 "relationshipTypes",
-                Collections.singletonList(relType)
+                singletonList(relType)
             ));
             CypherMapWrapper algoConfig = createMinimalConfig(configWithoutRelWeight);
 
@@ -277,7 +277,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             loadExplicitGraphWithRelationshipWeights(graphName, MULTI_RELATIONSHIPS_PROJECTION);
 
             CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map(
-                "relationshipTypes", Collections.singletonList("TYPE1"),
+                "relationshipTypes", singletonList("TYPE1"),
                 "relationshipWeightProperty", "weight1"
             ));
             CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
@@ -294,9 +294,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
 
         try {
-            Procedures procedures = db
-                .getDependencyResolver()
-                .resolveDependency(Procedures.class, DependencyResolver.SelectionStrategy.ONLY);
+            Procedures procedures = GraphDatabaseApiProxy.resolveDependency(db, Procedures.class);
             procedures.registerProcedure(GraphCreateProc.class);
         } catch (Exception ke) {
             ke.printStackTrace();

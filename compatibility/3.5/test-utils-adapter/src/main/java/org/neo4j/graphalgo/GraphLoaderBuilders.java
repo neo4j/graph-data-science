@@ -23,6 +23,7 @@ package org.neo4j.graphalgo;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
@@ -156,9 +157,8 @@ final class GraphLoaderBuilders {
         GraphCreateConfig graphCreateConfig
     ) {
         try (Transaction tx = api.beginTx()) {
-            KernelTransaction kernelTransaction = api
-                .getDependencyResolver()
-                .resolveDependency(ThreadToStatementContextBridge.class)
+            KernelTransaction kernelTransaction = GraphDatabaseApiProxy
+                .resolveDependency(api, ThreadToStatementContextBridge.class)
                 .getKernelTransactionBoundToThisThread(true);
             tx.success();
             return ImmutableGraphLoader.of(
