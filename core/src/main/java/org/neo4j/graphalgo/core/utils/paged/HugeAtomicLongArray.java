@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.compat.UnsafeProxy;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.unsafe.impl.internal.dragons.UnsafeUtil;
 
 import java.util.Arrays;
 import java.util.function.IntToLongFunction;
@@ -197,9 +197,9 @@ public abstract class HugeAtomicLongArray {
     private static final int shift;
 
     static {
-        UnsafeUtil.assertHasUnsafe();
-        base = UnsafeUtil.arrayBaseOffset(long[].class);
-        int scale = UnsafeUtil.arrayIndexScale(long[].class);
+        UnsafeProxy.assertHasUnsafe();
+        base = UnsafeProxy.arrayBaseOffset(long[].class);
+        int scale = UnsafeProxy.arrayIndexScale(long[].class);
         if (!BitUtil.isPowerOfTwo(scale)) {
             throw new Error("data type scale not a power of two");
         }
@@ -238,7 +238,7 @@ public abstract class HugeAtomicLongArray {
         @Override
         public void set(long index, long value) {
             assert index < size;
-            UnsafeUtil.putLongVolatile(page, memoryOffset((int) index), value);
+            UnsafeProxy.putLongVolatile(page, memoryOffset((int) index), value);
         }
 
         @Override
@@ -278,11 +278,11 @@ public abstract class HugeAtomicLongArray {
         }
 
         private long getRaw(long offset) {
-            return UnsafeUtil.getLongVolatile(page, offset);
+            return UnsafeProxy.getLongVolatile(page, offset);
         }
 
         private boolean compareAndSetRaw(long offset, long expect, long update) {
-            return UnsafeUtil.compareAndSwapLong(page, offset, expect, update);
+            return UnsafeProxy.compareAndSwapLong(page, offset, expect, update);
         }
     }
 
@@ -344,7 +344,7 @@ public abstract class HugeAtomicLongArray {
             assert index < size && index >= 0;
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
-            UnsafeUtil.putLongVolatile(pages[pageIndex], memoryOffset(indexInPage), value);
+            UnsafeProxy.putLongVolatile(pages[pageIndex], memoryOffset(indexInPage), value);
         }
 
         @Override
@@ -389,11 +389,11 @@ public abstract class HugeAtomicLongArray {
         }
 
         private long getRaw(long[] page, long offset) {
-            return UnsafeUtil.getLongVolatile(page, offset);
+            return UnsafeProxy.getLongVolatile(page, offset);
         }
 
         private boolean compareAndSetRaw(long[] page, long offset, long expect, long update) {
-            return UnsafeUtil.compareAndSwapLong(page, offset, expect, update);
+            return UnsafeProxy.compareAndSwapLong(page, offset, expect, update);
         }
     }
 }
