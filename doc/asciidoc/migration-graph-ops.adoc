@@ -15,7 +15,7 @@
 .Changes in the YIELD fields
 [opts=header,cols="1,1"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 | requiredMemory    | requiredMemory
 | bytesMin          | bytesMin
 | bytesMax          | bytesMax
@@ -30,7 +30,7 @@ The most significant change in memory estimation is that in GDS to estimate an o
 .Estimating the memory requirements of loading a named graph:
 [opts=header,cols="1a,1a"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Native Projections
 |
 [source, cypher]
@@ -80,7 +80,7 @@ CALL gds.graph.create.cypher.estimate(
 .Changes in the YIELD fields
 [opts=header, cols="1,1"]
 |====
-| GA                        | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 | name                      | graphName
 | graph                     | -
 | direction                 | -
@@ -100,7 +100,7 @@ CALL gds.graph.create.cypher.estimate(
 .Loading a named graph in the default way:
 [opts=header,cols="1a,1a"]
 |===
-| GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Minimal Native Projection
 |
 [source, cypher]
@@ -218,7 +218,7 @@ CALL gds.graph.create(
 .Loading a named graph using Cypher queries:
 [opts=header,cols="1a,1a"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Basic Cypher queries, defining source and target
 |
 [source, cypher]
@@ -289,7 +289,7 @@ CALL gds.graph.create.cypher(
 .Changes in the YIELD fields
 [opts=header,cols="1,1"]
 |===
-|GA                 | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 | name              | graphName
 | nodes             | nodeCount
 | relationships     | relationshipCount
@@ -305,7 +305,7 @@ CALL gds.graph.create.cypher(
 .Listing named graphs:
 [opts=header,cols="1a,1a"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 |
 [source, cypher]
 ----
@@ -324,7 +324,7 @@ CALL gds.graph.list()
 .Changes in the YIELD fields
 [opts=header,cols="1,1"]
 |===
-|GA                 | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 | name              | graphName
 | nodes             | nodeCount
 | relationships     | relationshipCount
@@ -343,7 +343,7 @@ CALL gds.graph.list()
 .Viewing information about a specific named graph:
 [opts=header,cols="1a,1a"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| View information for a Named graph
 |
 [source, cypher]
@@ -388,7 +388,7 @@ RETURN dd.min, dd.max, dd.mean, dd.p50
 .Changes in the YIELD fields
 [opts=header,cols="1,1"]
 |===
-|GA                 | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 | name              | graphName
 | nodes             | nodeCount
 | relationships     | relationshipCount
@@ -406,7 +406,7 @@ RETURN dd.min, dd.max, dd.mean, dd.p50
 .Removing a named graph:
 [opts=header,cols="1a,1a"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 |
 [source, cypher]
 ----

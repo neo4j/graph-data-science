@@ -4,7 +4,7 @@
 .Changes in Configuration
 [opts=header,cols="1a,1a"]
 |===
-|GA                                 | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 | direction                         | -
 | iterations                        | maxIterations
 | tolerance                         | tolerance
@@ -21,7 +21,7 @@
 .Changes in YIELD fields
 [opts=header,cols="1a,1a"]
 |===
-| GA                     | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 | loadMillis             | createMillis
 | computeMillis          | computeMillis
 | writeMillis            | writeMillis
@@ -41,7 +41,7 @@
 .PageRank Stream Mode
 [opts=header,cols="1a,1a"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 2+|Minimalistic stream over named graph
 |
 [source, cypher]
@@ -151,7 +151,7 @@ CALL gds.pageRank.stream({
 .PageRank Write Mode
 [opts=header,cols="1a,1a"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Running `write` mode on named graph
 |
 [source, cypher]

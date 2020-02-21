@@ -4,7 +4,7 @@
 .Changes in Configuration
 [opts=header,cols="1a,1a"]
 |===
-|GA                                 | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 | direction                         | -
 | levels                            | maxLevels
 | concurrency                       | concurrency
@@ -23,7 +23,7 @@
 .Changes in YIELD fields
 [opts=header,cols="1a,1a"]
 |===
-| GA                     | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 | loadMillis             | createMillis
 | computeMillis          | computeMillis
 | writeMillis            | writeMillis
@@ -48,7 +48,7 @@
 .Louvain Stream Mode
 [opts=header,cols="1a,1a"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 2+|Minimalistic streaming over named graph
 |
 [source, cypher]
@@ -181,7 +181,7 @@ CALL gds.louvain.stream({
 .Louvain Write Mode
 [opts=header,cols="1a,1a"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Minimalistic write with just `writeProperty`
 |
 [source, cypher]

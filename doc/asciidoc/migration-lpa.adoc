@@ -4,7 +4,7 @@
 .Changes in Configuration
 [opts=header,cols="1a,1a"]
 |===
-|GA                 | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 | direction         | -
 | iterations        | maxIterations
 | concurrency       | concurrency
@@ -23,7 +23,7 @@
 .Changes in YIELD fields
 [opts=header,cols="1a,1a"]
 |===
-|GA                     | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 |loadMillis             |createMillis
 |computeMillis          |computeMillis
 |writeMillis            |writeMillis
@@ -43,7 +43,7 @@
 .Label Propagation Stream Mode
 [opts=header,cols="1a,1a"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Streaming over a named graph
 |
 [source, cypher]
@@ -153,7 +153,7 @@ CALL gds.labelPropagation.stream({
 .Label Propagation Write Mode
 [opts=header,cols="1a,1a"]
 |===
-|GA | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 2+|Minimalistic write
 |
 [source, cypher]

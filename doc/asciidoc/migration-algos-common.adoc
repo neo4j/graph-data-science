@@ -6,14 +6,14 @@ This section describes changes between Graph Algorithms library  and Graph Data 
 .Namespace
 [opts=header,cols="1,1"]
 |===
-|GA     | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 |algo.* | gds.*
 |===
 
 .Changes in Parameters
 [opts=header,cols="1,1,1"]
 |===
-|GA                 | GDS Named Graph   | GDS Anonymous Graph
+|Graph Algorithms v3.5 |Graph Data Science v1.0 Named Graph |Graph Data Science v1.0 Anonymous Graph
 | -                 | graphName         | graphConfiguration
 | node label footnote:common-node-inlined[Moved to `graphConfiguration` as `nodeProjection`]        | -                 | -
 | relationship type footnote:common-rel-inlined[Moved to `graphConfiguration` as `relationshipProjection`] | -                 | -
@@ -24,7 +24,7 @@ This section describes changes between Graph Algorithms library  and Graph Data 
 .Changes in configuration parameter map
 [opts=header,cols="1,1"]
 |===
-|GA     | GDS
+|Graph Algorithms v3.5 |Graph Data Science v1.0
 |`write: true` | Replaced by dedicated `write` mode
 |`graph: 'cypher'\|'huge'` | Removed. Always using `huge` graph footnote:graph-param[Graph creation with cypher queries has dedicate `gds.graph.create.cypher` procedure. There are parameters `nodeQuery` and `relationshipQuery` for anonymous graphs]
 |direction | Replaced by `projection` parameter of `relationshipProjection`
