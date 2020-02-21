@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.compat.InternalReadOps;
+import org.neo4j.graphalgo.compat.StatementConstantsProxy;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
@@ -138,8 +139,8 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
     private static long maxRelCountForLabelAndType(Read dataRead, int labelId, int id) {
         return Math.max(
-                dataRead.countsForRelationshipWithoutTxState(labelId, id, Read.ANY_LABEL),
-                dataRead.countsForRelationshipWithoutTxState(Read.ANY_LABEL, id, labelId)
+                dataRead.countsForRelationshipWithoutTxState(labelId, id, StatementConstantsProxy.ANY_LABEL),
+                dataRead.countsForRelationshipWithoutTxState(StatementConstantsProxy.ANY_LABEL, id, labelId)
         );
     }
 
@@ -151,7 +152,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         }
 
         Stream<Integer> stream() {
-            return ids.isEmpty() ? Stream.of(Read.ANY_LABEL) : ids.stream();
+            return ids.isEmpty() ? Stream.of(StatementConstantsProxy.ANY_LABEL) : ids.stream();
         }
 
         LongSet longSet() {
