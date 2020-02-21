@@ -112,7 +112,7 @@ CALL gds.pageRank.stream({
   nodeProjection: 'MyLabel',
   relationshipProjection: {
     MY_RELATIONSHIP_TYPE: {
-      projection: 'REVERSE'
+      orientation: 'REVERSE'
     }
   }
 })

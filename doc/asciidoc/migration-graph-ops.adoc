@@ -174,11 +174,11 @@ CALL gds.graph.create(
   {
     MY_RELATIONSHIP_TYPE_NATURAL: {
       type: 'MY_RELATIONSHIP_TYPE',
-      projection: 'NATURAL'
+      orientation: 'NATURAL'
     },
     MY_RELATIONSHIP_TYPE_REVERSE: {
       type: 'MY_RELATIONSHIP_TYPE',
-      projection: 'REVERSE'
+      orientation: 'REVERSE'
     }
   }
 )
@@ -205,7 +205,7 @@ CALL gds.graph.create(
   'MyLabel',
   {
     MY_RELATIONSHIP_TYPE: {
-      projection: 'UNDIRECTED'
+      orientation: 'UNDIRECTED'
     }
   }
 )

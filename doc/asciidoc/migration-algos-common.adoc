@@ -28,10 +28,10 @@ This section describes changes between Graph Algorithms library  and Graph Data 
 |`write: true` | Replaced by dedicated `write` mode
 |`graph: 'cypher'\|'huge'` | Removed. Always using `huge` graph footnote:graph-param[Graph creation with cypher queries has dedicate `gds.graph.create.cypher` procedure. There are parameters `nodeQuery` and `relationshipQuery` for anonymous graphs]
 |direction | Replaced by `projection` parameter of `relationshipProjection`
-|`direction: 'OUTGOING'` | `projection: 'NATURAL'`
-|`direction: 'INCOMING'` | `projection: 'REVERSE'`
-|`direction: 'BOTH'` | Removed footnote:direction-both[This behaviour can be achieved by creating two relationship projections - one with `projection: 'NATURAL'` and one with `projection: 'REVERSE'`. See <<direction-both-example, this example>>]
-|`undirected: true` | Replaced by `projection: 'UNDIRECTED'` parameter of `relationshipProjection`
+|`direction: 'OUTGOING'` | `orientation: 'NATURAL'`
+|`direction: 'INCOMING'` | `orientation: 'REVERSE'`
+|`direction: 'BOTH'` | Removed footnote:direction-both[This behaviour can be achieved by creating two relationship projections - one with `orientation: 'NATURAL'` and one with `orientation: 'REVERSE'`. See <<direction-both-example, this example>>]
+|`undirected: true` | Replaced by `orientation: 'UNDIRECTED'` parameter of `relationshipProjection`
 |duplicateRelationships | Replaced by `aggregation` parameter of `relationshipProjection`
 |`duplicateRelationships: 'SKIP'` | `aggregation: 'SINGLE'`
 |`iterations` | `maxIterations`

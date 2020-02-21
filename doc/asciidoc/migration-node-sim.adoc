@@ -141,7 +141,7 @@ CALL gds.nodeSimilarity.stream({
   nodeProjection: 'MyLabel',
   relationshipProjection: {
     MY_RELATIONSHIP_TYPE: {
-      projection: 'REVERSE'
+      orientation: 'REVERSE'
     }
   }
 })
@@ -164,11 +164,11 @@ CALL gds.nodeSimilarity.stream({
   relationshipProjection: {
     MY_RELATIONSHIP_TYPE_NATURAL: {
       type: 'MY_RELATIONSHIP_TYPE',
-      projection: 'NATURAL'
+      orientation: 'NATURAL'
     },
     MY_RELATIONSHIP_TYPE_REVERSE: {
       type: 'MY_RELATIONSHIP_TYPE',
-      projection: 'REVERSE'
+      orientation: 'REVERSE'
     }
   }
 })
