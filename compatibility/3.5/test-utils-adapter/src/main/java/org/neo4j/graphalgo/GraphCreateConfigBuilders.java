@@ -126,7 +126,7 @@ final class GraphCreateConfigBuilders {
     }
 
     /**
-     * Factory method that defines the generation of {@link StoreConfigBuilder}.
+     * Factory method that defines the generation of {@link CypherConfigBuilder}.
      */
     @Builder.Factory
     static GraphCreateFromCypherConfig cypherConfig(
