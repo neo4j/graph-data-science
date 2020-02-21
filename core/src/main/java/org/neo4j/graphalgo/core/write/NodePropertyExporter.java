@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.compat.StatementApi;
+import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;

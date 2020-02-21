@@ -17,20 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.utils;
 
-import org.neo4j.exceptions.KernelException;
+import org.neo4j.graphalgo.compat.TransactionWrapper;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+
+import static org.neo4j.graphalgo.compat.ExceptionUtil.throwIfUnchecked;
 
 public abstract class StatementApi {
 
     public interface TxConsumer {
-        void accept(KernelTransaction transaction) throws KernelException;
+        void accept(KernelTransaction transaction) throws Exception;
     }
 
     public interface TxFunction<T> {
-        T apply(KernelTransaction transaction) throws KernelException;
+        T apply(KernelTransaction transaction) throws Exception;
     }
 
 
@@ -46,8 +48,9 @@ public abstract class StatementApi {
         return tx.apply(ktx -> {
             try {
                 return fun.apply(ktx);
-            } catch (KernelException e) {
-                return ExceptionUtil.throwKernelException(e);
+            } catch (Exception e) {
+                throwIfUnchecked(e);
+                throw new RuntimeException(e);
             }
         });
     }
@@ -56,8 +59,9 @@ public abstract class StatementApi {
         tx.accept(ktx -> {
             try {
                 fun.accept(ktx);
-            } catch (KernelException e) {
-                ExceptionUtil.throwKernelException(e);
+            } catch (Exception e) {
+                throwIfUnchecked(e);
+                throw new RuntimeException(e);
             }
         });
     }

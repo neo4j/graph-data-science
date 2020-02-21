@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.compat.StatementApi;
+import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
