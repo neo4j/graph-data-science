@@ -62,7 +62,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.pageRank.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.pageRank.write(graphNameOrConfig: String|Map, configuration: Map)
 YIELD nodes, createMillis, computeMillis, writeMillis, configuration
 ----
 
@@ -74,28 +74,28 @@ include::common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                       | Type    | Default   | Optional | Description
-| dampingFactor              | FLOAT   | 0.85      | yes      | The damping factor of the Page Rank calculation.
-| maxIterations              | INTEGER | 20        | yes      | The maximum number of iterations of Page Rank to run.
-| tolerance                  | FLOAT   | 0.0000001 | yes      | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
-| relationshipWeightProperty | STRING  | null      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| writeProperty              | STRING  | n/a       | no       | The property name written back to.
+| dampingFactor              | Float   | 0.85      | yes      | The damping factor of the Page Rank calculation.
+| maxIterations              | Integer | 20        | yes      | The maximum number of iterations of Page Rank to run.
+| tolerance                  | Float   | 0.0000001 | yes      | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
+| relationshipWeightProperty | String  | null      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| writeProperty              | String  | n/a       | no       | The property name written back to.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name          | Type    | Description
-| ranIterations | INTEGER | The number of iterations run.
-| createMillis  | INTEGER | Milliseconds for creating the graph.
-| computeMillis | INTEGER | Milliseconds for running the algorithm.
-| writeMillis   | INTEGER | Milliseconds for writing result data back.
-| configuration | MAP     | The configuration used for running the algorithm.
+| ranIterations | Integer | The number of iterations run.
+| createMillis  | Integer | Milliseconds for creating the graph.
+| computeMillis | Integer | Milliseconds for running the algorithm.
+| writeMillis   | Integer | Milliseconds for writing result data back.
+| configuration | Map     | The configuration used for running the algorithm.
 |===
 
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.pageRank.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.pageRank.stream(graphNameOrConfig: String|Map, configuration: Map)
 YIELD node, score
 ----
 
@@ -107,24 +107,24 @@ include::common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                       | Type    | Default   | Optional | Description
-| dampingFactor              | FLOAT   | 0.85      | yes      | The damping factor of the Page Rank calculation.
-| maxIterations              | INTEGER | 20        | yes      | The maximum number of iterations of Page Rank to run.
-| tolerance                  | FLOAT   | 0.0000001 | yes      | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
-| relationshipWeightProperty | STRING  | null      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| dampingFactor              | Float   | 0.85      | yes      | The damping factor of the Page Rank calculation.
+| maxIterations              | Integer | 20        | yes      | The maximum number of iterations of Page Rank to run.
+| tolerance                  | Float   | 0.0000001 | yes      | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
+| relationshipWeightProperty | String  | null      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 |===
 
 .Results
 [opts="header"]
 |===
 | Name    | Type    | Description
-| nodeId  | INTEGER | Node ID
-| score   | FLOAT   | Page Rank
+| nodeId  | Integer | Node ID
+| score   | Float   | Page Rank
 |===
 
 .The following will run the algorithm and returns the result in form of statistical and measurement values:
 [source, cypher]
 ----
-CALL gds.pageRank.stats(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.pageRank.stats(graphNameOrConfig: String|Map, configuration: Map)
 YIELD nodes, relationships, ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
 
@@ -135,7 +135,7 @@ The configuration is the same as for the `write` mode.
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher]
 ----
-CALL gds.pageRank.<mode>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.pageRank.<mode>.estimate(graphNameOrConfig: String|Map, configuration: Map})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory, mapView
 ----
 
@@ -147,8 +147,8 @@ The `mode` can be substituted with the available modes (`stream`, `write` and `s
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name              | Type    | Default | Optional | Description
-| nodeCount         | INTEGER | 0       | yes      | The number of nodes in a fictive graph.
-| relationshipCount | INTEGER | 0       | yes      | The number of relationships in a fictive graph.
+| nodeCount         | Integer | 0       | yes      | The number of nodes in a fictive graph.
+| relationshipCount | Integer | 0       | yes      | The number of relationships in a fictive graph.
 |===
 
 Setting the `nodeCount` and `relationshipCount` parameters allows a memory estimation without loading the graph.

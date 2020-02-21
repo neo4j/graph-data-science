@@ -33,7 +33,7 @@ To make this process easier every algorithm supports the `.estimate` mode, which
 .Syntax
 [source, cypher]
 ----
-CALL gds.<ALGO>.<MODE>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.<ALGO>.<MODE>.estimate(graphNameOrConfig: String|Map, configuration: Map})
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
 ----
 
@@ -81,7 +81,7 @@ Those procedures don't accept the graph name as the first argument, as they don'
 .Syntax
 [source, cypher]
 ----
-CALL gds.graph.create.estimate(nodeProjection: STRING|LIST|MAP, relationshipProjection: STRING|LIST|MAP, configuration: MAP})
+CALL gds.graph.create.estimate(nodeProjection: String|List|Map, relationshipProjection: String|List|Map, configuration: Map})
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
 ----
 
@@ -99,7 +99,7 @@ The <<cypher-projection, `gds.graph.create.cypher`>> procedure has to execute bo
 .Syntax
 [source, cypher]
 ----
-CALL gds.graph.create.cypher.estimate(nodeQuery: STRING, relationshipQuery: STRING, configuration: MAP})
+CALL gds.graph.create.cypher.estimate(nodeQuery: String, relationshipQuery: String, configuration: Map})
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
 ----
 

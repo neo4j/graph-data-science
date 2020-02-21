@@ -29,8 +29,8 @@ Including all of the above mentioned elements leads to the following syntax outl
 [source]
 ----
 CALL gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
-  graphName: STRING,
-  configuration: MAP
+  graphName: String,
+  configuration: Map
 )
 ----
 
@@ -38,7 +38,7 @@ CALL gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
 [source]
 ----
 CALL gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
-  configuration: MAP
+  configuration: Map
 )
 ----
 

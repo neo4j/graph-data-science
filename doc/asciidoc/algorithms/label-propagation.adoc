@@ -62,7 +62,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.labelPropagation.write(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.write(graphNameOrConfig: String|Map, configuration: Map})
 YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
 
@@ -74,36 +74,36 @@ include::common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                       | Type    | Default | Optional | Description
-| maxIterations              | INTEGER | 10      | yes      | The maximum number of iterations to run.
-| nodeWeightProperty         | STRING  | null    | yes      | The name of the node property that represents weight.
-| relationshipWeightProperty | STRING  | null    | yes      | The name of the relationship property that represents weight.
-| seedProperty               | STRING  | n/a     | yes      | Used to define initial set of labels (must be a number).
-| writeProperty              | STRING  | n/a     | yes      | The node property to which the community ID is written to.
+| maxIterations              | Integer | 10      | yes      | The maximum number of iterations to run.
+| nodeWeightProperty         | String  | null    | yes      | The name of the node property that represents weight.
+| relationshipWeightProperty | String  | null    | yes      | The name of the relationship property that represents weight.
+| seedProperty               | String  | n/a     | yes      | Used to define initial set of labels (must be a number).
+| writeProperty              | String  | n/a     | yes      | The node property to which the community ID is written to.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type    | Description
-| createMillis          | INTEGER | Milliseconds for loading data.
-| computeMillis         | INTEGER | Milliseconds for running the algorithm.
-| writeMillis           | INTEGER | Milliseconds for writing result data back.
-| postProcessingMillis  | INTEGER | Milliseconds for computing percentiles and community count.
+| createMillis          | Integer | Milliseconds for loading data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| writeMillis           | Integer | Milliseconds for writing result data back.
+| postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
 
-| nodes                 | INTEGER | The number of nodes considered.
-| communityCount        | INTEGER | The number of communities found.
-| ranIterations         | INTEGER | The number of iterations that were executed.
-| didConverge           | BOOLEAN | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
+| nodes                 | Integer | The number of nodes considered.
+| communityCount        | Integer | The number of communities found.
+| ranIterations         | Integer | The number of iterations that were executed.
+| didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
 
-| communityDistribution | MAP     | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
-| configuration         | MAP     | The configuration used for running the algorithm.
+| communityDistribution | Map     | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
+| configuration         | Map     | The configuration used for running the algorithm.
 
 |===
 
 .The following will run the algorithm and stream back results:
 [source,cypher]
 ----
-CALL gds.labelPropagation.stream(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.stream(graphNameOrConfig: String|Map, configuration: Map})
 YIELD nodeId, communityId
 ----
 
@@ -115,24 +115,24 @@ include::common-configuration.adoc[]
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                       | Type    | Default                | Optional | Description
-| maxIterations              | INTEGER | 10                     | yes      | The maximum number of iterations to run.
-| nodeWeightProperty         | STRING  | null                   | yes      | The property name of node that contain weight. Must be numeric.
-| relationshipWeightProperty | STRING  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
-| seedProperty               | STRING  | n/a                    | yes      | Used to define initial set of labels (must be a number).
+| maxIterations              | Integer | 10                     | yes      | The maximum number of iterations to run.
+| nodeWeightProperty         | String  | null                   | yes      | The property name of node that contain weight. Must be numeric.
+| relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
+| seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
 |===
 
 .Results
 [opts="header"]
 |===
 | Name        | Type    | Description
-| nodeId      | INTEGER | Node ID
-| communityId | INTEGER | Community ID
+| nodeId      | Integer | Node ID
+| communityId | Integer | Community ID
 |===
 
 .The following will run the algorithm and returns the result in form of statistical and measurement values:
 [source, cypher]
 ----
-CALL gds.labelPropagation.stats(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.stats(graphNameOrConfig: String|Map, configuration: Map})
 YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
 
@@ -144,23 +144,23 @@ The configuration is the same as for the `write` mode.
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type    | Description
-| createMillis          | INTEGER | Milliseconds for loading data.
-| computeMillis         | INTEGER | Milliseconds for running the algorithm.
+| createMillis          | Integer | Milliseconds for loading data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
 // TODO: stats mode should not have writeMillis in the result
-| writeMillis           | INTEGER | Milliseconds for writing result data back.
-| postProcessingMillis  | INTEGER | Milliseconds for computing percentiles and community count.
-| nodes                 | INTEGER | The number of nodes considered.
-| communityCount        | INTEGER | The number of communities found.
-| ranIterations         | INTEGER | The number of iterations that were executed.
-| didConverge           | BOOLEAN | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
-| communityDistribution | MAP     | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
-| configuration         | MAP     | The configuration used for running the algorithm.
+| writeMillis           | Integer | Milliseconds for writing result data back.
+| postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
+| nodes                 | Integer | The number of nodes considered.
+| communityCount        | Integer | The number of communities found.
+| ranIterations         | Integer | The number of iterations that were executed.
+| didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
+| communityDistribution | Map     | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
+| configuration         | Map     | The configuration used for running the algorithm.
 |===
 
 .The following will estimate the memory requirements for running the algorithm:
 [source,cypher]
 ----
-CALL gds.labelPropagation.<mode>.estimate(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.labelPropagation.<mode>.estimate(graphNameOrConfig: String|Map, configuration: Map})
 YIELD nodes, relationships, bytesMin, bytesMax, requiredMemory, mapView
 ----
 
@@ -172,8 +172,8 @@ include::common-parameters.adoc[]
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type    | Default  | Optional | Description
-| nodeCount         | INTEGER | 0        | yes      | The number of nodes in a fictive graph.
-| relationshipCount | INTEGER | 0        | yes      | The number of relationships in a fictive graph.
+| nodeCount         | Integer | 0        | yes      | The number of nodes in a fictive graph.
+| relationshipCount | Integer | 0        | yes      | The number of relationships in a fictive graph.
 |===
 
 Setting the `nodeCount` and `relationshipCount` parameters allows a memory estimation without loading the graph.
@@ -184,13 +184,13 @@ Additionally algorithm specific parameters can also be provided as config.
 [opts="header",cols="1,1,6"]
 |===
 | Name           | Type    | Description
-| requiredMemory | STRING  | The required memory in human readable format.
-| bytesMin       | INTEGER | The minimum number of bytes required.
-| bytesMax       | INTEGER | The maximum number of bytes required.
-| mapView        | MAP     | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
+| requiredMemory | String  | The required memory in human readable format.
+| bytesMin       | Integer | The minimum number of bytes required.
+| bytesMax       | Integer | The maximum number of bytes required.
+| mapView        | Map     | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
 
-| nodes          | INTEGER | The number of nodes in the graph.
-| relationships  | INTEGER | The number of relationships in the graph.
+| nodes          | Integer | The number of nodes in the graph.
+| relationships  | Integer | The number of relationships in the graph.
 |===
 
 [[algorithms-label-propagation-examples]]

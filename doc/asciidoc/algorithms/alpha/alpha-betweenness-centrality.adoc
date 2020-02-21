@@ -78,7 +78,7 @@ It was considered to be one of the "three distinct intuitive conceptions of cent
 .The following will run the Betweenness Centrality algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.betweenness.write(configuration: MAP)
+CALL gds.alpha.betweenness.write(configuration: Map)
 YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis
 ----
 
@@ -116,7 +116,7 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMil
 .The following will run the Betweenness Centrality algorithm and stream results:
 [source,cypher]
 ----
-CALL gds.alpha.betweenness.stream(configuration: MAP)
+CALL gds.alpha.betweenness.stream(configuration: Map)
 YIELD nodeId, centrality
 ----
 
@@ -140,7 +140,7 @@ YIELD nodeId, centrality
 .The following will run the Sampled Betweenness Centrality algorithm and write back results:
 [source,cypher]
 ----
-CALL gds.alpha.betweenness.sampled.write(configuration: MAP)
+CALL gds.alpha.betweenness.sampled.write(configuration: Map)
 YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis
 ----
 
@@ -174,7 +174,7 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMil
 .The following will run the Sampled Betweenness Centrality algorithm and stream results:
 [source,cypher]
 ----
-CALL gds.alpha.betweenness.sampled.stream(configuration: MAP)
+CALL gds.alpha.betweenness.sampled.stream(configuration: Map)
 YIELD nodeId, centrality
 ----
 

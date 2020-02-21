@@ -53,7 +53,7 @@ Decomposing a directed graph into its strongly connected components is a classic
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.scc.write(graphName: STRING, configuration: MAP)
+CALL gds.alpha.scc.write(graphName: String, configuration: Map)
 YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 ----
 
@@ -61,7 +61,7 @@ YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type    | Default                | Optional | Description
-| writeProperty    | STRING  | 'partition'            | yes      | The property name written back to.
+| writeProperty    | String  | 'partition'            | yes      | The property name written back to.
 | concurrency      | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
@@ -97,7 +97,7 @@ YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.scc.stream(graphName: STRING, configuration: MAP)
+CALL gds.alpha.scc.stream(graphName: String, configuration: Map)
 YIELD nodeId, partition
 ----
 

@@ -57,7 +57,7 @@ For example, to get movie recommendations based on the preferences of users who 
 .The following will run the algorithm on a graph in the catalog and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.similarity.cosine.write(graphName: STRING, configuration: MAP)
+CALL gds.alpha.similarity.cosine.write(graphName: String, configuration: Map)
 YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
@@ -65,14 +65,14 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name          | Type    | Default | Optional | Description
-| graphName     | STRING  | n/a     | no       | The name of a graph in the catalog.
-| configuration | MAP     | `{}`    | yes      | Algorithm-specific configuration.
+| graphName     | String  | n/a     | no       | The name of a graph in the catalog.
+| configuration | Map     | `{}`    | yes      | Algorithm-specific configuration.
 |===
 
 .The following will create an anonymous graph to run the algorithm on and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.similarity.cosine.write(configuration: MAP)
+CALL gds.alpha.similarity.cosine.write(configuration: Map)
 YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
@@ -80,7 +80,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name          | Type    | Default | Optional | Description
-| configuration | MAP     | `{}`    | no      | Graph creation and algorithm-specific configuration.
+| configuration | Map     | `{}`    | no      | Graph creation and algorithm-specific configuration.
 |===
 
 .Configuration
@@ -131,7 +131,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 .The following will run the algorithm on a graph in the catalog and stream results:
 [source,cypher]
 ----
-CALL gds.alpha.similarity.cosine.stream(graphName: STRING, configuration: MAP)
+CALL gds.alpha.similarity.cosine.stream(graphName: String, configuration: Map)
 YIELD item1, item2, count1, count2, intersection, similarity
 ----
 
@@ -139,14 +139,14 @@ YIELD item1, item2, count1, count2, intersection, similarity
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name          | Type    | Default | Optional | Description
-| graphName     | STRING  | n/a     | no       | The name of a graph in the catalog.
-| configuration | MAP     | `{}`    | yes      | Algorithm-specific configuration.
+| graphName     | String  | n/a     | no       | The name of a graph in the catalog.
+| configuration | Map     | `{}`    | yes      | Algorithm-specific configuration.
 |===
 
 .The following will create an anonymous graph to run the algorithm on and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.similarity.cosine.stream(configuration: MAP)
+CALL gds.alpha.similarity.cosine.stream(configuration: Map)
 YIELD item1, item2, count1, count2, intersection, similarity
 ----
 
@@ -154,7 +154,7 @@ YIELD item1, item2, count1, count2, intersection, similarity
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name          | Type    | Default | Optional | Description
-| configuration | MAP     | `{}`    | no      | Graph creation and algorithm-specific configuration.
+| configuration | Map     | `{}`    | no      | Graph creation and algorithm-specific configuration.
 |===
 
 .Configuration

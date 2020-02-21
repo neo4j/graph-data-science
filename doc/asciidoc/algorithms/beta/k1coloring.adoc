@@ -44,8 +44,8 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL gds.beta.k1coloring.write(graphName: STRING, {
-  writeProperty: STRING
+CALL gds.beta.k1coloring.write(graphName: String, {
+  writeProperty: String
   // additional configuration
 })
 YIELD nodes, colorCount, ranIterations, didConverge, writeProperty, loadMillis, computeMillis, writeMillis
@@ -85,7 +85,7 @@ include::../common-parameters.adoc[]
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.beta.k1coloring.stream(graphName: STRING, {
+CALL gds.beta.k1coloring.stream(graphName: String, {
   // additional configuration
 })
 YIELD nodeId, color

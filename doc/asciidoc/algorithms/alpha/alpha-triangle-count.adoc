@@ -58,7 +58,7 @@ For more information, see http://i11www.iti.kit.edu/extra/publications/sw-fclt-0
 .The following will return a stream of triples with `nodeId` for each triangle:
 [source, cypher]
 ----
-CALL gds.alpha.triangle.stream(configuration: MAP)
+CALL gds.alpha.triangle.stream(configuration: Map)
 YIELD nodeA, nodeB, nodeC
 ----
 
@@ -82,7 +82,7 @@ YIELD nodeA, nodeB, nodeC
 .The following will count the number of triangles that a node is a member of, and return a stream with `nodeId` and `triangleCount`:
 [source, cypher]
 ----
-CALL gds.alpha.triangleCount.stream(configuration: MAP)
+CALL gds.alpha.triangleCount.stream(configuration: Map)
 YIELD nodeId, triangles
 ----
 
@@ -105,7 +105,7 @@ YIELD nodeId, triangles
 .The following will count the number of triangles that a node is a member of, and write it back. It will return the total triangle count and average clustering coefficient of the given graph:
 [source, cypher]
 ----
-CALL gds.alpha.triangleCount.write(configuration: MAP)
+CALL gds.alpha.triangleCount.write(configuration: Map)
 YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
 ----
 

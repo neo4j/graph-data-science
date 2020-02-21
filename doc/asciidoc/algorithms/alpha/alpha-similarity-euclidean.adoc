@@ -488,7 +488,7 @@ include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.similarity.euclidean.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.alpha.similarity.euclidean.write(graphNameOrConfig: String|Map, configuration: Map)
 YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
@@ -549,7 +549,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-CALL gds.alpha.similarity.euclidean.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.alpha.similarity.euclidean.stream(graphNameOrConfig: String|Map, configuration: Map)
 YIELD item1, item2, count1, count2, intersection, similarity
 
 ----

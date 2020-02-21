@@ -43,7 +43,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL gds.louvain.write(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.louvain.write(graphNameOrConfig: String|Map, configuration: Map)
 YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
 ----
 
@@ -55,30 +55,30 @@ include::common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                           | Type    | Default     | Optional | Description
-| weightProperty                 | STRING  | null        | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
-| seedProperty                   | STRING  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| write                          | BOOLEAN | true        | yes      | Specifies if the result should be written back as a node property.
-| writeProperty                  | STRING  | 'partition' | yes      | The property name written back the ID of the partition particular node belongs to.
-| maxLevels                      | INTEGER | 10          | yes      | The maximum number of levels in which the graph is clustered and then condensed.
-| maxIterations                  | INTEGER | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
-| tolerance                      | FLOAT   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
-| includeIntermediateCommunities | BOOLEAN | false       | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
+| weightProperty                 | String  | null        | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
+| seedProperty                   | String  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| write                          | Boolean | true        | yes      | Specifies if the result should be written back as a node property.
+| writeProperty                  | String  | 'partition' | yes      | The property name written back the ID of the partition particular node belongs to.
+| maxLevels                      | Integer | 10          | yes      | The maximum number of levels in which the graph is clustered and then condensed.
+| maxIterations                  | Integer | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
+| tolerance                      | Float   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+| includeIntermediateCommunities | Boolean | false       | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                 | Type            | Description
-| loadMillis           | INTEGER         | Milliseconds for loading data.
-| computeMillis        | INTEGER         | Milliseconds for running the algorithm.
-| writeMillis          | INTEGER         | Milliseconds for writing result data back.
-| postProcessingMillis | INTEGER         | Milliseconds for computing percentiles and community count.
-| nodes                | INTEGER         | The number of nodes considered.
-| communityCount       | INTEGER         | The number of communities found.
-| levels               | INTEGER         | The number of supersteps the algorithm actually ran.
-| modularity           | FLOAT           | The final modularity score.
-| modularities         | LIST of INTEGER | The final modularity scores for each level.
-| configuration        | MAP             | The configuration used for running the algorithm.
+| Name                 | Type      | Description
+| loadMillis           | Integer   | Milliseconds for loading data.
+| computeMillis        | Integer   | Milliseconds for running the algorithm.
+| writeMillis          | Integer   | Milliseconds for writing result data back.
+| postProcessingMillis | Integer   | Milliseconds for computing percentiles and community count.
+| nodes                | Integer   | The number of nodes considered.
+| communityCount       | Integer   | The number of communities found.
+| levels               | Integer   | The number of supersteps the algorithm actually ran.
+| modularity           | Float     | The final modularity score.
+| modularities         | Integer[] | The final modularity scores for each level.
+| configuration        | Map       | The configuration used for running the algorithm.
 |===
 
 
@@ -86,7 +86,7 @@ include::common-configuration.adoc[]
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.louvain.stream(graphNameOrConfig: STRING|MAP, configuration: MAP)
+CALL gds.louvain.stream(graphNameOrConfig: String|Map, configuration: Map)
 YIELD nodeId, community, communities
 ----
 
@@ -98,22 +98,22 @@ include::common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                           | Type     | Default | Optional | Description
-| relationshipWeightProperty     | STRING   | null  | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
-| seedProperty                   | STRING   | n/a     | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| levels                         | INTEGER  | 10      | yes      | The maximum number of levels in which the graph is clustered and then condensed.
-| innerIterations                | INTEGER  | 10      | yes      | The maximum number of iterations that the modularity optimization will run for each level.
-| tolerance                      | FLOAT    | 0.0001  | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
-| includeIntermediateCommunities | BOOLEAN  | false   | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
+| relationshipWeightProperty     | String   | null    | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
+| seedProperty                   | String   | n/a     | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| levels                         | Integer  | 10      | yes      | The maximum number of levels in which the graph is clustered and then condensed.
+| innerIterations                | Integer  | 10      | yes      | The maximum number of iterations that the modularity optimization will run for each level.
+| tolerance                      | Float    | 0.0001  | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+| includeIntermediateCommunities | Boolean  | false   | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
 |===
 
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name        | Type            | Description
-| nodeId      | INTEGER         | Node ID.
-| community   | INTEGER         | The community ID of the final level.
-| communities | LIST of INTEGER | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
+| Name        | Type      | Description
+| nodeId      | Integer   | Node ID.
+| community   | Integer   | The community ID of the final level.
+| communities | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
 |===
 
 [[algorithms-louvain-examples]]

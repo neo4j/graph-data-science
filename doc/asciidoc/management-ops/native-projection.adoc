@@ -33,10 +33,10 @@ In addition, the optional `configuration` parameter allows us to further configu
 [source,cypher]
 ----
 CALL gds.graph.create(
-    graphName: STRING,
-    nodeProjection: STRING, LIST or MAP,
-    relationshipProjection: STRING, LIST or MAP,
-    configuration: MAP
+    graphName: String,
+    nodeProjection: String, List or Map,
+    relationshipProjection: String, List or Map,
+    configuration: Map
 )
 ----
 
@@ -54,8 +54,8 @@ CALL gds.graph.create(
 [opts="header",cols="1,1,1,4"]
 |===
 | Name                   | Type                  | Default        | Description
-| readConcurrency        | INTEGER               | 4              | The number of concurrent threads used for creating the graph.
-| nodeProperties         | STRING, LIST or MAP   | empty map      |
+| readConcurrency        | Integer               | 4              | The number of concurrent threads used for creating the graph.
+| nodeProperties         | String, List or Map   | empty map      |
 |===
 
 

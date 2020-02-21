@@ -62,27 +62,27 @@ include::common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                       | Type    | Default | Optional  | Description
-| writeProperty              | STRING  | n/a     | no        | The node property to which the component ID is written to.
-| relationshipWeightProperty | STRING  | null    | yes       | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
-| defaultValue               | FLOAT   | null    | yes       | The default value of the relationship weight in case it is missing or invalid.
-| seedProperty               | STRING  | n/a     | yes       | Used to set the initial community for a node. The property value needs to be a number.
-| threshold                  | FLOAT   | null    | yes       | The value of the weight above which the relationship is considered in the computation.
-| consecutiveIds             | BOOLEAN | false   | yes       | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
+| writeProperty              | String  | n/a     | no        | The node property to which the component ID is written to.
+| relationshipWeightProperty | String  | null    | yes       | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
+| defaultValue               | Float   | null    | yes       | The default value of the relationship weight in case it is missing or invalid.
+| seedProperty               | String  | n/a     | yes       | Used to set the initial community for a node. The property value needs to be a number.
+| threshold                  | Float   | null    | yes       | The value of the weight above which the relationship is considered in the computation.
+| consecutiveIds             | Boolean | false   | yes       | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
 [opts="header",cols="1m,1,6"]
 |===
 | Name                          | Type    | Description
-| createMillis                  | INTEGER | Milliseconds for loading data.
-| computeMillis                 | INTEGER | Milliseconds for running the algorithm.
-| writeMillis                   | INTEGER | Milliseconds for writing result data back.
-| postProcessingMillis          | INTEGER | Milliseconds for computing component count and distribution statistics.
-| nodePropertiesWritten         | INTEGER | The number of node properties written.
-| relationshipPropertiesWritten | INTEGER | The number of relationship properties written.
-| componentCount                | INTEGER | The number of computed components.
-| componentDistribution         | MAP     | Statistical information about the component sizes.
-| configuration                 | MAP     | The configuration used for running the algorithm.
+| createMillis                  | Integer | Milliseconds for loading data.
+| computeMillis                 | Integer | Milliseconds for running the algorithm.
+| writeMillis                   | Integer | Milliseconds for writing result data back.
+| postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
+| nodePropertiesWritten         | Integer | The number of node properties written.
+| relationshipPropertiesWritten | Integer | The number of relationship properties written.
+| componentCount                | Integer | The number of computed components.
+| componentDistribution         | Map     | Statistical information about the component sizes.
+| configuration                 | Map     | The configuration used for running the algorithm.
 |===
 
 [[algorithms-wcc-syntax-stream]]
@@ -107,19 +107,19 @@ include::common-configuration.adoc[]
 [opts="header",cols="1m,1,1,1,4"]
 |===
 | Name                       | Type    | Default | Optional | Description
-| relationshipWeightProperty | STRING  | null    | yes      | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
-| defaultValue               | FLOAT   | null    | yes      | The default value of the relationship weight in case it is missing or invalid.
-| seedProperty               | STRING  | n/a     | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| threshold                  | FLOAT   | null    | yes      | The value of the weight above which the relationship is considered in the computation.
-| consecutiveIds             | BOOLEAN | false   | yes      | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
+| relationshipWeightProperty | String  | null    | yes      | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
+| defaultValue               | Float   | null    | yes      | The default value of the relationship weight in case it is missing or invalid.
+| seedProperty               | String  | n/a     | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| threshold                  | Float   | null    | yes      | The value of the weight above which the relationship is considered in the computation.
+| consecutiveIds             | Boolean | false   | yes      | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
 [opts="header",cols="1m,1,6"]
 |===
 | Name        | Type    | Description
-| nodeId      | INTEGER | The Neo4j node ID.
-| componentId | INTEGER | The component ID.
+| nodeId      | Integer | The Neo4j node ID.
+| componentId | Integer | The component ID.
 |===
 
 

@@ -46,7 +46,7 @@ Read more in https://link.springer.com/chapter/10.1007/978-3-319-23461-8_11[Two 
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.degree.write(configuration: MAP)
+CALL gds.alpha.degree.write(configuration: Map)
 YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 ----
 
@@ -75,7 +75,7 @@ YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.degree.stream(configuration: MAP)
+CALL gds.alpha.degree.stream(configuration: Map)
 YIELD node, score
 ----
 
