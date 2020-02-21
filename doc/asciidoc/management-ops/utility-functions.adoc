@@ -102,8 +102,8 @@ RETURN gds.util.isInfinite(value) as isInfinite
 |===
 | Name                                                                                      | Parameters
 | gds.util.asNode(nodeId: NUMBER)                                                           | nodeId of a node in the neo4j-graph
-| gds.util.asNodes(nodeIds: LIST<NUMBER>)                                                   | list of nodeIds of nodes in the neo4j-graph
-.3+| gds.util.asPath(nodeIds: LIST<NUMBER>, weights: LIST<NUMBER>, cumulativeWeights: BOOL) | nodeIds: nodeIds representing neo4j nodes
+| gds.util.asNodes(nodeIds: NUMBER[])                                                   | list of nodeIds of nodes in the neo4j-graph
+.3+| gds.util.asPath(nodeIds: NUMBER[], weights: NUMBER[], cumulativeWeights: BOOL) | nodeIds: nodeIds representing neo4j nodes
                                                                                             | weights: weights for the relationships between the nodes
                                                                                             | cumulativeWeights: whether the weights should be cumulated along the path
 ----
