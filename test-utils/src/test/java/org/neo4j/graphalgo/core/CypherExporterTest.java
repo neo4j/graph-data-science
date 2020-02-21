@@ -24,21 +24,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.TestDatabaseApi;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 final class CypherExporterTest {
 
-    private static GraphDatabaseAPI db;
+    private static TestDatabaseApi db;
 
     @BeforeEach
     void setup() {
@@ -54,11 +52,7 @@ final class CypherExporterTest {
                 "  (nC)-[:TYPE]->(nD)";
 
         db = TestDatabaseCreator.createTestDatabase();
-
-        try (Transaction tx = db.beginTx()) {
-            runQuery(db, createGraph);
-            tx.success();
-        }
+        db.runQuery(createGraph);
     }
 
     @AfterEach
