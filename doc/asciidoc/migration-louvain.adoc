@@ -49,7 +49,7 @@
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+|Minimalistic streaming over named graph
+2+|Minimalistic streaming over named graph:
 |
 [source, cypher]
 ----
@@ -62,7 +62,7 @@ YIELD nodeId, community, communities
 CALL gds.louvain.stream('myGraph')
 YIELD nodeId, communityId, communityIds
 ----
-2+|Streaming over named graph using additional properties - `maxLevels` and `maxIterations`
+2+|Streaming over named graph using additional properties - `maxLevels` and `maxIterations`:
 |
 [source, cypher]
 ----
@@ -87,7 +87,7 @@ CALL gds.louvain.stream(
   }
 )
 ----
-2+| Streaming over named graph with weight property
+2+| Streaming over named graph with weight property:
 |
 [source, cypher]
 ----
@@ -110,7 +110,7 @@ CALL gds.louvain.stream(
   }
 )
 ----
-2+| Minimalistic streaming over anonymous graph
+2+| Minimalistic streaming over anonymous graph:
 |
 [source, cypher]
 ----
@@ -127,7 +127,7 @@ CALL gds.louvain.stream({
   relationshipProjection: 'MY_RELATIONSHIP_TYPE'
 })
 ----
-2+| Streaming over anonymous graph with `REVERSE` relationship projection
+2+| Streaming over anonymous graph with `REVERSE` relationship projection:
 |
 [source, cypher]
 ----
@@ -149,7 +149,7 @@ CALL gds.louvain.stream({
   }
 })
 ----
-2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]
+2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]:
 |
 [source, cypher]
 ----
@@ -182,7 +182,7 @@ CALL gds.louvain.stream({
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+| Minimalistic write with just `writeProperty`
+2+| Minimalistic write with just `writeProperty`:
 |
 [source, cypher]
 ----
@@ -225,7 +225,7 @@ RETURN
   cd.p1 AS p1,
   conf.writeProperty AS writeProperty
 ----
-2+| Running in `write` mode over weighted graph
+2+| Running in `write` mode over weighted graph:
 |
 [source, cypher]
 ----
@@ -251,7 +251,7 @@ CALL gds.louvain.write(
   }
 )
 ----
-2+| Memory estimation of the algorithm
+2+| Memory estimation of the algorithm:
 |
 [source, cypher]
 ----

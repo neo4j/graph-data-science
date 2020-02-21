@@ -43,7 +43,7 @@
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+| Minimalistic stream over named graph
+2+| Minimalistic stream over named graph:
 |
 [source, cypher]
 ----
@@ -56,7 +56,7 @@ YIELD nodeId, setId
 CALL gds.wcc.stream('myGraph')
 YIELD nodeId, componentId
 ----
-2+| Streaming over weighted named graph
+2+| Streaming over weighted named graph:
 |
 [source, cypher]
 ----
@@ -79,7 +79,7 @@ CALL gds.wcc.stream(
   }
 )
 ----
-2+| Minimalistic streaming over anonymous graph
+2+| Minimalistic streaming over anonymous graph:
 |
 [source, cypher]
 ----
@@ -96,7 +96,7 @@ CALL gds.wcc.stream({
   relationshipProjection: 'MY_RELATIONSHIP_TYPE'
 })
 ----
-2+| Streaming over anonymous graph with `REVERSE` relationship projection
+2+| Streaming over anonymous graph with `REVERSE` relationship projection:
 |
 [source, cypher]
 ----
@@ -118,7 +118,7 @@ CALL gds.wcc.stream({
   }
 })
 ----
-2+| Streaming over anonymous graph with relationship specifying default value for the weight property
+2+| Streaming over anonymous graph with relationship specifying default value for the weight property:
 |
 [source, cypher]
 ----
@@ -154,7 +154,7 @@ CALL gds.wcc.stream({
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+| Minimalistic `write` mode
+2+| Minimalistic `write` mode:
 |
 [source, cypher]
 ----
@@ -191,7 +191,7 @@ RETURN
   cd.p1 AS p1,
   conf.writeProperty AS writeProperty
 ----
-2+| Running `write` mode over weighted named graph
+2+| Running `write` mode over weighted named graph:
 |
 [source, cypher]
 ----
@@ -217,7 +217,7 @@ CALL gds.wcc.write(
   }
 )
 ----
-2+| Memory estimation of the algorithm
+2+| Memory estimation of the algorithm:
 |
 [source, cypher]
 ----

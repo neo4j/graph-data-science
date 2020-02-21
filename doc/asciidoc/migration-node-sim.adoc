@@ -46,7 +46,7 @@
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+| Minimalistic streaming over named graph
+2+| Minimalistic streaming over named graph:
 |
 [source, cypher]
 ----
@@ -59,7 +59,7 @@ YIELD node1, node2, similarity
 CALL gds.nodeSimilarity.stream('myGraph')
 YIELD node1, node2, similarity
 ----
-2+| Streaming over named graph using `topK` and `similarityCutoff` configuration properties
+2+| Streaming over named graph using `topK` and `similarityCutoff` configuration properties:
 |
 [source, cypher]
 ----
@@ -84,7 +84,7 @@ CALL gds.nodeSimilarity.stream(
   }
 )
 ----
-2+| Streaming over named graph using `bottomK` configuration property
+2+| Streaming over named graph using `bottomK` configuration property:
 |
 [source, cypher]
 ----
@@ -107,7 +107,7 @@ CALL gds.nodeSimilarity.stream(
   }
 )
 ----
-2+| Minimalistic streaming over anonymous graph
+2+| Minimalistic streaming over anonymous graph:
 |
 [source, cypher]
 ----
@@ -124,7 +124,7 @@ CALL gds.nodeSimilarity.stream({
   relationshipProjection: 'MY_RELATIONSHIP_TYPE'
 })
 ----
-2+| Streaming over anonymous graph using `REVERSE` relationship projection
+2+| Streaming over anonymous graph using `REVERSE` relationship projection:
 |
 [source, cypher]
 ----
@@ -146,7 +146,7 @@ CALL gds.nodeSimilarity.stream({
   }
 })
 ----
-2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]
+2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]:
 |
 [source, cypher]
 ----
@@ -179,7 +179,7 @@ CALL gds.nodeSimilarity.stream({
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+|Minimalistic `write` with `writeRelationshipType` and `writeProperty`
+2+|Minimalistic `write` with `writeRelationshipType` and `writeProperty`:
 |
 [source, cypher]
 ----
@@ -226,7 +226,7 @@ RETURN
   sd.p1 AS p1,
   conf.writeProperty AS writeProperty
 ----
-2+| Memory estimation of the algorithm
+2+| Memory estimation of the algorithm:
 |
 [source, cypher]
 ----

@@ -42,7 +42,7 @@
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+|Minimalistic stream over named graph
+2+|Minimalistic stream over named graph:
 |
 [source, cypher]
 ----
@@ -55,7 +55,7 @@ YIELD nodeId, score
 CALL gds.pageRank.stream('myGraph')
 YIELD nodeId, score
 ----
-2+| Streaming over named graph with iteration limit
+2+| Streaming over named graph with iteration limit:
 |
 [source, cypher]
 ----
@@ -78,7 +78,7 @@ CALL gds.pageRank.stream(
   }
 )
 ----
-2+| Minimalistic streaming over anonymous graph
+2+| Minimalistic streaming over anonymous graph:
 |
 [source, cypher]
 ----
@@ -95,7 +95,7 @@ CALL gds.pageRank.stream({
   relationshipProjection: 'MY_RELATIONSHIP_TYPE'
 })
 ----
-2+| Streaming over anonymous graph with `REVERSE` relationship projection
+2+| Streaming over anonymous graph with `REVERSE` relationship projection:
 |
 [source, cypher]
 ----
@@ -117,7 +117,7 @@ CALL gds.pageRank.stream({
   }
 })
 ----
-2+| Streaming over anonymous graph with relationship weight property, assigning it a default value in case the property doesn't have value
+2+| Streaming over anonymous graph with relationship weight property, assigning it a default value in case the property doesn't have value:
 |
 [source, cypher]
 ----
@@ -152,7 +152,7 @@ CALL gds.pageRank.stream({
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+| Running `write` mode on named graph
+2+| Running `write` mode on named graph:
 |
 [source, cypher]
 ----
@@ -192,7 +192,7 @@ RETURN
   ranIterations,
   conf.writeProperty AS writeProperty
 ----
-2+| Memory estimation of the algorithm
+2+| Memory estimation of the algorithm:
 |
 [source, cypher]
 ----

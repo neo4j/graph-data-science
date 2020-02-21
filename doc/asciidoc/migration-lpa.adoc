@@ -44,7 +44,7 @@
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+| Streaming over a named graph
+2+| Streaming over a named graph:
 |
 [source, cypher]
 ----
@@ -57,7 +57,7 @@ YIELD nodeId, label
 CALL gds.labelPropagation.stream('myGraph')
 YIELD nodeId, communityId
 ----
-2+| Streaming over a named graph using configuration for iterations and relationship weight property
+2+| Streaming over a named graph using configuration for iterations and relationship weight property:
 |
 [source, cypher]
 ----
@@ -82,7 +82,7 @@ CALL gds.labelPropagation.stream(
   }
 )
 ----
-2+| Streaming over anonymous graph
+2+| Streaming over anonymous graph:
 |
 [source, cypher]
 ----
@@ -99,7 +99,7 @@ CALL gds.labelPropagation.stream({
   relationshipProjection: 'MY_RELATIONSHIP_TYPE'
 })
 ----
-2+| Streaming over anonymous graph using relationship with `REVERSE` projection
+2+| Streaming over anonymous graph using relationship with `REVERSE` projection:
 |
 [source, cypher]
 ----
@@ -121,7 +121,7 @@ CALL gds.labelPropagation.stream({
   }
 })
 ----
-2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]
+2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]:
 |
 [source, cypher]
 ----
@@ -154,7 +154,7 @@ CALL gds.labelPropagation.stream({
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+|Minimalistic write
+2+|Minimalistic write:
 |
 [source, cypher]
 ----
@@ -191,7 +191,7 @@ RETURN
   cd.p1 AS p1,
   conf.writeProperty AS writeProperty
 ----
-2+|Write using weight properties footnote:lpa-write-weighted[In GA the weightProperty is for Nodes and Relationships while in GDS there are separate properties ]
+2+|Write using weight properties footnote:lpa-write-weighted[In GA the weightProperty is for Nodes and Relationships while in GDS there are separate properties]:
 |
 [source, cypher]
 ----
@@ -218,7 +218,7 @@ CALL gds.labelPropagation.write(
   }
 )
 ----
-2+|Memory estimation of the algorithm
+2+|Memory estimation of the algorithm:
 |
 [source, cypher]
 ----

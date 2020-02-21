@@ -31,7 +31,7 @@ The most significant change in memory estimation is that in GDS to estimate an o
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+| Native Projections
+2+| Native Projections:
 |
 [source, cypher]
 ----
@@ -49,7 +49,7 @@ CALL gds.graph.create.estimate(
   'MY_RELATIONSHIP_TYPE'
 )
 ----
-2+| Cypher Projections
+2+| Cypher Projections:
 |
 [source, cypher]
 ----
@@ -101,7 +101,7 @@ CALL gds.graph.create.cypher.estimate(
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+| Minimal Native Projection
+2+| Minimal Native Projection:
 |
 [source, cypher]
 ----
@@ -120,7 +120,7 @@ CALL gds.graph.create(
   'MY_RELATIONSHIP_TYPE'
 )
 ----
-2+| Native Projection with additional properties
+2+| Native Projection with additional properties:
 |
 [source, cypher]
 ----
@@ -151,7 +151,7 @@ CALL gds.graph.create(
   }
 )
 ----
-2+|[[direction-both-example]]Native Projection with `direction: 'BOTH'`
+2+|[[direction-both-example]]Native Projection with `direction: 'BOTH'`:
 |
 [source, cypher]
 ----
@@ -183,7 +183,7 @@ CALL gds.graph.create(
   }
 )
 ----
-2+| Undirected Native Projection
+2+| Undirected Native Projection:
 |
 [source, cypher]
 ----
@@ -219,7 +219,7 @@ CALL gds.graph.create(
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+| Basic Cypher queries, defining source and target
+2+| Basic Cypher queries, defining source and target:
 |
 [source, cypher]
 ----
@@ -245,7 +245,7 @@ CALL gds.graph.create.cypher(
    RETURN id(s) AS source, id(t) AS target'
 )
 ----
-2+| With concurrency property and Cypher query with relationship property
+2+| With concurrency property and Cypher query with relationship property:
 |
 [source, cypher]
 ----
@@ -344,7 +344,7 @@ CALL gds.graph.list()
 [opts=header,cols="1a,1a"]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
-2+| View information for a Named graph
+2+| View information for a Named graph:
 |
 [source, cypher]
 ----
@@ -355,7 +355,7 @@ CALL algo.graph.info('myGraph')
 ----
 CALL gds.graph.list('myGraph')
 ----
-2+| Check graph existence
+2+| Check graph existence:
 |
 [source, cypher]
 ----
@@ -366,7 +366,7 @@ CALL algo.graph.info('myGraph') YIELD exists
 ----
 CALL gds.graph.exists('myGraph') YIELD exists
 ----
-2+| View graph statistics
+2+| View graph statistics:
 |
 [source, cypher]
 ----
