@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -69,39 +68,25 @@ public class BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    protected static Map<String, Object> anonymousGraphConfig(Object... objects) {
-        return anonymousGraphConfig(map(objects));
-    }
-
-    protected static Map<String, Object> anonymousGraphConfig(Map<String, Object> baseMap) {
-        if (!baseMap.containsKey(NODE_PROJECTION_KEY) && !baseMap.containsKey(NODE_QUERY_KEY)) {
-            baseMap.put(NODE_PROJECTION_KEY, PROJECT_ALL.name);
-        }
-        if (!baseMap.containsKey(RELATIONSHIP_PROJECTION_KEY) && !baseMap.containsKey(RELATIONSHIP_QUERY_KEY)) {
-            baseMap.put(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL.name);
-        }
-        return baseMap;
-    }
-
-    protected void registerFunctions(Class<?>... functionClasses) throws KernelException {
+    protected void registerFunctions(Class<?>... functionClasses) throws Exception {
         Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
         for (Class<?> clazz : functionClasses) {
             procedures.registerFunction(clazz);
         }
     }
 
-    protected void registerAggregationFunctions(Class<?>... functionClasses) throws KernelException {
+    protected void registerAggregationFunctions(Class<?>... functionClasses) throws Exception {
         Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
         for (Class<?> clazz : functionClasses) {
             procedures.registerAggregationFunction(clazz);
         }
     }
 
-    protected void registerProcedures(Class<?>... procedureClasses) throws KernelException {
+    protected void registerProcedures(Class<?>... procedureClasses) throws Exception {
         registerProcedures(db, procedureClasses);
     }
 
-    protected void registerProcedures(GraphDatabaseAPI db, Class<?>... procedureClasses) throws KernelException {
+    protected void registerProcedures(GraphDatabaseAPI db, Class<?>... procedureClasses) throws Exception {
         Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
         for (Class<?> clazz : procedureClasses) {
             procedures.registerProcedure(clazz);

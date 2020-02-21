@@ -24,20 +24,19 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.compat.ExceptionUtil;
 import org.neo4j.graphalgo.compat.StatementApi;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Values;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.neo4j.graphalgo.compat.ExceptionUtil.throwIfUnchecked;
 import static org.neo4j.graphalgo.core.concurrency.Pools.DEFAULT_SINGLE_THREAD_POOL;
 import static org.neo4j.graphalgo.core.write.NodePropertyExporter.MIN_BATCH_SIZE;
 
@@ -193,8 +192,9 @@ public final class RelationshipExporter extends StatementApi {
                         Values.doubleValue(property)
                     );
                 }
-            } catch (KernelException e) {
-                ExceptionUtil.throwKernelException(e);
+            } catch (Exception e) {
+                throwIfUnchecked(e);
+                throw new RuntimeException(e);
             }
             return true;
         }

@@ -19,14 +19,12 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.compat.ExceptionUtil;
 import org.neo4j.graphalgo.compat.StatementApi;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.internal.kernel.api.exceptions.explicitindex.AutoIndexingKernelException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -36,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.compat.ExceptionUtil.throwIfUnchecked;
 
 public class SimilarityExporter extends StatementApi {
 
@@ -62,8 +62,9 @@ public class SimilarityExporter extends StatementApi {
         applyInTransaction(statement -> {
             try {
                 createRelationship(similarityResult, statement);
-            } catch (KernelException e) {
-                ExceptionUtil.throwKernelException(e);
+            } catch (Exception e) {
+                throwIfUnchecked(e);
+                throw new RuntimeException(e);
             }
             return null;
         });
@@ -81,8 +82,9 @@ public class SimilarityExporter extends StatementApi {
                     if (progress % Math.min(TerminationFlag.RUN_CHECK_NODE_COUNT, similarityResults.size() / 2)== 0) {
                         terminationFlag.assertRunning();
                     }
-                } catch (KernelException e) {
-                    ExceptionUtil.throwKernelException(e);
+                } catch (Exception e) {
+                    throwIfUnchecked(e);
+                    throw new RuntimeException(e);
                 }
             }
             return null;

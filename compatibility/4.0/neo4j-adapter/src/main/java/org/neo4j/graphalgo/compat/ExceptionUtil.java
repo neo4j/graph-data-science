@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.exceptions.KernelException;
-import org.neo4j.kernel.api.exceptions.Status;
-
 import java.util.Objects;
 
 public final class ExceptionUtil {
@@ -56,29 +53,6 @@ public final class ExceptionUtil {
             initial.addSuppressed(current);
         }
         return initial;
-    }
-
-    public static RuntimeException asUnchecked(final Throwable exception) {
-        if (exception instanceof RuntimeException) {
-            return (RuntimeException) exception;
-        }
-        if (exception instanceof Error) {
-            throw (Error) exception;
-        }
-        return new RuntimeException(exception);
-    }
-
-    public static <T> T throwKernelException(KernelException e) {
-        Status status = e.status();
-        String codeString = status.code().serialize();
-        String message = e.getMessage();
-        String newMessage;
-        if (message == null || message.isEmpty()) {
-            newMessage = codeString;
-        } else {
-            newMessage = codeString + ": " + message;
-        }
-        throw new RuntimeException(newMessage, e);
     }
 
     /**

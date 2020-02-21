@@ -19,18 +19,19 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+
+import static org.neo4j.graphalgo.compat.ExceptionUtil.throwIfUnchecked;
 
 public abstract class StatementApi {
 
     public interface TxConsumer {
-        void accept(KernelTransaction transaction) throws KernelException;
+        void accept(KernelTransaction transaction) throws Exception;
     }
 
     public interface TxFunction<T> {
-        T apply(KernelTransaction transaction) throws KernelException;
+        T apply(KernelTransaction transaction) throws Exception;
     }
 
 
@@ -46,8 +47,9 @@ public abstract class StatementApi {
         return tx.apply(ktx -> {
             try {
                 return fun.apply(ktx);
-            } catch (KernelException e) {
-                return ExceptionUtil.throwKernelException(e);
+            } catch (Exception e) {
+                throwIfUnchecked(e);
+                throw new RuntimeException(e);
             }
         });
     }
@@ -56,8 +58,9 @@ public abstract class StatementApi {
         tx.accept(ktx -> {
             try {
                 fun.accept(ktx);
-            } catch (KernelException e) {
-                ExceptionUtil.throwKernelException(e);
+            } catch (Exception e) {
+                throwIfUnchecked(e);
+                throw new RuntimeException(e);
             }
         });
     }
