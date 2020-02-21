@@ -56,7 +56,7 @@ public final class ReadHelper {
         if (value instanceof NumberValue) {
             return ((NumberValue) value).doubleValue();
         }
-        if (Values.NO_VALUE.eq(value)) {
+        if (Values.NO_VALUE.equals(value)) {
             return defaultValue;
         }
 
