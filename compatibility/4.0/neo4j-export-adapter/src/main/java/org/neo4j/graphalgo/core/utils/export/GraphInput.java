@@ -21,16 +21,15 @@ package org.neo4j.graphalgo.core.utils.export;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.unsafe.impl.batchimport.InputIterable;
-import org.neo4j.unsafe.impl.batchimport.InputIterator;
-import org.neo4j.unsafe.impl.batchimport.cache.NumberArrayFactory;
-import org.neo4j.unsafe.impl.batchimport.cache.idmapping.IdMapper;
-import org.neo4j.unsafe.impl.batchimport.cache.idmapping.IdMappers;
-import org.neo4j.unsafe.impl.batchimport.input.Collector;
-import org.neo4j.unsafe.impl.batchimport.input.Input;
-import org.neo4j.unsafe.impl.batchimport.input.InputChunk;
-import org.neo4j.unsafe.impl.batchimport.input.InputEntityVisitor;
-import org.neo4j.unsafe.impl.batchimport.input.Inputs;
+import org.neo4j.internal.batchimport.InputIterable;
+import org.neo4j.internal.batchimport.InputIterator;
+import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.batchimport.input.Groups;
+import org.neo4j.internal.batchimport.input.IdType;
+import org.neo4j.internal.batchimport.input.Input;
+import org.neo4j.internal.batchimport.input.InputChunk;
+import org.neo4j.internal.batchimport.input.InputEntityVisitor;
+import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.values.storable.Value;
 
 import java.io.IOException;
@@ -50,23 +49,24 @@ public final class GraphInput implements Input {
     }
 
     @Override
-    public InputIterable nodes() {
+    public InputIterable nodes(Collector badCollector) {
         return () -> new NodeImporter(graph, batchSize);
     }
 
     @Override
-    public InputIterable relationships() {
+    public InputIterable relationships(Collector badCollector) {
         return () -> new RelationshipImporter(graph.concurrentCopy(), graph.nodeCount(), batchSize);
     }
 
     @Override
-    public IdMapper idMapper(NumberArrayFactory numberArrayFactory) {
-        return IdMappers.actual();
+    public IdType idType() {
+        return IdType.ACTUAL;
     }
 
     @Override
-    public Collector badCollector() {
-        return Collector.EMPTY;
+    public ReadableGroups groups() {
+        // TODO: @s1ck figure out what we need here
+        return Groups.EMPTY;
     }
 
     @Override
@@ -76,7 +76,7 @@ public final class GraphInput implements Input {
         long numberOfNodeProperties = graph.availableNodeProperties().size() * nodeCount;
         long numberOfRelationshipProperties = graph.hasRelationshipProperty() ? relationshipCount : 0;
 
-        return Inputs.knownEstimates(
+        return Input.knownEstimates(
             nodeCount,
             relationshipCount,
             numberOfNodeProperties,

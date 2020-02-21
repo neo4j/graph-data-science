@@ -21,12 +21,14 @@ package org.neo4j.graphalgo.core.utils.export;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
 
+@IdenticalCompat
 @ValueClass
 @Configuration("NeoExportConfigImpl")
 public interface NeoExportConfig extends BaseConfig {
@@ -34,11 +36,6 @@ public interface NeoExportConfig extends BaseConfig {
     String storeDir();
 
     String dbName();
-
-    @Value
-    default boolean enableDebugLog() {
-        return false;
-    }
 
     @Value.Default
     default int writeConcurrency() {
