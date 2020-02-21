@@ -25,4 +25,6 @@ public final class NamedThreadFactoryProxy {
     public static NamedThreadFactory daemon() {
         return NamedThreadFactory.daemon("algo");
     }
+
+    private NamedThreadFactoryProxy() {}
 }
