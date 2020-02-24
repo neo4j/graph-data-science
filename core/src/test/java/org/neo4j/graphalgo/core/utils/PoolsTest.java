@@ -26,10 +26,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 class PoolsTest {
 
-    @Test
-    void forkJoinPoolShouldBeLimited() {
-        int maximumConcurrency = Math.min(Runtime.getRuntime().availableProcessors(), Pools.MAXIMUM_CONCURRENCY);
-        assertThat(Pools.FJ_POOL.getParallelism(), equalTo(maximumConcurrency));
-    }
+    // TODO: add tests
 
 }

@@ -314,6 +314,36 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         });
     }
 
+//    @Test
+//    default void shouldThrowWhenTooManyCores() {
+//        String query = "CALL gds.pageRank.stream('myG', {concurrency: 10})";
+//
+//        assertError(query, "too much concurrency");
+//    }
+//
+//    @Test
+//    default void shouldThrowWhenTooManyCores() {
+//        applyOnProcedure((proc) -> {
+//            getWriteAndStreamProcedures(proc)
+//                .forEach(method -> {
+//                    Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 10))).toMap();
+//
+//                    try {
+//                        Stream<?> result = (Stream) method.invoke(proc, configMap, Collections.emptyMap());
+//
+//                        if (getProcedureMethodName(method).endsWith("stream")) {
+//                            assertEquals(0, result.count(), "Stream result should be empty.");
+//                        } else {
+//                            assertEquals(1, result.count());
+//                        }
+//
+//                    } catch (IllegalAccessException | InvocationTargetException e) {
+//                        fail(e);
+//                    }
+//                });
+//        });
+//    }
+
     @Test
     default void testFailOnMissingRelationshipType() {
         applyOnProcedure((proc) -> {

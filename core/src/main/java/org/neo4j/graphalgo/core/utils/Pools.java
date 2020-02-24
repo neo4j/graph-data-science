@@ -26,7 +26,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -35,12 +34,10 @@ import java.util.concurrent.TimeoutException;
 
 public final class Pools {
 
-    static final int MAXIMUM_CONCURRENCY;
     public static final int CORE_POOL_SIZE;
 
     static {
         ConcurrencyConfig concurrencyConfig = ConcurrencyConfig.of();
-        MAXIMUM_CONCURRENCY = concurrencyConfig.maximumConcurrency;
         CORE_POOL_SIZE = concurrencyConfig.corePoolSize;
     }
 
@@ -49,7 +46,7 @@ public final class Pools {
      */
     @Deprecated
     public static int allowedConcurrency(int concurrency) {
-        return Math.min(Pools.CORE_POOL_SIZE, concurrency);
+        return Math.min(CORE_POOL_SIZE, concurrency);
     }
 
     private static final int DEFAULT_QUEUE_SIZE = CORE_POOL_SIZE * 50;

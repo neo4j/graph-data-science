@@ -129,3 +129,11 @@ class ConcurrencyValidationTest extends BaseProcTest {
         unlimitedDb.shutdown();
     }
 }
+
+
+/*
+ * Clean up in ConcurrencyConfig / Editions
+ * Make Pools set up the same pool regardless of configuration
+ * Obfuscation of configuration to make it less easy to hack
+ *
+ */
