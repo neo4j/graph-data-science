@@ -27,8 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
@@ -67,7 +67,7 @@ public final class TestSupport {
     public @interface AllGraphTypesTest {}
 
     public static Stream<Class<? extends GraphStoreFactory>> allTypes() {
-        return Stream.of(HugeGraphStoreFactory.class, CypherGraphStoreFactory.class);
+        return Stream.of(NativeFactory.class, CypherFactory.class);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -76,7 +76,7 @@ public final class TestSupport {
     public @interface AllGraphTypesWithoutCypherTest {}
 
     public static Stream<Class<? extends GraphStoreFactory>> allTypesWithoutCypher() {
-        return Stream.of(HugeGraphStoreFactory.class);
+        return Stream.of(NativeFactory.class);
     }
 
     @Retention(RetentionPolicy.RUNTIME)

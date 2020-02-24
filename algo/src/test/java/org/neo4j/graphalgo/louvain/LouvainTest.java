@@ -44,8 +44,8 @@ import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
@@ -211,7 +211,7 @@ class LouvainTest extends AlgoTestBase {
 
     @AllGraphTypesTest
     void seededLouvain(Class<? extends GraphStoreFactory> graphImpl) {
-        assumeFalse(graphImpl == CypherGraphStoreFactory.class);
+        assumeFalse(graphImpl == CypherFactory.class);
 
         Graph graph = loadGraph(graphImpl, DB_CYPHER, true, "seed");
 
@@ -338,7 +338,7 @@ class LouvainTest extends AlgoTestBase {
 
     @Test
     void testLogging() {
-        Graph graph = loadGraph(HugeGraphStoreFactory.class, DB_CYPHER);
+        Graph graph = loadGraph(NativeFactory.class, DB_CYPHER);
 
         TestLog log = new TestLog();
 
@@ -388,7 +388,7 @@ class LouvainTest extends AlgoTestBase {
 
         PropertyMapping relWeightProperty = PropertyMapping.of("weight", 1.0);
 
-        if (factoryType == CypherGraphStoreFactory.class) {
+        if (factoryType == CypherFactory.class) {
             return QueryRunner.runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(nodeStatement)

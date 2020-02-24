@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.io.File;
@@ -73,7 +73,7 @@ class NeoExportTest {
             .loadAnyLabel()
             .loadAnyRelationshipType();
 
-        Graph inputGraph = loaderBuilder.api(db).build().graph(HugeGraphStoreFactory.class);
+        Graph inputGraph = loaderBuilder.api(db).build().graph(NativeFactory.class);
 
         NeoExportConfig config = NeoExportConfig.of(
             "test-user",
@@ -86,7 +86,7 @@ class NeoExportTest {
         neoExport.runFromTests();
 
         GraphDatabaseAPI exportDb = TestDatabaseCreator.createTestDatabase(tempDir);
-        Graph outputGraph = loaderBuilder.api(exportDb).build().graph(HugeGraphStoreFactory.class);
+        Graph outputGraph = loaderBuilder.api(exportDb).build().graph(NativeFactory.class);
 
         assertGraphEquals(inputGraph, outputGraph);
 
@@ -101,7 +101,7 @@ class NeoExportTest {
             .addNodeProperty(PropertyMapping.of("prop2", 42))
             .loadAnyRelationshipType();
 
-        Graph inputGraph = loaderBuilder.api(db).build().graph(HugeGraphStoreFactory.class);
+        Graph inputGraph = loaderBuilder.api(db).build().graph(NativeFactory.class);
 
         NeoExportConfig config = NeoExportConfig.of(
             "test-user",
@@ -114,7 +114,7 @@ class NeoExportTest {
         neoExport.runFromTests();
 
         GraphDatabaseAPI exportDb = TestDatabaseCreator.createTestDatabase(tempDir);
-        Graph outputGraph = loaderBuilder.api(exportDb).build().graph(HugeGraphStoreFactory.class);
+        Graph outputGraph = loaderBuilder.api(exportDb).build().graph(NativeFactory.class);
 
         assertGraphEquals(inputGraph, outputGraph);
 

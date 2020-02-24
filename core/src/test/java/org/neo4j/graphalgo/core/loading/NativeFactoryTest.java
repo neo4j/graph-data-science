@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class HugeGraphStoreFactoryTest {
+class NativeFactoryTest {
 
     @Test
     void memoryEstimation() {
@@ -40,7 +40,7 @@ class HugeGraphStoreFactoryTest {
             .relationshipProjectionMappings(RelationshipProjectionMappings.all())
             .build();
 
-        MemoryEstimation memoryEstimation = HugeGraphStoreFactory.getMemoryEstimation(dimensions);
+        MemoryEstimation memoryEstimation = NativeFactory.getMemoryEstimation(dimensions);
         MemoryTree estimate = memoryEstimation.estimate(dimensions, 1);
         assertEquals(3_405_981_448L, estimate.memoryUsage().min);
         assertEquals(4_606_168_240L, estimate.memoryUsage().max);
@@ -58,7 +58,7 @@ class HugeGraphStoreFactoryTest {
             .putRelationshipCount("TYPE2", 250_000_000L)
             .build();
 
-        MemoryTree estimate = HugeGraphStoreFactory.getMemoryEstimation(dimensions).estimate(dimensions, 1);
+        MemoryTree estimate = NativeFactory.getMemoryEstimation(dimensions).estimate(dimensions, 1);
         long idMapMemoryUsage = IdMap.memoryEstimation().estimate(dimensions, 1).memoryUsage().min;
         int instanceSize = 72;
 

@@ -38,7 +38,7 @@ import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 
-class CypherGraphStoreFactoryAggregationTest {
+class CypherFactoryAggregationTest {
 
     public static final String DB_CYPHER = "MERGE (n1 {id: 1})" +
                                            "MERGE (n2 {id: 2}) " +
@@ -76,7 +76,7 @@ class CypherGraphStoreFactoryAggregationTest {
                 .relationshipQuery(rels)
                 .globalAggregation(Aggregation.SINGLE)
                 .build()
-                .load(CypherGraphStoreFactory.class)
+                .load(CypherFactory.class)
         );
 
         assertEquals(2, graph.nodeCount());
@@ -96,7 +96,7 @@ class CypherGraphStoreFactoryAggregationTest {
                 .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                 .globalAggregation(Aggregation.SINGLE)
                 .build()
-                .load(CypherGraphStoreFactory.class)
+                .load(CypherFactory.class)
         );
 
         double[] weights = collectTargetProperties(graph, graph.toMappedNodeId(id1));
@@ -120,7 +120,7 @@ class CypherGraphStoreFactoryAggregationTest {
                 .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                 .globalAggregation(aggregation)
                 .build()
-                .load(CypherGraphStoreFactory.class)
+                .load(CypherFactory.class)
         );
 
         double[] weights = collectTargetProperties(graph, graph.toMappedNodeId(id1));

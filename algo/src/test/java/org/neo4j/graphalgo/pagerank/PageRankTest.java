@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -125,7 +125,7 @@ final class PageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(db, () ->
                 new CypherLoaderBuilder()
                     .api(db)
@@ -183,7 +183,7 @@ final class PageRankTest extends AlgoTestBase {
 
         final Graph graph;
         final CentralityResult rankResult;
-        if (factoryType.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(db, () ->
                 new CypherLoaderBuilder()
                     .api(db)
@@ -230,7 +230,7 @@ final class PageRankTest extends AlgoTestBase {
     @AllGraphTypesTest
     void correctPartitionBoundariesForAllNodes(Class<? extends GraphStoreFactory> factoryType) {
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(String.format("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))

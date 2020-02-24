@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -254,7 +254,7 @@ class GraphLoaderDirectionalityTest {
 
         GraphLoader graphLoader;
 
-        if (graphImpl == CypherGraphStoreFactory.class) {
+        if (graphImpl == CypherFactory.class) {
             graphLoader = new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(GraphCreateFromCypherConfig.ALL_NODES_QUERY)

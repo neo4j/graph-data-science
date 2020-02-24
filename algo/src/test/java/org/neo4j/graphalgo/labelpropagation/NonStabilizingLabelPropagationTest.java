@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
@@ -69,20 +69,20 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
     }
 
     Graph loadGraph(Class<? extends GraphStoreFactory> graphImpl) {
-        if (graphImpl == CypherGraphStoreFactory.class) {
+        if (graphImpl == CypherFactory.class) {
             return QueryRunner.runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(ALL_NODES_QUERY)
                 .relationshipQuery("MATCH (u1)-[rel]-(u2) RETURN id(u1) AS source, id(u2) AS target")
                 .build()
-                .graph(CypherGraphStoreFactory.class));
+                .graph(CypherFactory.class));
         } else {
             return new StoreLoaderBuilder()
                 .api(db)
                 .loadAnyLabel()
                 .loadAnyRelationshipType()
                 .build()
-                .graph(HugeGraphStoreFactory.class);
+                .graph(NativeFactory.class);
         }
     }
 

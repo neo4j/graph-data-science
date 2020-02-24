@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
@@ -187,7 +187,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     @AllGraphTypesTest
     default void testRunOnLoadedGraph(Class<? extends GraphStoreFactory> graphStoreFactory) {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = (graphStoreFactory.isAssignableFrom(HugeGraphStoreFactory.class))
+        GraphCreateConfig graphCreateConfig = (graphStoreFactory.isAssignableFrom(NativeFactory.class))
             ? GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName)
             : GraphCreateFromCypherConfig.emptyWithName("", loadedGraphName);
 
@@ -242,7 +242,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     @AllGraphTypesTest
     default void testRunMultipleTimesOnLoadedGraph(Class<? extends GraphStoreFactory> graphStoreFactory) {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = (graphStoreFactory.isAssignableFrom(HugeGraphStoreFactory.class))
+        GraphCreateConfig graphCreateConfig = (graphStoreFactory.isAssignableFrom(NativeFactory.class))
             ? GraphCreateFromStoreConfig.emptyWithName(TEST_USERNAME, loadedGraphName)
             : GraphCreateFromCypherConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
 

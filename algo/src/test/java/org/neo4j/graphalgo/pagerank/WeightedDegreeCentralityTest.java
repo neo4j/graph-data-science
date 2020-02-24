@@ -32,8 +32,8 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Label;
@@ -140,7 +140,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -191,7 +191,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                 .addNodeLabel("Label1")
                 .addRelationshipType("TYPE1")
                 .build()
-                .graph(HugeGraphStoreFactory.class);
+                .graph(NativeFactory.class);
 
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
             new WeightedDegreeCentrality(
@@ -228,7 +228,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -289,7 +289,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
 
         final Graph graph;
 
-        if (graphStoreFactory.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db, () -> new CypherLoaderBuilder()
                     .api(db)
@@ -348,7 +348,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
 
         Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db, () -> new CypherLoaderBuilder()
                     .api(db)

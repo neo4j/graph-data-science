@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -81,7 +81,7 @@ final class HugeIntersectionTest {
             .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         INTERSECT = graph.intersection();
         START1 = graph.toMappedNodeId(neoStarts[0]);

@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -112,7 +112,7 @@ final class CypherExporterTest {
             .addNodeProperty(PropertyMapping.of("property", 42))
             .addRelationshipProperty(PropertyMapping.of("property", 42))
             .build()
-            .load(HugeGraphStoreFactory.class);
+            .load(NativeFactory.class);
 
 
         StringWriter output = new StringWriter();

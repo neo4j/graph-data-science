@@ -78,7 +78,7 @@ class GraphStoreCatalogTest {
             .relationshipProjections(relationshipProjections())
             .build();
 
-        GraphStore graphStore = graphLoader.graphStore(HugeGraphStoreFactory.class);
+        GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
 
         final GraphCreateConfig graphCreateConfig = graphLoader.createConfig();
 

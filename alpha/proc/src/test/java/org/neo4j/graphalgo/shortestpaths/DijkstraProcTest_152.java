@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.impl.shortestpaths.DijkstraConfig;
 import org.neo4j.graphalgo.impl.shortestpaths.ShortestPathDijkstra;
 import org.neo4j.graphdb.Label;
@@ -91,7 +91,7 @@ class DijkstraProcTest_152 extends BaseProcTest {
             .addRelationshipType("ROAD")
             .addRelationshipProperty(PropertyMapping.of("d", 0))
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, DijkstraConfig.of(startNodeId, endNodeId));
         dijkstra.compute();
@@ -115,7 +115,7 @@ class DijkstraProcTest_152 extends BaseProcTest {
             .globalAggregation(Aggregation.NONE)
             .addRelationshipProperty(PropertyMapping.of("d", 0))
             .build()
-            .load(HugeGraphStoreFactory.class);
+            .load(NativeFactory.class);
 
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, DijkstraConfig.of(startNodeId, endNodeId));
         dijkstra.compute();

@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.write.ExporterBuilder;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
@@ -83,7 +83,7 @@ class ProgressLoggingTest {
             .addRelationshipType(RELATIONSHIP)
             .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
             .build()
-            .load(HugeGraphStoreFactory.class);
+            .load(NativeFactory.class);
 
         final String output = buffer.toString();
         assertTrue(output.length() > 0);
@@ -98,7 +98,7 @@ class ProgressLoggingTest {
             .addRelationshipType(RELATIONSHIP)
             .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
             .build()
-            .load(HugeGraphStoreFactory.class);
+            .load(NativeFactory.class);
 
         final StringWriter buffer = new StringWriter();
 

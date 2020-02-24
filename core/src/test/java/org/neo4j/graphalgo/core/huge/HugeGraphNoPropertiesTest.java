@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -101,7 +101,7 @@ final class HugeGraphNoPropertiesTest {
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
-            .load(HugeGraphStoreFactory.class);
+            .load(NativeFactory.class);
     }
 
 }

@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -79,7 +79,7 @@ class WeaklyConnectedComponentsPregelTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
-            .load(HugeGraphStoreFactory.class);
+            .load(NativeFactory.class);
     }
 
     @AfterEach

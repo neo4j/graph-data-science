@@ -49,9 +49,9 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 
-public final class HugeGraphStoreFactory extends GraphStoreFactory {
+public final class NativeFactory extends GraphStoreFactory {
 
-    public HugeGraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup) {
+    public NativeFactory(GraphDatabaseAPI api, GraphSetup setup) {
         super(api, setup);
     }
 

@@ -40,7 +40,7 @@ import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -241,7 +241,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -268,7 +268,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -295,7 +295,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -325,7 +325,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -352,7 +352,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -386,7 +386,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -416,7 +416,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -446,7 +446,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(UNDIRECTED)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -468,7 +468,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -528,7 +528,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -582,7 +582,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -624,7 +624,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .globalOrientation(orientation)
             .globalAggregation(Aggregation.NONE)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -652,7 +652,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(UNDIRECTED)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         IllegalArgumentException ex = Assertions.assertThrows(
             IllegalArgumentException.class,
@@ -676,7 +676,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,

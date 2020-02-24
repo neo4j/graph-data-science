@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
@@ -118,7 +118,7 @@ class RelationshipExporterTest {
             .addRelationshipType("BARFOO")
             .addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_MISSING))
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         if (!includeProperties) {
             fromGraph = fromGraph.withoutRelationshipProperties();
@@ -163,6 +163,6 @@ class RelationshipExporterTest {
             .addRelationshipType("FOOBAR")
             .addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_NOT_WRITTEN))
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
     }
 }

@@ -31,8 +31,8 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Label;
@@ -138,7 +138,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
         );
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = QueryRunner.runInTransaction(
                 db, () -> new CypherLoaderBuilder()
                     .api(db)
@@ -196,7 +196,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
 
         final Graph graph;
 
-        if (factoryType.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = QueryRunner.runInTransaction(
                 db, () -> new CypherLoaderBuilder().api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
@@ -211,7 +211,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
                 .addRelationshipType("TYPE1")
                 .globalOrientation(Orientation.REVERSE)
                 .build()
-                .graph(HugeGraphStoreFactory.class);
+                .graph(NativeFactory.class);
         }
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(graph, Pools.DEFAULT, 4, false, AllocationTracker.EMPTY);
@@ -249,7 +249,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = QueryRunner.runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()

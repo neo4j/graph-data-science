@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -189,6 +189,6 @@ class TriangleCountExpTest {
             .addRelationshipType(RELATIONSHIP)
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
     }
 }

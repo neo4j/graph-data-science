@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -166,7 +166,7 @@ class GraphLoaderTest {
                 .loadAnyRelationshipType()
                 .terminationFlag(terminationFlag)
                 .build()
-                .load(HugeGraphStoreFactory.class)
+                .load(NativeFactory.class)
         );
     }
 }

@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.results.CentralityResult;
 import org.neo4j.graphdb.Label;
 
@@ -140,7 +140,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -197,7 +197,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -254,7 +254,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -311,7 +311,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -368,7 +368,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()

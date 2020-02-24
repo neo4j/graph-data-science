@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
@@ -51,7 +51,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     @Override
     @Configuration.Ignore
     default Class<? extends GraphStoreFactory> getGraphImpl() {
-        return CypherGraphStoreFactory.class;
+        return CypherFactory.class;
     }
 
     @Override

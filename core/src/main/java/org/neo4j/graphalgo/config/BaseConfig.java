@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.config;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.Collection;
@@ -38,7 +38,7 @@ public interface BaseConfig {
 
     @Configuration.Ignore
     default Class<? extends GraphStoreFactory> getGraphImpl() {
-        return HugeGraphStoreFactory.class;
+        return NativeFactory.class;
     };
 
     @Configuration.CollectKeys

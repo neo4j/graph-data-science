@@ -38,8 +38,8 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -87,7 +87,7 @@ final class LabelPropagationTest extends AlgoTestBase {
 
     Graph loadGraph(Class<? extends GraphStoreFactory> graphImpl) {
         GraphLoader graphLoader;
-        if (graphImpl == CypherGraphStoreFactory.class) {
+        if (graphImpl == CypherFactory.class) {
             graphLoader = new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (u:User) RETURN id(u) AS id")
@@ -127,7 +127,7 @@ final class LabelPropagationTest extends AlgoTestBase {
             .addRelationshipType("FOLLOW")
             .addNodeProperty(PropertyMapping.of("seedId", 0.0))
             .build()
-            .graph(HugeGraphStoreFactory.class);
+            .graph(NativeFactory.class);
 
         LabelPropagation lp = new LabelPropagation(
             graph,

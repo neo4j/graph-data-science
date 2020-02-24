@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.graphbuilder.GridBuilder;
@@ -81,7 +81,7 @@ class ParallelDeltaSteppingTest {
                 .addRelationshipType(RELATIONSHIP)
                 .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
                 .build()
-                .graph(HugeGraphStoreFactory.class);
+                .graph(NativeFactory.class);
         }
 
         reference = compute(1);

@@ -68,7 +68,7 @@ final class UndirectedLoopsTest {
                 .loadAnyRelationshipType()
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
-                .graph(HugeGraphStoreFactory.class);
+                .graph(NativeFactory.class);
 
         LongArrayList nodes = new LongArrayList();
         graph.forEachNode(nodeId -> {

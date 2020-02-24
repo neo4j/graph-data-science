@@ -27,8 +27,8 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import static org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory.LIMIT;
-import static org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory.SKIP;
+import static org.neo4j.graphalgo.core.loading.CypherFactory.LIMIT;
+import static org.neo4j.graphalgo.core.loading.CypherFactory.SKIP;
 
 final class CypherLoadingUtils {
     static final int NO_BATCHING = -1;

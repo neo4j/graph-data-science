@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Timeout;
 import org.neo4j.graphalgo.PrivateLookup;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -128,7 +128,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
                 .loadAnyLabel()
                 .loadAnyRelationshipType()
                 .build()
-                .graph(HugeGraphStoreFactory.class);
+                .graph(NativeFactory.class);
             fail("Should have thrown an Exception.");
         } catch (Exception e) {
             assertEquals(message, e.getMessage());
@@ -190,7 +190,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
             .executorService(pool);
         block.accept(loader);
         try {
-            return loader.build().load(HugeGraphStoreFactory.class);
+            return loader.build().load(NativeFactory.class);
         } catch (Exception e) {
             markFailure();
             throw e;

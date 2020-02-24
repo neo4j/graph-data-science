@@ -37,7 +37,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -85,7 +85,7 @@ class K1ColoringTest extends AlgoTestBase {
         Graph graph;
 
         GraphLoader graphLoader;
-        if (graphImpl == CypherGraphStoreFactory.class) {
+        if (graphImpl == CypherFactory.class) {
             graphLoader = new CypherLoaderBuilder()
                 .api(db)
                 .graphName("cypher")

@@ -24,9 +24,9 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.GraphStore;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -105,10 +105,10 @@ public interface GraphLoader {
             GraphSetup setup = toSetup();
             GraphStoreFactory factory;
 
-            if (CypherGraphStoreFactory.class.isAssignableFrom(factoryType)) {
-                factory = new CypherGraphStoreFactory(api(), setup, kernelTransaction());
+            if (CypherFactory.class.isAssignableFrom(factoryType)) {
+                factory = new CypherFactory(api(), setup, kernelTransaction());
             } else {
-                factory = new HugeGraphStoreFactory(api(), setup);
+                factory = new NativeFactory(api(), setup);
             }
 
             return factoryType.cast(factory);

@@ -31,10 +31,10 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStore;
-import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
@@ -76,7 +76,7 @@ public class GraphCreateProc extends CatalogProc {
         // computation
         GraphCreateResult result = runWithExceptionLogging(
             "Graph creation failed",
-            () -> createGraph(config, HugeGraphStoreFactory.class)
+            () -> createGraph(config, NativeFactory.class)
         );
         // result
         return Stream.of(result);
@@ -98,7 +98,7 @@ public class GraphCreateProc extends CatalogProc {
             cypherConfig
         );
         validateConfig(cypherConfig, config);
-        return estimateGraph(config, HugeGraphStoreFactory.class);
+        return estimateGraph(config, NativeFactory.class);
     }
 
     @Procedure(name = "gds.graph.create.cypher", mode = Mode.READ)
@@ -125,7 +125,7 @@ public class GraphCreateProc extends CatalogProc {
         // computation
         GraphCreateResult result = runWithExceptionLogging(
             "Graph creation failed",
-            () -> createGraph(config, CypherGraphStoreFactory.class)
+            () -> createGraph(config, CypherFactory.class)
         );
         // result
         return Stream.of(result);
@@ -148,7 +148,7 @@ public class GraphCreateProc extends CatalogProc {
         );
         validateConfig(cypherConfig, config);
 
-        return estimateGraph(config, CypherGraphStoreFactory.class);
+        return estimateGraph(config, CypherFactory.class);
     }
 
     private GraphCreateResult createGraph(GraphCreateConfig config, Class<? extends GraphStoreFactory> factoryClazz) {

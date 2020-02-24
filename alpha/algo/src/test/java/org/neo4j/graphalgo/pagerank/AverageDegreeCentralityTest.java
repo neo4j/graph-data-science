@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Label;
 
@@ -116,7 +116,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
@@ -144,7 +144,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
@@ -173,7 +173,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherGraphStoreFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")

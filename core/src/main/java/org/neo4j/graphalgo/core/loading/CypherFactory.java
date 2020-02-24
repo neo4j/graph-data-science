@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.NODE
 import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.RELATIONSHIP;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
-public class CypherGraphStoreFactory extends GraphStoreFactory {
+public class CypherFactory extends GraphStoreFactory {
 
     public static final String TYPE = "cypher";
 
@@ -59,7 +59,7 @@ public class CypherGraphStoreFactory extends GraphStoreFactory {
     private final GraphSetup setup;
     private final KernelTransaction kernelTransaction;
 
-    public CypherGraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup, KernelTransaction kernelTransaction) {
+    public CypherFactory(GraphDatabaseAPI api, GraphSetup setup, KernelTransaction kernelTransaction) {
         super(api, setup, false);
         this.api = api;
         this.setup = setup;
@@ -76,12 +76,12 @@ public class CypherGraphStoreFactory extends GraphStoreFactory {
             .maxRelCount(relCount.rows())
             .build();
 
-        return HugeGraphStoreFactory.getMemoryEstimation(estimateDimensions);
+        return NativeFactory.getMemoryEstimation(estimateDimensions);
     }
 
     @Override
     public MemoryEstimation memoryEstimation(GraphDimensions dimensions) {
-        return HugeGraphStoreFactory.getMemoryEstimation(dimensions);
+        return NativeFactory.getMemoryEstimation(dimensions);
     }
 
     @Override
